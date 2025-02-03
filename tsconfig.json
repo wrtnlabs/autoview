@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "plugins": [
+      { "transform": "typia/lib/transform" }
+    ]
+  },
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}

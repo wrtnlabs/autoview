@@ -1,0 +1,68 @@
+{
+  "name": "@wrtnio/autoview",
+  "type": "module",
+  "version": "0.0.0",
+  "description": "Automatic viewer components renderer by JSON schema and AI agent",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wrtnio/autoview"
+  },
+  "author": "Wrtn Tenchnologies",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wrtnio/autoview/issues"
+  },
+  "keywords": [
+    "react",
+    "typescript",
+    "autoview",
+    "viewer",
+    "ai",
+    "agent",
+    "json-schema",
+    "openapi"
+  ],
+  "scripts": {
+    "build": "npm run build:static && npm run build:lib",
+    "build:static": "rimraf dist && tsc -b && vite build",
+    "build:lib": "rimraf lib && tsc --project tsconfig.lib.json --emitDeclarationOnly && rollup -c",
+    "dev": "vite",
+    "lint": "eslint .",
+    "prepare": "ts-patch install",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@samchon/openapi": "^2.4.1",
+    "typia": "^7.6.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@ryoppippi/unplugin-typia": "^1.2.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.16",
+    "globals": "^15.14.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.34.1",
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.6.2",
+    "typescript-eslint": "^8.18.2",
+    "vite": "^6.0.5"
+  },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "dist",
+    "lib",
+    "src",
+    "!src/examples"
+  ]
+}
