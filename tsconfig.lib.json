@@ -75,7 +75,6 @@
     "esModuleInterop": true,                             /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables `allowSyntheticDefaultImports` for type compatibility. */
     // "preserveSymlinks": true,                         /* Disable resolving symlinks to their realpath. This correlates to the same flag in node. */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
-    "allowImportingTsExtensions": true,
 
     /* Type Checking */
     "strict": true,                                      /* Enable all strict type-checking options. */
@@ -105,5 +104,6 @@
       { "transform": "typia/lib/transform" },
     ],
   },
-  "include": ["src"],
+  "include": ["./src"],
+  "exclude": ["./src/main.tsx"],
 }
