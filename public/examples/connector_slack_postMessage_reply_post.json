@@ -1,0 +1,18 @@
+{
+  "function": {
+    "path": "connector_slack_postMessage_reply_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "channel": "C0654GRKQNM",
+      "text": "Check out Amber's message here: https://wrtn.slack.com/archives/C0654GRKQNM/p1730771077456429",
+      "ts": "1730771658.021369",
+      "secretKey": "a8549034-e478-410a-8c42-de77dc91800c"
+    }
+  ],
+  "success": true,
+  "value": {
+    "ts": "1730771733.769649"
+  }
+}

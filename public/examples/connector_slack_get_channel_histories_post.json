@@ -1,0 +1,257 @@
+{
+  "function": {
+    "path": "connector_slack_get_channel_histories_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "channel": "C0654GRKQNM",
+      "channel_type": "public",
+      "latestDateTime": "2024-12-12T13:45:25.584+09:00",
+      "limit": 100,
+      "secretKey": "80180772-fa6f-464b-bb01-b8fa5da8ac4f"
+    }
+  ],
+  "success": true,
+  "value": {
+    "messages": [
+      {
+        "username": "Shrimp",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733977974981989",
+        "text": "<@gracie> 금일 wrtn-hamlet 인터페이스에 변경사항이 있을 예정입니다:\n• back-off에 None을 지정하면 default로 동작하는 것이 아니라 실제로 동작 안하도록 변경\n• 기존 reference만 받을 수 있었던 input 메시지가 이제 owned 타입을 받을 수 있음 -&gt; 프롬프트 렌더링이 쉽도록 변경",
+        "user": "U06H7A98TCL",
+        "channel": "C0654GRKQNM",
+        "ts": "1733977974.981989",
+        "ts_date": "2024-12-12T04:32:54.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0,
+        "links": [ ]
+      },
+      {
+        "username": "Amber",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733977451662959",
+        "text": "<@emily>\n에밀리 이거 로직 이메일 도메인으로 걸러내던데 이거 히스토리 스레드 있나요?? 아니면 임의 로직인가요!!",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1733977451.662959",
+        "ts_date": "2024-12-12T04:24:11.000Z",
+        "reply_count": 5,
+        "reply_users_count": 3,
+        "links": [ ]
+      },
+      {
+        "username": "Leo",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733976182603129",
+        "text": "<@jaxtyn> (축) 잭스틴 수료 :tada:",
+        "user": "U0508EDC413",
+        "channel": "C0654GRKQNM",
+        "ts": "1733976182.603129",
+        "ts_date": "2024-12-12T04:03:02.000Z",
+        "reply_count": 20,
+        "reply_users_count": 11,
+        "links": [ ]
+      },
+      {
+        "username": "Shrimp",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733973985935959",
+        "text": "<@gracie>, 이번 이슈 겪고 나서 느낀건데, 저희 action agent도 내부 모델 라우팅을 피쳐토글로 제어하면 좋겠다는 생각입니다",
+        "user": "U06H7A98TCL",
+        "channel": "C0654GRKQNM",
+        "ts": "1733973985.935959",
+        "ts_date": "2024-12-12T03:26:25.000Z",
+        "reply_count": 6,
+        "reply_users_count": 3,
+        "links": [ ]
+      },
+      {
+        "username": "Beatrice",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733970211775659",
+        "text": "<@shrimp> OpenAI 언제 복구될지도 모르는데 Prod Action Agent를 소넷으로 변경해도 되는지 확인바랍니다.",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1733970211.775659",
+        "ts_date": "2024-12-12T02:23:31.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0,
+        "links": [ ]
+      },
+      {
+        "username": "Gracie",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733969936582669",
+        "text": "오늘 무슨 특별한 이벤트가 있었나 싶었는데 애플 인텔리전스 베타가 오늘 오픈하면서 ChatGPT 연동 기능이 추가되었네요.",
+        "user": "U06NC3LAV6C",
+        "channel": "C0654GRKQNM",
+        "ts": "1733969936.582669",
+        "ts_date": "2024-12-12T02:18:56.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0,
+        "links": [ ]
+      },
+      {
+        "username": "Beatrice",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733969277490259",
+        "text": "<@amber>  Killer Scenario <LINK0/> 이지만, markdown, mermaid 등 발화창내 리턴밸류 보여주는 워크스트림이나 Payment 모듈은 아니면 <LINK1/> 에 추가하시면 어떻까합니다. Jason schema 기반은 아니지만 LLM UI presenter 워크스트림으로 보고 있으니 1750에 추가해 주십시오 .",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1733969277.490259",
+        "ts_date": "2024-12-12T02:07:57.000Z",
+        "reply_count": 7,
+        "reply_users_count": 2,
+        "links": [
+          "https://wrtn.atlassian.net/jira/software/projects/EC/boards/84/timeline?selectedIssue=EC-1861",
+          "https://wrtn.atlassian.net/jira/software/projects/EC/boards/84/timeline?selectedIssue=EC-1750"
+        ]
+      },
+      {
+        "username": "Samchon",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733968770416099",
+        "text": "@ecosystem-backend 커넥터 컨트롤러 메서드에 `@HumanRoute()` 디코레이터 적용하면 LLM function calling schema 로 전환하지 않습니다.\n\n그리고 컨트롤러 메서드에 `@ExperimentalRoute()` 달아주면, production 모드에서는 LLM function calling schema 로 전환하지 않고, 오직 로컬 및 데브 모드에서만 전환합니다.\n\n백엔드에는 이 사항 금일 중 prod 까지 배포할 예정이니, <@shrimp> 및 <@gracie> 는 rust agent prod 로 배포해도 되는 상황인지 확인해주세요.\n\n• 관련 문서 및 함수\n    ◦ <LINK0/>\n    ◦ <LINK1/>\n• 관련 PR\n    ◦ <LINK2/>\n    ◦ <LINK3/>\n    ◦ <LINK4/>\n    ◦ <LINK5/>",
+        "user": "U05RHSGCLPQ",
+        "channel": "C0654GRKQNM",
+        "ts": "1733968770.416099",
+        "ts_date": "2024-12-12T01:59:30.000Z",
+        "reply_count": 2,
+        "reply_users_count": 2,
+        "links": [
+          "https://github.com/wrtnio/decorators/blob/main/src/ExperimentalRoute.ts",
+          "https://github.com/wrtnio/decorators/blob/main/src/HumanRoute.ts",
+          "https://github.com/samchon/openapi/pull/106",
+          "https://github.com/wrtnio/schema/pull/14",
+          "https://github.com/wrtnio/decorators/pull/24",
+          "https://github.com/wrtnio/connectors/pull/773"
+        ]
+      },
+      {
+        "username": "Gracie",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733966175966539",
+        "text": "<@shrimp> 임시로 Anthropic Claude로 돌리는 패치입니다 <LINK0/>",
+        "user": "U06NC3LAV6C",
+        "channel": "C0654GRKQNM",
+        "ts": "1733966175.966539",
+        "ts_date": "2024-12-12T01:16:15.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0,
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/ecosystem/studio-meta-agent/-/merge_requests/43"
+        ]
+      },
+      {
+        "username": "Beatrice",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733965241630869",
+        "text": "Prod Studio Pro 의 Action Agent 도 답변생성이 안됩니다.",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1733965241.630869",
+        "ts_date": "2024-12-12T01:00:41.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0,
+        "links": [ ]
+      },
+      {
+        "username": "Beatrice",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733965131629349",
+        "text": "<LINK0/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1733965131.629349",
+        "ts_date": "2024-12-12T00:58:51.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0,
+        "links": [
+          "https://www.newsx.com/world/is-chatgpt-down-millions-experiences-unexpected-outage/"
+        ]
+      },
+      {
+        "username": "Beatrice",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733964974264789",
+        "text": "ChatGPT가 한 두시간째 계속 다운이군요.",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1733964974.264789",
+        "ts_date": "2024-12-12T00:56:14.000Z",
+        "reply_count": 7,
+        "reply_users_count": 3,
+        "links": [ ]
+      },
+      {
+        "username": "Nikki",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733933270273629",
+        "text": "모두들 good night~\n\n&gt; Sent by Action Agent in Wrtn Studio Pro\n",
+        "user": "U06G25JC4UC",
+        "channel": "C0654GRKQNM",
+        "ts": "1733933270.273629",
+        "ts_date": "2024-12-11T16:07:50.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0,
+        "links": [ ]
+      },
+      {
+        "username": "Nikki",
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1733925498095049",
+        "text": "good... 생성도 잘하는 듯..\n\n:one: Jira issue summary card",
+        "user": "U06G25JC4UC",
+        "channel": "C0654GRKQNM",
+        "ts": "1733925498.095049",
+        "ts_date": "2024-12-11T13:58:18.000Z",
+        "reply_count": 3,
+        "reply_users_count": 2,
+        "links": [ ]
+      }
+    ],
+    "members": [
+      {
+        "id": "U06H7A98TCL",
+        "display_name": "Shrimp"
+      },
+      {
+        "id": "U05J9AMF213",
+        "display_name": "Amber"
+      },
+      {
+        "id": "U0508EDC413",
+        "display_name": "Leo"
+      },
+      {
+        "id": "U060JBN3PGX",
+        "display_name": "Beatrice"
+      },
+      {
+        "id": "U06NC3LAV6C",
+        "display_name": "Gracie"
+      },
+      {
+        "id": "U05RHSGCLPQ",
+        "display_name": "Samchon"
+      },
+      {
+        "id": "U06G25JC4UC",
+        "display_name": "Nikki"
+      },
+      {
+        "id": "U0769CNJVLL",
+        "display_name": "Kakasoo"
+      },
+      {
+        "id": "U06T2V13R25",
+        "display_name": "Emily"
+      },
+      {
+        "id": "U0822LFPH6J",
+        "display_name": "Sunrabbit"
+      },
+      {
+        "id": "USLACKBOT",
+        "display_name": "Slackbot"
+      },
+      {
+        "id": "U05J9AM9E5T",
+        "display_name": "Asher"
+      }
+    ],
+    "usergroups": [ ],
+    "channel": {
+      "name": "02_wrtn_ecosystem"
+    },
+    "next_cursor": "bmV4dF90czoxNzMzNzMwOTI2MjAxNzE5"
+  }
+}

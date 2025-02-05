@@ -1,0 +1,104 @@
+{
+  "function": {
+    "path": "connector_slack_vote_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "channel": "C0654GRKQNM",
+      "items": [
+        {
+          "text": "똥맛 카레"
+        },
+        {
+          "text": "카레맛 똥"
+        }
+      ],
+      "title": "밸런스 게임",
+      "secretKey": "aef58d9c-7c21-40d4-8242-7a12729b24b0"
+    }
+  ],
+  "success": true,
+  "value": {
+    "blocks": [
+      {
+        "type": "section",
+        "block_id": "afGSl",
+        "text": {
+          "type": "mrkdwn",
+          "text": "*밸런스 게임* Poll by Nikki",
+          "verbatim": false
+        }
+      },
+      {
+        "type": "divider",
+        "block_id": "gswhH"
+      },
+      {
+        "type": "section",
+        "block_id": "VNmB9",
+        "text": {
+          "type": "mrkdwn",
+          "text": "똥맛 카레",
+          "verbatim": false
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Vote",
+            "emoji": true
+          },
+          "value": "pick_0/xoxp-1751759695684-6546188412964-7508760846676-80a3c2b33544130a2efec0090f22c652",
+          "action_id": "Tr+Y6"
+        }
+      },
+      {
+        "type": "context",
+        "block_id": "M2EZr",
+        "elements": [
+          {
+            "type": "mrkdwn",
+            "text": "No votes",
+            "verbatim": false
+          }
+        ]
+      },
+      {
+        "type": "section",
+        "block_id": "WX2WK",
+        "text": {
+          "type": "mrkdwn",
+          "text": "카레맛 똥",
+          "verbatim": false
+        },
+        "accessory": {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Vote",
+            "emoji": true
+          },
+          "value": "pick_1/xoxp-1751759695684-6546188412964-7508760846676-80a3c2b33544130a2efec0090f22c652",
+          "action_id": "b5kYq"
+        }
+      },
+      {
+        "type": "context",
+        "block_id": "qrWGX",
+        "elements": [
+          {
+            "type": "mrkdwn",
+            "text": "No votes",
+            "verbatim": false
+          }
+        ]
+      },
+      {
+        "type": "divider",
+        "block_id": "gqQRw"
+      }
+    ],
+    "ts": "1733895942.433629"
+  }
+}

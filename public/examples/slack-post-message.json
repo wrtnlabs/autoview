@@ -1,0 +1,21 @@
+{
+  "id": "aa595a34-8d88-4f80-ab40-24f7371f7cb5",
+  "function": {
+    "path": "/connector/slack/postMessage/text",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "channel": "C0654GRKQNM",
+      "text": "모두들 good night~",
+      "secretKey": "6c9d4797-d731-46fa-a607-0012234201e5"
+    }
+  ],
+  "success": true,
+  "value": {
+    "ts": "1733933270.273629"
+  },
+  "status": 201,
+  "created_at": "2024-12-11T16:07:49.571Z",
+  "completed_at": "2024-12-11T16:07:50.450Z"
+}

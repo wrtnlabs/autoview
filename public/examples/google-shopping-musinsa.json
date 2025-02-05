@@ -1,0 +1,51 @@
+{
+  "id": "f4999967-0e40-4a9f-8f11-7869babc2573",
+  "function": {
+    "path": "/connector/google-shopping/musinsa",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "keyword": "크롭 패딩 재킷",
+      "max_results": 4
+    }
+  ],
+  "success": true,
+  "value": [
+    {
+      "source": "무신사",
+      "deliveryCost": "무료 배송",
+      "title": "무신사 스탠다드 우먼MUSINSA STANDARD WOMAN 우먼즈 다운 푸퍼 크롭 패딩 재킷 [블랙]",
+      "link": "https://link.musinsa.com/app/goods/2653644?srsltid=AfmBOorU5swdQnbwjsXmj-GY9gsil9vXRvUmxg_HTqeaz47zEVWr7wL8RJk",
+      "price": "₩87,890",
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcRyneI7NHv4ikew_6Gs7Uf2vgsQxTEAlU-QJHryLLIVtKimaTcoVhOTLOpHRlxDjc7IVmEWg9NHeKikvYm9agWndS83m57Nc9cBZu1OMbY&usqp=CAE"
+    },
+    {
+      "source": "무신사",
+      "deliveryCost": "무료 배송",
+      "title": "무신사 스탠다드 우먼MUSINSA STANDARD WOMAN 우먼즈 볼륨 슬리브 크롭 패딩 재킷 [블랙]",
+      "link": "https://link.musinsa.com/app/goods/3422191?srsltid=AfmBOopg_FR717DuvGHkB5g499lJ8gz-vgL6RPDdXgt9W22T2wPDXGQaVzI",
+      "price": "₩44,790",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcQ3n7n_0XoxhWkNZ6rFu-nxBA5JoCYbUC-Q87Y9YkowtaA7nXvtUXWc85Gq5W1GN4UQ_3rnbIE-njx2ZJVaKupSU4cMYZYo90RuLMW-TM-HNpHJxWWYmnat3g&usqp=CAE"
+    },
+    {
+      "source": "무신사",
+      "deliveryCost": "무료 배송",
+      "title": "벤셔먼BEN SHERMAN 우먼 에센셜 크롭 다운 패딩 재킷 블랙 BODDU913FBK",
+      "link": "https://link.musinsa.com/app/goods/4543134?srsltid=AfmBOoobDngS6QIw_e-E62wS798qOrkUkFcnWjAoueiWnqehOES8cwsdwb8",
+      "price": "₩163,900",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTd2f4SrqlG1wVWYlKFs0d-xLSayj4dbhqqzVeWD-qylb4XovbV05fdYz9EjHW1LcE1AanTz2WAxJMV7VB5xQObnoqIgS1iJ7QjmWhfsUd9_JqG4_qzkrQ3ow&usqp=CAE"
+    },
+    {
+      "source": "무신사",
+      "deliveryCost": "무료 배송",
+      "title": "맥우드건MAGOODGAN 베타니 5652 코튼 패딩 모카 크롭 블루종 재킷",
+      "link": "https://link.musinsa.com/app/goods/4503926?srsltid=AfmBOoqH1j8cED0LgErUdIUf6egAPOYgBKF2W9kAiY9DqHP0lTCPTWvXk4g",
+      "price": "₩179,000",
+      "thumbnail": "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTUwqeRv0fZpFygruaPVaLB-S4XwHNpZlBQz8a-kVN9lUL5bHLufVOtStSWbRw96KYcGEg9OMI7Plv_fwJT44Ik6Zb58eh0SIPHbx7vsCrLLp8Bu37dIxxiKw&usqp=CAE"
+    }
+  ],
+  "status": 201,
+  "created_at": "2024-12-10T15:25:00.955Z",
+  "completed_at": "2024-12-10T15:25:02.001Z"
+}

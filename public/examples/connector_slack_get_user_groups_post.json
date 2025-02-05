@@ -1,0 +1,2705 @@
+{
+  "function": {
+    "path": "connector_slack_get_user_groups_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "secretKey": "81adc88c-5922-4677-939c-fb59987a8058"
+    }
+  ],
+  "success": true,
+  "value": {
+    "ok": true,
+    "usergroups": [
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MULJF96H",
+          "U01MXHN3W4S",
+          "U02FVUWQ94L",
+          "U034W19RAD9",
+          "U03V22E858X",
+          "U04H13LCNSV",
+          "U04LDH337FU",
+          "U05105YB563",
+          "U053PGWBVMW",
+          "U054S15NVDH",
+          "U058TN2TTQ8",
+          "U05D15RN4S3",
+          "U05G3N761LM",
+          "U05KF34CFNX",
+          "U05L4SV6QUQ",
+          "U05L4SW9JNL",
+          "U05MPAAHCUU",
+          "U05PJM9PNSJ",
+          "U05T34KKDJ5",
+          "U05V19HUUCT",
+          "U061UV494R5",
+          "U06C4MZ0M6Z",
+          "U06DEJY1L15",
+          "U06G25JKTHA",
+          "U06MP6NUBEX",
+          "U06SHN0V925",
+          "U06TTNE4FB9",
+          "U0711E0J8Q3",
+          "U079D6YG35H"
+        ],
+        "id": "S048AK5LKRV",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "프로덕트팀",
+        "handle": "product",
+        "is_external": false,
+        "date_create": 1667186523,
+        "date_update": 1719551955,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MUEWB9HT",
+        "updated_by": "U04H13LCNSV",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 30
+      },
+      {
+        "description": "",
+        "users": [
+          "U02S0U5HH47",
+          "U04P5HY516Z",
+          "U05G3N761LM",
+          "U05S9UX22T1",
+          "U068H3VDUA0",
+          "U06JU785KUZ",
+          "U06T2V13R25",
+          "U06TTNE4FB9",
+          "U0711HGBGSE",
+          "U07DEHK1QQ0"
+        ],
+        "id": "S048N79HYGM",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "디자인",
+        "handle": "design",
+        "is_external": false,
+        "date_create": 1667186556,
+        "date_update": 1725338243,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MUEWB9HT",
+        "updated_by": "U01MULJF96H",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 10
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MQUJPHEJ",
+          "U01MQUMGQ2J",
+          "U01MUEWB9HT"
+        ],
+        "id": "S048N7CN129",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "비즈니스팀",
+        "handle": "biz",
+        "is_external": false,
+        "date_create": 1667186653,
+        "date_update": 1681180867,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MUEWB9HT",
+        "updated_by": "U01MQUJPHEJ",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U034W19RAD9",
+          "U04JTP7U1JS",
+          "U058TN2TTQ8",
+          "U05CPD5K7BJ",
+          "U05D15RN4S3",
+          "U05J9AMF213",
+          "U06C4MZ0M6Z",
+          "U06G25JC4UC",
+          "U06MP6NUBEX",
+          "U06SHN0V925",
+          "U079D6YG35H",
+          "U07JF42E119"
+        ],
+        "id": "S048R31HNSF",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "프론트팀",
+        "handle": "front",
+        "is_external": false,
+        "date_create": 1667186577,
+        "date_update": 1728892653,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MUEWB9HT",
+        "updated_by": "U06C4MZ0M6Z",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C05KXEK4HRA",
+            "C05MN6TEMA4",
+            "C05KMV0MD7Z",
+            "C05KHMK9VGX"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 13
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MXHN3W4S",
+          "U02FVUWQ94L",
+          "U034W19RAD9",
+          "U03V22E858X",
+          "U046R3CS45R",
+          "U04JTP7U1JS",
+          "U04LDH337FU",
+          "U0508EDC413",
+          "U05105YB563",
+          "U053PGWBVMW",
+          "U058TN2TTQ8",
+          "U05AVUA00UX",
+          "U05CPD5K7BJ",
+          "U05D15RN4S3",
+          "U05F7PL563C",
+          "U05J9AM9E5T",
+          "U05J9AMF213",
+          "U05KF34CFNX",
+          "U05L4SW9JNL",
+          "U05RHSGCLPQ",
+          "U05T34KKDJ5",
+          "U061UV494R5",
+          "U06DEJY1L15",
+          "U06R2TQC0E7"
+        ],
+        "id": "S0493QR9DKK",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "개발팀",
+        "handle": "dev",
+        "is_external": false,
+        "date_create": 1667186605,
+        "date_update": 1711525673,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MUEWB9HT",
+        "updated_by": "U05K0KTA0K1",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C05KXEK4HRA",
+            "C05L0MD2MFW",
+            "C05LN5TCAHF",
+            "C05PYCS6KL2",
+            "C05KX7YN201",
+            "C05L2U6A7RV",
+            "C05LASW1057",
+            "C05QG39H329",
+            "C05KHMK9VGX",
+            "C05L0GG93RS",
+            "C05KMV0MD7Z",
+            "C035184P9D3",
+            "C05MN6TEMA4",
+            "C063R9K2N6P",
+            "C05S74UJ6QM",
+            "C05SMFS875Z",
+            "C061GJC89QS",
+            "C05UMUBRJ7M",
+            "C060YU7KRPF",
+            "C05LLTB1CRJ"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 25
+      },
+      {
+        "description": "사업개발 유관자",
+        "users": [
+          "U04URC5LEA0",
+          "U059ZKPRUEP"
+        ],
+        "id": "S04BSBSS0PL",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "사업개발",
+        "handle": "bizdev",
+        "is_external": false,
+        "date_create": 1669000184,
+        "date_update": 1712896089,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U049FULMHC3",
+        "updated_by": "U04URC5LEA0",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MQUJPHEJ",
+          "U01MQUMGQ2J",
+          "U01MUEWB9HT",
+          "U01MUF2VBS9",
+          "U01MULJF96H",
+          "U01MXHN3W4S",
+          "U02FVUWQ94L",
+          "U02S0U5HH47",
+          "U034W19RAD9",
+          "U03K299FVF1",
+          "U03V22E858X",
+          "U046R3CS45R",
+          "U04H13LCNSV",
+          "U04JTP7U1JS",
+          "U04LDH337FU",
+          "U04P5HY516Z",
+          "U04URC5LEA0",
+          "U0508EDC413",
+          "U05105YB563",
+          "U051EMNQ0RG",
+          "U051X15UWN8",
+          "U053PGWBVMW",
+          "U054S15NVDH",
+          "U054Y4QBF6E",
+          "U057SHQQS04",
+          "U058TN2TTQ8",
+          "U059ZKPRUEP",
+          "U05AVUA00UX",
+          "U05BK60K8NT",
+          "U05CPD5K7BJ",
+          "U05D15RN4S3",
+          "U05F7PL563C",
+          "U05G3N761LM",
+          "U05G93S3SCU",
+          "U05J9AM9E5T",
+          "U05J9AMF213",
+          "U05KF34CFNX",
+          "U05KHKE4D3N",
+          "U05KHKE7MBN",
+          "U05L4SV6QUQ",
+          "U05L4SW9JNL",
+          "U05MPAACGG4",
+          "U05MPAAHCUU",
+          "U05PJM9PNSJ",
+          "U05PNDC5WCD",
+          "U05RHSGCLPQ",
+          "U05S9UX22T1",
+          "U05T34KEC6M",
+          "U05T34KKDJ5",
+          "U05V19HUUCT",
+          "U060JBN3PGX",
+          "U061UV494R5",
+          "U063AHTV2D9",
+          "U066F37274K",
+          "U068H3VDUA0",
+          "U069GQGSTD1",
+          "U06A5MCLDFS",
+          "U06DEJY1L15",
+          "U06G25JC4UC",
+          "U06G25JKTHA",
+          "U06H7A98TCL",
+          "U06J8TZFGGN",
+          "U06JU785KUZ",
+          "U06L35L6HB2",
+          "U06LX1WNB41",
+          "U06MP6NUBEX",
+          "U06MP9WAML2",
+          "U06NC3LAV6C",
+          "U06Q15V1CJG",
+          "U06R2TQC0E7",
+          "U06SHN0V925",
+          "U06T2V13R25",
+          "U06TTNE4FB9",
+          "U0711E0J8Q3",
+          "U0711HGBGSE",
+          "U0769CNJVLL",
+          "U079D6YG35H",
+          "U07AHEU16TE",
+          "U07JF42E119",
+          "U07KUNEGBLZ",
+          "U07PKRRUJCT",
+          "U07RP83T5DY",
+          "U07RP840RPU",
+          "U07RRNU5RL4"
+        ],
+        "id": "S04BURDN4P6",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Team Wrtn",
+        "handle": "team",
+        "is_external": false,
+        "date_create": 1669000215,
+        "date_update": 1728871301,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U049FULMHC3",
+        "updated_by": "U06J8TZFGGN",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C02S1EDS5UG",
+            "C02PD98CD2T",
+            "C02PR0FNY77",
+            "C02LT3DBQRZ",
+            "C02QJCWUWHW",
+            "C02QJ1RL2GY",
+            "C03F9A5N308",
+            "C02GDQB01CY",
+            "C03GW56MUQZ",
+            "C0566P5KACA",
+            "C038DCAB8P6",
+            "C056AC9F6Q7",
+            "C03NC1RN6BF",
+            "C044ZLLS16F",
+            "C02PUJB8T34",
+            "C02ULEP40S1",
+            "C047RU2A8CT",
+            "C01TM46BGFL",
+            "C04BBPE5R55",
+            "C01NMCSGXJL",
+            "C05NXATUED7",
+            "C05MN6TEMA4",
+            "C0403GK31PC",
+            "C05DV7M6M7B",
+            "C04TSQW6Y66",
+            "C05FXGQ9FEX",
+            "C04L03KJHHQ",
+            "C035184P9D3",
+            "C058NMWN4R4",
+            "C05FAEUR4N8",
+            "C05G2K12Y9K",
+            "C05G09UECSG",
+            "C03H5EY7A0P",
+            "C05DP03029G",
+            "C04R79QRFJL",
+            "C053PC6S6T0",
+            "C038B1SFENN",
+            "C04FB8MFWJX",
+            "C05494P4W49",
+            "C0571AZ4SGM",
+            "C05S72VJSDB",
+            "C057EV1NXGQ",
+            "C03GPJTC9U2",
+            "C05RBR345Q9",
+            "C05FSJGAG01",
+            "C05L9ERQQ6P",
+            "C0557THH5DH",
+            "C05PZGS84UB",
+            "C058A4Q197F",
+            "C03RHBV0P2R",
+            "C03G3NNMT54",
+            "C05EQD9MH9T",
+            "C03D9QC7S81"
+          ],
+          "groups": [
+            "G01RAJ50CQ0"
+          ]
+        },
+        "user_count": 84
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MULJF96H",
+          "U034W19RAD9",
+          "U05105YB563",
+          "U058TN2TTQ8",
+          "U05G3N761LM",
+          "U05KF34CFNX",
+          "U05L4SV6QUQ",
+          "U05PJM9PNSJ",
+          "U06C4MZ0M6Z",
+          "U06DEJY1L15",
+          "U06MP6NUBEX",
+          "U06R2TQC0E7"
+        ],
+        "id": "S04S61LGKGA",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Chat Team",
+        "handle": "chat",
+        "is_external": false,
+        "date_create": 1677804264,
+        "date_update": 1711324353,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U06J8TZFGGN",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 12
+      },
+      {
+        "description": "Japan Team",
+        "users": [
+          "U01MQUMGQ2J",
+          "U01MUF2VBS9",
+          "U01MXHN3W4S",
+          "U03K299FVF1",
+          "U051X15UWN8",
+          "U05RX9S0Q4E",
+          "U05V19HUUCT",
+          "U068H3VDUA0",
+          "U06M66KQS9H",
+          "U06SHN0V925"
+        ],
+        "id": "S04TQ63BRA8",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Japan Team",
+        "handle": "japan",
+        "is_external": false,
+        "date_create": 1678708131,
+        "date_update": 1727268834,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U054S15NVDH",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 10
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MQUJPHEJ",
+          "U069GQGSTD1"
+        ],
+        "id": "S04UKMDRA5A",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "인사팀",
+        "handle": "hr",
+        "is_external": false,
+        "date_create": 1679065902,
+        "date_update": 1705301605,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U0520APTKU7",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MXHN3W4S",
+          "U034W19RAD9",
+          "U05105YB563",
+          "U058TN2TTQ8",
+          "U05KF34CFNX",
+          "U06C4MZ0M6Z",
+          "U06DEJY1L15",
+          "U06R2TQC0E7"
+        ],
+        "id": "S0515K1TJ3T",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Chat Team Development",
+        "handle": "chatdev",
+        "is_external": false,
+        "date_create": 1680080779,
+        "date_update": 1711525741,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U05K0KTA0K1",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 8
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MXHN3W4S",
+          "U02FVUWQ94L",
+          "U034W19RAD9",
+          "U03V22E858X",
+          "U046R3CS45R",
+          "U04JTP7U1JS",
+          "U04LDH337FU",
+          "U0508EDC413",
+          "U05105YB563",
+          "U051EMNQ0RG",
+          "U053PGWBVMW",
+          "U057SHQQS04",
+          "U058TN2TTQ8",
+          "U05AVUA00UX",
+          "U05BK60K8NT",
+          "U05CPD5K7BJ",
+          "U05D15RN4S3",
+          "U05F7PL563C",
+          "U05J9AM9E5T",
+          "U05J9AMF213",
+          "U05KF34CFNX",
+          "U05KHKE7MBN",
+          "U05L4SW9JNL",
+          "U05MPAAHCUU",
+          "U05T34KKDJ5",
+          "U061UV494R5",
+          "U06A5MCLDFS",
+          "U06C4MZ0M6Z",
+          "U06DEJY1L15",
+          "U06H7A98TCL",
+          "U06LX1WNB41",
+          "U06NC3LAV6C",
+          "U06R2TQC0E7",
+          "U07AHEU16TE"
+        ],
+        "id": "S053GRMTWQN",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Engineer",
+        "handle": "engineer",
+        "is_external": false,
+        "date_create": 1681795397,
+        "date_update": 1723541206,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNQ0RG",
+        "updated_by": "U06C4MZ0M6Z",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C05KXEK4HRA",
+            "C05SMFS875Z"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 35
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MXHN3W4S",
+          "U03V22E858X",
+          "U0508EDC413",
+          "U05105YB563",
+          "U053PGWBVMW",
+          "U05J9AM9E5T",
+          "U05KF34CFNX",
+          "U05RHSGCLPQ",
+          "U05T34KKDJ5",
+          "U06DEJY1L15",
+          "U06H7A98TCL"
+        ],
+        "id": "S053LF0GS69",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "백엔드팀",
+        "handle": "back",
+        "is_external": false,
+        "date_create": 1681794918,
+        "date_update": 1714637061,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNQ0RG",
+        "updated_by": "U05E1UB278D",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C035184P9D3",
+            "C04L03KJHHQ",
+            "C05G2K12Y9K",
+            "C05MN6TEMA4",
+            "C05LLTB1CRJ",
+            "C05AQRRMQ5B",
+            "C063R9K2N6P",
+            "C05KX7YN201",
+            "C05KXEK4HRA"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 12
+      },
+      {
+        "description": "",
+        "users": [
+          "U02FVUWQ94L",
+          "U03V22E858X",
+          "U046R3CS45R",
+          "U04LDH337FU",
+          "U05L4SW9JNL"
+        ],
+        "id": "S053PA2FCRH",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "MLE",
+        "handle": "mle",
+        "is_external": false,
+        "date_create": 1681795231,
+        "date_update": 1696923994,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNQ0RG",
+        "updated_by": "U051EMNQ0RG",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "",
+        "users": [
+          "U02FVUWQ94L",
+          "U046R3CS45R",
+          "U04LDH337FU",
+          "U057SHQQS04",
+          "U05L4SW9JNL",
+          "U061UV494R5"
+        ],
+        "id": "S053ZHRAEPN",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "AI",
+        "handle": "ai",
+        "is_external": false,
+        "date_create": 1681889734,
+        "date_update": 1710147517,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U04LDH337FU",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "",
+        "users": [
+          "U046R3CS45R",
+          "U04LDH337FU",
+          "U057SHQQS04",
+          "U05AVUA00UX",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U05L4SV6QUQ",
+          "U06LX1WNB41",
+          "U07AHEU16TE"
+        ],
+        "id": "S0549NJ1A4R",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Data",
+        "handle": "data",
+        "is_external": false,
+        "date_create": 1681889919,
+        "date_update": 1719927759,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 9
+      },
+      {
+        "description": "프롬프톤 관련 이야기",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MULJF96H",
+          "U02S0U5HH47",
+          "U04H13LCNSV",
+          "U054Y4QBF6E"
+        ],
+        "id": "S0562FWEELC",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "프롬프톤",
+        "handle": "prompthon",
+        "is_external": false,
+        "date_create": 1683100511,
+        "date_update": 1683103891,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U02S0U5HH47",
+        "updated_by": "U02S0U5HH47",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MULJF96H",
+          "U034W19RAD9",
+          "U058TN2TTQ8",
+          "U05D15RN4S3"
+        ],
+        "id": "S058DUM2V6U",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "앱",
+        "handle": "app",
+        "is_external": false,
+        "date_create": 1684114771,
+        "date_update": 1715317201,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04JTP85N5C",
+        "updated_by": "U05E1UB278D",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C05MN6TEMA4",
+            "C05KHMK9VGX",
+            "C05KXEK4HRA",
+            "C05KX7YN201",
+            "C05PYCS6KL2",
+            "C05KMV0MD7Z",
+            "C035184P9D3"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "po 모임",
+        "users": [
+          "U01MULJF96H",
+          "U02S0U5HH47",
+          "U054S15NVDH",
+          "U057SHQQS04"
+        ],
+        "id": "S058ER5QWQG",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "POs",
+        "handle": "po",
+        "is_external": false,
+        "date_create": 1684133961,
+        "date_update": 1695137117,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04LDH337FU",
+        "updated_by": "U0504QJT414",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "Data Engineers",
+        "users": [
+          "U057SHQQS04",
+          "U05AVUA00UX",
+          "U05BK60K8NT",
+          "U05F7PL563C",
+          "U05KHKE7MBN",
+          "U07AHEU16TE"
+        ],
+        "id": "S05C2QXA544",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "DE",
+        "handle": "de",
+        "is_external": false,
+        "date_create": 1686548611,
+        "date_update": 1719927746,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNQ0RG",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "에코시스템팀 BE engineer 멘션",
+        "users": [
+          "U0508EDC413",
+          "U05J9AM9E5T",
+          "U05RHSGCLPQ",
+          "U05T34KKDJ5",
+          "U06H7A98TCL",
+          "U0769CNJVLL"
+        ],
+        "id": "S05D21MCABH",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "@Ecosystem-Backend",
+        "handle": "ecosystem-backend",
+        "is_external": false,
+        "date_create": 1687328289,
+        "date_update": 1718176971,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U053PGWBVMW",
+        "updated_by": "U05RHSGCLPQ",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "플랫폼 스쿼드 프론트 개발자들 멘션",
+        "users": [
+          "U034W19RAD9",
+          "U058TN2TTQ8",
+          "U06C4MZ0M6Z",
+          "U06MP6NUBEX"
+        ],
+        "id": "S05DSJD3QKX",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Chat Team Front",
+        "handle": "chatfront",
+        "is_external": false,
+        "date_create": 1687477509,
+        "date_update": 1712030117,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNLL2W",
+        "updated_by": "U034W19RAD9",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C038DCAB8P6",
+            "C04FB8MFWJX"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U04P5HY516Z",
+          "U05S9UX22T1",
+          "U06JU785KUZ"
+        ],
+        "id": "S05E2K5K98V",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "brand",
+        "handle": "brand",
+        "is_external": false,
+        "date_create": 1687756275,
+        "date_update": 1713754951,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U0520APTKU7",
+        "updated_by": "U04P5HY516Z",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "",
+        "users": [
+          "U04JTP7U1JS",
+          "U05J9AM9E5T",
+          "U05J9AMF213",
+          "U05RHSGCLPQ"
+        ],
+        "id": "S05FF8CFRSR",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Gen-Hub",
+        "handle": "gen-hub",
+        "is_external": false,
+        "date_create": 1688520664,
+        "date_update": 1696473344,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U04URC5LEA0",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U05105YB563",
+          "U05KF34CFNX",
+          "U06DEJY1L15",
+          "U06R2TQC0E7"
+        ],
+        "id": "S05GE3F8EP9",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Chat Team Backend",
+        "handle": "chatback",
+        "is_external": false,
+        "date_create": 1689234259,
+        "date_update": 1711324372,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04NBMWMDT5",
+        "updated_by": "U06J8TZFGGN",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U05G3N761LM",
+          "U068H3VDUA0"
+        ],
+        "id": "S05GHMRB46Q",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Chat Team 디자이너",
+        "handle": "chatdesign",
+        "is_external": false,
+        "date_create": 1689068425,
+        "date_update": 1711448435,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04JTP85N5C",
+        "updated_by": "U051EMNLL2W",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "마케팅",
+        "users": [
+          "U05G93S3SCU",
+          "U05MPAACGG4",
+          "U063AHTV2D9",
+          "U066F37274K",
+          "U0711HGBGSE",
+          "U07KUNEGBLZ"
+        ],
+        "id": "S05HWKPF3C6",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "마케팅",
+        "handle": "mkt",
+        "is_external": false,
+        "date_create": 1689905666,
+        "date_update": 1725335955,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MXHN3W4S",
+        "updated_by": "U05G93S3SCU",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "",
+        "users": [
+          "U057SHQQS04",
+          "U05AVUA00UX",
+          "U05BK60K8NT",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U05KHKE7MBN"
+        ],
+        "id": "S05LP2608MT",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "DV",
+        "handle": "datavalue",
+        "is_external": false,
+        "date_create": 1691473098,
+        "date_update": 1700532431,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05KHKE4D3N",
+        "updated_by": "U05AVUA00UX",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "",
+        "users": [
+          "U057SHQQS04",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U05L4SV6QUQ"
+        ],
+        "id": "S05LS07PZTL",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "DA",
+        "handle": "data_analyst",
+        "is_external": false,
+        "date_create": 1691473289,
+        "date_update": 1691473290,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05KHKE4D3N",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U057SHQQS04",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U05L4SV6QUQ"
+        ],
+        "id": "S05MFLXK75W",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "PA",
+        "handle": "product_analyst",
+        "is_external": false,
+        "date_create": 1691473320,
+        "date_update": 1691473321,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05KHKE4D3N",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U057SHQQS04",
+          "U05AVUA00UX",
+          "U05BK60K8NT",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U05KHKE7MBN",
+          "U05L4SV6QUQ"
+        ],
+        "id": "S05RL0SF60N",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "뤼스타",
+        "handle": "뤼스타",
+        "is_external": false,
+        "date_create": 1694431709,
+        "date_update": 1694431710,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05KHKE4D3N",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 7
+      },
+      {
+        "description": "",
+        "users": [
+          "U02S0U5HH47",
+          "U05G3N761LM",
+          "U068H3VDUA0",
+          "U06TTNE4FB9"
+        ],
+        "id": "S05RRNF671U",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "프로덕트디자이너",
+        "handle": "pd",
+        "is_external": false,
+        "date_create": 1694510676,
+        "date_update": 1714441742,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNLL2W",
+        "updated_by": "U051EMNLL2W",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C03F9A5N308",
+            "C02ULEP40S1"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U05PJM9PNSJ"
+        ],
+        "id": "S05RYCE5LPM",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "QA",
+        "handle": "qa",
+        "is_external": false,
+        "date_create": 1694512146,
+        "date_update": 1708923870,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05K0KTA0K1",
+        "updated_by": "U05PJM9PNSJ",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C05KMV0MD7Z"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 1
+      },
+      {
+        "description": "Chat Team의 PM입니다.",
+        "users": [
+          "U01MULJF96H"
+        ],
+        "id": "S061XJP1796",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Chat Team PM",
+        "handle": "chatpm",
+        "is_external": false,
+        "date_create": 1697438339,
+        "date_update": 1705906487,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MULJF96H",
+        "updated_by": "U05762Z3517",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 1
+      },
+      {
+        "description": "MLOps 관련 엔지니어 모임",
+        "users": [
+          "U04LDH337FU",
+          "U051EMNQ0RG",
+          "U05F7PL563C",
+          "U05T34KKDJ5"
+        ],
+        "id": "S061ZFSFAAH",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "MLOps",
+        "handle": "mlops",
+        "is_external": false,
+        "date_create": 1697799524,
+        "date_update": 1700460740,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNQ0RG",
+        "updated_by": "U05K0KTA0K1",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C05FXGQ9FEX",
+            "C02GDQB01CY",
+            "C03NC1RN6BF"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U05KF34CFNX"
+        ],
+        "id": "S062WU45LH1",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "PromptHub",
+        "handle": "pm-dave_prompthub",
+        "is_external": false,
+        "date_create": 1698315202,
+        "date_update": 1699237212,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05762Z3517",
+        "updated_by": "U05RSUZ70KE",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 1
+      },
+      {
+        "description": "Customer eXperience (고객경험)",
+        "users": [ ],
+        "id": "S064Y6EQHV0",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "CX팀",
+        "handle": "cx",
+        "is_external": false,
+        "date_create": 1699494727,
+        "date_update": 1713758993,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05RSUZ70KE",
+        "updated_by": "U05RSUZ70KE",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 0
+      },
+      {
+        "description": "독서소모임",
+        "users": [
+          "U05L4SV6QUQ"
+        ],
+        "id": "S065AQN17DX",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "뤼든",
+        "handle": "book",
+        "is_external": false,
+        "date_create": 1699494384,
+        "date_update": 1717563423,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05L4SV6QUQ",
+        "updated_by": "USLACKBOT",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 1
+      },
+      {
+        "description": "피플 팀",
+        "users": [
+          "U01MQUJPHEJ",
+          "U069GQGSTD1",
+          "U06J8TZFGGN",
+          "U06MP9WAML2"
+        ],
+        "id": "S06697T63U6",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "People Team",
+        "handle": "people",
+        "is_external": false,
+        "date_create": 1700460228,
+        "date_update": 1713831437,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U01MQUJPHEJ",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "PR Team",
+        "users": [
+          "U054Y4QBF6E",
+          "U05PNDC5WCD",
+          "U06L35L6HB2"
+        ],
+        "id": "S066FPVAGF5",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "PR Team",
+        "handle": "pr",
+        "is_external": false,
+        "date_create": 1700460347,
+        "date_update": 1721349493,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUJPHEJ",
+        "updated_by": "U054Y4QBF6E",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "모바일 앱 서비스 엔지니어",
+        "users": [
+          "U01MUF2VBS9",
+          "U058TN2TTQ8",
+          "U05D15RN4S3",
+          "U06MP6NUBEX",
+          "U06SHN0V925",
+          "U07JF42E119"
+        ],
+        "id": "S067B15K0CF",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Mobile App Engineer",
+        "handle": "app-front",
+        "is_external": false,
+        "date_create": 1701232307,
+        "date_update": 1724655502,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05D15RN4S3",
+        "updated_by": "U05D15RN4S3",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "",
+        "users": [
+          "U02S0U5HH47",
+          "U05KHKE4D3N",
+          "U05MPAAHCUU",
+          "U06G25JKTHA",
+          "U0711E0J8Q3"
+        ],
+        "id": "S068ELNCK5Y",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "PM",
+        "handle": "pm",
+        "is_external": false,
+        "date_create": 1701658039,
+        "date_update": 1715318943,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MULJF96H",
+        "updated_by": "U057SHQQS04",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MXHN3W4S",
+          "U04H13LCNSV",
+          "U05D15RN4S3",
+          "U05MPAAHCUU",
+          "U06TTNE4FB9"
+        ],
+        "id": "S068KHWUZQU",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "그로스 제품",
+        "handle": "growthproduct",
+        "is_external": false,
+        "date_create": 1701696057,
+        "date_update": 1713164620,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05S354GE4R",
+        "updated_by": "U05S354GE4R",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "Platform Engineering, DevOps, SRE, Engineering Productivity 와 관련된 활동을 하는 엔지니어 모임입니다.",
+        "users": [
+          "U051EMNQ0RG",
+          "U06A5MCLDFS",
+          "U06Q15V1CJG"
+        ],
+        "id": "S069B3MLATG",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Platform Engineering Team",
+        "handle": "pe",
+        "is_external": false,
+        "date_create": 1702279398,
+        "date_update": 1718866948,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNQ0RG",
+        "updated_by": "U051EMNQ0RG",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C069EPYKL3F"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "",
+        "users": [
+          "U04JTP7U1JS",
+          "U0508EDC413",
+          "U05J9AM9E5T",
+          "U05J9AMF213",
+          "U05RHSGCLPQ",
+          "U060JBN3PGX",
+          "U06G25JC4UC",
+          "U06H7A98TCL",
+          "U06NC3LAV6C",
+          "U06T2V13R25",
+          "U0769CNJVLL",
+          "U07H4P9QERE"
+        ],
+        "id": "S06AS8Y5QAU",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Ecosystem",
+        "handle": "ecosystem",
+        "is_external": false,
+        "date_create": 1702529540,
+        "date_update": 1728402924,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05LJJU8B9R",
+        "updated_by": "U060JBN3PGX",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 12
+      },
+      {
+        "description": "좋은 Architecture 를 만들기 위해 고민하는 개발자들",
+        "users": [
+          "U05AVUA00UX"
+        ],
+        "id": "S06AT5PJS3U",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Software Archtect",
+        "handle": "architect",
+        "is_external": false,
+        "date_create": 1702984978,
+        "date_update": 1702984979,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05K0KTA0K1",
+        "updated_by": "U05K0KTA0K1",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C035184P9D3",
+            "C04L03KJHHQ",
+            "C05KX7YN201"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 1
+      },
+      {
+        "description": "Core Backend 팀 그룹",
+        "users": [
+          "U03V22E858X"
+        ],
+        "id": "S06D4D5RWNQ",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Core Backend 팀",
+        "handle": "core-backend",
+        "is_external": false,
+        "date_create": 1704802834,
+        "date_update": 1714459550,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05K0KTA0K1",
+        "updated_by": "U03V22E858X",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C063R9K2N6P",
+            "C06CZSG50SX",
+            "C05LN5TCAHF",
+            "C05KX7YN201",
+            "C05KXEK4HRA",
+            "C06CMTYCZTK",
+            "C05L0MD2MFW"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 1
+      },
+      {
+        "description": "AI팀의 Generality 파트를 맡고 있는 사람들.",
+        "users": [
+          "U04LDH337FU",
+          "U05L4SW9JNL",
+          "U061UV494R5"
+        ],
+        "id": "S06DU3QDAMU",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "AI-G",
+        "handle": "ai-g",
+        "is_external": false,
+        "date_create": 1705379350,
+        "date_update": 1711304168,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U061UV494R5",
+        "updated_by": "U057SHQM744",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "Data-AI Team 멤버 통합 그룹",
+        "users": [
+          "U02FVUWQ94L",
+          "U02S0U5HH47",
+          "U046R3CS45R",
+          "U04LDH337FU",
+          "U057SHQQS04",
+          "U05AVUA00UX",
+          "U05BK60K8NT",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U05KHKE7MBN",
+          "U05L4SW9JNL",
+          "U061UV494R5",
+          "U06LX1WNB41",
+          "U07AHEU16TE"
+        ],
+        "id": "S06ERAKQSF9",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Data-AI Team",
+        "handle": "dai",
+        "is_external": false,
+        "date_create": 1706015191,
+        "date_update": 1719927781,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U057SHQQS04",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 14
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MXHN3W4S",
+          "U04H13LCNSV",
+          "U04URC5LEA0",
+          "U054Y4QBF6E",
+          "U059ZKPRUEP",
+          "U05D15RN4S3",
+          "U05G93S3SCU",
+          "U05MPAACGG4",
+          "U05MPAAHCUU",
+          "U05PNDC5WCD",
+          "U063AHTV2D9",
+          "U066F37274K",
+          "U06L35L6HB2"
+        ],
+        "id": "S06F0LRDFJM",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "strategic growth",
+        "handle": "growth",
+        "is_external": false,
+        "date_create": 1705651885,
+        "date_update": 1710997925,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04H13LCNSV",
+        "updated_by": "U04H13LCNSV",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 13
+      },
+      {
+        "description": "AI팀의 Usability 파트",
+        "users": [
+          "U02FVUWQ94L",
+          "U04LDH337FU"
+        ],
+        "id": "S06F2UMUDEH",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "AI-U",
+        "handle": "ai-u",
+        "is_external": false,
+        "date_create": 1706015059,
+        "date_update": 1706064567,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U057SHQQS04",
+        "updated_by": "U057SHQQS04",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "",
+        "users": [
+          "U04JTP7U1JS",
+          "U05J9AMF213",
+          "U06G25JC4UC",
+          "U06NC3LAV6C"
+        ],
+        "id": "S06G06L1EKD",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Ecosystem-Frontend",
+        "handle": "ecosystem-frontend",
+        "is_external": false,
+        "date_create": 1706508328,
+        "date_update": 1714111495,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04MTT99C5P",
+        "updated_by": "U06G25JC4UC",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U04LDH337FU",
+          "U05AVUA00UX",
+          "U05F7PL563C"
+        ],
+        "id": "S06GMGFFT16",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Data/AI Team TPM_group members",
+        "handle": "dai-tpm",
+        "is_external": false,
+        "date_create": 1706455062,
+        "date_update": 1706455086,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U057SHQQS04",
+        "updated_by": "U057SHQQS04",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "wrtn-web 개발 관여 fe 그룹",
+        "users": [
+          "U01MUF2VBS9",
+          "U034W19RAD9",
+          "U058TN2TTQ8",
+          "U05CPD5K7BJ",
+          "U06C4MZ0M6Z",
+          "U079D6YG35H",
+          "U07JF42E119",
+          "U07RP83T5DY",
+          "U07RP840RPU"
+        ],
+        "id": "S06LMQSASTG",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "웹 fe",
+        "handle": "web-front",
+        "is_external": false,
+        "date_create": 1709039904,
+        "date_update": 1728983231,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U034W19RAD9",
+        "updated_by": "U034W19RAD9",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 9
+      },
+      {
+        "description": "[Data Convergence] Part Data Science / Data Management / MLOps",
+        "users": [
+          "U02S0U5HH47",
+          "U046R3CS45R",
+          "U057SHQQS04",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U06LX1WNB41"
+        ],
+        "id": "S06N9SVN5A5",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Data Convergence",
+        "handle": "data-convergence",
+        "is_external": false,
+        "date_create": 1709618474,
+        "date_update": 1713845589,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05F7PL563C",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "에코시스템 프로덕트 관련 그룹입니다.",
+        "users": [
+          "U060JBN3PGX",
+          "U06T2V13R25"
+        ],
+        "id": "S06NXLLKZT3",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "ecosystem-pm&pd",
+        "handle": "ecosystem-pmpd",
+        "is_external": false,
+        "date_create": 1709879521,
+        "date_update": 1715575769,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04MTT99C5P",
+        "updated_by": "U06G25JKTHA",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "",
+        "users": [
+          "U02FVUWQ94L",
+          "U046R3CS45R",
+          "U05L4SW9JNL"
+        ],
+        "id": "S06Q1SAT85A",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "NLP",
+        "handle": "nlp",
+        "is_external": false,
+        "date_create": 1710737706,
+        "date_update": 1710737707,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U046R3CS45R",
+        "updated_by": "U046R3CS45R",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "AI검색 생성 모니터링 그룹",
+        "users": [
+          "U04LDH337FU",
+          "U05105YB563",
+          "U058TN2TTQ8",
+          "U05KHKE4D3N",
+          "U05L4SW9JNL",
+          "U05PJM9PNSJ",
+          "U06C4MZ0M6Z"
+        ],
+        "id": "S06TTA7UK46",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "AI검색 모니터링",
+        "handle": "ai-search_monitoring",
+        "is_external": false,
+        "date_create": 1712898271,
+        "date_update": 1712905160,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05PJM9PNSJ",
+        "updated_by": "U046R3CS45R",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 7
+      },
+      {
+        "description": "SSO 작업에 참여하는 팀원들 멘션용",
+        "users": [
+          "U01MUF2VBS9",
+          "U05KF34CFNX",
+          "U05KHKE4D3N",
+          "U05PJM9PNSJ"
+        ],
+        "id": "S06UUGCR4E5",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "SSO",
+        "handle": "sso",
+        "is_external": false,
+        "date_create": 1713242323,
+        "date_update": 1715317163,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MULJF96H",
+        "updated_by": "U05E1UB278D",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "서비스 Backend 개발자 모임",
+        "users": [
+          "U01MXHN3W4S",
+          "U03V22E858X",
+          "U05105YB563",
+          "U053PGWBVMW",
+          "U05KF34CFNX",
+          "U05T34KKDJ5",
+          "U06DEJY1L15",
+          "U06R2TQC0E7"
+        ],
+        "id": "S06V2F0DH62",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "backend-dev",
+        "handle": "백엔드개발",
+        "is_external": false,
+        "date_create": 1713610983,
+        "date_update": 1720756447,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05K0KTA0K1",
+        "updated_by": "U01MQUJPHEJ",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C05L0MD2MFW",
+            "C06CZSG50SX",
+            "C06NXBMEKGR",
+            "C04L03KJHHQ"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 8
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MULJF96H",
+          "U01MXHN3W4S",
+          "U03V22E858X",
+          "U04LDH337FU",
+          "U05105YB563",
+          "U054S15NVDH",
+          "U058TN2TTQ8",
+          "U05L4SV6QUQ",
+          "U05L4SW9JNL",
+          "U05PJM9PNSJ",
+          "U05T34KKDJ5",
+          "U06C4MZ0M6Z",
+          "U06SHN0V925",
+          "U0711E0J8Q3",
+          "U079D6YG35H",
+          "U07DEHK1QQ0",
+          "U07JF42E119",
+          "U07RP840RPU"
+        ],
+        "id": "S0703EXMR8W",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "엔서엔진파트",
+        "handle": "answer_engine",
+        "is_external": false,
+        "date_create": 1713899856,
+        "date_update": 1728897217,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U054S15NVDH",
+        "updated_by": "U054S15NVDH",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 19
+      },
+      {
+        "description": "",
+        "users": [
+          "U03V22E858X",
+          "U05PJM9PNSJ"
+        ],
+        "id": "S0706RSE7FC",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "core-part",
+        "handle": "core-part",
+        "is_external": false,
+        "date_create": 1713869022,
+        "date_update": 1716775939,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05K0KTA0K1",
+        "updated_by": "U05RSUZ70KE",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C07006T9QAJ"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "광고 PoC 관련 인원",
+        "users": [
+          "U01MULJF96H",
+          "U02S0U5HH47",
+          "U046R3CS45R",
+          "U04URC5LEA0",
+          "U05105YB563",
+          "U057SHQQS04",
+          "U058TN2TTQ8",
+          "U059ZKPRUEP",
+          "U05CPD5K7BJ",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U06LX1WNB41",
+          "U06R2TQC0E7"
+        ],
+        "id": "S070F4KP71U",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "광고PoC",
+        "handle": "adpoc",
+        "is_external": false,
+        "date_create": 1714050489,
+        "date_update": 1714050490,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U02S0U5HH47",
+        "updated_by": "U02S0U5HH47",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 13
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MULJF96H",
+          "U02FVUWQ94L",
+          "U034W19RAD9",
+          "U051X15UWN8",
+          "U053PGWBVMW",
+          "U05G3N761LM",
+          "U05MPAAHCUU",
+          "U05V19HUUCT",
+          "U06DEJY1L15",
+          "U06MP6NUBEX",
+          "U07RP83T5DY"
+        ],
+        "id": "S070LRXRMDW",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "콘텐츠파트",
+        "handle": "contentspart",
+        "is_external": false,
+        "date_create": 1713756103,
+        "date_update": 1729238006,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MULJF96H",
+        "updated_by": "U01MULJF96H",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 11
+      },
+      {
+        "description": "",
+        "users": [
+          "U04H13LCNSV",
+          "U05D15RN4S3",
+          "U05KF34CFNX",
+          "U061UV494R5",
+          "U06G25JKTHA",
+          "U06TTNE4FB9"
+        ],
+        "id": "S070P90AD8D",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "소셜 본딩",
+        "handle": "socialbonding",
+        "is_external": false,
+        "date_create": 1714102041,
+        "date_update": 1717996028,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04H13LCNSV",
+        "updated_by": "U05KF34CFNX",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "플랫폼&비즈니스팀",
+        "users": [
+          "U02S0U5HH47",
+          "U03V22E858X",
+          "U046R3CS45R",
+          "U04URC5LEA0",
+          "U057SHQQS04",
+          "U058TN2TTQ8",
+          "U059ZKPRUEP",
+          "U05CPD5K7BJ",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U06LX1WNB41",
+          "U06R2TQC0E7",
+          "U079D6YG35H",
+          "U07PKRRUJCT"
+        ],
+        "id": "S070Y350Q1K",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Platform&Business",
+        "handle": "platformbiz",
+        "is_external": false,
+        "date_create": 1714321063,
+        "date_update": 1727662798,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U02S0U5HH47",
+        "updated_by": "U05KHKE4D3N",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 14
+      },
+      {
+        "description": "",
+        "users": [
+          "U05MPAAHCUU",
+          "U06G25JKTHA",
+          "U0711E0J8Q3"
+        ],
+        "id": "S071NBW3LAE",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "제품 PM",
+        "handle": "productpm",
+        "is_external": false,
+        "date_create": 1714638354,
+        "date_update": 1719551831,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U04H13LCNSV",
+        "updated_by": "U04H13LCNSV",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MXHN3W4S",
+          "U05AVUA00UX"
+        ],
+        "id": "S072UFSK327",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Mongo 관련자",
+        "handle": "mongo",
+        "is_external": false,
+        "date_create": 1715317280,
+        "date_update": 1715317281,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05E1UB278D",
+        "updated_by": "U05E1UB278D",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "Tokyo Office",
+        "users": [
+          "U01MQUMGQ2J",
+          "U03K299FVF1",
+          "U051X15UWN8",
+          "U05RX9S0Q4E",
+          "U05V19HUUCT",
+          "U06M66KQS9H"
+        ],
+        "id": "S073GBA498A",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Tokyo Office",
+        "handle": "tokyo",
+        "is_external": false,
+        "date_create": 1715738422,
+        "date_update": 1715738480,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MQUMGQ2J",
+        "updated_by": "U01MQUMGQ2J",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "플비 배포 유관자",
+        "users": [
+          "U03V22E858X",
+          "U046R3CS45R",
+          "U05CPD5K7BJ",
+          "U05F7PL563C",
+          "U06R2TQC0E7"
+        ],
+        "id": "S0751HD8UDU",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Platform&Biz Engineer",
+        "handle": "pb_engineer",
+        "is_external": false,
+        "date_create": 1716799852,
+        "date_update": 1726806245,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U02S0U5HH47",
+        "updated_by": "U03V22E858X",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "",
+        "users": [
+          "U04URC5LEA0",
+          "U059ZKPRUEP"
+        ],
+        "id": "S07587KGNGJ",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Platform&Biz Bizdev",
+        "handle": "pb_bizdev",
+        "is_external": false,
+        "date_create": 1716800302,
+        "date_update": 1716800303,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U02S0U5HH47",
+        "updated_by": "U02S0U5HH47",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "파트장, PM을 멘션",
+        "users": [
+          "U054S15NVDH",
+          "U0711E0J8Q3"
+        ],
+        "id": "S075LUE1M8C",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Answer Engine PM",
+        "handle": "answer-pm",
+        "is_external": false,
+        "date_create": 1716957297,
+        "date_update": 1716957297,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNLL2W",
+        "updated_by": "U051EMNLL2W",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [
+            "C06VDAURKQC",
+            "C038DCAB8P6",
+            "C0566P5KACA",
+            "C035184P9D3"
+          ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "",
+        "users": [
+          "U046R3CS45R",
+          "U05F7PL563C",
+          "U05KHKE4D3N",
+          "U06LX1WNB41"
+        ],
+        "id": "S075P9Y2MJR",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Platform&Biz Data",
+        "handle": "pb_data",
+        "is_external": false,
+        "date_create": 1717057932,
+        "date_update": 1727193360,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U02S0U5HH47",
+        "updated_by": "U02S0U5HH47",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U02S0U5HH47",
+          "U057SHQQS04",
+          "U05KHKE4D3N"
+        ],
+        "id": "S075S6ZT3J6",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "Platfome&Biz PM",
+        "handle": "pb_pm",
+        "is_external": false,
+        "date_create": 1717057892,
+        "date_update": 1717058001,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U02S0U5HH47",
+        "updated_by": "U02S0U5HH47",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "",
+        "users": [
+          "U058TN2TTQ8",
+          "U06C4MZ0M6Z",
+          "U06SHN0V925",
+          "U079D6YG35H",
+          "U07JF42E119",
+          "U07RP840RPU"
+        ],
+        "id": "S077NSD5GQ5",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "엔서 프론트엔드",
+        "handle": "answer-fe",
+        "is_external": false,
+        "date_create": 1718192578,
+        "date_update": 1728897200,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U054S15NVDH",
+        "updated_by": "U054S15NVDH",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "",
+        "users": [
+          "U058TN2TTQ8",
+          "U06C4MZ0M6Z",
+          "U079D6YG35H",
+          "U07JF42E119"
+        ],
+        "id": "S077RL8N2GK",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "엔서 웹",
+        "handle": "answer-web",
+        "is_external": false,
+        "date_create": 1718192622,
+        "date_update": 1724649876,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U054S15NVDH",
+        "updated_by": "U054S15NVDH",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 4
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MXHN3W4S",
+          "U03V22E858X",
+          "U05105YB563",
+          "U05T34KKDJ5",
+          "U079D6YG35H"
+        ],
+        "id": "S078EH5KX9N",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "엔서 백엔드",
+        "handle": "answer-be",
+        "is_external": false,
+        "date_create": 1718192478,
+        "date_update": 1723730197,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U054S15NVDH",
+        "updated_by": "U04H13LCNSV",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "",
+        "users": [
+          "U058TN2TTQ8",
+          "U06SHN0V925",
+          "U07JF42E119"
+        ],
+        "id": "S078EHE5BNC",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "엔서 앱",
+        "handle": "answer-app",
+        "is_external": false,
+        "date_create": 1718192601,
+        "date_update": 1724649855,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U054S15NVDH",
+        "updated_by": "U054S15NVDH",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 3
+      },
+      {
+        "description": "",
+        "users": [
+          "U04JTP7U1JS",
+          "U0508EDC413",
+          "U05J9AM9E5T",
+          "U05J9AMF213",
+          "U05RHSGCLPQ",
+          "U06G25JC4UC",
+          "U06H7A98TCL",
+          "U06NC3LAV6C",
+          "U0769CNJVLL"
+        ],
+        "id": "S078LMFAPRC",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "eco-dev",
+        "handle": "eco-dev",
+        "is_external": false,
+        "date_create": 1718790217,
+        "date_update": 1723446768,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05J9AM9E5T",
+        "updated_by": "U05J9AMF213",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 9
+      },
+      {
+        "description": "SaaS 사용 비용 절감 및 효율화와 관련된 구성원",
+        "users": [
+          "U01MQUJPHEJ",
+          "U01MUF2VBS9",
+          "U051EMNQ0RG",
+          "U054S15NVDH",
+          "U05AVUA00UX",
+          "U05T34KEC6M",
+          "U06A5MCLDFS",
+          "U06Q15V1CJG",
+          "U06R2TQC0E7",
+          "U079D6YG35H"
+        ],
+        "id": "S07BGUE2NC9",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "SaaS Cost Saving Group",
+        "handle": "saas-cost-saving",
+        "is_external": false,
+        "date_create": 1720136764,
+        "date_update": 1720137118,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U051EMNQ0RG",
+        "updated_by": "U051EMNQ0RG",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 10
+      },
+      {
+        "description": "",
+        "users": [
+          "U04LDH337FU",
+          "U05L4SW9JNL"
+        ],
+        "id": "S07E29NC892",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "엔서 AI",
+        "handle": "answer-ai",
+        "is_external": false,
+        "date_create": 1721891898,
+        "date_update": 1721891898,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05L4SW9JNL",
+        "updated_by": "U05L4SW9JNL",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 2
+      },
+      {
+        "description": "",
+        "users": [
+          "U01MUF2VBS9",
+          "U01MULJF96H",
+          "U04H13LCNSV",
+          "U054S15NVDH",
+          "U06SHN0V925"
+        ],
+        "id": "S07H1PR5MT9",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "wrtn on call",
+        "handle": "wrtn-on-call",
+        "is_external": false,
+        "date_create": 1724060736,
+        "date_update": 1729735663,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U054S15NVDH",
+        "updated_by": "U05L4SW9JNL",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 5
+      },
+      {
+        "description": "",
+        "users": [
+          "U05105YB563",
+          "U053PGWBVMW",
+          "U06C4MZ0M6Z",
+          "U06JU785KUZ",
+          "U07DEHK1QQ0",
+          "U07JF42E119"
+        ],
+        "id": "S07PJUFGL95",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "jadensquad",
+        "handle": "jadensquad",
+        "is_external": false,
+        "date_create": 1727841941,
+        "date_update": 1727841941,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U01MULJF96H",
+        "updated_by": "U01MULJF96H",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 6
+      },
+      {
+        "description": "",
+        "users": [
+          "U02FVUWQ94L",
+          "U034W19RAD9",
+          "U05G3N761LM",
+          "U05MPAAHCUU",
+          "U05T34KKDJ5",
+          "U06DEJY1L15",
+          "U06MP6NUBEX"
+        ],
+        "id": "S07PPVC0AG1",
+        "team_id": "T01N3NBLFL4",
+        "is_usergroup": true,
+        "name": "캐릭터 라이언 스쿼드",
+        "handle": "ryansquad",
+        "is_external": false,
+        "date_create": 1727420050,
+        "date_update": 1728274413,
+        "date_delete": 0,
+        "auto_type": null,
+        "created_by": "U05MPAAHCUU",
+        "updated_by": "U06C4MZ0M6Z",
+        "deleted_by": null,
+        "prefs": {
+          "channels": [ ],
+          "groups": [ ]
+        },
+        "user_count": 7
+      }
+    ]
+  }
+}

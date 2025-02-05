@@ -1,0 +1,869 @@
+{
+  "function": {
+    "path": "connector_slack_get_channel_link_histories_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "channel": "C0654GRKQNM",
+      "latestDateTime": "2024-10-08T23:59:59+09:00",
+      "limit": 1000,
+      "oldestDateTime": "2024-10-01T00:00:00+09:00",
+      "secretKey": "745b21f8-8ea6-4a00-87f3-011203f58d80"
+    }
+  ],
+  "success": true,
+  "value": {
+    "messages": [
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728395680972569",
+        "text": "<@beatrice> 아람코도 플랜트 분야 건설업체이다보니, 요즘 건설 업계에서 생성형 AI로 주목받고있는 스타트업 참고용으로 소개드립니다!\n주요기능은 건설 회사만 쓰는 특정한 현장 도면 기반 RAG 기술이 주 아이템입니다.\n워크플로우와 같은 기능이 있는 것이 특징입니다(UI는 저희 팀과 다르게 프리뷰 수준)\n<LINK0/>",
+        "user": "U06T2V13R25",
+        "channel": "C0654GRKQNM",
+        "ts": "1728395680.972569",
+        "links": [
+          "https://civils.ai/"
+        ],
+        "ts_date": "2024-10-08T13:54:40.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728395248251839",
+        "text": "이 워크플로우를 보고 싶으시다면...\n\n• <LINK1/>",
+        "user": "U0769CNJVLL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728395248.251839",
+        "links": [
+          "https://drive.google.com/file/d/1oVpbxtrfWqP-HPfPqCRNMuhu0dUEXbj9/view?usp=drive_link"
+        ],
+        "ts_date": "2024-10-08T13:47:28.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728383696537729",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n*오늘의 이슈 요약*\n\n*디자인 관련 이슈*\n\n•   <@beatrice> `[ENG] 인스타그램 마케팅 시안 생성 (발화-워크플로우 생성-위젯 등록) (최종).mp4` 이름으로 마지막 영상 업로드 했습니다. 기존 마케팅 시안 영상보다 훨씬 고퀄입니다. <LINK2/>\n\n*프론트엔드 관련 이슈*\n\n•   <@jaxtyn> dev서버에서 image capture 버튼이 간헐적으로 동작하지 않는 버그를 수정한 <LINK3/>\n•   <!subteam^S06AS8Y5QAU> SWL 문법 컨트롤 플로우 테스트해보았는데 Omni 성공률 100% 나오네요. 치명적인 컴파일러 버그 두 개를 잡았는데 극적으로 개선되었습니다. 다음주 내로 컨트롤 플로우가 지원되는 컴파일러가 적용될 예정입니다. [메시지 링크](<LINK4/>)\n\n*백엔드 관련 이슈*\n\n•   <@amber> 베타 바로 등록 api 개발 완료되어 보여드립니다! 아래는 데브서버로 테스트한 영상인데, 현재 데브 서버는 베타테스터가 아니어도 사내망에만 있으면 접근이 가능하기에... prod 올라가면 추가 테스트가 필요합니다! <LINK5/>\n\n*컴파일 관련 이슈*\n\n•   <!subteam^S06G06L1EKD> inspector data binding ui 고친 mR 입니다 [메시지 링크](<LINK6/>)\n",
+        "user": "U06H7A98TCL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728383696.537729",
+        "links": [
+          "https://wrtn.slack.com/archives/C0654GRKQNM/p1728382434609699",
+          "https://wrtn.slack.com/archives/C0654GRKQNM/p1728377750985799",
+          "https://wrtn.slack.com/archives/C0654GRKQNM/p1728374922409499",
+          "https://wrtn.slack.com/archives/C0654GRKQNM/p1728377539770939",
+          "https://wrtn.slack.com/archives/C0654GRKQNM/p1728371870926709"
+        ],
+        "ts_date": "2024-10-08T10:34:56.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728382434609699",
+        "text": "<@beatrice> `[ENG] 인스타그램 마케팅 시안 생성 (발화-워크플로우 생성-위젯 등록) (최종).mp4` 이름으로 마지막 영상 업로드 했습니다. 기존 마케팅 시안 영상보다 훨씬 고퀄입니다.\n<LINK7/>",
+        "user": "U07H4P9QERE",
+        "channel": "C0654GRKQNM",
+        "ts": "1728382434.609699",
+        "links": [
+          "https://drive.google.com/file/d/1Mr-pscHlpWcgkenlj7TYN79nTChUYcV4/view?usp=drive_link"
+        ],
+        "ts_date": "2024-10-08T10:13:54.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728377750985799",
+        "text": "<!subteam^S06G06L1EKD>\ndev서버에서 image capture 버튼이 간헐적으로 동작하지 않는 버그를 수정한 <LINK8/> 입니다.\ncc <@samchon>",
+        "user": "U04JTP7U1JS",
+        "channel": "C0654GRKQNM",
+        "ts": "1728377750.985799",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/507"
+        ],
+        "ts_date": "2024-10-08T08:55:50.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728375915567159",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\nA 30-minute 1:1 meeting has been scheduled with Owen on 2024-10-17 at 10:00 AM KST. \n\nDetails:\n- Title: 1:1 Meeting with Owen\n- Date &amp; Time: 2024-10-17, 10:00 AM - 10:30 AM KST\n- Attendee: Owen (<mailto:owen@wrtn.io|owen@wrtn.io>)\n\nView the event in Google Calendar: <LINK9/>\n",
+        "user": "U06G25JC4UC",
+        "channel": "C0654GRKQNM",
+        "ts": "1728375915.567159",
+        "links": [
+          "https://www.google.com/calendar/event?eid=NzhmcWR1OWw2cGJuaTVmdjlydmQ1bXV0cW8gbmlra2lAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-08T08:25:15.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728375508604869",
+        "text": "<@shrimp>\n\n줄바꿈 문자를 잘못 쓰는 이슈가 있습니다.\n\n• <LINK10/> \n• <LINK11/>",
+        "user": "U0769CNJVLL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728375508.604869",
+        "links": [
+          "https://app.datadoghq.com/logs?query=env%3Adev%20service%3Ahamlet%20&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=host%2Cservice&amp;event=AgAAAZJrM1HAWfDfZQAAAAAAAAAYAAAAAEFaSnJNMnEzQUFDSlZNUXRzTktpQUFBQQAAACQAAAAAMDE5MjZiMzMtNzQ4ZC00NzJkLThiNGMtOTFlMTcwYzk0Njhm&amp;fromUser=true&amp;messageDisplay=inline&amp;refresh_mode=sliding&amp;storage=hot&amp;stream_sort=desc&amp;viz=stream&amp;from_ts=1722493844203&amp;to_ts=1722494744203&amp;live=true",
+          "https://github.com/studio-pro/github_connector/issues/2240"
+        ],
+        "ts_date": "2024-10-08T08:18:28.000Z",
+        "reply_count": 9,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728373815014019",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\nA 30-minute 1:1 meeting with <mailto:studio@wrtn.io|studio@wrtn.io> has been scheduled for 2024-10-10 at 10:00. Event link: <LINK12/> 울랄라 :heavy_heart_exclamation_mark_ornament:\n",
+        "user": "U06G25JC4UC",
+        "channel": "C0654GRKQNM",
+        "ts": "1728373815.014019",
+        "links": [
+          "https://www.google.com/calendar/event?eid=aDFhNTc5Y3JiM2s4YjUyYTYzc3Bza3A4cmcgbmlra2lAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-08T07:50:15.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728372349709359",
+        "text": "<@nikki> <@beatrice> <@owen> 우선 본 스레드의 영상부터 컷편집하여 8분으로 줄인 mp4영상을 <LINK13/>에 업로드했습니다!\n+ 영어를 유창하게 적는 느낌으로다가,, 타이핑 시 속도를 조금씩 다 올림\n+ 시간 오래 걸리는 부분 컷편집+ 속도 빠르게 조절\n영상이 너무 길어지는 걸 우려해서 속도를 올렸는데, 확인 해보시고 너무 빠르다면 조정하겠습니다.",
+        "user": "U06T2V13R25",
+        "channel": "C0654GRKQNM",
+        "ts": "1728372349.709359",
+        "links": [
+          "https://drive.google.com/file/d/1fpv70fwFmjfNiC7FX9wzeFpvuZdsdJ68/view?usp=drive_link"
+        ],
+        "ts_date": "2024-10-08T07:25:49.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728371870926709",
+        "text": "<!subteam^S06G06L1EKD>\ninspector data binding ui 고친 mR 입니다\n<LINK14/>",
+        "user": "U04JTP7U1JS",
+        "channel": "C0654GRKQNM",
+        "ts": "1728371870.926709",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/505"
+        ],
+        "ts_date": "2024-10-08T07:17:50.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728370105232709",
+        "text": "<@kakasoo> Github 관련 한 개 시나리오 레코딩 아직 못했지요? (영문)  <LINK15/>하기는 좋지만 너무 오래되었고, 사용자에게 플래너 컨펌받는 부분이 들어가 있어서, 현재 버전하고 달라서요. 무엇보다 한국어라 사용 못함.",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728370105.232709",
+        "links": [
+          "https://drive.google.com/file/d/1RCbOD-qJd81jXzQJxy2_DkNKCVLgeUV9/view?usp=sharing"
+        ],
+        "ts_date": "2024-10-08T06:48:25.000Z",
+        "reply_count": 4,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728368930826349",
+        "text": "<@shrimp> 이거 머지해 두는 걸 깜박했는데 머지하고 wrtn-hamlet v8.1.0 릴리즈해두겠습니다. <LINK16/>",
+        "user": "U06NC3LAV6C",
+        "channel": "C0654GRKQNM",
+        "ts": "1728368930.826349",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/ecosystem/wrtn-hamlet/-/merge_requests/2#050c51f1c340209ffc19569e34c2d691f95b66a6"
+        ],
+        "ts_date": "2024-10-08T06:28:50.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728368109715919",
+        "text": "<!subteam^S06G06L1EKD>\n알아 볼 수 없는 값이 Inspector 에 보여지는 문제 해결한 <LINK17/> 입니다!(ex) workflow_variable)\ncc <@kakasoo> <@shrimp>",
+        "user": "U04JTP7U1JS",
+        "channel": "C0654GRKQNM",
+        "ts": "1728368109.715919",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/502"
+        ],
+        "ts_date": "2024-10-08T06:15:09.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728367925748549",
+        "text": "<@samchon> <LINK18/>",
+        "user": "U06H7A98TCL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728367925.748549",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/gh-devs-be/-/merge_requests/958"
+        ],
+        "ts_date": "2024-10-08T06:12:05.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728366372939309",
+        "text": "<@shrimp> <LINK19/>",
+        "user": "U05RHSGCLPQ",
+        "channel": "C0654GRKQNM",
+        "ts": "1728366372.939309",
+        "links": [
+          "https://www.notion.so/wrtn/2024-10-2-1180159c6b59802eb3bffca05584e91c"
+        ],
+        "ts_date": "2024-10-08T05:46:12.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728365802387369",
+        "text": "<!subteam^S06G06L1EKD>\nMarketing Copy 생성기 workflow같은경우 parameter만 입력하면 원래 잘 되야하는데, parameter가 아닌 곳에 값이 비워져 있는 것처럼 보이는것은 프론트 이슈입니다!\n해석할 수 없는 Expression이 들어왔는데 Error를 보여주지 않아 발생한 문제로. 이를 해결한 MR 입니다,\n\n이 <LINK20/> 이 머지되면 필수값이 안채워진채로 보이는 문제가 해결될 예정입니다!\ncc <!subteam^S06AS8Y5QAU>",
+        "user": "U04JTP7U1JS",
+        "channel": "C0654GRKQNM",
+        "ts": "1728365802.387369",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/501"
+        ],
+        "ts_date": "2024-10-08T05:36:42.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728364482456429",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n A 1:1 meeting has been scheduled with <mailto:studio@wrtn.io|studio@wrtn.io> on October 10, 2024, at 10:00 AM KST. Calendar link: <LINK21/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728364482.456429",
+        "links": [
+          "https://www.google.com/calendar/event?eid=M3NhajYza2xla2E1aXZ1bG90MzVwa2FyNmsgYmVhdHJpY2VAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-08T05:14:42.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728364248781549",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n 안녕하세요 팀! 10월에 방문하기 좋은 여행지 목록을 공유드립니다: 1. [태안 청산수목원](<LINK22/>) 2. [이탈리아 로마 및 오스트리아 빈](<LINK23/>) 3. [남이섬 (강원도 춘천시)](<LINK24/>) 4. [경기도 파주](<LINK25/>) 5. [설악산 하이킹](<LINK26/>) 특히, 태안 청산수목원 근처에서 추천드리는 레스토랑은 다음과 같습니다: - **연옥당**: 평점 4.7, [이미지 보기](<LINK27/>) - **허브농원**: 평점 3.6, [이미지 보기](<LINK28/>) - **파스타포포**: 평점 5, [이미지 보기](<LINK29/>) 더 많은 정보가 필요하시면 언제든지 말씀해 주세요! 감사합니다.",
+        "user": "U0508EDC413",
+        "channel": "C0654GRKQNM",
+        "ts": "1728364248.781549",
+        "links": [
+          "https://www.kkday.com/ko/blog/15568/asia-korea-oct-travel-spots-5?srsltid=AfmBOorBrgpumMpjcuE-9kQ-6tuhQyS3T9LJ_uOI_cenP81lkf3B08E5",
+          "https://www.skyscanner.co.kr/news/wheres-hot-in-october",
+          "https://brunch.co.kr/@e9ef4a874c6f4c6/365",
+          "https://brunch.co.kr/@hotelscomkr/486",
+          "https://www.gigsky.com/ko/blog/top-destinations-to-visit-in-october",
+          "https://lh5.googleusercontent.com/p/AF1QipNfWKlWWoRjdjIodyAt45K9cmYT7NCijHU90pBR=w163-h92-k-no",
+          "https://lh5.googleusercontent.com/p/AF1QipP3gPiEkVrS3YVGWEGoB4fU7W_mVNN5IRhVaGMs=w80-h106-k-no",
+          "https://lh5.googleusercontent.com/p/AF1QipN1koPi3smi2EpCIi3Yo_dcSQC6Yx2xAZrSdCL_=w80-h142-k-no"
+        ],
+        "ts_date": "2024-10-08T05:10:48.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728363451552979",
+        "text": "영상은 <LINK30/> 업로드 부탁합니다.",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728363451.552979",
+        "links": [
+          "https://drive.google.com/file/d/1p_nel-OLZrvfM-yG9IXZh2xCZZua_w6K/view?usp=sharing"
+        ],
+        "ts_date": "2024-10-08T04:57:31.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728362520684419",
+        "text": "<LINK31/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728362520.684419",
+        "links": [
+          "https://studio-pro.wrtn.ai/meta/b2952ba4-0f73-47c6-92e9-63eaf8286498"
+        ],
+        "ts_date": "2024-10-08T04:42:00.000Z",
+        "reply_count": 5,
+        "reply_users_count": 3
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728357342963469",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n A 1:1 meeting has been scheduled with <mailto:studio@wrtn.io|studio@wrtn.io> on October 10, 2024, at 10:00 AM KST. Calendar link: <LINK32/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728357342.963469",
+        "links": [
+          "https://www.google.com/calendar/event?eid=aG9uOWViNm81YnRzaDdzcHVxYzkwNG4yZzAgYmVhdHJpY2VAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-08T03:15:42.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728353637619539",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n A 1:1 meeting has been scheduled with <mailto:studio@wrtn.io|studio@wrtn.io> on October 10, 2024, at 10:00 AM KST. Calendar link: <LINK33/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728353637.619539",
+        "links": [
+          "https://www.google.com/calendar/event?eid=Z2c0b3NqcDcyMWR1ZmVsZWRoODgwZ200NjggYmVhdHJpY2VAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-08T02:13:57.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728353389599489",
+        "text": "다시 새 세션에서 생성한 워크플로로 실행 시도했는데, 이번에는 바로 <mailto:beatrice@wrtn.io|beatrice@wrtn.io> 연결을 했어도 <mailto:studio@wrtn.io|studio@wrtn.io> write access 없다고 뜨네요. 확인했을때는 값이 제대로 들어갔는데 무슨 문제인가요  (<LINK34/>)",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728353389.599489",
+        "links": [
+          "https://studio-pro.wrtn.ai/workflow/8fb80e4e-3953-4f02-b500-b505d29003ef"
+        ],
+        "ts_date": "2024-10-08T02:09:49.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728349401620899",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n A 1:1 meeting has been scheduled with <mailto:studio@wrtn.io|studio@wrtn.io> on October 10, 2024, at 10:00 AM KST. Calendar link: <LINK35/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728349401.620899",
+        "links": [
+          "https://www.google.com/calendar/event?eid=a282cWR1N29qaGo0cHE2cnUxdXVwb3NvbzQgYmVhdHJpY2VAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-08T01:03:21.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728349210444189",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n A 1:1 meeting has been scheduled with <mailto:studio@wrtn.io|studio@wrtn.io> on October 10, 2024, at 10:00 AM KST. Calendar link: <LINK36/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728349210.444189",
+        "links": [
+          "https://www.google.com/calendar/event?eid=a25mNmxzNHA1M3RkdWZ0cjFhN25lc3E3YjAgYmVhdHJpY2VAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-08T01:00:10.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728348424966139",
+        "text": "[PROD] <LINK37/>\n<@jaxtyn> <@leo>  <@shrimp> 에러 확인 부탁합니다. 입력값 어디를 고쳐야하나요",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728348424.966139",
+        "links": [
+          "https://studio-pro.wrtn.ai/workflow/4df6638e-cf2e-4c39-9843-11cdec7e938b"
+        ],
+        "ts_date": "2024-10-08T00:47:04.000Z",
+        "reply_count": 18,
+        "reply_users_count": 5
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728344875208979",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n A 1:1 meeting has been scheduled with <mailto:studio@wrtn.io|studio@wrtn.io> on October 10, 2024, at 10:00 AM KST. Calendar link: <LINK38/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1728344875.208979",
+        "links": [
+          "https://www.google.com/calendar/event?eid=NGIxNmN1dGRhZzVrdnN0Ym42NnEzaXAwNGsgYmVhdHJpY2VAd3J0bi5pbw"
+        ],
+        "ts_date": "2024-10-07T23:47:55.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728307778149149",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\nWrtn Studio Pro는 OpenAPI v3.1 사양을 채택하였으며, 몇 가지 수정을 가했습니다. OpenAPI v3.1 사양에는 모호하고 중복된 표현이 많아 Wrtn Studio Pro는 이러한 모호하고 중복된 표현을 제거하여 편리성과 명확성을 위해 수정된 OpenAPI v3.1 사양을 활용합니다. OpenAPI 사양과 Wrtn Studio Pro에서 사용하는 수정된 OpenAPI v3.1 사양의 전체 정의는 다음 링크에서 확인할 수 있습니다: <LINK39/>. 사용자가 수정되지 않은 원본 OpenAPI v3.1 또는 이전 버전을 지정한 문서를 사용할 경우, Wrtn Studio Pro는 자동으로 수정된 버전으로 변환합니다.\n",
+        "user": "U0769CNJVLL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728307778.149149",
+        "links": [
+          "https://wrtn.ai/studio-pro/tech-specs/openapi/document/"
+        ],
+        "ts_date": "2024-10-07T13:29:38.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728305972188129",
+        "text": "<@gracie> <LINK40/>",
+        "user": "U06H7A98TCL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728305972.188129",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/ecosystem/swlc/-/merge_requests/5"
+        ],
+        "ts_date": "2024-10-07T12:59:32.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728302652264159",
+        "text": "<!subteam^S06G06L1EKD>\n아래 사항을 반영한 <LINK41/> 입니다.\n• insepctor에서 title, description을 보여주는 방식을 변경(<LINK42/>)\n• Prerequisite에서 secret key를 선택할 때 선택이 되지 않았던 문제 해결",
+        "user": "U04JTP7U1JS",
+        "channel": "C0654GRKQNM",
+        "ts": "1728302652.264159",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/498",
+          "https://wrtn.slack.com/archives/C0654GRKQNM/p1728289865656609?thread_ts=1728287919.062609&amp;cid=C0654GRKQNM"
+        ],
+        "ts_date": "2024-10-07T12:04:12.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728300310196069",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다. 슬랙 마크다운 지원 • 이제부터 슬랙에서 마크다운을 지원합니다.\n• 아직 배포는 하지 않아 카카수의 로컬에서만 동작됩니다.\n• <LINK43/> 가 잘 걸리는지 테스트합니다. 헤더2 테스트 헤더3 테스트, • _기울임_ 테스트\n• *볼드체* 테스트 1. number list test\n2. number list test • 들여쓰기 테스트",
+        "user": "U0769CNJVLL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728300310.196069",
+        "links": [
+          "https://github.com/wrtnio/connectors"
+        ],
+        "ts_date": "2024-10-07T11:25:10.000Z",
+        "reply_count": 2,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728299979050029",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n*슬랙 마크다운 지원*\n\n•   이제부터 슬랙에서 마크다운을 지원합니다.\n•   아직 배포는 하지 않아 카카수의 로컬에서만 동작됩니다.\n•   <LINK44/>가 잘 걸리는지 테스트합니다.\n\n*헤더2 테스트*\n\n*헤더3 테스트,*\n\n•   ​_기울임_​ 테스트\n•   ​*볼드체*​ 테스트\n\n1.  number list test\n2.  number list test\n\n•   들여쓰기 테스트\n    •   뎁스 1\n        •   뎁스 2\n            •   뎁스 3\n                •   어디까지 들여쓰기 되나요?\n",
+        "user": "U0769CNJVLL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728299979.050029",
+        "links": [
+          "https://github.com/wrtnio/connectors"
+        ],
+        "ts_date": "2024-10-07T11:19:39.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728293448464979",
+        "text": "<!subteam^S06G06L1EKD>\n<LINK45/>\n요건 스토어에서 로그인 버튼을 눌렀을 때 아무런 액션도 없는 문제가 있어... 수정한 MR입니다",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1728293448.464979",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/ecosystem/store-web/-/merge_requests/148/diffs"
+        ],
+        "ts_date": "2024-10-07T09:30:48.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728293256807959",
+        "text": "<@jaxtyn> <!subteam^S06G06L1EKD>\n<LINK46/>\n에디터 v2 Node 퍼블리싱 MR 입니다! 개발 중 추가 스펙 정의가 필요한 부분이 보여 Emily와 추가 sync 후 별도 MR로 이어서 작업할 예정입니다!!",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1728293256.807959",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/493#54060a7c4d8b7be93c4d5718f64b1ba8c6c27901"
+        ],
+        "ts_date": "2024-10-07T09:27:36.000Z",
+        "reply_count": 2,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728291886433709",
+        "text": "<@asher> 애셔! 오웬이 전달주신 스토어 폼 다국어 대응 UI를 보니 `번역 채우기` 라는 기능이 있는데, 여기 API 준비 되어있나요?? <LINK47/>",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1728291886.433709",
+        "links": [
+          "https://www.figma.com/design/FPW5crLQvoMgkIHQjRdBRR?node-id=7181-180152#975504567"
+        ],
+        "ts_date": "2024-10-07T09:04:46.000Z",
+        "reply_count": 16,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728290388783269",
+        "text": "<@beatrice> <LINK48/>\n이 폴더에 요청하신 데모 영상 레코드한 것 올리겠습니다~",
+        "user": "U06G25JC4UC",
+        "channel": "C0654GRKQNM",
+        "ts": "1728290388.783269",
+        "links": [
+          "https://drive.google.com/drive/folders/1lKdhUXCaFLZkiPlmZU5BjFmUBM9vraHS?usp=drive_link"
+        ],
+        "ts_date": "2024-10-07T08:39:48.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728289025481159",
+        "text": "<LINK49/>\n위 MR <@nikki> 가 확인해주실 수 있나요?? Global Nav 관련입니다!",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1728289025.481159",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/496"
+        ],
+        "ts_date": "2024-10-07T08:17:05.000Z",
+        "reply_count": 2,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728287904119989",
+        "text": "<!subteam^S05D21MCABH>\n<LINK50/>\n카카수에게 나오는 에러 인데 도움 주실수 있는분..",
+        "user": "U05J9AM9E5T",
+        "channel": "C0654GRKQNM",
+        "ts": "1728287904.119989",
+        "links": [
+          "https://app.datadoghq.com/logs?query=host%3Aip-10-2-34-29.ap-northeast-2.compute.internal-dev-eks%20service%3Agh-devs-be%20container_id%3Abf29c28a417f688e46589632cb5e76a6b7173137c4c11db6a35a1268ebff7967%20filename%3A0.log%20&agg_m=count&agg_m_source=base&agg_t=count&cols=host%2Cservice&context_event=AZJl-pkVAAAihm2ENeOgjwAA&event=&fromUser=false&messageDisplay=inline&refresh_mode=sliding&screenId=rau-5jp-pd5&screenName=eco-dev-dashboard&storage=hot&stream_sort=time%2Cdesc&to_event=AgAAAZJl-2GAYAJd2wAAAAAAAAAYAAAAAEFaSmwtMl90QUFCaUQ5RV9aaExDSlFBQQAAACQAAAAAMDE5MjY1ZmQtNTgyMC00YzZiLWEzY2ItZjhjMzA3NTY2MjY0&viz=&from_ts=1728287470131&to_ts=1728287826305&live=false"
+        ],
+        "ts_date": "2024-10-07T07:58:24.000Z",
+        "reply_count": 3,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728286955144219",
+        "text": "이 메세지는 뤼튼 스튜디오 프로에 의해 전송됩니다.\n\n @Samchon 최근 GitHub의 samchon/typia 저장소에서 사용자들이 주로 관심을 보이는 이슈들을 조사했습니다. 다음과 같은 주요 관심사를 발견했으며, 관련 링크도 함께 공유드립니다:\\n\\n- **조사 범위**: 최근 열린 이슈들\\n  - 이슈 번호 1307: OpenAI의 구조화된 출력 지원에 대한 요청\\n    - 이슈 링크: [#1307](<LINK51/>)\\n  - 이슈 번호 1306: 유효한 UTF8 이모지의 올바른 인코딩을 처리하지 못하는 문제\\n    - 이슈 링크: [#1306](<LINK52/>)\\n  - 이슈 번호 1305: typia가 VSCode 디버거와 잘 호환되지 않음\\n    - 이슈 링크: [#1305](<LINK53/>)\\n\\n이 조사 결과를 바탕으로 어떤 추가적인 분석이나 조치가 필요한지 알려주시면 감사하겠습니다.",
+        "user": "U0769CNJVLL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728286955.144219",
+        "links": [
+          "https://github.com/samchon/typia/issues/1307",
+          "https://github.com/samchon/typia/issues/1306",
+          "https://github.com/samchon/typia/issues/1305"
+        ],
+        "ts_date": "2024-10-07T07:42:35.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728283580391209",
+        "text": "<!subteam^S06AS8Y5QAU> 모두 데모 시나리오 발굴하고 스크린샷 찍으십시오. 이게 최우선순위입니다.\n\n<LINK54/>",
+        "user": "U05RHSGCLPQ",
+        "channel": "C0654GRKQNM",
+        "ts": "1728283580.391209",
+        "links": [
+          "https://www.notion.so/wrtn/1180159c6b59802eb3bffca05584e91c"
+        ],
+        "ts_date": "2024-10-07T06:46:20.000Z",
+        "reply_count": 7,
+        "reply_users_count": 3
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728278170826779",
+        "text": ":완료: *<LINK55/> 마케팅 시나리오 테스트 (Prod) Thread*",
+        "user": "U06G25JC4UC",
+        "channel": "C0654GRKQNM",
+        "ts": "1728278170.826779",
+        "links": [
+          "https://studio-pro.wrtn.ai"
+        ],
+        "ts_date": "2024-10-07T05:16:10.000Z",
+        "reply_count": 57,
+        "reply_users_count": 4
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728276142163679",
+        "text": "<!subteam^S06G06L1EKD>\n<LINK56/>\n관련 MR입니다!!",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1728276142.163679",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/ecosystem/store-web/-/merge_requests/147"
+        ],
+        "ts_date": "2024-10-07T04:42:22.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728267356409449",
+        "text": "<@beatrice> <LINK57/>",
+        "user": "U06H7A98TCL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728267356.409449",
+        "links": [
+          "https://www.notion.so/wrtn/Studio-Pro-Service-Architecture-Diagram-9b00b14326bb4bdaa6df4816dcd7becf"
+        ],
+        "ts_date": "2024-10-07T02:15:56.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728264732003929",
+        "text": "삼촌, 슈림프, 비트리스 제외하고 이름 별로 문서를 팠습니다.\n메타 LLM 채팅 장면과 워크플로우 진입 후 화면 각각 스크린샷을 찍어 올려주시면 비교 후 괜찮은 시나리오를 영상 찍는 것으로.\n\n(레오는 감기몸살로 오늘 휴가이므로 제외)\n\n• <LINK58/>",
+        "user": "U0769CNJVLL",
+        "channel": "C0654GRKQNM",
+        "ts": "1728264732.003929",
+        "links": [
+          "https://www.notion.so/wrtn/1180159c6b59802eb3bffca05584e91c"
+        ],
+        "ts_date": "2024-10-07T01:32:12.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728035859402899",
+        "text": "<@kakasoo> 구글 search 관련 bug fix <LINK59/>입니다. 간단한거라서 바로 머지할게요",
+        "user": "U0508EDC413",
+        "channel": "C0654GRKQNM",
+        "ts": "1728035859.402899",
+        "links": [
+          "https://github.com/wrtnio/connectors/pull/547"
+        ],
+        "ts_date": "2024-10-04T09:57:39.000Z",
+        "reply_count": 3,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1728012699686139",
+        "text": "[홈 화면 개편]\n<@beatrice> cc. <@nikki>\n개편된 홈 화면의 레이아웃 세부 스펙을 디자인했습니다. 첨부 영상 혹은 <LINK60/> 에서 확인 후 승인 해주시면 니키가 레이아웃 조정 부터 먼저 하실 수 있도록 전달 하겠습니다! :raised_hands::skin-tone-2:\n\n외 1시부터는 현재 레이아웃 기반으로\n홈 화면 영어 텍스트 레이아웃 적용,\n한글 페이지 버튼 용어 조정,\n발화 창에서 공유 및 스크린샷 버튼 작업,\n발화 창 색 변경 (에러랑 겹치지 않도록) 시도해서\n퇴근 전에 니키께 업데이트 드리려 합니다!",
+        "user": "U07H4P9QERE",
+        "channel": "C0654GRKQNM",
+        "ts": "1728012699.686139",
+        "links": [
+          "https://www.figma.com/design/YwkUpr7dag0zYLwhmkBbyY/Ecosystem-Studio-Pro(Updating)?node-id=28313-481163&amp;t=Jbt1f8hceIsHyU1L-1"
+        ],
+        "ts_date": "2024-10-04T03:31:39.000Z",
+        "reply_count": 11,
+        "reply_users_count": 3
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727860891170039",
+        "text": "<@beatrice> cc. <@amber> <@nikki>\n비트리스, <LINK61/> 상세 스펙 플로우를 디자인했습니다.  피드백 부탁드립니다!:raised_hands::skin-tone-2:\n\n말씀하셨던 것 처럼 시각적으로 구분되도록 div 추가 및 간격 조정 완료하였습니다.\n또 사용자의 언어와, 열려있는 탭 별로 자동 번역 체우기 버튼 상태값이 달라지면서 생길 수 있는 분기를 정리하느라 시간이 좀 걸렸습니다.\n\n+) 추가로 현재 프론트 버전에서 제가 앱을 올리기를 시도하다, 사진이 필수 정보인걸 인식 못하고 publish 로 넘어가지 못했어서, error 을 잘못된 정보 포함만이 아니라, publish 시 어떤 정보가 빠졌는지도 표시 할 수 있도록 스펙 업데이트 했습니다.\n이를 위해서 아이콘을 비어있는 이미지로 표시 했는데,\n\n2번째 이미지) 이미지 없음 이라고 표시하고 기존 업로드 버튼을 쓸지\n3번째 이미지) 아래 썸네일과 같은 컴포넌트로 업로드 버튼을 대체할지, 결정하면 좋을 것 같습니다.\n\n해당 사항 확인 및 피드백 주시면, 앰버께 딜리버리 드리겠습니다!",
+        "user": "U07H4P9QERE",
+        "channel": "C0654GRKQNM",
+        "ts": "1727860891.170039",
+        "links": [
+          "https://www.figma.com/design/FPW5crLQvoMgkIHQjRdBRR/Ecosystem-Store-v.2.0?node-id=4829-311105&t=Ch48QOXo0bhWg07g-1"
+        ],
+        "ts_date": "2024-10-02T09:21:31.000Z",
+        "reply_count": 3,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727859840800309",
+        "text": "<@asher> `<LINK62/>`",
+        "user": "U0508EDC413",
+        "channel": "C0654GRKQNM",
+        "ts": "1727859840.800309",
+        "links": [
+          "https://gh-devs-be.s3.ap-northeast-2.amazonaws.com/marketing.png"
+        ],
+        "ts_date": "2024-10-02T09:04:00.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727859361039739",
+        "text": "<!subteam^S06AS8Y5QAU> 주간 업무보고서 작성해주세요.\n\n완료 후 :white_check_mark: 이모지 달아주세요.\n\n<LINK63/>",
+        "user": "U05RHSGCLPQ",
+        "channel": "C0654GRKQNM",
+        "ts": "1727859361.039739",
+        "links": [
+          "https://www.notion.so/wrtn/2024-10-02-1130159c6b59805d8035d0647f00bcdb"
+        ],
+        "ts_date": "2024-10-02T08:56:01.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727859265687709",
+        "text": "<!subteam^S06G06L1EKD>\n<LINK64/>\n스토어 검색창에 / 입력시 404 페이지로 이동(특수문자 인코딩 로직 부재)되는 문제가 있어서 수정했습니다! 확인 부탁드립니닷",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1727859265.687709",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/ecosystem/store-web/-/merge_requests/146"
+        ],
+        "ts_date": "2024-10-02T08:54:25.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727854617510709",
+        "text": "오 이제 OpenAI도 프롬프트 캐싱 지원하네요 cc. <@shrimp> <LINK65/>",
+        "user": "U06NC3LAV6C",
+        "channel": "C0654GRKQNM",
+        "ts": "1727854617.510709",
+        "links": [
+          "https://platform.openai.com/docs/guides/prompt-caching"
+        ],
+        "ts_date": "2024-10-02T07:36:57.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727853908401869",
+        "text": "<@beatrice> <!subteam^S06G06L1EKD>\n<LINK66/>가 업데이트 되었습니다!!\n<LINK67/>",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1727853908.401869",
+        "links": [
+          "https://studio-pro.wrtn.ai/policy/privacy",
+          "https://wrtn.slack.com/archives/C038B1SFENN/p1727853819358889"
+        ],
+        "ts_date": "2024-10-02T07:25:08.000Z",
+        "reply_count": 4,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727852860740749",
+        "text": "<@shrimp> <LINK68/>\n\n오늘 저녁 오후 7시-9시 라고 했는데 내일 오후 1시-3시로 생성하는 문제",
+        "user": "U0508EDC413",
+        "channel": "C0654GRKQNM",
+        "ts": "1727852860.740749",
+        "links": [
+          "https://app.datadoghq.com/logs?query=service%3Astudio-connector-poc%20env%3Adev%20status%3A%28error%20OR%20info%29%20%40path%3A%22%2Fconnector%2Fgoogle-calendar%2Fprimary%2Fevent%22&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=host%2Cservice&amp;event=AgAAAZJMB4MQcXHfqAAAAAAAAAAYAAAAAEFaSk1CNG1BQUFBWlJxYXBOS0V2TGdCRAAAACQAAAAAMDE5MjRjMGUtZWNhNS00NWE0LTk5NWYtYmFlMWEwZDIzZGY1&amp;fromUser=true&amp;messageDisplay=inline&amp;refresh_mode=paused&amp;storage=hot&amp;stream_sort=desc&amp;viz=stream&amp;from_ts=1727852280000&amp;to_ts=1727852460000&amp;live=false"
+        ],
+        "ts_date": "2024-10-02T07:07:40.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727847361303829",
+        "text": "<!subteam^S06G06L1EKD>\n<LINK69/>\n개인정보 처리방침 페이지 업데이트된 MR입니다~!! 오늘 main 배포 예정입니다",
+        "user": "U05J9AMF213",
+        "channel": "C0654GRKQNM",
+        "ts": "1727847361.303829",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/492"
+        ],
+        "ts_date": "2024-10-02T05:36:01.000Z",
+        "reply_count": 4,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727847149249219",
+        "text": "<@beatrice> cc. <@nikki>\n비트리스, <LINK70/>을 디자인했습니다. 피드백 부탁드립니다!:raised_hands::skin-tone-2:\n원래 11월 중 대응 예정이었던 스펙을 앞당길 수 있도록 시나리오 아이디에이션에 들어갈 수 있을 것입니다.",
+        "user": "U06T2V13R25",
+        "channel": "C0654GRKQNM",
+        "ts": "1727847149.249219",
+        "links": [
+          "https://www.figma.com/design/vXRNSK23kSCp4o8HFX1Cjd/Ecosystem-Studio-Pro-v5---V5.5?node-id=30790-298406&node-type=section&t=FReRTLsrThkDVMSQ-11"
+        ],
+        "ts_date": "2024-10-02T05:32:29.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727845505268079",
+        "text": "<@shrimp> <LINK71/>",
+        "user": "U0508EDC413",
+        "channel": "C0654GRKQNM",
+        "ts": "1727845505.268079",
+        "links": [
+          "https://app.datadoghq.com/logs?query=service%3Astudio-connector-poc%20env%3Adev%20status%3A%28error%20OR%20info%29&amp;agg_m=count&amp;agg_m_source=base&amp;agg_t=count&amp;cols=host%2Cservice&amp;event=AgAAAZJLjD9HWfwltgAAAAAAAAAYAAAAAEFaSkxqRkVlQUFDTkJQZW54eTJVT0FBQgAAACQAAAAAMDE5MjRiOTEtY2JlZC00NGQzLWFjZWEtNDk5YzI2Zjg4YjRl&amp;fromUser=true&amp;messageDisplay=inline&amp;refresh_mode=sliding&amp;storage=hot&amp;stream_sort=desc&amp;viz=stream&amp;from_ts=1727240471989&amp;to_ts=1727845271989&amp;live=true"
+        ],
+        "ts_date": "2024-10-02T05:05:05.000Z",
+        "reply_count": 1,
+        "reply_users_count": 1
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727839416342119",
+        "text": "<@nikki>  오늘 <@owen> 이 딜리버리하실 메타에이전트 랜딩 개선 및 스토어 탭 콤포넌트 작업 진행 먼저 해 주시구요,\n마케팅 시안 자동화를 제외한 기타 위젯으로 내보내지는 시나리오들을 확인해 주실 수 있다고 하셨는데 그 부분 테스트 좀 도와주세요. 그렇지 않으면 제가 식사 후 킬러 시나리오 선별 먼저 한 후, 루틴 스케줄링 할 만한 시나리오 선별을 따로 해서 Emily 지원을 하겠습니다.  헷깔리니 기록으로 문서 모음을 아래 하나 남김.\n\n<@jaxtyn> 리턴밸류 최근 테스트하시는 것과 싱크가 안맞을까봐 살짝 걱정입니다. 최근것은 데모가 없었으니, 어떻게 출력되는지 시간되실 때 스크린샷 있다면 몇 개만 올려주세요. cc <@emily>\n\n*문서 모음* \n> ReturnValue 디자인 패턴: <LINK72/>\n> 개발 방안 검토 1 (7월): <LINK73/>\n> 개발 방안 검토 2 (9월): <LINK74/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1727839416.342119",
+        "links": [
+          "https://www.notion.so/wrtn/Return-Value-Viewer-UI-69b34cbf23124d8fa1468088d509b977",
+          "https://www.notion.so/wrtn/Return-Value-Viewer-89d0c823ff184f108cb1c0eaeb0d22f4",
+          "https://www.notion.so/wrtn/Component-Function-Call-Return-Value-Viewer-10d0159c6b59801aa484fd616bf4eb1e"
+        ],
+        "ts_date": "2024-10-02T03:23:36.000Z",
+        "reply_count": 8,
+        "reply_users_count": 3
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727834829546329",
+        "text": "<@shrimp> OpenAI structured output 문서에서 처음으로 지원하는 json schema 스펙이 떳는데, 이놈들 OpenAPI v3 v3.1 스까쓰는 혼종임 ㄷㄷㄷ.\n\n`T | null` 을 `anyOf` 로 표현하는거 제일 킹받음\n\n<LINK75/>",
+        "user": "U05RHSGCLPQ",
+        "channel": "C0654GRKQNM",
+        "ts": "1727834829.546329",
+        "links": [
+          "https://platform.openai.com/docs/guides/structured-outputs/supported-schemas"
+        ],
+        "ts_date": "2024-10-02T02:07:09.000Z",
+        "reply_count": 17,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727833925489279",
+        "text": "<@amber>   개인정보방침에 Google workspace API 통해서 얻은 데이타를 모델학습에 쓰지않는다는 내용을 추가한 버전입니다. 한/영, 회사홈페이지 업데이트는 시간 걸리니 이 버전을 우리 제품 홈에 업데이트해 주세요. <LINK76/>",
+        "user": "U060JBN3PGX",
+        "channel": "C0654GRKQNM",
+        "ts": "1727833925.489279",
+        "links": [
+          "https://drive.google.com/drive/folders/1ahkQg1v83GpoA0wDPNj9jrMaVEVSEsx1?usp=sharing"
+        ],
+        "ts_date": "2024-10-02T01:52:05.000Z",
+        "reply_count": 33,
+        "reply_users_count": 2
+      },
+      {
+        "link": "https://wrtn.slack.com/archives/C0654GRKQNM/p1727832067213299",
+        "text": "<!subteam^S06G06L1EKD>\nMeta chat list 캡쳐 이미지에 background 추가한 <LINK77/> 입니다~\ncc <@samchon>",
+        "user": "U04JTP7U1JS",
+        "channel": "C0654GRKQNM",
+        "ts": "1727832067.213299",
+        "links": [
+          "https://gitlab.wrtn.club/wrtn/studio2-poc-fe/-/merge_requests/491"
+        ],
+        "ts_date": "2024-10-02T01:21:07.000Z",
+        "reply_count": 0,
+        "reply_users_count": 0
+      }
+    ],
+    "members": [
+      {
+        "id": "U06T2V13R25",
+        "display_name": "Emily"
+      },
+      {
+        "id": "U0769CNJVLL",
+        "display_name": "Kakasoo"
+      },
+      {
+        "id": "U06H7A98TCL",
+        "display_name": "Shrimp"
+      },
+      {
+        "id": "U07H4P9QERE",
+        "display_name": "Owen"
+      },
+      {
+        "id": "U04JTP7U1JS",
+        "display_name": "Jaxtyn"
+      },
+      {
+        "id": "U06G25JC4UC",
+        "display_name": "Nikki"
+      },
+      {
+        "id": "U060JBN3PGX",
+        "display_name": "Beatrice"
+      },
+      {
+        "id": "U06NC3LAV6C",
+        "display_name": "Gracie"
+      },
+      {
+        "id": "U05RHSGCLPQ",
+        "display_name": "Samchon"
+      },
+      {
+        "id": "U0508EDC413",
+        "display_name": "Leo"
+      },
+      {
+        "id": "U05J9AMF213",
+        "display_name": "Amber"
+      },
+      {
+        "id": "U05J9AM9E5T",
+        "display_name": "Asher"
+      }
+    ],
+    "next_cursor": null
+  }
+}

@@ -1,0 +1,824 @@
+{
+  "function": {
+    "path": "connector_slack_get_im_channels_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "secretKey": "aef58d9c-7c21-40d4-8242-7a12729b24b0"
+    }
+  ],
+  "success": true,
+  "value": [
+    {
+      "username": "sunrabbit",
+      "created": 1733752215,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.044852579154571,
+      "user": "U0822LFPH6J",
+      "id": "D084Y5KL7DW"
+    },
+    {
+      "username": "declan",
+      "created": 1733292149,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.03670570535341,
+      "user": "U06A5MCLDFS",
+      "id": "D083CRNSW94"
+    },
+    {
+      "username": "neve",
+      "created": 1732507458,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.0095202835924593,
+      "user": "U069GQGSTD1",
+      "id": "D081V5CLLCF"
+    },
+    {
+      "username": "bob",
+      "created": 1731482222,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.033988942487591,
+      "user": "U01MXHN3W4S",
+      "id": "D080JU8NJ9K"
+    },
+    {
+      "username": "noah.wrtn",
+      "created": 1730091209,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U01MUEWB9HT",
+      "id": "D07UDJEV0QG"
+    },
+    {
+      "username": "djay",
+      "created": 1729766575,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U04H13LCNSV",
+      "id": "D07TDNGC4G4"
+    },
+    {
+      "username": "bada",
+      "created": 1728627378,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05KF34CFNX",
+      "id": "D07REQRR3R9"
+    },
+    {
+      "username": "james",
+      "created": 1727266202,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06LX1WNB41",
+      "id": "D07PC3EFSRF"
+    },
+    {
+      "username": "eddie",
+      "created": 1727156430,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05F7PL563C",
+      "id": "D07NAABLK39"
+    },
+    {
+      "username": "owen",
+      "created": 1724292667,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.10165378706073,
+      "user": "U07H4P9QERE",
+      "id": "D07HZMSMR8A"
+    },
+    {
+      "username": "zia",
+      "created": 1722241907,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U0711E0J8Q3",
+      "id": "D07F4RC9VQQ"
+    },
+    {
+      "username": "chris",
+      "created": 1718948314,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U057SHQM744",
+      "id": "D078XU66YNA"
+    },
+    {
+      "username": "chloe",
+      "created": 1718878082,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U057SHQQS04",
+      "id": "D078W95Q1SR"
+    },
+    {
+      "username": "kakasoo",
+      "created": 1718594943,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.96190232096892,
+      "user": "U0769CNJVLL",
+      "id": "D0789TWSHPX"
+    },
+    {
+      "username": "adam",
+      "created": 1717477908,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U05ACCQQ6FK",
+      "id": "D075ZRR2B1V"
+    },
+    {
+      "username": "jenna",
+      "created": 1716959190,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U03K299FVF1",
+      "id": "D075X7E65S5"
+    },
+    {
+      "username": "hanson",
+      "created": 1717401219,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U0668GQRR4N",
+      "id": "D075TPK64J3"
+    },
+    {
+      "username": "jeffrey",
+      "created": 1716867229,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06P6FVC0AV",
+      "id": "D075Q9MA4QZ"
+    },
+    {
+      "username": "yennie",
+      "created": 1716961053,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U071EGPAG1F",
+      "id": "D075FNUC64V"
+    },
+    {
+      "username": "ev",
+      "created": 1716533628,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06R2TQC0E7",
+      "id": "D075B50NHJ5"
+    },
+    {
+      "username": "henry",
+      "created": 1716868131,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05L4SW9JNL",
+      "id": "D0758P7P0CD"
+    },
+    {
+      "username": "ryan",
+      "created": 1716529778,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05MPAAHCUU",
+      "id": "D074VARRN8M"
+    },
+    {
+      "username": "theo",
+      "created": 1716078201,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U05ACCQU8QZ",
+      "id": "D0743C7T691"
+    },
+    {
+      "username": "huckleberry",
+      "created": 1715319795,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05D15RN4S3",
+      "id": "D072RRDL19B"
+    },
+    {
+      "username": "emily",
+      "created": 1714394897,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.17103277223723,
+      "user": "U06T2V13R25",
+      "id": "D071157JUDB"
+    },
+    {
+      "username": "sunny",
+      "created": 1714120833,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U05HN4X02L9",
+      "id": "D070T85VBEF"
+    },
+    {
+      "username": "dean",
+      "created": 1714046208,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U063AHTV2D9",
+      "id": "D070PQKNR8U"
+    },
+    {
+      "username": "euni",
+      "created": 1714046171,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05MPAACGG4",
+      "id": "D070JDAAF4M"
+    },
+    {
+      "username": "soo",
+      "created": 1714043764,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U066F37274K",
+      "id": "D0706J5V5UP"
+    },
+    {
+      "username": "amy",
+      "created": 1713335591,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05PJM9PNSJ",
+      "id": "D06URNP2JH2"
+    },
+    {
+      "username": "gary",
+      "created": 1713234794,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05G93S3SCU",
+      "id": "D06U8TCNJ22"
+    },
+    {
+      "username": "derek.wrtn",
+      "created": 1712798690,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U01MQUJPHEJ",
+      "id": "D06TPPYQY21"
+    },
+    {
+      "username": "chedda",
+      "created": 1712047364,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U060AC7TMKJ",
+      "id": "D06SR15MLUR"
+    },
+    {
+      "username": "gracie",
+      "created": 1711979803,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06NC3LAV6C",
+      "id": "D06S10H06S2"
+    },
+    {
+      "username": "luke",
+      "created": 1711696287,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06Q41D55B2",
+      "id": "D06S0C9NX1A"
+    },
+    {
+      "username": "bernie",
+      "created": 1710342772,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06A5MCFYU8",
+      "id": "D06Q0Q8330Q"
+    },
+    {
+      "username": "jini",
+      "created": 1710820403,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U05F146N478",
+      "id": "D06PZMZPZHU"
+    },
+    {
+      "username": "blair",
+      "created": 1710738819,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06J8TZFGGN",
+      "id": "D06PZB8BXQB"
+    },
+    {
+      "username": "yunie",
+      "created": 1710485281,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06HTKY81CG",
+      "id": "D06PLSW6UUD"
+    },
+    {
+      "username": "samchon",
+      "created": 1710136123,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.081424232085435,
+      "user": "U05RHSGCLPQ",
+      "id": "D06P778PSTT"
+    },
+    {
+      "username": "shrimp",
+      "created": 1710146742,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.19861674497921,
+      "user": "U06H7A98TCL",
+      "id": "D06NV8HNFGS"
+    },
+    {
+      "username": "brynn",
+      "created": 1709876514,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06MP9WAML2",
+      "id": "D06NC7A36LE"
+    },
+    {
+      "username": "paul",
+      "created": 1709539604,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U058TN2TTQ8",
+      "id": "D06MT2149HS"
+    },
+    {
+      "username": "donut",
+      "created": 1709531814,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U045481UWK1",
+      "id": "D06MQ0B5NV9"
+    },
+    {
+      "username": "asher",
+      "created": 1709516047,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.0054402727474987,
+      "user": "U05J9AM9E5T",
+      "id": "D06MPCDDLFL"
+    },
+    {
+      "username": "zoey",
+      "created": 1709623799,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06K93ST05P",
+      "id": "D06MH0PDJMV"
+    },
+    {
+      "username": "jenny",
+      "created": 1709277591,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05105YB563",
+      "id": "D06MEBH5FNX"
+    },
+    {
+      "username": "jude",
+      "created": 1708848506,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06L35L6HB2",
+      "id": "D06LVNAEHJM"
+    },
+    {
+      "username": "jaxtyn",
+      "created": 1708408794,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.028553949625719,
+      "user": "U04JTP7U1JS",
+      "id": "D06LA6MHVL0"
+    },
+    {
+      "username": "leo",
+      "created": 1708307535,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U0508EDC413",
+      "id": "D06L3DM0PQ8"
+    },
+    {
+      "username": "tom",
+      "created": 1708697371,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06C4MZ0M6Z",
+      "id": "D06KWUPDQ79"
+    },
+    {
+      "username": "kyle",
+      "created": 1708567554,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U034YAQD8MS",
+      "id": "D06KV5N5WEA"
+    },
+    {
+      "username": "haru",
+      "created": 1708431352,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06DG9LRTDE",
+      "id": "D06KP8KQ6V8"
+    },
+    {
+      "username": "debop",
+      "created": 1708422343,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U05K0KTA0K1",
+      "id": "D06KNEQM8LS"
+    },
+    {
+      "username": "arthur",
+      "created": 1707970332,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06HY0LUZBK",
+      "id": "D06KKNSNPPS"
+    },
+    {
+      "username": "mark",
+      "created": 1708156595,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.066545508890491,
+      "user": "U05T34KKDJ5",
+      "id": "D06K4J5HR0E"
+    },
+    {
+      "username": "amber",
+      "created": 1707206867,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.73199694879545,
+      "user": "U05J9AMF213",
+      "id": "D06J1U9BEHW"
+    },
+    {
+      "username": "jake",
+      "created": 1707127336,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U053PGWBVMW",
+      "id": "D06HK8VTWC9"
+    },
+    {
+      "username": "santa",
+      "created": 1706674823,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06G25JKTHA",
+      "id": "D06H33K0J0Y"
+    },
+    {
+      "username": "jerome",
+      "created": 1706785133,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05T34KEC6M",
+      "id": "D06H25MNYRX"
+    },
+    {
+      "username": "ellie",
+      "created": 1707187977,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06D82E4B8E",
+      "id": "D06GXGES46B"
+    },
+    {
+      "username": "summer",
+      "created": 1706591650,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.025835799822875,
+      "user": "U02S0U5HH47",
+      "id": "D06GW0YJR8Q"
+    },
+    {
+      "username": "carl",
+      "created": 1706590964,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U05E1UB278D",
+      "id": "D06GVVC7U0G"
+    },
+    {
+      "username": "nana",
+      "created": 1706682100,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U05RSUZ70KE",
+      "id": "D06GTB02LLR"
+    },
+    {
+      "username": "kane",
+      "created": 1706847552,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.073312635946855,
+      "user": "U034W19RAD9",
+      "id": "D06GS5L33M3"
+    },
+    {
+      "username": "ruby",
+      "created": 1706837162,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U05KHKE4D3N",
+      "id": "D06GRKNU37X"
+    },
+    {
+      "username": "beatrice",
+      "created": 1706505686,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.071959730364902,
+      "user": "U060JBN3PGX",
+      "id": "D06GNUUU4SC"
+    },
+    {
+      "username": "jirabot",
+      "created": 1706597359,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U04P8TYARHV",
+      "id": "D06GL64URDX"
+    },
+    {
+      "username": "notion2",
+      "created": 1706682011,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U04P8EVDJQ2",
+      "id": "D06GEM88PAN"
+    },
+    {
+      "username": "dewey",
+      "created": 1706700371,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U06A46KSBT9",
+      "id": "D06G9H2FE8N"
+    },
+    {
+      "username": "figma",
+      "created": 1706597441,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U02DW7DGZ7W",
+      "id": "D06G7DD6Z7D"
+    },
+    {
+      "username": "sam",
+      "created": 1706589764,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U01MUF2VBS9",
+      "id": "D06G46TGHNZ"
+    },
+    {
+      "username": "polly",
+      "created": 1706498949,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U03V2KX04LT",
+      "id": "D06G2AQ8CKW"
+    },
+    {
+      "username": "jace",
+      "created": 1706508814,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U061UV4GDL7",
+      "id": "D06G07B2VC3"
+    },
+    {
+      "username": "david",
+      "created": 1706509665,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U04MTT99C5P",
+      "id": "D06FXE3QKRB"
+    },
+    {
+      "username": "lily",
+      "created": 1706507349,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.094919099213473,
+      "user": "U05CPD5K7BJ",
+      "id": "D06FXAGCWBF"
+    },
+    {
+      "username": "googledrive",
+      "created": 1706498949,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U03JMAQ3ZRB",
+      "id": "D06FT7XPSUE"
+    },
+    {
+      "username": "jackie",
+      "created": 1706498949,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": true,
+      "priority": 0,
+      "user": "U0520APTKU7",
+      "id": "D06FT7XPENS"
+    },
+    {
+      "username": "nikki",
+      "created": 1706494719,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "U06G25JC4UC",
+      "id": "D06FT2S4L1L"
+    },
+    {
+      "username": "google_calendar",
+      "created": 1706597373,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0.010880223477728,
+      "user": "U01S7PTAJG7",
+      "id": "D06FT0BBJS3"
+    },
+    {
+      "username": "slackbot",
+      "created": 1706494719,
+      "is_im": true,
+      "is_org_shared": false,
+      "is_user_deleted": false,
+      "priority": 0,
+      "user": "USLACKBOT",
+      "id": "D06FK59R9L7"
+    }
+  ]
+}
