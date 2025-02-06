@@ -1,0 +1,17 @@
+{
+  "function": {
+    "path": "connector_slack_postMessage_text_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "channel": "D06TD3CQ7QQ",
+      "text": "Emily님, 2024년 12월 16일 13:30부터 14:00까지 30분간의 회의가 예정되어 있습니다.",
+      "secretKey": "63c1bc2e-e737-42df-8322-77fa2e979a6b"
+    }
+  ],
+  "success": true,
+  "value": {
+    "ts": "1733994061.339749"
+  }
+}

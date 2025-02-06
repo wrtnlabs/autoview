@@ -1,0 +1,42 @@
+{
+  "id": "4d0965bb-cf0e-418a-b4f3-9d7cc8068130",
+  "function": {
+    "path": "/connector/jira/get-projects",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "maxResults": 50,
+      "orderBy": "name",
+      "startAt": 0,
+      "secretKey": "6a8ccdf9-6cd2-4230-be08-be7e4c8bc235"
+    }
+  ],
+  "success": true,
+  "value": {
+    "isLast": true,
+    "startAt": 0,
+    "maxResults": 50,
+    "values": [
+      {
+        "id": "10091",
+        "key": "CHAT",
+        "name": "chat"
+      },
+      {
+        "id": "10096",
+        "key": "EC",
+        "name": "Ecosystem"
+      },
+      {
+        "id": "10120",
+        "key": "FW",
+        "name": "FE-Web"
+      }
+    ],
+    "total": 43
+  },
+  "status": 201,
+  "created_at": "2024-12-10T15:23:00.260Z",
+  "completed_at": "2024-12-10T15:23:00.838Z"
+}

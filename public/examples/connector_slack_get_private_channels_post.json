@@ -1,0 +1,94 @@
+{
+  "function": {
+    "path": "connector_slack_get_private_channels_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "secretKey": "8104ac2e-4092-48df-835b-600147b94a6c"
+    }
+  ],
+  "success": true,
+  "value": [
+    {
+      "name": "01_ml",
+      "id": "C02GDQB01CY"
+    },
+    {
+      "name": "00_team_언론보도",
+      "id": "C02LT3DBQRZ"
+    },
+    {
+      "name": "00_team_daily-scrum",
+      "id": "C02PD98CD2T"
+    },
+    {
+      "name": "03_team_인사이트",
+      "id": "C02PUJB8T34"
+    },
+    {
+      "name": "00_team_vision",
+      "id": "C02QJ1RL2GY"
+    },
+    {
+      "name": "00_team_라이브러리",
+      "id": "C02QJCWUWHW"
+    },
+    {
+      "name": "00_team_자유",
+      "id": "C02S1EDS5UG"
+    },
+    {
+      "name": "03_design_인사이트",
+      "id": "C02ULEP40S1"
+    },
+    {
+      "name": "02_wrtn_issue",
+      "id": "C038DCAB8P6"
+    },
+    {
+      "name": "01_design",
+      "id": "C03F9A5N308"
+    },
+    {
+      "name": "01_product",
+      "id": "C03GW56MUQZ"
+    },
+    {
+      "name": "03_ml_인사이트",
+      "id": "C03NC1RN6BF"
+    },
+    {
+      "name": "03_gen_ai_인사이트",
+      "id": "C044ZLLS16F"
+    },
+    {
+      "name": "05_뤼튼인하우스",
+      "id": "C047RU2A8CT"
+    },
+    {
+      "name": "02_wrtn_app_review",
+      "id": "C0566P5KACA"
+    },
+    {
+      "name": "02_wrtn_desktop_app",
+      "id": "C056AC9F6Q7"
+    },
+    {
+      "name": "connector_dev",
+      "id": "C0756QE7EUT"
+    },
+    {
+      "name": "02_eco_앱_심사요청",
+      "id": "C07L1F5J4FM"
+    },
+    {
+      "name": "02_eco_metric",
+      "id": "C082AN8EA02"
+    },
+    {
+      "name": "03_dev_인사이트",
+      "id": "G01RAJ50CQ0"
+    }
+  ]
+}

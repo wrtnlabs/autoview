@@ -1,7 +1,9 @@
 {
   "name": "@wrtnio/autoview",
-  "type": "module",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "module": "lib/index.mjs",
+  "typings": "lib/index.d.ts",
   "description": "Automatic viewer components renderer by JSON schema and AI agent",
   "repository": {
     "type": "git",
@@ -23,13 +25,16 @@
     "openapi"
   ],
   "scripts": {
-    "build": "npm run build:static && npm run build:lib",
+    "build": "npm run build:static && npm run build:lib && npm run build:test",
     "build:static": "rimraf dist && tsc -b && vite build",
     "build:lib": "rimraf lib && tsc --project tsconfig.lib.json --emitDeclarationOnly && rollup -c",
+    "build:test": "rimraf bin && tsc --project test/tsconfig.json",
     "dev": "vite",
+    "dev:test": "npm run build:test -- --watch",
     "lint": "eslint .",
-    "prepare": "ts-patch install",
-    "preview": "vite preview"
+    "prepare": "ts-patch install && node build/env.mjs",
+    "preview": "vite preview",
+    "test": "ts-node test/index.ts"
   },
   "dependencies": {
     "@samchon/openapi": "^2.4.1",
@@ -40,18 +45,26 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
     "@ryoppippi/unplugin-typia": "^1.2.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "^22.13.1",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
+    "dotenv": "^16.4.7",
+    "dotenv-expand": "^12.0.1",
     "eslint": "^9.17.0",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "openai": "^4.82.0",
+    "prettier": "^3.4.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",
     "rollup": "^4.34.1",
+    "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
+    "tstl": "^3.0.0",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.5"

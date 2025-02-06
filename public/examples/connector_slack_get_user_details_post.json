@@ -1,0 +1,63 @@
+{
+  "function": {
+    "path": "connector_slack_get_user_details_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "userIds": [
+        "U0769CNJVLL",
+        "U05J9AM9E5T",
+        "U07H4P9QERE",
+        "U05J9AMF213"
+      ],
+      "secretKey": "5f3bd3f4-8bf4-4d84-a78a-f2985c5091c2"
+    }
+  ],
+  "success": true,
+  "value": [
+    {
+      "status_text": "Working From Office (일하는 중)",
+      "fields": {
+        "직함": "B.E. Developer",
+        "Name Pronunciation": "카카수(강경수)",
+        "Phone": "01085257658"
+      },
+      "id": "U0769CNJVLL",
+      "display_name": "Kakasoo",
+      "real_name": "Kakasoo"
+    },
+    {
+      "status_text": "Working From Office (일하는 중)",
+      "fields": {
+        "직함": "Backend Engineer",
+        "Phone": "01040195434",
+        "Name Pronunciation": "애셔"
+      },
+      "id": "U05J9AM9E5T",
+      "display_name": "Asher",
+      "real_name": "전세현"
+    },
+    {
+      "status_text": "",
+      "fields": {
+        "Name Pronunciation": "오웬",
+        "직함": "UX Design Intern"
+      },
+      "id": "U07H4P9QERE",
+      "display_name": "Owen",
+      "real_name": "서영진"
+    },
+    {
+      "status_text": "",
+      "fields": {
+        "Phone": "010-2948-8899",
+        "Name Pronunciation": "엠버",
+        "직함": "Software Engineer"
+      },
+      "id": "U05J9AMF213",
+      "display_name": "Amber",
+      "real_name": "추혜연"
+    }
+  ]
+}

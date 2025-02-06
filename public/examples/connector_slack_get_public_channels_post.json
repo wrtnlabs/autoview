@@ -1,0 +1,1354 @@
+{
+  "function": {
+    "path": "connector_slack_get_public_channels_post",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "secretKey": "80180772-fa6f-464b-bb01-b8fa5da8ac4f"
+    }
+  ],
+  "success": true,
+  "value": [
+    {
+      "name": "00_team_공지-notice",
+      "id": "C01NMCSGXJL"
+    },
+    {
+      "name": "99_kscy_develop",
+      "id": "C01NV4RV86B"
+    },
+    {
+      "name": "99_wrtn_develop",
+      "id": "C01Q5EG5NC8"
+    },
+    {
+      "name": "99_wrtn_tech",
+      "id": "C01QE04CHB8"
+    },
+    {
+      "name": "00_team_휴가",
+      "id": "C01TM46BGFL"
+    },
+    {
+      "name": "01_kscy_log",
+      "id": "C02NJBPJXFB"
+    },
+    {
+      "name": "00_team_식단",
+      "id": "C032F0W649M"
+    },
+    {
+      "name": "02_edu_error_back",
+      "id": "C032VUPAPC7"
+    },
+    {
+      "name": "01_dev",
+      "id": "C035184P9D3"
+    },
+    {
+      "name": "04_deploy_wrtn_frontend",
+      "id": "C035MM7B2HG"
+    },
+    {
+      "name": "02_wrtn_업데이트",
+      "id": "C038B1SFENN"
+    },
+    {
+      "name": "99_product_qa",
+      "id": "C03A58E9GNQ"
+    },
+    {
+      "name": "05_뤼슐랭",
+      "id": "C03D9QC7S81"
+    },
+    {
+      "name": "02_wrtn_사전예약명단",
+      "id": "C03EYELMTPT"
+    },
+    {
+      "name": "03_wrtn_인사이트",
+      "id": "C03G3NNMT54"
+    },
+    {
+      "name": "05_컨텐츠추천",
+      "id": "C03GG3CC1GX"
+    },
+    {
+      "name": "02_wrtn_세일즈",
+      "id": "C03GPJTC9U2"
+    },
+    {
+      "name": "01_dev_frontend",
+      "id": "C03H5EY7A0P"
+    },
+    {
+      "name": "02_wrtn_sentry_react",
+      "id": "C03JR7NTESF"
+    },
+    {
+      "name": "02_wrtn_poc",
+      "id": "C03KBKBNM27"
+    },
+    {
+      "name": "1",
+      "id": "C03MQM5E771"
+    },
+    {
+      "name": "12",
+      "id": "C03MQPRCHBR"
+    },
+    {
+      "name": "02_training_대기명단",
+      "id": "C03N5AXLWKV"
+    },
+    {
+      "name": "04_training_sentry",
+      "id": "C03NWHVNBCY"
+    },
+    {
+      "name": "00_team_블로그",
+      "id": "C03P5NQ40TD"
+    },
+    {
+      "name": "02_wrtn_얼리액세스신청",
+      "id": "C03QJJBKY80"
+    },
+    {
+      "name": "02_wrtn_마케팅",
+      "id": "C03R0BNCX0W"
+    },
+    {
+      "name": "02_wrtn_유저인사이트",
+      "id": "C03RHBV0P2R"
+    },
+    {
+      "name": "04_wrtn_sentry",
+      "id": "C03UU2VCAJG"
+    },
+    {
+      "name": "00_team_thankyou",
+      "id": "C0403GK31PC"
+    },
+    {
+      "name": "02_wrtn_모니터링_어뷰징",
+      "id": "C0427SDSF60"
+    },
+    {
+      "name": "카피라이팅",
+      "id": "C045C21MWH4"
+    },
+    {
+      "name": "비즈니스",
+      "id": "C045FMDM4R3"
+    },
+    {
+      "name": "02_copywriting_dd",
+      "id": "C045JGDBSD9"
+    },
+    {
+      "name": "02_wrtn_이미지",
+      "id": "C04AUR0AVPW"
+    },
+    {
+      "name": "00_team_onboarding",
+      "id": "C04BBPE5R55"
+    },
+    {
+      "name": "02_wrtn_이미지_모니터링",
+      "id": "C04F03RUV9A"
+    },
+    {
+      "name": "04_채널톡_고객문의",
+      "id": "C04FB8MFWJX"
+    },
+    {
+      "name": "04_wrtn_챗봇",
+      "id": "C04GPMS0HLK"
+    },
+    {
+      "name": "02_gaa_타입폼연동",
+      "id": "C04H9MRBKRB"
+    },
+    {
+      "name": "02_wrtn_모니터링_결제",
+      "id": "C04KAS250SG"
+    },
+    {
+      "name": "01_dev_backend",
+      "id": "C04L03KJHHQ"
+    },
+    {
+      "name": "04_deploy_wrtn_backend",
+      "id": "C04LMK42W95"
+    },
+    {
+      "name": "02_wrtn_platform_squad",
+      "id": "C04M4KV8YK1"
+    },
+    {
+      "name": "02_wrtn_gen_squad",
+      "id": "C04MMLF1Y4U"
+    },
+    {
+      "name": "04_wrtn_뤼튼필터_모니터링",
+      "id": "C04MYLZ55PZ"
+    },
+    {
+      "name": "02_document",
+      "id": "C04NMCE3FC6"
+    },
+    {
+      "name": "04_document_sentry",
+      "id": "C04PZGG45K7"
+    },
+    {
+      "name": "01_dev_builder",
+      "id": "C04QT2PUT28"
+    },
+    {
+      "name": "04_document_결제",
+      "id": "C04QVM0S4NM"
+    },
+    {
+      "name": "02_japan",
+      "id": "C04R79QRFJL"
+    },
+    {
+      "name": "04_deploy_wrtn_data",
+      "id": "C04RU18HCCE"
+    },
+    {
+      "name": "02_gaa_운영사무국",
+      "id": "C04TD0J0916"
+    },
+    {
+      "name": "05_반려동물",
+      "id": "C04TN4AULE4"
+    },
+    {
+      "name": "04_document_cs_feedback",
+      "id": "C04TS3A187P"
+    },
+    {
+      "name": "00_team_콘텐츠",
+      "id": "C04TSQW6Y66"
+    },
+    {
+      "name": "04_git_wrtn_backend",
+      "id": "C04TX2K203F"
+    },
+    {
+      "name": "02_gen_ml션파서블",
+      "id": "C04TZJGVBEU"
+    },
+    {
+      "name": "kyle-test",
+      "id": "C0502SGKYKY"
+    },
+    {
+      "name": "02_japan_결제내역",
+      "id": "C050QHGPAR2"
+    },
+    {
+      "name": "04_git_document_backend",
+      "id": "C050RTJ6T0E"
+    },
+    {
+      "name": "02_wrtn_gen_squad_jira",
+      "id": "C050W5RJXEH"
+    },
+    {
+      "name": "04_deploy_shakespeare",
+      "id": "C0520K56T8C"
+    },
+    {
+      "name": "04_team_github_releases",
+      "id": "C05256NQW21"
+    },
+    {
+      "name": "000_cathy_thinking",
+      "id": "C0536CT2GJC"
+    },
+    {
+      "name": "02_wrtn_plugin_제휴신청",
+      "id": "C053FHUAKDY"
+    },
+    {
+      "name": "02_wrtn_data-ai_team",
+      "id": "C053PC6S6T0"
+    },
+    {
+      "name": "02_wrtn_dai_team_jira",
+      "id": "C05431ED857"
+    },
+    {
+      "name": "02_wrtn_data",
+      "id": "C05494P4W49"
+    },
+    {
+      "name": "04_deploy_shakespeare_server",
+      "id": "C054RJY3Y1Z"
+    },
+    {
+      "name": "02_wrtn_marketing",
+      "id": "C0557THH5DH"
+    },
+    {
+      "name": "02_wrtn_studio_team",
+      "id": "C055ZTHNX6F"
+    },
+    {
+      "name": "04_openai_platform_squad_alert",
+      "id": "C0561832GQ3"
+    },
+    {
+      "name": "04_plugin_alert",
+      "id": "C05625B45LG"
+    },
+    {
+      "name": "wrtn-megumi",
+      "id": "C056BQKRVPT"
+    },
+    {
+      "name": "02_wrtn_plugin_design",
+      "id": "C056QCMR4N8"
+    },
+    {
+      "name": "04_openai_plugin_squad_alert",
+      "id": "C056R403JGY"
+    },
+    {
+      "name": "02_wrtn_prompthon",
+      "id": "C0571AZ4SGM"
+    },
+    {
+      "name": "02_wrtn_app",
+      "id": "C057EV1NXGQ"
+    },
+    {
+      "name": "04_prompthon_등록",
+      "id": "C057QFY86UX"
+    },
+    {
+      "name": "03_japan_insights",
+      "id": "C057VGMQQKW"
+    },
+    {
+      "name": "03_prompting_인사이트",
+      "id": "C057WQ4RVPH"
+    },
+    {
+      "name": "04_gen_ai_update_alert",
+      "id": "C057Y0P1HR6"
+    },
+    {
+      "name": "02_wrtn_community",
+      "id": "C058A4Q197F"
+    },
+    {
+      "name": "02_wrtn_branding_tf",
+      "id": "C058KHURYJE"
+    },
+    {
+      "name": "01_prompt",
+      "id": "C058NMWN4R4"
+    },
+    {
+      "name": "02_m_abusing",
+      "id": "C058SMTETNW"
+    },
+    {
+      "name": "02_wrtn_모니터링_매크로",
+      "id": "C0595UJGRB3"
+    },
+    {
+      "name": "02_wrtn_recaptcha_모니터링",
+      "id": "C059BA5RMQD"
+    },
+    {
+      "name": "02_wrtn_group_users",
+      "id": "C059T5R2G30"
+    },
+    {
+      "name": "02_m_k8s_prod",
+      "id": "C05AQRRMQ5B"
+    },
+    {
+      "name": "02_wrtn_catalyst_squad",
+      "id": "C05AZUWJGBU"
+    },
+    {
+      "name": "testt",
+      "id": "C05B0NQUJVD"
+    },
+    {
+      "name": "02_japan_cs",
+      "id": "C05BM3CV6NB"
+    },
+    {
+      "name": "02_training_dev",
+      "id": "C05CTSYF6CB"
+    },
+    {
+      "name": "test_plugin",
+      "id": "C05CVDW3LM8"
+    },
+    {
+      "name": "05_방탈출",
+      "id": "C05CWD160AU"
+    },
+    {
+      "name": "05_뤼튼튼_futsal-team",
+      "id": "C05D3E0C3U5"
+    },
+    {
+      "name": "01_ml_paper_review",
+      "id": "C05DP03029G"
+    },
+    {
+      "name": "01_dev_webview_tf",
+      "id": "C05DPGLHZPC"
+    },
+    {
+      "name": "02_japan_marketing",
+      "id": "C05DQM6CVR8"
+    },
+    {
+      "name": "00_team_uxwriting",
+      "id": "C05DV7M6M7B"
+    },
+    {
+      "name": "02_wrtn_gen-hub",
+      "id": "C05E92QS7GD"
+    },
+    {
+      "name": "03_mkt_인사이트",
+      "id": "C05EQD9MH9T"
+    },
+    {
+      "name": "02_wrtn_data_request",
+      "id": "C05EZ9DADFV"
+    },
+    {
+      "name": "wrtn-gkit",
+      "id": "C05F3208XKQ"
+    },
+    {
+      "name": "02_wrtn_chat_squad_scrum",
+      "id": "C05F32ZP8BS"
+    },
+    {
+      "name": "01_bizdev",
+      "id": "C05FAEUR4N8"
+    },
+    {
+      "name": "wrtn-sns",
+      "id": "C05FHADAYCV"
+    },
+    {
+      "name": "02_wrtn_app_version",
+      "id": "C05FSJGAG01"
+    },
+    {
+      "name": "01_dev_ml",
+      "id": "C05FXGQ9FEX"
+    },
+    {
+      "name": "01_people",
+      "id": "C05G09UECSG"
+    },
+    {
+      "name": "01_dev_stackoverflow",
+      "id": "C05G2K12Y9K"
+    },
+    {
+      "name": "03_wrtn_idea",
+      "id": "C05H08UA2EQ"
+    },
+    {
+      "name": "02_wrtn_휴면_모니터링",
+      "id": "C05HQRHQDB4"
+    },
+    {
+      "name": "02_wrtn_home_squad",
+      "id": "C05HSR86QEQ"
+    },
+    {
+      "name": "02_wrtn_release",
+      "id": "C05JB3PM90R"
+    },
+    {
+      "name": "02_wrtn_datavalue_team",
+      "id": "C05K11NABRD"
+    },
+    {
+      "name": "05_dev_nodejs",
+      "id": "C05KHMK9VGX"
+    },
+    {
+      "name": "05_dev_qa",
+      "id": "C05KMV0MD7Z"
+    },
+    {
+      "name": "05_dev_architecture",
+      "id": "C05KX7YN201"
+    },
+    {
+      "name": "05_dev_articles",
+      "id": "C05KXEK4HRA"
+    },
+    {
+      "name": "05_dev_codereview",
+      "id": "C05L0GG93RS"
+    },
+    {
+      "name": "05_dev_jvm",
+      "id": "C05L0MD2MFW"
+    },
+    {
+      "name": "05_dev_infrastructure",
+      "id": "C05L2U6A7RV"
+    },
+    {
+      "name": "wrtn-ppc",
+      "id": "C05L56TS1AT"
+    },
+    {
+      "name": "02_발화분석",
+      "id": "C05L9ERQQ6P"
+    },
+    {
+      "name": "05_dev_python",
+      "id": "C05LASW1057"
+    },
+    {
+      "name": "05_dev_k8s",
+      "id": "C05LLTB1CRJ"
+    },
+    {
+      "name": "05_dev_ai",
+      "id": "C05LN5TCAHF"
+    },
+    {
+      "name": "wrtn-dxlab",
+      "id": "C05LYMZRMT3"
+    },
+    {
+      "name": "00_incidents",
+      "id": "C05MN6TEMA4"
+    },
+    {
+      "name": "03_po_인사이트",
+      "id": "C05MT3V6K4P"
+    },
+    {
+      "name": "05_wrtn_위튼튼",
+      "id": "C05MZN6DUKG"
+    },
+    {
+      "name": "04_wrtn_data_alert",
+      "id": "C05N3SM2Y05"
+    },
+    {
+      "name": "04_wrtn_datavalue_team_alert_dev",
+      "id": "C05N97NUKPW"
+    },
+    {
+      "name": "02_wrtn_platform_request",
+      "id": "C05NGCTBV5K"
+    },
+    {
+      "name": "824-qa-특공대",
+      "id": "C05NUP2UBDJ"
+    },
+    {
+      "name": "00_team_식사",
+      "id": "C05NXATUED7"
+    },
+    {
+      "name": "05_뤼튼협곡",
+      "id": "C05P2M7FHRD"
+    },
+    {
+      "name": "05_소리지르는채널",
+      "id": "C05PDLR58KB"
+    },
+    {
+      "name": "05_be_chat",
+      "id": "C05PL3ZN4HL"
+    },
+    {
+      "name": "05_뤼튼맘카페",
+      "id": "C05PPD8JN77"
+    },
+    {
+      "name": "05_books",
+      "id": "C05PYCS6KL2"
+    },
+    {
+      "name": "02_wrtn_error",
+      "id": "C05PZDG0KC0"
+    },
+    {
+      "name": "02_wrtn_qa",
+      "id": "C05PZGS84UB"
+    },
+    {
+      "name": "09_smoker",
+      "id": "C05Q8G0ADR9"
+    },
+    {
+      "name": "05_dev_storage",
+      "id": "C05QG39H329"
+    },
+    {
+      "name": "04_gitlab_be_api",
+      "id": "C05QGPAPW87"
+    },
+    {
+      "name": "09_cars",
+      "id": "C05QL1ZQTPC"
+    },
+    {
+      "name": "04_todo-catalyst",
+      "id": "C05QU6CKZQC"
+    },
+    {
+      "name": "09_kade-test",
+      "id": "C05QZF77NSG"
+    },
+    {
+      "name": "09_travel",
+      "id": "C05R5MG1G14"
+    },
+    {
+      "name": "02_wrtn_video_contents",
+      "id": "C05RBR345Q9"
+    },
+    {
+      "name": "02_wrtn_chat_team",
+      "id": "C05S72VJSDB"
+    },
+    {
+      "name": "05_dev_data",
+      "id": "C05S74UJ6QM"
+    },
+    {
+      "name": "02_wrtn_collab_tf",
+      "id": "C05SCEQE43W"
+    },
+    {
+      "name": "05_dev_idea",
+      "id": "C05SMFS875Z"
+    },
+    {
+      "name": "999_chat_tf",
+      "id": "C05SMJBLA1Y"
+    },
+    {
+      "name": "05_dev_swift",
+      "id": "C05TCBMPDPD"
+    },
+    {
+      "name": "01_dev_rag_tf",
+      "id": "C05TG1H1V4H"
+    },
+    {
+      "name": "09_maplestory",
+      "id": "C05TJP5U2V9"
+    },
+    {
+      "name": "05_dev_golang",
+      "id": "C05UMUBRJ7M"
+    },
+    {
+      "name": "02_wrtn_blog_tf",
+      "id": "C0608KGMKD4"
+    },
+    {
+      "name": "02_wrtn_blog",
+      "id": "C060CB0SSER"
+    },
+    {
+      "name": "05_dev_search_engine",
+      "id": "C060YU7KRPF"
+    },
+    {
+      "name": "02_generate_error",
+      "id": "C0619KJJJBC"
+    },
+    {
+      "name": "05_dev_fe",
+      "id": "C061RRBHF5J"
+    },
+    {
+      "name": "02_platform_jira_manage",
+      "id": "C0622PWPMCN"
+    },
+    {
+      "name": "02_wrtn_abusing_studio",
+      "id": "C0625K6M96C"
+    },
+    {
+      "name": "00_team_인증번호",
+      "id": "C0628PM6XEK"
+    },
+    {
+      "name": "05-크리스찬소모임-wrtnic",
+      "id": "C062B8E2KMZ"
+    },
+    {
+      "name": "02_m_fe_oncall",
+      "id": "C062C9Z9L9W"
+    },
+    {
+      "name": "05_뤼클라이머_클라이밍",
+      "id": "C062VREDCN5"
+    },
+    {
+      "name": "05_뤼든_독서소모임",
+      "id": "C0638199RKP"
+    },
+    {
+      "name": "01_security",
+      "id": "C063ARQA4CT"
+    },
+    {
+      "name": "02_wrtn_cem",
+      "id": "C063BBPEZC3"
+    },
+    {
+      "name": "02_wrtn_growth_product",
+      "id": "C063MSHJSC9"
+    },
+    {
+      "name": "05_dev_kommons",
+      "id": "C063R9K2N6P"
+    },
+    {
+      "name": "datadog-test-noti",
+      "id": "C063REULT6C"
+    },
+    {
+      "name": "04_status_cloudflare",
+      "id": "C0643MB8GMQ"
+    },
+    {
+      "name": "02_wrtn_chat_console",
+      "id": "C0649A8D5N1"
+    },
+    {
+      "name": "02_wrtn_studio_monitoring",
+      "id": "C0649LYUTHP"
+    },
+    {
+      "name": "02_m_k8s_dev",
+      "id": "C064BSH2R1R"
+    },
+    {
+      "name": "02_tf_개인정보실태점검",
+      "id": "C064FKDJJCV"
+    },
+    {
+      "name": "02_wrtn_ecosystem",
+      "id": "C0654GRKQNM"
+    },
+    {
+      "name": "02_voc_report",
+      "id": "C06634B84V6"
+    },
+    {
+      "name": "01_dev_app",
+      "id": "C067B6NDE3Z"
+    },
+    {
+      "name": "05_서초동-헌옷수거함",
+      "id": "C067EDED5QW"
+    },
+    {
+      "name": "02_wrtn_chat_suggest",
+      "id": "C0681B4CCBA"
+    },
+    {
+      "name": "05_drl_study",
+      "id": "C06846FKMAM"
+    },
+    {
+      "name": "05_스포뤼파이",
+      "id": "C0690GABBJL"
+    },
+    {
+      "name": "05_drl_study_2",
+      "id": "C0691BHGSPQ"
+    },
+    {
+      "name": "02_platform_engineering",
+      "id": "C069EPYKL3F"
+    },
+    {
+      "name": "05_drl_study_1",
+      "id": "C069WPUE2NL"
+    },
+    {
+      "name": "낄끼빠빠-qa",
+      "id": "C06AA35BZ6F"
+    },
+    {
+      "name": "02_wrtn_one_build_tf",
+      "id": "C06AGTX37U5"
+    },
+    {
+      "name": "00_incident_monitor",
+      "id": "C06AX9PBZD0"
+    },
+    {
+      "name": "02_chat_dev",
+      "id": "C06B851TTS4"
+    },
+    {
+      "name": "02_wrtn_chat_scrum",
+      "id": "C06BCR41H54"
+    },
+    {
+      "name": "02_m_k8s_oom",
+      "id": "C06BKSQGTB7"
+    },
+    {
+      "name": "02-wrtn-strategic-growth-team",
+      "id": "C06BL0HRDLJ"
+    },
+    {
+      "name": "02_wrtn_college-agent",
+      "id": "C06BNTD0X1A"
+    },
+    {
+      "name": "05_미뤼클모닝",
+      "id": "C06CAGFHGKX"
+    },
+    {
+      "name": "02_m_k8s_unhealthy",
+      "id": "C06CBLCCMNC"
+    },
+    {
+      "name": "04_status_mongodb-cloud",
+      "id": "C06CC0YDL80"
+    },
+    {
+      "name": "02_wrtn_chat_wrtnsearch",
+      "id": "C06CR79K6TU"
+    },
+    {
+      "name": "05_dev_cds",
+      "id": "C06CZSG50SX"
+    },
+    {
+      "name": "05_풀파워로압살",
+      "id": "C06D6K4NDB5"
+    },
+    {
+      "name": "ryan_dev2",
+      "id": "C06DB5BKY13"
+    },
+    {
+      "name": "02_wrtn-io-홈페이지",
+      "id": "C06DF1F9QR5"
+    },
+    {
+      "name": "planner_ggpp_tf",
+      "id": "C06DPAQ0EJ0"
+    },
+    {
+      "name": "04_wrtn_social-feed",
+      "id": "C06DWSV3Z50"
+    },
+    {
+      "name": "05_dev_hamlet",
+      "id": "C06DXCULFNZ"
+    },
+    {
+      "name": "02_wrtn_brand",
+      "id": "C06DZ9P4A6M"
+    },
+    {
+      "name": "05_dev_prompt_registry",
+      "id": "C06E2NE2876"
+    },
+    {
+      "name": "05_dev_notification",
+      "id": "C06E2NLV52Q"
+    },
+    {
+      "name": "04_cs_issue-feed",
+      "id": "C06EX4ZFEF5"
+    },
+    {
+      "name": "02_auth_api_memory_monitoring",
+      "id": "C06F4H8CDU7"
+    },
+    {
+      "name": "02_be_api_memory_monitoring",
+      "id": "C06FLAMECA0"
+    },
+    {
+      "name": "02_be_api_cpu_monitoring",
+      "id": "C06FMH6HJ0L"
+    },
+    {
+      "name": "02_william_api_memory_monitoring",
+      "id": "C06FXNM3E8H"
+    },
+    {
+      "name": "02_auth_api_cpu_monitoring",
+      "id": "C06FXNNNDUZ"
+    },
+    {
+      "name": "02_ss_memory_monitoring",
+      "id": "C06G4HK371T"
+    },
+    {
+      "name": "05_productivity",
+      "id": "C06GP7FFCN8"
+    },
+    {
+      "name": "02_wrtn_design_system",
+      "id": "C06GVLB97UK"
+    },
+    {
+      "name": "02_api_gateway_memory_monitoring",
+      "id": "C06H9NCHZ5J"
+    },
+    {
+      "name": "02_baa_memory_monitoring",
+      "id": "C06HJBVHTQQ"
+    },
+    {
+      "name": "05_dev_agents",
+      "id": "C06JGDXLNF4"
+    },
+    {
+      "name": "05_뤼스베이거스",
+      "id": "C06JQKDBWNB"
+    },
+    {
+      "name": "02_memory_monitoring",
+      "id": "C06JRRRL79R"
+    },
+    {
+      "name": "02_m_oncall",
+      "id": "C06JUD64T8U"
+    },
+    {
+      "name": "05_생산성도구",
+      "id": "C06KKA0MCUV"
+    },
+    {
+      "name": "02_manage_oncall",
+      "id": "C06L56N625V"
+    },
+    {
+      "name": "02_m_k8s_storage",
+      "id": "C06L991D3H6"
+    },
+    {
+      "name": "99_sam_test",
+      "id": "C06LFFWET1P"
+    },
+    {
+      "name": "05_wrtn_hamlet_monitor",
+      "id": "C06LKU4LR6F"
+    },
+    {
+      "name": "02_be_error_monitoring",
+      "id": "C06M5TL3UJV"
+    },
+    {
+      "name": "04_wrtnsearch_error_monitor",
+      "id": "C06M6SRJG9Z"
+    },
+    {
+      "name": "core_backend_mr_review",
+      "id": "C06M6U1R2H0"
+    },
+    {
+      "name": "02_chat_team_be",
+      "id": "C06MD04SW2F"
+    },
+    {
+      "name": "02_refactor_monitoring",
+      "id": "C06MDHSDV3L"
+    },
+    {
+      "name": "05_chat_core_be",
+      "id": "C06MFGR41J8"
+    },
+    {
+      "name": "05_rustaceans",
+      "id": "C06MFHMUY6T"
+    },
+    {
+      "name": "02_wrtn_product_policy",
+      "id": "C06MSFFSK9C"
+    },
+    {
+      "name": "05_1993",
+      "id": "C06NT0VPBB2"
+    },
+    {
+      "name": "05_dev_event_pipeline",
+      "id": "C06NXBMEKGR"
+    },
+    {
+      "name": "04_mapo_access_logs",
+      "id": "C06P0CG2KHU"
+    },
+    {
+      "name": "03_daily_ml_papers",
+      "id": "C06P4D94NDA"
+    },
+    {
+      "name": "02_william_error_monitoring",
+      "id": "C06PCFQMB9S"
+    },
+    {
+      "name": "05_dev_sso",
+      "id": "C06PLC5M0H5"
+    },
+    {
+      "name": "05_ai-character-hackertone",
+      "id": "C06Q4MWMLSC"
+    },
+    {
+      "name": "05_dev_core_backend_projects",
+      "id": "C06QCFS4R9T"
+    },
+    {
+      "name": "04_status_notion",
+      "id": "C06QE6VAX3R"
+    },
+    {
+      "name": "05_dev_kommons_logging",
+      "id": "C06QFQS37FE"
+    },
+    {
+      "name": "02_cds_memory_monitoring",
+      "id": "C06R17LRSLR"
+    },
+    {
+      "name": "02_baf_monitor",
+      "id": "C06RDHAUL7J"
+    },
+    {
+      "name": "02_wrtn_contents",
+      "id": "C06SLPGNU2C"
+    },
+    {
+      "name": "02_wrtn_translation",
+      "id": "C06SRLHFMDL"
+    },
+    {
+      "name": "03_cx_인사이트",
+      "id": "C06TAHCRS01"
+    },
+    {
+      "name": "05_뤼튼그려줘",
+      "id": "C06TEC57EAC"
+    },
+    {
+      "name": "05_한반반",
+      "id": "C06TLTEJGBT"
+    },
+    {
+      "name": "04_deploy_wrtn_app",
+      "id": "C06TSH01FJ4"
+    },
+    {
+      "name": "05_music",
+      "id": "C06V3AYTVM1"
+    },
+    {
+      "name": "02_wrtn_answer_engine",
+      "id": "C06VDAURKQC"
+    },
+    {
+      "name": "01_wrtn_core_part",
+      "id": "C07006T9QAJ"
+    },
+    {
+      "name": "02_wrtn_social_bonding",
+      "id": "C070KL6JJ0Y"
+    },
+    {
+      "name": "02_wrtn_answer_engine_planning",
+      "id": "C070KT9PDL2"
+    },
+    {
+      "name": "mason-kinopio-test",
+      "id": "C070MU2H9C7"
+    },
+    {
+      "name": "02_wrtn_platform_biz",
+      "id": "C07111L20QJ"
+    },
+    {
+      "name": "02_wrtn_product_전체",
+      "id": "C071GUZBK2N"
+    },
+    {
+      "name": "02_wrtn_llm관제센터",
+      "id": "C071L2YK6CC"
+    },
+    {
+      "name": "05_뤼튼투혼",
+      "id": "C071MSDB6V6"
+    },
+    {
+      "name": "05_midjourney",
+      "id": "C071NNSHEV7"
+    },
+    {
+      "name": "02_tokyo_office",
+      "id": "C0721UK2N4E"
+    },
+    {
+      "name": "02_wrtn_abusing",
+      "id": "C0726N8NJUF"
+    },
+    {
+      "name": "mkt_campaign_tf",
+      "id": "C072B6PHVRS"
+    },
+    {
+      "name": "01_tech_sync_up_2",
+      "id": "C072G2MES5Q"
+    },
+    {
+      "name": "05_dev_cus",
+      "id": "C072QDNEVBR"
+    },
+    {
+      "name": "deployment_mason-be",
+      "id": "C0735HBAEPJ"
+    },
+    {
+      "name": "deploy_noti_test",
+      "id": "C073Y6JU9SB"
+    },
+    {
+      "name": "test-cspm",
+      "id": "C0767AQQ5R6"
+    },
+    {
+      "name": "05_종합게임",
+      "id": "C0768CXHYGY"
+    },
+    {
+      "name": "06_pe_test",
+      "id": "C076J0Z1HSR"
+    },
+    {
+      "name": "02_m_mason_test",
+      "id": "C076U0Y8CQG"
+    },
+    {
+      "name": "mason-test-channel",
+      "id": "C076Y3NH4P7"
+    },
+    {
+      "name": "mason_fe",
+      "id": "C077AAYP8CB"
+    },
+    {
+      "name": "09_william",
+      "id": "C077XGR66RY"
+    },
+    {
+      "name": "02_eco_monitoring",
+      "id": "C0795SSCN9X"
+    },
+    {
+      "name": "02_data_engineering",
+      "id": "C07A01P78TC"
+    },
+    {
+      "name": "04_wrtn_data_msk_alert",
+      "id": "C07A8TUTY2U"
+    },
+    {
+      "name": "02_m_ai_search",
+      "id": "C07BDA42QT0"
+    },
+    {
+      "name": "05_dev_study_ddd",
+      "id": "C07BZRNG5M5"
+    },
+    {
+      "name": "02_ae_incidents_sev2",
+      "id": "C07CKHS3HQW"
+    },
+    {
+      "name": "00_model_incidents",
+      "id": "C07CNU5B22V"
+    },
+    {
+      "name": "02_ae_incidents_sev3",
+      "id": "C07CS3NK8Q3"
+    },
+    {
+      "name": "02_ae_incidents_sev1",
+      "id": "C07CUM3BQJ0"
+    },
+    {
+      "name": "02_japan_app_review",
+      "id": "C07DG8GN000"
+    },
+    {
+      "name": "02_m_argocd_dev",
+      "id": "C07E24W748L"
+    },
+    {
+      "name": "02_m_argocd_prod",
+      "id": "C07ECAB3LAV"
+    },
+    {
+      "name": "02_dev_app_monitoring",
+      "id": "C07EWQRS7UH"
+    },
+    {
+      "name": "05_dev_study_pp",
+      "id": "C07HMBZ15H8"
+    },
+    {
+      "name": "02_eco_survey",
+      "id": "C07HTK7MYRG"
+    },
+    {
+      "name": "02_wrtn_on_call",
+      "id": "C07HUP59HKK"
+    },
+    {
+      "name": "05_crm_scheduler_monitoring",
+      "id": "C07J2NSHCM6"
+    },
+    {
+      "name": "01_people_채용_글로벌유닛_app_private",
+      "id": "C07K7AYN539"
+    },
+    {
+      "name": "02_wrtn_ecosystem_frontend",
+      "id": "C07KJGM1FJQ"
+    },
+    {
+      "name": "99_wrtn_carnival_tf",
+      "id": "C07L74F1TUK"
+    },
+    {
+      "name": "02_wrtn_contents_character_recommend",
+      "id": "C07LGT2RHSS"
+    },
+    {
+      "name": "02_platformbiz_memory_monitoring",
+      "id": "C07M6V3RAPP"
+    },
+    {
+      "name": "01_product_ops",
+      "id": "C07NA0ML3FY"
+    },
+    {
+      "name": "추석-해커톤-전사",
+      "id": "C07NDEKDHLY"
+    },
+    {
+      "name": "01_dev_app_code-review_request",
+      "id": "C07NXLYGDBQ"
+    },
+    {
+      "name": "02_wrtn_contents_payment",
+      "id": "C07PB64KP6X"
+    },
+    {
+      "name": "01_선발대",
+      "id": "C07PP6QCCF6"
+    },
+    {
+      "name": "01_dev_frontend_code-review_request",
+      "id": "C07PYL21P47"
+    },
+    {
+      "name": "datadog-noti-playground",
+      "id": "C07Q23MLS3E"
+    },
+    {
+      "name": "02_m_ad_oncall",
+      "id": "C07Q23P8E3E"
+    },
+    {
+      "name": "02_ad_noti_prod",
+      "id": "C07RLPTK76W"
+    },
+    {
+      "name": "02_ad_noti_dev",
+      "id": "C07S9HMKURE"
+    },
+    {
+      "name": "02_japan_operations",
+      "id": "C07SU5P53GU"
+    },
+    {
+      "name": "02_wrtn_contents_user_voice_jp",
+      "id": "C07T3LJB7H7"
+    },
+    {
+      "name": "02_wrtnads_채널톡문의",
+      "id": "C07T9RWK4DV"
+    },
+    {
+      "name": "02_wrtn_contents_notice",
+      "id": "C07TGCN7L0J"
+    },
+    {
+      "name": "02_wrtn_contents_recommendation",
+      "id": "C07VDTZGN82"
+    },
+    {
+      "name": "02_wrtn_contents_error",
+      "id": "C08068W83CY"
+    },
+    {
+      "name": "01_pa_요청",
+      "id": "C080AUVFKL0"
+    },
+    {
+      "name": "01_product_analyst",
+      "id": "C080FA3DLNA"
+    },
+    {
+      "name": "02_wrtn_contents_ceonsor",
+      "id": "C080UP70PNC"
+    },
+    {
+      "name": "02_wrtnads_광고문의",
+      "id": "C082HP6AR2T"
+    },
+    {
+      "name": "02_eco_connector_monitoring",
+      "id": "C082RUJD2P9"
+    },
+    {
+      "name": "02_m_william_oom",
+      "id": "C083KMVJM2N"
+    },
+    {
+      "name": "02_m_terry_oom",
+      "id": "C084Z2E4WKT"
+    },
+    {
+      "name": "cafe24-wrtn-techsupport",
+      "id": "C04PLCPN9PX"
+    },
+    {
+      "name": "monitor-clipping",
+      "id": "C07U2TZD8JV"
+    }
+  ]
+}

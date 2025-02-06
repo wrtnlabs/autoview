@@ -1,0 +1,43 @@
+{
+  "id": "f40aee74-9ab2-4bfd-9ac5-63b28d695bfe",
+  "function": {
+    "path": "/connector/google-shopping/olive-young",
+    "method": "post"
+  },
+  "arguments": [
+    {
+      "keyword": "가을 웜톤 뮤트 틴트",
+      "max_results": 3
+    }
+  ],
+  "success": true,
+  "value": [
+    {
+      "source": "올리브영",
+      "deliveryCost": "배송비 ₩2,500",
+      "title": "[NEW 컬러] 뮤드 글라세 립 틴트 11종 택1",
+      "link": "https://www.oliveyoung.co.kr/store/common/partner.do?chlNo=6&chlDtlNo=201&sndType=goods&sndVal=A000000172372",
+      "price": "₩16,100",
+      "thumbnail": "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcSQpwLA2BuIi0ERPORkHB39Y8Btx7cABMDVJWk2WFmI1Y8RaIdhLqtSnhCHhrUAdQ7DC3354fP78ulD2cwYtc_fWh4JqglQHKon5Y0xlJhC&usqp=CAE"
+    },
+    {
+      "source": "올리브영",
+      "deliveryCost": "배송비 ₩2,500",
+      "title": "[NEW 컬러] 어뮤즈 젤핏 틴트 기획/단품 (+반지립밤 증정)",
+      "link": "https://www.oliveyoung.co.kr/store/common/partner.do?chlNo=6&chlDtlNo=201&sndType=goods&sndVal=A000000179233",
+      "price": "₩18,000",
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQ_RPtS1WTmSj4w8_9rxDYT5wrUyoTT_qOjF6EagKVTwTtxdxIt_yb1foqpN28NXAKXa6zODHKrjVYhs1-y877eLvRT3VtKnfIcrNWwx_CaM0hf5xOlt8rA&usqp=CAE"
+    },
+    {
+      "source": "올리브영",
+      "deliveryCost": "배송비 ₩2,500",
+      "title": "[NEW컬러] 어뮤즈 듀 틴트 (AD)",
+      "link": "https://www.oliveyoung.co.kr/store/common/partner.do?chlNo=6&chlDtlNo=201&sndType=goods&sndVal=A000000158147",
+      "price": "₩18,000",
+      "thumbnail": "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcSzuLiyauo52Nl1w46-N9sVsLZIR_9ueM_W_JTxwEKntQAhr7K3zVJ1hPRbWzUxTGrzEVUQ48PXLKMkS-vOE1ZkmVWCPPfqgw1_LuIy9Nz1&usqp=CAE"
+    }
+  ],
+  "status": 201,
+  "created_at": "2024-12-10T15:26:25.656Z",
+  "completed_at": "2024-12-10T15:26:26.702Z"
+}
