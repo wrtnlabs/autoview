@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { Singleton } from "tstl";
 
 import { AutoViewAgent } from "../src/agents/AutoViewAgent";
+import { IAutoViewValueResult } from "../src/structures/IAutoViewValueResult";
 import { IAutoViewAgentProvider } from "../src/structures/agents/IAutoViewAgentProvider";
-import { IAutoViewComponentProps } from "../src/structures/properties/IAutoViewComponentProps";
 import { TestGlobal } from "./TestGlobal";
 
 const EXAMPLES = `${TestGlobal.ROOT}/public/examples`;
@@ -49,23 +49,34 @@ const main = async (): Promise<void> => {
     const data = JSON.parse(
       await fs.promises.readFile(`${EXAMPLES}/${file}`, "utf8"),
     );
-    const result: IAutoViewComponentProps | null = await AutoViewAgent.value({
+    const result: IAutoViewValueResult = await AutoViewAgent.value({
       retry: 3,
       provider,
       inputs: Array.isArray(data) ? data : [data],
     });
-    if (result === null) {
-      console.log(`${name}: failure`);
-      continue;
-    }
-    console.log(`${name}: success`);
+    console.log(`${name}: ${result.type}`);
 
     await mkdir.get();
-    await fs.promises.writeFile(
-      `${RESULTS}/json/${name}.json`,
-      JSON.stringify(result, null, 2),
-      "utf8",
-    );
+    try {
+      await fs.promises.writeFile(
+        `${RESULTS}/json/${name}.${result.type}.json`,
+        JSON.stringify(result, null, 2),
+        "utf8",
+      );
+    } catch (error) {
+      await fs.promises.writeFile(
+        `${RESULTS}/json/${name}.error.json`,
+        JSON.stringify(
+          {
+            type: "error",
+            error,
+          },
+          null,
+          2,
+        ),
+        "utf8",
+      );
+    }
   }
 };
 main().catch((error) => {
