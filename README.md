@@ -1,6 +1,66 @@
 # Autoview
-Automatic viewer renderer by JSON schema and AI agent.
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/wrtnlabs/autoview/blob/master/LICENSE)
+[![npm version](https://img.shields.io/npm/v/@wrtnlabs/autoview.svg)](https://www.npmjs.com/package/@wrtnlabs/autoview)
+[![Downloads](https://img.shields.io/npm/dm/@wrtnlabs/autoview.svg)](https://www.npmjs.com/package/@wrtnlabs/autoview)
+[![Build Status](https://github.com/wrtnlabs/autoview/workflows/build/badge.svg)](https://github.com/wrtnlabs/autoview/actions?query=workflow%3Abuild)
 
+Automatic viewer renderer by AI agent with JSON schema.
+
+
+
+## How to Use
+### Setup
+### Value Automation Tool
+### Schema Automation Tool
+
+
+
+
+## Principles
+### LLM Function Calling
+### Validation Feedback
+Is LLM function calling perfect?
+
+The answer is not. LLM (Large Language Model) providers like OpenAI take a lot of type level mistakes when composing the arguments of the target function to call. Even though an LLM function calling schema has defined an `Array<string>` type, LLM often fills it just by a `string` typed value.
+
+Therefore, when developing an LLM function calling agent, the validation feedback process is essentially required. If LLM takes a type level mistake on arguments composition, the agent must feedback the most detailed validation errors, and let LLM to retry the function calling referencing the validation errors.
+
+About the validation feedback, `@wrtnlabs/autoview` is utilizing [`typia.validate<T>()`](https://typia.io/docs/validators/validate). It constructs validation logic by analyzing TypeScript source codes and types in the compilation level, so that detailed and accurate than any other validator libraries like below. Also, as `IWrtnAutoViewProps` has an extremely complicated union type, `typia` is the sole validator which can feedback the `IWrtnAutoViewProps` type.
+
+Such validation feedback strategy and combination with `typia` runtime validator, `@wrtnlabs/autoview` has achieved the most ideal LLM function calling for the frontend viewer component automation.
+
+Components               | `typia` | `TypeBox` | `ajv` | `io-ts` | `zod` | `C.V.`
+-------------------------|--------|-----------|-------|---------|-------|------------------
+**Easy to use**          | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ 
+[Object (simple)](https://github.com/samchon/typia/blob/master/test/src/structures/ObjectSimple.ts)          | ✔ | ✔ | ✔ | ✔ | ✔ | ✔
+[Object (hierarchical)](https://github.com/samchon/typia/blob/master/test/src/structures/ObjectHierarchical.ts)    | ✔ | ✔ | ✔ | ✔ | ✔ | ✔
+[Object (recursive)](https://github.com/samchon/typia/blob/master/test/src/structures/ObjectRecursive.ts)       | ✔ | ❌ | ✔ | ✔ | ✔ | ✔ | ✔
+[Object (union, implicit)](https://github.com/samchon/typia/blob/master/test/src/structures/ObjectUnionImplicit.ts) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+[Object (union, explicit)](https://github.com/samchon/typia/blob/master/test/src/structures/ObjectUnionExplicit.ts) | ✔ | ✔ | ✔ | ✔ | ✔ | ❌
+[Object (additional tags)](https://github.com/samchon/typia/#comment-tags)        | ✔ | ✔ | ✔ | ✔ | ✔ | ✔
+[Object (template literal types)](https://github.com/samchon/typia/blob/master/test/src/structures/TemplateUnion.ts) | ✔ | ✔ | ✔ | ❌ | ❌ | ❌
+[Object (dynamic properties)](https://github.com/samchon/typia/blob/master/test/src/structures/DynamicTemplate.ts) | ✔ | ✔ | ✔ | ❌ | ❌ | ❌
+[Array (rest tuple)](https://github.com/samchon/typia/blob/master/test/src/structures/TupleRestAtomic.ts) | ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+[Array (hierarchical)](https://github.com/samchon/typia/blob/master/test/src/structures/ArrayHierarchical.ts)     | ✔ | ✔ | ✔ | ✔ | ✔ | ✔
+[Array (recursive)](https://github.com/samchon/typia/blob/master/test/src/structures/ArrayRecursive.ts)        | ✔ | ✔ | ✔ | ✔ | ✔ | ❌
+[Array (recursive, union)](https://github.com/samchon/typia/blob/master/test/src/structures/ArrayRecursiveUnionExplicit.ts) | ✔ | ✔ | ❌ | ✔ | ✔ | ❌
+[Array (R+U, implicit)](https://github.com/samchon/typia/blob/master/test/src/structures/ArrayRecursiveUnionImplicit.ts)    | ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+[Array (repeated)](https://github.com/samchon/typia/blob/master/test/src/structures/ArrayRepeatedNullable.ts)    | ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+[Array (repeated, union)](https://github.com/samchon/typia/blob/master/test/structures/ArrayRepeatedUnionWithTuple.ts)    | ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+[**Ultimate Union Type**](https://github.com/samchon/typia/blob/master/src/schemas/IJsonSchema.ts)  | ✅ | ❌ | ❌ | ❌ | ❌ | ❌
+
+> `C.V.` means `class-validator`
+
+### Compilation Feedback
+As I've mentioned in the above section, LLM function calling is not perfect. Also, TypeScript code generation by AI agent is not perfect either. So compilation feedback strategy is required like runtime feedback case.
+
+For the compilation feedback, `@wrtnlabs/autoview` is embedding TypeScript compiler. When schema autoomation tool writes invalid TyypeScript code so that compilation error occurred, `@wrtnlabs/autoview` will correct the TypeScript code by delivering the compilation error messages to the schema automation tool.
+
+By the way, even though no compilation error occurred in the TypeScript code generation from the schema automation tool, may we say that there's no problem on the code? It may not. The runtime data can violate the `IWrtnAutoViewProps` type due to the domain restriction reasons. 
+
+To avoid this problem, `@wrtnlabs/autoview` generates target schema's data randomly using [`typia.random<T>()`](https://typia.io/docs/random) function. And transforms `IWrtnAutoViewProps` typed value from the newly created function, and validates it with [`typia.validate<IWrtnAutoViewProps>()`](https://typia.io/docs/validators/validate) function. If the newly generated schema data occurs runtime error in the transformation, or could not pass the validation, `@wrtnlabs/autoview` re-writes the TypeScript code with the runtime or type error feedback.
+
+Such compiler feedback strategy and combination with `typia`'s random data generator and runtime validator, `@wrtnlabs/autoview` has achieved the most ideal LLM function calling for the frontend viewer component automation.
 
 
 
