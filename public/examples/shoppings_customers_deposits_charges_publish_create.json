@@ -1,1 +1,95 @@
-{"function":{"method":"post","path":"/shoppings/customers/deposits/charges/{chargeId}/publish","name":"shoppings_customers_deposits_charges_publish_create","parameters":{"type":"object","properties":{"chargeId":{"description":" Target charge's {@link IShoppingDepositCharge.id }\n\n\n@format uuid","type":"string"},"body":{"type":"object","properties":{"vendor":{"type":"string"},"uid":{"type":"string"}},"required":["vendor","uid"]}},"additionalProperties":false,"required":["chargeId","body"],"$defs":{}},"output":{"type":"object","properties":{"id":{"description":"@format uuid","type":"string"},"created_at":{"description":"@format date-time","type":"string"},"paid_at":{"anyOf":[{"type":"null"},{"type":"string","description":"@format date-time"}]},"cancelled_at":{"anyOf":[{"type":"null"},{"type":"string","description":"@format date-time"}]}},"required":["id","created_at","paid_at","cancelled_at"]},"description":"Publish a charge.\n\n{@link IShoppingDepositChargePublish Publish} a\n{@link IShoppingDepositCharge charge} that has been applied by the\n{@link IShoppingCustomer} with payment information gotten from the\npayment vendor system.\n\nAlso, the payment time can be different with the publish time. For example,\nif the payment method is manual bank account transfer, then the payment\nwould be delayed until the customer actually transfer the money. In that\ncase, {@link IShoppingDepositChargePublish.paid_at} would be `null` value,\nso that you have to check it after calling this publish function.","tags":["Discount"]},"arguments":{"chargeId":"eb3b0312-0211-482e-9cff-e93a2986ecd4","body":{"vendor":"somewhere","uid":"1a3beb5f-1c2e-423d-9e09-761addc366e7"}},"value":{"id":"10ce18ca-26b6-4e11-9c03-f48a12c6cab7","created_at":"2025-02-11T07:20:42.825Z","paid_at":"2025-02-11T07:20:42.825Z","cancelled_at":null}}
+{
+  "function": {
+    "method": "post",
+    "path": "/shoppings/customers/deposits/charges/{chargeId}/publish",
+    "name": "shoppings_customers_deposits_charges_publish_create",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "chargeId": {
+          "description": " Target charge's {@link IShoppingDepositCharge.id }\n\n\n@format uuid",
+          "type": "string"
+        },
+        "body": {
+          "type": "object",
+          "properties": {
+            "vendor": {
+              "type": "string"
+            },
+            "uid": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "vendor",
+            "uid"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "chargeId",
+        "body"
+      ],
+      "$defs": { }
+    },
+    "output": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "@format uuid",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "@format date-time",
+          "type": "string"
+        },
+        "paid_at": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "description": "@format date-time"
+            }
+          ]
+        },
+        "cancelled_at": {
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "description": "@format date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "paid_at",
+        "cancelled_at"
+      ]
+    },
+    "description": "Publish a charge.\n\n{@link IShoppingDepositChargePublish Publish} a\n{@link IShoppingDepositCharge charge} that has been applied by the\n{@link IShoppingCustomer} with payment information gotten from the\npayment vendor system.\n\nAlso, the payment time can be different with the publish time. For example,\nif the payment method is manual bank account transfer, then the payment\nwould be delayed until the customer actually transfer the money. In that\ncase, {@link IShoppingDepositChargePublish.paid_at} would be `null` value,\nso that you have to check it after calling this publish function.",
+    "tags": [
+      "Discount"
+    ]
+  },
+  "arguments": {
+    "chargeId": "eb3b0312-0211-482e-9cff-e93a2986ecd4",
+    "body": {
+      "vendor": "somewhere",
+      "uid": "1a3beb5f-1c2e-423d-9e09-761addc366e7"
+    }
+  },
+  "value": {
+    "id": "10ce18ca-26b6-4e11-9c03-f48a12c6cab7",
+    "created_at": "2025-02-11T07:20:42.825Z",
+    "paid_at": "2025-02-11T07:20:42.825Z",
+    "cancelled_at": null
+  }
+}

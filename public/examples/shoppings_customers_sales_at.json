@@ -1,1 +1,2398 @@
-{"function":{"method":"get","path":"/shoppings/customers/sales/{id}","name":"shoppings_customers_sales_at","parameters":{"type":"object","properties":{"id":{"description":" Target sale's {@link IShoppingSale.id }\n\n\n@format uuid","type":"string"}},"additionalProperties":false,"required":["id"],"$defs":{"IShoppingChannelCategory.IInvert":{"description":"Invert category information with parent category.","type":"object","properties":{"parent":{"title":"Parent category info with recursive structure","description":"Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.","anyOf":[{"type":"null"},{"$ref":"#/$defs/IShoppingChannelCategory.IInvert"}]},"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"code":{"title":"Identifier code of the category","description":"Identifier code of the category.\n\nThe code must be unique in the channel.","type":"string"},"parent_id":{"title":"Parent category's ID","description":"Parent category's ID.","anyOf":[{"type":"null"},{"type":"string","description":"@format uuid"}]},"name":{"title":"Representative name of the category","description":"Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.","type":"string"},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\n\n@format date-time","type":"string"}},"required":["parent","id","code","parent_id","name","created_at"]}}},"output":{"description":"Seller sales products.\n\n`IShoppingSale` is an entity that embodies \"product sales\" (sales)\ninformation registered by the {@link ISoppingSeller seller}. And the main\ninformation of the sale is recorded in the sub {@link IShoppingSaleSnapshot},\nnot in the main `IShoppingSale`. When a seller changes a previously registered\nitem, the existing `IShoppingSale` record is not changed, but a new\n{@link IShoppingSaleSnapshot snapshot} record be created.\n\nThis is to preserve the {@link IShoppingCustomer customer}'s\n{@link IShoppingOrder purchase history} flawlessly after the customer\npurchases a specific item, even if the seller changes the components or\nprice of the item. It is also intended to support sellers in so-called A/B\ntesting, which involves changing components or prices and measuring the\nperformance in each case.","type":"object","properties":{"section":{"title":"Belonged section","description":"Section information.\n\n`IShoppingSection` is a concept that refers to the spatial information of\nthe market.\n\nIf we compare the section mentioned here to the offline market, it means a\nspatially separated area within the store, such as the \"fruit corner\" or\n\"butcher corner\". Therefore, in the {@link IShoppingSale sale} entity, it is\nnot possible to classify multiple sections simultaneously, but only one section\ncan be classified.\n\nBy the way, if your shopping mall system requires only one section, then just\nuse only one. This concept is designed to be expandable in the future.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"code":{"title":"Identifier code","description":"Identifier code.","type":"string"},"name":{"title":"Representative name of the section","description":"Representative name of the section.","type":"string"},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\n\n@format date-time","type":"string"}},"required":["id","code","name","created_at"]},"seller":{"title":"Seller who has registered the sale","description":"Invert information starting from seller info.\n\nInstead of accessing to the seller information from the\n{@link IShoppingCustomer.member} -> {@link IShoppingMember.seller},\n`IShoppingSeller.IInvert` starts from the seller information\nand access to the customer, member and {@link IShoppingCitizen citizen}\ninformation inversely.\n\n------------------------------\n\nDescription of the current {@link IShoppingSeller.IInvert} type:\n\n> Invert information starting from seller info.\n> \n> Instead of accessing to the seller information from the\n> {@link IShoppingCustomer.member} -> {@link IShoppingMember.seller},\n> `IShoppingSeller.IInvert` starts from the seller information\n> and access to the customer, member and {@link IShoppingCitizen citizen}\n> information inversely.\n\n------------------------------\n\nDescription of the parent {@link IShoppingSeller} type:\n\n> Seller information.\n> \n> `IShoppingSeller` is an entity that embodies a person who registers\n> {@link IShoppingSale sales} to operate selling activities, with\n> {@link IShoppingMember membership} joining.\n> \n> For reference, unlike {@link IShoppingCustomer customers} which can\n> participate even without membership joining, seller must join membership\n> to operate sales. Also, seller must do the\n> {@link IShoppingCitizen real-name and mobile authentication}, too.","type":"object","properties":{"type":{"title":"Discriminant for the type of seller","description":"Discriminant for the type of seller.","type":"string","enum":["seller"]},"member":{"title":"Membership joining information","description":"Invert information of member.\n\nThis invert member information has been designed to be used for another\ninvert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the current {@link IShoppingMember.IInvert} type:\n\n> Invert information of member.\n> \n> This invert member information has been designed to be used for another\n> invert information of sellers and administrators like below.\n> \n> - {@link IShoppingSeller.IInvert}\n> - {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the parent {@link IShoppingMember} type:\n\n> Member Account.\n> \n> `IShoppingMember` is an entity that symbolizes the case when a\n> {@link IShoppingCustomer} signs up as a member of this shopping mall\n> system.\n> \n> If a `IShoppingMember` has seller or administrator property. it means that\n> the {@link IShoppingCustomer} has acting as a {@link IShoppingSeller seller}\n> or {@link IShoppingAdministrator administrator} at the same time.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"nickname":{"title":"Nickname that uniquely identifies the member","description":"Nickname that uniquely identifies the member.","type":"string"},"emails":{"title":"List of emails","description":"List of emails.","type":"array","items":{"description":"Email address of member.\n\nThis shopping mall system allows multiple email addresses to be\nregistered for one {@link IShoppingMember member}. If you don't have to\nplan such multiple email addresses, just use only one.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"value":{"title":"Email address value","description":"Email address value.\n\n\n@format email","type":"string"},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\n\n@format date-time","type":"string"}},"required":["id","value","created_at"]}},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\nAnother words, the time when the member has signed up.\n\n\n@format date-time","type":"string"}},"required":["id","nickname","emails","created_at"]},"customer":{"title":"Customer, the connection information","description":"Inverted customer information.\n\nThis inverted customer information has been designed to be used for\nanother invert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the current {@link IShoppingCustomer.IInvert} type:\n\n> Inverted customer information.\n> \n> This inverted customer information has been designed to be used for\n> another invert information of sellers and administrators like below.\n> \n> - {@link IShoppingSeller.IInvert}\n> - {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the parent {@link IShoppingCustomer} type:\n\n> Customer information, but not a person but a connection basis.\n> \n> `IShoppingCustomer` is an entity that literally embodies the information of\n> those who participated in the market as customers. By the way, the\n> `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,\n> even if the same person connects to the shopping mall multiple, multiple\n> records are created in `IShoppingCustomer`.\n> \n> The first purpose of this is to track the customer's inflow path in detail,\n> and it is for cases where the same person enters as a non-member,\n> {@link IShoppingCartCommodity puts items in the shopping cart} in advance,\n> and only authenticates their {@link IShoppingCitizen real name} or\n> registers/logs in at the moment of {@link IShoppingOrderPublish payment}.\n> It is the second. Lastly, it is to accurately track the activities that\n> a person performs at the shopping mall in various ways like below.\n> \n> - Same person comes from an {@link IShoppingExternalUser external service}\n> - Same person creates multiple accounts\n> - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}\n> - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time\n> \n> Therefore, `IShoppingCustomer` can have multiple records with the same\n> {@link IShoppingCitizen}, {@link IShoppingMember}, and\n> {@link IShoppingExternalUser}. Additionally, if a customer signs up for\n> membership after verifying their real name or signs up for our service after\n> being a user of an external service, all related records are changed at once.\n> Therefore, identification and tracking of customers can be done very\n> systematically.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"channel":{"title":"Belonged channel","description":"Channel information.\n\n`IShoppingChannel` is a concept that shapes the distribution channel in the\nmarket. Therefore, the difference in the channel in this e-commerce system\nmeans that it is another site or application.\n\nBy the way, if your shopping mall system requires only one channel, then\njust use only one. This concept is designed to be expandable in the future.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\n\n@format date-time","type":"string"},"code":{"title":"Identifier code","description":"Identifier code.","type":"string"},"name":{"title":"Name of the channel","description":"Name of the channel.","type":"string"}},"required":["id","created_at","code","name"]},"external_user":{"title":"External user information","description":"External user information.\n\nWhen the customer has come from an external service.","anyOf":[{"type":"null"},{"type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"citizen":{"title":"Citizen activation info","description":"Citizen activation info.","anyOf":[{"type":"null"},{"type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\n\n@format date-time","type":"string"},"mobile":{"title":"Mobile number","description":"Mobile number.\n\n\n@pattern ^[0-9]*$","x-wrtn-payment-order-mobile":true,"type":"string"},"name":{"title":"Real name, or equivalent nickname","description":"Real name, or equivalent nickname.","x-wrtn-payment-order-citizen":true,"type":"string"}},"required":["id","created_at","mobile","name"],"description":"Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored."}]},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\nAnother word, first time when the external user connected.\n\n\n@format date-time","type":"string"},"uid":{"title":"Identifier key of external user from the external system","description":"Identifier key of external user from the external system.","type":"string"},"application":{"title":"Identifier code of the external service","description":"Identifier code of the external service.\n\nIt can be same with {@link IShoppingChannel.code} in common.","type":"string"},"nickname":{"title":"Nickname of external user in the external system","description":"Nickname of external user in the external system.","type":"string"},"data":{"description":"Additional information about external user from the external\nsystem."}},"required":["id","citizen","created_at","uid","application","nickname","data"],"description":"External user information.\n\n`IShoppingExternalUser` is an entity dsigned for when this system needs\nto connect with external services and welcome their users as\n{@link IShoppingCustomer customers} of this service.\n\nFor reference, customers who connect from an external service must have\nthis record, and the external service user is identified through the two\nattributes {@link application} and {@link uid}. If a customer connected\nfrom an external service completes\n{@link IShoppingCitizen real-name authentication} from this service, each\ntime the external service user reconnects to this service and issues a\nnew customer authentication token, real-name authentication begins with\ncompleted.\n\nAnd {@link password} is the password issued to the user by the external\nservice system (the so-called permanent user authentication token), and\nis never the actual user password. However, for customers who entered the\nsame application and uid as the current external system user, this is to\ndetermine whether to view this as a correct external system user or a\nviolation.\n\nIn addition, additional information received from external services can\nbe recorded in the data field in JSON format."}]},"href":{"title":"Connection address","description":"Connection address.\n\nSame with {@link window.location.href} of client.\n\n\n@format uri","type":"string"},"referrer":{"title":"Referrer address","description":"Referrer address.\n\nSame with {@link window.document.referrer} of client.","anyOf":[{"type":"null"},{"type":"string","description":"@format uri"},{"type":"string","description":"@maxLength 0"}]},"ip":{"title":"Connection IP Address","description":"Connection IP Address.","anyOf":[{"type":"string","description":"@format ipv4"},{"type":"string","description":"@format ipv6"}]},"created_at":{"title":"Creation time of the connection record","description":"Creation time of the connection record.\n\n\n@format date-time","type":"string"}},"required":["id","channel","external_user","href","referrer","ip","created_at"]},"citizen":{"title":"Real-name and mobile number authentication information","description":"Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"created_at":{"title":"Creation time of record","description":"Creation time of record.\n\n\n@format date-time","type":"string"},"mobile":{"title":"Mobile number","description":"Mobile number.\n\n\n@pattern ^[0-9]*$","x-wrtn-payment-order-mobile":true,"type":"string"},"name":{"title":"Real name, or equivalent nickname","description":"Real name, or equivalent nickname.","x-wrtn-payment-order-citizen":true,"type":"string"}},"required":["id","created_at","mobile","name"]},"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"created_at":{"title":"Creation tmie of record","description":"Creation tmie of record.\n\nAnother words, the time when the seller has signed up.\n\n\n@format date-time","type":"string"}},"required":["type","member","customer","citizen","id","created_at"]},"id":{"title":"Primary Key of Sale","description":"Primary Key of Sale.\n\n\n@format uuid","type":"string"},"snapshot_id":{"title":"Primary Key of Snapshot","description":"Primary Key of Snapshot.\n\n\n@format uuid","type":"string"},"latest":{"title":"Whether the snapshot is the latest one or not","description":"Whether the snapshot is the latest one or not.","type":"boolean"},"content":{"title":"Description and image content describing the sale","description":"Content information of sale snapshot.\n\n`IShoppingSaleContent` is an entity embodies the description contents\nof {@link IShoppingSale}.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"title":{"title":"Title of the content","description":"Title of the content.","type":"string"},"format":{"title":"Format of the body content","description":"Format of the body content.\n\nSame meaning with file extension like `html`, `md`, and `txt`.","type":"string","enum":["html","md","txt"]},"body":{"title":"The main body content","description":"The main body content.","type":"string"},"files":{"title":"List of attached files","description":"List of attached files.","type":"array","items":{"description":"Attachment File.\n\nEvery attachment files that are managed in current system.\n\nFor reference, it is possible to omit one of file {@link name}\nor {@link extension} like `.gitignore` or `README` case, but not\npossible to omit both of them.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"created_at":{"title":"Creation time of attachment file","description":"Creation time of attachment file.\n\n\n@format date-time","type":"string"},"name":{"title":"File name, except extension","description":"File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.\n\n\n@maxLength 255","type":"string"},"extension":{"title":"Extension","description":"Extension.\n\nPossible to omit like `README` case.","anyOf":[{"type":"null"},{"type":"string","description":"@minLength 1\n@maxLength 8"}]},"url":{"title":"URL path of the real file","description":"URL path of the real file.\n\n\n@format uri\n@contentMediaType image/*","type":"string"}},"required":["id","created_at","name","extension","url"]}},"thumbnails":{"title":"List of thumbnails","description":"List of thumbnails.","type":"array","items":{"description":"Attachment File.\n\nEvery attachment files that are managed in current system.\n\nFor reference, it is possible to omit one of file {@link name}\nor {@link extension} like `.gitignore` or `README` case, but not\npossible to omit both of them.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"created_at":{"title":"Creation time of attachment file","description":"Creation time of attachment file.\n\n\n@format date-time","type":"string"},"name":{"title":"File name, except extension","description":"File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.\n\n\n@maxLength 255","type":"string"},"extension":{"title":"Extension","description":"Extension.\n\nPossible to omit like `README` case.","anyOf":[{"type":"null"},{"type":"string","description":"@minLength 1\n@maxLength 8"}]},"url":{"title":"URL path of the real file","description":"URL path of the real file.\n\n\n@format uri\n@contentMediaType image/*","type":"string"}},"required":["id","created_at","name","extension","url"]}}},"required":["id","title","format","body","files","thumbnails"]},"categories":{"title":"List of categories","description":"List of categories.\n\nWhich categories the sale is registered to.","type":"array","items":{"$ref":"#/$defs/IShoppingChannelCategory.IInvert"}},"tags":{"title":"List of search tags","description":"List of search tags.","type":"array","items":{"type":"string"}},"units":{"title":"List of units","description":"List of units.\n\nRecords about individual product composition information that are sold\nin the sale. Each {@link IShoppingSaleUnit unit} record has configurable\n{@link IShoppingSaleUnitOption options},\n{@link IShoppingSaleUnitOptionCandidate candidate} values for each\noption, and {@link IShoppingSaleUnitStock final stocks} determined by\nselecting every candidate values of each option.\n\n\n@minItems 1","type":"array","items":{"description":"Product composition information handled in the sale.\n\n`IShoppingSaleUnit` is an entity that embodies the \"individual product\"\ninformation handled in the {@link IShoppingSale sale}.\n\nFor reference, the reason why `IShoppingSaleUnit` is separated from\n{@link IShoppingSaleSnapshot} by an algebraic relationship of 1: N is because\nthere are some cases where multiple products are sold in one listing. This is\nthe case with so-called \"bundled products\".\n\n- Bundle from regular product (Mackbook Set)\n  - Main Body\n  - Keyboard\n  - Mouse\n  - Apple Care (Free A/S Voucher)\n\nAnd again, `IShoppingSaleUnit` does not in itself refer to the\n{@link IShoppingSaleUnitStock final stock} that the\n{@link IShoppingCustomer customer} will {@link IShoppingOrder purchase}.\nThe final stock can be found only after selecting all given\n{@link IShoppingSaleUnitOption options} and their\n{@link IShoppingSaleUnitOptionCandidate candidate values}.\n\nFor example, even if you buy a Macbook, the final stocks are determined only\nafter selecting all the options (CPU / RAM / SSD), etc.","type":"object","properties":{"options":{"title":"List of options","description":"List of options.","type":"array","items":{"anyOf":[{"type":"object","properties":{"candidates":{"title":"List of candidate values","description":"List of candidate values.\n\n\n@minItems 1","type":"array","items":{"description":"Selectable candidate values within an option.\n\n`IShoppingSaleUnitOptionCandidate` is an entity that represents individual\ncandidate values that can be selected from\n{@link IShoppingSaleUnitSelectableOption options of the \"select\" type}.\n\n- Example\n  - RAM: 8GB, 16GB, 32GB\n  - GPU: RTX 3060, RTX 4080, TESLA\n  - License: Private, Commercial, Educatiion\n\nBy the way, if belonged option is not \"select\" type, this entity never\nbeing used.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"name":{"title":"Represents the name of the candidate value","description":"Represents the name of the candidate value.","type":"string"}},"required":["id","name"]}},"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"type":{"title":"Discriminant for the type of selectable option","description":"Discriminant for the type of selectable option.","type":"string","enum":["select"]},"name":{"title":"Represents the name of the option","description":"Represents the name of the option.","type":"string"},"variable":{"title":"Whether the option is variable or not","description":"Whether the option is variable or not.\n\nWhen type of current option is \"select\", this attribute means whether\nselecting different candidate value affects the final stock or not.","type":"boolean"}},"required":["candidates","id","type","name","variable"],"description":"Individual option information on units for sale.\n\n`IShoppingSaleUnitSelectableOption` is a subsidiary entity of\n{@link IShoppingSaleUnit} that represents individual products in the\n{@link IShoppingSale sale}, and is an entity designed to represent individual\nselectable option information for the unit.\n\n- Examples of Options\n  - selectable options\n    - Computer: CPU, RAM, SSD, etc.\n    - Clothes: size, color, style, etc.\n  - descriptive options\n    - Engrave\n    - Simple question\n\nIf the {@link variable} property value is `true`, the final stock that the\n{@link IShoppingCustomer customer} will purchase changes depending on the\nselection of the {@link IShoppingSaleUnitOptionCandidate candidate value}.\n\nConversely, if it is a type other than \"select\", or if the {@link variable}\nproperty value is \"false\", , this is an option that has no meaning beyond\nsimple information transfer. Therefore, no matter what value the customer\nchooses when purchasing it, the option in this case does not affect the\n{@link IShoppingSaleUnitStock final stock}."},{"type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"type":{"title":"Type of descriptive option","description":"Type of descriptive option.\n\nWhich typed value should be written when purchasing.","type":"string","enum":["string","number","boolean"]},"name":{"title":"Readable name of the option","description":"Readable name of the option.","type":"string"}},"required":["id","type","name"],"description":"Descriptive option.\n\nWhen type of the option not `\"select\"`, it means the option is descriptive\nthat requiring {@link IShoppingCustomer customers} to write some value to\n{@link IShoppingOrder purchase}. Also, whatever customer writes about the\noption, it does not affect the {@link IShoppingSaleUnitStock final stock}.\n\nAnother words, the descriptive option is just for information transfer."}]}},"stocks":{"title":"List of final stocks","description":"List of final stocks.\n\n\n@minItems 1","type":"array","items":{"description":"Final component information on units for sale.\n\n`IShoppingSaleUnitStock` is a subsidiary entity of {@link IShoppingSaleUnit}\nthat represents a product catalog for sale, and is a kind of final stock that is\nconstructed by selecting all {@link IShoppingSaleUnitSelectableOption options}\n(variable \"select\" type) and their\n{@link IShoppingSaleUnitOptionCandidate candidate} values in the belonging unit.\nIt is the \"good\" itself that customers actually purchase.\n\n- Product Name) MacBook\n  - Options\n    - CPU: { i3, i5, i7, i9 }\n    - RAM: { 8GB, 16GB, 32GB, 64GB, 96GB }\n    - SSD: { 256GB, 512GB, 1TB }\n  - Number of final stocks: 4 * 5 * 3 = 60\n\nFor reference, the total number of `IShoppingSaleUnitStock` records in an\nattribution unit can be obtained using Cartesian Product. In other words, the\nvalue obtained by multiplying all the candidate values that each\n(variable \"select\" type) option can have by the number of cases is the total\nnumber of final stocks in the unit.\n\nOf course, without a single variable \"select\" type option, the final stocks\ncount in the unit is only 1.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"name":{"title":"Representative name of the stock","description":"Representative name of the stock.","type":"string"},"price":{"title":"Price of the stock","description":"Shopping price interface.","type":"object","properties":{"nominal":{"title":"Nominal price","description":"Nominal price.\n\nThis is not {@link real real price} to pay, but just a nominal price to show.\nIf this value is greater than the {@link real real price}, it would be shown\nlike {@link IShoppingSeller seller} is giving a discount.\n\n\n@minimum 0","type":"number"},"real":{"title":"Real price to pay","description":"Real price to pay.\n\n\n@minimum 0","type":"number"}},"required":["nominal","real"]},"inventory":{"title":"Current inventory status of the stock","description":"Inventory information of a final stock.","type":"object","properties":{"income":{"title":"Total income quantity","description":"Total income quantity.","type":"integer"},"outcome":{"title":"Total outcome quantity","description":"Total outcome quantity.","type":"integer"}},"required":["income","outcome"]},"choices":{"title":"List of choices","description":"List of choices.\n\nWhich candidate values being chosen for each option.","type":"array","items":{"description":"Selection information of final stock.\n\n`IShoppingSaleUnitStockChoice` is an entity that represents which\n{@link IShoppingSaleUnitSelectableOption option} of each variable \"select\"\ntype was selected for each {@link IShoppingSaleUnitStock stock} and which\n{@link IShoppingSaleUnitOptionCandidate candidate value} was selected within\nit.\n\nOf course, if the bound {@link IShoppingSaleUnit unit} does not have any\noptions, this entity can also be ignored.","type":"object","properties":{"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"option_id":{"description":"Target option's {@link IShoppingSaleUnitOption.id}\n\n\n@format uuid","type":"string"},"candidate_id":{"description":"Target candidate's {@link IShoppingSaleUnitOptionCandidate.id}\n\n\n@format uuid","type":"string"}},"required":["id","option_id","candidate_id"]}}},"required":["id","name","price","inventory","choices"]}},"id":{"title":"Primary Key","description":"Primary Key.\n\n\n@format uuid","type":"string"},"name":{"title":"Representative name of the unit","description":"Representative name of the unit.","type":"string"},"primary":{"title":"Whether the unit is primary or not","description":"Whether the unit is primary or not.\n\nJust a labeling value.","type":"boolean"},"required":{"title":"Whether the unit is required or not","description":"Whether the unit is required or not.\n\nWhen the unit is required, the customer must select the unit. If do not\nselect, customer can't buy it.\n\nFor example, if there's a sale \"Macbook Set\" and one of the unit is the\n\"Main Body\", is it possible to buy the \"Macbook Set\" without the\n\"Main Body\" unit? This property is for that case.","type":"boolean"}},"required":["options","stocks","id","name","primary","required"]}},"created_at":{"title":"Creation time of the record","description":"Creation time of the record.\n\nNote that, this property is different with {@link opened_at},\nwhich means the timepoint of the sale is opened.\n\n\n@format date-time","type":"string"},"updated_at":{"title":"Last updated time of the record","description":"Last updated time of the record.\n\nIn another words, creation time of the last snapshot.\n\n\n@format date-time","type":"string"},"paused_at":{"title":"Paused time of the sale","description":"Paused time of the sale.\n\nThe sale is paused by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} can still see the sale on the\nboth list and detail pages, but the sale has a warning label\n\"The sale is paused by the seller\".","anyOf":[{"type":"null"},{"type":"string","description":"@format date-time"}]},"suspended_at":{"title":"Suspended time of the sale","description":"Suspended time of the sale.\n\nThe sale is suspended by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} cannot see the sale on the\nboth list and detail pages. It is almost same with soft delettion,\nbut there's a little bit difference that the owner\n{@link IShoppingSeller seller} can still see the sale and resume it.\n\nOf course, the {@link IShoppingCustomer customers} who have\nalready purchased the sale can still see the sale on the\n{@link IShoppingOrder order} page.","anyOf":[{"type":"null"},{"type":"string","description":"@format date-time"}]},"opened_at":{"title":"Opening time of the sale","description":"Opening time of the sale.","anyOf":[{"type":"null"},{"type":"string","description":"@format date-time"}]},"closed_at":{"title":"Closing time of the sale","description":"Closing time of the sale.\n\nIf this value is `null`, the sale be continued forever.","anyOf":[{"type":"null"},{"type":"string","description":"@format date-time"}]}},"required":["section","seller","id","snapshot_id","latest","content","categories","tags","units","created_at","updated_at","paused_at","suspended_at","opened_at","closed_at"]},"description":"Get a sale with detailed information.\n\nGet a {@link IShoppingSale sale} with detailed information including\nthe SKU (Stock Keeping Unit) information represented by the\n{@link IShoppingSaleUnitOption} and {@link IShoppingSaleUnitStock} types.\n\n> If you're an A.I. chatbot, and the user wants to buy or compose a\n> {@link IShoppingCartCommodity shopping cart} from a sale, please call\n> this operation at least once to the target sale to get detailed SKU\n> information about the sale.\n>\n> It needs to be run at least once for the next steps. In other words,\n> if you A.I. agent has called this operation to a specific sale, you\n> don't need to call this operation again for the same sale.\n>\n> Additionally, please do not summarize the SKU information. Just show\n> the every options and stocks in the sale with detailed information.","tags":["Sale"]},"arguments":{"id":"19ec1620-4c23-4029-9827-bcfc943a37be"},"value":{"section":{"id":"2ddcc9ca-49c0-4497-88f4-0a544380bab3","code":"general","name":"General","created_at":"2025-02-11T07:20:37.245Z"},"seller":{"type":"seller","member":{"id":"02d170ce-0520-43f2-88a5-93262df6a785","nickname":"Robot","emails":[{"id":"e77997f6-ee81-4a82-a887-37a29e7abae3","value":"robot@nestia.io","created_at":"2025-02-11T07:20:37.344Z"}],"created_at":"2025-02-11T07:20:37.344Z"},"customer":{"id":"fa2aedf1-12ea-4b8e-8641-50fa85eb585a","channel":{"id":"91ad02ac-b297-4f83-96ac-4224f11b976f","created_at":"2025-02-11T07:20:37.082Z","code":"samchon","name":"Samchon Shopping Mall"},"external_user":null,"href":"http://127.0.0.1/TestAutomation","referrer":"http://127.0.0.1/NodeJS","ip":"127.0.0.1","created_at":"2025-02-11T07:20:37.373Z"},"citizen":{"id":"6e6e1002-fc54-4002-9b30-d5c9ee216d6a","created_at":"2025-02-11T07:20:37.276Z","mobile":"01012345678","name":"Robot"},"id":"7807ed28-9873-407d-a6df-c72ec85b0771","created_at":"2025-02-11T07:20:37.358Z"},"id":"19ec1620-4c23-4029-9827-bcfc943a37be","snapshot_id":"f67c3cd7-59d8-444e-8ac1-ea8c1e175055","latest":true,"content":{"id":"b1c324ce-58f2-4bf5-a6ca-5267abd6ce19","title":"Apple MacBook Pro","format":"md","body":"MacBook Pro\n\n**The Ultimate Tool for Professionals**\n\nMacBook Pro is designed to elevate your creativity and productivity to new heights. Combining exceptional performance, elegant design, and the unparalleled experience only Apple can deliver, this is the device that empowers you to tackle any challenge with confidence.\n\n- **Remarkable Performance**\n    \n    Powered by the next-generation chip, it handles demanding tasks and complex projects effortlessly, delivering unmatched speed and efficiency.\n    \n- **Outstanding Display**\n    \n    The Retina display offers rich colors and sharp contrast, creating an immersive visual experience. With ProMotion technology, enjoy smooth scrolling and fluid animations like never before.\n    \n- **All-Day Battery Life**\n    \n    Stay focused and in the flow wherever you go with a battery that lasts all day. This is a laptop that works as hard as you do.\n    \n- **Sleek Yet Powerful Design**\n    \n    A precision aluminum body that’s lightweight yet durable, paired with a minimalist design that stands out on your desk and on the go.\n    \n- **Smart Connectivity**\n    \n    Versatile ports for high-speed data transfer and seamless compatibility ensure you're ready for any work environment.\n    \nWith MacBook Pro, your potential knows no bounds. **It’s time to rediscover what you’re capable of.**\n","files":[{"id":"ce245179-fc53-437d-bfbd-f9a10e6bf536","created_at":"2025-02-11T07:20:37.527Z","name":"apple-macbook-pro-thumbnail","extension":"png","url":"https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spaceblack-gallery1-202410?wid=4000&hei=3074&fmt=jpeg&qlt=90&.v=1729264981617"}],"thumbnails":[{"id":"e45ebd8c-eedb-4ebb-8bf0-24f926596061","created_at":"2025-02-11T07:20:37.526Z","name":"apple-macbook-pro-thumbnail","extension":"png","url":"https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spaceblack-gallery1-202410?wid=4000&hei=3074&fmt=jpeg&qlt=90&.v=1729264981617"}]},"categories":[{"parent":null,"id":"4a850a9c-7a0d-4856-8d4b-758a731d556e","code":"electronics","parent_id":null,"name":"Electronics","created_at":"2025-02-11T07:20:37.092Z"},{"parent":{"parent":{"parent":null,"id":"4a850a9c-7a0d-4856-8d4b-758a731d556e","code":"electronics","parent_id":null,"name":"Electronics","created_at":"2025-02-11T07:20:37.092Z"},"id":"173fb7bd-084f-4b79-8157-5c72b9e61c7e","code":"laptops","parent_id":"4a850a9c-7a0d-4856-8d4b-758a731d556e","name":"Laptops","created_at":"2025-02-11T07:20:37.115Z"},"id":"41cae023-c0bb-4a08-a753-433a4b2ea81b","code":"macbooks","parent_id":"173fb7bd-084f-4b79-8157-5c72b9e61c7e","name":"MacBooks","created_at":"2025-02-11T07:20:37.130Z"}],"tags":[],"units":[{"options":[{"candidates":[{"id":"36e68c35-7cdf-4984-81cf-93075c4046fc","name":"Silver"},{"id":"ee451462-01c2-45ae-8707-7e70b9045cf4","name":"Space Gray"}],"id":"d1539434-9aab-4ab0-84f8-407848f8d15a","type":"select","name":"Color","variable":true},{"candidates":[{"id":"47d5c570-3ea7-49f3-8420-cb16ba807417","name":"16GB"},{"id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04","name":"32GB"},{"id":"50310274-d13f-40c1-b896-953cb600f6c3","name":"64GB"}],"id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","type":"select","name":"RAM","variable":true},{"candidates":[{"id":"f7790027-061e-46b6-b4fe-7d2917947d61","name":"512GB"},{"id":"c7835751-d5ab-42c3-bf2e-9007fe98b823","name":"1TB"},{"id":"308cd17e-c164-4d48-b6fa-febc97648a65","name":"2TB"}],"id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","type":"select","name":"SSD","variable":true},{"candidates":[{"id":"3690b079-92f0-42a9-93f7-66a919fe3050","name":"English"},{"id":"31d2206d-a31b-4e56-aad2-597f95fda30e","name":"Korean"}],"id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","type":"select","name":"Keyboard Language","variable":true}],"stocks":[{"id":"ca4c9ab0-7497-4ad2-a761-ce88a922cc58","name":"MacBook Pro (Silver, 16GB, 512GB, English)","price":{"nominal":2000000,"real":1800000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"2b671595-103a-4535-be66-ae28ffcb5fbd","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"69caf097-6b61-4595-8f73-0de262f1fb16","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"40969b82-3b1c-4f8a-8085-d0e009f68545","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"d016eb1b-0b79-48d5-9f07-c317f9f8ef3c","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"019c55fb-1eda-4f2f-8eb2-5258e275c798","name":"MacBook Pro (Silver, 16GB, 512GB, Korean)","price":{"nominal":2000000,"real":1800000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"f18c0aef-5e17-44c0-a77f-e6049a5380cb","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"43618c22-ad34-4c4b-a2f6-3f6cee845d3d","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"84fe08a8-2ef9-4f1a-a466-57623416d8b2","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"9aba97c4-96b3-4683-8022-8f1c81fd0061","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"e086a73f-015e-414b-97a2-b6925277e816","name":"MacBook Pro (Silver, 16GB, 1TB, English)","price":{"nominal":2300000,"real":2070000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"f024b12d-4aad-4cc6-94d9-62ea2c08e926","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"52fffd9b-a2f5-4a84-8600-e9903c5074a3","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"3439b38a-4126-4d1f-a336-684970cc9124","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"ba81cdd8-bb53-4db1-aa99-6b9646e508a1","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"b500f4e1-34a8-4832-918a-6d2c697524de","name":"MacBook Pro (Silver, 16GB, 1TB, Korean)","price":{"nominal":2300000,"real":2070000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"85bebf76-9250-43dd-96bb-93350426a6e5","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"af0aae03-3330-4cf3-bf7d-334bc127fbb2","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"34dd1a4d-7dd2-4223-8897-5ad16a19731d","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"7b48f21f-5490-4120-b3f1-a4e545c03458","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"83bd981c-06ed-4fa3-acaa-8c0eff68db4c","name":"MacBook Pro (Silver, 16GB, 2TB, English)","price":{"nominal":2900000,"real":2610000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"738a56ed-da48-47e3-93e9-142cb386af55","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"024ab3bc-63e2-4b2b-9875-4c702b4ed6c8","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"846f072b-9fa2-411e-a56a-35938854f751","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"8edcd7ee-0380-4efd-9ec1-30f6fa10e323","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"edd4ead3-5c6f-4639-b07b-3075bc3291cc","name":"MacBook Pro (Silver, 16GB, 2TB, Korean)","price":{"nominal":2900000,"real":2610000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"da024337-4e5d-4666-83e3-53ab2dd5a73f","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"a3d659ae-3d54-4410-a0ca-77e9a147e99f","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"427cc009-a9df-4f8c-a8c0-fa0d0b255488","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"ff392094-3830-48ac-adb1-c0110c1af747","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"b0044321-3be9-406a-aa15-ae04d6b73891","name":"MacBook Pro (Silver, 32GB, 512GB, English)","price":{"nominal":2600000,"real":2340000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"0165bd29-f102-439a-8e9b-dd5916af7cfd","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"6e53f214-dacc-4794-b991-ee80066ffd2f","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"671e249e-c58d-4edc-b86e-5bbbe10ac538","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"14e1f320-0fd0-47da-a0c4-85fa87104094","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"4c60e12d-4fa0-4b79-8e9d-870f40ab25c7","name":"MacBook Pro (Silver, 32GB, 512GB, Korean)","price":{"nominal":2600000,"real":2340000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"485271d8-7c79-410b-9150-c39ba741b863","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"86e97f1c-5042-49bf-be51-7f7e7e75dd5d","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"db1d5113-73c8-4a8a-9683-8e9b0ebd41b9","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"e14d7bf9-02c5-4046-9e12-4c1d55451500","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"a7077d63-ed4d-49f3-96c6-dfcdf7eabc6c","name":"MacBook Pro (Silver, 32GB, 1TB, English)","price":{"nominal":2900000,"real":2610000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"fa51bc82-4a40-46ba-8ea4-992df70f464d","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"2038ed2c-b07e-4b53-955b-e60af50eb703","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"2deefcaf-87ab-4bf0-9a01-c768491e8338","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"10e78d4e-1f1c-466c-8924-48a464be34f6","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"838342e8-0b06-445b-842d-ebd4dfa97f9a","name":"MacBook Pro (Silver, 32GB, 1TB, Korean)","price":{"nominal":2900000,"real":2610000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"0124156c-9a1d-4765-8699-016e3e492ffa","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"75348d93-6833-443f-b2d6-44c63556eaa0","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"ed9cb7eb-2d77-4726-9295-cdd26220a2f4","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"f6039359-be4c-47db-8120-c778ca23b0ef","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"d8a838cb-dde3-43e0-b97b-9cfa425884e9","name":"MacBook Pro (Silver, 32GB, 2TB, English)","price":{"nominal":3500000,"real":3150000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"7b62a3c7-707b-4d2e-b6c9-cdd646d40f22","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"24f5240a-5557-4aeb-b7bc-16fd15f16fe6","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"b038768a-51c5-4937-be8f-5b63e2025b78","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"bf5a9ef9-497b-456a-9613-eac6bd1db22a","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"3b1804cd-0afc-42a6-9f16-205592bb1bd1","name":"MacBook Pro (Silver, 32GB, 2TB, Korean)","price":{"nominal":3500000,"real":3150000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"c6f583f0-06db-4c14-b96f-f84f26bcf7e8","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"3b5a7901-f854-46cd-af90-2d92a570b42b","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"98fad9ac-620b-4b17-b4b2-1e3050efc4be","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"f0128a5c-d1d0-48f3-9361-6067a739134b","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"17c45b33-20e5-44ae-9a07-a6d6d46f1f7f","name":"MacBook Pro (Silver, 64GB, 512GB, English)","price":{"nominal":3200000,"real":2880000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"c380a6bd-61f7-4581-951b-8f9668885d0a","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"62c7c999-12ca-4a51-9b7f-66b5adc93c17","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"272b4e79-a463-4c15-bdbf-32f344346434","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"0a301c18-6d9f-4fd6-ab9c-c92a0bd52f04","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"b9da3665-7fef-4923-8923-eb59f93d9fcf","name":"MacBook Pro (Silver, 64GB, 512GB, Korean)","price":{"nominal":3200000,"real":2880000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"e42f12d1-2db8-4297-9ece-39874bb5b2a0","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"3bd5db88-b932-41ea-87a6-d011e8791684","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"a5bfd14a-2826-4e00-9b67-19cc1bad8dc0","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"78a4f533-9c38-4d1f-b2a1-0df88bf1a0d7","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"87d615e3-abd5-4156-a444-75b9f3146fbc","name":"MacBook Pro (Silver, 64GB, 1TB, English)","price":{"nominal":3500000,"real":3150000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"0c7d1aaf-3d26-4979-9b08-c3cfad2c5c42","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"6296b1ee-2a76-44ba-b284-d2298304f34c","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"c1c5583e-db4c-4cd4-93c7-f9a451f96334","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"ab8edff6-711d-4930-954c-9a610dfb4694","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"d2b66dc3-7198-4ba6-868f-83fc9a2637e5","name":"MacBook Pro (Silver, 64GB, 1TB, Korean)","price":{"nominal":3500000,"real":3150000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"00ae2ec7-6d4b-4501-adc8-13d509e80440","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"7f9239bd-66ab-487e-9579-d7465628206c","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"aaef559c-c463-4cf6-8d51-c1a3eca15e32","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"798a10d4-b52b-4bc1-a3f2-e84b3b0a7f35","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"d95b15cf-1f2d-4292-9692-51b4dc02fcc7","name":"MacBook Pro (Silver, 64GB, 2TB, English)","price":{"nominal":4100000,"real":3690000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"1b9e6ee3-efa8-488b-b63c-b8c2fb9eadf6","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"e1b5b16d-fa4c-44a9-a7c5-e3e112f730d7","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"9341a946-e76e-4ca3-a86a-5140262aef20","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"eb4ae534-6b0a-4bb8-8070-7bbc8534abe6","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"ecc2ca6c-68e6-4b46-9b7a-15411ed752e3","name":"MacBook Pro (Silver, 64GB, 2TB, Korean)","price":{"nominal":4100000,"real":3690000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"545d4ce3-ffd7-45c1-8d02-5a9e25205e9e","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"36e68c35-7cdf-4984-81cf-93075c4046fc"},{"id":"30941181-c371-47f3-8a08-a79da6e3d998","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"62c8fb04-39b1-4fee-a3e2-5fc2b432eee3","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"87006e83-d1eb-4c49-919a-558f512ae049","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"09a65389-30b2-4dd2-923a-c0a22db39093","name":"MacBook Pro (Space Gray, 16GB, 512GB, English)","price":{"nominal":2050000,"real":1845000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"fdb58d41-2357-4312-aa77-6539f9e04892","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"952c5276-0800-41a4-b198-8f104ccc6919","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"3699fcf2-2219-466f-a6f1-0a739e5c5955","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"6ad4361f-0e1e-40d6-b889-c143ec5eb1b9","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"936bde73-eb08-4a2b-9e9d-f684526f142a","name":"MacBook Pro (Space Gray, 16GB, 512GB, Korean)","price":{"nominal":2050000,"real":1845000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"46c2aac2-19de-4c06-8d8a-ac31d5d3bf7c","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"11c89bb4-3ca0-4317-8db3-0f9b6ece1486","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"4c4b659a-3b85-42ad-9da3-295cafddc0fb","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"beb3f6ee-3e05-4f95-973f-05176b66d9da","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"ef071326-81e1-4fdb-aa93-1c9ada43ec70","name":"MacBook Pro (Space Gray, 16GB, 1TB, English)","price":{"nominal":2350000,"real":2115000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"e1315a6b-7d85-4688-8d88-7017c288e552","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"698c9221-7106-4df3-962f-678cb1fc42d6","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"19441374-31a9-442b-8922-90d29d9887ee","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"1cce75d9-e43a-4f02-8542-c37e60204282","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"8055ca9c-f76e-4e24-9d57-853cdf0af995","name":"MacBook Pro (Space Gray, 16GB, 1TB, Korean)","price":{"nominal":2350000,"real":2115000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"6d01fb08-de2f-41c4-a3ba-091f83e14469","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"63de1ff0-647d-4331-8737-75e32e54c9d2","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"0f8e7a69-016f-4ea4-91c9-8220ba61315a","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"12c5ba5d-1501-4bcb-818c-6ef8b3db065e","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"f3c53029-80cd-4acb-8141-fb1960fe337e","name":"MacBook Pro (Space Gray, 16GB, 2TB, English)","price":{"nominal":2950000,"real":2655000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"e01d477c-ac8e-4348-b96c-4493e9719530","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"29ce12d9-2aa8-4b3c-bfb8-11ec719a71f3","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"4653f365-d3e8-40c5-95f3-224c244f8f19","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"90feb402-cd2b-46c1-92b3-5afb01dc8ab5","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"19fceb4a-9ed8-4231-8917-c690f21780df","name":"MacBook Pro (Space Gray, 16GB, 2TB, Korean)","price":{"nominal":2950000,"real":2655000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"884a292a-7ad6-4e74-9485-5f438463fc3e","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"03155157-2501-46fc-94d1-efd7e2d32ae8","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"47d5c570-3ea7-49f3-8420-cb16ba807417"},{"id":"5a3b9de9-85bd-43ab-9228-fcffca6a903f","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"7372e773-5b94-401b-a0f6-10ff8fc39eca","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"9ab6846d-fbba-4d97-8e82-01ae2754ad64","name":"MacBook Pro (Space Gray, 32GB, 512GB, English)","price":{"nominal":2650000,"real":2385000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"7c960b77-8a38-4b0d-b23c-f418b2bb66b7","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"57ba083a-e37b-4be5-80a9-c22edc90b791","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"3bd3566d-98eb-4a6b-9503-98e9422eddd1","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"70e376d1-9ad1-45f9-9772-e51b75ac6d82","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"654448b7-6165-40e0-b775-0a7b9b63fe86","name":"MacBook Pro (Space Gray, 32GB, 512GB, Korean)","price":{"nominal":2650000,"real":2385000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"cd2ebd1a-4896-4f8b-aa4e-f9ca2ded6fda","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"2c492aa9-6ad5-4cb7-9a93-7d6734150704","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"88382db7-46b1-4791-8d38-e94429b4356b","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"eedd3193-390f-43dd-9dfd-561605f91fa4","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"7993caf7-5141-42bc-8ea9-dea276d22278","name":"MacBook Pro (Space Gray, 32GB, 1TB, English)","price":{"nominal":2950000,"real":2655000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"236c3c71-4667-4586-b2c8-5d3938da5fae","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"eefea466-ebe4-49c4-976c-359a05e1e1c8","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"a7e4a26d-0bd6-49ac-8026-abe714807bf3","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"1b97d8f8-8786-4e90-acfe-ca0c67e3d9fd","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"5dbfbceb-6352-4c76-adc7-68669cb11349","name":"MacBook Pro (Space Gray, 32GB, 1TB, Korean)","price":{"nominal":2950000,"real":2655000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"1b557598-e782-4d78-add5-aff622c5fe4a","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"1c7bccbd-ad2e-4d8a-bc3d-8aa087c323a1","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"2ae85c85-da5e-4fc3-a2dc-887a57e25a68","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"6df45e5b-ef3c-4b9c-bc21-0b94289405aa","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"00558521-f1fa-4d56-8de5-1433c35e2a06","name":"MacBook Pro (Space Gray, 32GB, 2TB, English)","price":{"nominal":3550000,"real":3195000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"8800252a-d534-41e2-88e1-36bc0ec0386a","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"dc2f5d7c-2204-4a41-b83d-fe659c6532cb","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"97788b1f-d446-40bf-9d08-e8bbb183efe0","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"a8bd864f-a228-4d01-9145-8818ac7acb70","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"e736af0d-f9fe-464c-b6a3-50558dc0d929","name":"MacBook Pro (Space Gray, 32GB, 2TB, Korean)","price":{"nominal":3550000,"real":3195000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"0422160a-d078-4dca-b357-ac56825708e8","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"35fed157-821e-42a5-9983-1bb0bdff1482","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"},{"id":"24228674-d7b8-47ec-8a71-133b2e9b0a9a","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"85a2a5c7-1015-40a6-94e9-db2106a97de5","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"4bc53188-dbee-432d-91ec-07a59287e45d","name":"MacBook Pro (Space Gray, 64GB, 512GB, English)","price":{"nominal":3250000,"real":2925000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"a6159de8-5c23-4269-b447-d2a3c83658d1","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"0c782f10-25c3-4114-b995-00e0994f417b","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"5d24cf09-3edc-4e7e-be22-18e9e216081d","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"d0f2d946-d94a-4079-822f-64df132d0eda","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"5aa07647-7956-48b6-b5fb-fe7886d21a7e","name":"MacBook Pro (Space Gray, 64GB, 512GB, Korean)","price":{"nominal":3250000,"real":2925000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"1d17f548-405d-4337-9544-d1a455d536f7","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"dd7e2250-caf4-44a1-92bd-9ee7a8227073","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"77b515e0-0130-424e-b071-2e477c89ccc8","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"f7790027-061e-46b6-b4fe-7d2917947d61"},{"id":"827d4d99-ea27-4b86-aad6-40446ff52628","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"0305162e-5bc2-4638-8893-e096786e3ef1","name":"MacBook Pro (Space Gray, 64GB, 1TB, English)","price":{"nominal":3550000,"real":3195000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"a326ff1c-fe61-4a58-b193-131224b48b8d","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"be1e8eca-a51b-484b-a04d-9cbe34bc5958","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"66c0bf2c-39e3-4862-956f-808892d8b3a7","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"559c5942-be8b-4801-9ac6-11b9c220efff","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"5d3bc3c8-9579-493c-846a-e16ae42aad27","name":"MacBook Pro (Space Gray, 64GB, 1TB, Korean)","price":{"nominal":3550000,"real":3195000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"f8e97dac-c2e7-4d08-898f-93022c628d3e","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"16bb12bd-cf21-4eeb-9756-9a61674831b8","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"a3ec34b9-8145-4987-a6f3-81ef94061f93","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"c7835751-d5ab-42c3-bf2e-9007fe98b823"},{"id":"27a05e44-6175-4a88-880f-2d163ec786f4","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]},{"id":"204c5d1d-2ec3-4d99-a6c5-6f0b664d751c","name":"MacBook Pro (Space Gray, 64GB, 2TB, English)","price":{"nominal":4150000,"real":3735000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"a170418a-1ffa-42ca-80b0-8046b4fae701","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"5b938013-9b1b-4822-9b55-48508f6fc94e","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"251af592-e8ae-434c-bda9-1aad954e4f1e","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"f4cb7b0c-f91c-4ac2-b854-e741a83bd013","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"3690b079-92f0-42a9-93f7-66a919fe3050"}]},{"id":"f537f446-31d3-4341-9a12-12d021fccb6c","name":"MacBook Pro (Space Gray, 64GB, 2TB, Korean)","price":{"nominal":4150000,"real":3735000},"inventory":{"income":1000000,"outcome":0},"choices":[{"id":"d69a3baa-3823-4637-83a8-7c1a1e364e4f","option_id":"d1539434-9aab-4ab0-84f8-407848f8d15a","candidate_id":"ee451462-01c2-45ae-8707-7e70b9045cf4"},{"id":"47005624-a510-4959-a2bf-8e00efcbafe2","option_id":"bdfa6eb1-3ed0-4aab-b173-8efe2543ef12","candidate_id":"50310274-d13f-40c1-b896-953cb600f6c3"},{"id":"37ad53b3-be34-4000-8ede-7fee16ad0c2a","option_id":"6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5","candidate_id":"308cd17e-c164-4d48-b6fa-febc97648a65"},{"id":"3b582883-458c-4e0a-b2e6-3787c7ecf6bb","option_id":"a54e3f16-7df2-4ef6-938d-334320e6abbe","candidate_id":"31d2206d-a31b-4e56-aad2-597f95fda30e"}]}],"id":"f41f94c7-2071-48ce-97dc-67ffc1d581c9","name":"MacBook M3 Pro 14inch Entity","primary":false,"required":true},{"options":[],"stocks":[{"id":"80191d27-a2ea-4ec8-8960-0e5e637e22e7","name":"Warranty Program","price":{"nominal":100000,"real":89000},"inventory":{"income":1000000,"outcome":0},"choices":[]}],"id":"5789f39f-b01a-46ff-bd6a-e5ac73d55802","name":"Warranty Program","primary":false,"required":false},{"options":[],"stocks":[{"id":"983099f8-9b10-4c98-a27a-f7890d00d697","name":"Magnetic Keyboard","price":{"nominal":200000,"real":169000},"inventory":{"income":1000000,"outcome":0},"choices":[]}],"id":"263d5e4d-1485-422b-97dd-153418cf3af5","name":"Magnetic Keyboard","primary":false,"required":false}],"created_at":"2025-02-11T07:20:37.527Z","updated_at":"2025-02-11T07:20:37.527Z","paused_at":null,"suspended_at":null,"opened_at":"2025-02-11T07:20:37.525Z","closed_at":null}}
+{
+  "function": {
+    "method": "get",
+    "path": "/shoppings/customers/sales/{id}",
+    "name": "shoppings_customers_sales_at",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": " Target sale's {@link IShoppingSale.id }\n\n\n@format uuid",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id"
+      ],
+      "$defs": {
+        "IShoppingChannelCategory.IInvert": {
+          "description": "Invert category information with parent category.",
+          "type": "object",
+          "properties": {
+            "parent": {
+              "title": "Parent category info with recursive structure",
+              "description": "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+                }
+              ]
+            },
+            "id": {
+              "title": "Primary Key",
+              "description": "Primary Key.\n\n\n@format uuid",
+              "type": "string"
+            },
+            "code": {
+              "title": "Identifier code of the category",
+              "description": "Identifier code of the category.\n\nThe code must be unique in the channel.",
+              "type": "string"
+            },
+            "parent_id": {
+              "title": "Parent category's ID",
+              "description": "Parent category's ID.",
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "string",
+                  "description": "@format uuid"
+                }
+              ]
+            },
+            "name": {
+              "title": "Representative name of the category",
+              "description": "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+              "type": "string"
+            },
+            "created_at": {
+              "title": "Creation time of record",
+              "description": "Creation time of record.\n\n\n@format date-time",
+              "type": "string"
+            }
+          },
+          "required": [
+            "parent",
+            "id",
+            "code",
+            "parent_id",
+            "name",
+            "created_at"
+          ]
+        }
+      }
+    },
+    "output": {
+      "description": "Seller sales products.\n\n`IShoppingSale` is an entity that embodies \"product sales\" (sales)\ninformation registered by the {@link ISoppingSeller seller}. And the main\ninformation of the sale is recorded in the sub {@link IShoppingSaleSnapshot},\nnot in the main `IShoppingSale`. When a seller changes a previously registered\nitem, the existing `IShoppingSale` record is not changed, but a new\n{@link IShoppingSaleSnapshot snapshot} record be created.\n\nThis is to preserve the {@link IShoppingCustomer customer}'s\n{@link IShoppingOrder purchase history} flawlessly after the customer\npurchases a specific item, even if the seller changes the components or\nprice of the item. It is also intended to support sellers in so-called A/B\ntesting, which involves changing components or prices and measuring the\nperformance in each case.",
+      "type": "object",
+      "properties": {
+        "section": {
+          "title": "Belonged section",
+          "description": "Section information.\n\n`IShoppingSection` is a concept that refers to the spatial information of\nthe market.\n\nIf we compare the section mentioned here to the offline market, it means a\nspatially separated area within the store, such as the \"fruit corner\" or\n\"butcher corner\". Therefore, in the {@link IShoppingSale sale} entity, it is\nnot possible to classify multiple sections simultaneously, but only one section\ncan be classified.\n\nBy the way, if your shopping mall system requires only one section, then just\nuse only one. This concept is designed to be expandable in the future.",
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Primary Key",
+              "description": "Primary Key.\n\n\n@format uuid",
+              "type": "string"
+            },
+            "code": {
+              "title": "Identifier code",
+              "description": "Identifier code.",
+              "type": "string"
+            },
+            "name": {
+              "title": "Representative name of the section",
+              "description": "Representative name of the section.",
+              "type": "string"
+            },
+            "created_at": {
+              "title": "Creation time of record",
+              "description": "Creation time of record.\n\n\n@format date-time",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "code",
+            "name",
+            "created_at"
+          ]
+        },
+        "seller": {
+          "title": "Seller who has registered the sale",
+          "description": "Invert information starting from seller info.\n\nInstead of accessing to the seller information from the\n{@link IShoppingCustomer.member} -> {@link IShoppingMember.seller},\n`IShoppingSeller.IInvert` starts from the seller information\nand access to the customer, member and {@link IShoppingCitizen citizen}\ninformation inversely.\n\n------------------------------\n\nDescription of the current {@link IShoppingSeller.IInvert} type:\n\n> Invert information starting from seller info.\n> \n> Instead of accessing to the seller information from the\n> {@link IShoppingCustomer.member} -> {@link IShoppingMember.seller},\n> `IShoppingSeller.IInvert` starts from the seller information\n> and access to the customer, member and {@link IShoppingCitizen citizen}\n> information inversely.\n\n------------------------------\n\nDescription of the parent {@link IShoppingSeller} type:\n\n> Seller information.\n> \n> `IShoppingSeller` is an entity that embodies a person who registers\n> {@link IShoppingSale sales} to operate selling activities, with\n> {@link IShoppingMember membership} joining.\n> \n> For reference, unlike {@link IShoppingCustomer customers} which can\n> participate even without membership joining, seller must join membership\n> to operate sales. Also, seller must do the\n> {@link IShoppingCitizen real-name and mobile authentication}, too.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "title": "Discriminant for the type of seller",
+              "description": "Discriminant for the type of seller.",
+              "type": "string",
+              "enum": [
+                "seller"
+              ]
+            },
+            "member": {
+              "title": "Membership joining information",
+              "description": "Invert information of member.\n\nThis invert member information has been designed to be used for another\ninvert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the current {@link IShoppingMember.IInvert} type:\n\n> Invert information of member.\n> \n> This invert member information has been designed to be used for another\n> invert information of sellers and administrators like below.\n> \n> - {@link IShoppingSeller.IInvert}\n> - {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the parent {@link IShoppingMember} type:\n\n> Member Account.\n> \n> `IShoppingMember` is an entity that symbolizes the case when a\n> {@link IShoppingCustomer} signs up as a member of this shopping mall\n> system.\n> \n> If a `IShoppingMember` has seller or administrator property. it means that\n> the {@link IShoppingCustomer} has acting as a {@link IShoppingSeller seller}\n> or {@link IShoppingAdministrator administrator} at the same time.",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "title": "Primary Key",
+                  "description": "Primary Key.\n\n\n@format uuid",
+                  "type": "string"
+                },
+                "nickname": {
+                  "title": "Nickname that uniquely identifies the member",
+                  "description": "Nickname that uniquely identifies the member.",
+                  "type": "string"
+                },
+                "emails": {
+                  "title": "List of emails",
+                  "description": "List of emails.",
+                  "type": "array",
+                  "items": {
+                    "description": "Email address of member.\n\nThis shopping mall system allows multiple email addresses to be\nregistered for one {@link IShoppingMember member}. If you don't have to\nplan such multiple email addresses, just use only one.",
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "title": "Primary Key",
+                        "description": "Primary Key.\n\n\n@format uuid",
+                        "type": "string"
+                      },
+                      "value": {
+                        "title": "Email address value",
+                        "description": "Email address value.\n\n\n@format email",
+                        "type": "string"
+                      },
+                      "created_at": {
+                        "title": "Creation time of record",
+                        "description": "Creation time of record.\n\n\n@format date-time",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "value",
+                      "created_at"
+                    ]
+                  }
+                },
+                "created_at": {
+                  "title": "Creation time of record",
+                  "description": "Creation time of record.\n\nAnother words, the time when the member has signed up.\n\n\n@format date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "nickname",
+                "emails",
+                "created_at"
+              ]
+            },
+            "customer": {
+              "title": "Customer, the connection information",
+              "description": "Inverted customer information.\n\nThis inverted customer information has been designed to be used for\nanother invert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the current {@link IShoppingCustomer.IInvert} type:\n\n> Inverted customer information.\n> \n> This inverted customer information has been designed to be used for\n> another invert information of sellers and administrators like below.\n> \n> - {@link IShoppingSeller.IInvert}\n> - {@link IShoppingAdministrator.IInvert}\n\n------------------------------\n\nDescription of the parent {@link IShoppingCustomer} type:\n\n> Customer information, but not a person but a connection basis.\n> \n> `IShoppingCustomer` is an entity that literally embodies the information of\n> those who participated in the market as customers. By the way, the\n> `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,\n> even if the same person connects to the shopping mall multiple, multiple\n> records are created in `IShoppingCustomer`.\n> \n> The first purpose of this is to track the customer's inflow path in detail,\n> and it is for cases where the same person enters as a non-member,\n> {@link IShoppingCartCommodity puts items in the shopping cart} in advance,\n> and only authenticates their {@link IShoppingCitizen real name} or\n> registers/logs in at the moment of {@link IShoppingOrderPublish payment}.\n> It is the second. Lastly, it is to accurately track the activities that\n> a person performs at the shopping mall in various ways like below.\n> \n> - Same person comes from an {@link IShoppingExternalUser external service}\n> - Same person creates multiple accounts\n> - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}\n> - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time\n> \n> Therefore, `IShoppingCustomer` can have multiple records with the same\n> {@link IShoppingCitizen}, {@link IShoppingMember}, and\n> {@link IShoppingExternalUser}. Additionally, if a customer signs up for\n> membership after verifying their real name or signs up for our service after\n> being a user of an external service, all related records are changed at once.\n> Therefore, identification and tracking of customers can be done very\n> systematically.",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "title": "Primary Key",
+                  "description": "Primary Key.\n\n\n@format uuid",
+                  "type": "string"
+                },
+                "channel": {
+                  "title": "Belonged channel",
+                  "description": "Channel information.\n\n`IShoppingChannel` is a concept that shapes the distribution channel in the\nmarket. Therefore, the difference in the channel in this e-commerce system\nmeans that it is another site or application.\n\nBy the way, if your shopping mall system requires only one channel, then\njust use only one. This concept is designed to be expandable in the future.",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "title": "Primary Key",
+                      "description": "Primary Key.\n\n\n@format uuid",
+                      "type": "string"
+                    },
+                    "created_at": {
+                      "title": "Creation time of record",
+                      "description": "Creation time of record.\n\n\n@format date-time",
+                      "type": "string"
+                    },
+                    "code": {
+                      "title": "Identifier code",
+                      "description": "Identifier code.",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Name of the channel",
+                      "description": "Name of the channel.",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "created_at",
+                    "code",
+                    "name"
+                  ]
+                },
+                "external_user": {
+                  "title": "External user information",
+                  "description": "External user information.\n\nWhen the customer has come from an external service.",
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "Primary Key",
+                          "description": "Primary Key.\n\n\n@format uuid",
+                          "type": "string"
+                        },
+                        "citizen": {
+                          "title": "Citizen activation info",
+                          "description": "Citizen activation info.",
+                          "anyOf": [
+                            {
+                              "type": "null"
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "title": "Primary Key",
+                                  "description": "Primary Key.\n\n\n@format uuid",
+                                  "type": "string"
+                                },
+                                "created_at": {
+                                  "title": "Creation time of record",
+                                  "description": "Creation time of record.\n\n\n@format date-time",
+                                  "type": "string"
+                                },
+                                "mobile": {
+                                  "title": "Mobile number",
+                                  "description": "Mobile number.\n\n\n@pattern ^[0-9]*$",
+                                  "x-wrtn-payment-order-mobile": true,
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "title": "Real name, or equivalent nickname",
+                                  "description": "Real name, or equivalent nickname.",
+                                  "x-wrtn-payment-order-citizen": true,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "created_at",
+                                "mobile",
+                                "name"
+                              ],
+                              "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored."
+                            }
+                          ]
+                        },
+                        "created_at": {
+                          "title": "Creation time of record",
+                          "description": "Creation time of record.\n\nAnother word, first time when the external user connected.\n\n\n@format date-time",
+                          "type": "string"
+                        },
+                        "uid": {
+                          "title": "Identifier key of external user from the external system",
+                          "description": "Identifier key of external user from the external system.",
+                          "type": "string"
+                        },
+                        "application": {
+                          "title": "Identifier code of the external service",
+                          "description": "Identifier code of the external service.\n\nIt can be same with {@link IShoppingChannel.code} in common.",
+                          "type": "string"
+                        },
+                        "nickname": {
+                          "title": "Nickname of external user in the external system",
+                          "description": "Nickname of external user in the external system.",
+                          "type": "string"
+                        },
+                        "data": {
+                          "description": "Additional information about external user from the external\nsystem."
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "citizen",
+                        "created_at",
+                        "uid",
+                        "application",
+                        "nickname",
+                        "data"
+                      ],
+                      "description": "External user information.\n\n`IShoppingExternalUser` is an entity dsigned for when this system needs\nto connect with external services and welcome their users as\n{@link IShoppingCustomer customers} of this service.\n\nFor reference, customers who connect from an external service must have\nthis record, and the external service user is identified through the two\nattributes {@link application} and {@link uid}. If a customer connected\nfrom an external service completes\n{@link IShoppingCitizen real-name authentication} from this service, each\ntime the external service user reconnects to this service and issues a\nnew customer authentication token, real-name authentication begins with\ncompleted.\n\nAnd {@link password} is the password issued to the user by the external\nservice system (the so-called permanent user authentication token), and\nis never the actual user password. However, for customers who entered the\nsame application and uid as the current external system user, this is to\ndetermine whether to view this as a correct external system user or a\nviolation.\n\nIn addition, additional information received from external services can\nbe recorded in the data field in JSON format."
+                    }
+                  ]
+                },
+                "href": {
+                  "title": "Connection address",
+                  "description": "Connection address.\n\nSame with {@link window.location.href} of client.\n\n\n@format uri",
+                  "type": "string"
+                },
+                "referrer": {
+                  "title": "Referrer address",
+                  "description": "Referrer address.\n\nSame with {@link window.document.referrer} of client.",
+                  "anyOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "string",
+                      "description": "@format uri"
+                    },
+                    {
+                      "type": "string",
+                      "description": "@maxLength 0"
+                    }
+                  ]
+                },
+                "ip": {
+                  "title": "Connection IP Address",
+                  "description": "Connection IP Address.",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "description": "@format ipv4"
+                    },
+                    {
+                      "type": "string",
+                      "description": "@format ipv6"
+                    }
+                  ]
+                },
+                "created_at": {
+                  "title": "Creation time of the connection record",
+                  "description": "Creation time of the connection record.\n\n\n@format date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "channel",
+                "external_user",
+                "href",
+                "referrer",
+                "ip",
+                "created_at"
+              ]
+            },
+            "citizen": {
+              "title": "Real-name and mobile number authentication information",
+              "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+              "type": "object",
+              "properties": {
+                "id": {
+                  "title": "Primary Key",
+                  "description": "Primary Key.\n\n\n@format uuid",
+                  "type": "string"
+                },
+                "created_at": {
+                  "title": "Creation time of record",
+                  "description": "Creation time of record.\n\n\n@format date-time",
+                  "type": "string"
+                },
+                "mobile": {
+                  "title": "Mobile number",
+                  "description": "Mobile number.\n\n\n@pattern ^[0-9]*$",
+                  "x-wrtn-payment-order-mobile": true,
+                  "type": "string"
+                },
+                "name": {
+                  "title": "Real name, or equivalent nickname",
+                  "description": "Real name, or equivalent nickname.",
+                  "x-wrtn-payment-order-citizen": true,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "created_at",
+                "mobile",
+                "name"
+              ]
+            },
+            "id": {
+              "title": "Primary Key",
+              "description": "Primary Key.\n\n\n@format uuid",
+              "type": "string"
+            },
+            "created_at": {
+              "title": "Creation tmie of record",
+              "description": "Creation tmie of record.\n\nAnother words, the time when the seller has signed up.\n\n\n@format date-time",
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "member",
+            "customer",
+            "citizen",
+            "id",
+            "created_at"
+          ]
+        },
+        "id": {
+          "title": "Primary Key of Sale",
+          "description": "Primary Key of Sale.\n\n\n@format uuid",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "title": "Primary Key of Snapshot",
+          "description": "Primary Key of Snapshot.\n\n\n@format uuid",
+          "type": "string"
+        },
+        "latest": {
+          "title": "Whether the snapshot is the latest one or not",
+          "description": "Whether the snapshot is the latest one or not.",
+          "type": "boolean"
+        },
+        "content": {
+          "title": "Description and image content describing the sale",
+          "description": "Content information of sale snapshot.\n\n`IShoppingSaleContent` is an entity embodies the description contents\nof {@link IShoppingSale}.",
+          "type": "object",
+          "properties": {
+            "id": {
+              "title": "Primary Key",
+              "description": "Primary Key.\n\n\n@format uuid",
+              "type": "string"
+            },
+            "title": {
+              "title": "Title of the content",
+              "description": "Title of the content.",
+              "type": "string"
+            },
+            "format": {
+              "title": "Format of the body content",
+              "description": "Format of the body content.\n\nSame meaning with file extension like `html`, `md`, and `txt`.",
+              "type": "string",
+              "enum": [
+                "html",
+                "md",
+                "txt"
+              ]
+            },
+            "body": {
+              "title": "The main body content",
+              "description": "The main body content.",
+              "type": "string"
+            },
+            "files": {
+              "title": "List of attached files",
+              "description": "List of attached files.",
+              "type": "array",
+              "items": {
+                "description": "Attachment File.\n\nEvery attachment files that are managed in current system.\n\nFor reference, it is possible to omit one of file {@link name}\nor {@link extension} like `.gitignore` or `README` case, but not\npossible to omit both of them.",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "title": "Primary Key",
+                    "description": "Primary Key.\n\n\n@format uuid",
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "title": "Creation time of attachment file",
+                    "description": "Creation time of attachment file.\n\n\n@format date-time",
+                    "type": "string"
+                  },
+                  "name": {
+                    "title": "File name, except extension",
+                    "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.\n\n\n@maxLength 255",
+                    "type": "string"
+                  },
+                  "extension": {
+                    "title": "Extension",
+                    "description": "Extension.\n\nPossible to omit like `README` case.",
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "description": "@minLength 1\n@maxLength 8"
+                      }
+                    ]
+                  },
+                  "url": {
+                    "title": "URL path of the real file",
+                    "description": "URL path of the real file.\n\n\n@format uri\n@contentMediaType image/*",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "created_at",
+                  "name",
+                  "extension",
+                  "url"
+                ]
+              }
+            },
+            "thumbnails": {
+              "title": "List of thumbnails",
+              "description": "List of thumbnails.",
+              "type": "array",
+              "items": {
+                "description": "Attachment File.\n\nEvery attachment files that are managed in current system.\n\nFor reference, it is possible to omit one of file {@link name}\nor {@link extension} like `.gitignore` or `README` case, but not\npossible to omit both of them.",
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "title": "Primary Key",
+                    "description": "Primary Key.\n\n\n@format uuid",
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "title": "Creation time of attachment file",
+                    "description": "Creation time of attachment file.\n\n\n@format date-time",
+                    "type": "string"
+                  },
+                  "name": {
+                    "title": "File name, except extension",
+                    "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.\n\n\n@maxLength 255",
+                    "type": "string"
+                  },
+                  "extension": {
+                    "title": "Extension",
+                    "description": "Extension.\n\nPossible to omit like `README` case.",
+                    "anyOf": [
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "string",
+                        "description": "@minLength 1\n@maxLength 8"
+                      }
+                    ]
+                  },
+                  "url": {
+                    "title": "URL path of the real file",
+                    "description": "URL path of the real file.\n\n\n@format uri\n@contentMediaType image/*",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "created_at",
+                  "name",
+                  "extension",
+                  "url"
+                ]
+              }
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "format",
+            "body",
+            "files",
+            "thumbnails"
+          ]
+        },
+        "categories": {
+          "title": "List of categories",
+          "description": "List of categories.\n\nWhich categories the sale is registered to.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+          }
+        },
+        "tags": {
+          "title": "List of search tags",
+          "description": "List of search tags.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "units": {
+          "title": "List of units",
+          "description": "List of units.\n\nRecords about individual product composition information that are sold\nin the sale. Each {@link IShoppingSaleUnit unit} record has configurable\n{@link IShoppingSaleUnitOption options},\n{@link IShoppingSaleUnitOptionCandidate candidate} values for each\noption, and {@link IShoppingSaleUnitStock final stocks} determined by\nselecting every candidate values of each option.\n\n\n@minItems 1",
+          "type": "array",
+          "items": {
+            "description": "Product composition information handled in the sale.\n\n`IShoppingSaleUnit` is an entity that embodies the \"individual product\"\ninformation handled in the {@link IShoppingSale sale}.\n\nFor reference, the reason why `IShoppingSaleUnit` is separated from\n{@link IShoppingSaleSnapshot} by an algebraic relationship of 1: N is because\nthere are some cases where multiple products are sold in one listing. This is\nthe case with so-called \"bundled products\".\n\n- Bundle from regular product (Mackbook Set)\n  - Main Body\n  - Keyboard\n  - Mouse\n  - Apple Care (Free A/S Voucher)\n\nAnd again, `IShoppingSaleUnit` does not in itself refer to the\n{@link IShoppingSaleUnitStock final stock} that the\n{@link IShoppingCustomer customer} will {@link IShoppingOrder purchase}.\nThe final stock can be found only after selecting all given\n{@link IShoppingSaleUnitOption options} and their\n{@link IShoppingSaleUnitOptionCandidate candidate values}.\n\nFor example, even if you buy a Macbook, the final stocks are determined only\nafter selecting all the options (CPU / RAM / SSD), etc.",
+            "type": "object",
+            "properties": {
+              "options": {
+                "title": "List of options",
+                "description": "List of options.",
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "candidates": {
+                          "title": "List of candidate values",
+                          "description": "List of candidate values.\n\n\n@minItems 1",
+                          "type": "array",
+                          "items": {
+                            "description": "Selectable candidate values within an option.\n\n`IShoppingSaleUnitOptionCandidate` is an entity that represents individual\ncandidate values that can be selected from\n{@link IShoppingSaleUnitSelectableOption options of the \"select\" type}.\n\n- Example\n  - RAM: 8GB, 16GB, 32GB\n  - GPU: RTX 3060, RTX 4080, TESLA\n  - License: Private, Commercial, Educatiion\n\nBy the way, if belonged option is not \"select\" type, this entity never\nbeing used.",
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "title": "Primary Key",
+                                "description": "Primary Key.\n\n\n@format uuid",
+                                "type": "string"
+                              },
+                              "name": {
+                                "title": "Represents the name of the candidate value",
+                                "description": "Represents the name of the candidate value.",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "name"
+                            ]
+                          }
+                        },
+                        "id": {
+                          "title": "Primary Key",
+                          "description": "Primary Key.\n\n\n@format uuid",
+                          "type": "string"
+                        },
+                        "type": {
+                          "title": "Discriminant for the type of selectable option",
+                          "description": "Discriminant for the type of selectable option.",
+                          "type": "string",
+                          "enum": [
+                            "select"
+                          ]
+                        },
+                        "name": {
+                          "title": "Represents the name of the option",
+                          "description": "Represents the name of the option.",
+                          "type": "string"
+                        },
+                        "variable": {
+                          "title": "Whether the option is variable or not",
+                          "description": "Whether the option is variable or not.\n\nWhen type of current option is \"select\", this attribute means whether\nselecting different candidate value affects the final stock or not.",
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "candidates",
+                        "id",
+                        "type",
+                        "name",
+                        "variable"
+                      ],
+                      "description": "Individual option information on units for sale.\n\n`IShoppingSaleUnitSelectableOption` is a subsidiary entity of\n{@link IShoppingSaleUnit} that represents individual products in the\n{@link IShoppingSale sale}, and is an entity designed to represent individual\nselectable option information for the unit.\n\n- Examples of Options\n  - selectable options\n    - Computer: CPU, RAM, SSD, etc.\n    - Clothes: size, color, style, etc.\n  - descriptive options\n    - Engrave\n    - Simple question\n\nIf the {@link variable} property value is `true`, the final stock that the\n{@link IShoppingCustomer customer} will purchase changes depending on the\nselection of the {@link IShoppingSaleUnitOptionCandidate candidate value}.\n\nConversely, if it is a type other than \"select\", or if the {@link variable}\nproperty value is \"false\", , this is an option that has no meaning beyond\nsimple information transfer. Therefore, no matter what value the customer\nchooses when purchasing it, the option in this case does not affect the\n{@link IShoppingSaleUnitStock final stock}."
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "title": "Primary Key",
+                          "description": "Primary Key.\n\n\n@format uuid",
+                          "type": "string"
+                        },
+                        "type": {
+                          "title": "Type of descriptive option",
+                          "description": "Type of descriptive option.\n\nWhich typed value should be written when purchasing.",
+                          "type": "string",
+                          "enum": [
+                            "string",
+                            "number",
+                            "boolean"
+                          ]
+                        },
+                        "name": {
+                          "title": "Readable name of the option",
+                          "description": "Readable name of the option.",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "type",
+                        "name"
+                      ],
+                      "description": "Descriptive option.\n\nWhen type of the option not `\"select\"`, it means the option is descriptive\nthat requiring {@link IShoppingCustomer customers} to write some value to\n{@link IShoppingOrder purchase}. Also, whatever customer writes about the\noption, it does not affect the {@link IShoppingSaleUnitStock final stock}.\n\nAnother words, the descriptive option is just for information transfer."
+                    }
+                  ]
+                }
+              },
+              "stocks": {
+                "title": "List of final stocks",
+                "description": "List of final stocks.\n\n\n@minItems 1",
+                "type": "array",
+                "items": {
+                  "description": "Final component information on units for sale.\n\n`IShoppingSaleUnitStock` is a subsidiary entity of {@link IShoppingSaleUnit}\nthat represents a product catalog for sale, and is a kind of final stock that is\nconstructed by selecting all {@link IShoppingSaleUnitSelectableOption options}\n(variable \"select\" type) and their\n{@link IShoppingSaleUnitOptionCandidate candidate} values in the belonging unit.\nIt is the \"good\" itself that customers actually purchase.\n\n- Product Name) MacBook\n  - Options\n    - CPU: { i3, i5, i7, i9 }\n    - RAM: { 8GB, 16GB, 32GB, 64GB, 96GB }\n    - SSD: { 256GB, 512GB, 1TB }\n  - Number of final stocks: 4 * 5 * 3 = 60\n\nFor reference, the total number of `IShoppingSaleUnitStock` records in an\nattribution unit can be obtained using Cartesian Product. In other words, the\nvalue obtained by multiplying all the candidate values that each\n(variable \"select\" type) option can have by the number of cases is the total\nnumber of final stocks in the unit.\n\nOf course, without a single variable \"select\" type option, the final stocks\ncount in the unit is only 1.",
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "title": "Primary Key",
+                      "description": "Primary Key.\n\n\n@format uuid",
+                      "type": "string"
+                    },
+                    "name": {
+                      "title": "Representative name of the stock",
+                      "description": "Representative name of the stock.",
+                      "type": "string"
+                    },
+                    "price": {
+                      "title": "Price of the stock",
+                      "description": "Shopping price interface.",
+                      "type": "object",
+                      "properties": {
+                        "nominal": {
+                          "title": "Nominal price",
+                          "description": "Nominal price.\n\nThis is not {@link real real price} to pay, but just a nominal price to show.\nIf this value is greater than the {@link real real price}, it would be shown\nlike {@link IShoppingSeller seller} is giving a discount.\n\n\n@minimum 0",
+                          "type": "number"
+                        },
+                        "real": {
+                          "title": "Real price to pay",
+                          "description": "Real price to pay.\n\n\n@minimum 0",
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "nominal",
+                        "real"
+                      ]
+                    },
+                    "inventory": {
+                      "title": "Current inventory status of the stock",
+                      "description": "Inventory information of a final stock.",
+                      "type": "object",
+                      "properties": {
+                        "income": {
+                          "title": "Total income quantity",
+                          "description": "Total income quantity.",
+                          "type": "integer"
+                        },
+                        "outcome": {
+                          "title": "Total outcome quantity",
+                          "description": "Total outcome quantity.",
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "income",
+                        "outcome"
+                      ]
+                    },
+                    "choices": {
+                      "title": "List of choices",
+                      "description": "List of choices.\n\nWhich candidate values being chosen for each option.",
+                      "type": "array",
+                      "items": {
+                        "description": "Selection information of final stock.\n\n`IShoppingSaleUnitStockChoice` is an entity that represents which\n{@link IShoppingSaleUnitSelectableOption option} of each variable \"select\"\ntype was selected for each {@link IShoppingSaleUnitStock stock} and which\n{@link IShoppingSaleUnitOptionCandidate candidate value} was selected within\nit.\n\nOf course, if the bound {@link IShoppingSaleUnit unit} does not have any\noptions, this entity can also be ignored.",
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "title": "Primary Key",
+                            "description": "Primary Key.\n\n\n@format uuid",
+                            "type": "string"
+                          },
+                          "option_id": {
+                            "description": "Target option's {@link IShoppingSaleUnitOption.id}\n\n\n@format uuid",
+                            "type": "string"
+                          },
+                          "candidate_id": {
+                            "description": "Target candidate's {@link IShoppingSaleUnitOptionCandidate.id}\n\n\n@format uuid",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "option_id",
+                          "candidate_id"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "price",
+                    "inventory",
+                    "choices"
+                  ]
+                }
+              },
+              "id": {
+                "title": "Primary Key",
+                "description": "Primary Key.\n\n\n@format uuid",
+                "type": "string"
+              },
+              "name": {
+                "title": "Representative name of the unit",
+                "description": "Representative name of the unit.",
+                "type": "string"
+              },
+              "primary": {
+                "title": "Whether the unit is primary or not",
+                "description": "Whether the unit is primary or not.\n\nJust a labeling value.",
+                "type": "boolean"
+              },
+              "required": {
+                "title": "Whether the unit is required or not",
+                "description": "Whether the unit is required or not.\n\nWhen the unit is required, the customer must select the unit. If do not\nselect, customer can't buy it.\n\nFor example, if there's a sale \"Macbook Set\" and one of the unit is the\n\"Main Body\", is it possible to buy the \"Macbook Set\" without the\n\"Main Body\" unit? This property is for that case.",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "options",
+              "stocks",
+              "id",
+              "name",
+              "primary",
+              "required"
+            ]
+          }
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.\n\nNote that, this property is different with {@link opened_at},\nwhich means the timepoint of the sale is opened.\n\n\n@format date-time",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Last updated time of the record",
+          "description": "Last updated time of the record.\n\nIn another words, creation time of the last snapshot.\n\n\n@format date-time",
+          "type": "string"
+        },
+        "paused_at": {
+          "title": "Paused time of the sale",
+          "description": "Paused time of the sale.\n\nThe sale is paused by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} can still see the sale on the\nboth list and detail pages, but the sale has a warning label\n\"The sale is paused by the seller\".",
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "description": "@format date-time"
+            }
+          ]
+        },
+        "suspended_at": {
+          "title": "Suspended time of the sale",
+          "description": "Suspended time of the sale.\n\nThe sale is suspended by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} cannot see the sale on the\nboth list and detail pages. It is almost same with soft delettion,\nbut there's a little bit difference that the owner\n{@link IShoppingSeller seller} can still see the sale and resume it.\n\nOf course, the {@link IShoppingCustomer customers} who have\nalready purchased the sale can still see the sale on the\n{@link IShoppingOrder order} page.",
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "description": "@format date-time"
+            }
+          ]
+        },
+        "opened_at": {
+          "title": "Opening time of the sale",
+          "description": "Opening time of the sale.",
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "description": "@format date-time"
+            }
+          ]
+        },
+        "closed_at": {
+          "title": "Closing time of the sale",
+          "description": "Closing time of the sale.\n\nIf this value is `null`, the sale be continued forever.",
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "description": "@format date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "section",
+        "seller",
+        "id",
+        "snapshot_id",
+        "latest",
+        "content",
+        "categories",
+        "tags",
+        "units",
+        "created_at",
+        "updated_at",
+        "paused_at",
+        "suspended_at",
+        "opened_at",
+        "closed_at"
+      ]
+    },
+    "description": "Get a sale with detailed information.\n\nGet a {@link IShoppingSale sale} with detailed information including\nthe SKU (Stock Keeping Unit) information represented by the\n{@link IShoppingSaleUnitOption} and {@link IShoppingSaleUnitStock} types.\n\n> If you're an A.I. chatbot, and the user wants to buy or compose a\n> {@link IShoppingCartCommodity shopping cart} from a sale, please call\n> this operation at least once to the target sale to get detailed SKU\n> information about the sale.\n>\n> It needs to be run at least once for the next steps. In other words,\n> if you A.I. agent has called this operation to a specific sale, you\n> don't need to call this operation again for the same sale.\n>\n> Additionally, please do not summarize the SKU information. Just show\n> the every options and stocks in the sale with detailed information.",
+    "tags": [
+      "Sale"
+    ]
+  },
+  "arguments": {
+    "id": "19ec1620-4c23-4029-9827-bcfc943a37be"
+  },
+  "value": {
+    "section": {
+      "id": "2ddcc9ca-49c0-4497-88f4-0a544380bab3",
+      "code": "general",
+      "name": "General",
+      "created_at": "2025-02-11T07:20:37.245Z"
+    },
+    "seller": {
+      "type": "seller",
+      "member": {
+        "id": "02d170ce-0520-43f2-88a5-93262df6a785",
+        "nickname": "Robot",
+        "emails": [
+          {
+            "id": "e77997f6-ee81-4a82-a887-37a29e7abae3",
+            "value": "robot@nestia.io",
+            "created_at": "2025-02-11T07:20:37.344Z"
+          }
+        ],
+        "created_at": "2025-02-11T07:20:37.344Z"
+      },
+      "customer": {
+        "id": "fa2aedf1-12ea-4b8e-8641-50fa85eb585a",
+        "channel": {
+          "id": "91ad02ac-b297-4f83-96ac-4224f11b976f",
+          "created_at": "2025-02-11T07:20:37.082Z",
+          "code": "samchon",
+          "name": "Samchon Shopping Mall"
+        },
+        "external_user": null,
+        "href": "http://127.0.0.1/TestAutomation",
+        "referrer": "http://127.0.0.1/NodeJS",
+        "ip": "127.0.0.1",
+        "created_at": "2025-02-11T07:20:37.373Z"
+      },
+      "citizen": {
+        "id": "6e6e1002-fc54-4002-9b30-d5c9ee216d6a",
+        "created_at": "2025-02-11T07:20:37.276Z",
+        "mobile": "01012345678",
+        "name": "Robot"
+      },
+      "id": "7807ed28-9873-407d-a6df-c72ec85b0771",
+      "created_at": "2025-02-11T07:20:37.358Z"
+    },
+    "id": "19ec1620-4c23-4029-9827-bcfc943a37be",
+    "snapshot_id": "f67c3cd7-59d8-444e-8ac1-ea8c1e175055",
+    "latest": true,
+    "content": {
+      "id": "b1c324ce-58f2-4bf5-a6ca-5267abd6ce19",
+      "title": "Apple MacBook Pro",
+      "format": "md",
+      "body": "MacBook Pro\n\n**The Ultimate Tool for Professionals**\n\nMacBook Pro is designed to elevate your creativity and productivity to new heights. Combining exceptional performance, elegant design, and the unparalleled experience only Apple can deliver, this is the device that empowers you to tackle any challenge with confidence.\n\n- **Remarkable Performance**\n    \n    Powered by the next-generation chip, it handles demanding tasks and complex projects effortlessly, delivering unmatched speed and efficiency.\n    \n- **Outstanding Display**\n    \n    The Retina display offers rich colors and sharp contrast, creating an immersive visual experience. With ProMotion technology, enjoy smooth scrolling and fluid animations like never before.\n    \n- **All-Day Battery Life**\n    \n    Stay focused and in the flow wherever you go with a battery that lasts all day. This is a laptop that works as hard as you do.\n    \n- **Sleek Yet Powerful Design**\n    \n    A precision aluminum body that’s lightweight yet durable, paired with a minimalist design that stands out on your desk and on the go.\n    \n- **Smart Connectivity**\n    \n    Versatile ports for high-speed data transfer and seamless compatibility ensure you're ready for any work environment.\n    \nWith MacBook Pro, your potential knows no bounds. **It’s time to rediscover what you’re capable of.**\n",
+      "files": [
+        {
+          "id": "ce245179-fc53-437d-bfbd-f9a10e6bf536",
+          "created_at": "2025-02-11T07:20:37.527Z",
+          "name": "apple-macbook-pro-thumbnail",
+          "extension": "png",
+          "url": "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spaceblack-gallery1-202410?wid=4000&hei=3074&fmt=jpeg&qlt=90&.v=1729264981617"
+        }
+      ],
+      "thumbnails": [
+        {
+          "id": "e45ebd8c-eedb-4ebb-8bf0-24f926596061",
+          "created_at": "2025-02-11T07:20:37.526Z",
+          "name": "apple-macbook-pro-thumbnail",
+          "extension": "png",
+          "url": "https://store.storeimages.cdn-apple.com/8756/as-images.apple.com/is/mbp14-spaceblack-gallery1-202410?wid=4000&hei=3074&fmt=jpeg&qlt=90&.v=1729264981617"
+        }
+      ]
+    },
+    "categories": [
+      {
+        "parent": null,
+        "id": "4a850a9c-7a0d-4856-8d4b-758a731d556e",
+        "code": "electronics",
+        "parent_id": null,
+        "name": "Electronics",
+        "created_at": "2025-02-11T07:20:37.092Z"
+      },
+      {
+        "parent": {
+          "parent": {
+            "parent": null,
+            "id": "4a850a9c-7a0d-4856-8d4b-758a731d556e",
+            "code": "electronics",
+            "parent_id": null,
+            "name": "Electronics",
+            "created_at": "2025-02-11T07:20:37.092Z"
+          },
+          "id": "173fb7bd-084f-4b79-8157-5c72b9e61c7e",
+          "code": "laptops",
+          "parent_id": "4a850a9c-7a0d-4856-8d4b-758a731d556e",
+          "name": "Laptops",
+          "created_at": "2025-02-11T07:20:37.115Z"
+        },
+        "id": "41cae023-c0bb-4a08-a753-433a4b2ea81b",
+        "code": "macbooks",
+        "parent_id": "173fb7bd-084f-4b79-8157-5c72b9e61c7e",
+        "name": "MacBooks",
+        "created_at": "2025-02-11T07:20:37.130Z"
+      }
+    ],
+    "tags": [ ],
+    "units": [
+      {
+        "options": [
+          {
+            "candidates": [
+              {
+                "id": "36e68c35-7cdf-4984-81cf-93075c4046fc",
+                "name": "Silver"
+              },
+              {
+                "id": "ee451462-01c2-45ae-8707-7e70b9045cf4",
+                "name": "Space Gray"
+              }
+            ],
+            "id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+            "type": "select",
+            "name": "Color",
+            "variable": true
+          },
+          {
+            "candidates": [
+              {
+                "id": "47d5c570-3ea7-49f3-8420-cb16ba807417",
+                "name": "16GB"
+              },
+              {
+                "id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04",
+                "name": "32GB"
+              },
+              {
+                "id": "50310274-d13f-40c1-b896-953cb600f6c3",
+                "name": "64GB"
+              }
+            ],
+            "id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+            "type": "select",
+            "name": "RAM",
+            "variable": true
+          },
+          {
+            "candidates": [
+              {
+                "id": "f7790027-061e-46b6-b4fe-7d2917947d61",
+                "name": "512GB"
+              },
+              {
+                "id": "c7835751-d5ab-42c3-bf2e-9007fe98b823",
+                "name": "1TB"
+              },
+              {
+                "id": "308cd17e-c164-4d48-b6fa-febc97648a65",
+                "name": "2TB"
+              }
+            ],
+            "id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+            "type": "select",
+            "name": "SSD",
+            "variable": true
+          },
+          {
+            "candidates": [
+              {
+                "id": "3690b079-92f0-42a9-93f7-66a919fe3050",
+                "name": "English"
+              },
+              {
+                "id": "31d2206d-a31b-4e56-aad2-597f95fda30e",
+                "name": "Korean"
+              }
+            ],
+            "id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+            "type": "select",
+            "name": "Keyboard Language",
+            "variable": true
+          }
+        ],
+        "stocks": [
+          {
+            "id": "ca4c9ab0-7497-4ad2-a761-ce88a922cc58",
+            "name": "MacBook Pro (Silver, 16GB, 512GB, English)",
+            "price": {
+              "nominal": 2000000,
+              "real": 1800000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "2b671595-103a-4535-be66-ae28ffcb5fbd",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "69caf097-6b61-4595-8f73-0de262f1fb16",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "40969b82-3b1c-4f8a-8085-d0e009f68545",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "d016eb1b-0b79-48d5-9f07-c317f9f8ef3c",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "019c55fb-1eda-4f2f-8eb2-5258e275c798",
+            "name": "MacBook Pro (Silver, 16GB, 512GB, Korean)",
+            "price": {
+              "nominal": 2000000,
+              "real": 1800000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "f18c0aef-5e17-44c0-a77f-e6049a5380cb",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "43618c22-ad34-4c4b-a2f6-3f6cee845d3d",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "84fe08a8-2ef9-4f1a-a466-57623416d8b2",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "9aba97c4-96b3-4683-8022-8f1c81fd0061",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "e086a73f-015e-414b-97a2-b6925277e816",
+            "name": "MacBook Pro (Silver, 16GB, 1TB, English)",
+            "price": {
+              "nominal": 2300000,
+              "real": 2070000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "f024b12d-4aad-4cc6-94d9-62ea2c08e926",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "52fffd9b-a2f5-4a84-8600-e9903c5074a3",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "3439b38a-4126-4d1f-a336-684970cc9124",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "ba81cdd8-bb53-4db1-aa99-6b9646e508a1",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "b500f4e1-34a8-4832-918a-6d2c697524de",
+            "name": "MacBook Pro (Silver, 16GB, 1TB, Korean)",
+            "price": {
+              "nominal": 2300000,
+              "real": 2070000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "85bebf76-9250-43dd-96bb-93350426a6e5",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "af0aae03-3330-4cf3-bf7d-334bc127fbb2",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "34dd1a4d-7dd2-4223-8897-5ad16a19731d",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "7b48f21f-5490-4120-b3f1-a4e545c03458",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "83bd981c-06ed-4fa3-acaa-8c0eff68db4c",
+            "name": "MacBook Pro (Silver, 16GB, 2TB, English)",
+            "price": {
+              "nominal": 2900000,
+              "real": 2610000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "738a56ed-da48-47e3-93e9-142cb386af55",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "024ab3bc-63e2-4b2b-9875-4c702b4ed6c8",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "846f072b-9fa2-411e-a56a-35938854f751",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "8edcd7ee-0380-4efd-9ec1-30f6fa10e323",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "edd4ead3-5c6f-4639-b07b-3075bc3291cc",
+            "name": "MacBook Pro (Silver, 16GB, 2TB, Korean)",
+            "price": {
+              "nominal": 2900000,
+              "real": 2610000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "da024337-4e5d-4666-83e3-53ab2dd5a73f",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "a3d659ae-3d54-4410-a0ca-77e9a147e99f",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "427cc009-a9df-4f8c-a8c0-fa0d0b255488",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "ff392094-3830-48ac-adb1-c0110c1af747",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "b0044321-3be9-406a-aa15-ae04d6b73891",
+            "name": "MacBook Pro (Silver, 32GB, 512GB, English)",
+            "price": {
+              "nominal": 2600000,
+              "real": 2340000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "0165bd29-f102-439a-8e9b-dd5916af7cfd",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "6e53f214-dacc-4794-b991-ee80066ffd2f",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "671e249e-c58d-4edc-b86e-5bbbe10ac538",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "14e1f320-0fd0-47da-a0c4-85fa87104094",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "4c60e12d-4fa0-4b79-8e9d-870f40ab25c7",
+            "name": "MacBook Pro (Silver, 32GB, 512GB, Korean)",
+            "price": {
+              "nominal": 2600000,
+              "real": 2340000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "485271d8-7c79-410b-9150-c39ba741b863",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "86e97f1c-5042-49bf-be51-7f7e7e75dd5d",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "db1d5113-73c8-4a8a-9683-8e9b0ebd41b9",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "e14d7bf9-02c5-4046-9e12-4c1d55451500",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "a7077d63-ed4d-49f3-96c6-dfcdf7eabc6c",
+            "name": "MacBook Pro (Silver, 32GB, 1TB, English)",
+            "price": {
+              "nominal": 2900000,
+              "real": 2610000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "fa51bc82-4a40-46ba-8ea4-992df70f464d",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "2038ed2c-b07e-4b53-955b-e60af50eb703",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "2deefcaf-87ab-4bf0-9a01-c768491e8338",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "10e78d4e-1f1c-466c-8924-48a464be34f6",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "838342e8-0b06-445b-842d-ebd4dfa97f9a",
+            "name": "MacBook Pro (Silver, 32GB, 1TB, Korean)",
+            "price": {
+              "nominal": 2900000,
+              "real": 2610000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "0124156c-9a1d-4765-8699-016e3e492ffa",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "75348d93-6833-443f-b2d6-44c63556eaa0",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "ed9cb7eb-2d77-4726-9295-cdd26220a2f4",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "f6039359-be4c-47db-8120-c778ca23b0ef",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "d8a838cb-dde3-43e0-b97b-9cfa425884e9",
+            "name": "MacBook Pro (Silver, 32GB, 2TB, English)",
+            "price": {
+              "nominal": 3500000,
+              "real": 3150000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "7b62a3c7-707b-4d2e-b6c9-cdd646d40f22",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "24f5240a-5557-4aeb-b7bc-16fd15f16fe6",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "b038768a-51c5-4937-be8f-5b63e2025b78",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "bf5a9ef9-497b-456a-9613-eac6bd1db22a",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "3b1804cd-0afc-42a6-9f16-205592bb1bd1",
+            "name": "MacBook Pro (Silver, 32GB, 2TB, Korean)",
+            "price": {
+              "nominal": 3500000,
+              "real": 3150000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "c6f583f0-06db-4c14-b96f-f84f26bcf7e8",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "3b5a7901-f854-46cd-af90-2d92a570b42b",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "98fad9ac-620b-4b17-b4b2-1e3050efc4be",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "f0128a5c-d1d0-48f3-9361-6067a739134b",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "17c45b33-20e5-44ae-9a07-a6d6d46f1f7f",
+            "name": "MacBook Pro (Silver, 64GB, 512GB, English)",
+            "price": {
+              "nominal": 3200000,
+              "real": 2880000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "c380a6bd-61f7-4581-951b-8f9668885d0a",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "62c7c999-12ca-4a51-9b7f-66b5adc93c17",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "272b4e79-a463-4c15-bdbf-32f344346434",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "0a301c18-6d9f-4fd6-ab9c-c92a0bd52f04",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "b9da3665-7fef-4923-8923-eb59f93d9fcf",
+            "name": "MacBook Pro (Silver, 64GB, 512GB, Korean)",
+            "price": {
+              "nominal": 3200000,
+              "real": 2880000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "e42f12d1-2db8-4297-9ece-39874bb5b2a0",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "3bd5db88-b932-41ea-87a6-d011e8791684",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "a5bfd14a-2826-4e00-9b67-19cc1bad8dc0",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "78a4f533-9c38-4d1f-b2a1-0df88bf1a0d7",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "87d615e3-abd5-4156-a444-75b9f3146fbc",
+            "name": "MacBook Pro (Silver, 64GB, 1TB, English)",
+            "price": {
+              "nominal": 3500000,
+              "real": 3150000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "0c7d1aaf-3d26-4979-9b08-c3cfad2c5c42",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "6296b1ee-2a76-44ba-b284-d2298304f34c",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "c1c5583e-db4c-4cd4-93c7-f9a451f96334",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "ab8edff6-711d-4930-954c-9a610dfb4694",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "d2b66dc3-7198-4ba6-868f-83fc9a2637e5",
+            "name": "MacBook Pro (Silver, 64GB, 1TB, Korean)",
+            "price": {
+              "nominal": 3500000,
+              "real": 3150000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "00ae2ec7-6d4b-4501-adc8-13d509e80440",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "7f9239bd-66ab-487e-9579-d7465628206c",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "aaef559c-c463-4cf6-8d51-c1a3eca15e32",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "798a10d4-b52b-4bc1-a3f2-e84b3b0a7f35",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "d95b15cf-1f2d-4292-9692-51b4dc02fcc7",
+            "name": "MacBook Pro (Silver, 64GB, 2TB, English)",
+            "price": {
+              "nominal": 4100000,
+              "real": 3690000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "1b9e6ee3-efa8-488b-b63c-b8c2fb9eadf6",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "e1b5b16d-fa4c-44a9-a7c5-e3e112f730d7",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "9341a946-e76e-4ca3-a86a-5140262aef20",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "eb4ae534-6b0a-4bb8-8070-7bbc8534abe6",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "ecc2ca6c-68e6-4b46-9b7a-15411ed752e3",
+            "name": "MacBook Pro (Silver, 64GB, 2TB, Korean)",
+            "price": {
+              "nominal": 4100000,
+              "real": 3690000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "545d4ce3-ffd7-45c1-8d02-5a9e25205e9e",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "36e68c35-7cdf-4984-81cf-93075c4046fc"
+              },
+              {
+                "id": "30941181-c371-47f3-8a08-a79da6e3d998",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "62c8fb04-39b1-4fee-a3e2-5fc2b432eee3",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "87006e83-d1eb-4c49-919a-558f512ae049",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "09a65389-30b2-4dd2-923a-c0a22db39093",
+            "name": "MacBook Pro (Space Gray, 16GB, 512GB, English)",
+            "price": {
+              "nominal": 2050000,
+              "real": 1845000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "fdb58d41-2357-4312-aa77-6539f9e04892",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "952c5276-0800-41a4-b198-8f104ccc6919",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "3699fcf2-2219-466f-a6f1-0a739e5c5955",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "6ad4361f-0e1e-40d6-b889-c143ec5eb1b9",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "936bde73-eb08-4a2b-9e9d-f684526f142a",
+            "name": "MacBook Pro (Space Gray, 16GB, 512GB, Korean)",
+            "price": {
+              "nominal": 2050000,
+              "real": 1845000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "46c2aac2-19de-4c06-8d8a-ac31d5d3bf7c",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "11c89bb4-3ca0-4317-8db3-0f9b6ece1486",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "4c4b659a-3b85-42ad-9da3-295cafddc0fb",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "beb3f6ee-3e05-4f95-973f-05176b66d9da",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "ef071326-81e1-4fdb-aa93-1c9ada43ec70",
+            "name": "MacBook Pro (Space Gray, 16GB, 1TB, English)",
+            "price": {
+              "nominal": 2350000,
+              "real": 2115000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "e1315a6b-7d85-4688-8d88-7017c288e552",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "698c9221-7106-4df3-962f-678cb1fc42d6",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "19441374-31a9-442b-8922-90d29d9887ee",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "1cce75d9-e43a-4f02-8542-c37e60204282",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "8055ca9c-f76e-4e24-9d57-853cdf0af995",
+            "name": "MacBook Pro (Space Gray, 16GB, 1TB, Korean)",
+            "price": {
+              "nominal": 2350000,
+              "real": 2115000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "6d01fb08-de2f-41c4-a3ba-091f83e14469",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "63de1ff0-647d-4331-8737-75e32e54c9d2",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "0f8e7a69-016f-4ea4-91c9-8220ba61315a",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "12c5ba5d-1501-4bcb-818c-6ef8b3db065e",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "f3c53029-80cd-4acb-8141-fb1960fe337e",
+            "name": "MacBook Pro (Space Gray, 16GB, 2TB, English)",
+            "price": {
+              "nominal": 2950000,
+              "real": 2655000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "e01d477c-ac8e-4348-b96c-4493e9719530",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "29ce12d9-2aa8-4b3c-bfb8-11ec719a71f3",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "4653f365-d3e8-40c5-95f3-224c244f8f19",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "90feb402-cd2b-46c1-92b3-5afb01dc8ab5",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "19fceb4a-9ed8-4231-8917-c690f21780df",
+            "name": "MacBook Pro (Space Gray, 16GB, 2TB, Korean)",
+            "price": {
+              "nominal": 2950000,
+              "real": 2655000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "884a292a-7ad6-4e74-9485-5f438463fc3e",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "03155157-2501-46fc-94d1-efd7e2d32ae8",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "47d5c570-3ea7-49f3-8420-cb16ba807417"
+              },
+              {
+                "id": "5a3b9de9-85bd-43ab-9228-fcffca6a903f",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "7372e773-5b94-401b-a0f6-10ff8fc39eca",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "9ab6846d-fbba-4d97-8e82-01ae2754ad64",
+            "name": "MacBook Pro (Space Gray, 32GB, 512GB, English)",
+            "price": {
+              "nominal": 2650000,
+              "real": 2385000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "7c960b77-8a38-4b0d-b23c-f418b2bb66b7",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "57ba083a-e37b-4be5-80a9-c22edc90b791",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "3bd3566d-98eb-4a6b-9503-98e9422eddd1",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "70e376d1-9ad1-45f9-9772-e51b75ac6d82",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "654448b7-6165-40e0-b775-0a7b9b63fe86",
+            "name": "MacBook Pro (Space Gray, 32GB, 512GB, Korean)",
+            "price": {
+              "nominal": 2650000,
+              "real": 2385000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "cd2ebd1a-4896-4f8b-aa4e-f9ca2ded6fda",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "2c492aa9-6ad5-4cb7-9a93-7d6734150704",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "88382db7-46b1-4791-8d38-e94429b4356b",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "eedd3193-390f-43dd-9dfd-561605f91fa4",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "7993caf7-5141-42bc-8ea9-dea276d22278",
+            "name": "MacBook Pro (Space Gray, 32GB, 1TB, English)",
+            "price": {
+              "nominal": 2950000,
+              "real": 2655000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "236c3c71-4667-4586-b2c8-5d3938da5fae",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "eefea466-ebe4-49c4-976c-359a05e1e1c8",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "a7e4a26d-0bd6-49ac-8026-abe714807bf3",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "1b97d8f8-8786-4e90-acfe-ca0c67e3d9fd",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "5dbfbceb-6352-4c76-adc7-68669cb11349",
+            "name": "MacBook Pro (Space Gray, 32GB, 1TB, Korean)",
+            "price": {
+              "nominal": 2950000,
+              "real": 2655000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "1b557598-e782-4d78-add5-aff622c5fe4a",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "1c7bccbd-ad2e-4d8a-bc3d-8aa087c323a1",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "2ae85c85-da5e-4fc3-a2dc-887a57e25a68",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "6df45e5b-ef3c-4b9c-bc21-0b94289405aa",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "00558521-f1fa-4d56-8de5-1433c35e2a06",
+            "name": "MacBook Pro (Space Gray, 32GB, 2TB, English)",
+            "price": {
+              "nominal": 3550000,
+              "real": 3195000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "8800252a-d534-41e2-88e1-36bc0ec0386a",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "dc2f5d7c-2204-4a41-b83d-fe659c6532cb",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "97788b1f-d446-40bf-9d08-e8bbb183efe0",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "a8bd864f-a228-4d01-9145-8818ac7acb70",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "e736af0d-f9fe-464c-b6a3-50558dc0d929",
+            "name": "MacBook Pro (Space Gray, 32GB, 2TB, Korean)",
+            "price": {
+              "nominal": 3550000,
+              "real": 3195000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "0422160a-d078-4dca-b357-ac56825708e8",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "35fed157-821e-42a5-9983-1bb0bdff1482",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "2a8e9ee5-0d8e-49dc-aa8d-f7d78b14fb04"
+              },
+              {
+                "id": "24228674-d7b8-47ec-8a71-133b2e9b0a9a",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "85a2a5c7-1015-40a6-94e9-db2106a97de5",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "4bc53188-dbee-432d-91ec-07a59287e45d",
+            "name": "MacBook Pro (Space Gray, 64GB, 512GB, English)",
+            "price": {
+              "nominal": 3250000,
+              "real": 2925000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "a6159de8-5c23-4269-b447-d2a3c83658d1",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "0c782f10-25c3-4114-b995-00e0994f417b",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "5d24cf09-3edc-4e7e-be22-18e9e216081d",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "d0f2d946-d94a-4079-822f-64df132d0eda",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "5aa07647-7956-48b6-b5fb-fe7886d21a7e",
+            "name": "MacBook Pro (Space Gray, 64GB, 512GB, Korean)",
+            "price": {
+              "nominal": 3250000,
+              "real": 2925000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "1d17f548-405d-4337-9544-d1a455d536f7",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "dd7e2250-caf4-44a1-92bd-9ee7a8227073",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "77b515e0-0130-424e-b071-2e477c89ccc8",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "f7790027-061e-46b6-b4fe-7d2917947d61"
+              },
+              {
+                "id": "827d4d99-ea27-4b86-aad6-40446ff52628",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "0305162e-5bc2-4638-8893-e096786e3ef1",
+            "name": "MacBook Pro (Space Gray, 64GB, 1TB, English)",
+            "price": {
+              "nominal": 3550000,
+              "real": 3195000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "a326ff1c-fe61-4a58-b193-131224b48b8d",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "be1e8eca-a51b-484b-a04d-9cbe34bc5958",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "66c0bf2c-39e3-4862-956f-808892d8b3a7",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "559c5942-be8b-4801-9ac6-11b9c220efff",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "5d3bc3c8-9579-493c-846a-e16ae42aad27",
+            "name": "MacBook Pro (Space Gray, 64GB, 1TB, Korean)",
+            "price": {
+              "nominal": 3550000,
+              "real": 3195000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "f8e97dac-c2e7-4d08-898f-93022c628d3e",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "16bb12bd-cf21-4eeb-9756-9a61674831b8",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "a3ec34b9-8145-4987-a6f3-81ef94061f93",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "c7835751-d5ab-42c3-bf2e-9007fe98b823"
+              },
+              {
+                "id": "27a05e44-6175-4a88-880f-2d163ec786f4",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          },
+          {
+            "id": "204c5d1d-2ec3-4d99-a6c5-6f0b664d751c",
+            "name": "MacBook Pro (Space Gray, 64GB, 2TB, English)",
+            "price": {
+              "nominal": 4150000,
+              "real": 3735000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "a170418a-1ffa-42ca-80b0-8046b4fae701",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "5b938013-9b1b-4822-9b55-48508f6fc94e",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "251af592-e8ae-434c-bda9-1aad954e4f1e",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "f4cb7b0c-f91c-4ac2-b854-e741a83bd013",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "3690b079-92f0-42a9-93f7-66a919fe3050"
+              }
+            ]
+          },
+          {
+            "id": "f537f446-31d3-4341-9a12-12d021fccb6c",
+            "name": "MacBook Pro (Space Gray, 64GB, 2TB, Korean)",
+            "price": {
+              "nominal": 4150000,
+              "real": 3735000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [
+              {
+                "id": "d69a3baa-3823-4637-83a8-7c1a1e364e4f",
+                "option_id": "d1539434-9aab-4ab0-84f8-407848f8d15a",
+                "candidate_id": "ee451462-01c2-45ae-8707-7e70b9045cf4"
+              },
+              {
+                "id": "47005624-a510-4959-a2bf-8e00efcbafe2",
+                "option_id": "bdfa6eb1-3ed0-4aab-b173-8efe2543ef12",
+                "candidate_id": "50310274-d13f-40c1-b896-953cb600f6c3"
+              },
+              {
+                "id": "37ad53b3-be34-4000-8ede-7fee16ad0c2a",
+                "option_id": "6fb9af17-a370-47d7-8a2f-c6b6e1cf0af5",
+                "candidate_id": "308cd17e-c164-4d48-b6fa-febc97648a65"
+              },
+              {
+                "id": "3b582883-458c-4e0a-b2e6-3787c7ecf6bb",
+                "option_id": "a54e3f16-7df2-4ef6-938d-334320e6abbe",
+                "candidate_id": "31d2206d-a31b-4e56-aad2-597f95fda30e"
+              }
+            ]
+          }
+        ],
+        "id": "f41f94c7-2071-48ce-97dc-67ffc1d581c9",
+        "name": "MacBook M3 Pro 14inch Entity",
+        "primary": false,
+        "required": true
+      },
+      {
+        "options": [ ],
+        "stocks": [
+          {
+            "id": "80191d27-a2ea-4ec8-8960-0e5e637e22e7",
+            "name": "Warranty Program",
+            "price": {
+              "nominal": 100000,
+              "real": 89000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [ ]
+          }
+        ],
+        "id": "5789f39f-b01a-46ff-bd6a-e5ac73d55802",
+        "name": "Warranty Program",
+        "primary": false,
+        "required": false
+      },
+      {
+        "options": [ ],
+        "stocks": [
+          {
+            "id": "983099f8-9b10-4c98-a27a-f7890d00d697",
+            "name": "Magnetic Keyboard",
+            "price": {
+              "nominal": 200000,
+              "real": 169000
+            },
+            "inventory": {
+              "income": 1000000,
+              "outcome": 0
+            },
+            "choices": [ ]
+          }
+        ],
+        "id": "263d5e4d-1485-422b-97dd-153418cf3af5",
+        "name": "Magnetic Keyboard",
+        "primary": false,
+        "required": false
+      }
+    ],
+    "created_at": "2025-02-11T07:20:37.527Z",
+    "updated_at": "2025-02-11T07:20:37.527Z",
+    "paused_at": null,
+    "suspended_at": null,
+    "opened_at": "2025-02-11T07:20:37.525Z",
+    "closed_at": null
+  }
+}
