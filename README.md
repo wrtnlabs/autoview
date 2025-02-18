@@ -1,13 +1,20 @@
 # Autoview
 ![Gear Conceptual Diagram](https://github.com/user-attachments/assets/d2b40f25-db1a-42fe-8cba-af4652b18452)
 
+<!-- @todo Replace to example gif image, or video please -->
+
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/wrtnlabs/autoview/blob/master/LICENSE)
 [![npm version](https://img.shields.io/npm/v/@wrtnlabs/autoview.svg)](https://www.npmjs.com/package/@wrtnlabs/autoview)
 [![Downloads](https://img.shields.io/npm/dm/@wrtnlabs/autoview.svg)](https://www.npmjs.com/package/@wrtnlabs/autoview)
 [![Build Status](https://github.com/wrtnlabs/autoview/workflows/build/badge.svg)](https://github.com/wrtnlabs/autoview/actions?query=workflow%3Abuild)
 
-Automatic viewer renderer by AI agent.
+Automated Fontend Viewer Development.
 
+`@wrtnlabs/autoview` is an automation tool of frontend viewer development. It can automatically compose React viewer components, just by delivering a `value` to the `AutoViewAgent.value()` function. Also, it can compile a TypeScript code rendering a specific TypeScript type through `AutoViewAgent.compile()` function.
+
+Additionally, if you have a Swagger (OpenAPI) document, you can generate TypeScript codes rendering viewer components for every API operations. If you combined the automatically generated TypeScript codes from `@wrtnlabs/autoview`, you can dramatically enhance productivity of the frontend application interacting with the backend server.
+
+To automate the frontend viewer development, `@wrtnlabs/autoview` is performing LLM (Large Language Model) function calling strategy enhanced by compiler and validator feedbacks. Goal of the LLM function calling strategy is to composing the `IAutoViewComponentProps` typed instance, and it would be rendered by `<AutoViewComponent />` component.
 
 
 
@@ -16,9 +23,11 @@ Automatic viewer renderer by AI agent.
 ### Setup
 ```bash
 npm install @wrtnlabs/autoview
+
 npm install typia
-npm install -D @ryoppippi/unplugin-typia
 npx typia setup
+
+npm install -D @ryoppippi/unplugin-typia
 ```
 
 Install not only `@wrtnlabs/autoview`, but also [`typia`](https://github.com/samchon/typia).
@@ -49,7 +58,7 @@ const main = async (): Promise<void> => {
         apiKey: "YOUR_OPENAI_API_KEY",
       }),
     },
-    parameters: typia.llm.parameters<YourSchema, "chatgpt">(),
+    metadata: typia.llm.parameters<YourSchema, "chatgpt">(),
     value: {...},
   });
   ReactDOM.render(<AutoViewComponent {...props} />, document.body);
@@ -61,36 +70,46 @@ Automate frontend development by a `value`.
 
 If you want to render a value through AI agent of `@wrtnlabs/agent`, call the `AutoViewAgent.value()` function. It will return `IAutoViewComponentProps` typed value, which can be delivered to the `<AutoViewComponent />` component, so that you can accomplish the value viewer automation.
 
-Also, when filling arguments of the `AutoViewAgent.value()` function, you can explain metadata of the `value` by configuring the `parameters` property composed by [`typia.llm.parameters<T, Model>()`](https://typia.io/docs/llm/parameters) function. If you skip the `parameters` composition, you can't hint any definition to the AI agent, and the AI agent will just judge by itself just by content of the `value`.
+Also, when filling arguments of the `AutoViewAgent.value()` function, you can explain metadata of the `value` by configuring the `metadata` property composed by [`typia.llm.parameters<T, Model>()`](https://typia.io/docs/llm/parameters) function. If you skip the `metadata` composition, you can't hint any definition to the AI agent, and the AI agent will just judge by itself just by content of the `value`.
 
-### Schema Automation Tool
+### TypeScript Code Generator
 ```typescript
-import { 
-  AutoViewAgent,
-  AutoViewComponent,
-  IAutoViewComponentProps
-} from "@wrtnlabs/autoview";
-import ReactDOM from "react-dom";
+//----
+// CODE GENERATOR
+//----
+import { AutoViewAgent } from "@wrtnlabs/autoview";
+import fs from "fs";
 import typia from "typia";
 
-export const transformYourSchema: (
-  value: YourSchema,
-) => IAutoViewComponentPros = 
-  await AutoViewAgent.schema({
-    provider: {
-      type: "chatgpt",
-      model: "gpt-4o",
-      api: new OpenAI({
-        apiKey: "YOUR_OPENAI_API_KEY",
-      }),
-    },
-    parameters: typia.llm.parameters<YourSchema, "chatgpt">(),
-    random: typia.createRandom<YourSchema>(),
-  });
+export const script: string = await AutoViewAgent.schema({
+  provider: {
+    type: "chatgpt",
+    model: "gpt-4o",
+    api: new OpenAI({
+      apiKey: "YOUR_OPENAI_API_KEY",
+    }),
+  },
+  metadata: typia.llm.parameters<YourSchema, "chatgpt">(),
+  random: typia.createRandom<YourSchema>(),
+});
+await fs.promises.writeFile("convertYourSchema.ts", script, "utf8");
 
-// UTILIZATION CASE
-const value: YourSchema = { ... };
-const props: IAutoViewComponentProps = transformYourSchema(value);
+//----
+// GENERATED CODE
+//----
+import { IAutoViewComponentProps } from "@wrtnlabs/agent";
+
+export const $convert = (input: YourSchema): IAutoViewComponentProps => {
+  return { ... };
+};
+
+//----
+// UTILIZATITON CODE
+//----
+import { AutoViewComponent, IAutoViewComponentProps } from "@wrtnlabs/agent";
+import ReactDOM from "react-dom";
+
+const props: IAutoViewComponentProps = $convert({ ... });
 ReactDOM.render(<AutoViewComponent {...props} />, document.body);
 ```
 
@@ -98,9 +117,55 @@ Automate frontend development by `schema`.
 
 In the above section [#Value Automation Tool](#value-automation-tool), we've learned how to automate the value viewer rendering through `AutoViewAgent.value()` function. By the way, if you need to automate the value viewer rendering repeatedly, it may consume a lot of time and a lot of LLM costs.
 
-In that case, you can utilize `AutoViewAgent.schema()` function instead. It needs target schema instead of `value`, and returns a reusable function for the automation. With the `AutoViewAgent.schema()` returned function, you can automate the value viewer rendering whenever you want without the repeated AI agent execution.
+In that case, you can utilize `AutoViewAgent.compile()` function instead. When you put target schema type, it would return a TypeScript code. And the `AutoViewAgent.compile()` function written TypeScript code contains a converter function from `YourSchema` type to `IAutoViewComponentProps` type like above.
 
-To activate the `AutoViewAgent.value()` function, use two functions of `typia`, [`typia.llm.parameters<T, Model>()`](https://typia.io/docs/llm/parameters) and [`typia.random<T>()`](https://typia.io/docs/random) functions. `typia.llm.parameters<T, Model>()` function will inform the definition of the target type to the AI agent, and the other function `typia.random<T>()` will be used to internal validation.
+To activate such `AutoViewAgent.value()` function, [`typia.llm.parameters<T, Model>()`](https://typia.io/docs/llm/parameters) and [`typia.random<T>()`](https://typia.io/docs/random) functions are required. The first `typia.llm.parameters<T, Model>()` function will inform the definition of the target type to the AI agent, and the other function `typia.random<T>()` will be used to internal validation.
+
+### From Swagger Document
+```typescript
+import {
+  HttpLlm,
+  IHttpLlmApplication,
+  IHttpLlmFunction,
+  OpenApi,
+  OpenApiV3,
+  OpenApiV3_1,
+  SwaggerV2,
+} from "@samchon/openapi";
+import { AutoViewAgent } from "@wrtnlabs/autoview";
+import fs from "fs";
+
+const original:
+  | SwaggerV2.IDocument
+  | OpenApiV3.IDocument
+  | OpenApiV3_1.IDocument = await fetch(
+  "https://shopping-be.wrtn.ai/editor/swagger.json",
+).then((r) => r.json);
+const document: OpenApi.IDocument = OpenApi.convert(original);
+const application: IHttpLlmApplication<"chatgpt"> = HttpLlm.application({
+  model: "chatgpt",
+  document,
+});
+for (const func of application.functions) {
+  const script: string = await AutoViewAgent.compile({
+    provider: {
+      type: "chatgpt",
+      model: "gpt-4o",
+      api: new OpenAI({
+        apiKey: "YOUR_OPENAI_API_KEY",
+      }),
+    },
+    metadata: func,
+  });
+  await fs.promises.writeFile(`${func.name}.convert.ts`, script, "utf8");
+}
+```
+
+Automate return value viewer of API operations.
+
+If you have a Swagger (OpenAPI) document of a backend server, you can entirely assist or automate the return value viewer development of every API operations. Load swagger document, and convert it to LLM function calling application schema bypassing `OpenApi.convert()` and `HttpLlm.application()` functions. 
+
+And then generate TypeScript codes through `AutoViewAgent.compile()` for each API operation, then TypeScript codes rendering return value of every API operations would be automatically generated. With this way, you can boost up productivity of frontend application interacting with the backend server dramatically.
 
 
 
