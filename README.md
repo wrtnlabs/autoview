@@ -1,46 +1,74 @@
 # Autoview
+![Gear Conceptual Diagram](https://github.com/user-attachments/assets/d2b40f25-db1a-42fe-8cba-af4652b18452)
+
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/wrtnlabs/autoview/blob/master/LICENSE)
 [![npm version](https://img.shields.io/npm/v/@wrtnlabs/autoview.svg)](https://www.npmjs.com/package/@wrtnlabs/autoview)
 [![Downloads](https://img.shields.io/npm/dm/@wrtnlabs/autoview.svg)](https://www.npmjs.com/package/@wrtnlabs/autoview)
 [![Build Status](https://github.com/wrtnlabs/autoview/workflows/build/badge.svg)](https://github.com/wrtnlabs/autoview/actions?query=workflow%3Abuild)
 
-Automatic viewer renderer by AI agent with JSON schema.
+Automatic viewer renderer by AI agent.
+
+
 
 
 
 ## How to Use
 ### Setup
 ```bash
-npm install @wrtnlabs/autoview typia
+npm install @wrtnlabs/autoview
+npm install typia
 npm install -D @ryoppippi/unplugin-typia
 npx typia setup
 ```
 
+Install not only `@wrtnlabs/autoview`, but also [`typia`](https://github.com/samchon/typia).
+
+By the way, as `typia` is a transformer library analyzing TypeScript source code in the compilation level, it needs additional setup command `npx typia setup`. 
+
+Also, most frontend developers are not using the standard TypeScript compiler [`typescript`](https://www.npmjs.com/package/typescript). If you are one of them, please install [`@ryoppippi/unplugin-typia`](https://github.com/ryoppippi/unplugin-typia) additionally, following the below guide document.
+
+  - [Typia > Guide Documents > Setup > `unplugin-typia`](https://typia.io/docs/setup/#unplugin-typia)
+
 ### Value Automation Tool
 ```typescript
 import { 
-  IAutoViewComponentProps,
-  AutoView,
-  AutoViewAgent
+  AutoViewAgent,
+  AutoViewComponent,
+  IAutoViewComponentProps
 } from "@wrtnlabs/autoview";
+import OpenAI from "openai";
 import ReactDOM from "react-dom";
+import typia from "typia";
 
 const main = async (): Promise<void> => {
   const props: IAutoViewComponentProps = await AutoViewAgent.value({
+    provider: {
+      type: "chatgpt",
+      model: "gpt-4o",
+      api: new OpenAI({
+        apiKey: "YOUR_OPENAI_API_KEY",
+      }),
+    },
+    parameters: typia.llm.parameters<YourSchema, "chatgpt">(),
     value: {...},
-    provider: {},
   });
-  ReactDOM.render(<AutoView {...props} />, document.body);
+  ReactDOM.render(<AutoViewComponent {...props} />, document.body);
 };
 main().catch(console.error);
 ```
 
+Automate frontend development by a `value`.
+
+If you want to render a value through AI agent of `@wrtnlabs/agent`, call the `AutoViewAgent.value()` function. It will return `IAutoViewComponentProps` typed value, which can be delivered to the `<AutoViewComponent />` component, so that you can accomplish the value viewer automation.
+
+Also, when filling arguments of the `AutoViewAgent.value()` function, you can explain metadata of the `value` by configuring the `parameters` property composed by [`typia.llm.parameters<T, Model>()`](https://typia.io/docs/llm/parameters) function. If you skip the `parameters` composition, you can't hint any definition to the AI agent, and the AI agent will just judge by itself just by content of the `value`.
+
 ### Schema Automation Tool
 ```typescript
 import { 
-  IAutoViewComponentProps,
-  AutoView,
-  AutoViewAgent
+  AutoViewAgent,
+  AutoViewComponent,
+  IAutoViewComponentProps
 } from "@wrtnlabs/autoview";
 import ReactDOM from "react-dom";
 import typia from "typia";
@@ -49,15 +77,42 @@ export const transformYourSchema: (
   value: YourSchema,
 ) => IAutoViewComponentPros = 
   await AutoViewAgent.schema({
-    metadata: typia.json.schemas<[YourSchema]>(),
+    provider: {
+      type: "chatgpt",
+      model: "gpt-4o",
+      api: new OpenAI({
+        apiKey: "YOUR_OPENAI_API_KEY",
+      }),
+    },
+    parameters: typia.llm.parameters<YourSchema, "chatgpt">(),
     random: typia.createRandom<YourSchema>(),
   });
+
+// UTILIZATION CASE
+const value: YourSchema = { ... };
+const props: IAutoViewComponentProps = transformYourSchema(value);
+ReactDOM.render(<AutoViewComponent {...props} />, document.body);
 ```
+
+Automate frontend development by `schema`.
+
+In the above section [#Value Automation Tool](#value-automation-tool), we've learned how to automate the value viewer rendering through `AutoViewAgent.value()` function. By the way, if you need to automate the value viewer rendering repeatedly, it may consume a lot of time and a lot of LLM costs.
+
+In that case, you can utilize `AutoViewAgent.schema()` function instead. It needs target schema instead of `value`, and returns a reusable function for the automation. With the `AutoViewAgent.schema()` returned function, you can automate the value viewer rendering whenever you want without the repeated AI agent execution.
+
+To activate the `AutoViewAgent.value()` function, use two functions of `typia`, [`typia.llm.parameters<T, Model>()`](https://typia.io/docs/llm/parameters) and [`typia.random<T>()`](https://typia.io/docs/random) functions. `typia.llm.parameters<T, Model>()` function will inform the definition of the target type to the AI agent, and the other function `typia.random<T>()` will be used to internal validation.
+
 
 
 
 ## Principles
 ### LLM Function Calling
+`@wrtnlabs/autoview` fills `IAutoViewComponentProps` type by LLM function calling.
+
+The LLM (Large Language Model) function calling means that, AI agent selects proper function to call, and fills arguments of the function by analyzing the conversation context. 
+
+By the way, as `@wrtnlabs/autoview` delivers only target schema definition as context, and providing only one function `render()` to the AI agent, the AI agent will fill the arguments of the `render()` function by analyzing the target schema definition context.
+
 ### Validation Feedback
 ```typescript
 import { IAutoViewComponentProps } from "@wrtnlabs/autoview";
@@ -188,7 +243,7 @@ pnpm run dev  # FRONTEND DEVELOPMENT
 pnpm run test # RUN TEST BENCHMARK PROGRAM
 ```
 
-Above above commands.
+Run above commands.
 
 Then you can see the benchmark results in both `public/results/json` and `public/results/images` directories.
 
