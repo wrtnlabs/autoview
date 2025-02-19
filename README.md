@@ -81,7 +81,7 @@ import { AutoViewAgent } from "@wrtnlabs/autoview";
 import fs from "fs";
 import typia from "typia";
 
-export const script: string = await AutoViewAgent.schema({
+export const script: string = await AutoViewAgent.compile({
   provider: {
     type: "chatgpt",
     model: "gpt-4o",
