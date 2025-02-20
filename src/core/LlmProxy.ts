@@ -44,17 +44,17 @@ async function createCompletion(
   options?: OpenAI.RequestOptions,
   backoffStrategy?: ILlmBackoffStrategy,
 ): Promise<OpenAI.ChatCompletion> {
-  const backoffStrat = backoffStrategy ?? {
+  const backoffStrategyOrDefault = backoffStrategy ?? {
     maximumAttempts: 5,
     baseDelay: 1000,
     maximumDelay: 5000,
   };
 
-  if (backoffStrat.maximumAttempts < 1) {
+  if (backoffStrategyOrDefault.maximumAttempts < 1) {
     throw new Error("maximumAttempts must be greater than 0");
   }
 
-  for (let i = 1; i <= backoffStrat.maximumAttempts; ++i) {
+  for (let i = 1; i <= backoffStrategyOrDefault.maximumAttempts; ++i) {
     try {
       const completion = await api.chat.completions.create(body, options);
 
@@ -68,14 +68,14 @@ async function createCompletion(
         error instanceof OpenAI.APIError &&
         (error.status === 429 || (500 <= error.status && error.status <= 599))
       ) {
-        if (i === backoffStrat.maximumAttempts) {
+        if (i === backoffStrategyOrDefault.maximumAttempts) {
           throw error;
         }
 
-        const jitter = Math.random() * backoffStrat.baseDelay;
+        const jitter = Math.random() * backoffStrategyOrDefault.baseDelay;
         const delay = Math.min(
-          backoffStrat.baseDelay * 2 ** (i - 1) + jitter,
-          backoffStrat.maximumDelay,
+          backoffStrategyOrDefault.baseDelay * 2 ** (i - 1) + jitter,
+          backoffStrategyOrDefault.maximumDelay,
         );
         let delayWithRetryAfter = delay;
 
