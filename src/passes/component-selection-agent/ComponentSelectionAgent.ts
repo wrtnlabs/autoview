@@ -1,37 +1,46 @@
-import { JSONPath } from "jsonpath-plus";
 import { TypeGuardError, assertGuard } from "typia";
 
 import { Agent, LlmFailure, LlmProxy, parseLlmJsonOutput } from "../../core";
 import { IAutoViewAgentProvider } from "../../structures/agents/IAutoViewAgentProvider";
 import { prompt } from "./prompt";
 
-export namespace MainContentExtractionAgent {
+export namespace ComponentSelectionAgent {
   export interface Input {
     provider: IAutoViewAgentProvider;
-    jsonResponse: string;
+    mainContent: unknown;
+    components: InputComponent[];
+  }
+
+  export interface InputComponent {
+    name: string;
+    description: string;
   }
 
   export interface Output {
+    reasoning: string;
+    inferredEntity: string;
     explanation: string;
-    jsonPath: string;
-    mainContent: unknown;
+    selectedComponentName: string;
   }
 }
 
-export class MainContentExtractionAgent
+export class ComponentSelectionAgent
   implements
-    Agent<MainContentExtractionAgent.Input, MainContentExtractionAgent.Output>
+    Agent<ComponentSelectionAgent.Input, ComponentSelectionAgent.Output>
 {
   async execute(
-    input: MainContentExtractionAgent.Input,
-  ): Promise<MainContentExtractionAgent.Output> {
+    input: ComponentSelectionAgent.Input,
+  ): Promise<ComponentSelectionAgent.Output> {
     const systemPrompt = prompt({
-      json_response: input.jsonResponse.trim(),
+      main_content: Array.isArray(input.mainContent)
+        ? input.mainContent[0]!
+        : input.mainContent,
+      components: input.components,
     });
 
     const results = await new LlmProxy<
-      MainContentExtractionAgent.Input,
-      MainContentExtractionAgent.Output
+      ComponentSelectionAgent.Input,
+      ComponentSelectionAgent.Output
     >()
       .withTextHandler(handleText)
       .call(
@@ -60,38 +69,34 @@ export class MainContentExtractionAgent
 }
 
 function handleText(
-  input: MainContentExtractionAgent.Input,
+  input: ComponentSelectionAgent.Input,
   text: string,
-): MainContentExtractionAgent.Output {
+): ComponentSelectionAgent.Output {
   const output = parseOutput(text);
-  const rendered = JSONPath({
-    path: output.shortest_json_path,
-    json: JSON.parse(input.jsonResponse),
-    wrap: false,
-  });
 
-  if (rendered === undefined) {
-    throw new LlmFailure(
-      `failed to render the json path "${output.shortest_json_path}"; perhaps the json path is invalid? try again`,
-    );
+  if (
+    input.components.some(
+      (component) => component.name === output.selected_component_name,
+    )
+  ) {
+    return {
+      reasoning: output.reasoning,
+      inferredEntity: output.inferred_entity,
+      explanation: output.explanation,
+      selectedComponentName: output.selected_component_name,
+    };
   }
 
-  if (Array.isArray(rendered) && rendered.length === 0) {
-    throw new LlmFailure(
-      `rendered json path "${output.shortest_json_path}" is an empty array, you should select higher level of the json structure; try again`,
-    );
-  }
-
-  return {
-    explanation: output.explanation,
-    jsonPath: output.shortest_json_path,
-    mainContent: rendered,
-  };
+  throw new LlmFailure(
+    `selected component name "${output.selected_component_name}" is not in the list of components; try again`,
+  );
 }
 
 interface Output {
+  reasoning: string;
+  inferred_entity: string;
   explanation: string;
-  shortest_json_path: string;
+  selected_component_name: string;
 }
 
 function parseOutput(text: string): Output {

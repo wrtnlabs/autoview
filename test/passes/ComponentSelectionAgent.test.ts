@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 
+import { ComponentSelectionAgent } from "../../src/passes/component-selection-agent/ComponentSelectionAgent";
 import { MainContentExtractionAgent } from "../../src/passes/main-content-extraction-agent/MainContentExtractionAgent";
 import { IAutoViewAgentProvider } from "../../src/structures/agents/IAutoViewAgentProvider";
 import { TestGlobal } from "../TestGlobal";
@@ -18,7 +19,7 @@ async function main(): Promise<void> {
 
   const mainContentExtractionAgent = new MainContentExtractionAgent();
 
-  const result = await mainContentExtractionAgent.execute({
+  const result1 = await mainContentExtractionAgent.execute({
     provider,
     jsonResponse: `
 {
@@ -149,7 +150,48 @@ async function main(): Promise<void> {
 `,
   });
 
-  console.log(result);
+  console.log("result1.jsonPath", result1.jsonPath);
+
+  const componentSelectionAgent = new ComponentSelectionAgent();
+
+  const result2 = await componentSelectionAgent.execute({
+    provider,
+    mainContent: result1.mainContent,
+    components: [
+      {
+        name: "ImageViewer",
+        description:
+          "Renders a single image with an optional caption, optimal for highlighting individual visual content",
+      },
+      {
+        name: "Carousel",
+        description:
+          "Displays a slideshow of multiple images or cards, excellent for galleries or sequential presentations",
+      },
+      {
+        name: "DetailCard",
+        description:
+          "Presents a card layout with an image, title, and additional text, ideal for detailed summaries of complex items",
+      },
+      {
+        name: "TextBlock",
+        description:
+          "Displays plain text content, well-suited for narrative or descriptive information",
+      },
+      {
+        name: "BarChart",
+        description:
+          "Visualizes data as vertical or horizontal bars, ideal for comparing numerical values across categories or time periods",
+      },
+      {
+        name: "PieChart",
+        description:
+          "Presents data as a circular chart with slices, perfect for illustrating proportions or percentages",
+      },
+    ],
+  });
+
+  console.log("result2", result2);
 }
 
 main().catch(console.error);

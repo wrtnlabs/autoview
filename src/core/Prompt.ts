@@ -20,7 +20,7 @@ export function renderPrompt(prompt: string, context: any): string {
   return prompt
     .replace(/\{\{\s*([a-zA-Z0-9-_]+)\s*\}\}/g, (match, p1: string) => {
       if (p1 in context) {
-        return String(context[p1]);
+        return JSON.stringify(context[p1]);
       }
 
       return match;
