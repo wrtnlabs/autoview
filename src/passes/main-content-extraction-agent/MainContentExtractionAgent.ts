@@ -81,8 +81,6 @@ function handleText(
     );
   }
 
-  // TODO: write a verbose log for the output
-
   return {
     jsonPath: output.shortest_json_path,
     mainContent: rendered,
