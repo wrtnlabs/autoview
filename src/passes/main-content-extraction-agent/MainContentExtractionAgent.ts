@@ -75,6 +75,12 @@ function handleText(
     );
   }
 
+  if (Array.isArray(rendered) && rendered.length === 0) {
+    throw new LlmFailure(
+      `rendered json path "${output.shortest_json_path}" is an empty array, you should select higher level of the json structure; try again`,
+    );
+  }
+
   // TODO: write a verbose log for the output
 
   return {
