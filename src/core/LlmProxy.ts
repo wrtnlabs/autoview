@@ -1,8 +1,22 @@
 import OpenAI from "openai";
 
+/**
+ * A promise or a value.
+ */
 export type PromiseOrValue<T> = Promise<T> | T;
 
+/**
+ * A handler for text.
+ *
+ * This type is used to simplify the process of handling text.
+ */
 export type TextHandler<I, O> = (input: I, text: string) => PromiseOrValue<O>;
+
+/**
+ * A handler for tool calls.
+ *
+ * This type is used to simplify the process of handling tool calls.
+ */
 export type ToolHandler<I, O> = (
   input: I,
   toolCallId: string,
@@ -30,6 +44,13 @@ export interface ILlmBackoffStrategy {
   maximumDelay: number;
 }
 
+/**
+ * An error that occurs when the LLM fails to generate a valid output.
+ *
+ * Throw this type of error inside of the {@link TextHandler} or {@link ToolHandler}
+ * to indicate that the LLM has failed to generate a valid output and the request
+ * should be retried.
+ */
 export class LlmFailure {
   constructor(private readonly message: string) {}
 
@@ -38,6 +59,19 @@ export class LlmFailure {
   }
 }
 
+/**
+ * Create a completion.
+ *
+ * This function will create a completion for the given body and options.
+ *
+ * It retries the request when the LLM returns a 429 or a 5xx error.
+ *
+ * @param api - The API to use to create the completion.
+ * @param body - The body of the request to the LLM.
+ * @param options - The options for the request to the LLM.
+ * @param backoffStrategy - The backoff strategy to use for the request to the LLM.
+ * @returns The completion.
+ */
 async function createCompletion(
   api: OpenAI,
   body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
@@ -108,20 +142,56 @@ async function createCompletion(
   throw new Error("unreachable");
 }
 
+/**
+ * A proxy for an LLM.
+ *
+ * This class simplifies the process of calling an LLM by providing a way to
+ * handle text and tool calls. It automatically retries the request when the LLM
+ * fails to generate a valid output.
+ */
 export class LlmProxy<I, O> {
   private textHandler: TextHandler<I, O> | undefined;
   private readonly toolHandlers: Map<string, ToolHandler<I, O>> = new Map();
 
+  /**
+   * Set the text handler.
+   *
+   * The text handler is called when the LLM generates text.
+   *
+   * @param handler - The text handler.
+   * @returns The proxy itself.
+   */
   withTextHandler(handler: TextHandler<I, O>): this {
     this.textHandler = handler;
     return this;
   }
 
+  /**
+   * Set the tool handler.
+   *
+   * The tool handler is called when the LLM generates a tool call.
+   *
+   * @param name - The name of the tool.
+   * @param handler - The tool handler.
+   * @returns The proxy itself.
+   */
   withToolHandler(name: string, handler: ToolHandler<I, O>): this {
     this.toolHandlers.set(name, handler);
     return this;
   }
 
+  /**
+   * Call the LLM.
+   *
+   * This method will call the LLM with the given body and options.
+   *
+   * @param input - The input to the LLM.
+   * @param api - The API to use to call the LLM.
+   * @param body - The body of the request to the LLM.
+   * @param options - The options for the request to the LLM.
+   * @param backoffStrategy - The backoff strategy to use for the request to the LLM.
+   * @returns The output of the LLM.
+   */
   async call(
     input: I,
     api: OpenAI,
