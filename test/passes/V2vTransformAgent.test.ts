@@ -1,10 +1,9 @@
 import OpenAI from "openai";
-import typia, { is } from "typia";
+import typia, { createAssertGuard } from "typia";
 
-import { LlmFailure } from "../../src/core";
-import { ComponentSelectionAgent } from "../../src/passes/component-selection-agent/ComponentSelectionAgent";
 import { MainContentExtractionAgent } from "../../src/passes/main-content-extraction-agent/MainContentExtractionAgent";
 import { V2vTransformAgent } from "../../src/passes/v2v-transform-agent/V2vTransformAgent";
+import { V2vTransformAgentDto } from "../../src/passes/v2v-transform-agent/dto";
 import { IAutoViewAgentProvider } from "../../src/structures/agents/IAutoViewAgentProvider";
 import { TestGlobal } from "../TestGlobal";
 
@@ -155,70 +154,128 @@ async function main(): Promise<void> {
 
   console.log("result1.jsonPath", result1.jsonPath);
 
-  const componentSelectionAgent = new ComponentSelectionAgent();
-
-  const result2 = await componentSelectionAgent.execute({
-    provider,
-    mainContent: result1.mainContent,
-    components: [
-      {
-        name: "ImageViewer",
-        description:
-          "Renders a single image with an optional caption, optimal for highlighting individual visual content",
-      },
-      {
-        name: "Carousel",
-        description:
-          "Displays a slideshow of multiple images or cards, excellent for galleries or sequential presentations",
-      },
-      {
-        name: "DetailCard",
-        description:
-          "Presents a card layout with an image, title, and additional text, ideal for detailed summaries of complex items",
-      },
-      {
-        name: "TextBlock",
-        description:
-          "Displays plain text content, well-suited for narrative or descriptive information",
-      },
-      {
-        name: "BarChart",
-        description:
-          "Visualizes data as vertical or horizontal bars, ideal for comparing numerical values across categories or time periods",
-      },
-      {
-        name: "PieChart",
-        description:
-          "Presents data as a circular chart with slices, perfect for illustrating proportions or percentages",
-      },
-    ],
-  });
-
-  console.log("result2", result2);
+  const defs = {};
+  const components: V2vTransformAgentDto.IComponent[] = [
+    {
+      name: "Text",
+      description:
+        "Displays a single, readonly text string for labels, titles, or short descriptions",
+      componentSchema: typia.llm.schema<
+        ITestTextProps,
+        "chatgpt",
+        {
+          reference: true;
+          strict: true;
+        }
+      >(defs) as any,
+      valueValidator: createAssertGuard<ITestTextProps>(),
+    },
+    {
+      name: "Image",
+      description:
+        "Renders a single, readonly image from a URL, suitable for static visual content",
+      componentSchema: typia.llm.schema<
+        ITestImageProps,
+        "chatgpt",
+        {
+          reference: true;
+          strict: true;
+        }
+      >(defs) as any,
+      valueValidator: createAssertGuard<ITestImageProps>(),
+    },
+    {
+      name: "List",
+      description:
+        "Arranges a collection of readonly items in a vertical list, supporting nested components",
+      componentSchema: typia.llm.schema<
+        ITestListProps,
+        "chatgpt",
+        {
+          reference: true;
+          strict: true;
+        }
+      >(defs) as any,
+      valueValidator: createAssertGuard<ITestListProps>(),
+    },
+    {
+      name: "Container",
+      description:
+        "Groups multiple readonly components vertically for structured layouts",
+      componentSchema: typia.llm.schema<
+        ITestContainerProps,
+        "chatgpt",
+        {
+          reference: true;
+          strict: true;
+        }
+      >(defs) as any,
+      valueValidator: createAssertGuard<ITestContainerProps>(),
+    },
+    {
+      name: "BarGraph",
+      description:
+        "Displays readonly numerical data as a bar graph for comparison across categories",
+      componentSchema: typia.llm.schema<
+        ITestBarGraphProps,
+        "chatgpt",
+        {
+          reference: true;
+          strict: true;
+        }
+      >(defs) as any,
+      valueValidator: createAssertGuard<ITestBarGraphProps>(),
+    },
+  ];
 
   const v2vTransformAgent = new V2vTransformAgent();
-  interface ImageViewerInput {
-    url: string;
-    nameOrDescription: string;
-  }
-
-  const schema = typia.llm.schema<ImageViewerInput, "chatgpt">({});
-  const result3 = await v2vTransformAgent.execute({
+  const result2 = await v2vTransformAgent.execute({
     provider,
     content: result1.mainContent,
-    componentSchema: schema,
-    componentValueValidator: (value) => {
-      if (is<ImageViewerInput>(value)) {
-        return;
-      }
-
-      throw new LlmFailure(
-        "your response is not valid; please try again with the correct format, carefully following the given JSON Schema",
-      );
-    },
+    components,
+    defs,
   });
 
-  console.log("result3", result3);
+  console.log("result2", JSON.stringify(result2, null, 2));
 }
 
 main().catch(console.error);
+
+// Base interface with discriminator 'type'
+interface ITestComponentPropsBase<Type extends string> {
+  type: Type;
+}
+
+// Text component
+interface ITestTextProps extends ITestComponentPropsBase<"Text"> {
+  value: string;
+}
+
+// Image component
+interface ITestImageProps extends ITestComponentPropsBase<"Image"> {
+  src: string;
+}
+
+// List component
+interface ITestListProps extends ITestComponentPropsBase<"List"> {
+  children: ITestComponentProps[];
+}
+
+// Container component
+interface ITestContainerProps extends ITestComponentPropsBase<"Container"> {
+  children: ITestComponentProps[];
+}
+
+// BarGraph component
+interface ITestBarGraphProps extends ITestComponentPropsBase<"BarGraph"> {
+  labels: string[];
+  values: number[];
+}
+
+// Union type for all components
+type ITestComponentProps =
+  | ITestTextProps
+  | ITestImageProps
+  | ITestListProps
+  | ITestContainerProps
+  | ITestBarGraphProps;
