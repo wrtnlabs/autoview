@@ -160,70 +160,41 @@ async function main(): Promise<void> {
       name: "Text",
       description:
         "Displays a single, readonly text string for labels, titles, or short descriptions",
-      componentSchema: typia.llm.schema<
-        ITestTextProps,
-        "chatgpt",
-        {
-          reference: true;
-          strict: true;
-        }
-      >(defs) as any,
+      componentSchema: typia.llm.schema<ITestTextProps, "chatgpt">(defs) as any,
       valueValidator: createAssertGuard<ITestTextProps>(),
     },
     {
       name: "Image",
       description:
         "Renders a single, readonly image from a URL, suitable for static visual content",
-      componentSchema: typia.llm.schema<
-        ITestImageProps,
-        "chatgpt",
-        {
-          reference: true;
-          strict: true;
-        }
-      >(defs) as any,
+      componentSchema: typia.llm.schema<ITestImageProps, "chatgpt">(
+        defs,
+      ) as any,
       valueValidator: createAssertGuard<ITestImageProps>(),
     },
     {
       name: "List",
       description:
         "Arranges a collection of readonly items in a vertical list, supporting nested components",
-      componentSchema: typia.llm.schema<
-        ITestListProps,
-        "chatgpt",
-        {
-          reference: true;
-          strict: true;
-        }
-      >(defs) as any,
+      componentSchema: typia.llm.schema<ITestListProps, "chatgpt">(defs) as any,
       valueValidator: createAssertGuard<ITestListProps>(),
     },
     {
       name: "Container",
       description:
         "Groups multiple readonly components vertically for structured layouts",
-      componentSchema: typia.llm.schema<
-        ITestContainerProps,
-        "chatgpt",
-        {
-          reference: true;
-          strict: true;
-        }
-      >(defs) as any,
+      componentSchema: typia.llm.schema<ITestContainerProps, "chatgpt">(
+        defs,
+      ) as any,
       valueValidator: createAssertGuard<ITestContainerProps>(),
     },
     {
       name: "BarGraph",
       description:
         "Displays readonly numerical data as a bar graph for comparison across categories",
-      componentSchema: typia.llm.schema<
-        ITestBarGraphProps,
-        "chatgpt",
-        {
-          reference: true;
-          strict: true;
-        }
-      >(defs) as any,
+      componentSchema: typia.llm.schema<ITestBarGraphProps, "chatgpt">(
+        defs,
+      ) as any,
       valueValidator: createAssertGuard<ITestBarGraphProps>(),
     },
   ];
