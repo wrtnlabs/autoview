@@ -1,15 +1,13 @@
 # LetterAvatar
 
-The `LetterAvatar` component visually represents a user or entity by utilizing initials, allowing for quick identification of individuals or groups.
+The `LetterAvatar` component visually represents a user or an entity using initials, enabling easy identification of individuals or groups.
 
-## Purpose
+- Effectively conveys the identity of a user or entity for quick recognition and differentiation.
+- Used as a placeholder when a profile image is unavailable, commonly appearing in profiles, chat lists, and user directories.
 
-- Effectively displays a user’s or entity’s identity for easy recognition and differentiation.  
-- Serves as a placeholder in profiles, chat lists, and user directories when an image is unavailable.
+## Usage Conditions
 
-## Usage Requirements
-
-A user's name or nickname must be provided, as initials are generated based on this information. If the name is unavailable, a default user icon is displayed instead.
+A user's name or nickname must be provided, as the initials are generated based on this information. If no name is available, a default user icon will be displayed instead.
 
 ### Initials Examples
 
@@ -22,19 +20,19 @@ A user's name or nickname must be provided, as initials are generated based on t
 
 ### When Not to Use
 
-- If both the user's name and profile image are available, `ImageAvatar` should be used instead.  
-- When representing a specific function or action, using an `Icon` instead of `LetterAvatar` is more appropriate.  
-- If space is limited or visual elements are unnecessary, displaying the name as text is a better option.
+- If both a user’s name and profile image are available, `ImageAvatar` should be used instead.
+- If an icon is needed to represent a specific function or action, use an `Icon` instead of `LetterAvatar`.
+- In cases where space is limited or a visual element is unnecessary, displaying the user’s name as text may be more appropriate.
 
 ## Examples of Use
 
-- **Profile Page:** Positioned centrally on the user detail page to highlight individual identity.  
-- **Chat List:** Displays avatars in the chat list to help users recognize contacts.  
-- **Navigation Bar:** Placed on the right side of the top navigation bar to indicate the logged-in user.
+- **Profile Page:** Positioned centrally in a user's detailed profile to emphasize identity.
+- **Chat List:** Displays an avatar in chat lists to help identify conversation partners.
+- **Navigation Bar:** Positioned at the top-right of the navigation bar to indicate the logged-in user.
 
-## Additional Applications
+## Extensions
 
 A `Badge` can be added to the left, right, top, or bottom of the avatar to provide additional information.
 
-- **Status Indicator:** Represents the user's online status. Example: Green (Online), Gray (Offline).  
-- **Notification Indicator:** Displays the number of pending notifications requiring attention.
+- **Status Indication:** Represents the user's online status. Example: Green (Online), Gray (Offline).
+- **Notification Count:** Displays the number of unread notifications requiring attention.
