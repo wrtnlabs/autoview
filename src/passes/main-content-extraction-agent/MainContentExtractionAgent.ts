@@ -2,36 +2,26 @@ import { JSONPath } from "jsonpath-plus";
 import { TypeGuardError, assertGuard } from "typia";
 
 import { Agent, LlmFailure, LlmProxy, parseLlmJsonOutput } from "../../core";
-import { IAutoViewAgentProvider } from "../../structures/agents/IAutoViewAgentProvider";
+import { MainContentExtractionAgentDto } from "./dto";
 import { prompt } from "./prompt";
-
-export namespace MainContentExtractionAgent {
-  export interface Input {
-    provider: IAutoViewAgentProvider;
-    jsonResponse: string;
-  }
-
-  export interface Output {
-    explanation: string;
-    jsonPath: string;
-    mainContent: unknown;
-  }
-}
 
 export class MainContentExtractionAgent
   implements
-    Agent<MainContentExtractionAgent.Input, MainContentExtractionAgent.Output>
+    Agent<
+      MainContentExtractionAgentDto.Input,
+      MainContentExtractionAgentDto.Output
+    >
 {
   async execute(
-    input: MainContentExtractionAgent.Input,
-  ): Promise<MainContentExtractionAgent.Output> {
+    input: MainContentExtractionAgentDto.Input,
+  ): Promise<MainContentExtractionAgentDto.Output> {
     const systemPrompt = prompt({
       json_response: input.jsonResponse.trim(),
     });
 
     const results = await new LlmProxy<
-      MainContentExtractionAgent.Input,
-      MainContentExtractionAgent.Output
+      MainContentExtractionAgentDto.Input,
+      MainContentExtractionAgentDto.Output
     >()
       .withTextHandler(handleText)
       .call(
@@ -60,9 +50,9 @@ export class MainContentExtractionAgent
 }
 
 function handleText(
-  input: MainContentExtractionAgent.Input,
+  input: MainContentExtractionAgentDto.Input,
   text: string,
-): MainContentExtractionAgent.Output {
+): MainContentExtractionAgentDto.Output {
   const output = parseOutput(text);
   const rendered = JSONPath({
     path: output.shortest_json_path,

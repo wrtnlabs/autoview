@@ -1,42 +1,15 @@
 import { TypeGuardError, assertGuard } from "typia";
 
 import { Agent, LlmFailure, LlmProxy, parseLlmJsonOutput } from "../../core";
-import { IAutoViewAgentProvider } from "../../structures/agents/IAutoViewAgentProvider";
+import { V2vTransformAgentDto } from "./dto";
 import { prompt } from "./prompt";
 
-export namespace V2vTransformAgent {
-  export interface Input {
-    provider: IAutoViewAgentProvider;
-    content: unknown;
-    /**
-     * The schema of the component.
-     *
-     * It must describe a single object, even if the content is an array of objects. The {@link V2vTransformAgent} will
-     * iterate the content and validate each value.
-     */
-    componentSchema: unknown;
-    /**
-     * Validate the value of the component. It must throw an error of type {@link LlmFailure} if the value is invalid.
-     *
-     * It must expect a single object, even if the content is an array of objects. The {@link V2vTransformAgent} will
-     * iterate the content and validate each value.
-     *
-     * @param value - The value of the component.
-     */
-    componentValueValidator(value: unknown): void;
-  }
-
-  export interface Output {
-    transformedData: unknown;
-  }
-}
-
 export class V2vTransformAgent
-  implements Agent<V2vTransformAgent.Input, V2vTransformAgent.Output>
+  implements Agent<V2vTransformAgentDto.Input, V2vTransformAgentDto.Output>
 {
   async execute(
-    input: V2vTransformAgent.Input,
-  ): Promise<V2vTransformAgent.Output> {
+    input: V2vTransformAgentDto.Input,
+  ): Promise<V2vTransformAgentDto.Output> {
     if (!Array.isArray(input.content)) {
       return transform(input);
     }
@@ -51,21 +24,24 @@ export class V2vTransformAgent
     );
 
     return {
-      transformedData: outputs.map((output) => output.transformedData),
+      visualizations: outputs.flatMap((output) => output.visualizations),
     };
   }
 }
 
 async function transform(
-  input: V2vTransformAgent.Input,
-): Promise<V2vTransformAgent.Output> {
+  input: V2vTransformAgentDto.Input,
+): Promise<V2vTransformAgentDto.Output> {
   const systemPrompt = prompt({
     content: input.content,
-    component_schema: input.componentSchema,
+    atomic_components: input.components.map((component) => ({
+      ...component,
+      valueValidator: undefined,
+    })),
   });
   const results = await new LlmProxy<
-    V2vTransformAgent.Input,
-    V2vTransformAgent.Output
+    V2vTransformAgentDto.Input,
+    V2vTransformAgentDto.Output
   >()
     .withTextHandler(handleText)
     .call(
@@ -79,6 +55,29 @@ async function transform(
             content: systemPrompt,
           },
         ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "visualization",
+            description:
+              "The visualization to be returned, with an reasoning process",
+            schema: {
+              type: "object",
+              properties: {
+                reasoning: {
+                  type: "string",
+                },
+                visualization: {
+                  anyOf: input.components,
+                },
+              },
+              $defs: input.defs,
+              additionalProperties: false,
+              required: ["reasoning", "visualization"],
+            },
+            strict: false,
+          },
+        },
       },
       input.provider.options,
     );
@@ -93,21 +92,42 @@ async function transform(
 }
 
 function handleText(
-  input: V2vTransformAgent.Input,
+  input: V2vTransformAgentDto.Input,
   text: string,
-): V2vTransformAgent.Output {
+): V2vTransformAgentDto.Output {
   const output = parseOutput(text);
+  const isOutputValid = input.components.some((component) => {
+    try {
+      component.valueValidator(output.visualization);
+      return true;
+    } catch (error: unknown) {
+      if (error instanceof TypeGuardError) {
+        return false;
+      }
 
-  input.componentValueValidator(output.transformed_data);
+      throw error;
+    }
+  });
+
+  if (!isOutputValid) {
+    throw new LlmFailure(
+      "output is invalid; your visualization properties do not match with the any of the atomic components",
+    );
+  }
 
   return {
-    transformedData: output.transformed_data,
+    visualizations: [
+      {
+        reasoning: output.reasoning,
+        properties: output.visualization,
+      },
+    ],
   };
 }
 
 interface Output {
   reasoning: string;
-  transformed_data: unknown;
+  visualization: unknown;
 }
 
 function parseOutput(text: string): Output {
