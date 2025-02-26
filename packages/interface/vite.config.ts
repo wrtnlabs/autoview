@@ -1,4 +1,3 @@
-import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
 import { defineConfig } from "vite";
 
@@ -8,17 +7,6 @@ export default defineConfig({
       tsconfig: "./tsconfig.json",
       declaration: true,
       outDir: "dist",
-      module: "ES2020",
-      target: "ES2020",
-    }),
-    terser({
-      format: {
-        comments: "some",
-        beautify: true,
-      },
-      compress: false,
-      mangle: false,
-      module: true,
     }),
   ],
   build: {
@@ -31,7 +19,7 @@ export default defineConfig({
     },
     lib: {
       entry: "./src/index.ts",
-      name: "AutoViewAgent",
+      name: "AutoViewInterface",
       fileName: "index",
     },
   },

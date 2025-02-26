@@ -1,1 +1,1 @@
-console.log("Coming soon...")
+console.log("Coming soon...");
