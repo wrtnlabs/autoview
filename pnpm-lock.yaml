@@ -19,7 +19,7 @@ importers:
         version: 7.6.0(@samchon/openapi@2.4.1)(typescript@5.6.3)
       vite-plugin-dts:
         specifier: ^4.5.0
-        version: 4.5.0(@types/node@22.13.1)(rollup@4.34.1)(typescript@5.6.3)(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0))
+        version: 4.5.0(@types/node@22.13.1)(rollup@4.34.1)(typescript@5.6.3)(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3))
     devDependencies:
       '@eslint/js':
         specifier: ^9.17.0
@@ -32,7 +32,7 @@ importers:
         version: 12.1.2(rollup@4.34.1)(tslib@2.8.1)(typescript@5.6.3)
       '@ryoppippi/unplugin-typia':
         specifier: ^1.2.0
-        version: 1.2.0(@samchon/openapi@2.4.1)(@types/node@22.13.1)(rollup@4.34.1)(terser@5.37.0)
+        version: 1.2.0(@samchon/openapi@2.4.1)(@types/node@22.13.1)(rollup@4.34.1)(terser@5.37.0)(tsx@4.19.3)
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^5.2.2
         version: 5.2.2(prettier@3.4.2)
@@ -47,7 +47,7 @@ importers:
         version: 18.3.5(@types/react@18.3.18)
       '@vitejs/plugin-react':
         specifier: ^4.3.4
-        version: 4.3.4(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0))
+        version: 4.3.4(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3))
       dotenv:
         specifier: ^16.4.7
         version: 16.4.7
@@ -101,7 +101,7 @@ importers:
         version: 8.22.0(eslint@9.19.0)(typescript@5.6.3)
       vite:
         specifier: ^6.0.5
-        version: 6.0.11(@types/node@22.13.1)(terser@5.37.0)
+        version: 6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
 
   packages/agent:
     devDependencies:
@@ -113,7 +113,9 @@ importers:
         version: 5.7.3
       vite:
         specifier: ^6.1.1
-        version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)
+        version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
+
+  packages/compiler: {}
 
   packages/interface:
     devDependencies:
@@ -125,9 +127,13 @@ importers:
         version: 5.7.3
       vite:
         specifier: ^6.2.0
-        version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)
+        version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
+
+  packages/rpc: {}
 
   packages/tsconfig: {}
+
+  packages/ui: {}
 
 packages:
 
@@ -1370,6 +1376,9 @@ packages:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
     engines: {node: '>=6.9.0'}
 
+  get-tsconfig@4.10.0:
+    resolution: {integrity: sha512-kGzZ3LWWQcGIAmg6iWvXn0ei6WDtV26wzHRMwDSzmAbcXrTEXxHy6IehI6/4eT6VRKyMP1eF1VqwrVUmE/LR7A==}
+
   glob-parent@5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
     engines: {node: '>= 6'}
@@ -1838,6 +1847,9 @@ packages:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
     engines: {node: '>=4'}
 
+  resolve-pkg-maps@1.0.0:
+    resolution: {integrity: sha512-seS2Tj26TBVOC2NIc2rOe2y2ZO7efxITtLZcGSOnHHNOQ7CkiUBfw0Iw2ck6xkIhPwLhKNLS8BO+hEpngQlqzw==}
+
   resolve@1.22.10:
     resolution: {integrity: sha512-NPRy+/ncIMeDlTAsuqwKIiferiawhefFJtkNSW0qZJEqMEb+qBt/77B/jGeeek+F0uOeN05CDa6HXbbIgtVX4w==}
     engines: {node: '>= 0.4'}
@@ -2020,6 +2032,11 @@ packages:
 
   tstl@3.0.0:
     resolution: {integrity: sha512-pR83y6/tbJx6jeGRqGJXk2t/eCUynaHEE6zsOLB0Zga8ej61LXtPfoeiROdhezpoCT15+1QMbqKB1Um5kasSKg==}
+
+  tsx@4.19.3:
+    resolution: {integrity: sha512-4H8vUNGNjQ4V2EOoGw005+c+dGuPSnhpPBPHBtsZdGZBk/iJb4kguGlPWaZTZ3q5nMtFOEsY0nRDlh9PJyd6SQ==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
 
   type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -2786,7 +2803,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@ryoppippi/unplugin-typia@1.2.0(@samchon/openapi@2.4.1)(@types/node@22.13.1)(rollup@4.34.1)(terser@5.37.0)':
+  '@ryoppippi/unplugin-typia@1.2.0(@samchon/openapi@2.4.1)(@types/node@22.13.1)(rollup@4.34.1)(terser@5.37.0)(tsx@4.19.3)':
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.34.1)
       consola: 3.4.0
@@ -2800,7 +2817,7 @@ snapshots:
       typescript: 5.6.3
       typia: 7.6.0(@samchon/openapi@2.4.1)(typescript@5.6.3)
       unplugin: 1.16.1
-      vite: 6.0.11(@types/node@22.13.1)(terser@5.37.0)
+      vite: 6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
     transitivePeerDependencies:
       - '@samchon/openapi'
       - '@types/node'
@@ -2966,14 +2983,14 @@ snapshots:
       '@typescript-eslint/types': 8.22.0
       eslint-visitor-keys: 4.2.0
 
-  '@vitejs/plugin-react@4.3.4(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0))':
+  '@vitejs/plugin-react@4.3.4(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3))':
     dependencies:
       '@babel/core': 7.26.7
       '@babel/plugin-transform-react-jsx-self': 7.25.9(@babel/core@7.26.7)
       '@babel/plugin-transform-react-jsx-source': 7.25.9(@babel/core@7.26.7)
       '@types/babel__core': 7.20.5
       react-refresh: 0.14.2
-      vite: 6.0.11(@types/node@22.13.1)(terser@5.37.0)
+      vite: 6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
     transitivePeerDependencies:
       - supports-color
 
@@ -3470,6 +3487,11 @@ snapshots:
 
   gensync@1.0.0-beta.2: {}
 
+  get-tsconfig@4.10.0:
+    dependencies:
+      resolve-pkg-maps: 1.0.0
+    optional: true
+
   glob-parent@5.1.2:
     dependencies:
       is-glob: 4.0.3
@@ -3886,6 +3908,9 @@ snapshots:
 
   resolve-from@4.0.0: {}
 
+  resolve-pkg-maps@1.0.0:
+    optional: true
+
   resolve@1.22.10:
     dependencies:
       is-core-module: 2.16.1
@@ -4076,6 +4101,14 @@ snapshots:
 
   tstl@3.0.0: {}
 
+  tsx@4.19.3:
+    dependencies:
+      esbuild: 0.25.0
+      get-tsconfig: 4.10.0
+    optionalDependencies:
+      fsevents: 2.3.3
+    optional: true
+
   type-check@0.4.0:
     dependencies:
       prelude-ls: 1.2.1
@@ -4135,7 +4168,7 @@ snapshots:
 
   v8-compile-cache-lib@3.0.1: {}
 
-  vite-plugin-dts@4.5.0(@types/node@22.13.1)(rollup@4.34.1)(typescript@5.6.3)(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0)):
+  vite-plugin-dts@4.5.0(@types/node@22.13.1)(rollup@4.34.1)(typescript@5.6.3)(vite@6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)):
     dependencies:
       '@microsoft/api-extractor': 7.50.1(@types/node@22.13.1)
       '@rollup/pluginutils': 5.1.4(rollup@4.34.1)
@@ -4148,13 +4181,13 @@ snapshots:
       magic-string: 0.30.17
       typescript: 5.6.3
     optionalDependencies:
-      vite: 6.0.11(@types/node@22.13.1)(terser@5.37.0)
+      vite: 6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
       - supports-color
 
-  vite@6.0.11(@types/node@22.13.1)(terser@5.37.0):
+  vite@6.0.11(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3):
     dependencies:
       esbuild: 0.24.2
       postcss: 8.5.1
@@ -4163,8 +4196,9 @@ snapshots:
       '@types/node': 22.13.1
       fsevents: 2.3.3
       terser: 5.37.0
+      tsx: 4.19.3
 
-  vite@6.2.0(@types/node@22.13.1)(terser@5.37.0):
+  vite@6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3):
     dependencies:
       esbuild: 0.25.0
       postcss: 8.5.3
@@ -4173,6 +4207,7 @@ snapshots:
       '@types/node': 22.13.1
       fsevents: 2.3.3
       terser: 5.37.0
+      tsx: 4.19.3
 
   vscode-uri@3.1.0: {}
 

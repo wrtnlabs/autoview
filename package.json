@@ -29,9 +29,7 @@
     "build": "node deploy/build",
     "build:test": "rimraf bin && tsc --project test/tsconfig.json",
     "dev:test": "npm run build:test -- --watch",
-    "lint": "eslint .",
-    "prepare": "ts-patch install && node build/env.mjs",
-    "test": "ts-node test/index.ts"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@samchon/openapi": "^2.4.1",
