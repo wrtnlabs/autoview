@@ -1,0 +1,18 @@
+{
+  "private": true,
+  "name": "@autoview/tsconfig",
+  "version": "0.0.0",
+  "files": [
+    "base.json",
+    "node.json",
+    "app.json",
+    "react.json",
+    "react-library.json"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,cjs,mjs}": [
+      "eslint"
+    ]
+  }
+}

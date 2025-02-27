@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "plugins": [
+      { "transform": "typia/lib/transform" }
+    ]
+  },
+  "include": [ ],
+  "exclude": [ "node_modules" ]
+}

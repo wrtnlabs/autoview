@@ -1,6 +1,7 @@
 {
-  "name": "@wrtnio/autoview",
-  "version": "0.1.0",
+  "private": true,
+  "name": "@autoview/station",
+  "version": "0.0.0",
   "main": "lib/index.js",
   "module": "lib/index.mjs",
   "typings": "lib/index.d.ts",
@@ -25,21 +26,18 @@
     "openapi"
   ],
   "scripts": {
-    "build": "npm run build:static && npm run build:lib && npm run build:test",
-    "build:static": "rimraf dist && tsc -b && vite build",
-    "build:lib": "rimraf lib && tsc --project tsconfig.lib.json --emitDeclarationOnly && rollup -c",
+    "build": "node deploy/build",
     "build:test": "rimraf bin && tsc --project test/tsconfig.json",
-    "dev": "vite",
     "dev:test": "npm run build:test -- --watch",
     "lint": "eslint .",
     "prepare": "ts-patch install && node build/env.mjs",
-    "preview": "vite preview",
     "test": "ts-node test/index.ts"
   },
   "dependencies": {
     "@samchon/openapi": "^2.4.1",
     "jsonpath-plus": "^10.3.0",
-    "typia": "^7.6.0"
+    "typia": "^7.6.0",
+    "vite-plugin-dts": "^4.5.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -78,5 +76,6 @@
     "lib",
     "src",
     "!src/examples"
-  ]
+  ],
+  "packageManager": "pnpm@10.2.0+sha512.0d27364e0139c6aadeed65ada153135e0ca96c8da42123bd50047f961339dc7a758fc2e944b428f52be570d1bd3372455c1c65fa2e7aa0bfbf931190f9552001"
 }

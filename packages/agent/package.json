@@ -1,0 +1,28 @@
+{
+  "name": "@autoview/agent",
+  "version": "0.0.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "exports": {
+    "types": "./index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.umd.cjs"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.3",
+    "vite": "^6.1.1",
+    "@autoview/tsconfig": "workspace:*"
+  }
+}
