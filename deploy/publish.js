@@ -42,7 +42,7 @@ const build = ({ version, tag, name }) => {
       "utf8",
     );
     execute(
-      `npm publish --tag ${tag} --access public ${tag === "latest" ? "--provance" : ""}`,
+      `npm publish --tag ${tag} --access public ${tag === "latest" ? "--provenance" : ""}`,
     );
   } catch (exp) {
     throw exp;
