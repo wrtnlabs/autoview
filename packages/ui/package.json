@@ -1,4 +1,27 @@
 {
   "name": "@autoview/ui",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.umd.cjs",
+  "module": "./dist/index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "exports": {
+    "types": "./index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.umd.cjs"
+  },
+  "devDependencies": {
+    "@autoview/tsconfig": "workspace:*",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+  }
 }

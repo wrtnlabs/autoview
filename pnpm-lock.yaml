@@ -115,7 +115,17 @@ importers:
         specifier: ^6.1.1
         version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
 
-  packages/compiler: {}
+  packages/compiler:
+    devDependencies:
+      '@autoview/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ~5.7.3
+        version: 5.7.3
+      vite:
+        specifier: ^6.1.1
+        version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
 
   packages/interface:
     devDependencies:
@@ -129,11 +139,31 @@ importers:
         specifier: ^6.2.0
         version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
 
-  packages/rpc: {}
+  packages/rpc:
+    devDependencies:
+      '@autoview/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ~5.7.3
+        version: 5.7.3
+      vite:
+        specifier: ^6.1.1
+        version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
 
   packages/tsconfig: {}
 
-  packages/ui: {}
+  packages/ui:
+    devDependencies:
+      '@autoview/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+      typescript:
+        specifier: ~5.7.2
+        version: 5.7.3
+      vite:
+        specifier: ^6.2.0
+        version: 6.2.0(@types/node@22.13.1)(terser@5.37.0)(tsx@4.19.3)
 
 packages:
 
