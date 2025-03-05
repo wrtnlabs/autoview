@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wrtnio/autoview"
+    "url": "https://github.com/wrtnlabs/autoview"
   },
   "author": "Wrtn Tenchnologies",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/wrtnio/autoview/issues"
+    "url": "https://github.com/wrtnlabs/autoview/issues"
   },
   "files": [
     "dist"
