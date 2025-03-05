@@ -1,25 +1,22 @@
 # Tag
 
-The `Tag` component visually highlights content related to a specific category or expresses a status using short text.
-
-## Purpose
+The `Tag` component visually highlights specific categories or concisely represents statuses using short text.
 
 - **Tag Management:** Used to display keywords or categories related to content.
 
-## Usage Requirements
+## Usage Guidelines
 
-The `Tag` component can contain short text and numbers. It can also contain small visual elements such as `ImageAvatar`, `LetterAvatar`, or `Icon` to help users intuitively understand the tag content.
+A `Tag` can contain short text, numbers, or small visual elements such as `ImageAvatar`, `LetterAvatar`, or `Icon`. Additionally, an `Icon` can be included to help users intuitively understand the current selection state. While `Tag` can include `ImageAvatar`, `LetterAvatar`, and `Icon` as child elements, these components cannot have `Tag` as a child.
 
-Additionally, `Tag` is useful for listing multiple items simultaneously. For example, when displaying multiple tags on a post or listing various features of a product, multiple `Tag` components can be grouped together to enhance clarity and organization.
+Furthermore, `Tag` is useful for listing multiple items together. For example, it can display multiple tags for a post or list various product attributes, making grouped information more easily recognizable.
 
-### When Not to Use  
+### When Not to Use
 
-Avoid using the `Tag` component in the following situations:  
+Avoid using `Tag` in the following situations:
 
-- **When Interaction is Required:** If users need to add or remove elements, use `Chip` instead.  
-- **With Small Components:** `Tag` should not be used as a child of small-sized components like `ImageAvatar`, `LetterAvatar`, or `IconButton` due to space limitations.  
-- **Containing `Chip` or Another `Tag`:** `Tag` should not include `Chip` or another `Tag` as a child, as these components are not designed to nest within each other.
+- **When user interaction is required:** If the element needs to be added, removed, or interacted with, use a `Chip` instead.
+- **When used with small components:** `Tag` is not suitable as a child element of compact components such as `ImageAvatar`, `LetterAvatar`, or `IconButton`. In these cases, `Badge` is more appropriate. In summary, `Tag` can include `ImageAvatar`, `LetterAvatar`, and `Icon` as child elements, but the reverse is not applicable.
 
 ## Examples of Use
 
-- **Category Labels:** In an e-commerce website, `Tag` can be used to display product attributes such as "Coupon" or "Free Shipping," using different colors to enhance visual clarity.
+- **Category Labels:** In e-commerce sites, `Tag` components with different colors can be used to visually highlight product attributes such as "Coupon" or "Free Shipping."

@@ -1,28 +1,37 @@
 {
   "name": "@autoview/agent",
   "version": "0.0.0",
-  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wrtnlabs/autoview"
+  },
+  "author": "Wrtn Tenchnologies",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wrtnlabs/autoview/issues"
+  },
   "files": [
     "dist"
   ],
-
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.mjs",
   "types": "./index.d.ts",
   "scripts": {
-    "build": "tsc && vite build"
+    "build": "tsc && vite build",
+    "test": "ts-node test/index.ts",
+    "prepare": "ts-patch install"
   },
   "exports": {
     "types": "./index.d.ts",
-    "import": "./dist/index.js",
-    "require": "./dist/index.umd.cjs"
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.umd.js"
   },
   "devDependencies": {
+    "@autoview/tsconfig": "workspace:*",
     "typescript": "~5.7.3",
-    "vite": "^6.1.1",
-    "@autoview/tsconfig": "workspace:*"
+    "vite": "^6.1.1"
   }
 }

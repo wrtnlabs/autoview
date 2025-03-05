@@ -1,4 +1,37 @@
 {
   "name": "@autoview/rpc",
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wrtnlabs/autoview"
+  },
+  "author": "Wrtn Tenchnologies",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wrtnlabs/autoview/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "./dist/index.umd.js",
+  "module": "./dist/index.mjs",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "ts-node test/index.ts",
+    "prepare": "ts-patch install"
+  },
+  "exports": {
+    "types": "./index.d.ts",
+    "import": "./dist/index.mjs",
+    "require": "./dist/index.umd.js"
+  },
+  "devDependencies": {
+    "@autoview/tsconfig": "workspace:*",
+    "typescript": "~5.7.3",
+    "vite": "^6.1.1"
+  }
 }
