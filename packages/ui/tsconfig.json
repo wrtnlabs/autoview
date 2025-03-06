@@ -1,15 +1,8 @@
 {
-  "extends": "@autoview/tsconfig/node.json",
+  "extends": "@autoview/tsconfig/react-library.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "isolatedModules": true,
+    "jsx": "react",
     "moduleResolution": "node",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "declarationDir": "dist"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
