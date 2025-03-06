@@ -1,5 +1,4 @@
-import { IAutoViewAgentProvider } from "../../structures/agents/IAutoViewAgentProvider";
-import { IComponent } from "../common";
+import { IAutoViewAgentProvider } from "../../structures";
 
 export namespace TargetSchemaGenerationAgentDto {
   export interface Input {
