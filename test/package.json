@@ -1,0 +1,30 @@
+{
+  "private": true,
+  "name": "@autoview/test",
+  "version": "0.0.0",
+  "description": "Test program of Autoview",
+  "main": "index.js",
+  "scripts": {
+    "build": "rimraf bin && tsc",
+    "dev": "pnpm run build --watch",
+    "test": "node bin",
+    "prepare": "ts-patch install"
+  },
+  "keywords": [],
+  "author": "Wrtn Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "@nestia/e2e": "^0.8.2",
+    "@samchon/openapi": "^3.0.0",
+    "chalk": "4.1.2",
+    "tgrid": "^1.1.0",
+    "typia": "^8.0.0"
+  },
+  "devDependencies": {
+    "@autoview/compiler": "workspace:^",
+    "@autoview/interface": "workspace:^",
+    "rimraf": "^6.0.1",
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.8.2"
+  }
+}
