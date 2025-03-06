@@ -15,7 +15,7 @@ export interface IAutoViewBadgeProps
    * The numeric value displayed inside the badge.
    * - Used for notifications, item counts, or other numerical indicators.
    * - If `showZero` is `false`, the badge is hidden when `count` is `0`.
-   * - Default: `0`
+   * @default 0
    */
   count: number;
 
@@ -30,7 +30,7 @@ export interface IAutoViewBadgeProps
    * The maximum number displayed inside the badge.
    * - If `count` exceeds `maxCount`, it is displayed as `${maxCount}+`.
    * - Prevents large numbers from overflowing the badge UI.
-   * - Default: `99`
+   * @default 99
    *
    * Example:
    * - If `count = 120` and `maxCount = 99`, the displayed value will be `"99+"`.
@@ -41,7 +41,7 @@ export interface IAutoViewBadgeProps
    * Whether to show the badge when `count` is `0`.
    * - If `true`, the badge is displayed even when `count` is `0`.
    * - If `false`, the badge is hidden when `count` is `0`.
-   * - Default: `false`
+   * @default false
    */
   showZero?: boolean;
 
@@ -49,16 +49,16 @@ export interface IAutoViewBadgeProps
    * Enables the dot indicator mode.
    * - If `true`, the badge is displayed as a small dot instead of a number.
    * - Typically used for status indicators (e.g., online/offline).
-   * - Default: `false`
+   * @default false
    */
   dot?: boolean;
 
   /**
    * Adjusts the position of the badge relative to its parent element.
    * - `vertical`: Controls vertical positioning (`"top"` or `"bottom"`).
-   *   - Default: `"top"`
+   * @default "top"
    * - `horizontal`: Controls horizontal positioning (`"left"` or `"right"`).
-   *   - Default: `"right"`
+   * @default "right"
    *
    * Example:
    * ```ts

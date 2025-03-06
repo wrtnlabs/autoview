@@ -16,7 +16,7 @@ export interface IAutoViewDividerProps
    * Defines the orientation of the divider.
    * - `"horizontal"`: Creates a horizontal divider.
    * - `"vertical"`: Creates a vertical divider, useful for side-by-side layouts.
-   * - Default: `"horizontal"`
+   * @default "horizontal"
    *
    * Example:
    * ```tsx
@@ -30,7 +30,7 @@ export interface IAutoViewDividerProps
    * - `"solid"`: A continuous solid line.
    * - `"dashed"`: A dashed line, providing a subtle separation.
    * - `"dotted"`: A dotted line, often used for lightweight section divisions.
-   * - Default: `"solid"`
+   * @default "solid"
    *
    * Example:
    * ```tsx
@@ -42,7 +42,7 @@ export interface IAutoViewDividerProps
   /**
    * Sets the color of the divider.
    * - Accepts any valid CSS color value (e.g., `"black"`, `"#ff5733"`, `"rgba(0,0,0,0.5)"`).
-   * - Default: `#d3d3d3"`
+   * @default "#d3d3d3"
    *
    * Example:
    * ```tsx
