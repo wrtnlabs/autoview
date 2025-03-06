@@ -1,5 +1,7 @@
-import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
+import { IAutoViewIconProps } from "../../common";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewImageAvatarProps } from "../image-avatar";
+import { IAutoViewLetterAvatarProps } from "../letter-avatar";
 
 /**
  * Props for the `AutoViewBadge` component.
@@ -23,7 +25,10 @@ export interface IAutoViewBadgeProps
    * - The badge is overlaid on this element.
    * - Typically an icon, button, or avatar.
    */
-  children: IAutoViewComponentProps;
+  children:
+    | IAutoViewImageAvatarProps
+    | IAutoViewLetterAvatarProps
+    | IAutoViewIconProps;
 
   /**
    * The maximum number displayed inside the badge.

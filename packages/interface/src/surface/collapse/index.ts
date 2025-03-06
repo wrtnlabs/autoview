@@ -1,7 +1,5 @@
-import {
-  IAutoViewComponentProps,
-  IAutoViewNonSurfaceComponentProps,
-} from "../../properties/IAutoViewComponentProps";
+import { IAutoViewIconProps } from "../../common";
+import { IAutoViewNonSurfaceComponentProps } from "../../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -32,12 +30,6 @@ export interface IAutoViewCollapseProps
   expandedKeys?: number[];
 
   /**
-   * Callback function triggered when the expanded items change.
-   * Receives the new array of expanded keys as an argument.
-   */
-  onChange?: (expandedKeys: number[]) => void;
-
-  /**
    * Enables accordion behavior, allowing only one item to be expanded at a time.
    * When a new item is expanded, the previously expanded item will collapse.
    * @default false
@@ -54,7 +46,7 @@ export interface IAutoViewCollapseProps
    * Custom icon to indicate the expand/collapse state of each item.
    * If not provided, a default icon will be used.
    */
-  expandIcon?: IAutoViewComponentProps;
+  expandIcon?: IAutoViewIconProps;
 
   /**
    * Position of the expand/collapse icon relative to the item header.
@@ -85,12 +77,6 @@ export namespace IAutoViewCollapseProps {
      * Typically includes a title or summary of the collapsible content.
      */
     content: IAutoViewNonSurfaceComponentProps;
-
-    /**
-     * Additional elements displayed alongside the main header content.
-     * Can include actions like edit buttons or status indicators.
-     */
-    extra?: IAutoViewComponentProps;
   }
 
   /**

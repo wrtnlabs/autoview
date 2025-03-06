@@ -1,4 +1,4 @@
-import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
+import { IAutoViewIconProps } from "../../common";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -45,7 +45,7 @@ export interface IAutoViewStatsProps
   precision?: number;
 
   /**
-   * A React element displayed **before** the numerical value.
+   * An element displayed **before** the numerical value.
    * - Commonly used for currency symbols (`$`, `€`), units, or icons.
    *
    * Example:
@@ -53,18 +53,18 @@ export interface IAutoViewStatsProps
    * <AutoViewStats valuePrefix="$" value="1,245" />
    * ```
    */
-  valuePrefix?: IAutoViewComponentProps;
+  valuePrefix?: string | IAutoViewIconProps;
 
   /**
-   * A React element displayed **after** the numerical value.
+   * An element displayed **after** the numerical value.
    * - Typically used for units (`kg`, `%`, `kWh`) or additional indicators.
    *
    * Example:
    * ```tsx
-   * <AutoViewStats value="75" valueSuffix="%" />
+   * <AutoViewStats value="75" valueSuffix={{ name: "arrow-down", size: 16 }} />
    * ```
    */
-  valueSuffix?: IAutoViewComponentProps;
+  valueSuffix?: string | IAutoViewIconProps;
 }
 
 /**

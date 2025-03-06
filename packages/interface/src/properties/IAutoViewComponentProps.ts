@@ -1,4 +1,9 @@
 import {
+  IAutoViewIconProps,
+  IAutoViewImageProps,
+  IAutoViewTypographyProps,
+} from "../common";
+import {
   IAutoViewBadgeProps,
   IAutoViewChipProps,
   IAutoViewDividerProps,
@@ -11,6 +16,11 @@ import {
   IAutoViewGridListProps,
   IAutoViewStackedListProps,
 } from "../surface";
+
+export type IAutoViewCommonComponentProps =
+  | IAutoViewIconProps
+  | IAutoViewImageProps
+  | IAutoViewTypographyProps;
 
 export type IAutoViewDataDisplayComponentProps =
   | IAutoViewBadgeProps
@@ -26,8 +36,10 @@ export type IAutoViewSurfaceComponentProps =
   | IAutoViewStackedListProps;
 
 export type IAutoViewNonSurfaceComponentProps =
-  IAutoViewDataDisplayComponentProps;
+  | IAutoViewCommonComponentProps
+  | IAutoViewDataDisplayComponentProps;
 
 export type IAutoViewComponentProps =
+  | IAutoViewCommonComponentProps
   | IAutoViewDataDisplayComponentProps
   | IAutoViewSurfaceComponentProps;

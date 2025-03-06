@@ -1,5 +1,7 @@
-import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
+import { IAutoViewIconProps } from "../../common";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewImageAvatarProps } from "../image-avatar";
+import { IAutoViewLetterAvatarProps } from "../letter-avatar";
 
 /**
  * Props for the `AutoViewChip` component.
@@ -21,18 +23,24 @@ export interface IAutoViewChipProps
   label: string;
 
   /**
-   * A React element rendered at the **start (left side)** of the chip.
+   * An element rendered at the **start (left side)** of the chip.
    * - Can be an `ImageAvatar`, `LetterAvatar`, or an `Icon` to provide additional context.
    * - Example: A profile picture in a user selection chip.
    */
-  startElement?: IAutoViewComponentProps;
+  startElement?:
+    | IAutoViewImageAvatarProps
+    | IAutoViewLetterAvatarProps
+    | IAutoViewIconProps;
 
   /**
-   * A React element rendered at the **end (right side)** of the chip.
+   * An element rendered at the **end (right side)** of the chip.
    * - Can be an `Icon` representing an action (e.g., dropdown arrow or status indicator).
    * - Example: A small "check" icon indicating selection.
    */
-  endElement?: IAutoViewComponentProps;
+  endElement?:
+    | IAutoViewImageAvatarProps
+    | IAutoViewLetterAvatarProps
+    | IAutoViewIconProps;
 }
 
 export namespace IAutoViewChip {
