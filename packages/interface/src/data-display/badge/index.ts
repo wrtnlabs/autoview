@@ -1,5 +1,4 @@
-import { ReactNode } from "react";
-
+import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -24,7 +23,7 @@ export interface IAutoViewBadgeProps
    * - The badge is overlaid on this element.
    * - Typically an icon, button, or avatar.
    */
-  children: ReactNode;
+  children: IAutoViewComponentProps;
 
   /**
    * The maximum number displayed inside the badge.

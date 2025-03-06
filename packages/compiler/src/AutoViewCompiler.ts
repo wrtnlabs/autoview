@@ -4,6 +4,7 @@ import {
 } from "@autoview/interface";
 import { OpenApi } from "@samchon/openapi";
 import { ChatGptSchemaComposer } from "@samchon/openapi/lib/composers/llm/ChatGptSchemaComposer";
+import { is_node } from "tstl";
 import ts from "typescript";
 import typia from "typia";
 
@@ -11,6 +12,7 @@ import { RollupBundler } from "./compilers/RollupBundler";
 import { TypeScriptCompiler } from "./compilers/TypeScriptCompiler";
 import { AutoViewImportProgrammer } from "./programmers/AutoViewImportProgrammer";
 import { AutoViewProgrammer } from "./programmers/AutoViewProgrammer";
+import { IAutoViewProgrammerContext } from "./programmers/IAutoViewProgrammerContext";
 import { ErrorUtil } from "./utils/ErrorUtil";
 import { FilePrinter } from "./utils/FilePrinter";
 
@@ -26,18 +28,20 @@ export class AutoViewCompiler {
   }
 
   public async compile(script: string): Promise<IAutoViewCompilerResult> {
+    const ctx: IAutoViewProgrammerContext = {
+      components: this.components,
+      schema: this.schema,
+      importer: new AutoViewImportProgrammer(),
+      body: script,
+    };
     try {
-      const statements: ts.Statement[] = AutoViewProgrammer.write({
-        components: this.components,
-        schema: this.schema,
-        importer: new AutoViewImportProgrammer(),
-        body: script,
-      });
+      const statements: ts.Statement[] = AutoViewProgrammer.write(ctx);
       const result: IAutoViewCompilerResult = TypeScriptCompiler.build(
+        ctx,
         FilePrinter.write({ statements }),
       );
-      if (result.type === "success")
-        result.script = await RollupBundler.build(result.script);
+      if (result.type === "success" && is_node() === false)
+        result.javascript = await RollupBundler.build(result.javascript);
       return result;
     } catch (error) {
       return {

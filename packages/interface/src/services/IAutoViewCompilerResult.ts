@@ -5,7 +5,8 @@ export type IAutoViewCompilerResult =
 export namespace IAutoViewCompilerResult {
   export interface ISuccess {
     type: "success";
-    script: string;
+    typescript: string;
+    javascript: string;
   }
   export interface IError {
     type: "error";

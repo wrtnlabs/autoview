@@ -3,11 +3,21 @@ import { IPointer } from "tstl";
 import ts from "typescript";
 import transform from "typia/lib/transform";
 
+import { IAutoViewProgrammerContext } from "../programmers/IAutoViewProgrammerContext";
 import { RAW } from "../raw/RAW";
 import { COMPILER_OPTIONS } from "./COMPILER_OPTIONS";
 
 export namespace TypeScriptCompiler {
-  export const build = (script: string): IAutoViewCompilerResult => {
+  export const build = (
+    ctx: IAutoViewProgrammerContext,
+    typescript: string,
+  ): IAutoViewCompilerResult => {
+    // LLM GENERATED CODE
+    typescript = typescript.replace(
+      "return typia.random<IAutoViewComponentProps>();",
+      ctx.body,
+    );
+
     // PREPARE RAW FILES
     const dict: Map<string, ts.SourceFile> = new Map();
     for (const [file, content] of RAW) {
@@ -24,7 +34,7 @@ export namespace TypeScriptCompiler {
     // CREATE SOURCE FILE
     const source: ts.SourceFile = ts.createSourceFile(
       "main.ts",
-      script,
+      typescript,
       ts.ScriptTarget.ES2015,
     );
     dict.set("main.ts", source);
@@ -57,27 +67,18 @@ export namespace TypeScriptCompiler {
         jsDocParsingMode: ts.JSDocParsingMode.ParseAll,
       },
     );
-    (self as any).checker = program.getTypeChecker();
-    (self as any).source = source;
-
     diagnostics.push(...ts.getPreEmitDiagnostics(program, source));
 
-    const result: ts.EmitResult = program.emit(
-      source,
-      undefined,
-      undefined,
-      undefined,
-      {
-        before: [
-          transform(
-            program,
-            {},
-            { addDiagnostic: (input) => diagnostics.push(input) },
-          ),
-        ],
-      },
-    );
-    if (result.diagnostics.length)
+    program.emit(source, undefined, undefined, undefined, {
+      before: [
+        transform(
+          program,
+          {},
+          { addDiagnostic: (input) => diagnostics.push(input) },
+        ),
+      ],
+    });
+    if (diagnostics.length)
       return {
         type: "failure",
         diagnostics: diagnostics.map((diag) => ({
@@ -90,7 +91,8 @@ export namespace TypeScriptCompiler {
       };
     return {
       type: "success",
-      script: output.value,
+      typescript: typescript,
+      javascript: output.value,
     };
   };
 }

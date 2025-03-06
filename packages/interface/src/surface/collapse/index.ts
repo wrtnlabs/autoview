@@ -1,6 +1,7 @@
-import { ReactNode } from "react";
-
-import { IAutoViewNonSurfaceComponentProps } from "../../properties/IAutoViewComponentProps";
+import {
+  IAutoViewComponentProps,
+  IAutoViewNonSurfaceComponentProps,
+} from "../../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -53,7 +54,7 @@ export interface IAutoViewCollapseProps
    * Custom icon to indicate the expand/collapse state of each item.
    * If not provided, a default icon will be used.
    */
-  expandIcon?: ReactNode;
+  expandIcon?: IAutoViewComponentProps;
 
   /**
    * Position of the expand/collapse icon relative to the item header.
@@ -89,7 +90,7 @@ export namespace IAutoViewCollapseProps {
      * Additional elements displayed alongside the main header content.
      * Can include actions like edit buttons or status indicators.
      */
-    extra?: ReactNode;
+    extra?: IAutoViewComponentProps;
   }
 
   /**

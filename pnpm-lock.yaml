@@ -66,9 +66,6 @@ importers:
       '@samchon/openapi':
         specifier: ^3.0.0
         version: 3.0.0
-      prettier:
-        specifier: ^3.4.2
-        version: 3.5.3
       serialize-error:
         specifier: 4.1.0
         version: 4.1.0
@@ -176,6 +173,9 @@ importers:
       tgrid:
         specifier: ^1.1.0
         version: 1.1.0
+      tstl:
+        specifier: ^3.0.0
+        version: 3.0.0
       typia:
         specifier: ^8.0.0
         version: 8.0.0(@samchon/openapi@3.0.0)(typescript@5.8.2)

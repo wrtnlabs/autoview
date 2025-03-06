@@ -5,7 +5,6 @@ import { TypeFactory } from "typia/lib/factories/TypeFactory";
 import { FormatCheatSheet } from "typia/lib/tags/internal/FormatCheatSheet";
 import { Escaper } from "typia/lib/utils/Escaper";
 
-import { FilePrinter } from "../utils/FilePrinter";
 import { StringUtil } from "../utils/StringUtil";
 import { AutoViewImportProgrammer } from "./AutoViewImportProgrammer";
 import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
@@ -40,7 +39,7 @@ export namespace AutoViewSchemaProgrammer {
       else if (OpenApiTypeChecker.isObject(schema))
         return writeObject(ctx, schema);
       else if (OpenApiTypeChecker.isReference(schema))
-        return writeReference(ctx, schema);
+        return writeReference(schema);
       // UNION
       else if (OpenApiTypeChecker.isOneOf(schema))
         return writeOneOf(ctx, schema);
@@ -291,43 +290,36 @@ export namespace AutoViewSchemaProgrammer {
       value: OpenApi.IJsonSchema;
     },
   ) =>
-    FilePrinter.description(
-      ts.factory.createPropertySignature(
-        undefined,
-        Escaper.variable(props.key)
-          ? ts.factory.createIdentifier(props.key)
-          : ts.factory.createStringLiteral(props.key),
-        props.required.includes(props.key)
-          ? undefined
-          : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-        writeSchema(ctx, props.value),
-      ),
-      writeComment(props.value),
+    ts.factory.createPropertySignature(
+      undefined,
+      Escaper.variable(props.key)
+        ? ts.factory.createIdentifier(props.key)
+        : ts.factory.createStringLiteral(props.key),
+      props.required.includes(props.key)
+        ? undefined
+        : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+      writeSchema(ctx, props.value),
     );
 
   const writeDynamicProperty = (
     ctx: IAutoViewProgrammerContext,
     value: OpenApi.IJsonSchema,
   ) =>
-    FilePrinter.description(
-      ts.factory.createIndexSignature(
-        undefined,
-        [
-          ts.factory.createParameterDeclaration(
-            undefined,
-            undefined,
-            ts.factory.createIdentifier("key"),
-            undefined,
-            TypeFactory.keyword("string"),
-          ),
-        ],
-        writeSchema(ctx, value),
-      ),
-      writeComment(value),
+    ts.factory.createIndexSignature(
+      undefined,
+      [
+        ts.factory.createParameterDeclaration(
+          undefined,
+          undefined,
+          ts.factory.createIdentifier("key"),
+          undefined,
+          TypeFactory.keyword("string"),
+        ),
+      ],
+      writeSchema(ctx, value),
     );
 
   const writeReference = (
-    ctx: IAutoViewProgrammerContext,
     schema: OpenApi.IJsonSchema.IReference,
   ): ts.TypeReferenceNode | ts.KeywordTypeNode => {
     if (schema.$ref.startsWith("#/components/schemas") === false)
@@ -339,7 +331,7 @@ export namespace AutoViewSchemaProgrammer {
       .map(StringUtil.escapeNonVariable)
       .join("");
     if (name === "") return TypeFactory.keyword("any");
-    return ctx.importer.dto(name);
+    return ts.factory.createTypeReferenceNode(name);
   };
 
   /* -----------------------------------------------------------
@@ -356,19 +348,19 @@ export namespace AutoViewSchemaProgrammer {
 
 const createNode = (text: string) => ts.factory.createTypeReferenceNode(text);
 
-const writeComment = (schema: OpenApi.IJsonSchema): string =>
-  [
-    ...(schema.description?.length ? [schema.description] : []),
-    ...(schema.description?.length &&
-    (schema.title !== undefined || schema.deprecated === true)
-      ? [""]
-      : []),
-    ...(schema.title !== undefined ? [`@title ${schema.title}`] : []),
-    ...(schema.deprecated === true ? [`@deprecated`] : []),
-  ]
-    .join("\n")
-    .split("*/")
-    .join("*\\/");
+// const writeComment = (schema: OpenApi.IJsonSchema): string =>
+//   [
+//     ...(schema.description?.length ? [schema.description] : []),
+//     ...(schema.description?.length &&
+//     (schema.title !== undefined || schema.deprecated === true)
+//       ? [""]
+//       : []),
+//     ...(schema.title !== undefined ? [`@title ${schema.title}`] : []),
+//     ...(schema.deprecated === true ? [`@deprecated`] : []),
+//   ]
+//     .join("\n")
+//     .split("*/")
+//     .join("*\\/");
 
 const writePlugin = (props: {
   importer: AutoViewImportProgrammer;

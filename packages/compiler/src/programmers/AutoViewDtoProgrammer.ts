@@ -35,22 +35,22 @@ export namespace AutoViewDtoProgrammer {
         location = modulo.children;
       });
     }
-    return writeModulo(ctx, dict, true);
+    return writeModulo(ctx, dict, false);
   };
 
   const writeModulo = (
     ctx: IAutoViewProgrammerContext,
     dict: Map<string, IModulo>,
-    root: boolean,
+    inline: boolean,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [];
     for (const [key, value] of dict) {
       if (value.schema)
         statements.push(
           ts.factory.createTypeAliasDeclaration(
-            root
+            inline === true
               ? [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)]
-              : undefined,
+              : [],
             key,
             undefined,
             AutoViewSchemaProgrammer.writeSchema(ctx, value.schema),
@@ -59,10 +59,12 @@ export namespace AutoViewDtoProgrammer {
       if (value.children.size)
         statements.push(
           ts.factory.createModuleDeclaration(
-            undefined,
-            ts.factory.createIdentifier("Something"),
+            inline === true
+              ? [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)]
+              : [],
+            ts.factory.createIdentifier(key),
             ts.factory.createModuleBlock(
-              writeModulo(ctx, value.children, false),
+              writeModulo(ctx, value.children, true),
             ),
             ts.NodeFlags.Namespace,
           ),

@@ -25,6 +25,9 @@ export class AutoViewImportProgrammer {
     return name;
   }
 
+  /**
+   * @deprecated
+   */
   public dto(name: string, namespace?: string): ts.TypeReferenceNode {
     const file: string = name.split(".")[0]!;
     this.dtos_.add(file);

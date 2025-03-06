@@ -2,13 +2,16 @@ const cp = require("child_process");
 const fs = require("fs");
 
 const emendName = (name) =>
-  name.replaceAll("@", "_at_").replaceAll("/", "_slash_");
+  name
+    .replaceAll("@", "_at_")
+    .replaceAll("/", "_slash_")
+    .replaceAll("-", "_dash_");
 
 const external = (container) => (config) => (lib) => {
   const write = (variable) => (file) => (content) =>
     fs.writeFileSync(
       file,
-      `export const ${variable.replace("@", "_dollar_")}: string = ${JSON.stringify(content)};`,
+      `export const ${emendName(variable)}: string = ${JSON.stringify(content)};`,
       "utf8",
     );
 
@@ -119,13 +122,18 @@ const bucket = [];
 external(bucket)({
   packageJson: false,
   javaScript: false,
-  index: false,
+  index: true,
 })("@autoview/interface")("lib");
 external(bucket)({
   index: true,
   packageJson: true,
   javaScript: false,
 })("@samchon/openapi")("lib");
+external(bucket)({
+  packageJson: false,
+  javaScript: false,
+  index: true,
+})("tgrid")("lib");
 external(bucket)({
   index: true,
   packageJson: true,

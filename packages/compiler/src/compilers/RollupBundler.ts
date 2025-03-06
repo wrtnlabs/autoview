@@ -50,5 +50,6 @@ const reformUrl = (url: string): string => {
     library,
     ...elements.slice(library.startsWith("@") ? 2 : 1),
   ].join("/");
+  console.log("reformUrl", path);
   return `https://esm.sh/${path}`;
 };

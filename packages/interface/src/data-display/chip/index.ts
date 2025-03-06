@@ -1,5 +1,4 @@
-import { ReactNode } from "react";
-
+import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -22,32 +21,18 @@ export interface IAutoViewChipProps
   label: string;
 
   /**
-   * Callback function triggered when the chip is clicked.
-   * - Typically used for filter selection or toggling an active state.
-   * - If not provided, the chip is non-interactive.
-   */
-  onClick?: () => void;
-
-  /**
-   * Callback function triggered when the chip is deleted or removed.
-   * - Displays a delete icon or close button when provided.
-   * - If not provided, the chip cannot be removed.
-   */
-  onDelete?: () => void;
-
-  /**
    * A React element rendered at the **start (left side)** of the chip.
    * - Can be an `ImageAvatar`, `LetterAvatar`, or an `Icon` to provide additional context.
    * - Example: A profile picture in a user selection chip.
    */
-  startElement?: ReactNode;
+  startElement?: IAutoViewComponentProps;
 
   /**
    * A React element rendered at the **end (right side)** of the chip.
    * - Can be an `Icon` representing an action (e.g., dropdown arrow or status indicator).
    * - Example: A small "check" icon indicating selection.
    */
-  endElement?: ReactNode;
+  endElement?: IAutoViewComponentProps;
 }
 
 export namespace IAutoViewChip {

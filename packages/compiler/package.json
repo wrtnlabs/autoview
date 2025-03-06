@@ -15,7 +15,6 @@
     "@autoview/interface": "workspace:^",
     "@rollup/browser": "^4.34.9",
     "@samchon/openapi": "^3.0.0",
-    "prettier": "^3.4.2",
     "serialize-error": "4.1.0",
     "tgrid": "^1.1.0",
     "tstl": "^3.0.0",
@@ -23,6 +22,7 @@
   },
   "devDependencies": {
     "rimraf": "^6.0.1",
+    "ts-patch": "^3.3.0",
     "typescript": "~5.8.2"
   },
   "peerDependencies": {
@@ -31,7 +31,7 @@
   "scripts": {
     "build": "node build/raw && rimraf lib && tsc",
     "dev": "pnpm run build --watch",
-    "prepare": "ts-patch install"
+    "prepare": "ts-patch install && node build/raw"
   },
   "files": [
     "dist",

@@ -9,24 +9,12 @@ export namespace AutoViewProgrammer {
   export const write = (ctx: IAutoViewProgrammerContext): ts.Statement[] => {
     const statements: ts.Statement[] = [
       AutoViewClassProgrammer.write(ctx),
-      AutoViewMainProgrammer.write(),
+      AutoViewMainProgrammer.write(ctx),
       ts.factory.createExpressionStatement(
         ts.factory.createCallExpression(
-          ts.factory.createPropertyAccessExpression(
-            ts.factory.createCallExpression(
-              ts.factory.createIdentifier("main"),
-              undefined,
-              [],
-            ),
-            ts.factory.createIdentifier("catch"),
-          ),
+          ts.factory.createIdentifier("main"),
           undefined,
-          [
-            ts.factory.createPropertyAccessExpression(
-              ts.factory.createIdentifier("console"),
-              ts.factory.createIdentifier("error"),
-            ),
-          ],
+          [],
         ),
       ),
       ...AutoViewDtoProgrammer.write(ctx),

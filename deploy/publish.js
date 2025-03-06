@@ -27,8 +27,9 @@ const build = ({ version, tag, name }) => {
   pack.version = version;
   if (pack.main === "src/index.ts") {
     pack.main = "lib/index.js";
-    pack.module = "lib/index.mjs";
     pack.typings = "lib/index.d.ts";
+    if (fs.existsSync(`${location}/lib/index.mjs`))
+      pack.module = "lib/index.mjs";
   }
 
   // DEPENDENCIES

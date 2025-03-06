@@ -23,5 +23,8 @@
     "lib",
     "src",
     "README.md"
-  ]
+  ],
+  "dependencies": {
+    "@samchon/openapi": "^3.0.0"
+  }
 }

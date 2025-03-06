@@ -9,7 +9,7 @@ export namespace AutoViewClassProgrammer {
   ): ts.ClassDeclaration => {
     return ts.factory.createClassDeclaration(
       undefined,
-      ts.factory.createIdentifier("TransformerService"),
+      ts.factory.createIdentifier("MyTransformerService"),
       undefined,
       undefined,
       [writeTransform(ctx), writeRandom(ctx)],
@@ -36,10 +36,42 @@ export namespace AutoViewClassProgrammer {
         ),
       ],
       ts.factory.createTypeReferenceNode(
-        ts.factory.createIdentifier("IAutoViewComponentProps"),
+        ctx.importer.external({
+          type: "instance",
+          name: "IAutoViewComponentProps",
+          library: "@autoview/interface",
+        }),
         undefined,
       ),
-      ts.factory.createBlock([], true),
+      ts.factory.createBlock(
+        [
+          ts.factory.createReturnStatement(
+            ts.factory.createCallExpression(
+              ts.factory.createPropertyAccessExpression(
+                ts.factory.createIdentifier(
+                  ctx.importer.external({
+                    type: "default",
+                    library: "typia",
+                    name: "typia",
+                  }),
+                ),
+                ts.factory.createIdentifier("random"),
+              ),
+              [
+                ts.factory.createTypeReferenceNode(
+                  ctx.importer.external({
+                    type: "instance",
+                    name: "IAutoViewComponentProps",
+                    library: "@autoview/interface",
+                  }),
+                ),
+              ],
+              [],
+            ),
+          ),
+        ],
+        true,
+      ),
     );
 
   const writeRandom = (

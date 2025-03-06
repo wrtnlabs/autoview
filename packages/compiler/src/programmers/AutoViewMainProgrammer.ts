@@ -1,8 +1,12 @@
 import ts from "typescript";
 import { StatementFactory } from "typia/lib/factories/StatementFactory";
 
+import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
+
 export namespace AutoViewMainProgrammer {
-  export const write = (): ts.VariableStatement => {
+  export const write = (
+    ctx: IAutoViewProgrammerContext,
+  ): ts.VariableStatement => {
     const arrow: ts.ArrowFunction = ts.factory.createArrowFunction(
       [ts.factory.createToken(ts.SyntaxKind.AsyncKeyword)],
       undefined,
@@ -14,39 +18,29 @@ export namespace AutoViewMainProgrammer {
       ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken),
       ts.factory.createBlock(
         [
-          ts.factory.createVariableStatement(
-            undefined,
-            ts.factory.createVariableDeclarationList(
+          StatementFactory.constant({
+            name: "worker",
+            type: ts.factory.createTypeReferenceNode(
+              ctx.importer.external({
+                type: "instance",
+                name: "WorkerServer",
+                library: "tgrid",
+              }),
               [
-                ts.factory.createVariableDeclaration(
-                  ts.factory.createIdentifier("worker"),
+                ts.factory.createLiteralTypeNode(ts.factory.createNull()),
+                ts.factory.createTypeReferenceNode(
+                  ts.factory.createIdentifier("MyTransformerService"),
                   undefined,
-                  ts.factory.createTypeReferenceNode(
-                    ts.factory.createIdentifier("WorkerServer"),
-                    [
-                      ts.factory.createLiteralTypeNode(ts.factory.createNull()),
-                      ts.factory.createTypeReferenceNode(
-                        ts.factory.createIdentifier("MyTransformerService"),
-                        undefined,
-                      ),
-                      ts.factory.createLiteralTypeNode(ts.factory.createNull()),
-                    ],
-                  ),
-                  ts.factory.createNewExpression(
-                    ts.factory.createIdentifier("WorkerServer"),
-                    undefined,
-                    [],
-                  ),
                 ),
+                ts.factory.createLiteralTypeNode(ts.factory.createNull()),
               ],
-              ts.NodeFlags.Const |
-                ts.NodeFlags.Constant |
-                ts.NodeFlags.AwaitContext |
-                ts.NodeFlags.Constant |
-                ts.NodeFlags.ContextFlags |
-                ts.NodeFlags.TypeExcludesFlags,
             ),
-          ),
+            value: ts.factory.createNewExpression(
+              ts.factory.createIdentifier("WorkerServer"),
+              undefined,
+              [],
+            ),
+          }),
           ts.factory.createExpressionStatement(
             ts.factory.createAwaitExpression(
               ts.factory.createCallExpression(

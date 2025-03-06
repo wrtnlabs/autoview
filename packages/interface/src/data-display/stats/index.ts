@@ -1,5 +1,4 @@
-import { ReactNode } from "react";
-
+import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -54,7 +53,7 @@ export interface IAutoViewStatsProps
    * <AutoViewStats valuePrefix="$" value="1,245" />
    * ```
    */
-  valuePrefix?: ReactNode;
+  valuePrefix?: IAutoViewComponentProps;
 
   /**
    * A React element displayed **after** the numerical value.
@@ -65,7 +64,7 @@ export interface IAutoViewStatsProps
    * <AutoViewStats value="75" valueSuffix="%" />
    * ```
    */
-  valueSuffix?: ReactNode;
+  valueSuffix?: IAutoViewComponentProps;
 }
 
 /**

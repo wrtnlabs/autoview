@@ -1,5 +1,4 @@
-import { ReactNode } from "react";
-
+import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -25,14 +24,14 @@ export interface IAutoViewTagProps extends IAutoViewComponentPropsBase<"Tag"> {
    * - Can be an `ImageAvatar`, `LetterAvatar`, or an `Icon` to provide additional context.
    * - Example: A user avatar in a social media post tag.
    */
-  startElement?: ReactNode;
+  startElement?: IAutoViewComponentProps;
 
   /**
    * A React element rendered at the **end (right side)** of the tag.
    * - Can be an `Icon` to indicate additional meaning or actions.
    * - Example: A small info or checkmark icon representing status.
    */
-  endElement?: ReactNode;
+  endElement?: IAutoViewComponentProps;
 }
 
 /**
