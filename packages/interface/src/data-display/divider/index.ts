@@ -1,3 +1,5 @@
+import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+
 /**
  * Props for the `AutoViewDivider` component.
  *
@@ -8,7 +10,8 @@
  * - **Content Separation:** Groups related information or separates distinct sections.
  * - **Guiding Visual Flow:** Helps maintain a structured and logical layout.
  */
-export interface IAutoViewDividerProps {
+export interface IAutoViewDividerProps
+  extends IAutoViewComponentPropsBase<"Divider"> {
   /**
    * Defines the orientation of the divider.
    * - `"horizontal"`: Creates a horizontal divider.

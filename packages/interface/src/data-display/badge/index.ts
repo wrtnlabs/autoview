@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 
+import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+
 /**
  * Props for the `AutoViewBadge` component.
  *
@@ -7,14 +9,15 @@ import { ReactNode } from "react";
  * as an overlay on another UI element. It provides supplementary information, such as unread
  * notifications or online statuses.
  */
-export interface IAutoViewBadgeProps {
+export interface IAutoViewBadgeProps
+  extends IAutoViewComponentPropsBase<"Badge"> {
   /**
    * The numeric value displayed inside the badge.
    * - Used for notifications, item counts, or other numerical indicators.
    * - If `showZero` is `false`, the badge is hidden when `count` is `0`.
    * - Default: `0`
    */
-  count: number; // defaults to 0
+  count: number;
 
   /**
    * The child element that the badge is attached to.
@@ -32,7 +35,7 @@ export interface IAutoViewBadgeProps {
    * Example:
    * - If `count = 120` and `maxCount = 99`, the displayed value will be `"99+"`.
    */
-  maxCount?: number; // defaults to 99
+  maxCount?: number;
 
   /**
    * Whether to show the badge when `count` is `0`.
@@ -40,7 +43,7 @@ export interface IAutoViewBadgeProps {
    * - If `false`, the badge is hidden when `count` is `0`.
    * - Default: `false`
    */
-  showZero?: boolean; // defaults to false
+  showZero?: boolean;
 
   /**
    * Enables the dot indicator mode.
@@ -48,7 +51,7 @@ export interface IAutoViewBadgeProps {
    * - Typically used for status indicators (e.g., online/offline).
    * - Default: `false`
    */
-  dot?: boolean; // defaults to false
+  dot?: boolean;
 
   /**
    * Adjusts the position of the badge relative to its parent element.
@@ -64,8 +67,8 @@ export interface IAutoViewBadgeProps {
    * This places the badge at the bottom-left corner of the parent element.
    */
   offset?: {
-    vertical?: "top" | "bottom"; // defaults to top
-    horizontal?: "left" | "right"; // defaults to right
+    vertical?: "top" | "bottom";
+    horizontal?: "left" | "right";
   };
 }
 

@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 
+import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+
 /**
  * Props for the `AutoViewStats` component.
  *
@@ -11,7 +13,8 @@ import { ReactNode } from "react";
  * - **Summarizing Data:** Presents important figures extracted from larger datasets for quick insights.
  * - **Tracking Changes and Comparisons:** Shows real-time updates, goal achievements, or fluctuations over time.
  */
-export interface IAutoViewStatsProps {
+export interface IAutoViewStatsProps
+  extends IAutoViewComponentPropsBase<"Stats"> {
   /**
    * The title of the statistic.
    * - Provides context for the displayed number.

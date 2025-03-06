@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 
+import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+
 /**
  * Props for the `AutoViewChip` component.
  *
@@ -11,7 +13,8 @@ import { ReactNode } from "react";
  * - **Tag Management:** Helps users add or remove categories or tags.
  * - **Selection Display and Removal:** Shows selected items and enables removal.
  */
-export interface IAutoViewChipProps {
+export interface IAutoViewChipProps
+  extends IAutoViewComponentPropsBase<"Chip"> {
   /**
    * The text label displayed inside the chip.
    * - Represents the selected option, tag, or category.

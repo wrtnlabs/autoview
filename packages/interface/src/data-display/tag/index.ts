@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 
+import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+
 /**
  * Props for the `AutoViewTag` component.
  *
@@ -10,7 +12,7 @@ import { ReactNode } from "react";
  * - **Tag Management:** Displays keywords or categories related to content.
  * - **Status Representation:** Indicates different statuses such as "New", "Popular", or "Limited".
  */
-export interface IAutoViewTagProps {
+export interface IAutoViewTagProps extends IAutoViewComponentPropsBase<"Tag"> {
   /**
    * The text label displayed inside the tag.
    * - Represents the category, keyword, or status.
