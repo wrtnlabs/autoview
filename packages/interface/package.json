@@ -25,6 +25,7 @@
     "README.md"
   ],
   "dependencies": {
-    "@samchon/openapi": "^3.0.0"
+    "@samchon/openapi": "^3.0.0",
+    "typia": "^8.0.0"
   }
 }

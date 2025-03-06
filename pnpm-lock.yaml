@@ -94,6 +94,9 @@ importers:
       '@samchon/openapi':
         specifier: ^3.0.0
         version: 3.0.0
+      typia:
+        specifier: ^8.0.0
+        version: 8.0.0(@samchon/openapi@3.0.0)(typescript@5.8.2)
     devDependencies:
       rimraf:
         specifier: ^6.0.1

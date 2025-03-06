@@ -1,18 +1,21 @@
 import { AutoViewCompiler } from "@autoview/compiler";
 import { IAutoViewCompilerResult } from "@autoview/interface";
-import typia, { tags } from "typia";
+import typia from "typia";
 
 import { TestGlobal } from "../TestGlobal";
+import { IBbsArticle } from "../structures/IBbsArticle";
 
 export const test_compiler_llm_parameters = async (): Promise<void> => {
   const compiler: AutoViewCompiler = new AutoViewCompiler({
-    parameters: typia.llm.parameters<
-      IBbsArticle,
-      "chatgpt",
-      {
-        reference: true;
-      }
-    >(),
+    metadata: {
+      parameters: typia.llm.parameters<
+        IBbsArticle,
+        "chatgpt",
+        {
+          reference: true;
+        }
+      >(),
+    },
   });
   const result: IAutoViewCompilerResult = await compiler.compile(`
       return {
@@ -24,18 +27,3 @@ export const test_compiler_llm_parameters = async (): Promise<void> => {
     await TestGlobal.archive("llm_parameters.ts", result.typescript);
   else throw new Error(JSON.stringify(result, null, 2));
 };
-
-interface IBbsArticle {
-  id: string;
-  title: string;
-  body: string;
-  thumbnail: IBbsArticle.IThumbnail | null;
-  created_at: string & tags.Format<"date-time">;
-}
-namespace IBbsArticle {
-  export interface IThumbnail {
-    url: string;
-    width: number;
-    height: number;
-  }
-}

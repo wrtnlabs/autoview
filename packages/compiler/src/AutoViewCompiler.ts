@@ -1,4 +1,5 @@
 import {
+  IAutoViewCompilerMetadata,
   IAutoViewCompilerProps,
   IAutoViewCompilerResult,
 } from "@autoview/interface";
@@ -6,7 +7,6 @@ import { OpenApi } from "@samchon/openapi";
 import { ChatGptSchemaComposer } from "@samchon/openapi/lib/composers/llm/ChatGptSchemaComposer";
 import { is_node } from "tstl";
 import ts from "typescript";
-import typia from "typia";
 
 import { RollupBundler } from "./compilers/RollupBundler";
 import { TypeScriptCompiler } from "./compilers/TypeScriptCompiler";
@@ -19,12 +19,15 @@ import { FilePrinter } from "./utils/FilePrinter";
 export class AutoViewCompiler {
   private readonly components: OpenApi.IComponents;
   private readonly schema: OpenApi.IJsonSchema;
-  public constructor(props: IAutoViewCompilerProps) {
-    typia.assert(props); // @todo -> change to validate
+  private readonly compilerOptions: IAutoViewCompilerProps.ICompilerOptions;
 
-    const { components, schema } = getJsonSchema(props);
+  public constructor(props: IAutoViewCompilerProps) {
+    const { components, schema } = getJsonSchema(props.metadata);
     this.components = components;
     this.schema = schema;
+    this.compilerOptions = {
+      module: (props.compilerOptions?.module ?? is_node()) ? "cjs" : "esm",
+    };
   }
 
   public async compile(script: string): Promise<IAutoViewCompilerResult> {
@@ -39,6 +42,7 @@ export class AutoViewCompiler {
       const result: IAutoViewCompilerResult = TypeScriptCompiler.build(
         ctx,
         FilePrinter.write({ statements }),
+        this.compilerOptions.module,
       );
       if (result.type === "success" && is_node() === false)
         result.javascript = await RollupBundler.build(result.javascript);
@@ -53,8 +57,8 @@ export class AutoViewCompiler {
 }
 
 const getJsonSchema = (
-  props: IAutoViewCompilerProps,
-): IAutoViewCompilerProps.IOfJsonSchema => {
+  props: IAutoViewCompilerMetadata,
+): IAutoViewCompilerMetadata.IOfJsonSchema => {
   if (isJsonSchema(props)) return props;
   const components: OpenApi.IComponents = {
     schemas: {},
@@ -77,12 +81,12 @@ const getJsonSchema = (
 };
 
 const isJsonSchema = (
-  props: IAutoViewCompilerProps,
-): props is IAutoViewCompilerProps.IOfJsonSchema =>
-  (props as IAutoViewCompilerProps.IOfJsonSchema).components !== undefined;
+  props: IAutoViewCompilerMetadata,
+): props is IAutoViewCompilerMetadata.IOfJsonSchema =>
+  (props as IAutoViewCompilerMetadata.IOfJsonSchema).components !== undefined;
 
 const isChatGptParameters = (
-  props: IAutoViewCompilerProps,
-): props is IAutoViewCompilerProps.IOfChatGptParameters =>
-  (props as IAutoViewCompilerProps.IOfChatGptParameters).parameters !==
+  props: IAutoViewCompilerMetadata,
+): props is IAutoViewCompilerMetadata.IOfChatGptParameters =>
+  (props as IAutoViewCompilerMetadata.IOfChatGptParameters).parameters !==
   undefined;

@@ -1,21 +1,11 @@
-import { IChatGptSchema, OpenApi } from "@samchon/openapi";
+import { IAutoViewCompilerMetadata } from "./IAutoViewCompilerMetadata";
 
-export type IAutoViewCompilerProps =
-  | IAutoViewCompilerProps.IOfChatGptParameters
-  | IAutoViewCompilerProps.IOfChatGptSchema
-  | IAutoViewCompilerProps.IOfJsonSchema;
+export interface IAutoViewCompilerProps {
+  metadata: IAutoViewCompilerMetadata;
+  compilerOptions?: Partial<IAutoViewCompilerProps.ICompilerOptions>;
+}
 export namespace IAutoViewCompilerProps {
-  export interface IOfChatGptParameters {
-    parameters: IChatGptSchema.IParameters;
-  }
-
-  export interface IOfChatGptSchema {
-    $defs: Record<string, IChatGptSchema>;
-    schema: IChatGptSchema;
-  }
-
-  export interface IOfJsonSchema {
-    components: OpenApi.IComponents;
-    schema: OpenApi.IJsonSchema;
+  export interface ICompilerOptions {
+    module: "cjs" | "esm";
   }
 }

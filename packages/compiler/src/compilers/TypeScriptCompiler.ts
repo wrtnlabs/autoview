@@ -5,12 +5,12 @@ import transform from "typia/lib/transform";
 
 import { IAutoViewProgrammerContext } from "../programmers/IAutoViewProgrammerContext";
 import { RAW } from "../raw/RAW";
-import { COMPILER_OPTIONS } from "./COMPILER_OPTIONS";
 
 export namespace TypeScriptCompiler {
   export const build = (
     ctx: IAutoViewProgrammerContext,
     typescript: string,
+    target: "cjs" | "esm",
   ): IAutoViewCompilerResult => {
     // LLM GENERATED CODE
     typescript = typescript.replace(
@@ -44,7 +44,22 @@ export namespace TypeScriptCompiler {
     const diagnostics: ts.Diagnostic[] = [];
     const program: ts.Program = ts.createProgram(
       ["main.ts"],
-      COMPILER_OPTIONS,
+      {
+        target: ts.ScriptTarget.ESNext,
+        esModuleInterop: true,
+        downlevelIteration: true,
+        forceConsistentCasingInFileNames: true,
+        strict: true,
+        skipLibCheck: true,
+        ...(target === "cjs"
+          ? {
+              module: ts.ModuleKind.CommonJS,
+            }
+          : {
+              module: ts.ModuleKind.ESNext,
+              moduleResolution: ts.ModuleResolutionKind.Bundler,
+            }),
+      },
       {
         // KEY FEATURES
         fileExists: (file) => dict.has(file),
