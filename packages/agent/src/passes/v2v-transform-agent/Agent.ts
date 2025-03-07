@@ -1,15 +1,16 @@
 import { TypeGuardError, assertGuard } from "typia";
 
-import { Agent, LlmFailure, LlmProxy, parseLlmJsonOutput } from "../../core";
-import { V2vTransformAgentDto } from "./dto";
+import {
+  AgentBase,
+  LlmFailure,
+  LlmProxy,
+  parseLlmJsonOutput,
+} from "../../core";
+import { Input, Output } from "./dto";
 import { prompt } from "./prompt";
 
-export class V2vTransformAgent
-  implements Agent<V2vTransformAgentDto.Input, V2vTransformAgentDto.Output>
-{
-  async execute(
-    input: V2vTransformAgentDto.Input,
-  ): Promise<V2vTransformAgentDto.Output> {
+export class Agent implements AgentBase<Input, Output> {
+  async execute(input: Input): Promise<Output> {
     if (!Array.isArray(input.content)) {
       return transform(input);
     }
@@ -29,9 +30,7 @@ export class V2vTransformAgent
   }
 }
 
-async function transform(
-  input: V2vTransformAgentDto.Input,
-): Promise<V2vTransformAgentDto.Output> {
+async function transform(input: Input): Promise<Output> {
   const systemPrompt = prompt({
     content: input.content,
     atomic_components: input.components.map((component) => ({
@@ -39,10 +38,7 @@ async function transform(
       valueValidator: undefined,
     })),
   });
-  const results = await new LlmProxy<
-    V2vTransformAgentDto.Input,
-    V2vTransformAgentDto.Output
-  >()
+  const results = await new LlmProxy<Input, Output>()
     .withTextHandler(handleText)
     .call(
       input,
@@ -91,16 +87,15 @@ async function transform(
   return result;
 }
 
-function handleText(
-  input: V2vTransformAgentDto.Input,
-  text: string,
-): V2vTransformAgentDto.Output {
+function handleText(input: Input, text: string): Output {
   const output = parseOutput(text);
   const isOutputValid = input.components.some((component) => {
     try {
       component.valueValidator(output.visualization);
       return true;
     } catch (error: unknown) {
+      console.error("error", error, error instanceof TypeGuardError);
+
       if (error instanceof TypeGuardError) {
         return false;
       }
@@ -125,17 +120,17 @@ function handleText(
   };
 }
 
-interface Output {
+interface TextOutput {
   reasoning: string;
   visualization: unknown;
 }
 
-function parseOutput(text: string): Output {
+function parseOutput(text: string): TextOutput {
   const parsed = parseLlmJsonOutput(text);
-  let output: Output;
+  let output: TextOutput;
 
   try {
-    assertGuard<Output>(parsed);
+    assertGuard<TextOutput>(parsed);
     output = parsed;
   } catch (error: unknown) {
     if (error instanceof TypeGuardError) {

@@ -22,3 +22,5 @@ jobs:
       - name: Test
         run: pnpm run test
         working-directory: test
+        env:
+          CHATGPT_API_KEY: ${{ secrets.CHATGPT_API_KEY }}

@@ -1,10 +1,14 @@
+import {
+  IAutoViewAgentProvider,
+  MainContentExtraction,
+  V2vTransform,
+} from "@autoview/agent";
 import OpenAI from "openai";
+import typia, { createAssertGuard } from "typia";
 
-import { MainContentExtractionAgent } from "../../src/passes/main-content-extraction-agent/MainContentExtractionAgent";
-import { IAutoViewAgentProvider } from "../../src/structures/agents/IAutoViewAgentProvider";
 import { TestGlobal } from "../TestGlobal";
 
-async function main(): Promise<void> {
+export async function test_agent_v2v_transform_agent(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
@@ -16,9 +20,9 @@ async function main(): Promise<void> {
     }),
   };
 
-  const mainContentExtractionAgent = new MainContentExtractionAgent();
+  const mainContentExtractionAgent = new MainContentExtraction.Agent();
 
-  const result = await mainContentExtractionAgent.execute({
+  const result1 = await mainContentExtractionAgent.execute({
     provider,
     jsonResponse: `
 {
@@ -149,7 +153,95 @@ async function main(): Promise<void> {
 `,
   });
 
-  console.log(result);
+  const defs = {};
+  const components: V2vTransform.IComponent[] = [
+    {
+      name: "Text",
+      description:
+        "Displays a single, readonly text string for labels, titles, or short descriptions",
+      componentSchema: typia.llm.schema<ITestTextProps, "chatgpt">(defs) as any,
+      valueValidator: createAssertGuard<ITestTextProps>(),
+    },
+    {
+      name: "Image",
+      description:
+        "Renders a single, readonly image from a URL, suitable for static visual content",
+      componentSchema: typia.llm.schema<ITestImageProps, "chatgpt">(
+        defs,
+      ) as any,
+      valueValidator: createAssertGuard<ITestImageProps>(),
+    },
+    {
+      name: "List",
+      description:
+        "Arranges a collection of readonly items in a vertical list, supporting nested components",
+      componentSchema: typia.llm.schema<ITestListProps, "chatgpt">(defs) as any,
+      valueValidator: createAssertGuard<ITestListProps>(),
+    },
+    {
+      name: "Container",
+      description:
+        "Groups multiple readonly components vertically for structured layouts",
+      componentSchema: typia.llm.schema<ITestContainerProps, "chatgpt">(
+        defs,
+      ) as any,
+      valueValidator: createAssertGuard<ITestContainerProps>(),
+    },
+    {
+      name: "BarGraph",
+      description:
+        "Displays readonly numerical data as a bar graph for comparison across categories",
+      componentSchema: typia.llm.schema<ITestBarGraphProps, "chatgpt">(
+        defs,
+      ) as any,
+      valueValidator: createAssertGuard<ITestBarGraphProps>(),
+    },
+  ];
+
+  const v2vTransformAgent = new V2vTransform.Agent();
+  await v2vTransformAgent.execute({
+    provider,
+    content: result1.mainContent,
+    components,
+    defs,
+  });
 }
 
-main().catch(console.error);
+// Base interface with discriminator 'type'
+interface ITestComponentPropsBase<Type extends string> {
+  type: Type;
+}
+
+// Text component
+interface ITestTextProps extends ITestComponentPropsBase<"Text"> {
+  value: string;
+}
+
+// Image component
+interface ITestImageProps extends ITestComponentPropsBase<"Image"> {
+  src: string;
+}
+
+// List component
+interface ITestListProps extends ITestComponentPropsBase<"List"> {
+  children: ITestComponentProps[];
+}
+
+// Container component
+interface ITestContainerProps extends ITestComponentPropsBase<"Container"> {
+  children: ITestComponentProps[];
+}
+
+// BarGraph component
+interface ITestBarGraphProps extends ITestComponentPropsBase<"BarGraph"> {
+  labels: string[];
+  values: number[];
+}
+
+// Union type for all components
+type ITestComponentProps =
+  | ITestTextProps
+  | ITestImageProps
+  | ITestListProps
+  | ITestContainerProps
+  | ITestBarGraphProps;

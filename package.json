@@ -24,6 +24,7 @@
   ],
   "scripts": {
     "build": "node deploy/build",
+    "test": "cd test && pnpm run start",
     "lint": "eslint .",
     "publish": "node deploy/publish"
   },

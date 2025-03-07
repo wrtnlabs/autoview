@@ -1,9 +1,9 @@
 import { renderPrompt } from "../../core/Prompt";
-import { V2vTransformAgentDto } from "./dto";
+import { IComponent } from "./dto";
 
 export interface PromptContext {
   content: unknown;
-  atomic_components: Omit<V2vTransformAgentDto.IComponent, "valueValidator">[];
+  atomic_components: Omit<IComponent, "valueValidator">[];
 }
 
 const rawPrompt = `

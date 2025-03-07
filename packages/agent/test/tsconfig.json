@@ -1,9 +1,0 @@
-{
-  "extends": "@autoview/tsconfig/base.json",
-  "compilerOptions": {
-    "module": "CommonJS",
-  },
-  "include": [
-    "**/*.ts"
-  ],
-}

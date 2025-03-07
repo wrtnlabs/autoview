@@ -1,28 +1,22 @@
 import { JSONPath } from "jsonpath-plus";
 import { TypeGuardError, assertGuard } from "typia";
 
-import { Agent, LlmFailure, LlmProxy, parseLlmJsonOutput } from "../../core";
-import { MainContentExtractionAgentDto } from "./dto";
+import {
+  AgentBase,
+  LlmFailure,
+  LlmProxy,
+  parseLlmJsonOutput,
+} from "../../core";
+import { Input, Output } from "./dto";
 import { prompt } from "./prompt";
 
-export class MainContentExtractionAgent
-  implements
-    Agent<
-      MainContentExtractionAgentDto.Input,
-      MainContentExtractionAgentDto.Output
-    >
-{
-  async execute(
-    input: MainContentExtractionAgentDto.Input,
-  ): Promise<MainContentExtractionAgentDto.Output> {
+export class Agent implements AgentBase<Input, Output> {
+  async execute(input: Input): Promise<Output> {
     const systemPrompt = prompt({
       json_response: input.jsonResponse.trim(),
     });
 
-    const results = await new LlmProxy<
-      MainContentExtractionAgentDto.Input,
-      MainContentExtractionAgentDto.Output
-    >()
+    const results = await new LlmProxy<Input, Output>()
       .withTextHandler(handleText)
       .call(
         input,
@@ -49,10 +43,7 @@ export class MainContentExtractionAgent
   }
 }
 
-function handleText(
-  input: MainContentExtractionAgentDto.Input,
-  text: string,
-): MainContentExtractionAgentDto.Output {
+function handleText(input: Input, text: string): Output {
   const output = parseOutput(text);
   const rendered = JSONPath({
     path: output.shortest_json_path,
@@ -79,17 +70,17 @@ function handleText(
   };
 }
 
-interface Output {
+interface TextOutput {
   explanation: string;
   shortest_json_path: string;
 }
 
-function parseOutput(text: string): Output {
+function parseOutput(text: string): TextOutput {
   const parsed = parseLlmJsonOutput(text);
-  let output: Output;
+  let output: TextOutput;
 
   try {
-    assertGuard<Output>(parsed);
+    assertGuard<TextOutput>(parsed);
     output = parsed;
   } catch (error: unknown) {
     if (error instanceof TypeGuardError) {

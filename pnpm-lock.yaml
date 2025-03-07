@@ -197,6 +197,15 @@ importers:
       chalk:
         specifier: 4.1.2
         version: 4.1.2
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
+      dotenv-expand:
+        specifier: ^12.0.1
+        version: 12.0.1
+      openai:
+        specifier: ^4.86.2
+        version: 4.86.2
       tgrid:
         specifier: ^1.1.0
         version: 1.1.0
@@ -207,6 +216,9 @@ importers:
         specifier: ^8.0.0
         version: 8.0.0(@samchon/openapi@3.0.0)(typescript@5.8.2)
     devDependencies:
+      '@autoview/agent':
+        specifier: workspace:^
+        version: link:../packages/agent
       '@autoview/compiler':
         specifier: workspace:^
         version: link:../packages/compiler
