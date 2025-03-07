@@ -45,9 +45,6 @@ importers:
         specifier: ^8.0.0
         version: 8.0.0(@samchon/openapi@3.0.0)(typescript@5.8.2)
     devDependencies:
-      '@autoview/tsconfig':
-        specifier: workspace:^
-        version: link:../tsconfig
       '@rollup/plugin-terser':
         specifier: ^0.4.4
         version: 0.4.4(rollup@4.34.9)
@@ -63,6 +60,9 @@ importers:
       jsonpath-plus:
         specifier: ^10.3.0
         version: 10.3.0
+      rimraf:
+        specifier: ^6.0.1
+        version: 6.0.1
       ts-patch:
         specifier: ^3.3.0
         version: 3.3.0
@@ -72,9 +72,6 @@ importers:
       typescript:
         specifier: ~5.8.2
         version: 5.8.2
-      vite:
-        specifier: ^6.1.1
-        version: 6.2.0(@types/node@22.13.9)(terser@5.39.0)
 
   packages/compiler:
     dependencies:
