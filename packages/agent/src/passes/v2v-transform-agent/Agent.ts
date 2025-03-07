@@ -94,8 +94,6 @@ function handleText(input: Input, text: string): Output {
       component.valueValidator(output.visualization);
       return true;
     } catch (error: unknown) {
-      console.error("error", error, error instanceof TypeGuardError);
-
       if (error instanceof TypeGuardError) {
         return false;
       }
