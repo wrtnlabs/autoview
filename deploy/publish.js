@@ -25,9 +25,12 @@ const build = ({ version, tag, name }) => {
 
   delete pack.private;
   pack.version = version;
-  pack.main = "lib/index.js";
-  pack.module = "lib/index.mjs";
-  pack.typings = "lib/index.d.ts";
+  if (pack.main === "src/index.ts") {
+    pack.main = "lib/index.js";
+    pack.typings = "lib/index.d.ts";
+    if (fs.existsSync(`${location}/lib/index.mjs`))
+      pack.module = "lib/index.mjs";
+  }
 
   // DEPENDENCIES
   for (const obj of [pack.dependencies ?? {}, pack.devDependencies ?? {}])
