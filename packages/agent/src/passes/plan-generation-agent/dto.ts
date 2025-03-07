@@ -1,7 +1,7 @@
 import { IAutoViewAgentProvider } from "../../structures";
 import { IComponent } from "../common";
 
-export namespace TargetSchemaGenerationAgentDto {
+export namespace PlanGenerationAgentDto {
   export interface Input {
     provider: IAutoViewAgentProvider;
     inputSchema: unknown;
@@ -11,5 +11,6 @@ export namespace TargetSchemaGenerationAgentDto {
 
   export interface Output {
     reasoning: string;
+    plan: string;
   }
 }
