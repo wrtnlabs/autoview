@@ -130,6 +130,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@autoview/interface':
+        specifier: workspace:^
+        version: link:../interface
       '@emotion/react':
         specifier: ^11.14.0
         version: 11.14.0(@types/react@18.3.18)(react@18.3.1)

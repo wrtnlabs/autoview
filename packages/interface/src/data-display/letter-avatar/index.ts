@@ -31,7 +31,20 @@ export interface IAutoViewLetterAvatarProps
    * color: "#3498db"
    * ```
    */
-  color: IAutoViewLetterAvatarProps.IColor;
+  color?: IAutoViewLetterAvatarProps.IColor;
+
+  /**
+   * The size of the icon.
+   * - Accepts predefined size values.
+   * - Measured in pixels.
+   * @default 16
+   *
+   * Example:
+   * ```ts
+   * size: 24
+   * ```
+   */
+  size?: IAutoViewLetterAvatarProps.ISize;
 }
 
 /**
@@ -44,4 +57,10 @@ export namespace IAutoViewLetterAvatarProps {
    * - Accepts any valid CSS color format.
    */
   export type IColor = string;
+
+  /**
+   * Defines the available avatar sizes in pixels.
+   * - These values ensure consistency across UI elements.
+   */
+  export type ISize = 12 | 16 | 20 | 24 | 32 | 40;
 }
