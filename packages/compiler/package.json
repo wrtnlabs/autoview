@@ -1,6 +1,7 @@
 {
   "name": "@autoview/compiler",
   "version": "0.0.0",
+  "main": "./src/index.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/wrtnlabs/autoview"
@@ -10,28 +11,32 @@
   "bugs": {
     "url": "https://github.com/wrtnlabs/autoview/issues"
   },
-  "files": [
-    "dist"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "main": "./dist/index.umd.js",
-  "module": "./dist/index.mjs",
-  "types": "./index.d.ts",
-  "scripts": {
-    "build": "tsc && vite build",
-    "test": "ts-node test/index.ts",
-    "prepare": "ts-patch install"
-  },
-  "exports": {
-    "types": "./index.d.ts",
-    "import": "./dist/index.mjs",
-    "require": "./dist/index.umd.js"
+  "dependencies": {
+    "@autoview/interface": "workspace:^",
+    "@rollup/browser": "^4.34.9",
+    "@samchon/openapi": "^3.0.0",
+    "serialize-error": "4.1.0",
+    "tgrid": "^1.1.0",
+    "tstl": "^3.0.0",
+    "typia": "^8.0.0"
   },
   "devDependencies": {
-    "@autoview/tsconfig": "workspace:*",
-    "typescript": "~5.7.3",
-    "vite": "^6.1.1"
-  }
+    "rimraf": "^6.0.1",
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.8.2"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0"
+  },
+  "scripts": {
+    "build": "node build/raw && rimraf lib && tsc",
+    "dev": "pnpm run build --watch",
+    "prepare": "ts-patch install && node build/raw"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "src",
+    "README.sh"
+  ]
 }
