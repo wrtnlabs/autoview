@@ -3,6 +3,7 @@ import {
   MainContentExtraction,
   V2vTransform,
 } from "@autoview/agent";
+import { IComponent } from "@autoview/agent/src/passes/common";
 import OpenAI from "openai";
 import typia, { createAssertGuard } from "typia";
 
@@ -154,7 +155,7 @@ export async function test_agent_v2v_transform_agent(): Promise<void> {
   });
 
   const defs = {};
-  const components: V2vTransform.IComponent[] = [
+  const components: IComponent[] = [
     {
       name: "Text",
       description:

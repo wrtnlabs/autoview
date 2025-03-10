@@ -16,3 +16,8 @@ export interface IComponent {
    */
   valueValidator(value: unknown): void;
 }
+
+export type IComponentWithoutValueValidator = Omit<
+  IComponent,
+  "valueValidator"
+>;
