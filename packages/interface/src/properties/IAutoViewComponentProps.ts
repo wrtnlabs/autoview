@@ -6,7 +6,9 @@ import {
   IAutoViewDividerProps,
   IAutoViewGridListProps,
   IAutoViewIconProps,
+  IAutoViewImageAvatarProps,
   IAutoViewImageProps,
+  IAutoViewLetterAvatarProps,
   IAutoViewStackedListProps,
   IAutoViewStatsProps,
   IAutoViewTagProps,
@@ -23,6 +25,8 @@ export type IAutoViewDataDisplayComponentProps =
   | IAutoViewChipProps
   | IAutoViewDividerProps
   | IAutoViewStatsProps
+  | IAutoViewImageAvatarProps
+  | IAutoViewLetterAvatarProps
   | IAutoViewTagProps;
 
 export type IAutoViewSurfaceComponentProps =
