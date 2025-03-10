@@ -32,6 +32,7 @@
     "@autoview/interface": "workspace:^",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.7",
     "@mui/material": "^6.4.6",
     "embla-carousel": "^8.5.2",
     "embla-carousel-autoplay": "^8.5.2",
