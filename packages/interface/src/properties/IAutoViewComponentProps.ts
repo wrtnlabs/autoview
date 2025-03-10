@@ -1,21 +1,19 @@
 import {
-  IAutoViewIconProps,
-  IAutoViewImageProps,
-  IAutoViewTypographyProps,
-} from "../common";
-import {
   IAutoViewBadgeProps,
+  IAutoViewCarouselProps,
   IAutoViewChipProps,
+  IAutoViewCollapseProps,
   IAutoViewDividerProps,
+  IAutoViewGridListProps,
+  IAutoViewIconProps,
+  IAutoViewImageAvatarProps,
+  IAutoViewImageProps,
+  IAutoViewLetterAvatarProps,
+  IAutoViewStackedListProps,
   IAutoViewStatsProps,
   IAutoViewTagProps,
-} from "../data-display";
-import {
-  IAutoViewCarouselProps,
-  IAutoViewCollapseProps,
-  IAutoViewGridListProps,
-  IAutoViewStackedListProps,
-} from "../surface";
+  IAutoViewTypographyProps,
+} from "../components";
 
 export type IAutoViewCommonComponentProps =
   | IAutoViewIconProps
@@ -27,6 +25,8 @@ export type IAutoViewDataDisplayComponentProps =
   | IAutoViewChipProps
   | IAutoViewDividerProps
   | IAutoViewStatsProps
+  | IAutoViewImageAvatarProps
+  | IAutoViewLetterAvatarProps
   | IAutoViewTagProps;
 
 export type IAutoViewSurfaceComponentProps =
