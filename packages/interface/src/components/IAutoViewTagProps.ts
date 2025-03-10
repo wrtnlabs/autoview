@@ -1,7 +1,7 @@
-import { IAutoViewIconProps } from "../../common";
-import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
-import { IAutoViewImageAvatarProps } from "../image-avatar";
-import { IAutoViewLetterAvatarProps } from "../letter-avatar";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { IAutoViewIconProps } from "./IAutoViewIconProps";
+import { IAutoViewImageAvatarProps } from "./IAutoViewImageAvatarProps";
+import { IAutoViewLetterAvatarProps } from "./IAutoViewLetterAvatarProps";
 
 /**
  * Props for the `AutoViewTag` component.

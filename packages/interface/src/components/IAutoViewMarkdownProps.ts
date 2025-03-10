@@ -1,4 +1,4 @@
-import { IAutoViewComponentPropsBase } from "./IAutoViewComponentPropsBase";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 
 /**
  * The component rendering the markdown content.

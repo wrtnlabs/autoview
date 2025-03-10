@@ -1,5 +1,5 @@
-import { IAutoViewIconProps } from "../../common";
-import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 /**
  * Props for the `AutoViewStats` component.

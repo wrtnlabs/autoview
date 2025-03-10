@@ -1,6 +1,6 @@
-import { IAutoViewIconProps } from "../../common";
-import { IAutoViewNonSurfaceComponentProps } from "../../properties/IAutoViewComponentProps";
-import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 /**
  * Properties for configuring the Collapse component.

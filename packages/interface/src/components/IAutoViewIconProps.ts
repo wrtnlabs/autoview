@@ -1,4 +1,4 @@
-import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 
 /**
  * Props for the `AutoViewIcon` component.

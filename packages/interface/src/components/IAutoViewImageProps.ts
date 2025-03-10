@@ -1,6 +1,6 @@
 import { tags } from "typia";
 
-import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 
 /**
  * Props for the `AutoViewImage` component.

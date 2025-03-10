@@ -1,5 +1,5 @@
-import { IAutoViewNonSurfaceComponentProps } from "../../properties/IAutoViewComponentProps";
-import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 
 /**
  * Properties for configuring the GridList component.

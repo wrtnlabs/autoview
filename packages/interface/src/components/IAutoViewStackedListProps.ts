@@ -1,5 +1,5 @@
-import { IAutoViewComponentProps } from "../../properties/IAutoViewComponentProps";
-import { IAutoViewComponentPropsBase } from "../../properties/IAutoViewComponentPropsBase";
+import { IAutoViewComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 
 /**
  * Properties for configuring the StackedList component.
