@@ -28,11 +28,6 @@ export namespace IAutoViewGridListProps {
    */
   export interface IItem {
     /**
-     * Unique identifier for the grid item.
-     */
-    key: number;
-
-    /**
      * Content to be rendered within the grid item.
      * Must conform to the IAutoViewNonSurfaceComponentProps interface.
      */
