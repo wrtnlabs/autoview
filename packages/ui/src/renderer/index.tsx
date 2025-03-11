@@ -3,35 +3,30 @@ import React from "react";
 
 import { componentMap } from "../components";
 
-export function renderComponent(config: IAutoViewComponentProps) {
-  if (!config || typeof config !== "object" || !config.type) return null;
-
-  const Component = componentMap[config.type];
-
-  if (!Component) {
-    console.warn(`Unknown component type: ${config.type}`);
+export function renderComponent(
+  props: IAutoViewComponentProps | IAutoViewComponentProps[],
+) {
+  if (props == null || typeof props !== "object") {
     return null;
   }
 
-  if (!hasChildren(config)) {
-    return <Component {...config} />;
+  if (Array.isArray(props)) {
+    return props.map((c, index) => (
+      <React.Fragment key={index}>{renderComponent(c)}</React.Fragment>
+    ));
   }
 
-  const { children, ...props } = config;
+  if (!props.type) {
+    console.warn(`Missing component type`);
+    return null;
+  }
 
-  const renderedChildren = Array.isArray(children)
-    ? children.map((child, index) => (
-        <React.Fragment key={index}>{renderComponent(child)}</React.Fragment>
-      ))
-    : renderComponent(children);
+  const Component = componentMap[props.type];
 
-  return <Component {...props}>{renderedChildren}</Component>;
-}
+  if (!Component) {
+    console.warn(`Unknown component type: ${props.type}`);
+    return null;
+  }
 
-function hasChildren(
-  config: IAutoViewComponentProps,
-): config is IAutoViewComponentProps & {
-  children: IAutoViewComponentProps | IAutoViewComponentProps[];
-} {
-  return "children" in config;
+  return <Component {...props} />;
 }
