@@ -11,7 +11,6 @@ import {
   IAutoViewLetterAvatarProps,
   IAutoViewStackedListProps,
   IAutoViewStatsProps,
-  IAutoViewTagProps,
   IAutoViewTypographyProps,
 } from "../components";
 
@@ -26,8 +25,7 @@ export type IAutoViewDataDisplayComponentProps =
   | IAutoViewDividerProps
   | IAutoViewStatsProps
   | IAutoViewImageAvatarProps
-  | IAutoViewLetterAvatarProps
-  | IAutoViewTagProps;
+  | IAutoViewLetterAvatarProps;
 
 export type IAutoViewSurfaceComponentProps =
   | IAutoViewCollapseProps

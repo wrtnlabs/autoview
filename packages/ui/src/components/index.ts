@@ -12,7 +12,6 @@ import { ImageAvatar } from "./image-avatar";
 import { LetterAvatar } from "./letter-avatar";
 import { StackedList } from "./stacked-list";
 import { Stats } from "./stats";
-import { Tag } from "./tag";
 import { Typography } from "./typography";
 
 export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
@@ -29,5 +28,4 @@ export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
   StackedList,
   Stats,
   Typography,
-  Tag,
 };
