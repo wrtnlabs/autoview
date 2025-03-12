@@ -48,8 +48,9 @@ c. Produces output data conforming to the output schema
 Ensure that your function:
 - Uses appropriate TypeScript types and interfaces
 - Implements all necessary data transformations
-- Handles potential edge cases and invalid input gracefully
+- Handles potential edge cases gracefully
 - Includes comments explaining complex logic or non-obvious transformations
+- Do not validate inputs, as external system will validate inputs for you for better performance
 
 Provide your TypeScript function inside <typescript_function> tags. The function should have the following signature:
 
@@ -97,6 +98,8 @@ function visualizeData(input: InputType): OutputType {
   // Function implementation
 }
 </typescript_function>
+
+Do not generate any other text such as explanation, introduction, so on, after the <typescript_function> tags.
 
 Begin your response with the analysis process as instructed.
 `;

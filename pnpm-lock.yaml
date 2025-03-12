@@ -38,6 +38,9 @@ importers:
       '@autoview/compiler':
         specifier: workspace:^
         version: link:../compiler
+      '@autoview/interface':
+        specifier: workspace:^
+        version: link:../interface
       '@samchon/openapi':
         specifier: ^3.0.0
         version: 3.0.0

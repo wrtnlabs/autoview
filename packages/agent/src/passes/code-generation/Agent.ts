@@ -43,13 +43,15 @@ async function handleText(input: Input, text: string): Promise<Output> {
   const output = parseOutput(text);
   const compiler = new AutoViewCompiler({
     metadata: {
-      $defs: (input.rootComponentSchema as any)["$defs"],
-      schema: input.rootComponentSchema as any,
+      $defs: (input.inputSchema as any)["$defs"],
+      schema: input.inputSchema as any,
     },
     compilerOptions: {
       module: "cjs",
     },
   });
+
+  console.log(output.typescript_function);
 
   const result = await compiler.compile(output.typescript_function);
 
@@ -58,6 +60,9 @@ async function handleText(input: Input, text: string): Promise<Output> {
   }
 
   if (result.type === "failure") {
+    console.log(JSON.stringify(result.diagnostics, null, 2));
+    console.log(result.typescript);
+
     throw new LlmFailure(
       `failed to compile the typescript function: ${JSON.stringify(
         result.diagnostics,

@@ -8,6 +8,13 @@ import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
 export namespace AutoViewProgrammer {
   export const write = (ctx: IAutoViewProgrammerContext): ts.Statement[] => {
     const statements: ts.Statement[] = [
+      ts.factory.createExpressionStatement(
+        ts.factory.createCallExpression(
+          ts.factory.createIdentifier("placeholder"),
+          undefined,
+          [],
+        ),
+      ),
       AutoViewClassProgrammer.write(ctx),
       AutoViewMainProgrammer.write(ctx),
       ts.factory.createExpressionStatement(

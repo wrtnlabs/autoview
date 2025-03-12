@@ -37,11 +37,12 @@ export class AutoViewCompiler {
       importer: new AutoViewImportProgrammer(),
       body: script,
     };
+    const statements: ts.Statement[] = AutoViewProgrammer.write(ctx);
+    const source: string = FilePrinter.write({ statements });
     try {
-      const statements: ts.Statement[] = AutoViewProgrammer.write(ctx);
       const result: IAutoViewCompilerResult = TypeScriptCompiler.build(
         ctx,
-        FilePrinter.write({ statements }),
+        source,
         this.compilerOptions.module,
       );
       if (result.type === "success" && is_node() === false)

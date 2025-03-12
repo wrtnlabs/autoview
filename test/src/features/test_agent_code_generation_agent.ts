@@ -19,139 +19,6 @@ export async function test_agent_code_generation_agent(): Promise<void> {
     }),
   };
 
-  //   const mainContentExtractionAgent = new MainContentExtraction.Agent();
-
-  //   await mainContentExtractionAgent.execute({
-  //     provider,
-  //     jsonResponse: `
-  // {
-  //   "function": {
-  //     "path": "connector_slack_get_files_post",
-  //     "method": "post"
-  //   },
-  //   "arguments": [
-  //     {
-  //       "channel": "C0654GRKQNM",
-  //       "latestDateTime": "2024-10-16T10:31:47.492Z",
-  //       "limit": 200,
-  //       "oldestDateTime": "2024-10-13T00:00:00.000Z",
-  //       "secretKey": "63bfd9cf-b377-49b4-9ecc-0fb3fc0942ed"
-  //     }
-  //   ],
-  //   "success": true,
-  //   "value": {
-  //     "ok": true,
-  //     "files": [
-  //       {
-  //         "url_private": "https://files.slack.com/files-pri/T01N3NBLFL4-F07SBPQREAU/mockups.png",
-  //         "url_private_download": "https://files.slack.com/files-pri/T01N3NBLFL4-F07SBPQREAU/download/mockups.png",
-  //         "thumb_1024": "https://files.slack.com/files-tmb/T01N3NBLFL4-F07SBPQREAU-02c218b539/mockups_1024.png",
-  //         "name": "Mockups.png",
-  //         "id": "F07SBPQREAU",
-  //         "user": "U060JBN3PGX",
-  //         "size": 933559,
-  //         "channels": [
-  //           "C0654GRKQNM"
-  //         ],
-  //         "comments_count": 0,
-  //         "created": 1728857835,
-  //         "mimetype": "image/png"
-  //       },
-  //       {
-  //         "url_private": "https://files.slack.com/files-pri/T01N3NBLFL4-F07RLA68XGV/image.png",
-  //         "url_private_download": "https://files.slack.com/files-pri/T01N3NBLFL4-F07RLA68XGV/download/image.png",
-  //         "thumb_1024": "https://files.slack.com/files-tmb/T01N3NBLFL4-F07RLA68XGV-7ba430e150/image_1024.png",
-  //         "name": "image.png",
-  //         "id": "F07RLA68XGV",
-  //         "user": "U0769CNJVLL",
-  //         "size": 1351407,
-  //         "channels": [
-  //           "C0654GRKQNM"
-  //         ],
-  //         "comments_count": 0,
-  //         "created": 1728865958,
-  //         "mimetype": "image/png"
-  //       },
-  //       {
-  //         "url_private": "https://files.slack.com/files-pri/T01N3NBLFL4-F07RP3BTBMZ/image.png",
-  //         "url_private_download": "https://files.slack.com/files-pri/T01N3NBLFL4-F07RP3BTBMZ/download/image.png",
-  //         "thumb_1024": "https://files.slack.com/files-tmb/T01N3NBLFL4-F07RP3BTBMZ-b3f01a2f8f/image_1024.png",
-  //         "name": "image.png",
-  //         "id": "F07RP3BTBMZ",
-  //         "user": "U0769CNJVLL",
-  //         "size": 1327518,
-  //         "channels": [
-  //           "C0654GRKQNM"
-  //         ],
-  //         "comments_count": 0,
-  //         "created": 1728865967,
-  //         "mimetype": "image/png"
-  //       },
-  //       {
-  //         "url_private": "https://files.slack.com/files-pri/T01N3NBLFL4-F07SC00310Q/image.png",
-  //         "url_private_download": "https://files.slack.com/files-pri/T01N3NBLFL4-F07SC00310Q/download/image.png",
-  //         "thumb_1024": "https://files.slack.com/files-tmb/T01N3NBLFL4-F07SC00310Q-005e912be6/image_1024.png",
-  //         "name": "image.png",
-  //         "id": "F07SC00310Q",
-  //         "user": "U0769CNJVLL",
-  //         "size": 1410819,
-  //         "channels": [
-  //           "C0654GRKQNM"
-  //         ],
-  //         "comments_count": 0,
-  //         "created": 1728865998,
-  //         "mimetype": "image/png"
-  //       },
-  //       {
-  //         "url_private": "https://files.slack.com/files-pri/T01N3NBLFL4-F07RP61MCHG/image.png",
-  //         "url_private_download": "https://files.slack.com/files-pri/T01N3NBLFL4-F07RP61MCHG/download/image.png",
-  //         "thumb_1024": "https://files.slack.com/files-tmb/T01N3NBLFL4-F07RP61MCHG-19e338ab2d/image_1024.png",
-  //         "name": "image.png",
-  //         "id": "F07RP61MCHG",
-  //         "user": "U0769CNJVLL",
-  //         "size": 1370028,
-  //         "channels": [
-  //           "C0654GRKQNM"
-  //         ],
-  //         "comments_count": 0,
-  //         "created": 1728866008,
-  //         "mimetype": "image/png"
-  //       },
-  //       {
-  //         "url_private": "https://files.slack.com/files-tmb/T01N3NBLFL4-F07RLU40D1B-e506dd18f1/________________________________2024-10-14______________2.38.45.mp4",
-  //         "url_private_download": "https://files.slack.com/files-pri/T01N3NBLFL4-F07RLU40D1B/download/________________________________2024-10-14______________2.38.45.mov",
-  //         "name": "화면 기록 2024-10-14 오후 2.38.45.mov",
-  //         "id": "F07RLU40D1B",
-  //         "user": "U04JTP7U1JS",
-  //         "size": 15396803,
-  //         "channels": [
-  //           "C0654GRKQNM"
-  //         ],
-  //         "comments_count": 0,
-  //         "created": 1728884368,
-  //         "mimetype": "video/quicktime"
-  //       },
-  //       {
-  //         "url_private": "https://files.slack.com/files-pri/T01N3NBLFL4-F07R8KG95ST/image.png",
-  //         "url_private_download": "https://files.slack.com/files-pri/T01N3NBLFL4-F07R8KG95ST/download/image.png",
-  //         "thumb_1024": "https://files.slack.com/files-tmb/T01N3NBLFL4-F07R8KG95ST-65edb15839/image_1024.png",
-  //         "name": "image.png",
-  //         "id": "F07R8KG95ST",
-  //         "user": "U0769CNJVLL",
-  //         "size": 1313006,
-  //         "channels": [
-  //           "C0654GRKQNM"
-  //         ],
-  //         "comments_count": 0,
-  //         "created": 1728866108,
-  //         "mimetype": "image/png"
-  //       }
-  //     ]
-  //   }
-  // }
-  // `,
-  //   });
-
   const planGenerationAgent = new PlanGeneration.Agent();
   const plan = await planGenerationAgent.execute({
     provider,
@@ -267,62 +134,62 @@ export async function test_agent_code_generation_agent(): Promise<void> {
       },
       additionalProperties: false,
       required: ["body"],
-    },
-    defs: {
-      "IShoppingChannelCategory.IInvert": {
-        description: "Invert category information with parent category.",
-        type: "object",
-        properties: {
-          parent: {
-            title: "Parent category info with recursive structure",
-            description:
-              "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
-            anyOf: [
-              {
-                type: "null",
-              },
-              {
-                $ref: "#/$defs/IShoppingChannelCategory.IInvert",
-              },
-            ],
+      $defs: {
+        "IShoppingChannelCategory.IInvert": {
+          description: "Invert category information with parent category.",
+          type: "object",
+          properties: {
+            parent: {
+              title: "Parent category info with recursive structure",
+              description:
+                "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
+              anyOf: [
+                {
+                  type: "null",
+                },
+                {
+                  $ref: "#/$defs/IShoppingChannelCategory.IInvert",
+                },
+              ],
+            },
+            id: {
+              title: "Primary Key",
+              description: "Primary Key.\n\n\n@format uuid",
+              type: "string",
+            },
+            code: {
+              title: "Identifier code of the category",
+              description:
+                "Identifier code of the category.\n\nThe code must be unique in the channel.",
+              type: "string",
+            },
+            parent_id: {
+              title: "Parent category's ID",
+              description: "Parent category's ID.",
+              anyOf: [
+                {
+                  type: "null",
+                },
+                {
+                  type: "string",
+                  description: "@format uuid",
+                },
+              ],
+            },
+            name: {
+              title: "Representative name of the category",
+              description:
+                "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+              type: "string",
+            },
+            created_at: {
+              title: "Creation time of record",
+              description: "Creation time of record.\n\n\n@format date-time",
+              type: "string",
+            },
           },
-          id: {
-            title: "Primary Key",
-            description: "Primary Key.\n\n\n@format uuid",
-            type: "string",
-          },
-          code: {
-            title: "Identifier code of the category",
-            description:
-              "Identifier code of the category.\n\nThe code must be unique in the channel.",
-            type: "string",
-          },
-          parent_id: {
-            title: "Parent category's ID",
-            description: "Parent category's ID.",
-            anyOf: [
-              {
-                type: "null",
-              },
-              {
-                type: "string",
-                description: "@format uuid",
-              },
-            ],
-          },
-          name: {
-            title: "Representative name of the category",
-            description:
-              "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
-            type: "string",
-          },
-          created_at: {
-            title: "Creation time of record",
-            description: "Creation time of record.\n\n\n@format date-time",
-            type: "string",
-          },
+          required: ["parent", "id", "code", "parent_id", "name", "created_at"],
         },
-        required: ["parent", "id", "code", "parent_id", "name", "created_at"],
       },
     },
     components: [
@@ -539,28 +406,85 @@ export async function test_agent_code_generation_agent(): Promise<void> {
       },
       additionalProperties: false,
       required: ["body"],
+      $defs: {
+        "IShoppingChannelCategory.IInvert": {
+          description: "Invert category information with parent category.",
+          type: "object",
+          properties: {
+            parent: {
+              title: "Parent category info with recursive structure",
+              description:
+                "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
+              anyOf: [
+                {
+                  type: "null",
+                },
+                {
+                  $ref: "#/$defs/IShoppingChannelCategory.IInvert",
+                },
+              ],
+            },
+            id: {
+              title: "Primary Key",
+              description: "Primary Key.\n\n\n@format uuid",
+              type: "string",
+            },
+            code: {
+              title: "Identifier code of the category",
+              description:
+                "Identifier code of the category.\n\nThe code must be unique in the channel.",
+              type: "string",
+            },
+            parent_id: {
+              title: "Parent category's ID",
+              description: "Parent category's ID.",
+              anyOf: [
+                {
+                  type: "null",
+                },
+                {
+                  type: "string",
+                  description: "@format uuid",
+                },
+              ],
+            },
+            name: {
+              title: "Representative name of the category",
+              description:
+                "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+              type: "string",
+            },
+            created_at: {
+              title: "Creation time of record",
+              description: "Creation time of record.\n\n\n@format date-time",
+              type: "string",
+            },
+          },
+          required: ["parent", "id", "code", "parent_id", "name", "created_at"],
+        },
+      },
     },
     rootComponentSchema: {
-      defs: {
+      $defs: {
         Component: {
           anyOf: [
             {
-              $ref: "#/defs/VerticalList",
+              $ref: "#/$defs/VerticalList",
             },
             {
-              $ref: "#/defs/HorizontalList",
+              $ref: "#/$defs/HorizontalList",
             },
             {
-              $ref: "#/defs/Grid",
+              $ref: "#/$defs/Grid",
             },
             {
-              $ref: "#/defs/ImageView",
+              $ref: "#/$defs/ImageView",
             },
             {
-              $ref: "#/defs/TextView",
+              $ref: "#/$defs/TextView",
             },
             {
-              $ref: "#/defs/LinkTextView",
+              $ref: "#/$defs/LinkTextView",
             },
           ],
         },
@@ -570,7 +494,7 @@ export async function test_agent_code_generation_agent(): Promise<void> {
             children: {
               type: "array",
               items: {
-                $ref: "#/defs/Component",
+                $ref: "#/$defs/Component",
               },
             },
           },
@@ -582,7 +506,7 @@ export async function test_agent_code_generation_agent(): Promise<void> {
             children: {
               type: "array",
               items: {
-                $ref: "#/defs/Component",
+                $ref: "#/$defs/Component",
               },
             },
           },
@@ -594,7 +518,7 @@ export async function test_agent_code_generation_agent(): Promise<void> {
             children: {
               type: "array",
               items: {
-                $ref: "#/defs/Component",
+                $ref: "#/$defs/Component",
               },
             },
             columns: {
@@ -637,7 +561,7 @@ export async function test_agent_code_generation_agent(): Promise<void> {
           required: ["children", "url"],
         },
       },
-      $ref: "#/defs/Component",
+      $ref: "#/$defs/Component",
     },
     componentPlan: plan.component,
   });

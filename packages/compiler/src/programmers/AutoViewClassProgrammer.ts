@@ -47,26 +47,9 @@ export namespace AutoViewClassProgrammer {
         [
           ts.factory.createReturnStatement(
             ts.factory.createCallExpression(
-              ts.factory.createPropertyAccessExpression(
-                ts.factory.createIdentifier(
-                  ctx.importer.external({
-                    type: "default",
-                    library: "typia",
-                    name: "typia",
-                  }),
-                ),
-                ts.factory.createIdentifier("random"),
-              ),
-              [
-                ts.factory.createTypeReferenceNode(
-                  ctx.importer.external({
-                    type: "instance",
-                    name: "IAutoViewComponentProps",
-                    library: "@autoview/interface",
-                  }),
-                ),
-              ],
-              [],
+              ts.factory.createIdentifier("visualizeData"),
+              undefined,
+              [ts.factory.createIdentifier("$input")],
             ),
           ),
         ],

@@ -13,10 +13,7 @@ export namespace TypeScriptCompiler {
     target: "cjs" | "esm",
   ): IAutoViewCompilerResult => {
     // LLM GENERATED CODE
-    typescript = typescript.replace(
-      "return typia.random<IAutoViewComponentProps>();",
-      ctx.body,
-    );
+    typescript = typescript.replace("placeholder();", ctx.body);
 
     // PREPARE RAW FILES
     const dict: Map<string, ts.SourceFile> = new Map();
@@ -103,10 +100,11 @@ export namespace TypeScriptCompiler {
           length: diag.length,
           messageText: getMessageText(diag.messageText),
         })),
+        typescript,
       };
     return {
       type: "success",
-      typescript: typescript,
+      typescript,
       javascript: output.value,
     };
   };
