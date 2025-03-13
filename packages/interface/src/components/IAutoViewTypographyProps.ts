@@ -40,6 +40,8 @@ export interface IAutoViewTypographyProps
    * @default null
    */
   lineClamp?: number | null;
+
+  children: string;
 }
 
 /**
