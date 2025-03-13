@@ -82,6 +82,6 @@ export namespace IAutoViewCarouselProps {
      * Content to be rendered within the carousel item.
      * Must conform to the IAutoViewNonSurfaceComponentProps interface.
      */
-    children: IAutoViewNonSurfaceComponentProps;
+    children: IAutoViewNonSurfaceComponentProps[];
   }
 }

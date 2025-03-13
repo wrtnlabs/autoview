@@ -23,7 +23,7 @@ export const Carousel = (props: IAutoViewCarouselProps) => {
     >
       <Container>
         {items.map((item, index) => (
-          <Slide key={index} item={item} />
+          <Slide key={index} {...item} />
         ))}
       </Container>
 

@@ -6,13 +6,17 @@ import {
 } from "@mui/material";
 import React from "react";
 
-export const Collapse = (props: IAutoViewCollapseProps.IItem) => {
+import { renderComponent } from "../../renderer";
+
+export const Collapse = (props: IAutoViewCollapseProps) => {
   return (
     <MuiCollapse>
       <MuiCollapseSummary>
-        {JSON.stringify(props.header.content)}
+        {renderComponent(props.header.children)}
       </MuiCollapseSummary>
-      <MuiCollapseDetails>{JSON.stringify(props.content)}</MuiCollapseDetails>
+      <MuiCollapseDetails>
+        {renderComponent(props.content.children)}
+      </MuiCollapseDetails>
     </MuiCollapse>
   );
 };
