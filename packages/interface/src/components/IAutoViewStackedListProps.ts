@@ -13,6 +13,12 @@ export interface IAutoViewStackedListProps
    * Each item should conform to the IAutoViewComponentProps interface, ensuring uniformity across all elements.
    */
   items: IAutoViewStackedListProps.IItem[];
+
+  /**
+   * A gap between list items.
+   * @default 8
+   */
+  gap?: number;
 }
 
 export namespace IAutoViewStackedListProps {
