@@ -15,10 +15,16 @@ export interface IAutoViewGridListProps
   items: IAutoViewGridListProps.IItem[];
 
   /**
-   * Number of columns in the grid, determining how many items are displayed per row.
-   * @default 2
+   * A row gap space between children.
+   * @default 8
    */
-  columns?: number;
+  rowGap?: number;
+
+  /**
+   * A column gap space between children.
+   * @default 8
+   */
+  columnGap?: number;
 }
 
 export namespace IAutoViewGridListProps {
@@ -28,14 +34,27 @@ export namespace IAutoViewGridListProps {
    */
   export interface IItem {
     /**
-     * Unique identifier for the grid item.
-     */
-    key: number;
-
-    /**
      * Content to be rendered within the grid item.
      * Must conform to the IAutoViewNonSurfaceComponentProps interface.
      */
     children: IAutoViewNonSurfaceComponentProps;
+
+    /**
+     * Size of the column in different screen sizes
+     * @default 12
+     */
+    column?: IColumn | IResponsive;
+
+    /**
+     * Size of the column
+     * @default 0
+     */
+    offset?: IColumn | IResponsive;
   }
+
+  export type IColumn = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+
+  export type IBreakpoint = "xs" | "sm" | "md" | "lg" | "xl";
+
+  export interface IResponsive extends Record<IBreakpoint, IColumn> {}
 }

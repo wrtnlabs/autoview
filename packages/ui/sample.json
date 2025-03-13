@@ -1,0 +1,40 @@
+{
+  "type": "Carousel",
+  "autoPlay": true,
+  "items": [
+    {
+      "type": "Card",
+      "content": "Card 1",
+      "image": {
+        "type": "Image",
+        "src": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.oliveyoung.co.kr%2Fstore%2Fgoods%2FgetGoodsDetail.do%3FgoodsNo%3DA000000181231&psig=AOvVaw3nxr0hbR9kLpL6OSDazTt-&ust=1741674666579000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCKCE_fPx_osDFQAAAAAdAAAAABAE",
+        "alt": ""
+      }
+    },
+    {
+      "type": "Card",
+      "content": "Card 2",
+      "image": {
+        "type": "Image",
+        "src": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.instagram.com%2Fbebe_the_ori%2Fp%2FDAgBR9TvUVH%2F&psig=AOvVaw34sJG0F0-rG5bpbIaWUryI&ust=1741674718705000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCUkYny_osDFQAAAAAdAAAAABAE",
+        "alt": ""
+      }
+    },
+    {
+      "type": "Card",
+      "content": "Card 3",
+      "image": {
+        "type": "Image",
+        "src": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fkr.pinterest.com%2Fheuni1%2F%25EC%259B%2583%25EA%25B8%25B4-%25EC%25A7%25A4%2F&psig=AOvVaw34sJG0F0-rG5bpbIaWUryI&ust=1741674718705000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPCUkYny_osDFQAAAAAdAAAAABAI",
+        "alt": ""
+      }
+    }
+  ],
+  "interval": 3000,
+  "infinite": true,
+  "effect": "slide",
+  "speed": 1000,
+  "dotPosition": "bottom",
+  "showArrows": true,
+  "indicators": false
+}

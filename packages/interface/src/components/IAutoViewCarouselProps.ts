@@ -79,14 +79,9 @@ export namespace IAutoViewCarouselProps {
    */
   export interface IItem {
     /**
-     * Unique identifier for the carousel item.
-     */
-    key: number;
-
-    /**
      * Content to be rendered within the carousel item.
      * Must conform to the IAutoViewNonSurfaceComponentProps interface.
      */
-    children: IAutoViewNonSurfaceComponentProps;
+    children: IAutoViewNonSurfaceComponentProps[];
   }
 }

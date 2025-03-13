@@ -3,13 +3,13 @@ import React, { PropsWithChildren } from "react";
 
 import { AutoViewCarouselContext } from "./Context";
 
-export const CarouselContainer = (props: PropsWithChildren) => {
+export const CarouselContainer = ({ children }: PropsWithChildren) => {
   const { carouselRef } =
     AutoViewCarouselContext.useAutoViewCarouselContextContext();
 
   return (
     <RefContainer ref={carouselRef}>
-      <Container>{props.children}</Container>
+      <Container>{children}</Container>
     </RefContainer>
   );
 };

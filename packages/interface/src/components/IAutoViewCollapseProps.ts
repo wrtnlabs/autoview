@@ -3,38 +3,26 @@ import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPro
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 /**
- * Properties for configuring the Collapse component.
+ * Props for the `AutoViewCollapse` component.
  *
- * The Collapse component allows users to expand or collapse sections of content,
- * enabling them to view or hide information as needed, thus optimizing space and reducing complexity on the page.
+ * The `AutoViewCollapse` component allows users to expand or collapse sections of content,
+ * optimizing space usage and enhancing readability. It is commonly used for FAQs, settings panels,
+ * and expandable content sections.
+ *
  */
 export interface IAutoViewCollapseProps
   extends IAutoViewComponentPropsBase<"Collapse"> {
   /**
-   * An array of items to be displayed within the collapse component.
-   * Each item must conform to the IItem interface, ensuring a consistent structure across all elements.
+   * Represents the header of an individual collapse item.
+   * This section acts as the trigger to expand or collapse the content.
    */
-  items: IAutoViewCollapseProps.IItem[];
+  header: IAutoViewCollapseProps.IHeader;
 
   /**
-   * Keys of the items that should be expanded by default when the component is first rendered.
-   * If not provided, the first item (key 0) will be expanded by default.
-   * @default [0]
+   * Represents the collapsible content.
+   * This section becomes visible when the collapse item is expanded.
    */
-  defaultExpandedKeys?: number[];
-
-  /**
-   * Keys of the currently expanded items.
-   * This prop makes the component controlled, allowing external control over which items are expanded.
-   */
-  expandedKeys?: number[];
-
-  /**
-   * Enables accordion behavior, allowing only one item to be expanded at a time.
-   * When a new item is expanded, the previously expanded item will collapse.
-   * @default false
-   */
-  accordion?: boolean;
+  content: IAutoViewCollapseProps.IContent;
 
   /**
    * Adds a border around each collapse item, distinguishing them from surrounding content.
@@ -43,24 +31,27 @@ export interface IAutoViewCollapseProps
   bordered?: boolean;
 
   /**
-   * Custom icon to indicate the expand/collapse state of each item.
+   * Icon displayed for expanding the section.
    * If not provided, a default icon will be used.
+   * @default undefined
    */
   expandIcon?: IAutoViewIconProps;
 
   /**
-   * Position of the expand/collapse icon relative to the item header.
-   * - 'start': Icon appears before the header content.
-   * - 'end': Icon appears after the header content.
+   * Icon displayed for collapsing the section.
+   * If not provided, a default icon will be used.
+   * @default undefined
+   */
+  collapseIcon?: IAutoViewIconProps;
+
+  /**
+   * Position of the expand/collapse icon relative to the header content.
    * @default 'start'
    */
   expandIconPosition?: IAutoViewCollapseProps.IIconPosition;
 
   /**
-   * Size of the collapse items.
-   * - 'large': Larger padding and font size.
-   * - 'middle': Medium padding and font size.
-   * - 'small': Smaller padding and font size.
+   * Defines the size of the collapse component.
    * @default 'middle'
    */
   size?: IAutoViewCollapseProps.ISize;
@@ -69,41 +60,29 @@ export interface IAutoViewCollapseProps
 export namespace IAutoViewCollapseProps {
   /**
    * Represents the header of an individual collapse item.
-   * Contains the main content and optional extra elements.
+   * Contains the main title or summary and may include additional elements.
    */
-  export interface IItemHeader {
+  export interface IHeader {
     /**
-     * Main content of the item header.
-     * Typically includes a title or summary of the collapsible content.
+     * Main content of the header.
+     * Should clearly indicate what the collapsible content contains.
      */
-    content: IAutoViewNonSurfaceComponentProps;
+    children: IAutoViewNonSurfaceComponentProps[];
   }
 
   /**
-   * Represents an individual item within the collapse component.
-   * Each item has a unique key, a header, and content that can be expanded or collapsed.
+   * Represents the content of an individual collapse item.
+   * This section is displayed when the item is expanded.
    */
-  export interface IItem {
+  export interface IContent {
     /**
-     * Unique identifier for the collapse item.
-     * Used to manage the expanded/collapsed state of the item.
+     * Main content inside the collapsible section.
      */
-    key: number;
-
-    /**
-     * Header of the collapse item, containing the main title and optional extra elements.
-     */
-    header: IItemHeader;
-
-    /**
-     * Content to be rendered within the collapse item when expanded.
-     * Must conform to the IAutoViewNonSurfaceComponentProps interface.
-     */
-    content: IAutoViewNonSurfaceComponentProps;
+    children: IAutoViewNonSurfaceComponentProps[];
   }
 
   /**
-   * Defines the size options for collapse items.
+   * Defines the size options for the collapse component.
    * - 'large': Larger padding and font size.
    * - 'middle': Medium padding and font size.
    * - 'small': Smaller padding and font size.
@@ -112,8 +91,8 @@ export namespace IAutoViewCollapseProps {
 
   /**
    * Defines the position options for the expand/collapse icon.
-   * - 'start': Icon appears before the header content.
-   * - 'end': Icon appears after the header content.
+   * - `'start'`: Icon appears before the header content.
+   * - `'end'`: Icon appears after the header content (default).
    */
   export type IIconPosition = "start" | "end";
 }

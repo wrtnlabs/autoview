@@ -2,7 +2,7 @@ import { IAutoViewTypographyProps } from "@autoview/interface";
 import { TypographyOwnProps } from "@mui/material";
 
 export function transformTypographyProps(
-  props: IAutoViewTypographyProps,
+  props: Omit<IAutoViewTypographyProps, "type">,
 ): TypographyOwnProps {
   return {
     variant: props.variant,

@@ -12,5 +12,17 @@ export interface IAutoViewStackedListProps
    * Array of items to be displayed in the stacked list.
    * Each item should conform to the IAutoViewComponentProps interface, ensuring uniformity across all elements.
    */
-  items: IAutoViewComponentProps[];
+  items: IAutoViewStackedListProps.IItem[];
+
+  /**
+   * A gap between list items.
+   * @default 8
+   */
+  gap?: number;
+}
+
+export namespace IAutoViewStackedListProps {
+  export interface IItem {
+    children: IAutoViewComponentProps[];
+  }
 }
