@@ -56,6 +56,7 @@ export namespace TypeScriptCompiler {
               module: ts.ModuleKind.ESNext,
               moduleResolution: ts.ModuleResolutionKind.Bundler,
             }),
+        noImplicitAny: false,
       },
       {
         // KEY FEATURES

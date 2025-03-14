@@ -10,29 +10,25 @@ export namespace MainAgent {
   export async function execute(
     provider: IAutoViewAgentProvider,
     inputSchema: unknown,
-  ): Promise<any> {
-    const planGenerationAgent = new PlanGeneration.Agent();
-    const codeGenerationAgent = new CodeGeneration.Agent();
-
+  ): Promise<Function> {
     const components = listComponents();
 
-    const { visualizationPlanning, component } =
-      await planGenerationAgent.execute({
-        components,
-        inputSchema,
-        provider,
-      });
-
-    const { jsFunction } = await codeGenerationAgent.execute({
+    const planGenerationAgent = new PlanGeneration.Agent();
+    const plan = await planGenerationAgent.execute({
       provider,
       inputSchema,
-      componentPlan: visualizationPlanning,
-      componentSchema: component,
+      components,
     });
 
-    const v2vTranformer = new Function("$input", jsFunction);
+    const codeGenerationAgent = new CodeGeneration.Agent();
+    const { transform } = await codeGenerationAgent.execute({
+      provider,
+      inputSchema,
+      componentSchema: componentSchema(),
+      componentPlan: plan.component,
+    });
 
-    return v2vTranformer;
+    return transform;
   }
 
   function listComponents(): IComponentWithoutValueValidator[] {
@@ -71,6 +67,17 @@ export namespace MainAgent {
     });
 
     return components;
+  }
+
+  function componentSchema(): unknown {
+    if (!ChatGptTypeChecker.isObject(PARAMETERS)) {
+      throw new Error("PARAMETERS is not an object.");
+    }
+
+    return {
+      ...PARAMETERS.properties["props"],
+      $defs: PARAMETERS.$defs,
+    };
   }
 
   const PARAMETERS = typia.llm.parameters<

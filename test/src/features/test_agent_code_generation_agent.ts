@@ -378,8 +378,8 @@ export async function test_agent_code_generation_agent(): Promise<void> {
   });
 
   console.log(code.analysis);
-  console.log(code.tsFunction);
-  console.log(code.jsFunction);
+  console.log(code.transform);
+  console.log(code.random);
 }
 
 function listComponents(): IComponentWithoutValueValidator[] {

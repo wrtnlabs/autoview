@@ -1,4 +1,5 @@
-import { RollupBuild, rollup } from "@rollup/browser";
+import commonjs from "@rollup/plugin-commonjs";
+import { RollupBuild, rollup } from "rollup";
 import { VariadicSingleton } from "tstl";
 
 export namespace RollupBundler {
@@ -9,6 +10,7 @@ export namespace RollupBundler {
     const builder: RollupBuild = await rollup({
       input: "index.js",
       plugins: [
+        commonjs(),
         {
           name: "virtual",
           resolveId: (id) => {
@@ -24,7 +26,8 @@ export namespace RollupBundler {
     });
 
     const { output } = await builder.generate({
-      format: "cjs",
+      format: "iife",
+      name: "module",
     });
     const bundled: string | undefined = output[0]?.code;
     if (!bundled?.length) throw new Error("Failed to bundle.");

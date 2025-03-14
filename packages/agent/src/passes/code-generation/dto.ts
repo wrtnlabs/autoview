@@ -9,6 +9,6 @@ export interface Input {
 
 export interface Output {
   analysis: string;
-  tsFunction: string;
-  jsFunction: string;
+  transform: Function;
+  random: Function;
 }

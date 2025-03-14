@@ -12,6 +12,7 @@ import { RollupBundler } from "./compilers/RollupBundler";
 import { TypeScriptCompiler } from "./compilers/TypeScriptCompiler";
 import { AutoViewImportProgrammer } from "./programmers/AutoViewImportProgrammer";
 import { AutoViewProgrammer } from "./programmers/AutoViewProgrammer";
+import { AutoViewRandomProgrammer } from "./programmers/AutoViewRandomProgrammer";
 import { IAutoViewProgrammerContext } from "./programmers/IAutoViewProgrammerContext";
 import { ErrorUtil } from "./utils/ErrorUtil";
 import { FilePrinter } from "./utils/FilePrinter";
@@ -71,7 +72,35 @@ export class AutoViewCompiler {
         source,
         this.compilerOptions.module,
       );
-      if (result.type === "success" && is_node() === false)
+      if (result.type === "success")
+        result.javascript = await RollupBundler.build(result.javascript);
+      return result;
+    } catch (error) {
+      return {
+        type: "error",
+        error: ErrorUtil.toJSON(error),
+      };
+    }
+  }
+
+  public async compileRandom(): Promise<IAutoViewCompilerResult> {
+    const ctx: IAutoViewProgrammerContext = {
+      importer: new AutoViewImportProgrammer(),
+    };
+    const statements: ts.Statement[] = AutoViewRandomProgrammer.write(
+      ctx,
+      this.inputComponents,
+      this.inputSchema,
+    );
+    const source: string = FilePrinter.write({ statements });
+
+    try {
+      const result: IAutoViewCompilerResult = TypeScriptCompiler.build(
+        ctx,
+        source,
+        this.compilerOptions.module,
+      );
+      if (result.type === "success")
         result.javascript = await RollupBundler.build(result.javascript);
       return result;
     } catch (error) {

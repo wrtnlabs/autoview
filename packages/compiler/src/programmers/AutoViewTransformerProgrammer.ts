@@ -17,7 +17,7 @@ export namespace AutoViewTransformerProgrammer {
         AutoViewSchemaProgrammer.writeSchema(ctx, inputSchema),
       ),
       ts.factory.createFunctionDeclaration(
-        undefined,
+        [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
         undefined,
         ts.factory.createIdentifier("transform"),
         undefined,
@@ -28,7 +28,7 @@ export namespace AutoViewTransformerProgrammer {
             ts.factory.createIdentifier("$input"),
             undefined,
             ts.factory.createTypeReferenceNode(
-              ts.factory.createIdentifier("IAutoViewTransformerInputType"),
+              ts.factory.createIdentifier("unknown"),
               undefined,
             ),
           ),

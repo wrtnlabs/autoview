@@ -47,19 +47,19 @@ Wrap your reasoning in <transformation_analysis> tags. Be thorough and detailed 
 - Write down the key TypeScript types and interfaces you'll be working with.
 
 After completing your analysis, implement a TypeScript function named "visualizeData" that accomplishes the following:
-a. Accepts input data of type IAutoViewTransformerInput
+a. Accepts input data of type IAutoViewTransformerInputType
 b. Transforms the input data according to the component plan
 c. Produces output data of type IAutoViewComponentProps
 
 Ensure that your function:
-- Uses the provided types IAutoViewTransformerInput and IAutoViewComponentProps (do not define these types yourself)
+- Uses the provided types IAutoViewTransformerInputType and IAutoViewComponentProps (do not define these types yourself)
 - Implements all necessary data transformations
 - Handles potential edge cases and invalid input gracefully
 - Includes comments explaining complex logic or non-obvious transformations
 
 Provide your TypeScript function inside <typescript_function> tags. The function should have the following signature:
 
-function visualizeData(input: IAutoViewTransformerInput): IAutoViewComponentProps
+function visualizeData(input: IAutoViewTransformerInputType): IAutoViewComponentProps
 
 Remember to adhere strictly to the input schema, output schema, and component plan provided. Do not introduce any additional functionality or data structures that are not specified in these inputs.
 
