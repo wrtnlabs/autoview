@@ -1,9 +1,6 @@
-export * from "./common";
-export * from "./data-display";
-export * from "./surface";
+export * from "./components";
 export * from "./properties/IAutoViewComponentProps";
 export * from "./properties/IAutoViewComponentPropsBase";
-
 export * from "./services/IAutoViewCompilerMetadata";
 export * from "./services/IAutoViewCompilerProps";
 export * from "./services/IAutoViewCompilerResult";
