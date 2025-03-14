@@ -185,5 +185,5 @@ export async function test_main_agent(): Promise<void> {
   };
   const result = await MainAgent.execute(provider, schema);
 
-  console.log(result);
+  console.log(result.toString());
 }
