@@ -15,6 +15,7 @@ export namespace IAutoViewCompilerResult {
   export interface IFailure {
     type: "failure";
     diagnostics: IDiagnostic[];
+    typescript: string;
   }
   export interface IDiagnostic {
     category: DiagnosticCategory;

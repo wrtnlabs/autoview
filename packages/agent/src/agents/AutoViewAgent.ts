@@ -160,7 +160,7 @@ export namespace AutoViewAgent {
 }
 
 const FUNCTION: ILlmFunctionOfValidate<"chatgpt"> = typia.llm
-  .applicationOfValidate<IAutoViewApplication, "chatgpt", { reference: true }>()
+  .application<IAutoViewApplication, "chatgpt", { reference: true }>()
   .functions.find((f) => f.name === "render")!;
 
 interface ICallResult {

@@ -1,10 +1,12 @@
-import { IAutoViewAccordionProps } from "./IAutoViewAccordionProps";
-import { IAutoViewCarouselProps } from "./IAutoViewCarouselProps";
-import { IAutoViewGridProps } from "./IAutoViewGridProps";
-import { IAutoViewListProps } from "./IAutoViewListProps";
+import {
+  IAutoViewCarouselProps,
+  IAutoViewCollapseProps,
+  IAutoViewGridListProps,
+  IAutoViewStackedListProps,
+} from "@autoview/interface";
 
 export type IAutoViewComponentProps =
-  | IAutoViewAccordionProps
   | IAutoViewCarouselProps
-  | IAutoViewGridProps
-  | IAutoViewListProps;
+  | IAutoViewCollapseProps
+  | IAutoViewGridListProps
+  | IAutoViewStackedListProps;

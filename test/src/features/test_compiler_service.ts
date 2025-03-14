@@ -28,9 +28,13 @@ export const test_compiler_service = async (): Promise<void> => {
   try {
     const service: Driver<IAutoViewCompilerService> = worker.getDriver();
     await service.initialize({
-      metadata: {
+      inputMetadata: {
         $defs,
         schema,
+      },
+      componentMetadata: {
+        $defs: {},
+        schema: {},
       },
     });
     const result: IAutoViewCompilerResult = await service.compile(`
