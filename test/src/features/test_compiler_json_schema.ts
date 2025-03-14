@@ -8,9 +8,13 @@ import { IBbsArticle } from "../structures/IBbsArticle";
 export const test_compiler_json_schema = async (): Promise<void> => {
   const collection: IJsonSchemaCollection = typia.json.schemas<[IBbsArticle]>();
   const compiler: AutoViewCompiler = new AutoViewCompiler({
-    metadata: {
+    inputMetadata: {
       components: collection.components,
       schema: collection.schemas[0]!,
+    },
+    componentMetadata: {
+      $defs: {},
+      schema: {},
     },
   });
   const result: IAutoViewCompilerResult = await compiler.compile(`

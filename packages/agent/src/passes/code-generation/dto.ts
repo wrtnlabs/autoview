@@ -3,7 +3,7 @@ import { IAutoViewAgentProvider } from "../../structures";
 export interface Input {
   provider: IAutoViewAgentProvider;
   inputSchema: unknown;
-  rootComponentSchema: unknown;
+  componentSchema: unknown;
   componentPlan: string;
 }
 

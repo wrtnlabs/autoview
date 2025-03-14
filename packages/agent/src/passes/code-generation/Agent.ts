@@ -6,10 +6,25 @@ import { prompt } from "./prompt";
 
 export class Agent implements AgentBase<Input, Output> {
   async execute(input: Input): Promise<Output> {
+    const compiler = new AutoViewCompiler({
+      inputMetadata: {
+        $defs: (input.inputSchema as any)["$defs"],
+        schema: input.inputSchema as any,
+      },
+      componentMetadata: {
+        $defs: (input.componentSchema as any)["$defs"],
+        schema: input.componentSchema as any,
+      },
+      compilerOptions: {
+        module: "cjs",
+      },
+    });
+    const boilerplate = compiler.generateBoilerplate();
     const systemPrompt = prompt({
       input_schema: input.inputSchema,
-      output_schema: input.rootComponentSchema,
+      output_schema: input.componentSchema,
       component_plan: input.componentPlan,
+      boilerplate,
     });
 
     const results = await new LlmProxy<Input, Output>()
@@ -42,16 +57,18 @@ export class Agent implements AgentBase<Input, Output> {
 async function handleText(input: Input, text: string): Promise<Output> {
   const output = parseOutput(text);
   const compiler = new AutoViewCompiler({
-    metadata: {
+    inputMetadata: {
       $defs: (input.inputSchema as any)["$defs"],
       schema: input.inputSchema as any,
+    },
+    componentMetadata: {
+      $defs: (input.componentSchema as any)["$defs"],
+      schema: input.componentSchema as any,
     },
     compilerOptions: {
       module: "cjs",
     },
   });
-
-  console.log(output.typescript_function);
 
   const result = await compiler.compile(output.typescript_function);
 
@@ -85,7 +102,9 @@ interface TextOutput {
 }
 
 function parseOutput(text: string): TextOutput {
-  const analysis = text.match(/<analysis>([\s\S]*?)<\/analysis>/);
+  const analysis = text.match(
+    /<transformation_analysis>([\s\S]*?)<\/transformation_analysis>/,
+  );
   const typescriptFunction = text.match(
     /<typescript_function>([\s\S]*?)<\/typescript_function>/,
   );

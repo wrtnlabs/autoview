@@ -1,7 +1,8 @@
 import { IAutoViewCompilerMetadata } from "./IAutoViewCompilerMetadata";
 
 export interface IAutoViewCompilerProps {
-  metadata: IAutoViewCompilerMetadata;
+  inputMetadata: IAutoViewCompilerMetadata;
+  componentMetadata: IAutoViewCompilerMetadata;
   compilerOptions?: Partial<IAutoViewCompilerProps.ICompilerOptions>;
 }
 export namespace IAutoViewCompilerProps {

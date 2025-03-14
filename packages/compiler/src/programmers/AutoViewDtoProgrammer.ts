@@ -7,19 +7,22 @@ import { AutoViewSchemaProgrammer } from "./AutoViewSchemaProgrammer";
 import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
 
 export namespace AutoViewDtoProgrammer {
-  export const write = (ctx: IAutoViewProgrammerContext): ts.Statement[] => {
+  export const write = (
+    ctx: IAutoViewProgrammerContext,
+    components: OpenApi.IComponents,
+    schema: OpenApi.IJsonSchema,
+  ): ts.Statement[] => {
     const references: Map<string, OpenApi.IJsonSchema> = new Map();
     OpenApiTypeChecker.visit({
       closure: (schema) => {
         if (OpenApiTypeChecker.isReference(schema)) {
           const key: string = schema.$ref.split("/").pop() ?? "";
-          const value: OpenApi.IJsonSchema =
-            ctx.components.schemas?.[key] ?? {};
+          const value: OpenApi.IJsonSchema = components.schemas?.[key] ?? {};
           references.set(key, value);
         }
       },
-      components: ctx.components,
-      schema: ctx.schema,
+      components,
+      schema,
     });
 
     const dict: Map<string, IModulo> = new Map();
@@ -35,11 +38,13 @@ export namespace AutoViewDtoProgrammer {
         location = modulo.children;
       });
     }
-    return writeModulo(ctx, dict, false);
+    return writeModulo(ctx, components, schema, dict, false);
   };
 
   const writeModulo = (
     ctx: IAutoViewProgrammerContext,
+    components: OpenApi.IComponents,
+    schema: OpenApi.IJsonSchema,
     dict: Map<string, IModulo>,
     inline: boolean,
   ): ts.Statement[] => {
@@ -64,7 +69,7 @@ export namespace AutoViewDtoProgrammer {
               : [],
             ts.factory.createIdentifier(key),
             ts.factory.createModuleBlock(
-              writeModulo(ctx, value.children, true),
+              writeModulo(ctx, components, schema, value.children, true),
             ),
             ts.NodeFlags.Namespace,
           ),

@@ -22,9 +22,13 @@ export const test_compiler_transform = async (): Promise<void> => {
   >($defs);
 
   const compiler: AutoViewCompiler = new AutoViewCompiler({
-    metadata: {
+    inputMetadata: {
       $defs,
       schema,
+    },
+    componentMetadata: {
+      $defs: {},
+      schema: {},
     },
     compilerOptions: {
       module: "cjs",

@@ -3,7 +3,11 @@ import {
   IAutoViewAgentProvider,
   PlanGeneration,
 } from "@autoview/agent";
+import { IComponentWithoutValueValidator } from "@autoview/agent/src/passes/common";
+import { IAutoViewComponentProps } from "@autoview/interface";
+import { ChatGptTypeChecker } from "@samchon/openapi";
 import OpenAI from "openai";
+import typia from "typia";
 
 import { TestGlobal } from "../TestGlobal";
 
@@ -13,11 +17,12 @@ export async function test_agent_code_generation_agent(): Promise<void> {
 
   const provider: IAutoViewAgentProvider.IChatGpt = {
     type: "chatgpt",
-    model: "gpt-4o-mini",
+    model: "gpt-4o",
     api: new OpenAI({
       apiKey: TestGlobal.env.CHATGPT_API_KEY,
     }),
   };
+  const components = listComponents();
 
   const planGenerationAgent = new PlanGeneration.Agent();
   const plan = await planGenerationAgent.execute({
@@ -192,103 +197,7 @@ export async function test_agent_code_generation_agent(): Promise<void> {
         },
       },
     },
-    components: [
-      {
-        name: "VerticalList",
-        description: "places children components in vetical layout",
-        componentSchema: {
-          type: "object",
-          properties: {
-            children: {
-              type: "array",
-              items: {
-                type: "object",
-              },
-            },
-          },
-          required: ["children"],
-        },
-      },
-      {
-        name: "HorizontalList",
-        description: "places children components in horizontal layout",
-        componentSchema: {
-          type: "object",
-          properties: {
-            children: {
-              type: "array",
-              items: {
-                type: "object",
-              },
-            },
-          },
-        },
-      },
-      {
-        name: "Grid",
-        description: "places children components in grid layout",
-        componentSchema: {
-          type: "object",
-          properties: {
-            children: {
-              type: "array",
-              items: {
-                type: "object",
-              },
-            },
-            columns: {
-              type: "number",
-            },
-          },
-          required: ["children", "columns"],
-        },
-      },
-      {
-        name: "ImageView",
-        description: "displays an image",
-        componentSchema: {
-          type: "object",
-          properties: {
-            url: {
-              type: "string",
-            },
-            alt: {
-              type: "string",
-            },
-          },
-          required: ["url"],
-        },
-      },
-      {
-        name: "Text",
-        description: "displays a text",
-        componentSchema: {
-          type: "object",
-          properties: {
-            children: {
-              type: "string",
-            },
-          },
-          required: ["children"],
-        },
-      },
-      {
-        name: "LinkText",
-        description: "displays a text with a link",
-        componentSchema: {
-          type: "object",
-          properties: {
-            children: {
-              type: "string",
-            },
-            url: {
-              type: "string",
-            },
-          },
-          required: ["children", "url"],
-        },
-      },
-    ],
+    components,
   });
 
   const codeGenerationAgent = new CodeGeneration.Agent();
@@ -464,105 +373,7 @@ export async function test_agent_code_generation_agent(): Promise<void> {
         },
       },
     },
-    rootComponentSchema: {
-      $defs: {
-        Component: {
-          anyOf: [
-            {
-              $ref: "#/$defs/VerticalList",
-            },
-            {
-              $ref: "#/$defs/HorizontalList",
-            },
-            {
-              $ref: "#/$defs/Grid",
-            },
-            {
-              $ref: "#/$defs/ImageView",
-            },
-            {
-              $ref: "#/$defs/TextView",
-            },
-            {
-              $ref: "#/$defs/LinkTextView",
-            },
-          ],
-        },
-        VerticalList: {
-          type: "object",
-          properties: {
-            children: {
-              type: "array",
-              items: {
-                $ref: "#/$defs/Component",
-              },
-            },
-          },
-          required: ["children"],
-        },
-        HorizontalList: {
-          type: "object",
-          properties: {
-            children: {
-              type: "array",
-              items: {
-                $ref: "#/$defs/Component",
-              },
-            },
-          },
-          required: ["children"],
-        },
-        Grid: {
-          type: "object",
-          properties: {
-            children: {
-              type: "array",
-              items: {
-                $ref: "#/$defs/Component",
-              },
-            },
-            columns: {
-              type: "number",
-            },
-          },
-          required: ["children", "columns"],
-        },
-        ImageView: {
-          type: "object",
-          properties: {
-            url: {
-              type: "string",
-            },
-            alt: {
-              type: "string",
-            },
-          },
-          required: ["url"],
-        },
-        TextView: {
-          type: "object",
-          properties: {
-            children: {
-              type: "string",
-            },
-          },
-          required: ["children"],
-        },
-        LinkTextView: {
-          type: "object",
-          properties: {
-            children: {
-              type: "string",
-            },
-            url: {
-              type: "string",
-            },
-          },
-          required: ["children", "url"],
-        },
-      },
-      $ref: "#/$defs/Component",
-    },
+    componentSchema: componentSchema(),
     componentPlan: plan.component,
   });
 
@@ -570,3 +381,62 @@ export async function test_agent_code_generation_agent(): Promise<void> {
   console.log(code.tsFunction);
   console.log(code.jsFunction);
 }
+
+function listComponents(): IComponentWithoutValueValidator[] {
+  const components: IComponentWithoutValueValidator[] = [];
+
+  ChatGptTypeChecker.visit({
+    closure(schema) {
+      if (!ChatGptTypeChecker.isReference(schema)) {
+        return;
+      }
+
+      if (!schema.$ref.startsWith("#/$defs/IAutoView")) {
+        return;
+      }
+
+      const name = schema.$ref.split("/").pop();
+
+      if (!name) {
+        return;
+      }
+
+      const definition = PARAMETERS.$defs[name];
+
+      if (!definition) {
+        return;
+      }
+
+      components.push({
+        name,
+        description: definition.description ?? definition.title ?? "",
+        componentSchema: definition as Record<string, unknown>,
+      });
+    },
+    $defs: PARAMETERS.$defs,
+    schema: PARAMETERS.properties,
+  });
+
+  return components;
+}
+
+function componentSchema(): unknown {
+  if (!ChatGptTypeChecker.isObject(PARAMETERS)) {
+    throw new Error("PARAMETERS is not an object.");
+  }
+
+  return {
+    ...PARAMETERS.properties["props"],
+    $defs: PARAMETERS.$defs,
+  };
+}
+
+const PARAMETERS = typia.llm.parameters<
+  {
+    props: IAutoViewComponentProps;
+  },
+  "chatgpt",
+  {
+    reference: true;
+  }
+>();

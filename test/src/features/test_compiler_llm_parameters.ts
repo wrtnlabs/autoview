@@ -7,7 +7,7 @@ import { IBbsArticle } from "../structures/IBbsArticle";
 
 export const test_compiler_llm_parameters = async (): Promise<void> => {
   const compiler: AutoViewCompiler = new AutoViewCompiler({
-    metadata: {
+    inputMetadata: {
       parameters: typia.llm.parameters<
         IBbsArticle,
         "chatgpt",
@@ -15,6 +15,10 @@ export const test_compiler_llm_parameters = async (): Promise<void> => {
           reference: true;
         }
       >(),
+    },
+    componentMetadata: {
+      $defs: {},
+      schema: {},
     },
   });
   const result: IAutoViewCompilerResult = await compiler.compile(`

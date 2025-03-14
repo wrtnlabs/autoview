@@ -8,12 +8,12 @@ import { RAW } from "../raw/RAW";
 
 export namespace TypeScriptCompiler {
   export const build = (
-    ctx: IAutoViewProgrammerContext,
+    _ctx: IAutoViewProgrammerContext,
     typescript: string,
     target: "cjs" | "esm",
   ): IAutoViewCompilerResult => {
     // LLM GENERATED CODE
-    typescript = typescript.replace("placeholder();", ctx.body);
+    // typescript = typescript.replace("placeholder();", ctx.body);
 
     // PREPARE RAW FILES
     const dict: Map<string, ts.SourceFile> = new Map();
