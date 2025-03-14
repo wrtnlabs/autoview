@@ -55,6 +55,7 @@ Ensure that your function:
 - Uses the provided types IAutoViewTransformerInputType and IAutoViewComponentProps (do not define these types yourself)
 - Implements all necessary data transformations
 - Handles potential edge cases and invalid input gracefully
+- But do not validate the input data, as the compiler will generate validation code for you
 - Includes comments explaining complex logic or non-obvious transformations
 
 Provide your TypeScript function inside <typescript_function> tags. The function should have the following signature:
