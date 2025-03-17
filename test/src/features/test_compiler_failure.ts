@@ -18,9 +18,13 @@ export const test_compiler_failure = async (): Promise<void> => {
   >($defs);
 
   const compiler: AutoViewCompiler = new AutoViewCompiler({
-    metadata: {
+    inputMetadata: {
       $defs,
       schema,
+    },
+    componentMetadata: {
+      $defs: {},
+      schema: {},
     },
   });
   const result: IAutoViewCompilerResult = await compiler.compile(`

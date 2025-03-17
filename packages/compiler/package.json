@@ -14,7 +14,9 @@
   "dependencies": {
     "@autoview/interface": "workspace:^",
     "@rollup/browser": "^4.34.9",
+    "@rollup/plugin-commonjs": "^28.0.2",
     "@samchon/openapi": "^3.0.0",
+    "rollup": "^4.34.1",
     "serialize-error": "4.1.0",
     "tgrid": "^1.1.0",
     "tstl": "^3.0.0",

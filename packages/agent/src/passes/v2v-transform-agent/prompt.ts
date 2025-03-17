@@ -1,5 +1,5 @@
 import { renderPrompt } from "../../core/Prompt";
-import { IComponent } from "./dto";
+import { IComponent } from "../common";
 
 export interface PromptContext {
   content: unknown;
