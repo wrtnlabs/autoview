@@ -4,6 +4,10 @@ import React from "react";
 
 import { transformTypographyProps } from "./transform";
 
-export const Typography = (props: IAutoViewTypographyProps) => {
-  return <MuiTypography {...transformTypographyProps(props)} />;
+export const Typography = (props: Omit<IAutoViewTypographyProps, "type">) => {
+  return (
+    <MuiTypography {...transformTypographyProps(props)}>
+      {props.children}
+    </MuiTypography>
+  );
 };
