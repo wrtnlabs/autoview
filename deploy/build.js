@@ -22,6 +22,6 @@ const main = () => {
     cwd: `${__dirname}/../`,
     stdio: "inherit",
   });
-  loadPackages().forEach(build);
+  loadPackages().reverse().forEach(build);
 };
 main();
