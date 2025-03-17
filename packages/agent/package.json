@@ -12,13 +12,12 @@
   },
   "files": [
     "lib",
-    "src",
     "README.md"
   ],
   "publishConfig": {
     "access": "public"
   },
-  "main": "./src/index.ts",
+  "main": "./lib/index.js",
   "scripts": {
     "new-agent": "ts-node scripts/new-agent.ts",
     "build": "rimraf lib && tsc",

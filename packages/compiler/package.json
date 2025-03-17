@@ -1,7 +1,7 @@
 {
   "name": "@autoview/compiler",
   "version": "0.0.0",
-  "main": "./src/index.ts",
+  "main": "./lib/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/wrtnlabs/autoview"
@@ -36,9 +36,7 @@
     "prepare": "ts-patch install && node build/raw"
   },
   "files": [
-    "dist",
     "lib",
-    "src",
     "README.md"
   ]
 }
