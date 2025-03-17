@@ -7,10 +7,35 @@ import { IComponentWithoutValueValidator } from "../passes/common";
 import { IAutoViewAgentProvider } from "../structures";
 
 export namespace MainAgent {
+  export interface IResult {
+    /**
+     * (Intermediate reasoning) The plan of the visualization.
+     */
+    visualizationPlanning: string;
+    /**
+     * (Intermediate reasoning) React-like component plan.
+     */
+    componentPlan: string;
+    /**
+     * (Intermediate reasoning) The analysis of the input schema and data exploration.
+     */
+    analysis: string;
+    /**
+     * The transform function that takes input value (which follows the input schema) and returns the output value (which follows the {@link IAutoViewComponentProps}).
+     */
+    transform: Function;
+    /**
+     * The random function that generates random data which follows the {@link IAutoViewComponentProps}.
+     *
+     * It is useful to quickly test your generated component.
+     */
+    random: Function;
+  }
+
   export async function execute(
     provider: IAutoViewAgentProvider,
     inputSchema: unknown,
-  ): Promise<Function> {
+  ): Promise<IResult> {
     const components = listComponents();
 
     const planGenerationAgent = new PlanGeneration.Agent();
@@ -21,14 +46,20 @@ export namespace MainAgent {
     });
 
     const codeGenerationAgent = new CodeGeneration.Agent();
-    const { transform } = await codeGenerationAgent.execute({
+    const { analysis, transform, random } = await codeGenerationAgent.execute({
       provider,
       inputSchema,
       componentSchema: componentSchema(),
       componentPlan: plan.component,
     });
 
-    return transform;
+    return {
+      visualizationPlanning: plan.visualizationPlanning,
+      componentPlan: plan.component,
+      analysis,
+      transform,
+      random: random,
+    };
   }
 
   function listComponents(): IComponentWithoutValueValidator[] {
