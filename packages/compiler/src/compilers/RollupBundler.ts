@@ -1,5 +1,5 @@
+import { RollupBuild, rollup } from "@rollup/browser";
 import commonjs from "@rollup/plugin-commonjs";
-import { RollupBuild, rollup } from "rollup";
 import { VariadicSingleton } from "tstl";
 
 export namespace RollupBundler {
