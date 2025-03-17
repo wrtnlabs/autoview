@@ -22,6 +22,7 @@ export class Agent implements AgentBase<Input, Output> {
               content: systemPrompt,
             },
           ],
+          reasoning_effort: "medium",
         },
         input.provider.options,
       );

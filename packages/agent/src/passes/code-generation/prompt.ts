@@ -57,6 +57,7 @@ Ensure that your function:
 - Handles potential edge cases and invalid input gracefully
 - But do not validate the input data, as the compiler will generate validation code for you
 - Includes comments explaining complex logic or non-obvious transformations
+- Your code is for production use, so you NEVER use any mock-ups, placeholders, or any hard-coded fake data
 
 Provide your TypeScript function inside <typescript_function> tags. The function should have the following signature:
 
@@ -69,6 +70,8 @@ Note that your code will be attached to the following boilerplate code, generate
 <boilerplate>
 {{boilerplate}}
 </boilerplate>
+
+Do not copy-paste and/or repeat the boilerplate code in your response. They will be attached automatically by the compiler.
 
 Your response should follow this structure:
 

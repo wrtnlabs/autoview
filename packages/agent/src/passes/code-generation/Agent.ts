@@ -42,6 +42,7 @@ export class Agent implements AgentBase<Input, Output> {
               content: systemPrompt,
             },
           ],
+          reasoning_effort: "medium",
         },
         input.provider.options,
       );
@@ -86,6 +87,7 @@ async function handleText(input: Input, text: string): Promise<Output> {
         2,
       )}`,
     );
+    console.log(`code:\n${result.typescript}`);
 
     throw new LlmFailure(
       `failed to compile the typescript function: ${JSON.stringify(
