@@ -44,6 +44,9 @@ importers:
       '@samchon/openapi':
         specifier: ^3.0.0
         version: 3.0.0
+      jsonpath-plus:
+        specifier: ^10.3.0
+        version: 10.3.0
       openai:
         specifier: ^4.86.2
         version: 4.86.2(ws@8.18.1)
@@ -66,9 +69,6 @@ importers:
       dotenv-expand:
         specifier: ^12.0.1
         version: 12.0.1
-      jsonpath-plus:
-        specifier: ^10.3.0
-        version: 10.3.0
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1

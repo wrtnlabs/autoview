@@ -30,7 +30,6 @@
     "@types/node": "^22.13.9",
     "dotenv": "^16.4.7",
     "dotenv-expand": "^12.0.1",
-    "jsonpath-plus": "^10.3.0",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
@@ -41,6 +40,7 @@
     "@autoview/compiler": "workspace:^",
     "@autoview/interface": "workspace:^",
     "@samchon/openapi": "^3.0.0",
+    "jsonpath-plus": "^10.3.0",
     "openai": "^4.86.2",
     "typia": "^8.0.0"
   }
