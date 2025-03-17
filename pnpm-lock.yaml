@@ -93,15 +93,9 @@ importers:
       '@rollup/browser':
         specifier: ^4.34.9
         version: 4.34.9
-      '@rollup/plugin-commonjs':
-        specifier: ^28.0.2
-        version: 28.0.2(rollup@4.34.9)
       '@samchon/openapi':
         specifier: ^3.0.0
         version: 3.0.0
-      rollup:
-        specifier: ^4.34.1
-        version: 4.34.9
       serialize-error:
         specifier: 4.1.0
         version: 4.1.0

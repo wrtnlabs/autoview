@@ -1,5 +1,4 @@
 import { RollupBuild, rollup } from "@rollup/browser";
-import commonjs from "@rollup/plugin-commonjs";
 import { VariadicSingleton } from "tstl";
 
 export namespace RollupBundler {
@@ -10,7 +9,6 @@ export namespace RollupBundler {
     const builder: RollupBuild = await rollup({
       input: "index.js",
       plugins: [
-        commonjs(),
         {
           name: "virtual",
           resolveId: (id) => {
