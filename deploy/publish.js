@@ -79,12 +79,14 @@ const main = () => {
     cwd: `${__dirname}/../`,
     stdio: "inherit",
   });
-  loadPackages().forEach((name) =>
-    build({
-      name,
-      version,
-      tag,
-    }),
-  );
+  loadPackages()
+    .reverse()
+    .forEach((name) =>
+      build({
+        name,
+        version,
+        tag,
+      }),
+    );
 };
 main();
