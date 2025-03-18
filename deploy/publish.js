@@ -4,6 +4,8 @@ const fs = require("fs");
 const { loadPackages } = require("./internal/loadPackages");
 
 const build = ({ version, tag, name }) => {
+  if (name === "compiler-bundle") return;
+
   console.log("=========================================");
   console.log(` Publish @autoview/${name}`);
   console.log("=========================================");
