@@ -7,11 +7,35 @@ const buildInterface = () => {
   console.log("---------------------------------------");
 
   const location = `${__dirname}/../../interface`;
-  console.log(require("path").resolve(location));
-  cp.execSync("pnpm pack", {
-    cwd: location,
-    stdio: "inherit",
-  });
+  const load = () =>
+    JSON.parse(fs.readFileSync(`${location}/package.json`, "utf-8"));
+
+  const original = load();
+  const packJson = load();
+  packJson.main = "./lib/index.js";
+  packJson.typings = "./lib/index.d.ts";
+
+  const execute = (command) =>
+    cp.execSync(command, {
+      cwd: location,
+      stdio: "inherit",
+    });
+  try {
+    fs.writeFileSync(
+      `${location}/package.json`,
+      JSON.stringify(packJson, null, 2),
+    );
+    execute("pnpm run build");
+    execute("pnpm pack");
+  } catch (error) {
+    throw error;
+  } finally {
+    fs.writeFileSync(
+      `${location}/package.json`,
+      JSON.stringify(original, null, 2),
+      "utf8",
+    );
+  }
 };
 
 const buildCompiler = () => {
@@ -25,18 +49,23 @@ const buildCompiler = () => {
 
   const original = load();
   const packJson = load();
+  packJson.main = "./lib/index.js";
+  packJson.typings = "./lib/index.d.ts";
   packJson.dependencies["@autoview/interface"] =
     `file:../interface/autoview-interface-${original.version}.tgz`;
 
+  const execute = (command) =>
+    cp.execSync(command, {
+      cwd: location,
+      stdio: "inherit",
+    });
   try {
     fs.writeFileSync(
       `${location}/package.json`,
       JSON.stringify(packJson, null, 2),
     );
-    cp.execSync("pnpm pack", {
-      cwd: location,
-      stdio: "inherit",
-    });
+    execute("pnpm run build");
+    execute("pnpm pack");
   } catch (error) {
     throw error;
   } finally {
