@@ -26,7 +26,7 @@ const result: IAutoViewCompilerResult = await service.compile("...");
 await worker.close();
 ```
 
-### Browser Environment
+## Browser Environment
 Compile the worker from by below URL.
 
   - https://wrtnlabs.io/autoview/compiler/worker.js
