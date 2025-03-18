@@ -13,12 +13,9 @@
     "url": "https://github.com/wrtnlabs/autoview/issues"
   },
   "scripts": {
-    "build": "rimraf lib && tsc",
-    "dev": "pnpm run build --watch"
-  },
-  "devDependencies": {
-    "rimraf": "^6.0.1",
-    "typescript": "~5.8.2"
+    "build": "rimraf lib && ts-node build/iconName.ts && tsc",
+    "dev": "pnpm run build --watch",
+    "prepare": "ts-patch install && ts-node build/iconName.ts"
   },
   "files": [
     "lib",
@@ -26,11 +23,15 @@
     "README.md"
   ],
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.7.2",
-    "@fortawesome/free-brands-svg-icons": "^6.7.2",
-    "@fortawesome/free-solid-svg-icons": "^6.7.2",
-    "@fortawesome/react-fontawesome": "^0.2.2",
     "@samchon/openapi": "^3.0.0",
     "typia": "^8.0.0"
+  },
+  "devDependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@types/node": "^22.13.9",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.8.2"
   }
 }
