@@ -30,3 +30,4 @@ dist-ssr
 public/results
 
 *storybook.log
+*.tgz
