@@ -4,8 +4,6 @@ const fs = require("fs");
 const { loadPackages } = require("./internal/loadPackages");
 
 const build = ({ version, tag, name }) => {
-  if (name === "compiler-bundle") return;
-
   console.log("=========================================");
   console.log(` Publish @autoview/${name}`);
   console.log("=========================================");
@@ -18,6 +16,8 @@ const build = ({ version, tag, name }) => {
       stdio: "inherit",
     });
   execute("pnpm run build");
+
+  if (name === "compiler-bundle") return;
 
   // PACKAGE MAIN INFO
   const load = () => fs.readFileSync(`${location}/package.json`, "utf8");
