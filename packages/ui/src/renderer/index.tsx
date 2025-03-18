@@ -4,7 +4,10 @@ import React from "react";
 import { componentMap } from "../components";
 
 export function renderComponent(
-  props: IAutoViewComponentProps | IAutoViewComponentProps[],
+  props:
+    | string
+    | IAutoViewComponentProps
+    | Array<string | IAutoViewComponentProps>,
 ) {
   if (props == null || typeof props !== "object") {
     return null;

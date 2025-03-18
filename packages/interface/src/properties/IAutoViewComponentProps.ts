@@ -11,13 +11,13 @@ import {
   IAutoViewLetterAvatarProps,
   IAutoViewStackedListProps,
   IAutoViewStatsProps,
-  IAutoViewTypographyProps,
+  IAutoViewTextProps,
 } from "../components";
 
 export type IAutoViewCommonComponentProps =
   | IAutoViewIconProps
   | IAutoViewImageProps
-  | IAutoViewTypographyProps;
+  | IAutoViewTextProps;
 
 export type IAutoViewDataDisplayComponentProps =
   | IAutoViewBadgeProps

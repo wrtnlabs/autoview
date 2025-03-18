@@ -21,18 +21,21 @@ export default {
   external: ["react", "react-dom"],
   plugins: [
     peerDepsExternal(),
-    resolve(),
-    // commonjs(),
-    // typescript({
-    //   tsconfigOverride: {
-    //     compilerOptions: {
-    //       declaration: true,
-    //       declarationDir: "./dist",
-    //     },
-    //   },
-    //   rollupCommonJSResolveHack: true,
-    //   clean: true,
-    // }),
-    // json(),
+    commonjs(),
+    typescript({
+      tsconfigOverride: {
+        compilerOptions: {
+          declaration: true,
+          declarationDir: "./dist",
+        },
+      },
+      rollupCommonJSResolveHack: true,
+      clean: true,
+    }),
+    json(),
+    resolve({
+      extensions: [".json", ".ts", ".tsx", ".js", ".jsx"],
+    }),
+    terser(),
   ],
 };

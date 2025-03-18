@@ -43,11 +43,7 @@ export interface IAutoViewTextProps
    */
   lineClamp?: number | null;
 
-  children:
-    | Array<string | number | IAutoViewIconProps>
-    | string
-    | number
-    | IAutoViewIconProps;
+  children: Array<string | IAutoViewIconProps> | string | IAutoViewIconProps;
 }
 
 /**
