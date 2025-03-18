@@ -3,14 +3,17 @@ import type {
   IAutoViewCompilerResult,
   IAutoViewCompilerService,
 } from "@autoview/interface";
+import type { rollup as RollupFunction } from "rollup";
 
-import { AutoViewCompiler } from "../AutoViewCompiler";
+import { AutoViewCompiler } from "./AutoViewCompiler";
 
 export class AutoViewCompilerService implements IAutoViewCompilerService {
   private compiler_: AutoViewCompiler | null = null;
 
+  public constructor(private readonly rollup: typeof RollupFunction) {}
+
   public async initialize(props: IAutoViewCompilerProps): Promise<void> {
-    this.compiler_ = new AutoViewCompiler(props);
+    this.compiler_ = new AutoViewCompiler(this.rollup, props);
   }
 
   public generateBoilerplate(): string {

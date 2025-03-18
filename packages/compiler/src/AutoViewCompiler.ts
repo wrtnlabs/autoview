@@ -5,6 +5,7 @@ import type {
 } from "@autoview/interface";
 import { OpenApi } from "@samchon/openapi";
 import { ChatGptSchemaComposer } from "@samchon/openapi/lib/composers/llm/ChatGptSchemaComposer";
+import type { rollup as RollupFunction } from "rollup";
 import { is_node } from "tstl";
 import ts from "typescript";
 
@@ -24,7 +25,10 @@ export class AutoViewCompiler {
   private readonly componentSchema: OpenApi.IJsonSchema;
   private readonly compilerOptions: IAutoViewCompilerProps.ICompilerOptions;
 
-  public constructor(props: IAutoViewCompilerProps) {
+  public constructor(
+    private readonly rollup: typeof RollupFunction,
+    props: IAutoViewCompilerProps,
+  ) {
     const { components, schema } = getJsonSchema(props.inputMetadata);
     const { components: componentComponents, schema: componentSchema } =
       getJsonSchema(props.componentMetadata);
@@ -73,7 +77,10 @@ export class AutoViewCompiler {
         this.compilerOptions.module,
       );
       if (result.type === "success")
-        result.javascript = await RollupBundler.build(result.javascript);
+        result.javascript = await RollupBundler.build(
+          this.rollup,
+          result.javascript,
+        );
       return result;
     } catch (error) {
       return {
@@ -101,7 +108,10 @@ export class AutoViewCompiler {
         this.compilerOptions.module,
       );
       if (result.type === "success")
-        result.javascript = await RollupBundler.build(result.javascript);
+        result.javascript = await RollupBundler.build(
+          this.rollup,
+          result.javascript,
+        );
       return result;
     } catch (error) {
       return {
