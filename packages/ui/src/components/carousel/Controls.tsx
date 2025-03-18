@@ -4,15 +4,20 @@ import React, { useCallback } from "react";
 import { AutoViewCarouselContext } from "./Context";
 
 export const CarouselControls = () => {
-  const { carouselApi } =
+  const { carouselApi, setSelectedIndex } =
     AutoViewCarouselContext.useAutoViewCarouselContextContext();
 
   const goToPrev = useCallback(() => {
-    carouselApi?.scrollPrev();
-  }, []);
+    if (!carouselApi) return;
+    carouselApi.scrollPrev();
+    setSelectedIndex((prev) => (prev - 1 < 0 ? 2 : prev - 1));
+  }, [carouselApi]);
+
   const goToNext = useCallback(() => {
-    carouselApi?.scrollNext();
-  }, []);
+    if (!carouselApi) return;
+    carouselApi.scrollNext();
+    setSelectedIndex((prev) => (prev + 1 > 2 ? 0 : prev + 1));
+  }, [carouselApi]);
 
   return (
     <Controls>
@@ -20,7 +25,7 @@ export const CarouselControls = () => {
         Prev
       </button>
       <button type="button" onClick={goToNext}>
-        <q>Next</q>
+        Next
       </button>
     </Controls>
   );

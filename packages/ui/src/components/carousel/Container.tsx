@@ -17,8 +17,17 @@ export const CarouselContainer = ({ children }: PropsWithChildren) => {
 const RefContainer = styled("div")`
   position: relative;
   overflow: hidden;
+  width: 500px;
+  height: 400px;
 `;
 
 const Container = styled("div")`
   display: flex;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-position: center;
+    object-fit: cover;
+  }
 `;

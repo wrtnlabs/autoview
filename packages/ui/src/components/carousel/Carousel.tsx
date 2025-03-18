@@ -1,6 +1,6 @@
 import { IAutoViewCarouselProps } from "@autoview/interface";
 import useEmblaCarousel from "embla-carousel-react";
-import React from "react";
+import React, { useState } from "react";
 
 import { CarouselContainer as Container } from "./Container";
 import { AutoViewCarouselContext } from "./Context";
@@ -13,12 +13,15 @@ export const Carousel = (props: IAutoViewCarouselProps) => {
   const { items, showArrows, indicators } = props;
   const [options, plugins] = transformCarouselProps(props);
   const [carouselRef, carouselApi] = useEmblaCarousel(options, plugins);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   return (
     <AutoViewCarouselContext.AutoViewCarouselContextProvider
       value={{
         carouselRef,
         carouselApi,
+        selectedIndex,
+        setSelectedIndex,
       }}
     >
       <Container>
