@@ -1,4 +1,5 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { IAutoViewColor } from "../properties/theme";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 import { IAutoViewImageAvatarProps } from "./IAutoViewImageAvatarProps";
 import { IAutoViewLetterAvatarProps } from "./IAutoViewLetterAvatarProps";
@@ -41,6 +42,8 @@ export interface IAutoViewChipProps
     | IAutoViewImageAvatarProps
     | IAutoViewLetterAvatarProps
     | IAutoViewIconProps;
+
+  color?: IAutoViewColor.IVariant | IAutoViewColor.IScale | IAutoViewColor.IHex;
 }
 
 export namespace IAutoViewChip {

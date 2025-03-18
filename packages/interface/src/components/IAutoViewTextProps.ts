@@ -1,4 +1,6 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { IAutoViewColor, IAutoViewTypography } from "../properties/theme";
+import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 /**
  * Props for the `AutoViewTypography` component.
@@ -6,15 +8,15 @@ import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPro
  * The `AutoViewTypography` component is used to display text with different styles,
  * colors, and behaviors such as truncation and line clamping.
  */
-export interface IAutoViewTypographyProps
-  extends IAutoViewComponentPropsBase<"Typography"> {
+export interface IAutoViewTextProps
+  extends IAutoViewComponentPropsBase<"Text"> {
   /**
    * Defines the style of the typography.
    * - Determines the font size, weight, and spacing.
    * - Common values include 'h1', 'body1', 'subtitle1', etc.
    * @default "body1"
    */
-  variant?: IAutoViewTypographyProps.IVariant;
+  variant?: IAutoViewTextProps.IVariant;
 
   /**
    * Defines the text color.
@@ -22,7 +24,7 @@ export interface IAutoViewTypographyProps
    * - Typically used to match theme or provide emphasis.
    * @default "inherit"
    */
-  color?: IAutoViewTypographyProps.IColor;
+  color?: IAutoViewTextProps.IColor;
 
   /**
    * Enables text truncation with an ellipsis ("...").
@@ -41,36 +43,29 @@ export interface IAutoViewTypographyProps
    */
   lineClamp?: number | null;
 
-  children: string;
+  children:
+    | Array<string | number | IAutoViewIconProps>
+    | string
+    | number
+    | IAutoViewIconProps;
 }
 
 /**
  * Namespace containing type definitions for `IAutoViewTypographyProps`.
  */
-export namespace IAutoViewTypographyProps {
+export namespace IAutoViewTextProps {
   /**
    * Defines the available typography variants.
    * - Matches common text styles used in UI design.
    */
-  export type IVariant =
-    | "body1" // Default body text
-    | "body2" // Smaller body text
-    | "button" // Button text style
-    | "caption" // Small caption text
-    | "h1" // Heading 1
-    | "h2" // Heading 2
-    | "h3" // Heading 3
-    | "h4" // Heading 4
-    | "h5" // Heading 5
-    | "h6" // Heading 6
-    | "inherit" // Inherits styles from parent
-    | "overline" // Overline text (typically uppercase, small)
-    | "subtitle1" // Subtitle style 1
-    | "subtitle2"; // Subtitle style 2
+  export type IVariant = IAutoViewTypography.IVariant;
 
   /**
    * Defines the type for the `color` property.
    * - Accepts any valid CSS color value.
    */
-  export type IColor = string;
+  export type IColor =
+    | IAutoViewTypography.ITextColor
+    | IAutoViewColor.IScale
+    | `#${string}`;
 }

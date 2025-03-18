@@ -12,7 +12,7 @@ import { ImageAvatar } from "./image-avatar";
 import { LetterAvatar } from "./letter-avatar";
 import { StackedList } from "./stacked-list";
 import { Stats } from "./stats";
-import { Typography } from "./typography";
+import { Text } from "./text";
 
 export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
   Badge,
@@ -27,5 +27,5 @@ export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
   LetterAvatar,
   StackedList,
   Stats,
-  Typography,
+  Text,
 };
