@@ -1,3 +1,5 @@
 packages:
   - 'packages/*'
   - 'test'
+  - 'website'
+  - '!packages/compiler-bundle'

@@ -1,4 +1,4 @@
-import serializeError = require("serialize-error");
+import serializeError from "serialize-error";
 
 export namespace ErrorUtil {
   export function toJSON(err: any): object {

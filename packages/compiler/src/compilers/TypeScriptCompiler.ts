@@ -1,4 +1,4 @@
-import { IAutoViewCompilerResult } from "@autoview/interface";
+import type { IAutoViewCompilerResult } from "@autoview/interface";
 import { IPointer } from "tstl";
 import ts from "typescript";
 import transform from "typia/lib/transform";

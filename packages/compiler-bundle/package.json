@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "compiler-bundle",
+  "version": "0.0.0",
+  "description": "Isolated bundling environment for the compiler",
+  "scripts": {
+    "build": "node build/rspack"
+  },
+  "author": "Wrtn Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "@autoview/compiler": "file:../compiler/autoview-compiler-0.0.0.tgz",
+    "@autoview/interface": "file:../interface/autoview-interface-0.0.0.tgz",
+    "path": "^0.12.7",
+    "process": "^0.11.10",
+    "tgrid": "^1.1.0",
+    "url": "^0.11.4"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "@rollup/plugin-url": "^8.0.2",
+    "@rspack/cli": "^1.2.8",
+    "@rspack/core": "^1.2.8",
+    "rollup": "^4.36.0",
+    "rollup-plugin-node-externals": "^8.0.0",
+    "ts-loader": "^9.5.2",
+    "typescript": "5.7.3"
+  }
+}

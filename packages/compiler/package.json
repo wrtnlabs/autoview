@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "node build/raw && rimraf lib && tsc",
-    "dev": "pnpm run build --watch",
+    "dev": "node build/raw && rimraf lib && tsc --watch",
     "prepare": "ts-patch install && node build/raw"
   },
   "files": [
