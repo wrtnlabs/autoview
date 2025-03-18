@@ -13,7 +13,7 @@ const build = (name) => {
       cwd,
       stdio: "inherit",
     });
-  execute("pnpm install");
+
   execute("pnpm run build");
 };
 

@@ -3,9 +3,7 @@ const path = require("path");
 
 const loadPackages = () => {
   const packagesDir = path.resolve(__dirname, "../../packages");
-  const directories = fs
-    .readdirSync(packagesDir)
-    .filter((name) => name.startsWith("compiler-") === false);
+  const directories = fs.readdirSync(packagesDir);
 
   return directories.filter((dir) => {
     const dirPath = path.join(packagesDir, dir);

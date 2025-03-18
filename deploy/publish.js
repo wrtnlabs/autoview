@@ -17,7 +17,6 @@ const build = ({ version, tag, name }) => {
       cwd: location,
       stdio: "inherit",
     });
-  execute("pnpm install");
   execute("pnpm run build");
 
   // PACKAGE MAIN INFO
