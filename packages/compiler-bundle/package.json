@@ -1,5 +1,4 @@
 {
-  "private": true,
   "name": "compiler-bundle",
   "version": "0.0.0",
   "description": "Isolated bundling environment for the compiler",
