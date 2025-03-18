@@ -5,7 +5,7 @@
   "description": "autoview Website",
   "scripts": {
     "dev": "next",
-    "build": "node build/compiler && next build",
+    "build": "node build/compiler && next build && node build/sitemap",
     "start": "next start",
     "lint": "next lint"
   },
