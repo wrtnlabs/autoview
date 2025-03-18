@@ -1,4 +1,12 @@
 export { IAutoViewBadgeProps } from "./IAutoViewBadgeProps";
+export {
+  IAutoViewCardProps,
+  IAutoViewCardActionAreaProps,
+  IAutoViewCardActionsProps,
+  IAutoViewCardContentProps,
+  IAutoViewCardHeaderProps,
+  IAutoViewCardMediaProps,
+} from "./IAutoViewCardProps";
 export { IAutoViewCarouselProps } from "./IAutoViewCarouselProps";
 export { IAutoViewChipProps } from "./IAutoViewChipProps";
 export { IAutoViewCollapseProps } from "./IAutoViewCollapseProps";
