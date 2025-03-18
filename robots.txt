@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://wrtnlabs.io/autoview
+
+# Sitemaps
+Sitemap: https://wrtnlabs.io/autoview/sitemap.xml
