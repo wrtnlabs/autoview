@@ -19,7 +19,7 @@ const buildCompiler = () => {
   console.log(" Build Compiler");
   console.log("---------------------------------------");
 
-  const location = `${__dirname}/..`;
+  const location = `${__dirname}/../../compiler`;
   const load = () =>
     JSON.parse(fs.readFileSync(`${location}/package.json`, "utf-8"));
 
