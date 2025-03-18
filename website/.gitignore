@@ -1,0 +1,7 @@
+.next/
+typedoc-json/
+
+out/
+public/compiler/
+public/robots.txt
+public/sitemap*.xml
