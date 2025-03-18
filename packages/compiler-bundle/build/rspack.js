@@ -54,21 +54,38 @@ const buildWorker = () => {
   console.log("---------------------------------------");
 
   const location = `${__dirname}/..`;
-  const packJson = JSON.parse(
-    fs.readFileSync(`${location}/package.json`, "utf-8"),
-  );
-  packJson.dependencies["@autoview/compiler"] =
-    `file:../compiler/autoview-compiler-${packJson.version}.tgz`;
-  packJson.dependencies["@autoview/interface"] =
-    `file:../interface/autoview-interface-${packJson.version}.tgz`;
+  const load = () =>
+    JSON.parse(fs.readFileSync(`${location}/package.json`, "utf-8"));
+  const original = load();
+  const packJson = load();
 
-  const execute = (command) =>
-    cp.execSync(command, {
-      cwd: location,
-      stdio: "inherit",
-    });
-  execute("npm install");
-  execute("npx rspack");
+  try {
+    packJson.dependencies["@autoview/compiler"] =
+      `file:../compiler/autoview-compiler-${packJson.version}.tgz`;
+    packJson.dependencies["@autoview/interface"] =
+      `file:../interface/autoview-interface-${packJson.version}.tgz`;
+    fs.writeFileSync(
+      `${location}/package.json`,
+      JSON.stringify(packJson, null, 2),
+      "utf8",
+    );
+
+    const execute = (command) =>
+      cp.execSync(command, {
+        cwd: location,
+        stdio: "inherit",
+      });
+    execute("npm install");
+    execute("npx rspack");
+  } catch (error) {
+    throw error;
+  } finally {
+    fs.writeFileSync(
+      `${location}/package.json`,
+      JSON.stringify(original, null, 2),
+      "utf8",
+    );
+  }
 };
 
 buildInterface();
