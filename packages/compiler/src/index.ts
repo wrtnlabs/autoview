@@ -1,2 +1,2 @@
 export * from "./AutoViewCompiler";
-export * from "./worker/AutoViewCompilerService";
+export * from "./AutoViewCompilerService";

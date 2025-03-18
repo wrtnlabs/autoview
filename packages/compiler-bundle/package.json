@@ -8,6 +8,7 @@
   "author": "Wrtn Technologies",
   "license": "MIT",
   "dependencies": {
+    "@rollup/browser": "^4.36.0",
     "path": "^0.12.7",
     "process": "^0.11.10",
     "tgrid": "^1.1.0",

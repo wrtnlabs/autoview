@@ -1,30 +1,30 @@
-import { rollup as browserRollUp } from "@rollup/browser";
-import { RollupBuild, rollup as nodeRollUp } from "rollup";
-import { VariadicSingleton, is_node } from "tstl";
+import type { RollupBuild, rollup as RollupFunction } from "rollup";
+import { VariadicSingleton } from "tstl";
 
 export namespace RollupBundler {
-  export const build = async (script: string): Promise<string> => {
+  export const build = async (
+    rollup: typeof RollupFunction,
+    script: string,
+  ): Promise<string> => {
     const modules: Record<string, string> = {
       "index.js": script,
     };
-    const builder: RollupBuild = await (is_node() ? nodeRollUp : browserRollUp)(
-      {
-        input: "index.js",
-        plugins: [
-          {
-            name: "virtual",
-            resolveId: (id) => {
-              if (id in modules) return id;
-              return new URL(id, "https://esm.sh").href;
-            },
-            load: (id) => {
-              if (id in modules) return modules[id];
-              return esm.get(id);
-            },
+    const builder: RollupBuild = await rollup({
+      input: "index.js",
+      plugins: [
+        {
+          name: "virtual",
+          resolveId: (id) => {
+            if (id in modules) return id;
+            return new URL(id, "https://esm.sh").href;
           },
-        ],
-      },
-    );
+          load: (id) => {
+            if (id in modules) return modules[id];
+            return esm.get(id);
+          },
+        },
+      ],
+    });
 
     const { output } = await builder.generate({
       format: "iife",
