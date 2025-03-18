@@ -46,20 +46,32 @@ export namespace MainAgent {
     });
 
     const codeGenerationAgent = new CodeGeneration.Agent();
-    const { analysis, transform, random } = await codeGenerationAgent.execute({
-      provider,
-      inputSchema,
-      componentSchema: componentSchema(),
-      componentPlan: plan.component,
-    });
+    await codeGenerationAgent.open();
 
-    return {
-      visualizationPlanning: plan.visualizationPlanning,
-      componentPlan: plan.component,
-      analysis,
-      transform,
-      random: random,
-    };
+    try {
+      const { analysis, transform, random } = await codeGenerationAgent.execute(
+        {
+          provider,
+          inputSchema,
+          componentSchema: componentSchema(),
+          componentPlan: plan.component,
+        },
+      );
+
+      return {
+        visualizationPlanning: plan.visualizationPlanning,
+        componentPlan: plan.component,
+        analysis,
+        transform,
+        random: random,
+      };
+    } finally {
+      try {
+        await codeGenerationAgent.close();
+      } catch (error) {
+        console.warn(`failed to close code generation agent: ${error}`);
+      }
+    }
   }
 
   function listComponents(): IComponentWithoutValueValidator[] {

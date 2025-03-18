@@ -20,17 +20,17 @@
   "main": "./lib/index.js",
   "scripts": {
     "new-agent": "ts-node scripts/new-agent.ts",
-    "build": "rimraf lib && tsc",
+    "copy-compiler-bundle": "mkdir -p lib/workers && cp ../compiler-bundle/dist/worker.js lib/workers",
+    "build": "rimraf lib && tsc && pnpm run copy-compiler-bundle",
     "dev": "pnpm run build --watch",
     "prepare": "ts-patch install"
   },
   "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^12.1.2",
     "@types/node": "^22.13.9",
     "dotenv": "^16.4.7",
     "dotenv-expand": "^12.0.1",
     "rimraf": "^6.0.1",
+    "tgrid": "^1.1.0",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
     "tstl": "^3.0.0",
