@@ -1,6 +1,5 @@
-import { IconName } from "@fortawesome/fontawesome-svg-core";
-
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { AutoViewIconName } from "../typings/AutoViewIconName";
 
 /**
  * Interface for defining properties of an Icon component.
@@ -14,5 +13,5 @@ export interface IAutoViewIconProps
    * - Example values: `"arrow-right"`, `"coffee"`, `"user"`, etc.
    * - Incorrect values will result in a TypeScript error.
    */
-  id: IconName;
+  id: AutoViewIconName;
 }
