@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/wrtnlabs/autoview/issues"
   },
-  "homepage": "https://wrtnlabs.io",
+  "homepage": "https://wrtnlabs.io/autoview",
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.6",
     "@radix-ui/react-navigation-menu": "^1.2.5",

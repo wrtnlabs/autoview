@@ -4,15 +4,50 @@ Embedded TypeScript compiler for `@autoview/agent`.
 
 It is for validation feedback, and bundling for actual running.
 
-You can learn how to use it by looking the `test/src/features` test functions.
+## NodeJS Environment
+Connect to the worker in the `node_modules`.
 
-Also, after running the compiler test program, you can see the example values generated each test functions in the `test/results` directory. 
+```typescript
+import { Driver, WorkerConnector } from "tgrid";
+import {
+  IAutoViewCompilerService,
+  IAutoViewCompilerResult
+} from "@autoview/compiler";
 
-```bash
-git clone https://github.com/wrtnlabs/autoview
-cd autoview
-pnpm install
+const worker: WorkerConnector<null, null, IAutoViewCompilerService> =
+  new WorkerConnector(null, null);
+await worker.connect(
+  `${__dirname}/../../node_modules/@autoview/compiler/lib/worker/index.js`,
+);
+const service: Driver<IAutoViewCompilerService> = worker.getDriver();
+await service.initialize({...});
 
-cd test
-pnpm start --include compiler
+const result: IAutoViewCompilerResult = await service.compile("...");
+await worker.close();
+```
+
+### Browser Environment
+Compile the worker from by below URL.
+
+  - https://wrtnlabs.io/autoview/compiler/worker.js
+
+```typescript
+import { Driver, WorkerConnector } from "tgrid";
+import {
+  IAutoViewCompilerService,
+  IAutoViewCompilerResult
+} from "@autoview/compiler";
+
+const worker: WorkerConnector<null, null, IAutoViewCompilerService> =
+  new WorkerConnector(null, null);
+await worker.compile(
+  await fetch(
+    "https://wrtnlabs.io/autoview/compiler/worker.js",
+  ).then((r) => r.json()),
+);
+const service: Driver<IAutoViewCompilerService> = worker.getDriver();
+await service.initialize({...});
+
+const result: IAutoViewCompilerResult = await service.compile("...");
+await worker.close();
 ```
