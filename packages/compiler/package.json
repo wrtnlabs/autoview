@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@autoview/interface": "workspace:^",
-    "@rollup/browser": "^4.34.9",
     "@samchon/openapi": "^3.0.0",
     "rollup": "^4.34.1",
     "serialize-error": "4.1.0",

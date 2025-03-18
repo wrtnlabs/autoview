@@ -87,9 +87,6 @@ importers:
       '@autoview/interface':
         specifier: workspace:^
         version: link:../interface
-      '@rollup/browser':
-        specifier: ^4.34.9
-        version: 4.36.0
       '@samchon/openapi':
         specifier: ^3.0.0
         version: 3.1.0
@@ -1688,9 +1685,6 @@ packages:
     resolution: {integrity: sha512-9oMEYIDc3sk0G5rysnYvdNrkSg7B04yTKl50HHSZVbokeHpnU0yRmsDaWb9B/5RprcKj8XszEk5guBO8Sa/Q+Q==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
-
-  '@rollup/browser@4.36.0':
-    resolution: {integrity: sha512-0gsh/gWP2HEKcDz24P1OCt2Rr/+5MW0TnNDHcWtiaRD9z+uAi2qdJf+wmgw5iTF/Dp3jEixkOXvmd+32LCwRSA==}
 
   '@rollup/plugin-commonjs@28.0.3':
     resolution: {integrity: sha512-pyltgilam1QPdn+Zd9gaCfOLcnjMEJ9gV+bTw6/r73INdvzf1ah9zLIJBm+kW7R6IUFIQ1YO+VqZtYxZNWFPEQ==}
@@ -7546,10 +7540,6 @@ snapshots:
   '@react-types/shared@3.28.0(react@19.0.0)':
     dependencies:
       react: 19.0.0
-
-  '@rollup/browser@4.36.0':
-    dependencies:
-      '@types/estree': 1.0.6
 
   '@rollup/plugin-commonjs@28.0.3(rollup@4.36.0)':
     dependencies:
