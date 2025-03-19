@@ -26,7 +26,8 @@ const build = ({ version, tag, name }) => {
 
   delete pack.private;
   pack.version = version;
-  if (pack.main === "src/index.ts") {
+
+  if (pack.main?.endsWith("src/index.ts")) {
     pack.main = "lib/index.js";
     pack.typings = "lib/index.d.ts";
     if (fs.existsSync(`${location}/lib/index.mjs`))
