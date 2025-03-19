@@ -73,17 +73,23 @@ export class AutoViewCompiler {
     const source: string = `${FilePrinter.write({ statements })}\n\n${script}`;
 
     try {
+      console.log("TypeScript Compiler Source", script);
       const result: IAutoViewCompilerResult = TypeScriptCompiler.build(
         ctx,
         source,
         this.compilerOptions.module,
       );
-      // console.log("TypeScript Compiler Result", result);
-      if (result.type === "success")
+      console.log(
+        "TypeScript Compiler Result",
+        JSON.stringify(result, null, 2),
+      );
+      if (result.type === "success") {
+        console.log("Rollup Bundler Source", result.javascript);
         result.javascript = await RollupBundler.build(
           this.rollup,
           result.javascript,
         );
+      }
       return result;
     } catch (error) {
       return {
