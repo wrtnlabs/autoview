@@ -6,7 +6,7 @@ export namespace RollupBundler {
     rollup: typeof RollupFunction,
     script: string,
   ): Promise<string> => {
-    console.log("RollupBundle.build()", script);
+    console.log("RollupBundle.build()");
     const modules: Record<string, string> = {
       "./src/index.js": script,
     };
