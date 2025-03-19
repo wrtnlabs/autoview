@@ -37,7 +37,7 @@ export class AutoViewCompiler {
     this.componentComponents = componentComponents;
     this.componentSchema = componentSchema;
     this.compilerOptions = {
-      module: (props.compilerOptions?.module ?? is_node()) ? "cjs" : "esm",
+      module: props.compilerOptions?.module ?? (is_node() ? "cjs" : "esm"),
     };
   }
 

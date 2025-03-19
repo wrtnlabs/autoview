@@ -54,9 +54,6 @@ export class Agent implements AgentBase<Input, Output> {
         $defs: (input.componentSchema as any)["$defs"],
         schema: input.componentSchema as any,
       },
-      compilerOptions: {
-        module: "cjs",
-      },
     });
 
     const boilerplate = await service.generateBoilerplate();
