@@ -6,19 +6,20 @@ export namespace RollupBundler {
     rollup: typeof RollupFunction,
     script: string,
   ): Promise<string> => {
+    console.log("RollupBundle.build()");
     const modules: Record<string, string> = {
-      "index.js": script,
+      "./src/index.js": script,
     };
     const builder: RollupBuild = await rollup({
-      input: "index.js",
+      input: "./src/index.js",
       plugins: [
         {
           name: "virtual",
-          resolveId: (id) => {
+          resolveId(id) {
             if (id in modules) return id;
             return new URL(id, "https://esm.sh").href;
           },
-          load: (id) => {
+          load(id) {
             if (id in modules) return modules[id];
             return esm.get(id);
           },
@@ -27,8 +28,7 @@ export namespace RollupBundler {
     });
 
     const { output } = await builder.generate({
-      format: "iife",
-      name: "module",
+      format: "cjs",
     });
     const bundled: string | undefined = output[0]?.code;
     if (!bundled?.length) throw new Error("Failed to bundle.");
@@ -37,6 +37,7 @@ export namespace RollupBundler {
 }
 
 const esm = new VariadicSingleton(async (url: string) => {
+  console.log("esm.get()", url, reformUrl(url));
   const response: Response = await fetch(reformUrl(url));
   const text: string = await response.text();
   return text;

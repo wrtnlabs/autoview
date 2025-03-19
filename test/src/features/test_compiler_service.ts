@@ -1,6 +1,7 @@
 import {
   IAutoViewCompilerResult,
   IAutoViewCompilerService,
+  IAutoViewComponentProps,
 } from "@autoview/interface";
 import { IChatGptSchema } from "@samchon/openapi";
 import { Driver, WorkerConnector } from "tgrid";
@@ -29,19 +30,27 @@ export const test_compiler_service = async (): Promise<void> => {
     const service: Driver<IAutoViewCompilerService> = worker.getDriver();
     await service.initialize({
       inputMetadata: {
-        $defs,
-        schema,
+        parameters: typia.llm.parameters<IBbsArticle, "chatgpt">(),
       },
       componentMetadata: {
-        $defs: {},
-        schema: {},
+        parameters: typia.llm.parameters<
+          {
+            props: IAutoViewComponentProps;
+          },
+          "chatgpt",
+          {
+            reference: true;
+          }
+        >(),
       },
     });
     const result: IAutoViewCompilerResult = await service.compile(`
-      return {
-        type: "GridList",
-        items: [],
-      };
+function visualizeData(_: unknown): IAutoViewComponentProps {
+  return {
+    type: "GridList",
+    items: [],
+  };
+}
   `);
     if (result.type !== "success")
       throw new Error(JSON.stringify(result, null, 2));
