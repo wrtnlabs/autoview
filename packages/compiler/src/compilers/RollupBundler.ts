@@ -6,7 +6,7 @@ export namespace RollupBundler {
     rollup: typeof RollupFunction,
     script: string,
   ): Promise<string> => {
-    console.log("RollupBundle.build()");
+    console.log("RollupBundle.build()", script);
     const modules: Record<string, string> = {
       "./src/index.js": script,
     };
@@ -16,10 +16,12 @@ export namespace RollupBundler {
         {
           name: "virtual",
           resolveId(id) {
+            console.log(`resolvId(${JSON.stringify(id)})`);
             if (id in modules) return id;
             return new URL(id, "https://esm.sh").href;
           },
           load(id) {
+            console.log(`load(${JSON.stringify(id)})`);
             if (id in modules) return modules[id];
             return esm.get(id);
           },

@@ -12,6 +12,7 @@ export namespace TypeScriptCompiler {
     typescript: string,
     target: "cjs" | "esm",
   ): IAutoViewCompilerResult => {
+    console.log("TypeScriptCompiler.build()", typescript, target);
     // LLM GENERATED CODE
     // typescript = typescript.replace("placeholder();", ctx.body);
 
