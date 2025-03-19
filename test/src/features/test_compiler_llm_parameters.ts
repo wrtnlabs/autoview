@@ -1,12 +1,13 @@
 import { AutoViewCompiler } from "@autoview/compiler";
 import { IAutoViewCompilerResult } from "@autoview/interface";
+import { rollup } from "rollup";
 import typia from "typia";
 
 import { TestGlobal } from "../TestGlobal";
 import { IBbsArticle } from "../structures/IBbsArticle";
 
 export const test_compiler_llm_parameters = async (): Promise<void> => {
-  const compiler: AutoViewCompiler = new AutoViewCompiler({
+  const compiler: AutoViewCompiler = new AutoViewCompiler(rollup, {
     inputMetadata: {
       parameters: typia.llm.parameters<
         IBbsArticle,

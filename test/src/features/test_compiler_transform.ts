@@ -5,6 +5,7 @@ import {
   IAutoViewTransformerService,
 } from "@autoview/interface";
 import { IChatGptSchema } from "@samchon/openapi";
+import { rollup } from "rollup";
 import { Driver, WorkerConnector } from "tgrid";
 import typia from "typia";
 
@@ -21,7 +22,7 @@ export const test_compiler_transform = async (): Promise<void> => {
     }
   >($defs);
 
-  const compiler: AutoViewCompiler = new AutoViewCompiler({
+  const compiler: AutoViewCompiler = new AutoViewCompiler(rollup, {
     inputMetadata: {
       $defs,
       schema,

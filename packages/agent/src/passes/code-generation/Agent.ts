@@ -3,6 +3,7 @@ import {
   IAutoViewComponentProps,
 } from "@autoview/interface";
 import { Driver, WorkerConnector } from "tgrid";
+import { is_node } from "tstl";
 import { TypeGuardError, assertGuard } from "typia";
 
 import { AgentBase, LlmFailure, LlmProxy } from "../../core";
@@ -15,7 +16,18 @@ export class Agent implements AgentBase<Input, Output> {
 
   async open(): Promise<void> {
     this.worker = new WorkerConnector(null, null);
-    await this.worker.connect(`${__dirname}/workers/worker.js`);
+
+    if (is_node()) {
+      await this.worker.connect(
+        `${__dirname}/../../../node_modules/@autoview/compiler/lib/worker/index.js`,
+      );
+    } else {
+      await this.worker.compile(
+        await fetch("https://wrtnlabs.io/autoview/compiler/worker.js").then(
+          (r) => r.text(),
+        ),
+      );
+    }
   }
 
   async close(): Promise<void> {
