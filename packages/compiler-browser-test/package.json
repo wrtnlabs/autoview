@@ -4,17 +4,19 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
+    "dev": "node build/worker.cjs && vite",
+    "build": "node build/worker.cjs && tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "prepare": "ts-patch install"
   },
   "dependencies": {
     "@autoview/interface": "workspace:^",
+    "@rollup/browser": "^4.13.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tgrid": "^1.1.0",
+    "tstl": "^3.0.0",
     "typia": "^8.0.0"
   },
   "devDependencies": {

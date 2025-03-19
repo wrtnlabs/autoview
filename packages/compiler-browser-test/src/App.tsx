@@ -18,11 +18,7 @@ function App() {
     const initialize = async () => {
       const worker: WorkerConnector<null, null, IAutoViewCompilerService> =
         new WorkerConnector(null, null);
-      await worker.compile(
-        await fetch(
-          "https://wrtnlabs.github.io/autoview/compiler/worker.js",
-        ).then((r) => r.text()),
-      );
+      await worker.connect("worker.js");
       const service: Driver<IAutoViewCompilerService> = worker.getDriver();
       await service.initialize({
         inputMetadata: {
