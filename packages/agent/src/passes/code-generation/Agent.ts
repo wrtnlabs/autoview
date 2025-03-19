@@ -24,7 +24,7 @@ export class Agent implements AgentBase<Input, Output> {
     } else {
       await this.worker.compile(
         await fetch("https://wrtnlabs.io/autoview/compiler/worker.js").then(
-          (r) => r.text(),
+          (r) => r.json(),
         ),
       );
     }
