@@ -1,5 +1,6 @@
 import { IAutoViewNonSurfaceComponentProps } from "../../src/properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../../src/properties/IAutoViewComponentPropsBase";
+import { Arrayable } from "../../src/utils";
 
 export interface IAutoViewGridListProps
   extends IAutoViewComponentPropsBase<"GridList"> {
@@ -10,7 +11,7 @@ export interface IAutoViewGridListProps
 
 export namespace IAutoViewGridListProps {
   export interface IItem {
-    children: IAutoViewNonSurfaceComponentProps;
+    childComponents: Arrayable<IAutoViewNonSurfaceComponentProps>;
     column?: IColumn | IResponsive;
     offset?: IColumn | IResponsive;
   }

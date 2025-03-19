@@ -1,7 +1,6 @@
 export { IAutoViewBadgeProps } from "./IAutoViewBadgeProps";
 export {
   IAutoViewCardProps,
-  IAutoViewCardActionAreaProps,
   IAutoViewCardActionsProps,
   IAutoViewCardContentProps,
   IAutoViewCardHeaderProps,
@@ -19,4 +18,5 @@ export { IAutoViewLetterAvatarProps } from "./IAutoViewLetterAvatarProps";
 export { IAutoViewMarkdownProps } from "./IAutoViewMarkdownProps";
 export { IAutoViewStackedListProps } from "./IAutoViewStackedListProps";
 export { IAutoViewStatsProps } from "./IAutoViewStatsProps";
+export { IAutoViewStackProps } from "./IAutoViewStackProps";
 export { IAutoViewTextProps } from "./IAutoViewTextProps";

@@ -10,13 +10,11 @@ import { renderComponent } from "../../renderer";
 
 export const Collapse = (props: IAutoViewCollapseProps) => {
   return (
-    <MuiCollapse>
-      <MuiCollapseSummary>
-        {renderComponent(props.header.children)}
+    <MuiCollapse style={props.style}>
+      <MuiCollapseSummary expandIcon={renderComponent(props.expandIcon)}>
+        {renderComponent(props.header)}
       </MuiCollapseSummary>
-      <MuiCollapseDetails>
-        {renderComponent(props.content.children)}
-      </MuiCollapseDetails>
+      <MuiCollapseDetails>{renderComponent(props.content)}</MuiCollapseDetails>
     </MuiCollapse>
   );
 };

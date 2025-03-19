@@ -10,7 +10,7 @@ export const GridList = (props: IAutoViewGridListProps) => {
 
   return (
     <MuiGrid container {...listProps}>
-      {props.items.map((item) => renderComponent(item.children))}
+      {props.items.map((item) => renderComponent(item.childComponents))}
     </MuiGrid>
   );
 };

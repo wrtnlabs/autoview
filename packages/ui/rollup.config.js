@@ -32,7 +32,6 @@ export default {
       rollupCommonJSResolveHack: true,
       clean: true,
     }),
-    json(),
     resolve({
       extensions: [".json", ".ts", ".tsx", ".js", ".jsx"],
     }),

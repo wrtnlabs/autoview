@@ -3,6 +3,7 @@ import {
   IAutoViewColor,
   IAutoViewTypography,
 } from "../../src/properties/theme";
+import { Arrayable } from "../../src/utils";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 export interface IAutoViewTextProps
@@ -11,7 +12,7 @@ export interface IAutoViewTextProps
   color?: IAutoViewTextProps.IColor;
   ellipsis?: boolean;
   lineClamp?: number | null;
-  children: Array<string | IAutoViewIconProps> | string | IAutoViewIconProps;
+  content: Arrayable<string | IAutoViewIconProps>;
 }
 
 export namespace IAutoViewTextProps {

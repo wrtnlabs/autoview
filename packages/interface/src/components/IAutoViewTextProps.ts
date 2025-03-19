@@ -1,5 +1,6 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { IAutoViewColor, IAutoViewTypography } from "../properties/theme";
+import { Arrayable } from "../utils";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 /**
@@ -43,7 +44,7 @@ export interface IAutoViewTextProps
    */
   lineClamp?: number | null;
 
-  children: Array<string | IAutoViewIconProps> | string | IAutoViewIconProps;
+  content: Arrayable<string | IAutoViewIconProps>;
 }
 
 /**

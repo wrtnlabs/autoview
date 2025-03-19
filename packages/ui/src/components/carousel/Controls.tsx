@@ -1,6 +1,7 @@
-import { styled } from "@mui/material";
+import { IconButton, styled } from "@mui/material";
 import React, { useCallback } from "react";
 
+import { Icon } from "../icon";
 import { AutoViewCarouselContext } from "./Context";
 
 export const CarouselControls = () => {
@@ -21,17 +22,21 @@ export const CarouselControls = () => {
 
   return (
     <Controls>
-      <button type="button" onClick={goToPrev}>
-        Prev
-      </button>
-      <button type="button" onClick={goToNext}>
-        Next
-      </button>
+      <IconButton onClick={goToPrev}>
+        <Icon type="Icon" id="chevron-left" />
+      </IconButton>
+      <IconButton onClick={goToNext}>
+        <Icon type="Icon" id="chevron-right" />
+      </IconButton>
     </Controls>
   );
 };
 
 const Controls = styled("div")`
+  position: absolute;
+  top: 50%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
+  transform: translateY(-50%);
 `;

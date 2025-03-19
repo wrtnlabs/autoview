@@ -4,7 +4,7 @@ import { IAutoViewComponentPropsBase } from "../../src/properties/IAutoViewCompo
 export interface IAutoViewCarouselProps
   extends IAutoViewComponentPropsBase<"Carousel"> {
   autoPlay?: boolean;
-  items: IAutoViewCarouselProps.IItem[];
+  childComponents: IAutoViewNonSurfaceComponentProps[];
   interval?: number;
   infinite?: boolean;
   effect?: "slide" | "fade";
@@ -12,10 +12,4 @@ export interface IAutoViewCarouselProps
   dotPosition?: "top" | "bottom" | "left" | "right";
   showArrows?: boolean;
   indicators?: boolean;
-}
-
-export namespace IAutoViewCarouselProps {
-  export interface IItem {
-    children: IAutoViewNonSurfaceComponentProps[];
-  }
 }

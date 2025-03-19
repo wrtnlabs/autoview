@@ -1,5 +1,10 @@
 import {
   IAutoViewBadgeProps,
+  IAutoViewCardActionsProps,
+  IAutoViewCardContentProps,
+  IAutoViewCardHeaderProps,
+  IAutoViewCardMediaProps,
+  IAutoViewCardProps,
   IAutoViewCarouselProps,
   IAutoViewChipProps,
   IAutoViewCollapseProps,
@@ -9,6 +14,7 @@ import {
   IAutoViewImageAvatarProps,
   IAutoViewImageProps,
   IAutoViewLetterAvatarProps,
+  IAutoViewStackProps,
   IAutoViewStackedListProps,
   IAutoViewStatsProps,
   IAutoViewTextProps,
@@ -17,7 +23,8 @@ import {
 export type IAutoViewCommonComponentProps =
   | IAutoViewIconProps
   | IAutoViewImageProps
-  | IAutoViewTextProps;
+  | IAutoViewTextProps
+  | IAutoViewStackProps;
 
 export type IAutoViewDataDisplayComponentProps =
   | IAutoViewBadgeProps
@@ -33,6 +40,13 @@ export type IAutoViewSurfaceComponentProps =
   | IAutoViewGridListProps
   | IAutoViewStackedListProps;
 
+export type IAutoViewCardComponentProps =
+  | IAutoViewCardActionsProps
+  | IAutoViewCardContentProps
+  | IAutoViewCardHeaderProps
+  | IAutoViewCardMediaProps
+  | IAutoViewCardProps;
+
 export type IAutoViewNonSurfaceComponentProps =
   | IAutoViewCommonComponentProps
   | IAutoViewDataDisplayComponentProps;
@@ -40,4 +54,5 @@ export type IAutoViewNonSurfaceComponentProps =
 export type IAutoViewComponentProps =
   | IAutoViewCommonComponentProps
   | IAutoViewDataDisplayComponentProps
-  | IAutoViewSurfaceComponentProps;
+  | IAutoViewSurfaceComponentProps
+  | IAutoViewCardComponentProps;

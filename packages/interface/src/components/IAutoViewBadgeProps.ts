@@ -26,7 +26,7 @@ export interface IAutoViewBadgeProps
    * - The badge is overlaid on this element.
    * - Typically an icon, button, or avatar.
    */
-  children:
+  childComponents:
     | IAutoViewImageAvatarProps
     | IAutoViewLetterAvatarProps
     | IAutoViewIconProps;

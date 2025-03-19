@@ -1,10 +1,11 @@
+import { IAutoViewNonSurfaceComponentProps } from "@autoview/interface";
 import { styled } from "@mui/material";
 import React from "react";
 
 import { AutoViewCarouselContext } from "./Context";
 
 export interface CarouselIndicators {
-  items: any[];
+  items: IAutoViewNonSurfaceComponentProps[];
 }
 
 export const CarouselIndicators = ({ items }: CarouselIndicators) => {
@@ -15,7 +16,7 @@ export const CarouselIndicators = ({ items }: CarouselIndicators) => {
     <DotContainer>
       {items.map((item, index) => (
         <Dot
-          key={item.key}
+          key={`${item.type}.${index}`}
           active={index === selectedIndex}
           onClick={() => {
             setSelectedIndex(index);
@@ -31,6 +32,8 @@ const DotContainer = styled("div")`
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 8px;
+  padding-top: 10px;
 `;
 
 const Dot = styled("div")<{ active?: boolean }>`

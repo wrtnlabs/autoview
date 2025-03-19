@@ -20,7 +20,7 @@ export interface IAutoViewCarouselProps
    * Array of items to be displayed in the carousel.
    * Each item must conform to the IItem interface, ensuring a consistent structure across all elements.
    */
-  items: IAutoViewCarouselProps.IItem[];
+  childComponents: IAutoViewNonSurfaceComponentProps[];
 
   /**
    * Time interval in milliseconds between automatic transitions when `autoPlay` is enabled.

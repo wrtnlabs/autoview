@@ -7,13 +7,13 @@ import { renderComponent } from "../../renderer";
 export const StackedList = ({ items, gap = 8 }: IAutoViewStackedListProps) => {
   return (
     <Stack gap={gap}>
-      {items.map((item) => renderComponent(item.children))}
+      {items.map((item) => renderComponent(item.childComponents))}
     </Stack>
   );
 };
 
 const Stack = styled("div")<{ gap?: number }>`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: ${(props) => props.gap}px;
 `;
