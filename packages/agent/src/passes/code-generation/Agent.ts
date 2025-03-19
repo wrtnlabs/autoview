@@ -22,11 +22,16 @@ export class Agent implements AgentBase<Input, Output> {
         `${__dirname}/../../../node_modules/@autoview/compiler/lib/worker/index.js`,
       );
     } else {
-      await this.worker.compile(
-        await fetch("https://wrtnlabs.io/autoview/compiler/worker.js").then(
-          (r) => r.json(),
-        ),
-      );
+      const scriptText = await fetch(
+        "https://wrtnlabs.io/autoview/compiler/worker.js",
+      ).then((r) => r.text());
+      console.log("Fetched script:", scriptText); // 스크립트 내용 확인
+
+      const blob = new Blob([scriptText], { type: "application/javascript" });
+      const blobUrl = URL.createObjectURL(blob);
+      console.log("Blob URL:", blobUrl); // Blob URL 확인
+
+      await this.worker.connect(blobUrl);
     }
   }
 
