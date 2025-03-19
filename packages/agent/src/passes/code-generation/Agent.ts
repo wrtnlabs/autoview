@@ -23,7 +23,7 @@ export class Agent implements AgentBase<Input, Output> {
       );
     } else {
       const scriptText = await fetch(
-        "https://wrtnlabs.io/autoview/compiler/worker.js",
+        "https://wrtnlabs.github.io/autoview/compiler/worker.js",
       ).then((r) => r.text());
       console.log("Fetched script:", scriptText); // 스크립트 내용 확인
 
@@ -100,6 +100,12 @@ function handleText(
 ): (input: Input, text: string) => Promise<Output> {
   return async function (_input: Input, text: string) {
     const output = parseOutput(text);
+
+    console.log(
+      "ts-code",
+      `${await service.generateBoilerplate()}\n\n${output.typescript_function}`,
+    );
+
     const result = await service.compile(output.typescript_function);
 
     if (result.type === "error") {
