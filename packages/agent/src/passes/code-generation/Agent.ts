@@ -23,7 +23,8 @@ export class Agent implements AgentBase<Input, Output> {
       );
     } else {
       const scriptText = await fetch(
-        "https://wrtnlabs.github.io/autoview/compiler/worker.js",
+        // "https://wrtnlabs.github.io/autoview/compiler/worker.js",
+        "/worker.js",
       ).then((r) => r.text());
       console.log("Fetched script:", scriptText); // 스크립트 내용 확인
 
