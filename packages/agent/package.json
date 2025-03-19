@@ -20,8 +20,7 @@
   "main": "./lib/index.js",
   "scripts": {
     "new-agent": "ts-node scripts/new-agent.ts",
-    "copy-compiler-bundle": "mkdir -p lib/workers && cp ../compiler-bundle/dist/worker.js lib/workers",
-    "build": "rimraf lib && tsc && pnpm run copy-compiler-bundle",
+    "build": "rimraf lib && tsc",
     "dev": "pnpm run build --watch",
     "prepare": "ts-patch install"
   },
