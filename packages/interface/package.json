@@ -1,7 +1,7 @@
 {
   "name": "@autoview/interface",
   "version": "0.0.0",
-  "main": "./src/index.ts",
+  "main": "./lib/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/wrtnlabs/autoview"
@@ -32,5 +32,6 @@
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
     "typescript": "~5.8.2"
-  }
+  },
+  "typings": "./lib/index.d.ts"
 }

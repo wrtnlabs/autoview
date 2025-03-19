@@ -6,7 +6,7 @@ import type {
 import { OpenApi } from "@samchon/openapi";
 import { ChatGptSchemaComposer } from "@samchon/openapi/lib/composers/llm/ChatGptSchemaComposer";
 import type { rollup as RollupFunction } from "rollup";
-import { is_node } from "tstl";
+// import { is_node } from "tstl";
 import ts from "typescript";
 
 import { RollupBundler } from "./compilers/RollupBundler";
@@ -37,7 +37,8 @@ export class AutoViewCompiler {
     this.componentComponents = componentComponents;
     this.componentSchema = componentSchema;
     this.compilerOptions = {
-      module: (props.compilerOptions?.module ?? is_node()) ? "cjs" : "esm",
+      module: "cjs",
+      // module: (props.compilerOptions?.module ?? is_node()) ? "cjs" : "esm",
     };
   }
 
@@ -76,6 +77,7 @@ export class AutoViewCompiler {
         source,
         this.compilerOptions.module,
       );
+      console.log("TypeScript Compiler Result", result);
       if (result.type === "success")
         result.javascript = await RollupBundler.build(
           this.rollup,
