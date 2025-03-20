@@ -43,8 +43,6 @@
     "embla-carousel-autoplay": "^8.5.2",
     "embla-carousel-fade": "^8.5.2",
     "embla-carousel-react": "^8.5.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
@@ -60,11 +58,13 @@
     "@storybook/react": "^8.6.4",
     "@storybook/react-vite": "^8.6.4",
     "@storybook/test": "^8.6.4",
-    "@types/react": "^18.3.18",
-    "@types/react-dom": "^18.3.5",
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
     "@vitest/browser": "^3.0.8",
     "@vitest/coverage-v8": "^3.0.8",
     "playwright": "^1.51.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "rollup": "^4.34.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-terser": "^7.0.2",
@@ -73,5 +73,9 @@
     "typescript": "~5.8.2",
     "vite": "^6.2.0",
     "vitest": "^3.0.8"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
   }
 }
