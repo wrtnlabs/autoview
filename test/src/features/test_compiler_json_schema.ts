@@ -1,6 +1,5 @@
 import { AutoViewCompiler } from "@autoview/compiler";
 import { IAutoViewCompilerResult } from "@autoview/interface";
-import { rollup } from "rollup";
 import typia, { IJsonSchemaCollection } from "typia";
 
 import { TestGlobal } from "../TestGlobal";
@@ -8,7 +7,7 @@ import { IBbsArticle } from "../structures/IBbsArticle";
 
 export const test_compiler_json_schema = async (): Promise<void> => {
   const collection: IJsonSchemaCollection = typia.json.schemas<[IBbsArticle]>();
-  const compiler: AutoViewCompiler = new AutoViewCompiler(rollup, {
+  const compiler: AutoViewCompiler = new AutoViewCompiler({
     inputMetadata: {
       components: collection.components,
       schema: collection.schemas[0]!,

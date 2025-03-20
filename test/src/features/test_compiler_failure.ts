@@ -2,7 +2,6 @@ import { AutoViewCompiler } from "@autoview/compiler";
 import { IAutoViewCompilerResult } from "@autoview/interface";
 import { TestValidator } from "@nestia/e2e";
 import { IChatGptSchema } from "@samchon/openapi";
-import { rollup } from "rollup";
 import typia from "typia";
 
 import { TestGlobal } from "../TestGlobal";
@@ -18,7 +17,7 @@ export const test_compiler_failure = async (): Promise<void> => {
     }
   >($defs);
 
-  const compiler: AutoViewCompiler = new AutoViewCompiler(rollup, {
+  const compiler: AutoViewCompiler = new AutoViewCompiler({
     inputMetadata: {
       $defs,
       schema,
