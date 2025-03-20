@@ -11,6 +11,7 @@ export namespace AutoViewDtoProgrammer {
     ctx: IAutoViewProgrammerContext,
     components: OpenApi.IComponents,
     schema: OpenApi.IJsonSchema,
+    exportAll: boolean = false,
   ): ts.Statement[] => {
     const references: Map<string, OpenApi.IJsonSchema> = new Map();
     OpenApiTypeChecker.visit({
@@ -38,7 +39,7 @@ export namespace AutoViewDtoProgrammer {
         location = modulo.children;
       });
     }
-    return writeModulo(ctx, components, schema, dict, false);
+    return writeModulo(ctx, components, schema, dict, exportAll);
   };
 
   const writeModulo = (

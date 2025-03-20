@@ -15,7 +15,18 @@ export namespace AutoViewProgrammer {
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [
       ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
-      ...AutoViewDtoProgrammer.write(ctx, componentComponents, componentSchema),
+      ts.factory.createModuleDeclaration(
+        undefined,
+        ts.factory.createIdentifier("IAutoView"),
+        ts.factory.createModuleBlock(
+          AutoViewDtoProgrammer.write(
+            ctx,
+            componentComponents,
+            componentSchema,
+            true,
+          ),
+        ),
+      ),
       ...AutoViewTransformerProgrammer.write(ctx, inputSchema),
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];
@@ -26,13 +37,18 @@ export namespace AutoViewProgrammer {
     inputComponents: OpenApi.IComponents,
     inputSchema: OpenApi.IJsonSchema,
   ): ts.Statement[] => {
-    ctx.importer.external({
-      type: "instance",
-      library: "@autoview/interface",
-      name: "IAutoViewComponentProps",
-    });
-
     const statements: ts.Statement[] = [
+      ts.factory.createImportDeclaration(
+        undefined,
+        ts.factory.createImportClause(
+          true,
+          undefined,
+          ts.factory.createNamespaceImport(
+            ts.factory.createIdentifier("IAutoView"),
+          ),
+        ),
+        ts.factory.createStringLiteral("@autoview/interface"),
+      ),
       ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
       ...AutoViewTransformerProgrammer.write(ctx, inputSchema),
     ];

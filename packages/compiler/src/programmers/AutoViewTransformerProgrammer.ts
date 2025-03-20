@@ -34,7 +34,10 @@ export namespace AutoViewTransformerProgrammer {
           ),
         ],
         ts.factory.createTypeReferenceNode(
-          ts.factory.createIdentifier("IAutoViewComponentProps"),
+          ts.factory.createQualifiedName(
+            ts.factory.createIdentifier("IAutoView"),
+            ts.factory.createIdentifier("IAutoViewComponentProps"),
+          ),
         ),
         ts.factory.createBlock(
           [

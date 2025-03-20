@@ -58,6 +58,7 @@ Ensure that your function:
 - But do not validate the input data, as the compiler will generate validation code for you
 - Includes comments explaining complex logic or non-obvious transformations
 - Your code is for production use, so you NEVER use any mock-ups, placeholders, or any hard-coded fake data
+- You are NOT generating the code for React; you are generating a TypeScript function that just transforms the input data into the output data
 
 Provide your TypeScript function inside <typescript_function> tags. The function should have the following signature:
 
@@ -70,6 +71,10 @@ Note that your code will be attached to the following boilerplate code, generate
 <boilerplate>
 {{boilerplate}}
 </boilerplate>
+
+You should access all the AutoView interfaces and types by prefixing \`IAutoView.\` to the type name, as they are inside the namespace \`IAutoView\`.
+But the type names are still prefixed with \`IAutoView.\`. For example, \`IAutoView.IAutoViewComponentProps\` is the type of the component props.
+The only exception is the \`IAutoViewTransformerInputType\` type and its sub-types and components, which is not part of the \`IAutoView\` namespace.
 
 Do not copy-paste and/or repeat the boilerplate code in your response. They will be attached automatically by the compiler.
 

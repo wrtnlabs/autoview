@@ -20,16 +20,19 @@ export namespace MainAgent {
      * (Intermediate reasoning) The analysis of the input schema and data exploration.
      */
     analysis: string;
+
     /**
      * The transform function that takes input value (which follows the input schema) and returns the output value (which follows the {@link IAutoViewComponentProps}).
      */
-    transform: Function;
+    // transform: Function;
+
     /**
      * The random function that generates random data which follows the {@link IAutoViewComponentProps}.
      *
      * It is useful to quickly test your generated component.
      */
-    random: Function;
+    // random: Function;
+
     /**
      * The TypeScript code of the transform function.
      *
@@ -45,30 +48,29 @@ export namespace MainAgent {
     const components = listComponents();
 
     const planGenerationAgent = new PlanGeneration.Agent();
+    const codeGenerationAgent = new CodeGeneration.Agent();
+    await codeGenerationAgent.open();
+
     const plan = await planGenerationAgent.execute({
       provider,
       inputSchema,
       components,
     });
 
-    const codeGenerationAgent = new CodeGeneration.Agent();
-    await codeGenerationAgent.open();
-
     try {
-      const { analysis, transform, random, transformTsCode } =
-        await codeGenerationAgent.execute({
-          provider,
-          inputSchema,
-          componentSchema: componentSchema(),
-          componentPlan: plan.component,
-        });
+      const { analysis, transformTsCode } = await codeGenerationAgent.execute({
+        provider,
+        inputSchema,
+        componentSchema: componentSchema(),
+        componentPlan: plan.component,
+      });
 
       return {
         visualizationPlanning: plan.visualizationPlanning,
         componentPlan: plan.component,
         analysis,
-        transform,
-        random,
+        // transform,
+        // random,
         transformTsCode,
       };
     } finally {
@@ -89,7 +91,11 @@ export namespace MainAgent {
           return;
         }
 
-        if (!schema.$ref.startsWith("#/$defs/IAutoView")) {
+        if (
+          !schema.$ref.startsWith("#/$defs/IAutoView") ||
+          !schema.$ref.endsWith("Props") ||
+          schema.$ref.includes(".")
+        ) {
           return;
         }
 
@@ -112,7 +118,7 @@ export namespace MainAgent {
         });
       },
       $defs: PARAMETERS.$defs,
-      schema: PARAMETERS.properties,
+      schema: PARAMETERS.properties["props"]!,
     });
 
     return components;
