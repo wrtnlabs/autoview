@@ -31,7 +31,7 @@
     "require": "./dist/index.umd.cjs"
   },
   "dependencies": {
-    "@autoview/interface": "0.0.0",
+    "@autoview/interface": "workspace:^",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
@@ -46,7 +46,7 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@autoview/tsconfig": "0.0.0",
+    "@autoview/tsconfig": "workspace:^",
     "@chromatic-com/storybook": "^3.2.5",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-json": "^6.1.0",
