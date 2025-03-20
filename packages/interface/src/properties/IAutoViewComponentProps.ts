@@ -1,43 +1,70 @@
 import {
+  IAutoViewAvatarProps,
   IAutoViewBadgeProps,
+  IAutoViewButtonProps,
+  IAutoViewCardContentProps,
+  IAutoViewCardHeaderProps,
+  IAutoViewCardMediaProps,
+  IAutoViewCardProps,
   IAutoViewCarouselProps,
   IAutoViewChipProps,
   IAutoViewCollapseProps,
   IAutoViewDividerProps,
-  IAutoViewGridListProps,
+  IAutoViewIconButtonProps,
   IAutoViewIconProps,
-  IAutoViewImageAvatarProps,
   IAutoViewImageProps,
-  IAutoViewLetterAvatarProps,
-  IAutoViewStackedListProps,
+  IAutoViewListItemAvatarProps,
+  IAutoViewListItemButtonProps,
+  IAutoViewListItemIconProps,
+  IAutoViewListItemProps,
+  IAutoViewListItemTextProps,
+  IAutoViewListProps,
+  IAutoViewListSubheaderProps,
+  IAutoViewMarkdownProps,
   IAutoViewStatsProps,
-  IAutoViewTypographyProps,
+  IAutoViewStepperProps,
+  IAutoViewTextProps,
+  IAutoViewTooltipProps,
 } from "../components";
 
 export type IAutoViewCommonComponentProps =
-  | IAutoViewIconProps
-  | IAutoViewImageProps
-  | IAutoViewTypographyProps;
-
-export type IAutoViewDataDisplayComponentProps =
-  | IAutoViewBadgeProps
+  | IAutoViewAvatarProps
   | IAutoViewChipProps
+  | IAutoViewButtonProps
   | IAutoViewDividerProps
+  | IAutoViewBadgeProps
+  | IAutoViewIconProps
+  | IAutoViewIconButtonProps
+  | IAutoViewImageProps
+  | IAutoViewMarkdownProps
   | IAutoViewStatsProps
-  | IAutoViewImageAvatarProps
-  | IAutoViewLetterAvatarProps;
+  | IAutoViewTextProps
+  | IAutoViewTooltipProps;
 
-export type IAutoViewSurfaceComponentProps =
-  | IAutoViewCollapseProps
+export type IAutoViewCardComponentProps =
+  | IAutoViewCardContentProps
+  | IAutoViewCardHeaderProps
+  | IAutoViewCardMediaProps
+  | IAutoViewCardProps;
+
+export type IAutoViewListComponentProps =
+  | IAutoViewListItemAvatarProps
+  | IAutoViewListItemButtonProps
+  | IAutoViewListItemIconProps
+  | IAutoViewListItemProps
+  | IAutoViewListItemTextProps
+  | IAutoViewListProps
+  | IAutoViewListSubheaderProps;
+
+export type IAutoViewContainerComponentProps =
+  | IAutoViewCardComponentProps
   | IAutoViewCarouselProps
-  | IAutoViewGridListProps
-  | IAutoViewStackedListProps;
+  | IAutoViewCollapseProps
+  | IAutoViewListComponentProps
+  | IAutoViewStepperProps;
 
-export type IAutoViewNonSurfaceComponentProps =
-  | IAutoViewCommonComponentProps
-  | IAutoViewDataDisplayComponentProps;
+export type IAutoViewPresentationComponentProps = IAutoViewCommonComponentProps;
 
 export type IAutoViewComponentProps =
   | IAutoViewCommonComponentProps
-  | IAutoViewDataDisplayComponentProps
-  | IAutoViewSurfaceComponentProps;
+  | IAutoViewCardComponentProps;

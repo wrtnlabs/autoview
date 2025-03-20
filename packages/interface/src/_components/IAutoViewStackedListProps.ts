@@ -1,5 +1,6 @@
 import { IAutoViewComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { Arrayable } from "../utils";
 
 /**
  * Properties for configuring the StackedList component.
@@ -23,6 +24,6 @@ export interface IAutoViewStackedListProps
 
 export namespace IAutoViewStackedListProps {
   export interface IItem {
-    children: IAutoViewComponentProps[];
+    childComponents: Arrayable<IAutoViewComponentProps>;
   }
 }

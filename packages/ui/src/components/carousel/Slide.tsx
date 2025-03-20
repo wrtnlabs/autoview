@@ -1,11 +1,11 @@
-import { IAutoViewCarouselProps } from "@autoview/interface";
+import { IAutoViewPresentationComponentProps } from "@autoview/interface";
 import { styled } from "@mui/material";
 import React from "react";
 
 import { renderComponent } from "../../renderer";
 
-export const CarouselSlide = ({ children }: IAutoViewCarouselProps.IItem) => {
-  return <Slide>{renderComponent(children)}</Slide>;
+export const CarouselSlide = (props: IAutoViewPresentationComponentProps) => {
+  return <Slide>{renderComponent(props)}</Slide>;
 };
 
 const Slide = styled("div")`

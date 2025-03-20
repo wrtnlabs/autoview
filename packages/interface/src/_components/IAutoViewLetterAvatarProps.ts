@@ -1,4 +1,5 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { IAutoViewColor } from "../properties/theme";
 
 /**
  * Props for the `AutoViewLetterAvatar` component.
@@ -31,7 +32,7 @@ export interface IAutoViewLetterAvatarProps
    * color: "#3498db"
    * ```
    */
-  color?: IAutoViewLetterAvatarProps.IColor;
+  color?: IAutoViewColor.IScale | IAutoViewColor.IHex;
 
   /**
    * The size of the icon.

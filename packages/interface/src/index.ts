@@ -6,3 +6,4 @@ export * from "./services/IAutoViewCompilerProps";
 export * from "./services/IAutoViewCompilerResult";
 export * from "./services/IAutoViewCompilerService";
 export * from "./services/IAutoViewTransformerService";
+export * from "./utils";

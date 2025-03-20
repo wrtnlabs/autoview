@@ -8,5 +8,7 @@ import { transformGridItemProps } from "./transform";
 export const GridItem = (props: IAutoViewGridListProps.IItem) => {
   const itemProps = transformGridItemProps(props);
 
-  return <MuiGrid {...itemProps}>{renderComponent(props.children)}</MuiGrid>;
+  return (
+    <MuiGrid {...itemProps}>{renderComponent(props.childComponents)}</MuiGrid>
+  );
 };

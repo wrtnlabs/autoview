@@ -8,7 +8,7 @@ export function transformCarouselOptions(
 ): EmblaOptionsType {
   return {
     loop: props.infinite ?? true,
-    duration: props.interval ?? 3000,
+    duration: props.interval ?? 25,
   };
 }
 

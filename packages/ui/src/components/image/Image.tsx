@@ -6,4 +6,7 @@ export const Image = (props: IAutoViewImageProps) => {
   return <Img src={props.src} alt={props.alt} />;
 };
 
-const Img = styled("img")``;
+const Img = styled("img")`
+  max-width: 100%;
+  max-height: 100%;
+`;

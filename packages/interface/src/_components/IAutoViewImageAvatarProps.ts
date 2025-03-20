@@ -55,5 +55,5 @@ export namespace IAutoViewImageAvatarProps {
    * Defines the available avatar sizes in pixels.
    * - These values ensure consistency across UI elements.
    */
-  export type ISize = 12 | 16 | 20 | 24 | 32 | 40;
+  export type ISize = number;
 }
