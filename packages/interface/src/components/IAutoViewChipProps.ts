@@ -1,8 +1,7 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { IAutoViewColor } from "../properties/theme";
-import { IAutoViewImageAvatarProps } from "./IAutoViewAvatarProps";
+import { IAutoViewAvatarProps } from "./IAutoViewAvatarProps";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
-import { IAutoViewLetterAvatarProps } from "./IAutoViewLetterAvatarProps";
 
 /**
  * Props for the `AutoViewChip` component.
@@ -28,20 +27,14 @@ export interface IAutoViewChipProps
    * - Can be an `ImageAvatar`, `LetterAvatar`, or an `Icon` to provide additional context.
    * - Example: A profile picture in a user selection chip.
    */
-  startElement?:
-    | IAutoViewImageAvatarProps
-    | IAutoViewLetterAvatarProps
-    | IAutoViewIconProps;
+  startElement?: IAutoViewAvatarProps | IAutoViewIconProps;
 
   /**
    * An element rendered at the **end (right side)** of the chip.
    * - Can be an `Icon` representing an action (e.g., dropdown arrow or status indicator).
    * - Example: A small "check" icon indicating selection.
    */
-  endElement?:
-    | IAutoViewImageAvatarProps
-    | IAutoViewLetterAvatarProps
-    | IAutoViewIconProps;
+  endElement?: IAutoViewAvatarProps | IAutoViewIconProps;
 
   color?: IAutoViewColor.IVariant | IAutoViewColor.IScale | IAutoViewColor.IHex;
 }
