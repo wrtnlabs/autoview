@@ -59,6 +59,20 @@ export class AutoViewCompiler {
     return source;
   }
 
+  public generateBoilerplateForRawTsCode(): string {
+    const ctx: IAutoViewProgrammerContext = {
+      importer: new AutoViewImportProgrammer(),
+    };
+    const statements: ts.Statement[] = AutoViewProgrammer.writeWithoutDto(
+      ctx,
+      this.inputComponents,
+      this.inputSchema,
+    );
+    const source: string = FilePrinter.write({ statements });
+
+    return source;
+  }
+
   public async compile(script: string): Promise<IAutoViewCompilerResult> {
     const ctx: IAutoViewProgrammerContext = {
       importer: new AutoViewImportProgrammer(),

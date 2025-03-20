@@ -22,6 +22,12 @@ export class AutoViewCompilerService implements IAutoViewCompilerService {
     return this.compiler_.generateBoilerplate();
   }
 
+  public generateBoilerplateForRawTsCode(): string {
+    if (this.compiler_ === null)
+      throw new Error("You have not initialized yet.");
+    return this.compiler_.generateBoilerplateForRawTsCode();
+  }
+
   public async compile(script: string): Promise<IAutoViewCompilerResult> {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");

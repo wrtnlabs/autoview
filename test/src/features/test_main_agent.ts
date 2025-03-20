@@ -183,7 +183,7 @@ export async function test_main_agent(): Promise<void> {
       },
     },
   };
-  const { transform } = await MainAgent.execute(provider, schema);
+  const { transformTsCode } = await MainAgent.execute(provider, schema);
 
-  console.log(transform.toString());
+  console.log(transformTsCode);
 }

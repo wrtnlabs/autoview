@@ -20,4 +20,22 @@ export namespace AutoViewProgrammer {
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];
   };
+
+  export const writeWithoutDto = (
+    ctx: IAutoViewProgrammerContext,
+    inputComponents: OpenApi.IComponents,
+    inputSchema: OpenApi.IJsonSchema,
+  ): ts.Statement[] => {
+    ctx.importer.external({
+      type: "instance",
+      library: "@autoview/interface",
+      name: "IAutoViewComponentProps",
+    });
+
+    const statements: ts.Statement[] = [
+      ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
+      ...AutoViewTransformerProgrammer.write(ctx, inputSchema),
+    ];
+    return [...ctx.importer.toStatements(() => ""), ...statements];
+  };
 }

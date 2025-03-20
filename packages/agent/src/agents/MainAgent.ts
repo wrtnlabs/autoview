@@ -30,6 +30,12 @@ export namespace MainAgent {
      * It is useful to quickly test your generated component.
      */
     random: Function;
+    /**
+     * The TypeScript code of the transform function.
+     *
+     * This code includes several import statements, preventing it to include bunch of DTO interface declarations.
+     */
+    transformTsCode: string;
   }
 
   export async function execute(
@@ -49,21 +55,21 @@ export namespace MainAgent {
     await codeGenerationAgent.open();
 
     try {
-      const { analysis, transform, random } = await codeGenerationAgent.execute(
-        {
+      const { analysis, transform, random, transformTsCode } =
+        await codeGenerationAgent.execute({
           provider,
           inputSchema,
           componentSchema: componentSchema(),
           componentPlan: plan.component,
-        },
-      );
+        });
 
       return {
         visualizationPlanning: plan.visualizationPlanning,
         componentPlan: plan.component,
         analysis,
         transform,
-        random: random,
+        random,
+        transformTsCode,
       };
     } finally {
       try {

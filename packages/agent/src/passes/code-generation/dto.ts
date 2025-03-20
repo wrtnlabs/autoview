@@ -11,4 +11,5 @@ export interface Output {
   analysis: string;
   transform: Function;
   random: Function;
+  transformTsCode: string;
 }

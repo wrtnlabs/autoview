@@ -98,11 +98,7 @@ function handleText(
 ): (input: Input, text: string) => Promise<Output> {
   return async function (_input: Input, text: string) {
     const output = parseOutput(text);
-
-    console.log(
-      "ts-code",
-      `${await service.generateBoilerplate()}\n\n${output.typescript_function}`,
-    );
+    const rawTsCode = `${await service.generateBoilerplateForRawTsCode()}\n\n${output.typescript_function}`;
 
     const result = await service.compile(output.typescript_function);
 
@@ -183,6 +179,7 @@ function handleText(
       analysis: output.analysis,
       transform,
       random,
+      transformTsCode: rawTsCode,
     };
   };
 }
