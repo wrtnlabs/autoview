@@ -1,7 +1,7 @@
 import { StandardProperties } from "csstype";
 import { Format } from "typia/lib/tags";
 
-import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { Arrayable } from "../utils";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
@@ -24,12 +24,12 @@ export interface IAutoViewCardProps
 
 export interface IAutoViewCardActionsProps
   extends IAutoViewComponentPropsBase<"CardActions"> {
-  childComponents: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  childComponents: Arrayable<IAutoViewPresentationComponentProps>;
 }
 
 export interface IAutoViewCardContentProps
   extends IAutoViewComponentPropsBase<"CardContent"> {
-  childComponents: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  childComponents: Arrayable<IAutoViewPresentationComponentProps>;
 }
 
 export interface IAutoViewCardHeaderProps

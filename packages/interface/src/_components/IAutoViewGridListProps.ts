@@ -1,4 +1,4 @@
-import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { Arrayable } from "../utils";
 
@@ -38,7 +38,7 @@ export namespace IAutoViewGridListProps {
      * Content to be rendered within the grid item.
      * Must conform to the IAutoViewNonSurfaceComponentProps interface.
      */
-    childComponents: Arrayable<IAutoViewNonSurfaceComponentProps>;
+    childComponents: Arrayable<IAutoViewPresentationComponentProps>;
 
     /**
      * Size of the column in different screen sizes

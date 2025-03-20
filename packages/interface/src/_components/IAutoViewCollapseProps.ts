@@ -1,4 +1,4 @@
-import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { Arrayable } from "../utils";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
@@ -17,13 +17,13 @@ export interface IAutoViewCollapseProps
    * Represents the header of an individual collapse item.
    * This section acts as the trigger to expand or collapse the content.
    */
-  header: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  header: Arrayable<IAutoViewPresentationComponentProps>;
 
   /**
    * Represents the collapsible content.
    * This section becomes visible when the collapse item is expanded.
    */
-  content: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  content: Arrayable<IAutoViewPresentationComponentProps>;
 
   /**
    * Adds a border around each collapse item, distinguishing them from surrounding content.
@@ -68,7 +68,7 @@ export namespace IAutoViewCollapseProps {
      * Main content of the header.
      * Should clearly indicate what the collapsible content contains.
      */
-    children: IAutoViewNonSurfaceComponentProps[];
+    children: IAutoViewPresentationComponentProps[];
   }
 
   /**
@@ -79,7 +79,7 @@ export namespace IAutoViewCollapseProps {
     /**
      * Main content inside the collapsible section.
      */
-    children: IAutoViewNonSurfaceComponentProps[];
+    children: IAutoViewPresentationComponentProps[];
   }
 
   /**

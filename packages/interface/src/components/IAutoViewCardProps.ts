@@ -1,6 +1,6 @@
 import { Format } from "typia/lib/tags";
 
-import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { Arrayable } from "../utils";
 import { IAutoViewAvatarProps } from "./IAutoViewAvatarProps";
@@ -27,7 +27,7 @@ export interface IAutoViewCardHeaderProps
 
 export interface IAutoViewCardContentProps
   extends IAutoViewComponentPropsBase<"CardContent"> {
-  childrenProps: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  childrenProps: Arrayable<IAutoViewPresentationComponentProps>;
 }
 
 // FIXME:
@@ -39,5 +39,5 @@ export interface IAutoViewCardMediaProps
 // FIXME:
 export interface IAutoViewCardFooterProps
   extends IAutoViewComponentPropsBase<"CardHeader"> {
-  childrenProps: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  childrenProps: Arrayable<IAutoViewPresentationComponentProps>;
 }

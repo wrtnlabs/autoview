@@ -23,7 +23,7 @@ export interface IAutoViewBadgeProps
   };
 }
 
-export namespace IAutoViewBadge {
+export namespace IAutoViewBadgeProps {
   export type IColors = string;
   export type IStatus = "error" | "info" | "success" | "warning";
 

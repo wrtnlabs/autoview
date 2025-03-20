@@ -1,4 +1,4 @@
-import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 
 export interface IAutoViewCarouselProps
@@ -13,11 +13,11 @@ export interface IAutoViewCarouselProps
 
   navControls?: boolean;
   indicators?: boolean;
-  childComponents: IAutoViewNonSurfaceComponentProps[];
+  childComponents: IAutoViewPresentationComponentProps[];
 }
 
 export namespace IAutoViewCarouselProps {
   export interface IItem {
-    children: IAutoViewNonSurfaceComponentProps[];
+    children: IAutoViewPresentationComponentProps[];
   }
 }

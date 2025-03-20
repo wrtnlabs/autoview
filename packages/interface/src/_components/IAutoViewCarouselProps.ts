@@ -1,4 +1,4 @@
-import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 
 /**
@@ -20,7 +20,7 @@ export interface IAutoViewCarouselProps
    * Array of items to be displayed in the carousel.
    * Each item must conform to the IItem interface, ensuring a consistent structure across all elements.
    */
-  childComponents: IAutoViewNonSurfaceComponentProps[];
+  childComponents: IAutoViewPresentationComponentProps[];
 
   /**
    * Time interval in milliseconds between automatic transitions when `autoPlay` is enabled.
@@ -82,6 +82,6 @@ export namespace IAutoViewCarouselProps {
      * Content to be rendered within the carousel item.
      * Must conform to the IAutoViewNonSurfaceComponentProps interface.
      */
-    children: IAutoViewNonSurfaceComponentProps[];
+    children: IAutoViewPresentationComponentProps[];
   }
 }

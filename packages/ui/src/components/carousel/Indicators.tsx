@@ -1,11 +1,11 @@
-import { IAutoViewNonSurfaceComponentProps } from "@autoview/interface";
+import { IAutoViewPresentationComponentProps } from "@autoview/interface";
 import { styled } from "@mui/material";
 import React from "react";
 
 import { AutoViewCarouselContext } from "./Context";
 
 export interface CarouselIndicators {
-  items: IAutoViewNonSurfaceComponentProps[];
+  items: IAutoViewPresentationComponentProps[];
 }
 
 export const CarouselIndicators = ({ items }: CarouselIndicators) => {

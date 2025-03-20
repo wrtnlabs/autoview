@@ -1,12 +1,12 @@
-import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { Arrayable } from "../utils";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 export interface IAutoViewCollapseProps
   extends IAutoViewComponentPropsBase<"Collapse"> {
-  header: Arrayable<IAutoViewNonSurfaceComponentProps>;
-  content: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  header: Arrayable<IAutoViewPresentationComponentProps>;
+  content: Arrayable<IAutoViewPresentationComponentProps>;
 
   expandIcon?: IAutoViewIconProps;
 
@@ -18,12 +18,12 @@ export interface IAutoViewCollapseProps
 export namespace IAutoViewCollapseProps {
   export interface IHeader {
     // FIXME:
-    childrenProps: IAutoViewNonSurfaceComponentProps[];
+    childrenProps: IAutoViewPresentationComponentProps[];
   }
 
   export interface IContent {
     // FIXME:
-    childrenProps: IAutoViewNonSurfaceComponentProps[];
+    childrenProps: IAutoViewPresentationComponentProps[];
   }
 
   export type ISize = "large" | "middle" | "small";
