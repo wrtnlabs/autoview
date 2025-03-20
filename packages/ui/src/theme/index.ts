@@ -1,7 +1,8 @@
 import { createTheme } from "@mui/material";
 
-import typography from "./custom/typography";
-import recipes from "./recipes";
+import components from "./components";
+import { dark, light } from "./palette";
+import typography from "./typography";
 
 const customTheme = {
   typography,
@@ -10,19 +11,15 @@ const customTheme = {
   shape: {
     borderRadius: 8, // 컴포넌트의 모서리 둥글기 설정
   },
-  components: recipes,
+  components,
 };
 
 export const lightTheme = createTheme({
   ...customTheme,
-  palette: {
-    mode: "light",
-  },
+  palette: light,
 });
 
 export const darkTheme = createTheme({
   ...customTheme,
-  palette: {
-    mode: "dark",
-  },
+  palette: dark,
 });
