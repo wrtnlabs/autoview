@@ -19,7 +19,7 @@ export class Agent implements AgentBase<Input, Output> {
 
     if (is_node()) {
       await this.worker.connect(
-        `${__dirname}/../../../node_modules/@autoview/compiler/lib/worker/index.js`,
+        `${__dirname}/../../../../compiler/lib/worker/index.js`,
       );
     } else {
       const scriptText = await fetch(

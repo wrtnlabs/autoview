@@ -90,9 +90,6 @@ importers:
       '@samchon/openapi':
         specifier: ^3.0.0
         version: 3.1.0
-      rollup:
-        specifier: ^4.34.1
-        version: 4.36.0
       serialize-error:
         specifier: 4.1.0
         version: 4.1.0
@@ -121,6 +118,9 @@ importers:
       '@autoview/interface':
         specifier: workspace:^
         version: link:../interface
+      '@rollup/browser':
+        specifier: ^4.13.0
+        version: 4.36.0
       react:
         specifier: ^19.0.0
         version: 19.0.0
@@ -130,6 +130,9 @@ importers:
       tgrid:
         specifier: ^1.1.0
         version: 1.1.0
+      tstl:
+        specifier: ^3.0.0
+        version: 3.0.0
       typia:
         specifier: ^8.0.0
         version: 8.0.3(@samchon/openapi@3.1.0)(typescript@5.8.2)
@@ -1762,6 +1765,9 @@ packages:
     resolution: {integrity: sha512-9oMEYIDc3sk0G5rysnYvdNrkSg7B04yTKl50HHSZVbokeHpnU0yRmsDaWb9B/5RprcKj8XszEk5guBO8Sa/Q+Q==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1
+
+  '@rollup/browser@4.36.0':
+    resolution: {integrity: sha512-0gsh/gWP2HEKcDz24P1OCt2Rr/+5MW0TnNDHcWtiaRD9z+uAi2qdJf+wmgw5iTF/Dp3jEixkOXvmd+32LCwRSA==}
 
   '@rollup/plugin-commonjs@28.0.3':
     resolution: {integrity: sha512-pyltgilam1QPdn+Zd9gaCfOLcnjMEJ9gV+bTw6/r73INdvzf1ah9zLIJBm+kW7R6IUFIQ1YO+VqZtYxZNWFPEQ==}
@@ -7707,6 +7713,10 @@ snapshots:
     dependencies:
       react: 19.0.0
 
+  '@rollup/browser@4.36.0':
+    dependencies:
+      '@types/estree': 1.0.6
+
   '@rollup/plugin-commonjs@28.0.3(rollup@4.36.0)':
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.36.0)
@@ -8539,6 +8549,23 @@ snapshots:
       natural-compare: 1.4.0
       ts-api-utils: 2.0.1(typescript@5.6.3)
       typescript: 5.6.3
+    transitivePeerDependencies:
+      - supports-color
+
+  '@typescript-eslint/eslint-plugin@8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.6.3))(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)':
+    dependencies:
+      '@eslint-community/regexpp': 4.12.1
+      '@typescript-eslint/parser': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.6.3)
+      '@typescript-eslint/scope-manager': 8.26.1
+      '@typescript-eslint/type-utils': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
+      '@typescript-eslint/utils': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
+      '@typescript-eslint/visitor-keys': 8.26.1
+      eslint: 9.22.0(jiti@2.4.2)
+      graphemer: 1.4.0
+      ignore: 5.3.2
+      natural-compare: 1.4.0
+      ts-api-utils: 2.0.1(typescript@5.8.2)
+      typescript: 5.8.2
     transitivePeerDependencies:
       - supports-color
 
@@ -13065,7 +13092,7 @@ snapshots:
 
   typescript-eslint@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2):
     dependencies:
-      '@typescript-eslint/eslint-plugin': 8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
+      '@typescript-eslint/eslint-plugin': 8.26.1(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.6.3))(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/parser': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       '@typescript-eslint/utils': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       eslint: 9.22.0(jiti@2.4.2)

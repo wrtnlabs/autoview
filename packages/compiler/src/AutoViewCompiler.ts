@@ -5,11 +5,8 @@ import type {
 } from "@autoview/interface";
 import { OpenApi } from "@samchon/openapi";
 import { ChatGptSchemaComposer } from "@samchon/openapi/lib/composers/llm/ChatGptSchemaComposer";
-import type { rollup as RollupFunction } from "rollup";
-// import { is_node } from "tstl";
 import ts from "typescript";
 
-import { RollupBundler } from "./compilers/RollupBundler";
 import { TypeScriptCompiler } from "./compilers/TypeScriptCompiler";
 import { AutoViewImportProgrammer } from "./programmers/AutoViewImportProgrammer";
 import { AutoViewProgrammer } from "./programmers/AutoViewProgrammer";
@@ -25,10 +22,7 @@ export class AutoViewCompiler {
   private readonly componentSchema: OpenApi.IJsonSchema;
   private readonly compilerOptions: IAutoViewCompilerProps.ICompilerOptions;
 
-  public constructor(
-    private readonly rollup: typeof RollupFunction,
-    props: IAutoViewCompilerProps,
-  ) {
+  public constructor(props: IAutoViewCompilerProps) {
     const { components, schema } = getJsonSchema(props.inputMetadata);
     const { components: componentComponents, schema: componentSchema } =
       getJsonSchema(props.componentMetadata);
@@ -37,9 +31,7 @@ export class AutoViewCompiler {
     this.componentComponents = componentComponents;
     this.componentSchema = componentSchema;
     this.compilerOptions = {
-      // module: "cjs",
       module: "esm",
-      // module: (props.compilerOptions?.module ?? is_node()) ? "cjs" : "esm",
     };
   }
 
@@ -87,24 +79,7 @@ export class AutoViewCompiler {
     const source: string = `${FilePrinter.write({ statements })}\n\n${script}`;
 
     try {
-      console.log("TypeScript Compiler Source", script);
-      const result: IAutoViewCompilerResult = TypeScriptCompiler.build(
-        ctx,
-        source,
-        this.compilerOptions.module,
-      );
-      console.log(
-        "TypeScript Compiler Result",
-        JSON.stringify(result, null, 2),
-      );
-      if (result.type === "success") {
-        console.log("Rollup Bundler Source", result.javascript);
-        result.javascript = await RollupBundler.build(
-          this.rollup,
-          result.javascript,
-        );
-      }
-      return result;
+      return TypeScriptCompiler.build(ctx, source, this.compilerOptions.module);
     } catch (error) {
       return {
         type: "error",
@@ -125,17 +100,7 @@ export class AutoViewCompiler {
     const source: string = FilePrinter.write({ statements });
 
     try {
-      const result: IAutoViewCompilerResult = TypeScriptCompiler.build(
-        ctx,
-        source,
-        this.compilerOptions.module,
-      );
-      if (result.type === "success")
-        result.javascript = await RollupBundler.build(
-          this.rollup,
-          result.javascript,
-        );
-      return result;
+      return TypeScriptCompiler.build(ctx, source, this.compilerOptions.module);
     } catch (error) {
       return {
         type: "error",
