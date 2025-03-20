@@ -1,7 +1,7 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { IAutoViewColor } from "../properties/theme";
-import { IAutoViewImageAvatarProps } from "./IAutoViewAvatarProps";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
+import { IAutoViewImageAvatarProps } from "./IAutoViewImageAvatarProps";
 import { IAutoViewLetterAvatarProps } from "./IAutoViewLetterAvatarProps";
 
 /**

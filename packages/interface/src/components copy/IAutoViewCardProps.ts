@@ -1,14 +1,13 @@
 import { StandardProperties } from "csstype";
 import { Format } from "typia/lib/tags";
 
-import {
-  IAutoViewComponentPropsBase,
-  IAutoViewNonSurfaceComponentProps,
-} from "../../src";
-import { Arrayable } from "../../src/utils";
+import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
+import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { Arrayable } from "../utils";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 import { IAutoViewImageAvatarProps } from "./IAutoViewImageAvatarProps";
 import { IAutoViewLetterAvatarProps } from "./IAutoViewLetterAvatarProps";
+import { IAutoViewStackProps } from "./IAutoViewStackProps";
 
 export interface IAutoViewCardProps
   extends IAutoViewComponentPropsBase<"Card"> {
@@ -19,6 +18,7 @@ export interface IAutoViewCardProps
     | IAutoViewCardContentProps
     | IAutoViewCardHeaderProps
     | IAutoViewCardMediaProps
+    | IAutoViewStackProps
   >;
 }
 

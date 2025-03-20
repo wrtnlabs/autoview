@@ -1,54 +1,43 @@
-import { StandardProperties } from "csstype";
 import { Format } from "typia/lib/tags";
 
 import { IAutoViewNonSurfaceComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { Arrayable } from "../utils";
+import { IAutoViewAvatarProps } from "./IAutoViewAvatarProps";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
-import { IAutoViewImageAvatarProps } from "./IAutoViewImageAvatarProps";
-import { IAutoViewLetterAvatarProps } from "./IAutoViewLetterAvatarProps";
-import { IAutoViewStackProps } from "./IAutoViewStackProps";
 
 export interface IAutoViewCardProps
   extends IAutoViewComponentPropsBase<"Card"> {
-  maxWidth?: StandardProperties["maxWidth"];
-  borderRadius?: StandardProperties["borderRadius"];
-  childComponents: Arrayable<
-    | IAutoViewCardActionsProps
-    | IAutoViewCardContentProps
+  childrenProps: Arrayable<
     | IAutoViewCardHeaderProps
+    | IAutoViewCardContentProps
+    | IAutoViewCardFooterProps
     | IAutoViewCardMediaProps
-    | IAutoViewStackProps
   >;
 }
 
-export interface IAutoViewCardActionsProps
-  extends IAutoViewComponentPropsBase<"CardActions"> {
-  childComponents: Arrayable<IAutoViewNonSurfaceComponentProps>;
+// FIXME:
+export interface IAutoViewCardHeaderProps
+  extends IAutoViewComponentPropsBase<"CardFooter"> {
+  title?: string;
+  description?: string;
+  startElement?: IAutoViewAvatarProps | IAutoViewIconProps;
+  endElement?: IAutoViewAvatarProps | IAutoViewIconProps;
 }
 
 export interface IAutoViewCardContentProps
   extends IAutoViewComponentPropsBase<"CardContent"> {
-  childComponents: Arrayable<IAutoViewNonSurfaceComponentProps>;
+  childrenProps: Arrayable<IAutoViewNonSurfaceComponentProps>;
 }
 
-export interface IAutoViewCardHeaderProps
-  extends IAutoViewComponentPropsBase<"CardHeader"> {
-  action: null;
-  startElement?:
-    | IAutoViewImageAvatarProps
-    | IAutoViewLetterAvatarProps
-    | IAutoViewIconProps;
-  title?: string;
-  description?: string;
-  endElement?:
-    | IAutoViewImageAvatarProps
-    | IAutoViewLetterAvatarProps
-    | IAutoViewIconProps;
-}
-
+// FIXME:
 export interface IAutoViewCardMediaProps
   extends IAutoViewComponentPropsBase<"CardMedia"> {
   src: string & Format<"uri">;
-  height?: StandardProperties["height"];
+}
+
+// FIXME:
+export interface IAutoViewCardFooterProps
+  extends IAutoViewComponentPropsBase<"CardHeader"> {
+  childrenProps: Arrayable<IAutoViewNonSurfaceComponentProps>;
 }
