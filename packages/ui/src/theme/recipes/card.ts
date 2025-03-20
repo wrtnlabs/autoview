@@ -1,4 +1,6 @@
-const cardRecipe = {
+import { Components } from "@mui/material";
+
+const recipe: Components["MuiCard"] = {
   styleOverrides: {
     root: {
       borderRadius: 1,
@@ -8,4 +10,4 @@ const cardRecipe = {
   },
 };
 
-export default cardRecipe;
+export default recipe;
