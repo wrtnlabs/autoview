@@ -1,16 +1,20 @@
 import { IAutoViewCarouselProps } from "@autoview/interface";
 import useEmblaCarousel from "embla-carousel-react";
-import React, { useState } from "react";
+import { useState } from "react";
 
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 import { CarouselContainer as Container } from "./Container";
 import { AutoViewCarouselContext } from "./Context";
-import { CarouselControls as Controls } from "./Controls";
 import { CarouselIndicators as Indicators } from "./Indicators";
+import { CarouselNavControls as Controls } from "./NavControls";
 import { CarouselSlide as Slide } from "./Slide";
 import { transformCarouselProps } from "./transform";
 
-export const Carousel = (props: IAutoViewCarouselProps) => {
-  const { childComponents, showArrows, indicators } = props;
+export interface CarouselProps
+  extends TransformToComponentProps<IAutoViewCarouselProps> {}
+
+export const Carousel = (props: CarouselProps) => {
+  const { childrenProps = [], navControls, indicators } = props;
   const [options, plugins] = transformCarouselProps(props);
   const [carouselRef, carouselApi] = useEmblaCarousel(options, plugins);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -26,13 +30,13 @@ export const Carousel = (props: IAutoViewCarouselProps) => {
     >
       <div style={{ position: "relative" }}>
         <Container>
-          {childComponents.map((comp, index) => (
+          {childrenProps.map((comp, index) => (
             <Slide key={index} {...comp} />
           ))}
         </Container>
 
-        {showArrows && <Controls />}
-        {indicators && <Indicators items={childComponents} />}
+        {navControls && <Controls />}
+        {indicators && <Indicators items={childrenProps} />}
       </div>
     </AutoViewCarouselContext.AutoViewCarouselContextProvider>
   );

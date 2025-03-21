@@ -7,7 +7,6 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import React from "react";
 
 import { Icon } from "../../../components/icon";
 

@@ -7,7 +7,7 @@ export interface IAutoViewBadgeProps
   extends IAutoViewComponentPropsBase<"Badge"> {
   count: number;
 
-  childComponents: IAutoViewAvatarProps | IAutoViewIconProps;
+  childrenProps: IAutoViewAvatarProps | IAutoViewIconProps;
 
   color?: IAutoViewColor.IVariant | IAutoViewColor.IScale | IAutoViewColor.IHex;
 

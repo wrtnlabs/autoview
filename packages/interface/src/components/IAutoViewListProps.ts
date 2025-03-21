@@ -1,16 +1,27 @@
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
+import { Arrayable } from "../utils";
 
 export interface IAutoViewListProps
-  extends IAutoViewComponentPropsBase<"List"> {}
+  extends IAutoViewComponentPropsBase<"List"> {
+  childrenProps?: Arrayable<
+    IAutoViewListItemProps | IAutoViewListSubheaderProps
+  >;
+}
 
 export interface IAutoViewListItemProps
-  extends IAutoViewComponentPropsBase<"ListItem"> {}
-
-export interface IAutoViewListItemAvatarProps
-  extends IAutoViewComponentPropsBase<"ListItemAvatar"> {}
+  extends IAutoViewComponentPropsBase<"ListItem"> {
+  childrenProps?:
+    | IAutoViewListItemButtonProps
+    | Arrayable<IAutoViewPresentationComponentProps>;
+}
 
 export interface IAutoViewListItemButtonProps
-  extends IAutoViewComponentPropsBase<"ListItemButton"> {}
+  extends IAutoViewComponentPropsBase<"ListItemButton"> {
+  childrenProps?:
+    | IAutoViewListItemButtonProps
+    | Arrayable<IAutoViewPresentationComponentProps>;
+}
 
 export interface IAutoViewListItemIconProps
   extends IAutoViewComponentPropsBase<"ListItemIcon"> {}

@@ -4,17 +4,20 @@ import {
   AccordionDetails as MuiCollapseDetails,
   AccordionSummary as MuiCollapseSummary,
 } from "@mui/material";
-import React from "react";
 
 import { renderComponent } from "../../renderer";
 
-export const Collapse = (props: IAutoViewCollapseProps) => {
+export const Collapse = ({
+  header,
+  content,
+  expandIcon,
+}: IAutoViewCollapseProps) => {
   return (
-    <MuiCollapse style={props.style}>
-      <MuiCollapseSummary expandIcon={renderComponent(props.expandIcon)}>
-        {renderComponent(props.header)}
+    <MuiCollapse>
+      <MuiCollapseSummary expandIcon={renderComponent(expandIcon)}>
+        {renderComponent(header)}
       </MuiCollapseSummary>
-      <MuiCollapseDetails>{renderComponent(props.content)}</MuiCollapseDetails>
+      <MuiCollapseDetails>{renderComponent(content)}</MuiCollapseDetails>
     </MuiCollapse>
   );
 };

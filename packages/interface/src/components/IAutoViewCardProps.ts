@@ -8,7 +8,7 @@ import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 export interface IAutoViewCardProps
   extends IAutoViewComponentPropsBase<"Card"> {
-  childrenProps: Arrayable<
+  childrenProps?: Arrayable<
     | IAutoViewCardHeaderProps
     | IAutoViewCardContentProps
     | IAutoViewCardFooterProps
@@ -27,17 +27,17 @@ export interface IAutoViewCardHeaderProps
 
 export interface IAutoViewCardContentProps
   extends IAutoViewComponentPropsBase<"CardContent"> {
-  childrenProps: Arrayable<IAutoViewPresentationComponentProps>;
+  childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
 }
 
 // FIXME:
 export interface IAutoViewCardMediaProps
   extends IAutoViewComponentPropsBase<"CardMedia"> {
-  src: string & Format<"uri">;
+  src?: string & Format<"uri">;
 }
 
 // FIXME:
 export interface IAutoViewCardFooterProps
   extends IAutoViewComponentPropsBase<"CardHeader"> {
-  childrenProps: Arrayable<IAutoViewPresentationComponentProps>;
+  childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
 }

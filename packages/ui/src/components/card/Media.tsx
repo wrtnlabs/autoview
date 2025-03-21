@@ -1,17 +1,23 @@
 import { IAutoViewCardMediaProps } from "@autoview/interface";
-import { CardMediaProps, CardMedia as MuiCardMedia } from "@mui/material";
-import React from "react";
+import {
+  CardMediaProps as BaseProps,
+  CardMedia as MuiCardMedia,
+} from "@mui/material";
 
-export const CardMedia = (props: IAutoViewCardMediaProps) => {
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
+
+export interface CardMediaProps
+  extends TransformToComponentProps<IAutoViewCardMediaProps> {}
+
+export const CardMedia = (props: CardMediaProps) => {
   return <MuiCardMedia {...transformCardMediaProps(props)} />;
 };
 
 export function transformCardMediaProps(
-  props: IAutoViewCardMediaProps,
-): CardMediaProps {
+  props: TransformToComponentProps<IAutoViewCardMediaProps>,
+): BaseProps {
   return {
     src: props.src,
     image: props.src,
-    sx: props.style,
   };
 }

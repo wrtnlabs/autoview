@@ -18,13 +18,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Carousel: Story = {
-  args: imageCarousel,
+  args: (imageCarousel as Parameters<typeof renderComponent>[0]) ?? {},
 };
 
 export const ProductCard: Story = {
-  args: productCard,
+  args: (productCard as Parameters<typeof renderComponent>[0]) ?? {},
 };
 
 export const Collapse: Story = {
-  args: collapse,
+  args: (collapse as Parameters<typeof renderComponent>[0]) ?? {},
 };

@@ -1,10 +1,10 @@
 import { IconButton, styled } from "@mui/material";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 
 import { Icon } from "../icon";
 import { AutoViewCarouselContext } from "./Context";
 
-export const CarouselControls = () => {
+export const CarouselNavControls = () => {
   const { carouselApi, setSelectedIndex } =
     AutoViewCarouselContext.useAutoViewCarouselContextContext();
 

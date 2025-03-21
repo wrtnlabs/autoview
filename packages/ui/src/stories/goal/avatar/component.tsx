@@ -1,8 +1,5 @@
 import { Avatar, AvatarGroup } from "@mui/material";
 import { blue, orange, yellow } from "@mui/material/colors";
-import React from "react";
-
-import { Image } from "../../../components/image";
 
 export function DefaultAvatarGroup() {
   return (

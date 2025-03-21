@@ -1,17 +1,21 @@
 import { IAutoViewCardHeaderProps } from "@autoview/interface";
-import { CardHeaderProps, CardHeader as MuiCardHeader } from "@mui/material";
-import React from "react";
+import {
+  CardHeaderProps as BaseProps,
+  CardHeader as MuiCardHeader,
+} from "@mui/material";
 
 import { renderComponent } from "../../renderer";
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 import { Icon } from "../icon";
 
-export const CardHeader = (props: IAutoViewCardHeaderProps) => {
+export interface CardHeaderProps
+  extends TransformToComponentProps<IAutoViewCardHeaderProps> {}
+
+export const CardHeader = (props: CardHeaderProps) => {
   return <MuiCardHeader {...transformCardHeaderProps(props)} />;
 };
 
-export function transformCardHeaderProps(
-  props: IAutoViewCardHeaderProps,
-): CardHeaderProps {
+export function transformCardHeaderProps(props: CardHeaderProps): BaseProps {
   const { startElement, endElement } = props;
 
   return {

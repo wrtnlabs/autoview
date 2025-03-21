@@ -1,13 +1,13 @@
 import { IAutoViewTextProps } from "@autoview/interface";
 import { Typography as MuiTypography, TypographyOwnProps } from "@mui/material";
-import React from "react";
 
 import { renderComponent } from "../../renderer";
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 
-export const Text = ({
-  content,
-  ...props
-}: Omit<IAutoViewTextProps, "type">) => {
+export interface TextProps
+  extends TransformToComponentProps<IAutoViewTextProps> {}
+
+export const Text = ({ content, ...props }: TextProps) => {
   return (
     <MuiTypography {...transformTextProps(props)}>
       {renderComponent(content)}
@@ -16,7 +16,7 @@ export const Text = ({
 };
 
 export function transformTextProps(
-  props: Partial<IAutoViewTextProps>,
+  props: Partial<TextProps>,
 ): TypographyOwnProps {
   return {
     variant: props.variant as any,

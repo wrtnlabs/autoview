@@ -1,24 +1,20 @@
 import { IAutoViewCardProps } from "@autoview/interface";
-import { CardProps, Card as MuiCard } from "@mui/material";
-import React from "react";
+import { CardProps as BaseProps, Card as MuiCard } from "@mui/material";
 
 import { renderComponent } from "../../renderer";
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 
-export const Card = ({ childComponents, ...props }: IAutoViewCardProps) => {
+export interface CardProps
+  extends TransformToComponentProps<IAutoViewCardProps> {}
+
+export const Card = ({ childrenProps, ...props }: CardProps) => {
   return (
     <MuiCard {...transformCardProps(props)} raised>
-      {renderComponent(childComponents)}
+      {renderComponent(childrenProps)}
     </MuiCard>
   );
 };
 
-export function transformCardProps(
-  props: Partial<IAutoViewCardProps>,
-): CardProps {
-  return {
-    sx: {
-      maxWidth: props.maxWidth ?? 400,
-      // borderRadius: props.borderRadius ?? 8,
-    },
-  };
+export function transformCardProps(props: CardProps): BaseProps {
+  return {};
 }

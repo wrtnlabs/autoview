@@ -1,11 +1,14 @@
 import { IAutoViewIconProps } from "@autoview/interface";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { styled } from "@mui/material";
-import React from "react";
 
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 import { transformIconProps } from "./transform";
 
-export const Icon = (props: IAutoViewIconProps) => {
+export interface IconProps
+  extends TransformToComponentProps<IAutoViewIconProps> {}
+
+export const Icon = (props: IconProps) => {
   try {
     return (
       <Box style={props.style}>

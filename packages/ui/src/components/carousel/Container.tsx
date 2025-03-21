@@ -1,5 +1,5 @@
 import { styled } from "@mui/material";
-import React, { PropsWithChildren } from "react";
+import { PropsWithChildren } from "react";
 
 import { AutoViewCarouselContext } from "./Context";
 

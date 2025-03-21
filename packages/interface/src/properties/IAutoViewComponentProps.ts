@@ -3,6 +3,7 @@ import {
   IAutoViewBadgeProps,
   IAutoViewButtonProps,
   IAutoViewCardContentProps,
+  IAutoViewCardFooterProps,
   IAutoViewCardHeaderProps,
   IAutoViewCardMediaProps,
   IAutoViewCardProps,
@@ -43,6 +44,7 @@ export type IAutoViewCommonComponentProps =
 
 export type IAutoViewCardComponentProps =
   | IAutoViewCardContentProps
+  | IAutoViewCardFooterProps
   | IAutoViewCardHeaderProps
   | IAutoViewCardMediaProps
   | IAutoViewCardProps;
@@ -66,5 +68,5 @@ export type IAutoViewContainerComponentProps =
 export type IAutoViewPresentationComponentProps = IAutoViewCommonComponentProps;
 
 export type IAutoViewComponentProps =
-  | IAutoViewCommonComponentProps
-  | IAutoViewCardComponentProps;
+  | IAutoViewPresentationComponentProps
+  | IAutoViewContainerComponentProps;

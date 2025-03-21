@@ -1,8 +1,12 @@
 import { IAutoViewImageProps } from "@autoview/interface";
 import { styled } from "@mui/material";
-import React from "react";
 
-export const Image = (props: IAutoViewImageProps) => {
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
+
+export interface ImageProps
+  extends TransformToComponentProps<IAutoViewImageProps> {}
+
+export const Image = (props: ImageProps) => {
   return <Img src={props.src} alt={props.alt} />;
 };
 

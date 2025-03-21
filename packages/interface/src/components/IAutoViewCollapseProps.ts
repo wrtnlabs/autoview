@@ -9,24 +9,19 @@ export interface IAutoViewCollapseProps
   content: Arrayable<IAutoViewPresentationComponentProps>;
 
   expandIcon?: IAutoViewIconProps;
-
   expandIconPosition?: IAutoViewCollapseProps.IIconPosition;
-
-  size?: IAutoViewCollapseProps.ISize;
 }
 
 export namespace IAutoViewCollapseProps {
   export interface IHeader {
     // FIXME:
-    childrenProps: IAutoViewPresentationComponentProps[];
+    childrenProps?: IAutoViewPresentationComponentProps[];
   }
 
   export interface IContent {
     // FIXME:
-    childrenProps: IAutoViewPresentationComponentProps[];
+    childrenProps?: IAutoViewPresentationComponentProps[];
   }
-
-  export type ISize = "large" | "middle" | "small";
 
   export type IIconPosition = "start" | "end";
 }

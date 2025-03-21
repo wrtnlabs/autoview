@@ -1,6 +1,5 @@
 import { IAutoViewPresentationComponentProps } from "@autoview/interface";
 import { styled } from "@mui/material";
-import React from "react";
 
 import { AutoViewCarouselContext } from "./Context";
 
