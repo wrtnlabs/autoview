@@ -1,5 +1,5 @@
 import { IAutoViewComponentProps } from "@autoview/interface";
-import React from "react";
+import { Fragment } from "react/jsx-runtime";
 
 import { componentMap } from "../components";
 
@@ -12,7 +12,7 @@ export function renderComponent(
 
   if (Array.isArray(props)) {
     return props.map((c, index) => (
-      <React.Fragment key={index}>{renderComponent(c)}</React.Fragment>
+      <Fragment key={index}>{renderComponent(c)}</Fragment>
     ));
   }
 

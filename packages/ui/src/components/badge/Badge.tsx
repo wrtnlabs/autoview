@@ -1,6 +1,5 @@
 import { IAutoViewBadgeProps } from "@autoview/interface";
 import { Badge as MuiBadge } from "@mui/material";
-import React from "react";
 
 import { transformBadgeProps } from "./transform";
 

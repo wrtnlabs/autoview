@@ -1,6 +1,5 @@
 import { IAutoViewImageAvatarProps } from "@autoview/interface";
 import { Avatar as MuiImageAvatar } from "@mui/material";
-import React from "react";
 
 import { transformImageAvatarProps } from "./transform";
 

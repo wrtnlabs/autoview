@@ -1,6 +1,5 @@
 import { IAutoViewLetterAvatarProps } from "@autoview/interface";
 import { Avatar as MuiLetterAvatar } from "@mui/material";
-import React from "react";
 
 import { transformLetterAvatarProps } from "./transform";
 

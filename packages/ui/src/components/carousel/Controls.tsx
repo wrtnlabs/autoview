@@ -1,5 +1,5 @@
 import { styled } from "@mui/material";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 
 import { AutoViewCarouselContext } from "./Context";
 

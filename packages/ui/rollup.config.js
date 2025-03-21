@@ -18,7 +18,7 @@ export default {
       sourcemap: true,
     },
   ],
-  external: ["react", "react-dom"],
+  external: ["react"],
   plugins: [
     peerDepsExternal(),
     resolve(),

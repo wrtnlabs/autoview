@@ -13,7 +13,7 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: "./src/index.ts",
-      external: ["react", "react-dom"],
+      external: ["react"],
       output: {
         dir: "dist",
       },

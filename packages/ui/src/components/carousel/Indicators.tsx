@@ -1,5 +1,4 @@
 import { styled } from "@mui/material";
-import React from "react";
 
 export interface CarouselIndicators {
   items: any[];

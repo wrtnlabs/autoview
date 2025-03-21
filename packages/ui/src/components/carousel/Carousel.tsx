@@ -1,6 +1,5 @@
 import { IAutoViewCarouselProps } from "@autoview/interface";
 import useEmblaCarousel from "embla-carousel-react";
-import React from "react";
 
 import { CarouselContainer as Container } from "./Container";
 import { AutoViewCarouselContext } from "./Context";
