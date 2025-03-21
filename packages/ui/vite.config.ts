@@ -13,11 +13,12 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: "./src/index.ts",
-      external: ["react", "react/jsx-runtime"],
+      external: ["react", "react/jsx-runtime", "react/jsx-dev-runtime"],
       output: {
         globals: {
           react: "React",
           "react/jsx-runtime": "ReactJsxRuntime",
+          "react/jsx-dev-runtime": "ReactJsxDevRuntime",
         },
         dir: "dist",
       },
