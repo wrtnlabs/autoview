@@ -1,5 +1,6 @@
 import { Arrayable, IAutoViewComponentProps } from "@autoview/interface";
-import React, { ReactNode } from "react";
+import { type ReactNode } from "react";
+import { Fragment } from "react/jsx-runtime";
 
 import { componentMap } from "../components";
 
@@ -11,7 +12,7 @@ export function renderComponent(
   }
 
   if (typeof props === "string") {
-    return <React.Fragment>{props}</React.Fragment>;
+    return <Fragment>{props}</Fragment>;
   }
 
   if (typeof props !== "object") {
@@ -19,8 +20,8 @@ export function renderComponent(
   }
 
   if (Array.isArray(props)) {
-    return props.map((c, i) => (
-      <React.Fragment key={i}>{renderComponent(c)}</React.Fragment>
+    return props.map((c, index) => (
+      <Fragment key={index}>{renderComponent(c)}</Fragment>
     ));
   }
 

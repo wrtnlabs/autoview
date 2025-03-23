@@ -1,9 +1,9 @@
 import { styled } from "@mui/material";
-import { PropsWithChildren } from "react";
+import { type PropsWithChildren } from "react";
 
 import { AutoViewCarouselContext } from "./Context";
 
-export const CarouselContainer = ({ children }: PropsWithChildren) => {
+export const CarouselContainer = ({ children }: PropsWithChildren<{}>) => {
   const { carouselRef } =
     AutoViewCarouselContext.useAutoViewCarouselContextContext();
 

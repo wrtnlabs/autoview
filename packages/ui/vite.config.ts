@@ -13,7 +13,22 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       input: "./src/index.ts",
-      external: ["react", "react-dom"],
+      external: [
+        "react",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "@emotion/react",
+        "@emotion/styled",
+        "@mui/material",
+        "@fortawesome/react-fontawesome",
+        "@fortawesome/fontawesome-svg-core",
+        "@fortawesome/free-brands-svg-icons",
+        "@fortawesome/free-solid-svg-icons",
+        "embla-carousel",
+        "embla-carousel-autoplay",
+        "embla-carousel-fade",
+        "embla-carousel-react",
+      ],
       output: {
         dir: "dist",
       },
