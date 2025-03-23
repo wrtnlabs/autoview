@@ -1,32 +1,40 @@
 import { IAutoViewCardHeaderProps } from "@autoview/interface";
 import {
+  CardHeader as BaseCardHeader,
   CardHeaderProps as BaseProps,
-  CardHeader as MuiCardHeader,
 } from "@mui/material";
 
 import { renderComponent } from "../../renderer";
 import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
-import { Icon } from "../icon";
 
 export interface CardHeaderProps
   extends TransformToComponentProps<IAutoViewCardHeaderProps> {}
 
 export const CardHeader = (props: CardHeaderProps) => {
-  return <MuiCardHeader {...transformCardHeaderProps(props)} />;
+  const result = transformCardHeaderProps(props);
+
+  return <BaseCardHeader sx={baseStyle} {...result} />;
 };
 
 export function transformCardHeaderProps(props: CardHeaderProps): BaseProps {
   const { startElement, endElement } = props;
 
   return {
-    action: endElement ? renderComponent(endElement) : undefined,
-    avatar: startElement ? renderComponent(startElement) : undefined,
-    subheader: [
-      <Icon type="Icon" id="home" style={{ width: "10px", height: "10px" }} />,
-      props.description,
-    ],
-    subheaderTypographyProps: undefined,
+    avatar: renderComponent(startElement),
+    action: renderComponent(endElement),
+    subheader: renderComponent(props.description),
+    subheaderTypographyProps: {
+      variant: "caption",
+      color: "#777",
+    },
     title: props.title,
-    titleTypographyProps: undefined,
+    titleTypographyProps: {
+      variant: "subtitle2",
+      color: "#111",
+    },
   };
 }
+
+const baseStyle = {
+  width: "100%",
+};

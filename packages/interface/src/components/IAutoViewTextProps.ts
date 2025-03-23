@@ -1,6 +1,6 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { IAutoViewColor, IAutoViewTypography } from "../properties/theme";
-import { Arrayable } from "../utils";
+import { Arrayable } from "../utils/Arrayable";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 export interface IAutoViewTextProps
@@ -8,8 +8,6 @@ export interface IAutoViewTextProps
   variant?: IAutoViewTextProps.IVariant;
 
   color?: IAutoViewTextProps.IColor;
-
-  ellipsis?: boolean;
 
   lineClamp?: number | null;
 

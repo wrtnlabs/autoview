@@ -2,27 +2,51 @@ import { Format } from "typia/lib/tags";
 
 import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
-import { Arrayable } from "../utils";
+import { Arrayable } from "../utils/Arrayable";
 import { IAutoViewAvatarProps } from "./IAutoViewAvatarProps";
+import { IAutoViewBadgeProps } from "./IAutoViewBadgeProps";
+import { IAutoViewChipProps } from "./IAutoViewChipProps";
+import { IAutoViewIconButtonProps } from "./IAutoViewIconButtonProps";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
+import { IAutoViewTextProps } from "./IAutoViewTextProps";
 
-export interface IAutoViewCardProps
-  extends IAutoViewComponentPropsBase<"Card"> {
-  childrenProps?: Arrayable<
-    | IAutoViewCardHeaderProps
-    | IAutoViewCardContentProps
-    | IAutoViewCardFooterProps
-    | IAutoViewCardMediaProps
-  >;
+type ChildrenProps<T extends IAutoViewCardProps.IOrientation> =
+  T extends "horizontal"
+    ? Arrayable<IAutoViewCardMediaProps | IAutoViewCardContentProps>
+    : Arrayable<
+        | IAutoViewCardHeaderProps
+        | IAutoViewCardContentProps
+        | IAutoViewCardFooterProps
+        | IAutoViewCardMediaProps
+      >;
+
+// IAutoViewCardProps 인터페이스 정의
+export interface IAutoViewCardProps<
+  T extends IAutoViewCardProps.IOrientation = IAutoViewCardProps.IOrientation,
+> extends IAutoViewComponentPropsBase<"Card"> {
+  orientation?: T;
+  childrenProps?: ChildrenProps<T>;
 }
 
 // FIXME:
 export interface IAutoViewCardHeaderProps
-  extends IAutoViewComponentPropsBase<"CardFooter"> {
+  extends IAutoViewComponentPropsBase<"CardHeader"> {
   title?: string;
   description?: string;
-  startElement?: IAutoViewAvatarProps | IAutoViewIconProps;
-  endElement?: IAutoViewAvatarProps | IAutoViewIconProps;
+  startElement?:
+    | IAutoViewAvatarProps
+    | IAutoViewIconProps
+    | IAutoViewChipProps
+    | IAutoViewBadgeProps
+    | IAutoViewIconButtonProps
+    | IAutoViewTextProps;
+  endElement?:
+    | IAutoViewAvatarProps
+    | IAutoViewIconProps
+    | IAutoViewChipProps
+    | IAutoViewBadgeProps
+    | IAutoViewIconButtonProps
+    | IAutoViewTextProps;
 }
 
 export interface IAutoViewCardContentProps
@@ -38,6 +62,10 @@ export interface IAutoViewCardMediaProps
 
 // FIXME:
 export interface IAutoViewCardFooterProps
-  extends IAutoViewComponentPropsBase<"CardHeader"> {
+  extends IAutoViewComponentPropsBase<"CardFooter"> {
   childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
+}
+
+export namespace IAutoViewCardProps {
+  export type IOrientation = "vertical" | "horizontal";
 }

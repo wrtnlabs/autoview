@@ -2,7 +2,11 @@ import { Components } from "@mui/material";
 
 const recipe: Components["MuiCardContent"] = {
   styleOverrides: {
-    root: {},
+    root: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+    },
   },
 };
 

@@ -14,7 +14,6 @@ import {
   IAutoViewIconButtonProps,
   IAutoViewIconProps,
   IAutoViewImageProps,
-  IAutoViewListItemAvatarProps,
   IAutoViewListItemButtonProps,
   IAutoViewListItemIconProps,
   IAutoViewListItemProps,
@@ -50,7 +49,6 @@ export type IAutoViewCardComponentProps =
   | IAutoViewCardProps;
 
 export type IAutoViewListComponentProps =
-  | IAutoViewListItemAvatarProps
   | IAutoViewListItemButtonProps
   | IAutoViewListItemIconProps
   | IAutoViewListItemProps

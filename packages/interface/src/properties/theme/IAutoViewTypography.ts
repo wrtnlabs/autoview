@@ -1,19 +1,19 @@
 export namespace IAutoViewTypography {
   export type IVariant =
-    | "body1" // Default body text (16px)
-    | "body2" // Smaller body text (14px)
-    | "button" // Button text style (15px)
-    | "caption1" // Small caption text (13px)
-    | "caption2" // Smaller caption text (12px)
-    | "h1" // Heading 1 (40px)
-    | "h2" // Heading 2 (30px)
-    | "h3" // Heading 3 (26px)
-    | "h4" // Heading 4 (22px)
-    | "h5" // Heading 5 (18px)
-    | "h6" // Heading 6 (16px)
-    | "inherit" // Inherits styles from parent
-    | "subtitle1" // Subtitle text (20px)
-    | "subtitle2"; // Smaller subtitle text (18px)
+    | "h1"
+    | "h2"
+    | "h3"
+    | "h4"
+    | "h5"
+    | "h6"
+    | "subtitle1"
+    | "subtitle2"
+    | "subtitle3"
+    | "body1"
+    | "body2"
+    | "caption"
+    | "button"
+    | "footnote";
 
   export type ITextColor =
     | "primary"

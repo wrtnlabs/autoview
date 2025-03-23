@@ -1,5 +1,5 @@
 import { IAutoViewCardProps } from "@autoview/interface";
-import { CardProps as BaseProps, Card as MuiCard } from "@mui/material";
+import { Card as BaseCard } from "@mui/material";
 
 import { renderComponent } from "../../renderer";
 import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
@@ -7,14 +7,39 @@ import { TransformToComponentProps } from "../../utils/TransformToComponentProps
 export interface CardProps
   extends TransformToComponentProps<IAutoViewCardProps> {}
 
-export const Card = ({ childrenProps, ...props }: CardProps) => {
+export const Card = ({
+  childrenProps,
+  orientation = "vertical",
+  ...props
+}: CardProps) => {
   return (
-    <MuiCard {...transformCardProps(props)} raised>
+    <BaseCard sx={orientationStyle[orientation]} raised {...props}>
       {renderComponent(childrenProps)}
-    </MuiCard>
+    </BaseCard>
   );
 };
 
-export function transformCardProps(props: CardProps): BaseProps {
-  return {};
-}
+const orientationStyle = {
+  vertical: {
+    maxWidth: 320,
+    "[class*='CardMedia']": {
+      width: "100%",
+      minHeight: 200,
+    },
+  },
+  horizontal: {
+    display: "flex",
+    maxWidth: 560,
+    "[class*='CardMedia']": {
+      flexShrink: 0,
+      width: 200,
+      alignSelf: "stretch",
+    },
+    "[class*='CardContent']": {
+      flexGrow: 1,
+    },
+    "[class*='CardContent']:last-child": {
+      paddingBottom: 4,
+    },
+  },
+};

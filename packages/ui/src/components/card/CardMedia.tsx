@@ -17,7 +17,6 @@ export function transformCardMediaProps(
   props: TransformToComponentProps<IAutoViewCardMediaProps>,
 ): BaseProps {
   return {
-    src: props.src,
     image: props.src,
   };
 }
