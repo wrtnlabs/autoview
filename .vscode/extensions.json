@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "tekumara.typos-vscode",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+  ]
+}
