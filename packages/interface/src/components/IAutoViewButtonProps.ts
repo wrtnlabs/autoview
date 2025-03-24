@@ -1,3 +1,5 @@
+import { tags } from "typia";
+
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { IAutoViewColor } from "../properties/theme";
 import { Arrayable } from "../utils/Arrayable";
@@ -10,4 +12,5 @@ export interface IAutoViewButtonProps
   label?: Arrayable<string>;
   startElement?: IAutoViewIconProps;
   endElement?: IAutoViewIconProps;
+  href?: string & tags.Format<"uri">;
 }
