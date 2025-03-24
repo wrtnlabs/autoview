@@ -8,5 +8,7 @@ export interface ListProps
   extends TransformToComponentProps<IAutoViewListProps> {}
 
 export const List = ({ childrenProps, ...props }: ListProps) => {
-  return <BaseList>{renderComponent(childrenProps)}</BaseList>;
+  return (
+    <BaseList style={props.style}>{renderComponent(childrenProps)}</BaseList>
+  );
 };

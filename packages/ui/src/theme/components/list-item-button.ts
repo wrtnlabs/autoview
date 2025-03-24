@@ -2,7 +2,9 @@ import { Components } from "@mui/material";
 
 const recipe: Components["MuiListItemButton"] = {
   styleOverrides: {
-    root: {},
+    root: {
+      gap: 12,
+    },
   },
 };
 

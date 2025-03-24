@@ -1,5 +1,5 @@
 import { IAutoViewCardFooterProps } from "@autoview/interface";
-import { CardActions as MuiCardActions } from "@mui/material";
+import { CardActions as BaseCardFooter } from "@mui/material";
 
 import { renderComponent } from "../../renderer";
 import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
@@ -11,6 +11,6 @@ export const CardFooter = (
   props: TransformToComponentProps<IAutoViewCardFooterProps>,
 ) => {
   return (
-    <MuiCardActions>{renderComponent(props.childrenProps)}</MuiCardActions>
+    <BaseCardFooter>{renderComponent(props.childrenProps)}</BaseCardFooter>
   );
 };

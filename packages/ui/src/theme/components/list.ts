@@ -2,7 +2,12 @@ import { Components } from "@mui/material";
 
 const recipe: Components["MuiList"] = {
   styleOverrides: {
-    root: {},
+    root: {
+      minWidth: 360,
+    },
+    subheader: {
+      width: "100%",
+    },
   },
 };
 

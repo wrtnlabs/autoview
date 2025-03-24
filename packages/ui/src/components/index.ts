@@ -10,6 +10,7 @@ import { Collapse } from "./collapse";
 import { Divider } from "./divider";
 import { Icon } from "./icon";
 import { Image } from "./image";
+import { List, ListItem, ListSubheader } from "./list";
 import { Stats } from "./stats";
 import { Text } from "./text";
 
@@ -30,4 +31,7 @@ export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
   CardFooter,
   CardHeader,
   CardMedia,
+  List,
+  ListItem,
+  ListSubheader,
 };

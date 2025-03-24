@@ -11,6 +11,13 @@ import MuiCardHeader from "./card-header";
 import MuiCardMedia from "./card-media";
 import MuiChip from "./chip";
 import MuiIconButton from "./icon-button";
+import MuiList from "./list";
+import MuiListItem from "./list-item";
+import MuiListItemAvatar from "./list-item-avatar";
+import MuiListItemButton from "./list-item-button";
+import MuiListItemIcon from "./list-item-icon";
+import MuiListItemText from "./list-item-text";
+import MuiListSubheader from "./list-subheader";
 import MuiTypography from "./typography";
 
 const components: Components<Omit<Theme, "components">> = {
@@ -25,6 +32,13 @@ const components: Components<Omit<Theme, "components">> = {
   MuiCardMedia,
   MuiChip,
   MuiIconButton,
+  MuiList,
+  MuiListItem,
+  MuiListItemAvatar,
+  MuiListItemButton,
+  MuiListItemIcon,
+  MuiListItemText,
+  MuiListSubheader,
   MuiTypography,
 };
 
