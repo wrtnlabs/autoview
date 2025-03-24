@@ -12,7 +12,7 @@ const stepCardVariants = cva("flex flex-col gap-3", {
   },
 });
 
-const stepDividerVariants = cva("", {
+const stepDividerVariants = cva("hidden md:block", {
   variants: {
     status: {
       complete: "border-[#86FFD9]",
