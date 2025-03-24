@@ -5,8 +5,13 @@ import { GithubIcon } from "../icons/Github";
 
 export function WelcomeSection() {
   return (
-    <div className="h-screen relative flex flex-col py-20 items-center justify-center gap-[86px] overflow-hidden md:h-fit md:justify-start">
-      <h1 className="text-[80px] font-semibold text-zinc-50 z-10">Autoview</h1>
+    <div className="h-screen relative flex flex-col py-20 items-center justify-center gap-[38px] overflow-hidden md:h-fit md:justify-start">
+      <section className="flex flex-col gap-4 z-10">
+        <h1 className="text-[80px] font-semibold text-zinc-50">AutoView</h1>
+        <p className="text-gray-300 text-xl text-center">
+          AI-Powered Instant UI Generation
+        </p>
+      </section>
       <Link
         href="https://github.com/wrtnlabs/autoview"
         target="_blank"
