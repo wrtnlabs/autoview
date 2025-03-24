@@ -11,3 +11,10 @@ export interface IAutoViewAvatarProps
   variant?: IAutoViewColor.IVariant | IAutoViewColor.IScale;
   size?: IAutoViewSize.IIconSize;
 }
+
+export interface IAutoViewAvatarGroupProps
+  extends IAutoViewComponentPropsBase<"AvatarGroup"> {
+  childrenProps?: IAutoViewAvatarProps[];
+  maxItems?: number;
+  totalItems?: number;
+}

@@ -20,7 +20,6 @@ type ChildrenProps<T extends IAutoViewCardProps.IOrientation> =
         | IAutoViewCardMediaProps
       >;
 
-// IAutoViewCardProps 인터페이스 정의
 export interface IAutoViewCardProps<
   T extends IAutoViewCardProps.IOrientation = IAutoViewCardProps.IOrientation,
 > extends IAutoViewComponentPropsBase<"Card"> {
@@ -28,7 +27,6 @@ export interface IAutoViewCardProps<
   childrenProps?: ChildrenProps<T>;
 }
 
-// FIXME:
 export interface IAutoViewCardHeaderProps
   extends IAutoViewComponentPropsBase<"CardHeader"> {
   title?: string;

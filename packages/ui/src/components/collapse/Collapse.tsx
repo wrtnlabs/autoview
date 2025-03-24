@@ -1,23 +1,17 @@
 import { IAutoViewCollapseProps } from "@autoview/interface";
-import {
-  Accordion as MuiCollapse,
-  AccordionDetails as MuiCollapseDetails,
-  AccordionSummary as MuiCollapseSummary,
-} from "@mui/material";
+import { Accordion as MuiCollapse } from "@mui/material";
 
 import { renderComponent } from "../../renderer";
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 
-export const Collapse = ({
-  header,
-  content,
-  expandIcon,
-}: IAutoViewCollapseProps) => {
+export interface CollapseProps
+  extends TransformToComponentProps<IAutoViewCollapseProps> {}
+
+export const Collapse = ({ header, content }: CollapseProps) => {
   return (
     <MuiCollapse>
-      <MuiCollapseSummary expandIcon={renderComponent(expandIcon)}>
-        {renderComponent(header)}
-      </MuiCollapseSummary>
-      <MuiCollapseDetails>{renderComponent(content)}</MuiCollapseDetails>
+      {renderComponent(header)}
+      {renderComponent(content)}
     </MuiCollapse>
   );
 };

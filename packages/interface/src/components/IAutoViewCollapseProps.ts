@@ -7,11 +7,11 @@ export interface IAutoViewCollapseProps
   extends IAutoViewComponentPropsBase<"Collapse"> {
   header: IAutoViewCollapseHeaderProps;
   content: IAutoViewCollapseContentProps;
-  toggleIcon?: IAutoViewIconProps;
 }
 
 export interface IAutoViewCollapseHeaderProps
   extends IAutoViewComponentPropsBase<"CollapseHeader"> {
+  toggleIcon?: IAutoViewIconProps;
   childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
 }
 

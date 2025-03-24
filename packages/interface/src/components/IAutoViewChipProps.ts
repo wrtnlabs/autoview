@@ -13,6 +13,12 @@ export interface IAutoViewChipProps
   variant?: IAutoViewChipProps.IVariant;
 }
 
+export interface IAutoViewChipGroupProps
+  extends IAutoViewComponentPropsBase<"ChipGroup"> {
+  childrenProps?: IAutoViewChipProps[];
+  maxItems?: number;
+}
+
 export namespace IAutoViewChipProps {
   export type IVariant = "filled" | "outlined";
 }

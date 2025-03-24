@@ -10,14 +10,7 @@ export interface IAutoViewCarouselProps
   effect?: "slide" | "fade";
   navControls?: boolean;
   indicators?: boolean;
-  childrenProps?: IAutoViewCarouselItemProps[];
+  childrenProps?: IAutoViewCardProps[];
 }
 
-export interface IAutoViewCarouselItemProps
-  extends IAutoViewComponentPropsBase<"CarouselItem"> {
-  childrenProps: IAutoViewCardProps;
-}
-
-export type IAutoViewCarouselComponentProps =
-  | IAutoViewCarouselProps
-  | IAutoViewCarouselItemProps;
+export type IAutoViewCarouselComponentProps = IAutoViewCarouselProps;
