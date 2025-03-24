@@ -11,4 +11,9 @@ export interface IAutoViewChipProps
   endElement?: IAutoViewAvatarProps | IAutoViewIconProps;
   color?: IAutoViewColor.IVariant | IAutoViewColor.IScale;
   size?: IAutoViewSize.IBase;
+  variant?: IAutoViewChipProps.IVariant;
+}
+
+export namespace IAutoViewChipProps {
+  export type IVariant = "filled" | "outlined";
 }

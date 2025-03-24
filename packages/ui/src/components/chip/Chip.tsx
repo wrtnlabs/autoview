@@ -18,6 +18,7 @@ export function transformChipProps(props: ChipProps): BaseProps {
     color: props.color ?? "primary",
     size: props.size ?? "small",
     clickable: false,
+    variant: props.variant ?? "filled",
     icon: (renderComponent(props.startElement) as ReactElement) ?? undefined,
     deleteIcon:
       (renderComponent(props.endElement) as ReactElement) ?? undefined,

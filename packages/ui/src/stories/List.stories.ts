@@ -51,6 +51,7 @@ export const ListWithSubheader: Story = {
           type: "Chip",
           label: "Active",
           color: "green",
+          variant: "outlined",
         },
       },
       {
@@ -67,6 +68,7 @@ export const ListWithSubheader: Story = {
           type: "Chip",
           label: "Pending",
           color: "orange",
+          variant: "outlined",
         },
       },
       {
@@ -83,6 +85,7 @@ export const ListWithSubheader: Story = {
           type: "Chip",
           label: "Rejected",
           color: "red",
+          variant: "outlined",
         },
       },
     ],
