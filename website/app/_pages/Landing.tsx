@@ -1,8 +1,25 @@
+"use client";
+
+import sdk from "@stackblitz/sdk";
+import { useEffect } from "react";
+
 import { Stepper } from "../_components/landing/Stepper";
 import { WelcomeSection } from "../_components/landing/WelcomeSection";
 import Footer from "../_components/layout/Footer";
 
 export default function LandingPage() {
+  useEffect(() => {
+    sdk.embedGithubProject(
+      "stackblitz-playground",
+      "wrtnlabs/autoview-stackblitz-playground",
+      {
+        openFile: [
+          "src/generate.ts,src/transform.ts,src/YourSchema.ts,src/env.ts,README.md",
+        ],
+      },
+    );
+  }, []);
+
   return (
     <div className="relative min-w-[320px] flex flex-col justify-center">
       <WelcomeSection />
@@ -10,9 +27,9 @@ export default function LandingPage() {
       {/* Playground */}
       <div className="p-2 rounded-4xl border border-zinc-700 flex flex-col gap-8 max-w-[1280px] mb-16 md:mb-52 mx-4 md:mx-20 lg:mx-auto">
         {/* @Shrimp */}
-        <iframe
-          className="aspect-video border border-zinc-700 rounded-3xl hidden md:block"
-          src="https://www.youtube.com/embed/eEPmx_JZCkY"
+        <div
+          id="stackblitz-playground"
+          className="aspect-video border border-zinc-700 rounded-3xl hidden md:block min-h-[700px]"
         />
 
         {/* Mobile Screen Mockup Container */}
