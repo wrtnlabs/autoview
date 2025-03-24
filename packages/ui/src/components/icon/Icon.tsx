@@ -8,10 +8,16 @@ import { transformIconProps } from "./transform";
 export interface IconProps
   extends TransformToComponentProps<IAutoViewIconProps> {}
 
-export const Icon = (props: IconProps) => {
+export const Icon = ({ size, color, ...props }: IconProps) => {
   try {
     return (
-      <Box style={props.style}>
+      <Box
+        sx={{
+          width: size ?? "1em",
+          height: size ?? "1em",
+          color: color ? `${color}.main` : undefined,
+        }}
+      >
         <FontAwesomeIcon icon={transformIconProps(props)} />
       </Box>
     );
@@ -25,11 +31,8 @@ const Box = styled("div")((props) => ({
   justifyContent: "center",
   alignItems: "center",
   flexShrink: "0",
-  color: "currentcolor",
+  color: props.color ?? "currentcolor",
   verticalAlign: "middle",
-  width: props.style?.width ?? "1em",
-  height: props.style?.height ?? "1em",
-  ...props.style,
   svg: {
     width: "100%",
     height: "100%",

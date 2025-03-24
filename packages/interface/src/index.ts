@@ -1,6 +1,7 @@
 export * from "./components";
 export * from "./properties/IAutoViewComponentProps";
 export * from "./properties/IAutoViewComponentPropsBase";
+export * from "./properties/theme";
 export * from "./services/IAutoViewCompilerMetadata";
 export * from "./services/IAutoViewCompilerProps";
 export * from "./services/IAutoViewCompilerResult";

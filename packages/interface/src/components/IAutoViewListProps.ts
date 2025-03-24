@@ -1,5 +1,6 @@
 import { tags } from "typia";
 
+import { IAutoViewPresentationComponentProps } from "../properties/IAutoViewComponentProps";
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { Arrayable } from "../utils";
 import { IAutoViewAvatarProps } from "./IAutoViewAvatarProps";
@@ -18,34 +19,7 @@ export interface IAutoViewListProps
   >;
 }
 
-export type IAutoViewListItemProps =
-  | ({
-      title?: string;
-      description?: string;
-      startElement?:
-        | IAutoViewAvatarProps
-        | IAutoViewBadgeProps
-        | IAutoViewChipProps
-        | IAutoViewIconButtonProps
-        | IAutoViewIconProps
-        | IAutoViewImageProps
-        | IAutoViewTextProps;
-      endElement?:
-        | IAutoViewAvatarProps
-        | IAutoViewBadgeProps
-        | IAutoViewButtonProps
-        | IAutoViewChipProps
-        | IAutoViewIconButtonProps
-        | IAutoViewIconProps
-        | IAutoViewImageProps
-        | IAutoViewTextProps;
-    } & IAutoViewComponentPropsBase<"ListItem">)
-  | ({
-      childrenProps?: IAutoViewListItemButtonProps;
-    } & IAutoViewComponentPropsBase<"ListItem">);
-
-export interface IAutoViewListItemButtonProps
-  extends IAutoViewComponentPropsBase<"ListItemButton"> {
+export type IAutoViewListItemProps = {
   title?: string;
   description?: string;
   startElement?:
@@ -56,7 +30,7 @@ export interface IAutoViewListItemButtonProps
     | IAutoViewIconProps
     | IAutoViewImageProps
     | IAutoViewTextProps;
-  endElement?:
+  endElement?: Arrayable<
     | IAutoViewAvatarProps
     | IAutoViewBadgeProps
     | IAutoViewButtonProps
@@ -64,12 +38,13 @@ export interface IAutoViewListItemButtonProps
     | IAutoViewIconButtonProps
     | IAutoViewIconProps
     | IAutoViewImageProps
-    | IAutoViewTextProps;
+    | IAutoViewTextProps
+  >;
   href?: string & tags.Format<"uri">;
-}
+} & IAutoViewComponentPropsBase<"ListItem">;
 
 export interface IAutoViewListSubheaderProps
   extends IAutoViewComponentPropsBase<"ListSubheader"> {
   stickToTop?: boolean;
-  childrenProps?: IAutoViewTextProps;
+  childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
 }

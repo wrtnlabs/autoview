@@ -18,7 +18,9 @@ export namespace IAutoViewColor {
     | "blue"
     | "indigo"
     | "violet"
-    | "pink";
+    | "pink"
+    | "gray"
+    | "darkGray";
 
   export type IHex = `#${string}`;
 }
