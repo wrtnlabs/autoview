@@ -1,5 +1,9 @@
 import { Components, Theme } from "@mui/material";
 
+import MuiAccordion from "./accordion";
+import MuiAccordionActions from "./accordion-actions";
+import MuiAccordionDetails from "./accordion-details";
+import MuiAccordionSummary from "./accordion-summary";
 import MuiAvatar from "./avatar";
 import MuiAvatarGroup from "./avatar-group";
 import MuiButton from "./button";
@@ -21,6 +25,10 @@ import MuiListSubheader from "./list-subheader";
 import MuiTypography from "./typography";
 
 const components: Components<Omit<Theme, "components">> = {
+  MuiAccordion,
+  MuiAccordionActions,
+  MuiAccordionDetails,
+  MuiAccordionSummary,
   MuiAvatar,
   MuiAvatarGroup,
   MuiButton,

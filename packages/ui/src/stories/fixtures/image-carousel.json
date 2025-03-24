@@ -3,85 +3,77 @@
   "autoPlay": true,
   "childrenProps": [
     {
-      "type": "CarouselItem",
-      "childrenProps": {
-        "type": "Card",
-        "childrenProps": [
-          {
-            "type": "CardMedia",
-            "src": "https://images.unsplash.com/photo-1732825892754-b2af908be8d9?q=80&w=2103&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "alt": "1"
-          },
-          {
-            "type": "CardContent",
-            "childrenProps": [
-              {
-                "type": "Text",
-                "variant": "subtitle1",
-                "content": "Slide 1"
-              },
-              {
-                "type": "Text",
-                "variant": "body1",
-                "content": "Slide 1",
-                "color": "gray"
-              }
-            ]
-          }
-        ]
-      }
+      "type": "Card",
+      "childrenProps": [
+        {
+          "type": "CardMedia",
+          "src": "https://images.unsplash.com/photo-1732825892754-b2af908be8d9?q=80&w=2103&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          "alt": "1"
+        },
+        {
+          "type": "CardContent",
+          "childrenProps": [
+            {
+              "type": "Text",
+              "variant": "subtitle1",
+              "content": "Slide 1"
+            },
+            {
+              "type": "Text",
+              "variant": "body1",
+              "content": "Slide 1",
+              "color": "gray"
+            }
+          ]
+        }
+      ]
     },
     {
-      "type": "CarouselItem",
-      "childrenProps": {
-        "type": "Card",
-        "childrenProps": [
-          {
-            "type": "CardMedia",
-            "src": "https://images.unsplash.com/photo-1731331443866-8f6f72027157?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "alt": "2"
-          },
-          {
-            "type": "CardContent",
-            "childrenProps": [
-              {
-                "type": "Text",
-                "variant": "subtitle1",
-                "content": "Slide 2"
-              },
-              {
-                "type": "Text",
-                "variant": "body1",
-                "content": "Slide 2",
-                "color": "gray"
-              }
-            ]
-          }
-        ]
-      }
+
+      "type": "Card",
+      "childrenProps": [
+        {
+          "type": "CardMedia",
+          "src": "https://images.unsplash.com/photo-1731331443866-8f6f72027157?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          "alt": "2"
+        },
+        {
+          "type": "CardContent",
+          "childrenProps": [
+            {
+              "type": "Text",
+              "variant": "subtitle1",
+              "content": "Slide 2"
+            },
+            {
+              "type": "Text",
+              "variant": "body1",
+              "content": "Slide 2",
+              "color": "gray"
+            }
+          ]
+        }
+      ]
     },
     {
-      "type": "CarouselItem",
-      "childrenProps": {
-        "type": "Card",
-        "childrenProps": [
-          {
-            "type": "CardMedia",
-            "src": "https://images.unsplash.com/photo-1741115815553-20c3c83ca6c0?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-            "alt": "3"
-          },
-          {
-            "type": "CardContent",
-            "childrenProps": [
-              {
-                "type": "Text",
-                "variant": "subtitle1",
-                "content": "Slide 3"
-              }
-            ]
-          }
-        ]
-      }
+      "type": "Card",
+      "childrenProps": [
+        {
+          "type": "CardMedia",
+          "src": "https://images.unsplash.com/photo-1741115815553-20c3c83ca6c0?q=80&w=3687&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+          "alt": "3"
+        },
+        {
+          "type": "CardContent",
+          "childrenProps": [
+            {
+              "type": "Text",
+              "variant": "subtitle1",
+              "content": "Slide 3"
+            }
+          ]
+        }
+      ]
     }
   ],
   "infinite": true,

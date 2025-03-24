@@ -12,7 +12,6 @@ export * from "./IAutoViewIconProps";
 export * from "./IAutoViewImageProps";
 export * from "./IAutoViewListProps";
 export * from "./IAutoViewMarkdownProps";
-export * from "./IAutoViewStepperProps";
 export * from "./IAutoViewTableProps";
 export * from "./IAutoViewTextProps";
 export * from "./IAutoViewTooltipProps";

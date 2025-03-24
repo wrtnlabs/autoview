@@ -7,10 +7,7 @@ import { DataListItem } from "./DataListItem";
 export interface DataListProps
   extends TransformToComponentProps<IAutoViewDataListProps> {}
 
-export const DataList = function ({
-  childrenProps = [],
-  ...props
-}: DataListProps) {
+export const DataList = function ({ childrenProps = [] }: DataListProps) {
   return (
     <Stack>
       {childrenProps.map((prop, index) => (

@@ -1,22 +1,19 @@
-import { IAutoViewCarouselItemProps } from "@autoview/interface";
 import { Box } from "@mui/material";
-
-import { renderComponent } from "../../renderer";
-import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
+import { PropsWithChildren } from "react";
 
 export interface CarouselItemProps
-  extends TransformToComponentProps<IAutoViewCarouselItemProps> {
-  gutter?: number;
-}
+  extends PropsWithChildren<{
+    gutter?: number;
+  }> {}
 
 export const CarouselItem = ({
-  childrenProps,
+  children,
   gutter,
   ...props
 }: CarouselItemProps) => {
   return (
     <Box sx={baseStyle} mx={`${gutter}px`} {...props}>
-      {renderComponent(childrenProps)}
+      {children}
     </Box>
   );
 };

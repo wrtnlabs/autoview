@@ -1,7 +1,6 @@
 import { IAutoViewListItemProps } from "@autoview/interface";
 import {
   ListItem as BaseListItem,
-  ListItemProps as BaseListItemProps,
   ListItemButton,
   ListItemText,
 } from "@mui/material";

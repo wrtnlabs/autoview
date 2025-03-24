@@ -2,7 +2,11 @@ import { Components } from "@mui/material";
 
 const recipe: Components["MuiAccordion"] = {
   styleOverrides: {
-    root: {},
+    root: {
+      width: 400,
+      borderRadius: 5,
+      boxShadow: "none",
+    },
   },
 };
 

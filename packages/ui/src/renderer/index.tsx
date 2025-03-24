@@ -12,7 +12,7 @@ export function renderComponent(
   }
 
   if (typeof props === "string") {
-    return <Fragment>{props}</Fragment>;
+    return <>{props}</>;
   }
 
   if (typeof props !== "object") {

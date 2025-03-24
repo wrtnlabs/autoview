@@ -1,39 +1,42 @@
 {
   "type": "Collapse",
   "header": {
-    "type": "Text",
-    "variant": "h5",
-    "content": "The cuttiest rodent in the world"
-  },
-  "content": [
-    {
-      "type": "Image",
-      "src": "https://images.unsplash.com/photo-1732704827525-4ffb9262eff6?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    },
-    {
-      "type": "Text",
-      "variant": "body1",
-      "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec auctor imperdiet feugiat. Aliquam tortor nisi, facilisis non mi id, sagittis consectetur sem. Donec porta, nibh nec placerat ultrices, urna odio sodales eros, a pharetra massa urna a purus. Quisque fringilla volutpat enim in posuere."
-    },
-    {
+    "type": "CollapseHeader",
+    "toggleIcon": {
       "type": "Icon",
-      "id": "arrow-down"
+      "id": "caret-down"
     },
-    {
-      "type": "Text",
-      "variant": "body1",
-      "content": "Ut vitae ante aliquet, bibendum dui sit amet, rutrum mauris. Mauris volutpat ac nulla nec sollicitudin. Nullam eleifend ligula eros, sed dictum nisi dictum convallis. Fusce ac varius nisi. Donec viverra semper iaculis. Sed est magna, convallis sed felis eu, dignissim varius enim."
-    }
-  ],
-  "style": {
-    "maxWidth": "500px"
+    "childrenProps": [
+      {
+        "type": "Text",
+        "variant": "h5",
+        "content": "The cuttiest rodent in the world"
+      }
+    ]
   },
-  "expandIcon": {
-    "type": "Icon",
-    "id": "arrow-down"
-  },
-  "collapse": {
-    "type": "Icon",
-    "id": "arrow-up"
+  "content": {
+    "type": "CollapseContent",
+    "childrenProps": [
+      {
+        "type": "Image",
+        "src": "https://images.unsplash.com/photo-1732704827525-4ffb9262eff6?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      },
+      {
+        "type": "Text",
+        "variant": "body1",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec auctor imperdiet feugiat. Aliquam tortor nisi, facilisis non mi id, sagittis consectetur sem. Donec porta, nibh nec placerat ultrices, urna odio sodales eros, a pharetra massa urna a purus. Quisque fringilla volutpat enim in posuere."
+      },
+      {
+        "type": "Button",
+        "variant": "contained",
+        "color": "green",
+        "label": "Button"
+      },
+      {
+        "type": "Text",
+        "variant": "body1",
+        "content": "Ut vitae ante aliquet, bibendum dui sit amet, rutrum mauris. Mauris volutpat ac nulla nec sollicitudin. Nullam eleifend ligula eros, sed dictum nisi dictum convallis. Fusce ac varius nisi. Donec viverra semper iaculis. Sed est magna, convallis sed felis eu, dignissim varius enim."
+      }
+    ]
   }
 }

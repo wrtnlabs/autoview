@@ -3,6 +3,7 @@ import { Box } from "@mui/material";
 import useEmblaCarousel from "embla-carousel-react";
 import { useState } from "react";
 
+import { renderComponent } from "../../renderer";
 import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 import { AutoViewCarouselContext } from "./CarouselContext";
 import { CarouselIndicators } from "./CarouselIndicators";
@@ -37,7 +38,9 @@ export const Carousel = ({
       <Box sx={baseStyle}>
         <CarouselContainer>
           {childrenProps.map((prop, index) => (
-            <CarouselItem key={index} {...prop} gutter={gutter} />
+            <CarouselItem key={index} gutter={gutter}>
+              {renderComponent(prop)}
+            </CarouselItem>
           ))}
         </CarouselContainer>
 
