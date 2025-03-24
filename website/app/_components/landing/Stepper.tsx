@@ -1,13 +1,13 @@
 import { STEPPER_CONTENTS } from "@/app/_constants/landing";
 import { cva } from "class-variance-authority";
 
-const stepCardVariants = cva("flex flex-col gap-3", {
+const stepCardVariants = cva("flex flex-col gap-3 relative", {
   variants: {
     status: {
-      complete: "bg-zinc-900",
+      complete: "md:bg-zinc-900",
       "in-progress":
-        "bg-zinc-900 bg-radial-[300%_300%_at_300%_50%] from-[#97F7E2] to-[#97F7E2]/0",
-      "not-started": "bg-[#030303]",
+        "md:bg-zinc-900 md:bg-radial-[300%_300%_at_300%_50%] md:from-[#97F7E2] md:to-[#97F7E2]/0",
+      "not-started": "md:bg-[#030303]",
     },
   },
 });
@@ -29,8 +29,9 @@ interface StepperProps {
 
 export const Stepper = ({ currentStep = -1 }: StepperProps) => {
   return (
-    <div className="flex flex-col rounded-3xl border overflow-hidden border-zinc-700 md:flex-row">
+    <div className="flex flex-col rounded-3xl pb-2 md:border overflow-hidden border-zinc-700 md:flex-row md:pb-0">
       {STEPPER_CONTENTS.map(({ title, description }, index) => {
+        const isLast = index === STEPPER_CONTENTS.length - 1;
         const status =
           index < currentStep
             ? "complete"
@@ -40,8 +41,15 @@ export const Stepper = ({ currentStep = -1 }: StepperProps) => {
 
         return (
           <div key={title + index} className={stepCardVariants({ status })}>
-            <div className="flex flex-col gap-3 px-8 pt-5 pb-2">
-              <p className="text-lg text-zinc-500">
+            <div className="absolute left-3.5 h-full top-8 md:hidden">
+              <div className="rounded-full border-2 bg-[#030303] border-[#86FFD9] w-2.5 h-2.5" />
+              <div
+                className={`w-px mx-auto ${isLast ? "bg-linear-to-t from-0 to-[#3F3F46] h-[calc(100%-12px)]" : "bg-[#3F3F46] h-full"}`}
+              />
+            </div>
+
+            <div className="flex md:flex-col gap-3 px-8 pt-5 pb-2">
+              <p className="text-lg text-zinc-500 hidden md:block">
                 {(index + 1).toString().padStart(2, "0")}
               </p>
               <h3 className="text-2xl text-zinc-50">{title}</h3>
