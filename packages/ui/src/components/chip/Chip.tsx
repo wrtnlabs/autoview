@@ -20,7 +20,5 @@ export function transformChipProps(props: ChipProps): BaseProps {
     clickable: false,
     variant: props.variant ?? "filled",
     icon: (renderComponent(props.startElement) as ReactElement) ?? undefined,
-    deleteIcon:
-      (renderComponent(props.endElement) as ReactElement) ?? undefined,
   };
 }

@@ -1,33 +1,22 @@
-import { styled } from "@mui/material";
+import { Box, Stack } from "@mui/material";
 import { type PropsWithChildren } from "react";
 
-import { AutoViewCarouselContext } from "./Context";
+import { AutoViewCarouselContext } from "./CarouselContext";
 
 export const CarouselContainer = ({ children }: PropsWithChildren<{}>) => {
   const { carouselRef } =
     AutoViewCarouselContext.useAutoViewCarouselContextContext();
 
   return (
-    <RefContainer ref={carouselRef}>
-      <Container>{children}</Container>
-    </RefContainer>
+    <Box
+      position="relative"
+      overflow="hidden"
+      borderRadius="5px"
+      ref={carouselRef}
+    >
+      <Stack flexDirection="row" alignItems="stretch">
+        {children}
+      </Stack>
+    </Box>
   );
 };
-
-const RefContainer = styled("div")`
-  position: relative;
-  overflow: hidden;
-  width: 500px;
-  height: 400px;
-`;
-
-const Container = styled("div")`
-  display: flex;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-position: center;
-    object-fit: cover;
-  }
-`;

@@ -1,5 +1,8 @@
 import { IAutoViewTextProps } from "@autoview/interface";
-import { Typography as MuiTypography, TypographyOwnProps } from "@mui/material";
+import {
+  TypographyProps as BaseProps,
+  Typography as BaseText,
+} from "@mui/material";
 
 import { renderComponent } from "../../renderer";
 import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
@@ -7,32 +10,32 @@ import { TransformToComponentProps } from "../../utils/TransformToComponentProps
 export interface TextProps
   extends TransformToComponentProps<IAutoViewTextProps> {}
 
-export const Text = ({ content, lineClamp = null, ...props }: TextProps) => {
+export const Text = ({ content, lineClamp, ...props }: TextProps) => {
   return (
-    <MuiTypography
+    <BaseText
       sx={lineClamp ? lineClampFactory(lineClamp) : {}}
       {...transformTextProps(props)}
     >
       {renderComponent(content)}
-    </MuiTypography>
+    </BaseText>
   );
 };
 
 export function transformTextProps(
-  props: Partial<TextProps>,
-): TypographyOwnProps {
+  props: Omit<TextProps, "content">,
+): BaseProps {
   return {
     variant: props.variant,
     color: props.color,
   };
 }
 
-function lineClampFactory(line: number = 1) {
+function lineClampFactory(line: number) {
   return {
     overflow: "hidden",
     textOverflow: "ellipsis",
     display: "-webkit-box",
-    WebkitLineClamp: line, // 표시할 최대 줄 수
+    WebkitLineClamp: line,
     WebkitBoxOrient: "vertical",
   };
 }

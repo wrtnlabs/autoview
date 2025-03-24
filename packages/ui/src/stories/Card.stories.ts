@@ -107,6 +107,8 @@ export const VerticalCardWithFooter: Story = {
           {
             type: "Button",
             label: "팔로우",
+            color: "blue",
+            variant: "outlined",
             startElement: {
               type: "Icon",
               id: "plus",

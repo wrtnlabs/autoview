@@ -5,18 +5,12 @@ import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 export interface IAutoViewBadgeProps
   extends IAutoViewComponentPropsBase<"Badge"> {
-  count: number;
-
+  count?: number;
+  color?: IAutoViewColor.IVariant | IAutoViewColor.IScale;
   childrenProps: IAutoViewAvatarProps | IAutoViewIconProps;
-
-  color?: IAutoViewColor.IVariant | IAutoViewColor.IScale | IAutoViewColor.IHex;
-
   maxCount?: number;
-
   showZero?: boolean;
-
   dot?: boolean;
-
   offset?: {
     vertical?: "top" | "bottom";
     horizontal?: "left" | "right";

@@ -6,8 +6,13 @@ import { TransformToComponentProps } from "../../utils/TransformToComponentProps
 export interface AvatarProps
   extends TransformToComponentProps<IAutoViewAvatarProps> {}
 
-export const Avatar = (props: AvatarProps) => {
-  return <BaseAvatar {...transformAvatarProps(props)} />;
+export const Avatar = ({ size = 24, ...props }: AvatarProps) => {
+  return (
+    <BaseAvatar
+      sx={{ width: size, height: size, flexShrink: 0 }}
+      {...transformAvatarProps(props)}
+    />
+  );
 };
 
 export function transformAvatarProps(props: AvatarProps): BaseProps {

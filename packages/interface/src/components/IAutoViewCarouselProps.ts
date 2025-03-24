@@ -1,12 +1,12 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { IAutoViewCardProps } from "./IAutoViewCardProps";
-import { IAutoViewImageProps } from "./IAutoViewImageProps";
 
 export interface IAutoViewCarouselProps
   extends IAutoViewComponentPropsBase<"Carousel"> {
   autoPlay?: boolean;
   interval?: number;
   infinite?: boolean;
+  gutter?: number;
   effect?: "slide" | "fade";
   navControls?: boolean;
   indicators?: boolean;
@@ -15,7 +15,7 @@ export interface IAutoViewCarouselProps
 
 export interface IAutoViewCarouselItemProps
   extends IAutoViewComponentPropsBase<"CarouselItem"> {
-  childrenProps: IAutoViewCardProps | IAutoViewImageProps;
+  childrenProps: IAutoViewCardProps;
 }
 
 export type IAutoViewCarouselComponentProps =

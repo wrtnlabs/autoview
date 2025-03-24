@@ -8,7 +8,6 @@ export interface IAutoViewChipProps
   extends IAutoViewComponentPropsBase<"Chip"> {
   label: string;
   startElement?: IAutoViewAvatarProps | IAutoViewIconProps;
-  endElement?: IAutoViewAvatarProps | IAutoViewIconProps;
   color?: IAutoViewColor.IVariant | IAutoViewColor.IScale;
   size?: IAutoViewSize.IBase;
   variant?: IAutoViewChipProps.IVariant;

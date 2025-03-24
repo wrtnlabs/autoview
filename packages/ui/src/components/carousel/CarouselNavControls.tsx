@@ -1,8 +1,8 @@
-import { IconButton, styled } from "@mui/material";
+import { IconButton, Stack } from "@mui/material";
 import { useCallback } from "react";
 
 import { Icon } from "../icon";
-import { AutoViewCarouselContext } from "./Context";
+import { AutoViewCarouselContext } from "./CarouselContext";
 
 export const CarouselNavControls = () => {
   const { carouselApi, setSelectedIndex } =
@@ -21,22 +21,21 @@ export const CarouselNavControls = () => {
   }, [carouselApi]);
 
   return (
-    <Controls>
-      <IconButton onClick={goToPrev}>
-        <Icon type="Icon" id="chevron-left" />
+    <Stack flexDirection="row" sx={baseStyle} justifyContent="space-between">
+      <IconButton size="small" onClick={goToPrev}>
+        <Icon type="Icon" id="chevron-left" size={16} />
       </IconButton>
-      <IconButton onClick={goToNext}>
-        <Icon type="Icon" id="chevron-right" />
+      <IconButton size="small" onClick={goToNext}>
+        <Icon type="Icon" id="chevron-right" size={16} />
       </IconButton>
-    </Controls>
+    </Stack>
   );
 };
 
-const Controls = styled("div")`
-  position: absolute;
-  top: 50%;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  transform: translateY(-50%);
-`;
+const baseStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  width: `calc(100% + ${28 * 2 + 8 * 2}px)`,
+  transform: "translate(-50%, -50%)",
+};

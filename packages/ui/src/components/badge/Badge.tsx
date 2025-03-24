@@ -1,29 +1,30 @@
 import { IAutoViewBadgeProps } from "@autoview/interface";
-import { BadgeOwnProps, Badge as MuiBadge } from "@mui/material";
+import { Badge as BaseBadge, BadgeProps as BaseProps } from "@mui/material";
 
 import { renderComponent } from "../../renderer";
 import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 
-export const Badge = (
-  props: TransformToComponentProps<IAutoViewBadgeProps>,
-) => {
+export interface BadgeProps
+  extends TransformToComponentProps<IAutoViewBadgeProps> {}
+
+export const Badge = (props: BadgeProps) => {
   return (
-    <MuiBadge {...transformBadgeProps(props)}>
+    <BaseBadge {...transformBadgeProps(props)}>
       {renderComponent(props.childrenProps)}
-    </MuiBadge>
+    </BaseBadge>
   );
 };
 
 export function transformBadgeProps(
   props: TransformToComponentProps<IAutoViewBadgeProps>,
-): BadgeOwnProps {
+): BaseProps {
   return {
     anchorOrigin: {
       vertical: props.offset?.vertical ?? "top",
       horizontal: props.offset?.horizontal ?? "right",
     },
     badgeContent: props.count,
-    color: "primary",
+    color: props.color ?? "green",
     max: props.maxCount,
     showZero: props.showZero,
     variant: props.dot ? "dot" : "standard",
