@@ -5,23 +5,22 @@ import { IAutoViewIconProps } from "./IAutoViewIconProps";
 
 export interface IAutoViewCollapseProps
   extends IAutoViewComponentPropsBase<"Collapse"> {
-  header: Arrayable<IAutoViewPresentationComponentProps>;
-  content: Arrayable<IAutoViewPresentationComponentProps>;
-
-  expandIcon?: IAutoViewIconProps;
-  expandIconPosition?: IAutoViewCollapseProps.IIconPosition;
+  header: IAutoViewCollapseHeaderProps;
+  content: IAutoViewCollapseContentProps;
+  toggleIcon?: IAutoViewIconProps;
 }
 
-export namespace IAutoViewCollapseProps {
-  export interface IHeader {
-    // FIXME:
-    childrenProps?: IAutoViewPresentationComponentProps[];
-  }
-
-  export interface IContent {
-    // FIXME:
-    childrenProps?: IAutoViewPresentationComponentProps[];
-  }
-
-  export type IIconPosition = "start" | "end";
+export interface IAutoViewCollapseHeaderProps
+  extends IAutoViewComponentPropsBase<"CollapseHeader"> {
+  childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
 }
+
+export interface IAutoViewCollapseContentProps
+  extends IAutoViewComponentPropsBase<"CollapseContent"> {
+  childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
+}
+
+export type IAutoViewCollapseComponentProps =
+  | IAutoViewCollapseProps
+  | IAutoViewCollapseHeaderProps
+  | IAutoViewCollapseContentProps;

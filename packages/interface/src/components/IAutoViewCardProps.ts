@@ -69,3 +69,10 @@ export interface IAutoViewCardFooterProps
 export namespace IAutoViewCardProps {
   export type IOrientation = "vertical" | "horizontal";
 }
+
+export type IAutoViewCardComponentProps =
+  | IAutoViewCardContentProps
+  | IAutoViewCardFooterProps
+  | IAutoViewCardHeaderProps
+  | IAutoViewCardMediaProps
+  | IAutoViewCardProps;

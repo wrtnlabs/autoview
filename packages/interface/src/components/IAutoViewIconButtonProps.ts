@@ -1,12 +1,13 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
 import { IAutoViewColor } from "../properties/theme";
+import { IAutoViewSize } from "../properties/theme/IAutoViewSize";
+import { AutoViewIconName } from "../typings/AutoViewIconName";
+import { IAutoViewTooltipProps } from "./IAutoViewTooltipProps";
 
 export interface IAutoViewIconButtonProps
   extends IAutoViewComponentPropsBase<"IconButton"> {
-  // FIXME: 버튼 variant와 일치
-  variant?: IAutoViewColor.IVariant;
-  // FIXME: 버튼 size와 일치
-  size?: string;
-  // FIXME:
-  tooltip?: any;
+  icon?: AutoViewIconName;
+  variant?: IAutoViewColor.IVariant | IAutoViewColor.IScale;
+  size?: IAutoViewSize.IBase;
+  tooltip?: IAutoViewTooltipProps;
 }

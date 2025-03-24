@@ -2,21 +2,15 @@ import {
   IAutoViewAvatarProps,
   IAutoViewBadgeProps,
   IAutoViewButtonProps,
-  IAutoViewCardContentProps,
-  IAutoViewCardFooterProps,
-  IAutoViewCardHeaderProps,
-  IAutoViewCardMediaProps,
-  IAutoViewCardProps,
-  IAutoViewCarouselProps,
+  IAutoViewCardComponentProps,
+  IAutoViewCarouselComponentProps,
   IAutoViewChipProps,
-  IAutoViewCollapseProps,
+  IAutoViewCollapseComponentProps,
   IAutoViewDividerProps,
   IAutoViewIconButtonProps,
   IAutoViewIconProps,
   IAutoViewImageProps,
-  IAutoViewListItemProps,
-  IAutoViewListProps,
-  IAutoViewListSubheaderProps,
+  IAutoViewListComponentProps,
   IAutoViewMarkdownProps,
   IAutoViewStatsProps,
   IAutoViewStepperProps,
@@ -24,40 +18,26 @@ import {
   IAutoViewTooltipProps,
 } from "../components";
 
-export type IAutoViewCommonComponentProps =
+export type IAutoViewPresentationComponentProps =
   | IAutoViewAvatarProps
-  | IAutoViewChipProps
-  | IAutoViewButtonProps
-  | IAutoViewDividerProps
   | IAutoViewBadgeProps
-  | IAutoViewIconProps
+  | IAutoViewButtonProps
+  | IAutoViewChipProps
+  | IAutoViewDividerProps
   | IAutoViewIconButtonProps
+  | IAutoViewIconProps
   | IAutoViewImageProps
   | IAutoViewMarkdownProps
   | IAutoViewStatsProps
   | IAutoViewTextProps
   | IAutoViewTooltipProps;
 
-export type IAutoViewCardComponentProps =
-  | IAutoViewCardContentProps
-  | IAutoViewCardFooterProps
-  | IAutoViewCardHeaderProps
-  | IAutoViewCardMediaProps
-  | IAutoViewCardProps;
-
-export type IAutoViewListComponentProps =
-  | IAutoViewListItemProps
-  | IAutoViewListProps
-  | IAutoViewListSubheaderProps;
-
 export type IAutoViewContainerComponentProps =
   | IAutoViewCardComponentProps
-  | IAutoViewCarouselProps
-  | IAutoViewCollapseProps
+  | IAutoViewCarouselComponentProps
+  | IAutoViewCollapseComponentProps
   | IAutoViewListComponentProps
   | IAutoViewStepperProps;
-
-export type IAutoViewPresentationComponentProps = IAutoViewCommonComponentProps;
 
 export type IAutoViewComponentProps =
   | IAutoViewPresentationComponentProps

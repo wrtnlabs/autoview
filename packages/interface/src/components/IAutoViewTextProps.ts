@@ -6,11 +6,8 @@ import { IAutoViewIconProps } from "./IAutoViewIconProps";
 export interface IAutoViewTextProps
   extends IAutoViewComponentPropsBase<"Text"> {
   variant?: IAutoViewTextProps.IVariant;
-
   color?: IAutoViewTextProps.IColor;
-
-  lineClamp?: number | null;
-
+  lineClamp?: number;
   content: Arrayable<string | IAutoViewIconProps>;
 }
 

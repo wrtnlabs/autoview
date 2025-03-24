@@ -48,3 +48,8 @@ export interface IAutoViewListSubheaderProps
   stickToTop?: boolean;
   childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
 }
+
+export type IAutoViewListComponentProps =
+  | IAutoViewListItemProps
+  | IAutoViewListProps
+  | IAutoViewListSubheaderProps;
