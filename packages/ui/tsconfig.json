@@ -3,6 +3,8 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "moduleResolution": "node",
+    "declaration": true,
+    "resolveJsonModule": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

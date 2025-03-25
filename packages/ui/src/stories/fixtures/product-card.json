@@ -1,0 +1,81 @@
+{
+  "type": "Card",
+  "childrenProps": [
+    {
+      "type": "CardHeader",
+      "startElement": {
+        "type": "Avatar",
+        "src": "https://images.unsplash.com/photo-1732919258508-3fd53a8007b6?q=80&w=2646&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        "name": "hi",
+        "size": 40
+      },
+      "title": "Imo Kwon",
+      "description": "Art director",
+      "endElement": {
+        "type": "Icon",
+        "id": "home"
+      }
+    },
+    {
+      "type": "CardMedia",
+      "src": "https://images.unsplash.com/photo-1732919258508-3fd53a8007b6?q=80&w=2646&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "style": {
+        "width": "100%",
+        "height": "500px"
+      }
+    },
+    {
+      "type": "CardContent",
+      "childrenProps": [
+        {
+          "type": "Text",
+          "variant": "h5",
+          "content": "Product Name"
+        },
+        {
+          "type": "Badge",
+          "count": 11,
+          "maxCount": 10,
+          "dot": true,
+          "offset": {
+            "vertical": "bottom",
+            "horizontal": "left"
+          },
+          "childrenProps": {
+            "type": "Chip",
+            "label": "Tag1",
+            "color": "red",
+
+            "startElement": {
+              "type": "Avatar",
+              "src": "https://images.unsplash.com/photo-1732919258508-3fd53a8007b6?q=80&w=2646&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+              "size": 16
+            }
+          }
+        },
+        {
+          "type": "Chip",
+          "label": "Tag2",
+          "color": "violet",
+          "startElement": {
+            "type": "Icon",
+            "id": "arrow-right"
+          }
+        },
+        {
+          "type": "Text",
+          "variant": "body2",
+          "content": "왜 여기는 되고 다른 곳에서는 안 되는지 이해할 길이 없구먼"
+        }
+      ]
+    },
+    {
+      "type": "CardFooter",
+      "childrenProps": {
+        "type": "Text",
+        "variant": "h5",
+        "content": "$400"
+      }
+    }
+  ]
+}

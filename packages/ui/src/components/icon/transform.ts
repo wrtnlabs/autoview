@@ -3,9 +3,13 @@ import { IconName } from "@fortawesome/fontawesome-svg-core";
 import * as freeBrandIcons from "@fortawesome/free-brands-svg-icons";
 import * as freeSolidIcons from "@fortawesome/free-solid-svg-icons";
 
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
+
 const freeIcons = { ...freeBrandIcons, ...freeSolidIcons };
 
-export function transformIconProps(props: IAutoViewIconProps) {
+export function transformIconProps(
+  props: TransformToComponentProps<IAutoViewIconProps>,
+) {
   const { id } = props;
   const camelCaseId = convertToCamelCase(id);
   return freeIcons[camelCaseId] as freeBrandIcons.IconDefinition;

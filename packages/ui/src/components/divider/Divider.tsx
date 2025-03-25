@@ -1,8 +1,17 @@
 import { IAutoViewDividerProps } from "@autoview/interface";
-import { Divider as MuiDivider } from "@mui/material";
+import { DividerOwnProps, Divider as MuiDivider } from "@mui/material";
 
-import { transformDividerProps } from "./transform";
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
 
-export const Divider = (props: IAutoViewDividerProps) => {
+export interface DividerProps
+  extends TransformToComponentProps<IAutoViewDividerProps> {}
+
+export const Divider = (props: DividerProps) => {
   return <MuiDivider {...transformDividerProps(props)} />;
 };
+
+export function transformDividerProps(props: DividerProps): DividerOwnProps {
+  return {
+    orientation: props.orientation ?? "horizontal",
+  };
+}

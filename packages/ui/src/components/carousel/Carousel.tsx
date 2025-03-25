@@ -1,33 +1,58 @@
 import { IAutoViewCarouselProps } from "@autoview/interface";
+import { Box } from "@mui/material";
 import useEmblaCarousel from "embla-carousel-react";
+import { useState } from "react";
 
-import { CarouselContainer as Container } from "./Container";
-import { AutoViewCarouselContext } from "./Context";
-import { CarouselControls as Controls } from "./Controls";
-import { CarouselIndicators as Indicators } from "./Indicators";
-import { CarouselSlide as Slide } from "./Slide";
+import { renderComponent } from "../../renderer";
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
+import { AutoViewCarouselContext } from "./CarouselContext";
+import { CarouselIndicators } from "./CarouselIndicators";
+import { CarouselItem } from "./CarouselItem";
+import { CarouselNavControls } from "./CarouselNavControls";
+import { CarouselContainer } from "./Container";
 import { transformCarouselProps } from "./transform";
 
-export const Carousel = (props: IAutoViewCarouselProps) => {
-  const { items, showArrows, indicators } = props;
+export interface CarouselProps
+  extends TransformToComponentProps<IAutoViewCarouselProps> {}
+
+export const Carousel = ({
+  childrenProps = [],
+  navControls,
+  indicators,
+  gutter = 16,
+  ...props
+}: CarouselProps) => {
   const [options, plugins] = transformCarouselProps(props);
   const [carouselRef, carouselApi] = useEmblaCarousel(options, plugins);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   return (
     <AutoViewCarouselContext.AutoViewCarouselContextProvider
       value={{
         carouselRef,
         carouselApi,
+        selectedIndex,
+        setSelectedIndex,
       }}
     >
-      <Container>
-        {items.map((item, index) => (
-          <Slide key={index} {...item} />
-        ))}
-      </Container>
+      <Box sx={baseStyle}>
+        <CarouselContainer>
+          {childrenProps.map((prop, index) => (
+            <CarouselItem key={index} gutter={gutter}>
+              {renderComponent(prop)}
+            </CarouselItem>
+          ))}
+        </CarouselContainer>
 
-      {showArrows && <Controls />}
-      {indicators && <Indicators items={items} />}
+        {navControls && <CarouselNavControls />}
+      </Box>
+      {indicators && <CarouselIndicators length={childrenProps.length} />}
     </AutoViewCarouselContext.AutoViewCarouselContextProvider>
   );
+};
+
+const baseStyle = {
+  position: "relative",
+  width: "100%",
+  maxWidth: 320,
 };

@@ -1,31 +1,48 @@
 import { IAutoViewComponentProps } from "@autoview/interface";
 
+import { Avatar, AvatarGroup } from "./avatar";
 import { Badge } from "./badge";
+import { Button } from "./button";
+import { Card, CardContent, CardFooter, CardHeader, CardMedia } from "./card";
 import { Carousel } from "./carousel";
-import { Chip } from "./chip";
-import { Collapse } from "./collapse";
+import { Chip, ChipGroup } from "./chip";
+import { Collapse, CollapseContent, CollapseHeader } from "./collapse";
+import { DataList, DataListItem } from "./data-list";
 import { Divider } from "./divider";
-import { GridList } from "./grid-list";
 import { Icon } from "./icon";
+import { IconButton } from "./icon-button";
 import { Image } from "./image";
-import { ImageAvatar } from "./image-avatar";
-import { LetterAvatar } from "./letter-avatar";
-import { StackedList } from "./stacked-list";
-import { Stats } from "./stats";
-import { Typography } from "./typography";
+import { List, ListItem, ListSubheader } from "./list";
+import { Markdown } from "./markdown";
+import { Text } from "./text";
+import { Tooltip } from "./tooltip";
 
 export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
+  Avatar,
+  AvatarGroup,
   Badge,
+  Button,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardMedia,
   Carousel,
   Chip,
+  ChipGroup,
   Collapse,
+  CollapseContent,
+  CollapseHeader,
+  DataList,
+  DataListItem,
   Divider,
-  GridList,
   Icon,
+  IconButton,
   Image,
-  ImageAvatar,
-  LetterAvatar,
-  StackedList,
-  Stats,
-  Typography,
+  List,
+  ListItem,
+  ListSubheader,
+  Markdown,
+  Text,
+  Tooltip,
 };

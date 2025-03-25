@@ -1,12 +1,21 @@
-import { IAutoViewComponentProps } from "@autoview/interface";
+import { Arrayable, IAutoViewComponentProps } from "@autoview/interface";
+import { type ReactNode } from "react";
 import { Fragment } from "react/jsx-runtime";
 
 import { componentMap } from "../components";
 
 export function renderComponent(
-  props: IAutoViewComponentProps | IAutoViewComponentProps[],
-) {
-  if (props == null || typeof props !== "object") {
+  props: Arrayable<undefined | null | string | IAutoViewComponentProps>,
+): ReactNode {
+  if (props == null) {
+    return null;
+  }
+
+  if (typeof props === "string") {
+    return <>{props}</>;
+  }
+
+  if (typeof props !== "object") {
     return null;
   }
 

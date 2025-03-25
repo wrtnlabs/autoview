@@ -3,17 +3,19 @@ import { EmblaOptionsType, EmblaPluginType } from "embla-carousel";
 import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";
 
+import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
+
 export function transformCarouselOptions(
-  props: IAutoViewCarouselProps,
+  props: TransformToComponentProps<IAutoViewCarouselProps>,
 ): EmblaOptionsType {
   return {
     loop: props.infinite ?? true,
-    duration: props.interval ?? 3000,
+    duration: props.interval ?? 25,
   };
 }
 
 export function transformCarouselPlugins(
-  props: IAutoViewCarouselProps,
+  props: TransformToComponentProps<IAutoViewCarouselProps>,
 ): EmblaPluginType[] {
   const autoPlay = props.autoPlay ? Autoplay() : null;
   const fade = props.effect === "fade" ? Fade() : null;
@@ -22,7 +24,7 @@ export function transformCarouselPlugins(
 }
 
 export function transformCarouselProps(
-  props: IAutoViewCarouselProps,
+  props: TransformToComponentProps<IAutoViewCarouselProps>,
 ): [EmblaOptionsType, EmblaPluginType[]] {
   return [transformCarouselOptions(props), transformCarouselPlugins(props)];
 }

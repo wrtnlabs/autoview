@@ -1,2 +1,2 @@
 export * from "./Chip";
-export * from "./transform";
+export * from "./ChipGroup";
