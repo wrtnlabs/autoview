@@ -26,6 +26,7 @@ export namespace AutoViewProgrammer {
             true,
           ),
         ),
+        ts.NodeFlags.Namespace,
       ),
       ...AutoViewTransformerProgrammer.write(ctx, inputSchema),
     ];
