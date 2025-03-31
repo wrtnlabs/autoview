@@ -3,7 +3,14 @@ import { IAutoViewComponentProps } from "@autoview/interface";
 import { Avatar, AvatarGroup } from "./avatar";
 import { Badge } from "./badge";
 import { Button } from "./button";
-import { Card, CardContent, CardFooter, CardHeader, CardMedia } from "./card";
+import {
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardMedia,
+  HorizontalCard,
+  VerticalCard,
+} from "./card";
 import { Carousel } from "./carousel";
 import { Chip, ChipGroup } from "./chip";
 import { Collapse, CollapseContent, CollapseHeader } from "./collapse";
@@ -22,7 +29,6 @@ export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
   AvatarGroup,
   Badge,
   Button,
-  Card,
   CardContent,
   CardFooter,
   CardHeader,
@@ -36,6 +42,7 @@ export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
   DataList,
   DataListItem,
   Divider,
+  HorizontalCard,
   Icon,
   IconButton,
   Image,
@@ -45,4 +52,5 @@ export const componentMap: Record<IAutoViewComponentProps["type"], any> = {
   Markdown,
   Text,
   Tooltip,
+  VerticalCard,
 };

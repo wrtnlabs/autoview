@@ -10,21 +10,21 @@ import { IAutoViewIconButtonProps } from "./IAutoViewIconButtonProps";
 import { IAutoViewIconProps } from "./IAutoViewIconProps";
 import { IAutoViewTextProps } from "./IAutoViewTextProps";
 
-type ChildrenProps<T extends IAutoViewCardProps.IOrientation> =
-  T extends "horizontal"
-    ? Arrayable<IAutoViewCardMediaProps | IAutoViewCardContentProps>
-    : Arrayable<
-        | IAutoViewCardHeaderProps
-        | IAutoViewCardContentProps
-        | IAutoViewCardFooterProps
-        | IAutoViewCardMediaProps
-      >;
+export interface IAutoViewHorizontalCardProps
+  extends IAutoViewComponentPropsBase<"HorizontalCard"> {
+  childrenProps?: Arrayable<
+    IAutoViewCardMediaProps | IAutoViewCardContentProps
+  >;
+}
 
-export interface IAutoViewCardProps<
-  T extends IAutoViewCardProps.IOrientation = IAutoViewCardProps.IOrientation,
-> extends IAutoViewComponentPropsBase<"Card"> {
-  orientation?: T;
-  childrenProps?: ChildrenProps<T>;
+export interface IAutoViewVerticalCardProps
+  extends IAutoViewComponentPropsBase<"VerticalCard"> {
+  childrenProps?: Arrayable<
+    | IAutoViewCardHeaderProps
+    | IAutoViewCardContentProps
+    | IAutoViewCardFooterProps
+    | IAutoViewCardMediaProps
+  >;
 }
 
 export interface IAutoViewCardHeaderProps
@@ -64,13 +64,10 @@ export interface IAutoViewCardFooterProps
   childrenProps?: Arrayable<IAutoViewPresentationComponentProps>;
 }
 
-export namespace IAutoViewCardProps {
-  export type IOrientation = "vertical" | "horizontal";
-}
-
 export type IAutoViewCardComponentProps =
   | IAutoViewCardContentProps
   | IAutoViewCardFooterProps
   | IAutoViewCardHeaderProps
   | IAutoViewCardMediaProps
-  | IAutoViewCardProps;
+  | IAutoViewVerticalCardProps
+  | IAutoViewHorizontalCardProps;

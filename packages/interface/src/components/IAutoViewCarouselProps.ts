@@ -1,5 +1,8 @@
 import { IAutoViewComponentPropsBase } from "../properties/IAutoViewComponentPropsBase";
-import { IAutoViewCardProps } from "./IAutoViewCardProps";
+import {
+  IAutoViewHorizontalCardProps,
+  IAutoViewVerticalCardProps,
+} from "./IAutoViewCardProps";
 
 export interface IAutoViewCarouselProps
   extends IAutoViewComponentPropsBase<"Carousel"> {
@@ -10,7 +13,9 @@ export interface IAutoViewCarouselProps
   effect?: "slide" | "fade";
   navControls?: boolean;
   indicators?: boolean;
-  childrenProps?: IAutoViewCardProps[];
+  childrenProps?: Array<
+    IAutoViewVerticalCardProps | IAutoViewHorizontalCardProps
+  >;
 }
 
 export type IAutoViewCarouselComponentProps = IAutoViewCarouselProps;
