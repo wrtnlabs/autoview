@@ -19,6 +19,13 @@ export namespace IAutoViewAgentProvider {
     model: OpenAI.ChatModel;
 
     /**
+     * Whether to enable thinking.
+     *
+     * Set this `true` if your model supports thinking, and you want to use thinking.
+     */
+    isThinkingEnabled: boolean;
+
+    /**
      * Options for the request.
      */
     options?: OpenAI.RequestOptions | undefined;

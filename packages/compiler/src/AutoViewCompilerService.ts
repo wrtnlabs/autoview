@@ -15,6 +15,12 @@ export class AutoViewCompilerService implements IAutoViewCompilerService {
     this.compiler_ = new AutoViewCompiler(props);
   }
 
+  public generateComponentDto(): string {
+    if (this.compiler_ === null)
+      throw new Error("You have not initialized yet.");
+    return this.compiler_.generateComponentDto();
+  }
+
   public generateBoilerplate(): string {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");

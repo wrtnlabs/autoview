@@ -1,4 +1,5 @@
 export * from "./components";
+export * from "./icons";
 export * from "./properties/IAutoViewComponentProps";
 export * from "./properties/IAutoViewComponentPropsBase";
 export * from "./properties/theme";

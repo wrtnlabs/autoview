@@ -3,14 +3,18 @@ import { renderPrompt } from "../../core/Prompt";
 export interface PromptContext {
   input_schema: unknown;
   output_schema: unknown;
-  component_plan: string;
+  initial_analysis: string;
+  data_exploration: string;
+  ideas: string;
+  reasoning: string;
+  planning: string;
   boilerplate: string;
 }
 
 const rawPrompt = `
-You are an expert TypeScript developer specializing in data visualization. Your task is to create a function that transforms input data into a format suitable for visualization based on given schemas and a component plan.
+You are an expert TypeScript developer specializing in data visualization. Your task is to create a function that transforms input data into a format suitable for visualization based on given schemas and a thinking process for visual planning.
 
-First, review the following input schema, output schema, and component plan:
+First, review the following input schema, output schema:
 
 <input_schema>
 {{input_schema}}
@@ -20,15 +24,33 @@ First, review the following input schema, output schema, and component plan:
 {{output_schema}}
 </output_schema>
 
-<component_plan>
-{{component_plan}}
-</component_plan>
+Now, you will be given thinking process for visual planning:
+
+<initial_analysis>
+{{initial_analysis}}
+</initial_analysis>
+
+<data_exploration>
+{{data_exploration}}
+</data_exploration>
+
+<ideas>
+{{ideas}}
+</ideas>
+
+<reasoning>
+{{reasoning}}
+</reasoning>
+
+<planning>
+{{planning}}
+</planning>
 
 Before writing the function, analyze the entire process in detail. Use the following steps to guide your reasoning:
 
 1. Analyze the input schema and identify key data structures.
 2. Examine the output schema and determine the required transformations.
-3. Study the component plan and break down the visualization requirements.
+3. Study the thinking process for visual planning and break down the visualization requirements.
 4. Plan the data transformation process, including any necessary aggregations, filtering, or calculations.
 5. Consider potential edge cases and how to handle them.
 6. Outline the main steps the function will need to perform.

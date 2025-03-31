@@ -3,35 +3,39 @@ import { ChatGptTypeChecker } from "@samchon/openapi";
 import typia from "typia";
 
 import { CodeGeneration, PlanGeneration } from "../passes";
-import { IComponentWithoutValueValidator } from "../passes/common";
 import { IAutoViewAgentProvider } from "../structures";
 
 export namespace AutoViewAgent {
   export interface IResult {
     /**
-     * (Intermediate reasoning) The plan of the visualization.
+     * (Intermediate reasoning) Initial analysis of the input schema.
      */
-    visualizationPlanning: string;
+    initialAnalysis: string;
+
     /**
-     * (Intermediate reasoning) React-like component plan.
+     * (Intermediate reasoning) Data exploration of the input schema.
      */
-    componentPlan: string;
+    dataExploration: string;
+
     /**
-     * (Intermediate reasoning) The analysis of the input schema and data exploration.
+     * (Intermediate reasoning) Ideas of visualizations.
+     */
+    ideas: string;
+
+    /**
+     * (Intermediate reasoning) Reasoning of the visualization.
+     */
+    reasoning: string;
+
+    /**
+     * (Intermediate reasoning) Planning of the visualization.
+     */
+    planning: string;
+
+    /**
+     * (Intermediate reasoning) The analysis of the input schema and thinking process of the visualization planning.
      */
     analysis: string;
-
-    /**
-     * The transform function that takes input value (which follows the input schema) and returns the output value (which follows the {@link IAutoViewComponentProps}).
-     */
-    // transform: Function;
-
-    /**
-     * The random function that generates random data which follows the {@link IAutoViewComponentProps}.
-     *
-     * It is useful to quickly test your generated component.
-     */
-    // random: Function;
 
     /**
      * The TypeScript code of the transform function.
@@ -42,86 +46,55 @@ export namespace AutoViewAgent {
   }
 
   export async function execute(
-    provider: IAutoViewAgentProvider,
+    planProvider: IAutoViewAgentProvider,
+    codeProvider: IAutoViewAgentProvider,
     inputSchema: unknown,
   ): Promise<IResult> {
-    const components = listComponents();
-
     const planGenerationAgent = new PlanGeneration.Agent();
+    await planGenerationAgent.open();
+
     const codeGenerationAgent = new CodeGeneration.Agent();
     await codeGenerationAgent.open();
 
     const plan = await planGenerationAgent.execute({
-      provider,
+      provider: planProvider,
       inputSchema,
-      components,
+      componentSchema: componentSchema(),
     });
 
     try {
       const { analysis, transformTsCode } = await codeGenerationAgent.execute({
-        provider,
+        provider: codeProvider,
         inputSchema,
         componentSchema: componentSchema(),
-        componentPlan: plan.component,
+        initialAnalysis: plan.initial_analysis,
+        dataExploration: plan.data_exploration,
+        ideas: plan.ideas,
+        reasoning: plan.reasoning,
+        planning: plan.planning,
       });
 
       return {
-        visualizationPlanning: plan.visualizationPlanning,
-        componentPlan: plan.component,
+        initialAnalysis: plan.initial_analysis,
+        dataExploration: plan.data_exploration,
+        ideas: plan.ideas,
+        reasoning: plan.reasoning,
+        planning: plan.planning,
         analysis,
-        // transform,
-        // random,
         transformTsCode,
       };
     } finally {
+      try {
+        await planGenerationAgent.close();
+      } catch (error) {
+        console.warn(`failed to close plan generation agent: ${error}`);
+      }
       try {
         await codeGenerationAgent.close();
       } catch (error) {
         console.warn(`failed to close code generation agent: ${error}`);
       }
     }
-  }
-
-  function listComponents(): IComponentWithoutValueValidator[] {
-    const components: IComponentWithoutValueValidator[] = [];
-
-    ChatGptTypeChecker.visit({
-      closure(schema) {
-        if (!ChatGptTypeChecker.isReference(schema)) {
-          return;
-        }
-
-        if (
-          !schema.$ref.startsWith("#/$defs/IAutoView") ||
-          !schema.$ref.endsWith("Props") ||
-          schema.$ref.includes(".")
-        ) {
-          return;
-        }
-
-        const name = schema.$ref.split("/").pop();
-
-        if (!name) {
-          return;
-        }
-
-        const definition = PARAMETERS.$defs[name];
-
-        if (!definition) {
-          return;
-        }
-
-        components.push({
-          name,
-          description: definition.description ?? definition.title ?? "",
-          componentSchema: definition as Record<string, unknown>,
-        });
-      },
-      $defs: PARAMETERS.$defs,
-      schema: PARAMETERS.properties["props"]!,
-    });
-
-    return components;
   }
 
   function componentSchema(): unknown {

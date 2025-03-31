@@ -1,9 +1,8 @@
 import { renderPrompt } from "../../core/Prompt";
-import { IComponent } from "../common";
 
 export interface PromptContext {
   input_schema: unknown;
-  atomic_components: Omit<IComponent, "valueValidator">[];
+  component_types: string;
 }
 
 const rawPrompt = `
@@ -12,8 +11,14 @@ You are an AI assistant specialized in data visualization. Your task is to analy
 First, carefully review the following available visual components:
 
 <visual_components>
-{{atomic_components}}
+{{component_types}}
 </visual_components>
+
+Above TypeScript interfaces define the properties of each visual component. You should identify each interfaces and deduce how and when to use components, including intent of components.
+
+Since all of the component properties are under \`IAutoView.\` namespace, you should access the properties by prefixing them with \`IAutoView.\`.
+
+Also, all of the component properties are postfixed with \`Props\` suffix. For example, \`IAutoView.IAutoViewTextProps\` is the properties of \`IAutoView.IAutoViewText\` component. In this case, \`IAutoView.IAutoViewText\` must be used as a component name, inside your final result.
 
 Now, examine the JSON schema for the data you'll be visualizing:
 
@@ -23,9 +28,9 @@ Now, examine the JSON schema for the data you'll be visualizing:
 
 Your goal is to analyze this information and provide insights about the data representation, along with a React-like component that uses only the given visual components.
 
-Begin your analysis by considering the following points. Wrap your analysis inside <visualization_planning> tags:
+Begin your analysis by considering the following points. Each section should be wrapped inside dedicated tags (will be instructed later):
 
-1. Initial Schema and Component Analysis:
+1. Initial Schema and Component Analysis (within <initial_analysis> tag):
    - List each field in the JSON schema with the following properties:
      - Field name
      - Data type
@@ -36,7 +41,7 @@ Begin your analysis by considering the following points. Wrap your analysis insi
    - Note any data transformations that might be necessary for effective visualization.
    - Review the list of available components and their potential uses.
 
-2. Data Exploration:
+2. Data Exploration (within <data_exploration> tag):
    - For each field in the JSON schema:
      - Describe its potential use in visualization
      - Rank the visual components by their suitability for this field
@@ -45,65 +50,48 @@ Begin your analysis by considering the following points. Wrap your analysis insi
    - Brainstorm potential data sources based on the schema
    - Consider any data transformations that might be necessary for visualization
 
-3. Visualization Ideas:
+3. Visualization Ideas (within <ideas> tag):
    - List at least three different ways the data could be visualized
    - For each idea:
      - Explain why it might be effective and any potential drawbacks
      - Score the idea on a scale of 1-10 for effectiveness
      - Score the idea on a scale of 1-10 for feasibility
 
-4. Reasoning:
+4. Reasoning (within <reasoning> tag):
    - Summarize your thought process
    - Justify your final visualization choice
    - Explain any assumptions you've made about the data and its source
 
-5. Component Planning:
+5. Component Planning (within <planning> tag):
    - Plan the structure of your React-like component
    - Determine which transform functions, if any, will be necessary
    - Decide how to compose the visual components within your JSX-like structure
 
-Based on your analysis, create a React-like component that visualizes the data using the provided visual components. Your component should follow this structure:
-
-1. Define a function named \`Visualized\` that takes a \`data\` parameter.
-2. Include any necessary transform functions within the component.
-3. Use the transform functions to process the data if needed.
-4. Return a JSX-like structure that composes the visual components.
-
 Here's an example of the desired output structure:
 
-<visualization_planning>
-[Step by step reasoning and planning process, including all steps of 1 to 4 described above]
-</visualization_planning>
+<initial_analysis>
+[Step by step analysis of the input schema and available components]
+</initial_analysis>
 
-<component>
-export function Visualized(data: any) {
-  function transform1(input: any) {
-    // Transform logic here
-    return transformedData;
-  }
+<data_exploration>
+[Step by step analysis of the data exploration]
+</data_exploration>
 
-  function transform2(input: any) {
-    // Another transform function if needed
-    return transformedData;
-  }
+<ideas>
+[Step by step analysis of the visualization ideas]
+</ideas>
 
-  const processedData1 = transform1(data);
-  const processedData2 = transform2(processedData1);
+<reasoning>
+[Step by step reasoning of the final visualization choice]
+</reasoning>
 
-  return (
-    <>
-      <VisualComponent1 data={processedData2.someField}>
-        <VisualComponent2 value={processedData2.anotherField} />
-      </VisualComponent1>
-      <VisualComponent3 data={processedData2.yetAnotherField} />
-    </>
-  );
-}
-</component>
+<planning>
+[Step by step planning of the final visualization plan]
+</planning>
 
-Remember to use only the visual components provided in the <visual_components> section. Do not introduce any HTML elements or other React components that weren't specified.
+Ensure that you include all of the above sections in your response, wrapped inside dedicated tags. If you don't, your response will be rejected.
 
-Now, please provide your analysis and the resulting React-like component based on the given JSON schema and visual components.
+Now, please provide your analysis process and final plan.
 `;
 
 export function prompt(context: PromptContext): string {

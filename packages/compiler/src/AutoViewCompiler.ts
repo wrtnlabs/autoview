@@ -35,6 +35,20 @@ export class AutoViewCompiler {
     };
   }
 
+  public generateComponentDto(): string {
+    const ctx: IAutoViewProgrammerContext = {
+      importer: new AutoViewImportProgrammer(),
+    };
+    const statements: ts.Statement[] = AutoViewProgrammer.writeComponentOnly(
+      ctx,
+      this.componentComponents,
+      this.componentSchema,
+    );
+    const source: string = FilePrinter.write({ statements });
+
+    return source;
+  }
+
   public generateBoilerplate(): string {
     const ctx: IAutoViewProgrammerContext = {
       importer: new AutoViewImportProgrammer(),

@@ -1,4 +1,4 @@
-import { IAutoViewIconProps } from "@autoview/interface";
+import { IAutoViewIconProps, findIconId } from "@autoview/interface";
 import { IconName } from "@fortawesome/fontawesome-svg-core";
 import * as freeBrandIcons from "@fortawesome/free-brands-svg-icons";
 import * as freeSolidIcons from "@fortawesome/free-solid-svg-icons";
@@ -11,7 +11,7 @@ export function transformIconProps(
   props: TransformToComponentProps<IAutoViewIconProps>,
 ) {
   const { id } = props;
-  const camelCaseId = convertToCamelCase(id);
+  const camelCaseId = convertToCamelCase(findIconId(id));
   return freeIcons[camelCaseId] as freeBrandIcons.IconDefinition;
 }
 

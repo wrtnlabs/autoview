@@ -18,17 +18,7 @@ export class Agent implements AgentBase<Input, Output> {
         `${__dirname}/../../../../compiler/lib/worker/index.js`,
       );
     } else {
-      const scriptText = await fetch(
-        // "https://wrtnlabs.github.io/autoview/compiler/worker.js",
-        "/worker.js",
-      ).then((r) => r.text());
-      console.log("Fetched script:", scriptText); // 스크립트 내용 확인
-
-      const blob = new Blob([scriptText], { type: "application/javascript" });
-      const blobUrl = URL.createObjectURL(blob);
-      console.log("Blob URL:", blobUrl); // Blob URL 확인
-
-      await this.worker.connect(blobUrl);
+      await this.worker.connect("/worker.js");
     }
   }
 
@@ -57,7 +47,11 @@ export class Agent implements AgentBase<Input, Output> {
     const systemPrompt = prompt({
       input_schema: input.inputSchema,
       output_schema: input.componentSchema,
-      component_plan: input.componentPlan,
+      initial_analysis: input.initialAnalysis,
+      data_exploration: input.dataExploration,
+      ideas: input.ideas,
+      reasoning: input.reasoning,
+      planning: input.planning,
       boilerplate,
     });
 
@@ -74,7 +68,9 @@ export class Agent implements AgentBase<Input, Output> {
               content: systemPrompt,
             },
           ],
-          reasoning_effort: "medium",
+          ...(input.provider.isThinkingEnabled
+            ? { reasoning_effort: "medium" }
+            : {}),
         },
         input.provider.options,
       );

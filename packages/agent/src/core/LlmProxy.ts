@@ -152,6 +152,7 @@ async function createCompletion(
 export class LlmProxy<I, O> {
   private textHandler: TextHandler<I, O> | undefined;
   private readonly toolHandlers: Map<string, ToolHandler<I, O>> = new Map();
+  private errorCallback: ((error: LlmFailure) => void) | undefined;
 
   /**
    * Set the text handler.
@@ -177,6 +178,11 @@ export class LlmProxy<I, O> {
    */
   withToolHandler(name: string, handler: ToolHandler<I, O>): this {
     this.toolHandlers.set(name, handler);
+    return this;
+  }
+
+  withErrorCallback(callback: (error: LlmFailure) => void): this {
+    this.errorCallback = callback;
     return this;
   }
 
@@ -245,6 +251,10 @@ export class LlmProxy<I, O> {
           outputs.push(await this.textHandler(input, content));
         } catch (error: unknown) {
           if (error instanceof LlmFailure) {
+            if (this.errorCallback != null) {
+              this.errorCallback(error);
+            }
+
             lastFailure = {
               llmOutput: completion,
               llmFailure: error.getMessage(),
@@ -294,6 +304,10 @@ export class LlmProxy<I, O> {
             );
           } catch (error: unknown) {
             if (error instanceof LlmFailure) {
+              if (this.errorCallback != null) {
+                this.errorCallback(error);
+              }
+
               lastFailure = {
                 llmOutput: completion,
                 llmFailure: error.getMessage(),

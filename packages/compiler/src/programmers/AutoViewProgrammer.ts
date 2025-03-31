@@ -33,6 +33,29 @@ export namespace AutoViewProgrammer {
     return [...ctx.importer.toStatements(() => ""), ...statements];
   };
 
+  export const writeComponentOnly = (
+    ctx: IAutoViewProgrammerContext,
+    componentComponents: OpenApi.IComponents,
+    componentSchema: OpenApi.IJsonSchema,
+  ): ts.Statement[] => {
+    const statements: ts.Statement[] = [
+      ts.factory.createModuleDeclaration(
+        undefined,
+        ts.factory.createIdentifier("IAutoView"),
+        ts.factory.createModuleBlock(
+          AutoViewDtoProgrammer.write(
+            ctx,
+            componentComponents,
+            componentSchema,
+            true,
+          ),
+        ),
+        ts.NodeFlags.Namespace,
+      ),
+    ];
+    return [...ctx.importer.toStatements(() => ""), ...statements];
+  };
+
   export const writeWithoutDto = (
     ctx: IAutoViewProgrammerContext,
     inputComponents: OpenApi.IComponents,

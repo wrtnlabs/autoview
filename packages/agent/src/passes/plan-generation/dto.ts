@@ -1,13 +1,15 @@
 import { IAutoViewAgentProvider } from "../../structures";
-import { IComponentWithoutValueValidator } from "../common";
 
 export interface Input {
   provider: IAutoViewAgentProvider;
   inputSchema: unknown;
-  components: IComponentWithoutValueValidator[];
+  componentSchema: unknown;
 }
 
 export interface Output {
-  visualizationPlanning: string;
-  component: string;
+  initial_analysis: string;
+  data_exploration: string;
+  ideas: string;
+  reasoning: string;
+  planning: string;
 }

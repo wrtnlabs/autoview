@@ -4,12 +4,14 @@ export interface Input {
   provider: IAutoViewAgentProvider;
   inputSchema: unknown;
   componentSchema: unknown;
-  componentPlan: string;
+  initialAnalysis: string;
+  dataExploration: string;
+  ideas: string;
+  reasoning: string;
+  planning: string;
 }
 
 export interface Output {
   analysis: string;
-  // transform: Function;
-  // random: Function;
   transformTsCode: string;
 }

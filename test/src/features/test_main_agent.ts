@@ -1,4 +1,4 @@
-import { IAutoViewAgentProvider, MainAgent } from "@autoview/agent";
+import { AutoViewAgent, IAutoViewAgentProvider } from "@autoview/agent";
 import OpenAI from "openai";
 
 import { TestGlobal } from "../TestGlobal";
@@ -7,9 +7,18 @@ export async function test_main_agent(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
-  const provider: IAutoViewAgentProvider.IChatGpt = {
+  const planProvider: IAutoViewAgentProvider.IChatGpt = {
     type: "chatgpt",
     model: "o3-mini-2025-01-31",
+    isThinkingEnabled: true,
+    api: new OpenAI({
+      apiKey: TestGlobal.env.CHATGPT_API_KEY,
+    }),
+  };
+  const codeProvider: IAutoViewAgentProvider.IChatGpt = {
+    type: "chatgpt",
+    model: "o3-mini-2025-01-31",
+    isThinkingEnabled: true,
     api: new OpenAI({
       apiKey: TestGlobal.env.CHATGPT_API_KEY,
     }),
@@ -183,7 +192,11 @@ export async function test_main_agent(): Promise<void> {
       },
     },
   };
-  const { transformTsCode } = await MainAgent.execute(provider, schema);
+  const { transformTsCode } = await AutoViewAgent.execute(
+    planProvider,
+    codeProvider,
+    schema,
+  );
 
   console.log(transformTsCode);
 }
