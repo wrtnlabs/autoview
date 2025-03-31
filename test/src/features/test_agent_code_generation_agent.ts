@@ -3,7 +3,10 @@ import {
   IAutoViewAgentProvider,
   PlanGeneration,
 } from "@autoview/agent";
-import { IAutoViewComponentProps } from "@autoview/interface";
+import {
+  IAutoViewCompilerMetadata,
+  IAutoViewComponentProps,
+} from "@autoview/interface";
 import { ChatGptTypeChecker } from "@samchon/openapi";
 import OpenAI from "openai";
 import typia from "typia";
@@ -34,19 +37,25 @@ export async function test_agent_code_generation_agent(): Promise<void> {
   const planGenerationAgent = new PlanGeneration.Agent();
   await planGenerationAgent.open();
 
-  const plan = await planGenerationAgent.execute({
-    provider: planProvider,
-    inputSchema: schema,
-    componentSchema: componentSchema(),
-  });
-
   const codeGenerationAgent = new CodeGeneration.Agent();
   await codeGenerationAgent.open();
 
+  const components = componentSchema();
+
+  const schemaAsCompilerMetadata: IAutoViewCompilerMetadata = {
+    $defs: schema["$defs"] as any,
+    schema: schema as any,
+  };
+
+  const plan = await planGenerationAgent.execute({
+    provider: planProvider,
+    inputSchema: schemaAsCompilerMetadata,
+    componentSchema: components,
+  });
   const code = await codeGenerationAgent.execute({
     provider: codeProvider,
-    inputSchema: schema,
-    componentSchema: componentSchema(),
+    inputSchema: schemaAsCompilerMetadata,
+    componentSchema: components,
     initialAnalysis: plan.initial_analysis,
     dataExploration: plan.data_exploration,
     ideas: plan.ideas,
@@ -69,14 +78,14 @@ export async function test_agent_code_generation_agent(): Promise<void> {
   }
 }
 
-function componentSchema(): unknown {
+function componentSchema(): IAutoViewCompilerMetadata {
   if (!ChatGptTypeChecker.isObject(PARAMETERS)) {
     throw new Error("PARAMETERS is not an object.");
   }
 
   return {
-    ...PARAMETERS.properties["props"],
     $defs: PARAMETERS.$defs,
+    schema: PARAMETERS.properties["props"]!,
   };
 }
 
@@ -259,4 +268,4 @@ const schema = {
       required: ["parent", "id", "code", "parent_id", "name", "created_at"],
     },
   },
-} as const;
+};

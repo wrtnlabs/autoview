@@ -33,14 +33,8 @@ export class Agent implements AgentBase<Input, Output> {
 
     const service = this.worker.getDriver();
     await service.initialize({
-      inputMetadata: {
-        $defs: (input.inputSchema as any)["$defs"],
-        schema: input.inputSchema as any,
-      },
-      componentMetadata: {
-        $defs: (input.componentSchema as any)["$defs"],
-        schema: input.componentSchema as any,
-      },
+      inputMetadata: input.inputSchema,
+      componentMetadata: input.componentSchema,
     });
 
     const boilerplate = await service.generateBoilerplate();

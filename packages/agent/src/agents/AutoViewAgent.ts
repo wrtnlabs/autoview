@@ -1,4 +1,7 @@
-import { IAutoViewComponentProps } from "@autoview/interface";
+import {
+  IAutoViewCompilerMetadata,
+  IAutoViewComponentProps,
+} from "@autoview/interface";
 import { ChatGptTypeChecker } from "@samchon/openapi";
 import typia from "typia";
 
@@ -48,7 +51,7 @@ export namespace AutoViewAgent {
   export async function execute(
     planProvider: IAutoViewAgentProvider,
     codeProvider: IAutoViewAgentProvider,
-    inputSchema: unknown,
+    inputSchema: IAutoViewCompilerMetadata,
   ): Promise<IResult> {
     const planGenerationAgent = new PlanGeneration.Agent();
     await planGenerationAgent.open();
@@ -56,17 +59,19 @@ export namespace AutoViewAgent {
     const codeGenerationAgent = new CodeGeneration.Agent();
     await codeGenerationAgent.open();
 
+    const components = componentSchema();
+
     const plan = await planGenerationAgent.execute({
       provider: planProvider,
       inputSchema,
-      componentSchema: componentSchema(),
+      componentSchema: components,
     });
 
     try {
       const { analysis, transformTsCode } = await codeGenerationAgent.execute({
         provider: codeProvider,
         inputSchema,
-        componentSchema: componentSchema(),
+        componentSchema: components,
         initialAnalysis: plan.initial_analysis,
         dataExploration: plan.data_exploration,
         ideas: plan.ideas,
@@ -97,14 +102,14 @@ export namespace AutoViewAgent {
     }
   }
 
-  function componentSchema(): unknown {
+  function componentSchema(): IAutoViewCompilerMetadata {
     if (!ChatGptTypeChecker.isObject(PARAMETERS)) {
       throw new Error("PARAMETERS is not an object.");
     }
 
     return {
-      ...PARAMETERS.properties["props"],
       $defs: PARAMETERS.$defs,
+      schema: PARAMETERS.properties["props"]!,
     };
   }
 
