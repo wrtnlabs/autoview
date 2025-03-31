@@ -434,13 +434,13 @@ importers:
         specifier: ^2.4.1
         version: 2.4.1(react@19.0.0)
       react:
-        specifier: 19.0.0
+        specifier: ^19.0.0
         version: 19.0.0
       react-dom:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
       react-markdown:
-        specifier: ^9.0.3
+        specifier: ^9.0.0
         version: 9.1.0(@types/react@19.0.11)(react@19.0.0)
       react-use:
         specifier: ^17.6.0

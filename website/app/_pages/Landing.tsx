@@ -14,7 +14,7 @@ export default function LandingPage() {
       "wrtnlabs/autoview-stackblitz-playground",
       {
         openFile: [
-          "src/generate.ts,src/transform.ts,src/YourSchema.ts,src/env.ts",
+          "src/generate.ts,src/transformYourSchema.ts,src/YourSchema.ts,src/env.ts",
         ],
       },
     );
