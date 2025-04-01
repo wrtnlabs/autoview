@@ -1,6 +1,6 @@
 import {
   CodeGeneration,
-  IAutoViewAgentVendor,
+  IAutoViewVendor,
   PlanGeneration,
 } from "@autoview/agent";
 import {
@@ -17,14 +17,14 @@ export async function test_agent_code_generation_agent(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
-  const planProvider: IAutoViewAgentVendor = {
+  const planProvider: IAutoViewVendor = {
     model: "o3-mini-2025-01-31",
     isThinkingEnabled: true,
     api: new OpenAI({
       apiKey: TestGlobal.env.CHATGPT_API_KEY,
     }),
   };
-  const codeProvider: IAutoViewAgentVendor = {
+  const codeProvider: IAutoViewVendor = {
     model: "o3-mini-2025-01-31",
     isThinkingEnabled: true,
     api: new OpenAI({

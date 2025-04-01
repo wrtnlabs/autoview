@@ -5,7 +5,7 @@ import OpenAI from "openai";
  *
  * It defines the LLM vendor and the model to be used.
  */
-export interface IAutoViewAgentVendor {
+export interface IAutoViewVendor {
   /**
    * OpenAI API instance.
    *
@@ -16,7 +16,7 @@ export interface IAutoViewAgentVendor {
    * ```typescript
    * import OpenAI from "openai";
    *
-   * const vendor: IAutoViewAgentVendor = {
+   * const vendor: IAutoViewVendor = {
    *   api: new OpenAI(...), // Provide your own OpenAI instance
    *   ...
    * };

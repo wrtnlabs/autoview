@@ -1,4 +1,4 @@
-import { IAutoViewAgentVendor, PlanGeneration } from "@autoview/agent";
+import { IAutoViewVendor, PlanGeneration } from "@autoview/agent";
 import {
   IAutoViewCompilerMetadata,
   IAutoViewComponentProps,
@@ -13,7 +13,7 @@ export async function test_agent_plan_generation_agent(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
-  const vendor: IAutoViewAgentVendor = {
+  const vendor: IAutoViewVendor = {
     model: "o3-mini-2025-01-31",
     isThinkingEnabled: true,
     api: new OpenAI({

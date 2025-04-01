@@ -1,1 +1,1 @@
-export * from "./IAutoViewAgentVendor";
+export * from "./IAutoViewVendor";

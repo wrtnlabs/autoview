@@ -1,9 +1,9 @@
 import { IAutoViewCompilerMetadata } from "@autoview/interface";
 
-import { IAutoViewAgentVendor } from "../../structures";
+import { IAutoViewVendor } from "../../structures";
 
 export interface Input {
-  vendor: IAutoViewAgentVendor;
+  vendor: IAutoViewVendor;
   inputSchema: IAutoViewCompilerMetadata;
   componentSchema: IAutoViewCompilerMetadata;
 }
