@@ -6,9 +6,29 @@ import { ChatGptTypeChecker } from "@samchon/openapi";
 import typia from "typia";
 
 import { CodeGeneration, PlanGeneration } from "../passes";
-import { IAutoViewAgentProvider } from "../structures";
+import { IAutoViewAgentVendor } from "../structures";
 
 export namespace AutoViewAgent {
+  /**
+   * Configuration of the {@link AutoViewAgent}.
+   */
+  export interface IConfig {
+    /**
+     * The vendor of the entire agent pipeline.
+     */
+    vendor: IAutoViewAgentVendor;
+
+    /**
+     * The vendor of the code generation.
+     *
+     * If not provided, the same vendor as the `vendor` will be used.
+     */
+    codeVendor?: IAutoViewAgentVendor;
+  }
+
+  /**
+   * Result of the {@link AutoViewAgent}.
+   */
   export interface IResult {
     /**
      * (Intermediate reasoning) Initial analysis of the input schema.
@@ -47,12 +67,27 @@ export namespace AutoViewAgent {
      */
     transformTsCode: string;
   }
+}
 
-  export async function execute(
-    planProvider: IAutoViewAgentProvider,
-    codeProvider: IAutoViewAgentProvider,
+/**
+ * The `AutoViewAgent`.
+ *
+ * This is the class that orchestrates the entire agent pipeline.
+ */
+export class AutoViewAgent {
+  constructor(private config: AutoViewAgent.IConfig) {}
+
+  /**
+   * Execute the agent pipeline.
+   *
+   * It generates the TypeScript code of the transform function from the input schema into the AutoView component.
+   *
+   * @param inputSchema - The input schema to be transformed.
+   * @returns The result of the agent pipeline.
+   */
+  async generate(
     inputSchema: IAutoViewCompilerMetadata,
-  ): Promise<IResult> {
+  ): Promise<AutoViewAgent.IResult> {
     const planGenerationAgent = new PlanGeneration.Agent();
     await planGenerationAgent.open();
 
@@ -62,14 +97,14 @@ export namespace AutoViewAgent {
     const components = componentSchema();
 
     const plan = await planGenerationAgent.execute({
-      provider: planProvider,
+      provider: this.config.vendor,
       inputSchema,
       componentSchema: components,
     });
 
     try {
       const { analysis, transformTsCode } = await codeGenerationAgent.execute({
-        provider: codeProvider,
+        provider: this.config.codeVendor ?? this.config.vendor,
         inputSchema,
         componentSchema: components,
         initialAnalysis: plan.initial_analysis,
@@ -101,25 +136,25 @@ export namespace AutoViewAgent {
       }
     }
   }
+}
 
-  function componentSchema(): IAutoViewCompilerMetadata {
-    if (!ChatGptTypeChecker.isObject(PARAMETERS)) {
-      throw new Error("PARAMETERS is not an object.");
-    }
-
-    return {
-      $defs: PARAMETERS.$defs,
-      schema: PARAMETERS.properties["props"]!,
-    };
+function componentSchema(): IAutoViewCompilerMetadata {
+  if (!ChatGptTypeChecker.isObject(PARAMETERS)) {
+    throw new Error("PARAMETERS is not an object.");
   }
 
-  const PARAMETERS = typia.llm.parameters<
-    {
-      props: IAutoViewComponentProps;
-    },
-    "chatgpt",
-    {
-      reference: true;
-    }
-  >();
+  return {
+    $defs: PARAMETERS.$defs,
+    schema: PARAMETERS.properties["props"]!,
+  };
 }
+
+const PARAMETERS = typia.llm.parameters<
+  {
+    props: IAutoViewComponentProps;
+  },
+  "chatgpt",
+  {
+    reference: true;
+  }
+>();

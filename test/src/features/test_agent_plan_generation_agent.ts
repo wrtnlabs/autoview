@@ -1,4 +1,4 @@
-import { IAutoViewAgentProvider, PlanGeneration } from "@autoview/agent";
+import { IAutoViewAgentVendor, PlanGeneration } from "@autoview/agent";
 import {
   IAutoViewCompilerMetadata,
   IAutoViewComponentProps,
@@ -13,8 +13,7 @@ export async function test_agent_plan_generation_agent(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
-  const provider: IAutoViewAgentProvider.IChatGpt = {
-    type: "chatgpt",
+  const vendor: IAutoViewAgentVendor = {
     model: "o3-mini-2025-01-31",
     isThinkingEnabled: true,
     api: new OpenAI({
@@ -30,7 +29,7 @@ export async function test_agent_plan_generation_agent(): Promise<void> {
     schema: schema as any,
   };
   const plan = await planGenerationAgent.execute({
-    provider,
+    provider: vendor,
     inputSchema: schemaAsCompilerMetadata,
     componentSchema: componentSchema(),
   });

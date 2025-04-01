@@ -1,2 +1,1 @@
-export * from "./IAutoViewAgentProvider";
-export * from "./IAutoViewAgentValueProps";
+export * from "./IAutoViewAgentVendor";
