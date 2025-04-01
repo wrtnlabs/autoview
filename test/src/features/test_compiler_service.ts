@@ -3,23 +3,12 @@ import {
   IAutoViewCompilerService,
   IAutoViewComponentProps,
 } from "@autoview/interface";
-import { IChatGptSchema } from "@samchon/openapi";
 import { Driver, WorkerConnector } from "tgrid";
 import typia from "typia";
 
-import { TestGlobal } from "../TestGlobal";
 import { IBbsArticle } from "../structures/IBbsArticle";
 
 export const test_compiler_service = async (): Promise<void> => {
-  const $defs: Record<string, IChatGptSchema> = {};
-  const schema: IChatGptSchema = typia.llm.schema<
-    IBbsArticle,
-    "chatgpt",
-    {
-      reference: true;
-    }
-  >($defs);
-
   const worker: WorkerConnector<null, null, IAutoViewCompilerService> =
     new WorkerConnector(null, null);
   await worker.connect(
@@ -44,14 +33,17 @@ export const test_compiler_service = async (): Promise<void> => {
         >(),
       },
     });
-    const result: IAutoViewCompilerResult = await service.compile(`
+    const result: IAutoViewCompilerResult = await service.compile(
+      `
 function visualizeData(_: unknown): IAutoViewComponentProps {
   return {
     type: "GridList",
     items: [],
   };
 }
-  `);
+  `,
+      "test_compiler_service",
+    );
     if (result.type !== "success")
       throw new Error(JSON.stringify(result, null, 2));
   } catch (error) {

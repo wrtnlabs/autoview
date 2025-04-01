@@ -12,6 +12,7 @@ export namespace AutoViewProgrammer {
     inputSchema: OpenApi.IJsonSchema,
     componentComponents: OpenApi.IComponents,
     componentSchema: OpenApi.IJsonSchema,
+    transformFunctionName: string,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [
       ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
@@ -28,7 +29,11 @@ export namespace AutoViewProgrammer {
         ),
         ts.NodeFlags.Namespace,
       ),
-      ...AutoViewTransformerProgrammer.write(ctx, inputSchema),
+      ...AutoViewTransformerProgrammer.write(
+        ctx,
+        inputSchema,
+        transformFunctionName,
+      ),
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];
   };
@@ -60,6 +65,7 @@ export namespace AutoViewProgrammer {
     ctx: IAutoViewProgrammerContext,
     inputComponents: OpenApi.IComponents,
     inputSchema: OpenApi.IJsonSchema,
+    transformFunctionName: string,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [
       ts.factory.createImportDeclaration(
@@ -74,7 +80,11 @@ export namespace AutoViewProgrammer {
         ts.factory.createStringLiteral("@autoview/interface"),
       ),
       ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
-      ...AutoViewTransformerProgrammer.write(ctx, inputSchema),
+      ...AutoViewTransformerProgrammer.write(
+        ctx,
+        inputSchema,
+        transformFunctionName,
+      ),
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];
   };

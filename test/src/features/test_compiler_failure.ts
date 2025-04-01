@@ -27,11 +27,14 @@ export const test_compiler_failure = async (): Promise<void> => {
       schema: {},
     },
   });
-  const result: IAutoViewCompilerResult = await compiler.compile(`
+  const result: IAutoViewCompilerResult = await compiler.compile(
+    `
       return {
         type: "GridList",
       };
-  `);
+  `,
+    "test_compiler_failure",
+  );
   TestValidator.equals("failure")(result.type)("failure");
   TestGlobal.archive("failure.json", JSON.stringify(result, null, 2));
 };

@@ -31,7 +31,10 @@ export async function test_main_agent(): Promise<void> {
     vendor: planVendor,
     codeVendor,
   });
-  const { transformTsCode } = await agent.generate(schemaAsCompilerMetadata);
+  const { transformTsCode } = await agent.generate(
+    schemaAsCompilerMetadata,
+    "transform_generated_by_test_main_agent",
+  );
 
   console.log(transformTsCode);
 }

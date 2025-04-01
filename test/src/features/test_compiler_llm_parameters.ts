@@ -21,12 +21,15 @@ export const test_compiler_llm_parameters = async (): Promise<void> => {
       schema: {},
     },
   });
-  const result: IAutoViewCompilerResult = await compiler.compile(`
+  const result: IAutoViewCompilerResult = await compiler.compile(
+    `
       return {
         type: "GridList",
         items: [],
       };
-  `);
+  `,
+    "test_compiler_llm_parameters",
+  );
   if (result.type === "success")
     await TestGlobal.archive("llm_parameters.ts", result.typescript);
   else throw new Error(JSON.stringify(result, null, 2));

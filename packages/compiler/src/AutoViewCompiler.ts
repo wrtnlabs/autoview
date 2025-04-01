@@ -49,7 +49,7 @@ export class AutoViewCompiler {
     return source;
   }
 
-  public generateBoilerplate(): string {
+  public generateBoilerplate(transformFunctionName: string): string {
     const ctx: IAutoViewProgrammerContext = {
       importer: new AutoViewImportProgrammer(),
     };
@@ -59,13 +59,16 @@ export class AutoViewCompiler {
       this.inputSchema,
       this.componentComponents,
       this.componentSchema,
+      transformFunctionName,
     );
     const source: string = FilePrinter.write({ statements });
 
     return source;
   }
 
-  public generateBoilerplateForRawTsCode(): string {
+  public generateBoilerplateForRawTsCode(
+    transformFunctionName: string,
+  ): string {
     const ctx: IAutoViewProgrammerContext = {
       importer: new AutoViewImportProgrammer(),
     };
@@ -73,13 +76,17 @@ export class AutoViewCompiler {
       ctx,
       this.inputComponents,
       this.inputSchema,
+      transformFunctionName,
     );
     const source: string = FilePrinter.write({ statements });
 
     return source;
   }
 
-  public async compile(script: string): Promise<IAutoViewCompilerResult> {
+  public async compile(
+    script: string,
+    transformFunctionName: string,
+  ): Promise<IAutoViewCompilerResult> {
     const ctx: IAutoViewProgrammerContext = {
       importer: new AutoViewImportProgrammer(),
     };
@@ -89,6 +96,7 @@ export class AutoViewCompiler {
       this.inputSchema,
       this.componentComponents,
       this.componentSchema,
+      transformFunctionName,
     );
     const source: string = `${FilePrinter.write({ statements })}\n\n${script}`;
 

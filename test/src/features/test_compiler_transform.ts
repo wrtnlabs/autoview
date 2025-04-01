@@ -34,12 +34,15 @@ export const test_compiler_transform = async (): Promise<void> => {
       module: "cjs",
     },
   });
-  const result: IAutoViewCompilerResult = await compiler.compile(`
+  const result: IAutoViewCompilerResult = await compiler.compile(
+    `
         return {
           type: "GridList",
           items: [],
         };
-    `);
+    `,
+    "test_compiler_transform",
+  );
   if (result.type !== "success")
     throw new Error(JSON.stringify(result, null, 2));
   await TestGlobal.archive("transformer.js", result.javascript);

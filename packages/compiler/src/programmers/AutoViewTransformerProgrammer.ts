@@ -8,6 +8,7 @@ export namespace AutoViewTransformerProgrammer {
   export const write = (
     ctx: IAutoViewProgrammerContext,
     inputSchema: OpenApi.IJsonSchema,
+    transformFunctionName: string,
   ): ts.Statement[] => {
     return [
       ts.factory.createTypeAliasDeclaration(
@@ -19,7 +20,7 @@ export namespace AutoViewTransformerProgrammer {
       ts.factory.createFunctionDeclaration(
         [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],
         undefined,
-        ts.factory.createIdentifier("transform"),
+        ts.factory.createIdentifier(transformFunctionName),
         undefined,
         [
           ts.factory.createParameterDeclaration(

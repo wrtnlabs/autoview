@@ -37,7 +37,9 @@ export class Agent implements AgentBase<Input, Output> {
       componentMetadata: input.componentSchema,
     });
 
-    const boilerplate = await service.generateBoilerplate();
+    const boilerplate = await service.generateBoilerplate(
+      input.transformFunctionName,
+    );
     const systemPrompt = prompt({
       input_schema: input.inputSchema,
       output_schema: input.componentSchema,
@@ -82,11 +84,14 @@ export class Agent implements AgentBase<Input, Output> {
 function handleText(
   service: Driver<IAutoViewCompilerService, false>,
 ): (input: Input, text: string) => Promise<Output> {
-  return async function (_input: Input, text: string) {
+  return async function (input: Input, text: string) {
     const output = parseOutput(text);
-    const rawTsCode = `${await service.generateBoilerplateForRawTsCode()}\n\n${output.typescript_function}`;
+    const rawTsCode = `${await service.generateBoilerplateForRawTsCode(input.transformFunctionName)}\n\n${output.typescript_function}`;
 
-    const result = await service.compile(output.typescript_function);
+    const result = await service.compile(
+      output.typescript_function,
+      input.transformFunctionName,
+    );
 
     if (result.type === "error") {
       throw result.error;

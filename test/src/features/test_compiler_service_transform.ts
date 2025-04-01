@@ -44,12 +44,15 @@ const test_service = async (): Promise<string> => {
         schema: {},
       },
     });
-    const result: IAutoViewCompilerResult = await service.compile(`
+    const result: IAutoViewCompilerResult = await service.compile(
+      `
       return {
         type: "GridList",
         items: [],
       };
-  `);
+  `,
+      "test_compiler_service_transform",
+    );
     if (result.type !== "success")
       throw new Error(JSON.stringify(result, null, 2));
     return result.javascript;

@@ -29,7 +29,7 @@ export async function test_agent_plan_generation_agent(): Promise<void> {
     schema: schema as any,
   };
   const plan = await planGenerationAgent.execute({
-    provider: vendor,
+    vendor,
     inputSchema: schemaAsCompilerMetadata,
     componentSchema: componentSchema(),
   });

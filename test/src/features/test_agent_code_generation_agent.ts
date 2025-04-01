@@ -46,12 +46,12 @@ export async function test_agent_code_generation_agent(): Promise<void> {
   };
 
   const plan = await planGenerationAgent.execute({
-    provider: planProvider,
+    vendor: planProvider,
     inputSchema: schemaAsCompilerMetadata,
     componentSchema: components,
   });
   const code = await codeGenerationAgent.execute({
-    provider: codeProvider,
+    vendor: codeProvider,
     inputSchema: schemaAsCompilerMetadata,
     componentSchema: components,
     initialAnalysis: plan.initial_analysis,
@@ -59,6 +59,8 @@ export async function test_agent_code_generation_agent(): Promise<void> {
     ideas: plan.ideas,
     reasoning: plan.reasoning,
     planning: plan.planning,
+    transformFunctionName:
+      "transform_generated_by_test_agent_code_generation_agent",
   });
 
   console.log(code.transformTsCode);

@@ -21,22 +21,29 @@ export class AutoViewCompilerService implements IAutoViewCompilerService {
     return this.compiler_.generateComponentDto();
   }
 
-  public generateBoilerplate(): string {
+  public generateBoilerplate(transformFunctionName: string): string {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.generateBoilerplate();
+    return this.compiler_.generateBoilerplate(transformFunctionName);
   }
 
-  public generateBoilerplateForRawTsCode(): string {
+  public generateBoilerplateForRawTsCode(
+    transformFunctionName: string,
+  ): string {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.generateBoilerplateForRawTsCode();
+    return this.compiler_.generateBoilerplateForRawTsCode(
+      transformFunctionName,
+    );
   }
 
-  public async compile(script: string): Promise<IAutoViewCompilerResult> {
+  public async compile(
+    script: string,
+    transformFunctionName: string,
+  ): Promise<IAutoViewCompilerResult> {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.compile(script);
+    return this.compiler_.compile(script, transformFunctionName);
   }
 
   public async compileRandom(): Promise<IAutoViewCompilerResult> {

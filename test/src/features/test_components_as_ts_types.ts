@@ -29,7 +29,9 @@ export async function test_components_as_ts_types(): Promise<void> {
     },
   });
 
-  const boilerplate = await service.generateBoilerplate();
+  const boilerplate = await service.generateBoilerplate(
+    "test_components_as_ts_types",
+  );
   console.log(boilerplate);
   await fs.writeFile("test.ts", boilerplate, "utf-8");
 
