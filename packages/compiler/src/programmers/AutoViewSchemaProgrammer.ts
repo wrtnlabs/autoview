@@ -5,6 +5,7 @@ import { TypeFactory } from "typia/lib/factories/TypeFactory";
 import { FormatCheatSheet } from "typia/lib/tags/internal/FormatCheatSheet";
 import { Escaper } from "typia/lib/utils/Escaper";
 
+import { FilePrinter } from "../utils/FilePrinter";
 import { StringUtil } from "../utils/StringUtil";
 import { AutoViewImportProgrammer } from "./AutoViewImportProgrammer";
 import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
@@ -290,33 +291,39 @@ export namespace AutoViewSchemaProgrammer {
       value: OpenApi.IJsonSchema;
     },
   ) =>
-    ts.factory.createPropertySignature(
-      undefined,
-      Escaper.variable(props.key)
-        ? ts.factory.createIdentifier(props.key)
-        : ts.factory.createStringLiteral(props.key),
-      props.required.includes(props.key)
-        ? undefined
-        : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-      writeSchema(ctx, props.value),
+    FilePrinter.description(
+      ts.factory.createPropertySignature(
+        undefined,
+        Escaper.variable(props.key)
+          ? ts.factory.createIdentifier(props.key)
+          : ts.factory.createStringLiteral(props.key),
+        props.required.includes(props.key)
+          ? undefined
+          : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
+        writeSchema(ctx, props.value),
+      ),
+      writeComment(props.value),
     );
 
   const writeDynamicProperty = (
     ctx: IAutoViewProgrammerContext,
     value: OpenApi.IJsonSchema,
   ) =>
-    ts.factory.createIndexSignature(
-      undefined,
-      [
-        ts.factory.createParameterDeclaration(
-          undefined,
-          undefined,
-          ts.factory.createIdentifier("key"),
-          undefined,
-          TypeFactory.keyword("string"),
-        ),
-      ],
-      writeSchema(ctx, value),
+    FilePrinter.description(
+      ts.factory.createIndexSignature(
+        undefined,
+        [
+          ts.factory.createParameterDeclaration(
+            undefined,
+            undefined,
+            ts.factory.createIdentifier("key"),
+            undefined,
+            TypeFactory.keyword("string"),
+          ),
+        ],
+        writeSchema(ctx, value),
+      ),
+      writeComment(value),
     );
 
   const writeReference = (
@@ -375,3 +382,17 @@ const writePlugin = (props: {
   if (Object.keys(extra).length !== 0)
     props.intersection.push(props.importer.tag("JsonSchemaPlugin", extra));
 };
+
+const writeComment = (schema: OpenApi.IJsonSchema): string =>
+  [
+    ...(schema.description?.length ? [schema.description] : []),
+    ...(schema.description?.length &&
+    (schema.title !== undefined || schema.deprecated === true)
+      ? [""]
+      : []),
+    ...(schema.title !== undefined ? [`@title ${schema.title}`] : []),
+    ...(schema.deprecated === true ? [`@deprecated`] : []),
+  ]
+    .join("\n")
+    .split("*/")
+    .join("*\\/");
