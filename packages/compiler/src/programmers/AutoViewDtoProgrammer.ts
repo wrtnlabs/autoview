@@ -2,6 +2,7 @@ import { OpenApi } from "@samchon/openapi";
 import { OpenApiTypeChecker } from "@samchon/openapi";
 import ts from "typescript";
 
+import { FilePrinter } from "../utils/FilePrinter";
 import { MapUtil } from "../utils/MapUtil";
 import { AutoViewSchemaProgrammer } from "./AutoViewSchemaProgrammer";
 import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
@@ -53,13 +54,16 @@ export namespace AutoViewDtoProgrammer {
     for (const [key, value] of dict) {
       if (value.schema)
         statements.push(
-          ts.factory.createTypeAliasDeclaration(
-            inline === true
-              ? [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)]
-              : [],
-            key,
-            undefined,
-            AutoViewSchemaProgrammer.writeSchema(ctx, value.schema),
+          FilePrinter.description(
+            ts.factory.createTypeAliasDeclaration(
+              inline === true
+                ? [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)]
+                : [],
+              key,
+              undefined,
+              AutoViewSchemaProgrammer.writeSchema(ctx, value.schema),
+            ),
+            writeComment(value.schema),
           ),
         );
       if (value.children.size)
@@ -79,6 +83,20 @@ export namespace AutoViewDtoProgrammer {
     return statements;
   };
 }
+
+const writeComment = (schema: OpenApi.IJsonSchema): string =>
+  [
+    ...(schema.description?.length ? [schema.description] : []),
+    ...(schema.description?.length &&
+    (schema.title !== undefined || schema.deprecated === true)
+      ? [""]
+      : []),
+    ...(schema.title !== undefined ? [`@title ${schema.title}`] : []),
+    ...(schema.deprecated === true ? [`@deprecated`] : []),
+  ]
+    .join("\n")
+    .split("*/")
+    .join("*\\/");
 
 interface IModulo {
   name: string;
