@@ -53,20 +53,20 @@ export class Agent implements AgentBase<Input, Output> {
       .withTextHandler(handleText(service))
       .call(
         input,
-        input.provider.api,
+        input.vendor.api,
         {
-          model: input.provider.model,
+          model: input.vendor.model,
           messages: [
             {
               role: "user",
               content: systemPrompt,
             },
           ],
-          ...(input.provider.isThinkingEnabled
+          ...(input.vendor.isThinkingEnabled
             ? { reasoning_effort: "medium" }
             : {}),
         },
-        input.provider.options,
+        input.vendor.options,
       );
 
     const result = results[0];
