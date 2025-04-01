@@ -11,5 +11,6 @@ typia = "typia"
 [files]
 extend-exclude = [
   "*.json",
-  "AutoViewIconName.ts"
+  "AutoViewIconName.ts",
+  "*.test.ts"
 ]
