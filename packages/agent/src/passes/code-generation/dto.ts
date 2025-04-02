@@ -1,4 +1,7 @@
-import { IAutoViewCompilerMetadata } from "@autoview/interface";
+import {
+  IAutoViewCompilerMetadata,
+  IAutoViewCompilerResult,
+} from "@autoview/interface";
 
 import { IAutoViewVendor } from "../../structures";
 
@@ -12,6 +15,10 @@ export interface Input {
   reasoning: string;
   planning: string;
   transformFunctionName: string;
+  onCompilerError?: (
+    tsCode: string,
+    diagnostics: IAutoViewCompilerResult.IDiagnostic[],
+  ) => void | Promise<void>;
 }
 
 export interface Output {
