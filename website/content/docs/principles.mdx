@@ -1,0 +1,179 @@
+---
+title: AutoView > Guide Documents > Principles
+---
+import { Tabs } from "nextra/components";
+
+## Code Generation
+<Tabs items={["TypeScript Type", "OpenAPI Document"]}>
+  <Tabs.Tab>
+```typescript filename="src/generateTsType.ts" showLineNumbers copy
+import { AutoViewAgent } from "@autoview/agent";
+import fs from "fs";
+import OpenAI from "openai";
+import typia, { tags } from "typia";
+
+interface IMember {
+  id: string & tags.Format<"uuid">;
+  name: string;
+  age: number & tags.Minimum<0> & tags.Maximum<100>;
+  thumbnail: string & tags.Format<"uri"> & tags.ContentMiaType;
+}
+
+const agent: AutoViewAgent = new AutoViewAgent({
+  vendor: {
+    api: new OpenAI({ apiKey: "********" }),
+    model: "o3-mini",
+  },
+  inputSchema: {
+    parameters: typia.llm.parameters<
+      IMember, 
+      "chatgpt", 
+      { reference: true }
+    >(),
+  },
+});
+const result: IAutoViewResult = await agent.generate();
+
+await fs.promises.writeFile(
+  "./src/transformers/transformMember.ts",
+  result.transformTsCode,
+  "utf8",
+);
+```
+  </Tabs.Tab>
+  <Tabs.Tab>
+```typescript filename="src/generateOpenApi.ts" showLineNumbers copy
+import { AutoViewAgent } from "@autoview/agent";
+import { OpenApi } from "@samchon/openapi";
+import fs from "fs";
+import OpenAI from "openai";
+import typia, { tags } from "typia";
+
+const app: IHttpLlmApplication<"chatgpt"> = HttpLlm.application({
+  model: "chatgpt",
+  document,
+  options: {
+    reference: true,
+  },
+});
+const func: IHttpLlmFunction<"chatgpt"> | undefined = app.functions.find(
+  (func) =>
+    func.path === "/shoppings/customers/sales/{id}" && 
+    func.method === "get",
+);
+if (func === undefined) throw new Error("Function not found");
+else if (func.output === undefined) throw new Error("No return type");
+
+const agent: AutoViewAgent = new AutoViewAgent({
+  vendor: {
+    api: new OpenAI({ apiKey: "********" }),
+    model: "o3-mini",
+  },
+  inputSchema: {
+    $defs: func.parameters.$defs,
+    schema: func.output!,
+  },
+  transformFunctionName: "transformSale",
+});
+const result: IAutoViewResult = await agent.generate();
+
+await fs.promises.writeFile(
+  "./src/transformers/transformSale.ts",
+  result.typescript,
+  "utf8",
+);
+```
+  </Tabs.Tab>
+</Tabs>
+
+`@autoview` reads user-defined schemas (TypeScript types or Swagger/OpenAPI operation schemas) and guides AI to write TypeScript frontend code based on these schemas. By the way, is AI-generated frontend code is perfect? The answer is no, AI takes a lot of mistakes and errors writing the TypeScript code.
+
+To guide the AI in writing proper frontend code, `@autoview` employs below feedback strategies.
+
+
+
+
+## Compiler Feedback
+```typescript
+import { FunctionCall } from "pseudo";
+import { IValidation } from "typia";
+
+export const correctCompile = <T>(ctx: {
+  call: FunctionCall;
+  compile: (src: string) => Promise<IValidation<(v: T) => IAutoViewComponentProps>>;
+  random: () => T;
+  repeat: number;
+  retry: (reason: string, errors?: IValidation.IError[]) => Promise<unknown>;
+}): Promise<(v: T) => IAutoViewComponentProps>> => {
+  // FIND FUNCTION
+  if (ctx.call.name !== "render")
+    return ctx.retry("Unable to find function. Try it again");
+
+  //----
+  // COMPILER FEEDBACK
+  //----
+  const result: IValidation<(v: T) => IAutoViewComponentProps>> = 
+    await ctx.compile(call.arguments.source);
+  if (result.success === false)
+    return ctx.retry("Correct compilation errors", result.errors);
+
+  //----
+  // VALIDATION FEEDBACK
+  //----
+  for (let i: number = 0; i < ctx.repeat; ++i) {
+    const value: T = ctx.random(); // random value generation
+    try {
+      const props: IAutoViewComponentProps = result.data(value);
+      const validation: IValidation<IAutoViewComponentProps> = 
+        func.validate(props); //validate AI generated function
+      if (validation.success === false)
+        return ctx.retry(
+          "Type errors are detected. Correct it through validation errors",
+          {
+            errors: validation.errors,
+          },
+        );
+    } catch (error) {
+      //----
+      // EXCEPTION FEEDBACK
+      //----
+      return ctx.retry(
+        "Runtime error occurred. Correct by the error message",
+        {
+          errors: [
+            {
+              path: "$input",
+              name: error.name,
+              reason: error.message,
+              stack: error.stack,
+            }
+          ]
+        }
+      )
+    }
+  }
+  return result.data;
+}
+```
+
+The first strategy involves providing compilation errors to the AI agent.
+
+`@autoview` runs `tsc` command to the AI-generated TypeScript code, and if it fails to compile, it provides the AI with detailed information about the compilation errors. The AI agent can then correct the code based on this feedback.
+
+
+
+## Validation Feedback
+The second strategy is validation feedback. 
+
+`@autoview` generates random values for the given schema type using the [`typia.random<T>()`](https://typia.io/docs/random) function and tests whether the AI-generated TypeScript rendering function produces valid output. 
+
+If validation fails, `@autoview` guides the AI agent to correct the function with detailed tracking information.
+
+
+
+## Exception Feedback
+The final strategy is exception feedback.
+
+Even if the AI-generated TypeScript code compiles without errors, runtime exceptions may still occur. `@autoview` tests whether the AI-generated TypeScript function throws error or not by using [`typia.random<T>()`](https://typia.io/docs/random) function generated random values.
+
+If exception occurs, `@autoview` guides the AI agent to correct the function using the exception information.
