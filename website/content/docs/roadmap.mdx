@@ -1,0 +1,32 @@
+## Screenshot Feedback
+Learning from rendering results.
+
+The current version of `@autoview` implements three feedback strategies: "compiler," "validation," and "exception." In the next update, `@autoview` will add "screenshot feedback."
+
+When AI creates a new TypeScript transformer function for a user-defined type, `@autoview` will request an example value for that type, capture a screenshot of the result, and allow the AI agent to review the screenshot.
+
+Since AI agents excel at analyzing and interpreting images, the next version of `@autoview` will provide an even more exciting experience.
+
+
+
+
+## Human Feedback
+Conversation with users about rendering results.
+
+The current version of `@autoview` is not a chatbot but a frontend code generator that uses only user-defined type schemas.
+
+In the next update, it will support the `AutoViewAgent.conversate()` function for chatbot development. In this chatbot, users can guide AI in generating frontend code through conversation. While viewing the rendering result, users can request the AI to modify the frontend code with instructions like:
+
+  - Too narrow. Make it wider
+  - I want to enhance the title. Make it larger
+  - Too much detail. Make it more concise please.
+
+
+
+
+## Theme System
+`@autoview` supports a theme system, allowing you to replace the default renderer `@autoview/ui` with custom options.
+
+However, this custom theme feature is not yet documented.
+
+In the next update, comprehensive documentation for custom themes will be provided.
