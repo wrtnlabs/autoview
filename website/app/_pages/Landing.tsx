@@ -19,7 +19,7 @@ export default function LandingPage() {
         startScript: [
           "start",
           `echo "Run 'npm run generate' command to generate code"`,
-        ] as any,
+        ] as unknown as string, // not declared in type, but actually possible
       },
     );
   }, []);
