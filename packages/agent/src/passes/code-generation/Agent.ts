@@ -98,21 +98,23 @@ function handleText(
     }
 
     if (result.type === "failure") {
-      console.debug(
-        `llm generated invalid typescript code: ${JSON.stringify(
+      if (input.onCompilerError != null) {
+        const maybePromise = input.onCompilerError(
+          rawTsCode,
           result.diagnostics,
-          null,
-          2,
-        )}`,
-      );
-      console.log(`code:\n${rawTsCode}`);
+        );
+
+        if (maybePromise != null) {
+          await maybePromise;
+        }
+      }
 
       throw new LlmFailure(
-        `failed to compile the typescript function: ${JSON.stringify(
+        `your code failed to compile; please review the error and try again:\n\n<error>\n${JSON.stringify(
           result.diagnostics,
           null,
           2,
-        )}`,
+        )}\n</error>`,
       );
     }
 
