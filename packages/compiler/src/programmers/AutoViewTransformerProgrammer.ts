@@ -29,7 +29,10 @@ export namespace AutoViewTransformerProgrammer {
             ts.factory.createIdentifier("$input"),
             undefined,
             ts.factory.createTypeReferenceNode(
-              ts.factory.createIdentifier("unknown"),
+              ts.factory.createQualifiedName(
+                ts.factory.createIdentifier("IAutoView"),
+                ts.factory.createIdentifier("IAutoViewComponentProps"),
+              ),
               undefined,
             ),
           ),
@@ -42,30 +45,6 @@ export namespace AutoViewTransformerProgrammer {
         ),
         ts.factory.createBlock(
           [
-            // typia.assertGuard<IAutoViewTransformerInputType>($input);
-            ts.factory.createExpressionStatement(
-              ts.factory.createCallExpression(
-                ts.factory.createPropertyAccessExpression(
-                  ts.factory.createIdentifier(
-                    ctx.importer.external({
-                      type: "default",
-                      library: "typia",
-                      name: "typia",
-                    }),
-                  ),
-                  ts.factory.createIdentifier("assertGuard"),
-                ),
-                [
-                  ts.factory.createTypeReferenceNode(
-                    ts.factory.createIdentifier(
-                      "IAutoViewTransformerInputType",
-                    ),
-                    undefined,
-                  ),
-                ],
-                [ts.factory.createIdentifier("$input")],
-              ),
-            ),
             // return visualizeData($input);
             ts.factory.createReturnStatement(
               ts.factory.createCallExpression(

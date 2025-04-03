@@ -23,8 +23,8 @@
     "README.md"
   ],
   "dependencies": {
-    "@samchon/openapi": "^3.2.0",
-    "typia": "^8.0.4"
+    "@samchon/openapi": "^3.2.4",
+    "typia": "^8.1.1"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
