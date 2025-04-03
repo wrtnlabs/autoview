@@ -208,7 +208,7 @@ async function buildReport(
     }
 
     if (problematicComponentMap.size === 0) {
-      mdLines.push("*N/A*");
+      mdLines.push("*No problematic component*");
     } else {
       const problematicComponentList = Array.from(
         problematicComponentMap.entries(),
@@ -284,18 +284,22 @@ function buildDump(results: IRunAttemptResult[]): string {
   mdLines.push("## Successes");
   mdLines.push("");
 
-  for (const result of results) {
-    if (result.validTsCode === undefined) {
-      continue;
+  if (filterSuccesses(results).length === 0) {
+    mdLines.push("*No success*");
+  } else {
+    for (const result of results) {
+      if (result.validTsCode === undefined) {
+        continue;
+      }
+
+      mdLines.push("```ts");
+      mdLines.push(result.validTsCode);
+      mdLines.push("```");
+      mdLines.push("");
+
+      mdLines.push("---");
+      mdLines.push("");
     }
-
-    mdLines.push("```ts");
-    mdLines.push(result.validTsCode);
-    mdLines.push("```");
-    mdLines.push("");
-
-    mdLines.push("---");
-    mdLines.push("");
   }
 
   return mdLines.join("\n");
@@ -375,7 +379,7 @@ function buildErrorStatistics(results: IRunAttemptResult[]): string {
   const mdLines: string[] = [];
 
   if (stats.size === 0) {
-    mdLines.push("*N/A*");
+    mdLines.push("*No error*");
     return mdLines.join("\n");
   }
 
