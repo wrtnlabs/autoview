@@ -16,6 +16,10 @@ export default function LandingPage() {
         openFile: [
           "src/generate.ts,src/transformYourSchema.ts,src/YourSchema.ts,src/env.ts",
         ],
+        startScript: [
+          "start",
+          `echo "Run 'npm run generate' command to generate code"`,
+        ] as any,
       },
     );
   }, []);
@@ -29,7 +33,7 @@ export default function LandingPage() {
         {/* @Shrimp */}
         <div
           id="stackblitz-playground"
-          className="aspect-video border border-zinc-700 rounded-3xl hidden md:block min-h-[700px]"
+          className="aspect-video border border-zinc-700 rounded-3xl hidden md:block min-h-[800px]"
         />
 
         {/* Mobile Screen Mockup Container */}
