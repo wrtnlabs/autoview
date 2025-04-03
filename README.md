@@ -6,7 +6,7 @@
 [![Downloads](https://img.shields.io/npm/dm/@autoview/interface.svg)](https://www.npmjs.com/package/@autoview/interface)
 [![Build Status](https://github.com/wrtnlabs/autoview/workflows/build/badge.svg)](https://github.com/wrtnlabs/autoview/actions?query=workflow%3Abuild)
 
-`@autoview` is an automated frontend builder that generates code using type schema.
+Turn your blueprint into UI components.
 
 `@autoview` is a code generator that produces TypeScript frontend component from schema information. This schema information can be derived from either TypeScript types or Swagger/OpenAPI documents.
 
