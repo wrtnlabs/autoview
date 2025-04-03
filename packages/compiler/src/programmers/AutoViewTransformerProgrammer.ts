@@ -29,10 +29,7 @@ export namespace AutoViewTransformerProgrammer {
             ts.factory.createIdentifier("$input"),
             undefined,
             ts.factory.createTypeReferenceNode(
-              ts.factory.createQualifiedName(
-                ts.factory.createIdentifier("IAutoView"),
-                ts.factory.createIdentifier("IAutoViewComponentProps"),
-              ),
+              ts.factory.createIdentifier("IAutoViewTransformerInputType"),
               undefined,
             ),
           ),
