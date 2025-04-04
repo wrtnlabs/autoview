@@ -42,17 +42,20 @@ export class Agent implements AgentBase<Input, Output> {
       .withToolHandler("example", handleExampleTool)
       .call(
         input,
-        input.provider.api,
+        input.vendor.api,
         {
-          model: input.provider.model,
+          model: input.vendor.model,
           messages: [
             {
               role: "user",
               content: systemPrompt,
             },
           ],
+          ...(input.vendor.isThinkingEnabled
+            ? { reasoning_effort: "medium" }
+            : {}),
         },
-        input.provider.options,
+        input.vendor.options,
       );
 
     const result = results[0];
@@ -114,10 +117,10 @@ function parseOutput(text: string): TextOutput {
     fs.writeFile(
       path.join(agentPath, "dto.ts"),
       `
-import { IAutoViewAgentProvider } from "../../structures";
+import { IAutoViewVendor } from "../../structures";
 
 export interface Input {
-  provider: IAutoViewAgentProvider;
+  vendor: IAutoViewVendor;
   input: unknown;
 }
 

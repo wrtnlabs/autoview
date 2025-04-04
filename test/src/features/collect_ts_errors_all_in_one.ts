@@ -1,6 +1,8 @@
 import {
+  AllInOne,
   CodeGeneration,
   IAutoViewVendor,
+  LlmUnrecoverableError,
   PlanGeneration,
 } from "@autoview/agent";
 import {
@@ -19,7 +21,7 @@ import * as Report from "./collect_ts_errors_report_agent";
 
 const NUM_OF_ATTEMPTS_PER_SCHEMA = 10;
 
-export async function test_collect_ts_errors(): Promise<void> {
+export async function test_collect_ts_errors_all_in_one(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
@@ -65,10 +67,10 @@ export async function test_collect_ts_errors(): Promise<void> {
     await fs.mkdir(reportDir);
   }
 
-  const reportPath = path.join(reportDir, "report.md");
+  const reportPath = path.join(reportDir, "all-in-one-report.md");
   await fs.writeFile(reportPath, report, "utf-8");
 
-  const dumpPath = path.join(reportDir, "dump.md");
+  const dumpPath = path.join(reportDir, "all-in-one-dump.md");
   await fs.writeFile(dumpPath, dump, "utf-8");
 
   console.log(`report is generated at "${reportPath}"`);
@@ -277,38 +279,6 @@ function buildDump(results: IRunAttemptResult[]): string {
       mdLines.push("```");
       mdLines.push("");
 
-      if (result.plan != null) {
-        mdLines.push("```plaintext");
-        mdLines.push("plan.initial_analysis:");
-        mdLines.push(result.plan.initial_analysis);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.data_exploration:");
-        mdLines.push(result.plan.data_exploration);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.ideas:");
-        mdLines.push(result.plan.ideas);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.reasoning:");
-        mdLines.push(result.plan.reasoning);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.planning:");
-        mdLines.push(result.plan.planning);
-        mdLines.push("```");
-        mdLines.push("");
-      }
-
       mdLines.push("```ts");
       mdLines.push(error.tsCode);
       mdLines.push("```");
@@ -453,14 +423,7 @@ async function collectAllTsErrors(
   schemaList: ISchema[],
   numOfAttemptsPerSchema: number,
 ): Promise<IRunAttemptResult[]> {
-  const planVendor: IAutoViewVendor = {
-    model: model as any,
-    isThinkingEnabled,
-    api: new OpenAI({
-      apiKey: TestGlobal.env.CHATGPT_API_KEY,
-    }),
-  };
-  const codeVendor: IAutoViewVendor = {
+  const vendor: IAutoViewVendor = {
     model: model as any,
     isThinkingEnabled,
     api: new OpenAI({
@@ -472,7 +435,7 @@ async function collectAllTsErrors(
     schemaList.flatMap((schema) =>
       new Array(numOfAttemptsPerSchema)
         .fill(0)
-        .map(() => runAttempt(counter, planVendor, codeVendor, schema)),
+        .map(() => runAttempt(counter, vendor, schema)),
     ),
   );
 
@@ -531,7 +494,6 @@ interface ITsError {
 
 interface IRunAttemptResult {
   schema: ISchema;
-  plan?: PlanGeneration.Output;
   errors: ITsError[];
   validTsCode?: string;
   systemError?: unknown;
@@ -539,67 +501,49 @@ interface IRunAttemptResult {
 
 async function runAttempt(
   counter: TestCounter,
-  planVendor: IAutoViewVendor,
-  codeVendor: IAutoViewVendor,
+  vendor: IAutoViewVendor,
   schema: ISchema,
 ): Promise<IRunAttemptResult> {
-  const planAgent = new PlanGeneration.Agent();
-  await planAgent.open();
+  const agent = new AllInOne.Agent();
+  await agent.open();
 
-  const codeAgent = new CodeGeneration.Agent();
-  await codeAgent.open();
+  const components = componentSchema();
+  const tsErrors: ITsError[] = [];
 
   try {
-    const components = componentSchema();
-    const tsErrors: ITsError[] = [];
-
-    const plan = await planAgent.execute({
-      vendor: planVendor,
+    const result = await agent.execute({
+      vendor,
       inputSchema: schema.schema,
       componentSchema: components,
+      transformFunctionName: "transform",
+      onCompilerError(tsCode, diagnostics) {
+        tsErrors.push({ tsCode, diagnostics });
+      },
     });
 
-    try {
-      const code = await codeAgent.execute({
-        vendor: codeVendor,
-        inputSchema: schema.schema,
-        componentSchema: components,
-        initialAnalysis: plan.initial_analysis,
-        dataExploration: plan.data_exploration,
-        ideas: plan.ideas,
-        reasoning: plan.reasoning,
-        planning: plan.planning,
-        transformFunctionName: "transform",
-        onCompilerError(tsCode, diagnostics) {
-          tsErrors.push({ tsCode, diagnostics });
-        },
-      });
-
-      counter.reportProgress("success");
-      return {
-        schema,
-        plan,
-        errors: tsErrors,
-        validTsCode: code.transformTsCode,
-      };
-    } catch {
+    counter.reportProgress("success");
+    return {
+      schema,
+      errors: tsErrors,
+      validTsCode: result.transformTsCode,
+    };
+  } catch (error: unknown) {
+    if (error instanceof LlmUnrecoverableError) {
       counter.reportProgress("hard failure");
       return {
         schema,
-        plan,
         errors: tsErrors,
       };
     }
-  } catch (error) {
+
     counter.reportProgress("system error");
     return {
       schema,
-      errors: [],
+      errors: tsErrors,
       systemError: error,
     };
   } finally {
-    await planAgent.close();
-    await codeAgent.close();
+    await agent.close();
   }
 }
 

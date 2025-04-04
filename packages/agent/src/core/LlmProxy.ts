@@ -60,6 +60,19 @@ export class LlmFailure {
 }
 
 /**
+ * An error that occurs when the LLM fails to generate any valid output, even after a few retries.
+ *
+ * You should review and edit the prompt if this error occurs.
+ */
+export class LlmUnrecoverableError {
+  constructor(private readonly message: string) {}
+
+  getMessage(): string {
+    return this.message;
+  }
+}
+
+/**
  * Create a completion.
  *
  * This function will create a completion for the given body and options.
@@ -323,7 +336,7 @@ export class LlmProxy<I, O> {
       return outputs;
     }
 
-    throw new Error(
+    throw new LlmUnrecoverableError(
       `failed to generate output, despite maximum retries(=${MAXIMUM_RETRIES}); last failure: ${JSON.stringify(lastFailure, null, 2)}`,
     );
   }
