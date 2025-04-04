@@ -55,7 +55,7 @@ await fs.promises.writeFile(
 
 You can experience how typia works by playground website:
 
-💻 https://wrtnlabs.io/agentica/
+💻 https://wrtnlabs.io/autoview/
 
 
 
