@@ -1,0 +1,143 @@
+{
+  "type": "object",
+  "properties": {
+    "sort": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "-seller.created_at"
+              },
+              {
+                "const": "-seller.goods.payments.real"
+              },
+              {
+                "const": "-seller.goods.publish_count"
+              },
+              {
+                "const": "-seller.reviews.average"
+              },
+              {
+                "const": "-seller.reviews.count"
+              },
+              {
+                "const": "-goods.publish_count"
+              },
+              {
+                "const": "-goods.payments.real"
+              },
+              {
+                "const": "-reviews.average"
+              },
+              {
+                "const": "-reviews.count"
+              },
+              {
+                "const": "-sale.created_at"
+              },
+              {
+                "const": "-sale.updated_at"
+              },
+              {
+                "const": "-sale.opened_at"
+              },
+              {
+                "const": "-sale.closed_at"
+              },
+              {
+                "const": "-sale.content.title"
+              },
+              {
+                "const": "-sale.price_range.lowest.real"
+              },
+              {
+                "const": "-sale.price_range.highest.real"
+              },
+              {
+                "const": "+seller.created_at"
+              },
+              {
+                "const": "+seller.goods.payments.real"
+              },
+              {
+                "const": "+seller.goods.publish_count"
+              },
+              {
+                "const": "+seller.reviews.average"
+              },
+              {
+                "const": "+seller.reviews.count"
+              },
+              {
+                "const": "+goods.publish_count"
+              },
+              {
+                "const": "+goods.payments.real"
+              },
+              {
+                "const": "+reviews.average"
+              },
+              {
+                "const": "+reviews.count"
+              },
+              {
+                "const": "+sale.created_at"
+              },
+              {
+                "const": "+sale.updated_at"
+              },
+              {
+                "const": "+sale.opened_at"
+              },
+              {
+                "const": "+sale.closed_at"
+              },
+              {
+                "const": "+sale.content.title"
+              },
+              {
+                "const": "+sale.price_range.lowest.real"
+              },
+              {
+                "const": "+sale.price_range.highest.real"
+              }
+            ]
+          }
+        }
+      ],
+      "title": "Sorting conditions",
+      "description": "Sorting conditions."
+    },
+    "page": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "integer"
+        }
+      ],
+      "title": "Page number",
+      "description": "Page number."
+    },
+    "limit": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "integer"
+        }
+      ],
+      "title": "Limitation of records per a page",
+      "description": "Limitation of records per a page."
+    }
+  },
+  "required": [],
+  "description": "Request of summarized sales with pagination and searching/sorting options."
+}

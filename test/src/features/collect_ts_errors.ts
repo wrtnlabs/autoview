@@ -17,7 +17,7 @@ import typia from "typia";
 import { TestGlobal } from "../TestGlobal";
 import * as Report from "./collect_ts_errors_report_agent";
 
-const NUM_OF_ATTEMPTS_PER_SCHEMA = 1;
+const NUM_OF_ATTEMPTS_PER_SCHEMA = 10;
 
 export async function test_collect_ts_errors(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
@@ -100,7 +100,7 @@ async function buildReport(
     mdLines.push(`| Total schemas | ${schemaCount} |`);
     mdLines.push(`| Attempts per schema | ${numOfAttemptsPerSchema} |`);
     mdLines.push(
-      `| Total attempts | ${results.length} *(${schemaCount} * ${numOfAttemptsPerSchema})* |`,
+      `| Total attempts | ${results.length} _(${schemaCount} \* ${numOfAttemptsPerSchema})_ |`,
     );
     mdLines.push(`| System errors | ${systemErrors.length} |`);
     mdLines.push(`| Hard failures | ${hardFailures.length} |`);
@@ -271,6 +271,38 @@ function buildDump(results: IRunAttemptResult[]): string {
         mdLines.push("");
       }
 
+      if (result.plan != null) {
+        mdLines.push("```plaintext");
+        mdLines.push("plan.initial_analysis:");
+        mdLines.push(result.plan.initial_analysis);
+        mdLines.push("```");
+        mdLines.push("");
+
+        mdLines.push("```plaintext");
+        mdLines.push("plan.data_exploration:");
+        mdLines.push(result.plan.data_exploration);
+        mdLines.push("```");
+        mdLines.push("");
+
+        mdLines.push("```plaintext");
+        mdLines.push("plan.ideas:");
+        mdLines.push(result.plan.ideas);
+        mdLines.push("```");
+        mdLines.push("");
+
+        mdLines.push("```plaintext");
+        mdLines.push("plan.reasoning:");
+        mdLines.push(result.plan.reasoning);
+        mdLines.push("```");
+        mdLines.push("");
+
+        mdLines.push("```plaintext");
+        mdLines.push("plan.planning:");
+        mdLines.push(result.plan.planning);
+        mdLines.push("```");
+        mdLines.push("");
+      }
+
       mdLines.push("```ts");
       mdLines.push(error.tsCode);
       mdLines.push("```");
@@ -383,7 +415,11 @@ function buildErrorStatistics(results: IRunAttemptResult[]): string {
     return mdLines.join("\n");
   }
 
-  for (const [code, count] of stats.entries()) {
+  const sortedStats = Array.from(stats.entries()).sort(
+    ([_a, aCount], [_b, bCount]) => bCount - aCount,
+  );
+
+  for (const [code, count] of sortedStats) {
     const tsErrorCode =
       typeof code === "string" ? code : `TS${code.toString()}`;
 
@@ -507,6 +543,7 @@ interface ITsError {
 
 interface IRunAttemptResult {
   schema: ISchema;
+  plan?: PlanGeneration.Output;
   errors: ITsError[];
   validTsCode?: string;
   systemError?: unknown;
@@ -549,6 +586,7 @@ async function runAttempt(
       counter.reportProgress("success");
       return {
         schema,
+        plan,
         errors: tsErrors,
         validTsCode: code.transformTsCode,
       };
@@ -556,6 +594,7 @@ async function runAttempt(
       counter.reportProgress("hard failure");
       return {
         schema,
+        plan,
         errors: tsErrors,
       };
     }

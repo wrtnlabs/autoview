@@ -15,7 +15,6 @@ export namespace AutoViewProgrammer {
     transformFunctionName: string,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [
-      ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
       ts.factory.createModuleDeclaration(
         undefined,
         ts.factory.createIdentifier("IAutoView"),
@@ -29,6 +28,7 @@ export namespace AutoViewProgrammer {
         ),
         ts.NodeFlags.Namespace,
       ),
+      ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
       ...AutoViewTransformerProgrammer.write(
         ctx,
         inputSchema,
