@@ -5,7 +5,7 @@ import {
 import { ChatGptTypeChecker } from "@samchon/openapi";
 import typia from "typia";
 
-import { CodeGeneration, PlanGeneration } from "../passes";
+import { AllInOne, CodeGeneration, PlanGeneration } from "../passes";
 import { IAutoViewVendor } from "../structures";
 
 /**
@@ -39,42 +39,19 @@ export interface IAutoViewConfig {
    * @default "transform"
    */
   transformFunctionName?: string;
+
+  /**
+   * Whether to use the experimental all-in-one agent, instead of the default pipeline.
+   *
+   * @default false
+   */
+  experimentalAllInOne?: boolean;
 }
 
 /**
  * Result of the {@link AutoViewAgent}.
  */
 export interface IAutoViewResult {
-  /**
-   * (Intermediate reasoning) Initial analysis of the input schema.
-   */
-  initialAnalysis: string;
-
-  /**
-   * (Intermediate reasoning) Data exploration of the input schema.
-   */
-  dataExploration: string;
-
-  /**
-   * (Intermediate reasoning) Ideas of visualizations.
-   */
-  ideas: string;
-
-  /**
-   * (Intermediate reasoning) Reasoning of the visualization.
-   */
-  reasoning: string;
-
-  /**
-   * (Intermediate reasoning) Planning of the visualization.
-   */
-  planning: string;
-
-  /**
-   * (Intermediate reasoning) The analysis of the input schema and thinking process of the visualization planning.
-   */
-  analysis: string;
-
   /**
    * The TypeScript code of the transform function.
    *
@@ -99,22 +76,28 @@ export class AutoViewAgent {
    * @returns The result of the agent pipeline.
    */
   async generate(): Promise<IAutoViewResult> {
+    if (this.config.experimentalAllInOne) {
+      return this.generateWithAllInOne();
+    } else {
+      return this.generateWithPlanGeneration();
+    }
+  }
+
+  private async generateWithPlanGeneration(): Promise<IAutoViewResult> {
     const planGenerationAgent = new PlanGeneration.Agent();
     await planGenerationAgent.open();
 
     const codeGenerationAgent = new CodeGeneration.Agent();
     await codeGenerationAgent.open();
 
-    const components = componentSchema();
-
-    const plan = await planGenerationAgent.execute({
-      vendor: this.config.vendor,
-      inputSchema: this.config.inputSchema,
-      componentSchema: components,
-    });
-
     try {
-      const { analysis, transformTsCode } = await codeGenerationAgent.execute({
+      const components = componentSchema();
+      const plan = await planGenerationAgent.execute({
+        vendor: this.config.vendor,
+        inputSchema: this.config.inputSchema,
+        componentSchema: components,
+      });
+      const { transformTsCode } = await codeGenerationAgent.execute({
         vendor: this.config.codeVendor ?? this.config.vendor,
         inputSchema: this.config.inputSchema,
         componentSchema: components,
@@ -127,12 +110,6 @@ export class AutoViewAgent {
       });
 
       return {
-        initialAnalysis: plan.initial_analysis,
-        dataExploration: plan.data_exploration,
-        ideas: plan.ideas,
-        reasoning: plan.reasoning,
-        planning: plan.planning,
-        analysis,
         transformTsCode,
       };
     } finally {
@@ -145,6 +122,31 @@ export class AutoViewAgent {
         await codeGenerationAgent.close();
       } catch (error) {
         console.warn(`failed to close code generation agent: ${error}`);
+      }
+    }
+  }
+
+  private async generateWithAllInOne(): Promise<IAutoViewResult> {
+    const allInOneAgent = new AllInOne.Agent();
+    await allInOneAgent.open();
+
+    try {
+      const components = componentSchema();
+      const result = await allInOneAgent.execute({
+        vendor: this.config.vendor,
+        inputSchema: this.config.inputSchema,
+        componentSchema: components,
+        transformFunctionName: this.config.transformFunctionName ?? "transform",
+      });
+
+      return {
+        transformTsCode: result.transformTsCode,
+      };
+    } finally {
+      try {
+        await allInOneAgent.close();
+      } catch (error) {
+        console.warn(`failed to close all-in-one agent: ${error}`);
       }
     }
   }
