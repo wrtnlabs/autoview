@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import { Stepper } from "../_components/landing/Stepper";
 import { WelcomeSection } from "../_components/landing/WelcomeSection";
 import Footer from "../_components/layout/Footer";
+import { HowToUse } from "../_components/landing/HowToUse";
+import { PreviewSection } from "../_components/landing/PreviewSection";
 
 export default function LandingPage() {
   useEffect(() => {
@@ -29,8 +31,10 @@ export default function LandingPage() {
       <WelcomeSection />
 
       {/* Playground */}
-      <div className="p-2 rounded-4xl border border-zinc-700 flex flex-col gap-8 max-w-[1280px] mb-16 md:mb-52 mx-4 md:mx-20 lg:mx-auto">
+      <div className="p-2 rounded-4xl border border-zinc-700 flex flex-col md:flex-col-reverse gap-8 max-w-[1280px] mb-16 md:mb-52 mx-4 md:mx-20 lg:mx-auto">
+        <HowToUse />
         {/* @Shrimp */}
+
         <div
           id="stackblitz-playground"
           className="aspect-video border border-zinc-700 rounded-3xl hidden md:block min-h-[800px]"
@@ -41,8 +45,11 @@ export default function LandingPage() {
           {"Playground is available\nonly on desktop."}
         </div>
 
-        <Stepper />
+        <Stepper currentStep={2} />
       </div>
+
+      {/* Preview */}
+      <PreviewSection />
 
       {/* Background */}
       <div className="absolute w-full h-full left-0 top-0 flex justify-between px-24 -z-1">

@@ -4,9 +4,9 @@ import { cva } from "class-variance-authority";
 const stepCardVariants = cva("flex flex-col gap-3 relative", {
   variants: {
     status: {
-      complete: "md:bg-zinc-900",
+      complete: "md:bg-[#030303]",
       "in-progress":
-        "md:bg-zinc-900 md:bg-radial-[300%_300%_at_300%_50%] md:from-[#97F7E2] md:to-[#97F7E2]/0",
+        "md:bg-zinc-[#030303] md:bg-radial-[300%_300%_at_300%_50%] md:from-[#97F7E2] md:to-[#97F7E2]/0",
       "not-started": "md:bg-[#030303]",
     },
   },
