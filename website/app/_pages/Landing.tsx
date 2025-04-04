@@ -7,7 +7,7 @@ import { Stepper } from "../_components/landing/Stepper";
 import { WelcomeSection } from "../_components/landing/WelcomeSection";
 import Footer from "../_components/layout/Footer";
 import { HowToUse } from "../_components/landing/HowToUse";
-import { PreviewCard } from "../_components/common/preview-card";
+import { PreviewSection } from "../_components/landing/PreviewSection";
 
 export default function LandingPage() {
   useEffect(() => {
@@ -45,15 +45,7 @@ export default function LandingPage() {
       </div>
 
       {/* Preview */}
-      <section className="flex justify-between w-full pb-[74px] md:justify-end md:pb-[120px]">
-        {/* TODO: Add preview card */}
-        <div></div>
-        <PreviewCard
-          title="Agent OS"
-          href="/"
-          image="/autoview/agent-OS.png"
-        />
-      </section>
+      <PreviewSection />
 
       {/* Background */}
       <div className="absolute w-full h-full left-0 top-0 flex justify-between px-24 -z-1">
