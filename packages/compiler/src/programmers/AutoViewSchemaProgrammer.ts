@@ -111,8 +111,11 @@ export namespace AutoViewSchemaProgrammer {
   ): ts.TypeNode =>
     writeNumeric(() => [
       TypeFactory.keyword("number"),
-      ctx.importer.tag("Type", "int32"),
-    ])(ctx, schema);
+      ctx.importer.tag("Type", schema.minimum === 0 ? "uint32" : "int32"),
+    ])(ctx, {
+      ...schema,
+      minimum: schema.minimum === 0 ? undefined : schema.minimum,
+    });
 
   const writeNumber = (
     ctx: IAutoViewProgrammerContext,

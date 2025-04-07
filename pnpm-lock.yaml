@@ -42,8 +42,8 @@ importers:
         specifier: workspace:^
         version: link:../interface
       '@samchon/openapi':
-        specifier: ^3.2.4
-        version: 3.2.4
+        specifier: ^4.0.0
+        version: 4.0.0
       jsonpath-plus:
         specifier: ^10.3.0
         version: 10.3.0
@@ -51,8 +51,8 @@ importers:
         specifier: ^4.90.0
         version: 4.90.0(ws@8.18.1)(zod@3.24.2)
       typia:
-        specifier: ^8.1.1
-        version: 8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2)
+        specifier: ^9.0.1
+        version: 9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2)
     devDependencies:
       '@types/node':
         specifier: ^22.13.9
@@ -88,8 +88,8 @@ importers:
         specifier: workspace:^
         version: link:../interface
       '@samchon/openapi':
-        specifier: ^3.2.4
-        version: 3.2.4
+        specifier: ^4.0.0
+        version: 4.0.0
       serialize-error:
         specifier: 4.1.0
         version: 4.1.0
@@ -100,8 +100,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       typia:
-        specifier: ^8.1.1
-        version: 8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2)
+        specifier: ^9.0.1
+        version: 9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2)
     devDependencies:
       rimraf:
         specifier: ^6.0.1
@@ -134,15 +134,15 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       typia:
-        specifier: ^8.1.1
-        version: 8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2)
+        specifier: ^9.0.1
+        version: 9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2)
     devDependencies:
       '@eslint/js':
         specifier: ^9.21.0
         version: 9.22.0
       '@ryoppippi/unplugin-typia':
         specifier: ^2.1.4
-        version: 2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))
+        version: 2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))
       '@types/react':
         specifier: ^19.0.10
         version: 19.0.11
@@ -180,11 +180,11 @@ importers:
   packages/interface:
     dependencies:
       '@samchon/openapi':
-        specifier: ^3.2.4
-        version: 3.2.4
+        specifier: ^4.0.0
+        version: 4.0.0
       typia:
-        specifier: ^8.1.1
-        version: 8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2)
+        specifier: ^9.0.1
+        version: 9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2)
     devDependencies:
       '@fortawesome/fontawesome-svg-core':
         specifier: ^6.7.2
@@ -334,8 +334,8 @@ importers:
         specifier: ^0.8.2
         version: 0.8.3
       '@samchon/openapi':
-        specifier: ^3.2.4
-        version: 3.2.4
+        specifier: ^4.0.0
+        version: 4.0.0
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -358,8 +358,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       typia:
-        specifier: ^8.1.1
-        version: 8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2)
+        specifier: ^9.0.1
+        version: 9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2)
     devDependencies:
       '@autoview/agent':
         specifier: workspace:^
@@ -1939,8 +1939,8 @@ packages:
       vite:
         optional: true
 
-  '@samchon/openapi@3.2.4':
-    resolution: {integrity: sha512-vHIBWVLHgMdPGuEQfsvPliO+brYv2K9rXgn+aTJNHsOEWU6Yy8KHC2nL97R74Uqrm6EFGx82fnD/d/rbHp0ifg==}
+  '@samchon/openapi@4.0.0':
+    resolution: {integrity: sha512-fzji+KTrLqb3rD6RZID7N1cTN7aDwd0KAq0fP4rl2p1dHEy3uybqS7bP9BjMWP10k0DvFaS+P+g8+a/PA0FyZw==}
 
   '@shikijs/core@2.5.0':
     resolution: {integrity: sha512-uu/8RExTKtavlpH7XqnVYBrfBkUc20ngXiX9NSrBhOVZYv/7XQRKUyhtkeflY5QsxC0GbJThCerruZfsUaSldg==}
@@ -5269,6 +5269,9 @@ packages:
     resolution: {integrity: sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==}
     engines: {node: '>=6'}
 
+  quansync@0.2.10:
+    resolution: {integrity: sha512-t41VRkMYbkHyCYmOvx/6URnN80H7k4X0lLdBMGsz+maAwrJQYB1djpV6vHrQIBE0WBSGqhtEHrK9U3DWWH8v7A==}
+
   quansync@0.2.8:
     resolution: {integrity: sha512-4+saucphJMazjt7iOM27mbFCk+D9dd/zmgMDCzRZ8MEoBfYp7lAvoN38et/phRQF6wOPMy/OROBGgoWeSKyluA==}
 
@@ -6094,11 +6097,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typia@8.1.1:
-    resolution: {integrity: sha512-R8iLPX52/tY/C/Ff7RhSsiV56JR21jLKbt1CShlrhKIJ6xoGejbXq8+y9RR/vLOo5WmZXi88yb2/zDHWyms2BQ==}
+  typia@9.0.1:
+    resolution: {integrity: sha512-ubx0/jugX1PbNT07jpKI/7+eW4RSe3t9QueIqFDza2Dpmfgb3Epa/YY0IDkLWshzXV1/OjBQh8cADM617xDUnw==}
     hasBin: true
     peerDependencies:
-      '@samchon/openapi': '>=3.2.2 <4.0.0'
+      '@samchon/openapi': '>=4.0.0 <5.0.0'
       typescript: '>=4.8.0 <5.9.0'
 
   ufo@1.5.4:
@@ -7873,7 +7876,7 @@ snapshots:
 
   '@rushstack/eslint-patch@1.11.0': {}
 
-  '@ryoppippi/unplugin-typia@2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))':
+  '@ryoppippi/unplugin-typia@2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))':
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.36.0)
       consola: 3.4.2
@@ -7885,14 +7888,14 @@ snapshots:
       pkg-types: 2.1.0
       type-fest: 4.37.0
       typescript: 5.8.2
-      typia: 8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2)
+      typia: 9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2)
       unplugin: 2.2.2
     optionalDependencies:
       vite: 6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0)
     transitivePeerDependencies:
       - rollup
 
-  '@samchon/openapi@3.2.4': {}
+  '@samchon/openapi@4.0.0': {}
 
   '@shikijs/core@2.5.0':
     dependencies:
@@ -9880,8 +9883,8 @@ snapshots:
       '@typescript-eslint/parser': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       eslint: 9.22.0(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.9.1(eslint-plugin-import@2.31.0)(eslint@9.22.0(jiti@2.4.2))
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@9.22.0(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2))
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.22.0(jiti@2.4.2))
       eslint-plugin-react: 7.37.4(eslint@9.22.0(jiti@2.4.2))
       eslint-plugin-react-hooks: 5.2.0(eslint@9.22.0(jiti@2.4.2))
@@ -9900,7 +9903,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0)(eslint@9.22.0(jiti@2.4.2)):
+  eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.0
@@ -9911,22 +9914,22 @@ snapshots:
       stable-hash: 0.0.5
       tinyglobby: 0.2.12
     optionalDependencies:
-      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@9.22.0(jiti@2.4.2))
+      eslint-plugin-import: 2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@9.22.0(jiti@2.4.2)):
+  eslint-module-utils@2.12.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2)
       eslint: 9.22.0(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-import-resolver-typescript: 3.9.1(eslint-plugin-import@2.31.0)(eslint@9.22.0(jiti@2.4.2))
+      eslint-import-resolver-typescript: 3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1)(eslint@9.22.0(jiti@2.4.2)):
+  eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.8
@@ -9937,7 +9940,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.22.0(jiti@2.4.2)
       eslint-import-resolver-node: 0.3.9
-      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1)(eslint@9.22.0(jiti@2.4.2))
+      eslint-module-utils: 2.12.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint-import-resolver-node@0.3.9)(eslint-import-resolver-typescript@3.9.1(eslint-plugin-import@2.31.0(@typescript-eslint/parser@8.26.1(eslint@9.22.0(jiti@2.4.2))(typescript@5.8.2))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2)))(eslint@9.22.0(jiti@2.4.2))
       hasown: 2.0.2
       is-core-module: 2.16.1
       is-glob: 4.0.3
@@ -11984,7 +11987,7 @@ snapshots:
 
   package-manager-detector@0.2.11:
     dependencies:
-      quansync: 0.2.8
+      quansync: 0.2.10
 
   parent-module@1.0.1:
     dependencies:
@@ -12149,6 +12152,8 @@ snapshots:
       punycode: 2.3.1
 
   punycode@2.3.1: {}
+
+  quansync@0.2.10: {}
 
   quansync@0.2.8: {}
 
@@ -13225,9 +13230,9 @@ snapshots:
 
   typescript@5.8.2: {}
 
-  typia@8.1.1(@samchon/openapi@3.2.4)(typescript@5.8.2):
+  typia@9.0.1(@samchon/openapi@4.0.0)(typescript@5.8.2):
     dependencies:
-      '@samchon/openapi': 3.2.4
+      '@samchon/openapi': 4.0.0
       commander: 10.0.1
       comment-json: 4.2.5
       inquirer: 8.2.6
