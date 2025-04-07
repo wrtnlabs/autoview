@@ -111,8 +111,11 @@ export namespace AutoViewSchemaProgrammer {
   ): ts.TypeNode =>
     writeNumeric(() => [
       TypeFactory.keyword("number"),
-      ctx.importer.tag("Type", "int32"),
-    ])(ctx, schema);
+      ctx.importer.tag("Type", schema.minimum === 0 ? "uint32" : "int32"),
+    ])(ctx, {
+      ...schema,
+      minimum: schema.minimum === 0 ? undefined : schema.minimum,
+    });
 
   const writeNumber = (
     ctx: IAutoViewProgrammerContext,
@@ -130,18 +133,16 @@ export namespace AutoViewSchemaProgrammer {
       if (schema.default !== undefined)
         intersection.push(ctx.importer.tag("Default", schema.default));
       if (schema.minimum !== undefined)
-        intersection.push(
-          ctx.importer.tag(
-            schema.exclusiveMinimum ? "ExclusiveMinimum" : "Minimum",
-            schema.minimum,
-          ),
-        );
+        intersection.push(ctx.importer.tag("Minimum", schema.minimum));
       if (schema.maximum !== undefined)
+        intersection.push(ctx.importer.tag("Maximum", schema.maximum));
+      if (typeof schema.exclusiveMinimum === "number")
         intersection.push(
-          ctx.importer.tag(
-            schema.exclusiveMaximum ? "ExclusiveMaximum" : "Maximum",
-            schema.maximum,
-          ),
+          ctx.importer.tag("ExclusiveMinimum", schema.exclusiveMinimum),
+        );
+      if (typeof schema.exclusiveMaximum === "number")
+        intersection.push(
+          ctx.importer.tag("ExclusiveMaximum", schema.exclusiveMaximum),
         );
       if (schema.multipleOf !== undefined)
         intersection.push(ctx.importer.tag("MultipleOf", schema.multipleOf));
