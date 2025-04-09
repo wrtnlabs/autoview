@@ -4,7 +4,7 @@ import type {
   IAutoViewCompilerResult,
 } from "@autoview/interface";
 import { OpenApi } from "@samchon/openapi";
-import { ChatGptSchemaComposer } from "@samchon/openapi/lib/composers/llm/ChatGptSchemaComposer";
+import { LlmSchemaComposer } from "@samchon/openapi/lib/composers/LlmSchemaComposer";
 import ts from "typescript";
 
 import { TypeScriptCompiler } from "./compilers/TypeScriptCompiler";
@@ -140,12 +140,12 @@ const getJsonSchema = (
     schemas: {},
   };
   const schema: OpenApi.IJsonSchema = isClaudeParameters(props)
-    ? ChatGptSchemaComposer.invert({
+    ? LlmSchemaComposer.invert("claude")({
         components,
         $defs: props.parameters.$defs,
         schema: props.parameters,
       })
-    : ChatGptSchemaComposer.invert({
+    : LlmSchemaComposer.invert("chatgpt")({
         components,
         $defs: props.$defs,
         schema: props.schema,
