@@ -18,6 +18,13 @@ export interface IAutoViewJsonSchemaInput
   unit: IJsonSchemaUnit;
 }
 
+export interface IAutoViewLlmSchemaInput<Model extends ILlmSchema.Model>
+  extends IAutoViewInputSchemaBase<"llm-schema"> {
+  model: Model;
+  schema: ILlmSchema.ModelSchema[Model];
+  $defs?: Record<string, ILlmSchema.ModelSchema[Model]>;
+}
+
 export interface IAutoViewParametersInput<Model extends ILlmSchema.Model>
   extends IAutoViewInputSchemaBase<"parameters"> {
   model: Model;
@@ -26,6 +33,12 @@ export interface IAutoViewParametersInput<Model extends ILlmSchema.Model>
 
 export type IAutoViewInput =
   | IAutoViewJsonSchemaInput
+  | IAutoViewLlmSchemaInput<"chatgpt">
+  | IAutoViewLlmSchemaInput<"claude">
+  | IAutoViewLlmSchemaInput<"gemini">
+  | IAutoViewLlmSchemaInput<"llama">
+  | IAutoViewLlmSchemaInput<"3.0">
+  | IAutoViewLlmSchemaInput<"3.1">
   | IAutoViewParametersInput<"chatgpt">
   | IAutoViewParametersInput<"claude">
   | IAutoViewParametersInput<"gemini">
@@ -113,6 +126,66 @@ export class AutoViewAgent {
       return {
         components: this.config.input.unit.components ?? {},
         schema: this.config.input.unit.schema,
+      } satisfies IAutoViewCompilerMetadata;
+    } else if (this.config.input.type === "llm-schema") {
+      let converted: ConvertedSchema;
+
+      switch (this.config.input.model) {
+        case "chatgpt": {
+          converted = convertSchema<"chatgpt">(
+            "chatgpt",
+            this.config.input.schema,
+            this.config.input.$defs,
+          );
+          break;
+        }
+        case "claude": {
+          converted = convertSchema<"claude">(
+            "claude",
+            this.config.input.schema,
+            this.config.input.$defs,
+          );
+          break;
+        }
+        case "gemini": {
+          converted = convertSchema<"gemini">(
+            "gemini",
+            this.config.input.schema,
+            this.config.input.$defs,
+          );
+          break;
+        }
+        case "llama": {
+          converted = convertSchema<"llama">(
+            "llama",
+            this.config.input.schema,
+            this.config.input.$defs,
+          );
+          break;
+        }
+        case "3.0": {
+          converted = convertSchema<"3.0">(
+            "3.0",
+            this.config.input.schema,
+            this.config.input.$defs,
+          );
+          break;
+        }
+        case "3.1": {
+          converted = convertSchema<"3.1">(
+            "3.1",
+            this.config.input.schema,
+            this.config.input.$defs,
+          );
+          break;
+        }
+      }
+
+      return {
+        components: {
+          schemas: converted.components,
+        },
+        schema: converted.schema,
       } satisfies IAutoViewCompilerMetadata;
     } else if (this.config.input.type === "parameters") {
       let converted: ConvertedSchema;
