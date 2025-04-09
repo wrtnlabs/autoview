@@ -80,9 +80,10 @@ const generateForSwagger = async (
       const agent: AutoViewAgent = new AutoViewAgent({
         vendor,
         input: {
-          type: "parameters",
+          type: "llm-schema",
           model: "chatgpt",
-          parameters: func.parameters,
+          schema: func.output!,
+          $defs: func.parameters.$defs,
         },
         transformFunctionName: name,
         experimentalAllInOne: true,
