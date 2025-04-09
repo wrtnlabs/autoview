@@ -145,7 +145,7 @@ const getJsonSchema = (
         $defs: props.parameters.$defs,
         schema: props.parameters,
       })
-    : LlmSchemaComposer.invert("chatgpt")({
+    : LlmSchemaComposer.invert("claude")({
         components,
         $defs: props.$defs,
         schema: props.schema,
