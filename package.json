@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@autoview/station",
-  "version": "7.0.1",
+  "version": "7.1.0",
   "description": "Automatic viewer components renderer by JSON schema and AI agent",
   "repository": {
     "type": "git",
