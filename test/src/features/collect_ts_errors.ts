@@ -486,10 +486,14 @@ interface ISchema {
 
 async function collectSchemaList(): Promise<ISchema[]> {
   const schemaList: ISchema[] = [];
-  const files = await fs.readdir(path.join(__dirname, "collect_ts_errors"));
+  const files = await fs.readdir(
+    path.join(__dirname, "collect_ts_errors_schemas"),
+  );
 
   for (const file of files) {
-    const stat = await fs.stat(path.join(__dirname, "collect_ts_errors", file));
+    const stat = await fs.stat(
+      path.join(__dirname, "collect_ts_errors_schemas", file),
+    );
 
     if (!stat.isFile()) {
       continue;
@@ -501,7 +505,7 @@ async function collectSchemaList(): Promise<ISchema[]> {
 
     const schema: unknown = JSON.parse(
       await fs.readFile(
-        path.join(__dirname, "collect_ts_errors", file),
+        path.join(__dirname, "collect_ts_errors_schemas", file),
         "utf-8",
       ),
     );

@@ -7,5 +7,6 @@
   },
   "[mdx]": {
     "editor.wordWrap": "on"
-  }
+  },
+  "typescript.tsdk": "packages/agent/node_modules/typescript/lib"
 }

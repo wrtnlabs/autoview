@@ -1,17 +1,18 @@
-import { IChatGptSchema, OpenApi } from "@samchon/openapi";
+import { IClaudeSchema, OpenApi } from "@samchon/openapi";
 
 export type IAutoViewCompilerMetadata =
-  | IAutoViewCompilerMetadata.IOfChatGptParameters
-  | IAutoViewCompilerMetadata.IOfChatGptSchema
+  | IAutoViewCompilerMetadata.IOfClaudeParameters
+  | IAutoViewCompilerMetadata.IOfClaudeSchema
   | IAutoViewCompilerMetadata.IOfJsonSchema;
+
 export namespace IAutoViewCompilerMetadata {
-  export interface IOfChatGptParameters {
-    parameters: IChatGptSchema.IParameters;
+  export interface IOfClaudeParameters {
+    parameters: IClaudeSchema.IParameters;
   }
 
-  export interface IOfChatGptSchema {
-    $defs: Record<string, IChatGptSchema>;
-    schema: IChatGptSchema;
+  export interface IOfClaudeSchema {
+    $defs: Record<string, IClaudeSchema>;
+    schema: IClaudeSchema;
   }
 
   export interface IOfJsonSchema {

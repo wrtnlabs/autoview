@@ -139,7 +139,7 @@ const getJsonSchema = (
   const components: OpenApi.IComponents = {
     schemas: {},
   };
-  const schema: OpenApi.IJsonSchema = isChatGptParameters(props)
+  const schema: OpenApi.IJsonSchema = isClaudeParameters(props)
     ? ChatGptSchemaComposer.invert({
         components,
         $defs: props.parameters.$defs,
@@ -161,8 +161,8 @@ const isJsonSchema = (
 ): props is IAutoViewCompilerMetadata.IOfJsonSchema =>
   (props as IAutoViewCompilerMetadata.IOfJsonSchema).components !== undefined;
 
-const isChatGptParameters = (
+const isClaudeParameters = (
   props: IAutoViewCompilerMetadata,
-): props is IAutoViewCompilerMetadata.IOfChatGptParameters =>
-  (props as IAutoViewCompilerMetadata.IOfChatGptParameters).parameters !==
+): props is IAutoViewCompilerMetadata.IOfClaudeParameters =>
+  (props as IAutoViewCompilerMetadata.IOfClaudeParameters).parameters !==
   undefined;

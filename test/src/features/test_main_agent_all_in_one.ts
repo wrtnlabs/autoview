@@ -3,18 +3,11 @@ import OpenAI from "openai";
 
 import { TestGlobal } from "../TestGlobal";
 
-export async function test_main_agent(): Promise<void> {
+export async function test_main_agent_all_in_one(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
-  const planVendor: IAutoViewVendor = {
-    model: "o3-mini-2025-01-31",
-    isThinkingEnabled: true,
-    api: new OpenAI({
-      apiKey: TestGlobal.env.CHATGPT_API_KEY,
-    }),
-  };
-  const codeVendor: IAutoViewVendor = {
+  const vendor: IAutoViewVendor = {
     model: "o3-mini-2025-01-31",
     isThinkingEnabled: true,
     api: new OpenAI({
@@ -24,13 +17,13 @@ export async function test_main_agent(): Promise<void> {
 
   const agent = new AutoViewAgent<"chatgpt">({
     model: "chatgpt",
-    vendor: planVendor,
-    codeVendor,
+    vendor,
     input: {
       type: "interface",
       parameters: schema as any,
     },
-    transformFunctionName: "transform_generated_by_test_main_agent",
+    transformFunctionName: "transform_generated_by_test_main_agent_all_in_one",
+    experimentalAllInOne: true,
   });
   const { transformTsCode } = await agent.generate();
 

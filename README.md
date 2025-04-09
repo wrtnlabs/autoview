@@ -1,4 +1,5 @@
 # Autoview
+
 [![AutoView Playground](https://wrtnlabs.io/autoview/images/docs/playground.png)](https://wrtnlabs.io/autoview)
 
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/wrtnlabs/autoview/blob/master/LICENSE)
@@ -14,12 +15,23 @@ Frontend developers can use `@autoview` to significantly increase productivity. 
 
 For backend developers, simply bring your `swagger.json` file to `@autoview`. If your API contains 200 functions, it will automatically generate 200 frontend components. If there are 300 API functions, 300 frontend components will be generated automatically.
 
-```typescript
+## Installation
+
+```bash
+npm install @autoview/agent @autoview/ui openai
+npm install -D typia
+npx typia setup
+```
+
+## How to generate the component
+
+```ts
 import { AutoViewAgent } from "@autoview/agent";
 import fs from "fs";
 import OpenAI from "openai";
 import typia, { tags } from "typia";
 
+// 1. Define your own TypeScript interface to display
 interface IMember {
   id: string & tags.Format<"uuid">;
   name: string;
@@ -27,20 +39,24 @@ interface IMember {
   thumbnail: string & tags.Format<"uri"> & tags.ContentMediaType;
 }
 
-const agent: AutoViewAgent = new AutoViewAgent({
+// 2. Setup the AutoView agent
+const agent = new AutoViewAgent<"chatgpt">({
+  model: "chatgpt",
   vendor: {
     api: new OpenAI({ apiKey: "********" }),
     model: "o3-mini",
+    isThinkingEnabled: true,
   },
-  inputSchema: {
-    parameters: typia.llm.parameters<
-      IMember, 
-      "chatgpt", 
-      { reference: true }
-    >(),
+  input: {
+    type: "interface",
+    parameters: typia.llm.parameters<IMember, "chatgpt", { reference: true }>(),
   },
+  transformFunctionName: "transform",
+  experimentalAllInOne: true, // recommended for faster and less-error results
 });
-const result: IAutoViewResult = await agent.generate();
+
+// 3. Get the result!
+const result = await agent.generate();
 
 await fs.promises.writeFile(
   "./src/transformers/transformMember.ts",
@@ -49,21 +65,33 @@ await fs.promises.writeFile(
 );
 ```
 
+## How to use the generated component
 
+```tsx
+import { renderComponent } from "@autoview/ui";
+
+import { transformMember } from "./transformers/transformMember";
+
+export interface MemberComponentProps {
+  member: IMember;
+}
+
+export default function MemberComponent(props: MemberComponentProps) {
+  return <div>{renderComponent(transformMember(props.member))}</div>;
+}
+```
 
 ## Playground
 
-You can experience how typia works by playground website:
+You can experience how the AutoView works by playground website:
 
 💻 https://wrtnlabs.io/autoview/
 
-
-
-
 ## Guide Documents
+
 Check out the document in the [website](https://wrtnlabs.io/autoview):
 
-  - [🚀 Introduction](https://wrtnlabs.io/autoview/docs/)
-  - [📦 Setup](https://wrtnlabs.io/autoview/docs/setup/)
-  - [📜 Principles](https://wrtnlabs.io/autoview/docs/principles/)
-  - [📅 Roadmap](https://wrtnlabs.io/autoview/docs/roadmap/)
+- [🚀 Introduction](https://wrtnlabs.io/autoview/docs/)
+- [📦 Setup](https://wrtnlabs.io/autoview/docs/setup/)
+- [📜 Principles](https://wrtnlabs.io/autoview/docs/principles/)
+- [📅 Roadmap](https://wrtnlabs.io/autoview/docs/roadmap/)
