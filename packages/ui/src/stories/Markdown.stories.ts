@@ -49,7 +49,7 @@ export const Index: StoryObj<typeof Markdown> = {
       "\n" +
       "| --- | --- |" +
       "\n" +
-      "| Frozen yoghurt | 159 |" +
+      "| Frozen yogurt | 159 |" +
       "\n" +
       "| Ice cream sandwich	 | 237 |" +
       "\n" +
