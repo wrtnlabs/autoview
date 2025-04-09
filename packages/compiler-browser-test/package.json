@@ -17,7 +17,7 @@
     "react-dom": "^19.0.0",
     "tgrid": "^1.1.0",
     "tstl": "^3.0.0",
-    "typia": "^9.0.1"
+    "typia": "^9.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

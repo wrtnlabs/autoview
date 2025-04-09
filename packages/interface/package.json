@@ -24,7 +24,7 @@
   ],
   "dependencies": {
     "@samchon/openapi": "^4.0.0",
-    "typia": "^9.0.1"
+    "typia": "^9.1.0"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",

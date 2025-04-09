@@ -19,7 +19,7 @@ For backend developers, simply bring your `swagger.json` file to `@autoview`. If
 
 ```bash
 npm install @autoview/agent @autoview/ui openai
-npm install -D typia
+npm install -D @samchon/openapi typia
 npx typia setup
 ```
 
@@ -40,7 +40,7 @@ interface IMember {
 }
 
 // 2. Setup the AutoView agent
-const agent = new AutoViewAgent<"chatgpt">({
+const agent = new AutoViewAgent({
   model: "chatgpt",
   vendor: {
     api: new OpenAI({ apiKey: "********" }),
@@ -48,10 +48,10 @@ const agent = new AutoViewAgent<"chatgpt">({
     isThinkingEnabled: true,
   },
   input: {
-    type: "interface",
-    parameters: typia.llm.parameters<IMember, "chatgpt", { reference: true }>(),
+    type: "json-schema",
+    unit: typia.json.unit<IMember>(),
   },
-  transformFunctionName: "transform",
+  transformFunctionName: "transformMember",
   experimentalAllInOne: true, // recommended for faster and less-error results
 });
 

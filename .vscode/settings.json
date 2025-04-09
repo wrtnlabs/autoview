@@ -6,7 +6,10 @@
     "source.fixAll.eslint": "explicit"
   },
   "[mdx]": {
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false
   },
   "typescript.tsdk": "packages/agent/node_modules/typescript/lib"
 }

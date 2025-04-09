@@ -65,6 +65,7 @@ import fs from "fs";
 import OpenAI from "openai";
 import typia, { tags } from "typia";
 
+// 1. Define your own TypeScript interface to display
 interface IMember {
   id: string & tags.Format<"uuid">;
   name: string;
@@ -72,20 +73,24 @@ interface IMember {
   thumbnail: string & tags.Format<"uri"> & tags.ContentMediaType;
 }
 
-const agent: AutoViewAgent = new AutoViewAgent({
+// 2. Setup the AutoView agent
+const agent = new AutoViewAgent({
+  model: "chatgpt",
   vendor: {
     api: new OpenAI({ apiKey: "********" }),
     model: "o3-mini",
+    isThinkingEnabled: true,
   },
-  inputSchema: {
-    parameters: typia.llm.parameters<
-      IMember, 
-      "chatgpt", 
-      { reference: true }
-    >(),
+  input: {
+    type: "json-schema",
+    unit: typia.json.unit<IMember>(),
   },
+  transformFunctionName: "transformMember",
+  experimentalAllInOne: true, // recommended for faster and less-error results
 });
-const result: IAutoViewResult = await agent.generate();
+
+// 3. Get the result!
+const result = await agent.generate();
 
 await fs.promises.writeFile(
   "./src/transformers/transformMember.ts",
@@ -97,14 +102,14 @@ await fs.promises.writeFile(
   <Tabs.Tab>
 ```typescript filename="src/generateOpenApi.ts" showLineNumbers copy
 import { AutoViewAgent } from "@autoview/agent";
-import { OpenApi } from "@samchon/openapi";
+import { IHttpLlmApplication, IHttpLlmFunction, HttpLlm } from "@samchon/openapi";
 import fs from "fs";
 import OpenAI from "openai";
 import typia, { tags } from "typia";
 
 const app: IHttpLlmApplication<"chatgpt"> = HttpLlm.application({
   model: "chatgpt",
-  document,
+  document, // TODO: feed your own OpenAPI document here
   options: {
     reference: true,
   },
@@ -117,18 +122,20 @@ const func: IHttpLlmFunction<"chatgpt"> | undefined = app.functions.find(
 if (func === undefined) throw new Error("Function not found");
 else if (func.output === undefined) throw new Error("No return type");
 
-const agent: AutoViewAgent = new AutoViewAgent({
+const agent = new AutoViewAgent({
   vendor: {
     api: new OpenAI({ apiKey: "********" }),
     model: "o3-mini",
   },
-  inputSchema: {
-    $defs: func.parameters.$defs,
-    schema: func.output!,
+  input: {
+    type: "parameters",
+    model: "chatgpt",
+    parameters: func.parameters,
   },
   transformFunctionName: "transformSale",
+  experimentalAllInOne: true, // recommended for faster and less-error results
 });
-const result: IAutoViewResult = await agent.generate();
+const result = await agent.generate();
 
 await fs.promises.writeFile(
   "./src/transformers/transformSale.ts",

@@ -41,6 +41,6 @@
     "@samchon/openapi": "^4.0.0",
     "jsonpath-plus": "^10.3.0",
     "openai": "^4.90.0",
-    "typia": "^9.0.1"
+    "typia": "^9.1.0"
   }
 }

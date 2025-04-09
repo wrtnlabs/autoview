@@ -1,4 +1,5 @@
-import { AutoViewAgent, IAutoViewVendor } from "@autoview/agent";
+import { AutoViewAgent, type IAutoViewVendor } from "@autoview/agent";
+import { type IChatGptSchema } from "@samchon/openapi";
 import OpenAI from "openai";
 
 import { TestGlobal } from "../TestGlobal";
@@ -15,12 +16,12 @@ export async function test_main_agent_all_in_one(): Promise<void> {
     }),
   };
 
-  const agent = new AutoViewAgent<"chatgpt">({
-    model: "chatgpt",
+  const agent = new AutoViewAgent({
     vendor,
     input: {
-      type: "interface",
-      parameters: schema as any,
+      type: "parameters",
+      model: "chatgpt",
+      parameters: schema,
     },
     transformFunctionName: "transform_generated_by_test_main_agent_all_in_one",
     experimentalAllInOne: true,
@@ -198,4 +199,4 @@ const schema = {
       required: ["parent", "id", "code", "parent_id", "name", "created_at"],
     },
   },
-};
+} satisfies IChatGptSchema.IParameters;

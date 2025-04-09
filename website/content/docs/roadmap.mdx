@@ -1,4 +1,27 @@
+## Emitting Modifiable React Components
+
+Tweak the generated React components with your own styles.
+
+The current version of `@autoview` does not emit React components, but only TypeScript transformer functions that must be used with `renderComponent` function from the `@autoview/ui` package.
+
+In the next update, `@autoview` will emit React components that can be easily modified with your own styles, without emitting the `renderComponent` function. By this way, you can introduce and utilize the `@autoview` components in your existing React projects seamlessly.
+
+
+
+
+## Figma Integration
+
+Automatically generate React components from Figma designs.
+
+It is very common to design UI with Figma, and then write each component in React by hand. However, this process is not only time-consuming but also error-prone.
+
+Let the `@autoview` agent generate React components from Figma designs automatically. The `@autoview` agent will analyze the Figma design and generate the prototype of the React components. Seat back and relax, while the `@autoview` agent does the magic.
+
+
+
+
 ## Screenshot Feedback
+
 Learning from rendering results.
 
 The current version of `@autoview` implements three feedback strategies: "compiler," "validation," and "exception." In the next update, `@autoview` will add "screenshot feedback."
@@ -11,6 +34,7 @@ Since AI agents excel at analyzing and interpreting images, the next version of 
 
 
 ## Human Feedback
+
 Conversation with users about rendering results.
 
 The current version of `@autoview` is not a chatbot but a frontend code generator that uses only user-defined type schemas.
@@ -25,6 +49,7 @@ In the next update, it will support the `AutoViewAgent.conversate()` function fo
 
 
 ## Theme System
+
 `@autoview` supports a theme system, allowing you to replace the default renderer `@autoview/ui` with custom options.
 
 However, this custom theme feature is not yet documented.

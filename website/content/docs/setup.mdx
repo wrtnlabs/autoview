@@ -4,6 +4,7 @@ title: AutoView > Guide Documents > Setup
 import { Tabs } from "nextra/components";
 
 ## Playground
+
 [![Playground](/images/docs/playground.png)](https://stackblitz.com/github/wrtnlabs/autoview-stackblitz-playground)
 
 [Playground Website](https://stackblitz.com/github/wrtnlabs/autoview-stackblitz-playground)
@@ -18,32 +19,35 @@ You can replace the provided schemas with your own to generate customized TypeSc
 
 
 ## Code Generator
+
 <Tabs items={["npm", "pnpm", "yarn"]}>
   <Tabs.Tab>
 ```bash filename="Terminal"
-npm install @autoview/agent @autoview/compiler @autoview/interface 
-npm install @samchon/openapi typia
+npm install @autoview/agent @autoview/ui openai
+npm install -D @samchon/openapi typia
 npx typia setup
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash filename="Terminal"
-pnpm install @autoview/compiler @autoview/interface @samchon/openapi typia
+pnpm install @autoview/agent @autoview/ui openai
+pnpm install -D @samchon/openapi typia
 pnpm typia setup
 ```
   </Tabs.Tab>
   <Tabs.Tab>
 ```bash filename="Terminal"
 # YARN BERRY IS NOT SUPPORTED
-yarn add @autoview/compiler @autoview/interface @samchon/openapi typia
+yarn add @autoview/agent @autoview/ui openai
+yarn add -D @samchon/openapi typia
 yarn typia setup
 ```
   </Tabs.Tab>
 </Tabs>
 
-To generate TypeScript frontend code, you need to install `@autoview/agent`, `@autoview/compiler`, `@autoview/interface` packages. Also, you have to install `@samchon/openapi` and `typia` packages too with `npx typia setup` command.
+To generate TypeScript frontend code, you need to install `@autoview/agent`, `@autoview/ui`, `openai` packages. Also, you have to install `@samchon/openapi` and `typia` packages too with `npx typia setup` command.
 
-In the `@autoview/*` packages, first `@autoview/agent` is an AI agent that generates TypeScript frontend code. The second `@autoview/compiler` is a module for compiling the agent written TypeScript code. The last `@autoview/interface` is a module containing primitive interfaces of frontend components.
+In the `@autoview/*` packages, first `@autoview/agent` is an AI agent that generates TypeScript frontend code. The second `@autoview/ui` is a module for rendering the generated TypeScript frontend code. The last `openai` is a module for calling OpenAI API.
 
 The external library [`@samchon/openapi`](https://github.com/samchon/openapi) is a collection of OpenAPI and JSON schema specifications. And [`typia`](https://typia.io) is a library generating JSON schema or random generator function from native TypeScript types. By the way, as `typia` is a type of transformer library patching TypeScript compiler, it needs post setup process by `npx typia setup` command.
 
@@ -55,6 +59,7 @@ import fs from "fs";
 import OpenAI from "openai";
 import typia, { tags } from "typia";
 
+// 1. Define your own TypeScript interface to display
 interface IMember {
   id: string & tags.Format<"uuid">;
   name: string;
@@ -62,20 +67,24 @@ interface IMember {
   thumbnail: string & tags.Format<"uri"> & tags.ContentMediaType;
 }
 
-const agent: AutoViewAgent = new AutoViewAgent({
+// 2. Setup the AutoView agent
+const agent = new AutoViewAgent({
+  model: "chatgpt",
   vendor: {
     api: new OpenAI({ apiKey: "********" }),
     model: "o3-mini",
+    isThinkingEnabled: true,
   },
-  inputSchema: {
-    parameters: typia.llm.parameters<
-      IMember, 
-      "chatgpt", 
-      { reference: true }
-    >(),
+  input: {
+    type: "json-schema",
+    unit: typia.json.unit<IMember>(),
   },
+  transformFunctionName: "transformMember",
+  experimentalAllInOne: true, // recommended for faster and less-error results
 });
-const result: IAutoViewResult = await agent.generate();
+
+// 3. Get the result!
+const result = await agent.generate();
 
 await fs.promises.writeFile(
   "./src/transformers/transformMember.ts",
