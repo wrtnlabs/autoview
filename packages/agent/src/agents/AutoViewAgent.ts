@@ -2,7 +2,7 @@ import {
   IAutoViewCompilerMetadata,
   IAutoViewComponentProps,
 } from "@autoview/interface";
-import { type ILlmSchema, OpenApiTypeChecker } from "@samchon/openapi";
+import { type ILlmSchema } from "@samchon/openapi";
 import typia, { type IJsonSchemaUnit } from "typia";
 
 import { AllInOne, CodeGeneration, PlanGeneration } from "../passes";
@@ -315,22 +315,15 @@ export class AutoViewAgent {
 }
 
 function componentSchema(): IAutoViewCompilerMetadata {
-  if (!OpenApiTypeChecker.isObject(PARAMETERS)) {
-    throw new Error("PARAMETERS is not an object.");
-  }
-
-  return {
-    $defs: PARAMETERS.$defs,
-    schema: PARAMETERS.properties["props"]!,
-  };
+  return typia.json.schema<IAutoViewComponentProps>();
 }
 
-const PARAMETERS = typia.llm.parameters<
-  {
-    props: IAutoViewComponentProps;
-  },
-  "chatgpt",
-  {
-    reference: true;
-  }
->();
+// const PARAMETERS = typia.llm.parameters<
+//   {
+//     props: IAutoViewComponentProps;
+//   },
+//   "chatgpt",
+//   {
+//     reference: true;
+//   }
+// >();
