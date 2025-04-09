@@ -1,18 +1,34 @@
 import { Box, Divider, Link, Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow, Typography } from "@mui/material"
+import { dracula } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { Prism, SyntaxHighlighterProps } from 'react-syntax-highlighter';
+
+// https://github.com/react-syntax-highlighter/react-syntax-highlighter/issues/539
+const SyntaxHighlighter = (Prism as any) as React.FC<SyntaxHighlighterProps>;
 
 export const MarkdownComponents = {
-  // code
-  code: ({ ...props }) => (
-    <code
-      style={{
-        backgroundColor: 'rgba(126, 125, 124, 0.1)',
-        borderRadius: '0.25rem',
+  // Code
+  code: ({ ...props }) => {
+    const { children, className, node, ...rest } = props
+    const match = /language-(\w+)/.exec(className || '')
+
+    return match ? (
+      <SyntaxHighlighter
+        PreTag="div"
+        children={String(children).replace(/\n$/, '')}
+        language={match[1]}
+        style={dracula}
+      />
+    ) : (
+      <Box component="code" {...rest} className={className} sx={{
+        backgroundColor: 'rgba(126, 126, 126, 0.1)',
         padding: '0.25rem 0.5rem',
-      }}
-    >
-      {props.children}
-    </code>
-  ),
+        borderRadius: '0.25rem',
+        color: 'text.primary',
+      }}>
+        {children}
+      </Box>
+    )
+  },
 
   // Divider
   hr: ({ ...props }) => (
