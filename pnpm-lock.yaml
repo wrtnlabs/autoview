@@ -306,6 +306,12 @@ importers:
       react:
         specifier: ^17.0.0
         version: 17.0.2
+      react-markdown:
+        specifier: ^9.0.0
+        version: 9.1.0(@types/react@17.0.84)(react@17.0.2)
+      remark-gfm:
+        specifier: ^4.0.1
+        version: 4.0.1
       rollup:
         specifier: ^4.34.1
         version: 4.36.0
@@ -12215,6 +12221,24 @@ snapshots:
   react-is@17.0.2: {}
 
   react-is@19.0.0: {}
+
+  react-markdown@9.1.0(@types/react@17.0.84)(react@17.0.2):
+    dependencies:
+      '@types/hast': 3.0.4
+      '@types/mdast': 4.0.4
+      '@types/react': 17.0.84
+      devlop: 1.1.0
+      hast-util-to-jsx-runtime: 2.3.6
+      html-url-attributes: 3.0.1
+      mdast-util-to-hast: 13.2.0
+      react: 17.0.2
+      remark-parse: 11.0.0
+      remark-rehype: 11.1.1
+      unified: 11.0.5
+      unist-util-visit: 5.0.0
+      vfile: 6.0.3
+    transitivePeerDependencies:
+      - supports-color
 
   react-markdown@9.1.0(@types/react@19.0.11)(react@19.0.0):
     dependencies:

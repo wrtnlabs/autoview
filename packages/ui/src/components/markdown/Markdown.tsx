@@ -1,12 +1,11 @@
 import { IAutoViewMarkdownProps } from "@autoview/interface";
 
-import { renderComponent } from "../../renderer";
 import { TransformToComponentProps } from "../../utils/TransformToComponentProps";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 export interface MarkdownProps
-  extends TransformToComponentProps<IAutoViewMarkdownProps> {}
+  extends TransformToComponentProps<IAutoViewMarkdownProps> { }
 
-// TODO: Markdown renderer
 export const Markdown = ({ content }: MarkdownProps) => {
-  return renderComponent(content);
+  return <MarkdownRenderer>{content}</MarkdownRenderer>
 };

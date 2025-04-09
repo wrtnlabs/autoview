@@ -64,6 +64,8 @@
     "embla-carousel-react": "^8.5.2",
     "playwright": "^1.51.0",
     "react": "^17.0.0",
+    "react-markdown": "^9.0.0",
+    "remark-gfm": "^4.0.1",
     "rollup": "^4.34.1",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-terser": "^7.0.2",
