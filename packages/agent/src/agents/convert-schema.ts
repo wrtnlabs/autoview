@@ -12,7 +12,7 @@ import { LlmSchemaComposer } from "@samchon/openapi/lib/composers/LlmSchemaCompo
 
 export interface ConvertedSchema {
   schema: OpenApi.IJsonSchema;
-  components: Record<string, OpenApi.IJsonSchema>;
+  components: OpenApi.IComponents;
 }
 
 export function convertSchema<Model extends ILlmSchema.Model>(

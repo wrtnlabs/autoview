@@ -180,11 +180,8 @@ export class AutoViewAgent {
           break;
         }
       }
-
       return {
-        components: {
-          schemas: converted.components,
-        },
+        components: converted.components,
         schema: converted.schema,
       } satisfies IAutoViewCompilerMetadata;
     } else if (this.config.input.type === "parameters") {
@@ -235,11 +232,8 @@ export class AutoViewAgent {
           break;
         }
       }
-
       return {
-        components: {
-          schemas: converted.components,
-        },
+        components: converted.components,
         schema: converted.schema,
       } satisfies IAutoViewCompilerMetadata;
     } else {
