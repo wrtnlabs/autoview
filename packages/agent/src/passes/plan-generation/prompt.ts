@@ -3,6 +3,7 @@ import { renderPrompt } from "../../core/Prompt";
 export interface PromptContext {
   input_schema: unknown;
   component_types: string;
+  instruction: string;
 }
 
 const rawPrompt = `
@@ -90,6 +91,14 @@ Here's an example of the desired output structure:
 </planning>
 
 Ensure that you include all of the above sections in your response, wrapped inside dedicated tags. If you don't, your response will be rejected.
+
+Finally, here is the extra instruction to guide your plan:
+
+<instruction>
+{{instruction}}
+</instruction>
+
+Pay close attention to the instruction and do your best to follow it.
 
 Now, please provide your analysis process and final plan.
 `;

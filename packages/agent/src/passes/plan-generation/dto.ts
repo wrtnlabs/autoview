@@ -6,6 +6,7 @@ export interface Input {
   vendor: IAutoViewVendor;
   inputSchema: IAutoViewCompilerMetadata;
   componentSchema: IAutoViewCompilerMetadata;
+  instruction?: string;
 }
 
 export interface Output {

@@ -2,6 +2,7 @@ import { renderPrompt } from "../../core/Prompt";
 
 export interface PromptContext {
   boilerplate: string;
+  instruction: string;
 }
 
 const rawPrompt = `
@@ -17,6 +18,9 @@ b. Transforms the input data if needed
 c. Produces output data of type \`IAutoView.IAutoViewComponentProps\`
 
 Ensure that your function:
+- Visualize the input data effectively; you should prefer icons, images, and other visual elements to make the UI more engaging, instead of just putting the data in a text format (as people does not like to read text)
+- If text representation is unavoidable, first consider using markdown components instead of plain text
+- The final UI will be rendered in a web browser, including mobile devices; make sure the UI is responsive and easy to use on small screens
 - Uses the provided types IAutoViewTransformerInputType and IAutoView.IAutoViewComponentProps (do not define these types yourself)
 - Implements all necessary data transformations
 - Handles potential edge cases and invalid input gracefully
@@ -25,6 +29,12 @@ Ensure that your function:
 - Your code is for production use, so you NEVER use any mock-ups, placeholders, or any hard-coded fake data
 - You are NOT generating the code for React; you are generating a TypeScript function that just transforms the input data into the output data
 - Do your best to make the function is easy to modify by human users
+
+Also, here is the extra instruction to guide your code; do your best to follow it, when composing the UI:
+
+<instruction>
+{{instruction}}
+</instruction>
 
 Provide your TypeScript function inside <typescript_function> tags. The function should have the following signature:
 

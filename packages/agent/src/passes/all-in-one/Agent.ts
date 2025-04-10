@@ -42,6 +42,7 @@ export class Agent implements AgentBase<Input, Output> {
     );
     const systemPrompt = prompt({
       boilerplate,
+      instruction: input.instruction ?? "no instruction provided",
     });
 
     const results = await new LlmProxy<Input, Output>()

@@ -9,6 +9,7 @@ export interface Input {
   vendor: IAutoViewVendor;
   inputSchema: IAutoViewCompilerMetadata;
   componentSchema: IAutoViewCompilerMetadata;
+  instruction?: string;
   transformFunctionName: string;
   onCompilerError?: (
     tsCode: string,

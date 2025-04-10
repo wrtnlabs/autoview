@@ -41,6 +41,7 @@ export class Agent implements AgentBase<Input, Output> {
     const systemPrompt = prompt({
       input_schema: input.inputSchema,
       component_types: componentTypes,
+      instruction: input.instruction ?? "no instruction provided",
     });
 
     const results = await new LlmProxy<Input, Output>()
