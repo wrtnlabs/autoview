@@ -57,6 +57,16 @@ All the AutoView interfaces have a pattern like \`IAutoView.IAutoViewXProps\`, w
 - \`IAutoView.IAutoViewDataListProps\`
 The only exception is the \`IAutoViewTransformerInputType\` type and its sub-types and components, which is not part of the \`IAutoView\` namespace.
 
+You must understand that some of the AutoView components accept \`childrenProps\` as an array of components or a single component. For example, \`IAutoView.IAutoViewVerticalCardProps.childrenProps\` is an array of components, but \`IAutoView.IAutoViewCardHeaderProps.startElement\` is a single component.
+But you cannot put any components into that property; each of them accepts a specific type of component. For example, \`IAutoView.IAutoViewCardHeaderProps.startElement\` only accepts below type of components:
+- \`IAutoView.IAutoViewAvatarProps\`
+- \`IAutoView.IAutoViewIconProps\`
+- \`IAutoView.IAutoViewChipProps\`
+- \`IAutoView.IAutoViewBadgeProps\`
+- \`IAutoView.IAutoViewIconButtonProps\`
+- \`IAutoView.IAutoViewTextProps\`
+You must always follow these constraints when composing the UI; pay extra attention to their allowed types.
+
 Do not copy-paste and/or repeat the boilerplate code in your response. They will be attached automatically by the compiler.
 
 Your response should follow this structure:
