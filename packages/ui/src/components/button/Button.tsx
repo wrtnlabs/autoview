@@ -10,8 +10,17 @@ export interface ButtonProps
 export const Button = (props: ButtonProps) => {
   const { startElement, endElement, label } = props;
 
+  function onClickHrefButton() {
+    if (!props.href) return;
+    window.open(props.href, "_blank");
+  }
+
   return (
-    <BaseButton sx={baseStyle} {...transformButtonProps(props)}>
+    <BaseButton
+      sx={baseStyle}
+      {...transformButtonProps(props)}
+      onClick={onClickHrefButton}
+    >
       {renderComponent(startElement)}
       {renderComponent(label)}
       {renderComponent(endElement)}
