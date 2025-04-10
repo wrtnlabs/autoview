@@ -21,6 +21,16 @@ export interface IAutoViewIconProps
    * - `caret-down`
    */
   id: string;
+  /**
+   * Color of the icon.
+   *
+   * It must be a valid color scale name, e.g. `red`, `blue`, `green`, etc.
+   *
+   * It does not support variant colors such as `primary`, `secondary`, `tertiary`, etc.
+   */
   color?: IAutoViewColor.IScale;
+  /**
+   * Size of the icon.
+   */
   size?: IAutoViewSize.IIconSize;
 }
