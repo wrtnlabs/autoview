@@ -146,7 +146,7 @@ Autoview is open-source and available under the [MIT License](https://github.com
 ---
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/2a143ef8-6a9d-4258-96ce-fb3a59137a5b" width="200" alt="Wrtn Technologies Logo" />
+  <img src="https://github.com/user-attachments/assets/2a143ef8-6a9d-4258-96ce-fb3a59137a5b" alt="Wrtn Technologies Logo" />
 </p>
 <div align="center">
   Autoview is maintained by <a href="https://wrtnlabs.io">Wrtn Technologies</a> &mdash; Empowering developers to automate frontend viewer creation.
