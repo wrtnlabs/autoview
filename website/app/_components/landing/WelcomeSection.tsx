@@ -6,8 +6,8 @@ import Image from "next/image";
 
 export function WelcomeSection() {
   return (
-    <div className="h-screen relative flex flex-col py-20 items-center justify-center gap-[38px] overflow-hidden md:h-fit md:justify-start">
-      <div className="relative w-44 h-44 md:w-[300px] md:h-[300px]">
+    <div className="h-screen relative flex flex-col py-20 items-center justify-center overflow-hidden md:h-fit md:justify-start">
+      <div className="relative w-[400px] h-[400px] aspect-square">
         <Image src="/autoview/logo.png" alt="logo" fill />
       </div>
 
@@ -17,12 +17,13 @@ export function WelcomeSection() {
           AI-Powered Instant UI Generation
         </p>
       </section>
+
       <Link
         href="https://github.com/wrtnlabs/autoview"
         target="_blank"
-        className="z-10"
+        className="z-10 mt-8"
       >
-        <Button variant="primary" className="w-full md:w-auto">
+        <Button variant="primary" className="w-full md:w-auto bg-white text-[#181818] hover:bg-white hover:text-[#181818]">
           Github <GithubIcon width={24} height={24} className="h-6 w-6" />
         </Button>
       </Link>
