@@ -5,7 +5,6 @@ import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 
 import "./globals.css";
-import ToastProvider from "./_providers/ToastProvider";
 
 export const metadata = {
   // ... your metadata API
@@ -98,7 +97,6 @@ export default async function RootLayout(props) {
         // ...Your additional theme config options
         >
           {props.children}
-          <ToastProvider />
         </Layout>
       </body>
     </html>
