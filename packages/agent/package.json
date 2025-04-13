@@ -38,9 +38,9 @@
   "dependencies": {
     "@autoview/compiler": "workspace:^",
     "@autoview/interface": "workspace:^",
-    "@samchon/openapi": "^4.0.0",
+    "@samchon/openapi": "^4.1.0",
     "jsonpath-plus": "^10.3.0",
     "openai": "^4.90.0",
-    "typia": "^9.1.0"
+    "typia": "^9.1.1"
   }
 }
