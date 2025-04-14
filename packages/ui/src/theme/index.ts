@@ -4,7 +4,7 @@ import components from "./components";
 import { dark, light } from "./palette";
 import typography from "./typography";
 
-const customTheme = {
+export const autoviewTheme = {
   typography,
   cssVariables: true,
   spacing: 4,
@@ -15,11 +15,11 @@ const customTheme = {
 };
 
 export const lightTheme = createTheme({
-  ...customTheme,
+  ...autoviewTheme,
   palette: light,
 });
 
 export const darkTheme = createTheme({
-  ...customTheme,
+  ...autoviewTheme,
   palette: dark,
 });
