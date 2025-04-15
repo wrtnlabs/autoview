@@ -42,8 +42,8 @@ importers:
         specifier: workspace:^
         version: link:../interface
       '@samchon/openapi':
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^4.1.0
+        version: 4.1.0
       jsonpath-plus:
         specifier: ^10.3.0
         version: 10.3.0
@@ -51,8 +51,8 @@ importers:
         specifier: ^4.90.0
         version: 4.90.0(ws@8.18.1)(zod@3.24.2)
       typia:
-        specifier: ^9.1.0
-        version: 9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2)
+        specifier: ^9.1.1
+        version: 9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2)
     devDependencies:
       '@types/node':
         specifier: ^22.13.9
@@ -88,8 +88,8 @@ importers:
         specifier: workspace:^
         version: link:../interface
       '@samchon/openapi':
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^4.1.0
+        version: 4.1.0
       serialize-error:
         specifier: 4.1.0
         version: 4.1.0
@@ -100,8 +100,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       typia:
-        specifier: ^9.1.0
-        version: 9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2)
+        specifier: ^9.1.1
+        version: 9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2)
     devDependencies:
       rimraf:
         specifier: ^6.0.1
@@ -134,15 +134,15 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       typia:
-        specifier: ^9.1.0
-        version: 9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2)
+        specifier: ^9.1.1
+        version: 9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2)
     devDependencies:
       '@eslint/js':
         specifier: ^9.21.0
         version: 9.22.0
       '@ryoppippi/unplugin-typia':
         specifier: ^2.1.4
-        version: 2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))
+        version: 2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))
       '@types/react':
         specifier: ^19.0.10
         version: 19.0.11
@@ -180,11 +180,11 @@ importers:
   packages/interface:
     dependencies:
       '@samchon/openapi':
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^4.1.0
+        version: 4.1.0
       typia:
-        specifier: ^9.1.0
-        version: 9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2)
+        specifier: ^9.1.1
+        version: 9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2)
     devDependencies:
       '@fortawesome/fontawesome-svg-core':
         specifier: ^6.7.2
@@ -266,7 +266,7 @@ importers:
         version: 8.6.7(storybook@8.6.7(prettier@3.5.3))
       '@storybook/blocks':
         specifier: ^8.6.4
-        version: 8.6.7(react-dom@17.0.2(react@19.0.0))(react@17.0.2)(storybook@8.6.7(prettier@3.5.3))
+        version: 8.6.7(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(storybook@8.6.7(prettier@3.5.3))
       '@storybook/experimental-addon-test':
         specifier: ^8.6.4
         version: 8.6.7(@vitest/browser@3.0.9)(@vitest/runner@3.0.9)(react-dom@17.0.2(react@19.0.0))(react@17.0.2)(storybook@8.6.7(prettier@3.5.3))(vitest@3.0.9)
@@ -365,8 +365,8 @@ importers:
         specifier: ^0.8.2
         version: 0.8.3
       '@samchon/openapi':
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^4.1.0
+        version: 4.1.0
       chalk:
         specifier: 4.1.2
         version: 4.1.2
@@ -389,8 +389,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
       typia:
-        specifier: ^9.1.0
-        version: 9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2)
+        specifier: ^9.1.1
+        version: 9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2)
     devDependencies:
       '@autoview/agent':
         specifier: workspace:^
@@ -473,9 +473,6 @@ importers:
       react-markdown:
         specifier: ^9.0.0
         version: 9.1.0(@types/react@19.0.11)(react@19.0.0)
-      react-toastify:
-        specifier: ^11.0.5
-        version: 11.0.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       react-use:
         specifier: ^17.6.0
         version: 17.6.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -1970,8 +1967,8 @@ packages:
       vite:
         optional: true
 
-  '@samchon/openapi@4.0.0':
-    resolution: {integrity: sha512-fzji+KTrLqb3rD6RZID7N1cTN7aDwd0KAq0fP4rl2p1dHEy3uybqS7bP9BjMWP10k0DvFaS+P+g8+a/PA0FyZw==}
+  '@samchon/openapi@4.1.0':
+    resolution: {integrity: sha512-UUFBI6n8R9+V0xt4scGEaQ0rib04cOVARhu7DXBZuEG0ExiTFPoiW49+qYFwE44LjYpfxBIlNkd+rcpiRGhsNA==}
 
   '@shikijs/core@2.5.0':
     resolution: {integrity: sha512-uu/8RExTKtavlpH7XqnVYBrfBkUc20ngXiX9NSrBhOVZYv/7XQRKUyhtkeflY5QsxC0GbJThCerruZfsUaSldg==}
@@ -5471,12 +5468,6 @@ packages:
     peerDependencies:
       react: '>= 0.14.0'
 
-  react-toastify@11.0.5:
-    resolution: {integrity: sha512-EpqHBGvnSTtHYhCPLxML05NLY2ZX0JURbAdNYa6BUkk+amz4wbKBQvoKQAB0ardvSarUBuY4Q4s1sluAzZwkmA==}
-    peerDependencies:
-      react: ^18 || ^19
-      react-dom: ^18 || ^19
-
   react-transition-group@4.4.5:
     resolution: {integrity: sha512-pZcd1MCJoiKiBR2NRxeCRg13uCXbydPnmB4EOeRrY7480qNWO8IIgQG6zlDkm6uRMsURXPuKq0GWtiM59a5Q6g==}
     peerDependencies:
@@ -6206,8 +6197,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typia@9.1.0:
-    resolution: {integrity: sha512-cUMYicsrQ8UitYDHmoWKcUQYaNwzbj+SN57zSIkU1kpTQZeFcFdLXLIS+JIyrtqVVY7GiaDDA5t4lSqwhWw/Bg==}
+  typia@9.1.1:
+    resolution: {integrity: sha512-fMgrd2VLGZoDjZZwWlgriotUiG38UEzcMD0ToJOhQ0bPr966mit0ZEy5TnDhm2RidXfejZOqHb7iOoTG3VHd4w==}
     hasBin: true
     peerDependencies:
       '@samchon/openapi': '>=4.0.0 <5.0.0'
@@ -7992,7 +7983,7 @@ snapshots:
 
   '@rushstack/eslint-patch@1.11.0': {}
 
-  '@ryoppippi/unplugin-typia@2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))':
+  '@ryoppippi/unplugin-typia@2.1.4(rollup@4.36.0)(typescript@5.8.2)(typia@9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2))(vite@6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0))':
     dependencies:
       '@rollup/pluginutils': 5.1.4(rollup@4.36.0)
       consola: 3.4.2
@@ -8004,14 +7995,14 @@ snapshots:
       pkg-types: 2.1.0
       type-fest: 4.37.0
       typescript: 5.8.2
-      typia: 9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2)
+      typia: 9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2)
       unplugin: 2.2.2
     optionalDependencies:
       vite: 6.2.2(@types/node@22.13.14)(jiti@2.4.2)(lightningcss@1.29.2)(terser@5.39.0)(yaml@2.7.0)
     transitivePeerDependencies:
       - rollup
 
-  '@samchon/openapi@4.0.0': {}
+  '@samchon/openapi@4.1.0': {}
 
   '@shikijs/core@2.5.0':
     dependencies:
@@ -8142,9 +8133,9 @@ snapshots:
       memoizerific: 1.11.3
       storybook: 8.6.7(prettier@3.5.3)
 
-  '@storybook/blocks@8.6.7(react-dom@17.0.2(react@19.0.0))(react@17.0.2)(storybook@8.6.7(prettier@3.5.3))':
+  '@storybook/blocks@8.6.7(react-dom@17.0.2(react@17.0.2))(react@17.0.2)(storybook@8.6.7(prettier@3.5.3))':
     dependencies:
-      '@storybook/icons': 1.4.0(react-dom@17.0.2(react@19.0.0))(react@17.0.2)
+      '@storybook/icons': 1.4.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       storybook: 8.6.7(prettier@3.5.3)
       ts-dedent: 2.2.0
     optionalDependencies:
@@ -8201,7 +8192,7 @@ snapshots:
   '@storybook/experimental-addon-test@8.6.7(@vitest/browser@3.0.9)(@vitest/runner@3.0.9)(react-dom@17.0.2(react@19.0.0))(react@17.0.2)(storybook@8.6.7(prettier@3.5.3))(vitest@3.0.9)':
     dependencies:
       '@storybook/global': 5.0.0
-      '@storybook/icons': 1.4.0(react-dom@17.0.2(react@19.0.0))(react@17.0.2)
+      '@storybook/icons': 1.4.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)
       '@storybook/instrumenter': 8.6.7(storybook@8.6.7(prettier@3.5.3))
       '@storybook/test': 8.6.7(storybook@8.6.7(prettier@3.5.3))
       polished: 4.3.1
@@ -8218,7 +8209,7 @@ snapshots:
 
   '@storybook/global@5.0.0': {}
 
-  '@storybook/icons@1.4.0(react-dom@17.0.2(react@19.0.0))(react@17.0.2)':
+  '@storybook/icons@1.4.0(react-dom@17.0.2(react@17.0.2))(react@17.0.2)':
     dependencies:
       react: 17.0.2
       react-dom: 17.0.2(react@19.0.0)
@@ -12481,12 +12472,6 @@ snapshots:
       react: 17.0.2
       refractor: 3.6.0
 
-  react-toastify@11.0.5(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
-    dependencies:
-      clsx: 2.1.1
-      react: 19.0.0
-      react-dom: 19.0.0(react@19.0.0)
-
   react-transition-group@4.4.5(react-dom@17.0.2(react@17.0.2))(react@17.0.2):
     dependencies:
       '@babel/runtime': 7.26.10
@@ -13453,9 +13438,9 @@ snapshots:
 
   typescript@5.8.3: {}
 
-  typia@9.1.0(@samchon/openapi@4.0.0)(typescript@5.8.2):
+  typia@9.1.1(@samchon/openapi@4.1.0)(typescript@5.8.2):
     dependencies:
-      '@samchon/openapi': 4.0.0
+      '@samchon/openapi': 4.1.0
       commander: 10.0.1
       comment-json: 4.2.5
       inquirer: 8.2.6

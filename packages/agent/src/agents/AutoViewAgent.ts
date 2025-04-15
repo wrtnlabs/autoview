@@ -35,12 +35,14 @@ export type IAutoViewInput =
   | IAutoViewJsonSchemaInput
   | IAutoViewLlmSchemaInput<"chatgpt">
   | IAutoViewLlmSchemaInput<"claude">
+  | IAutoViewLlmSchemaInput<"deepseek">
   | IAutoViewLlmSchemaInput<"gemini">
   | IAutoViewLlmSchemaInput<"llama">
   | IAutoViewLlmSchemaInput<"3.0">
   | IAutoViewLlmSchemaInput<"3.1">
   | IAutoViewParametersInput<"chatgpt">
   | IAutoViewParametersInput<"claude">
+  | IAutoViewParametersInput<"deepseek">
   | IAutoViewParametersInput<"gemini">
   | IAutoViewParametersInput<"llama">
   | IAutoViewParametersInput<"3.0">
@@ -144,7 +146,10 @@ export class AutoViewAgent {
           );
           break;
         }
-        case "claude": {
+        case "claude":
+        case "deepseek":
+        case "llama":
+        case "3.1": {
           converted = convertSchema<"claude">(
             "claude",
             this.config.input.schema,
@@ -160,25 +165,9 @@ export class AutoViewAgent {
           );
           break;
         }
-        case "llama": {
-          converted = convertSchema<"llama">(
-            "llama",
-            this.config.input.schema,
-            this.config.input.$defs,
-          );
-          break;
-        }
         case "3.0": {
           converted = convertSchema<"3.0">(
             "3.0",
-            this.config.input.schema,
-            this.config.input.$defs,
-          );
-          break;
-        }
-        case "3.1": {
-          converted = convertSchema<"3.1">(
-            "3.1",
             this.config.input.schema,
             this.config.input.$defs,
           );
@@ -201,7 +190,10 @@ export class AutoViewAgent {
           );
           break;
         }
-        case "claude": {
+        case "claude":
+        case "deepseek":
+        case "llama":
+        case "3.1": {
           converted = convertSchema<"claude">(
             "claude",
             this.config.input.parameters,
@@ -216,24 +208,8 @@ export class AutoViewAgent {
           );
           break;
         }
-        case "llama": {
-          converted = convertSchema<"llama">(
-            "llama",
-            this.config.input.parameters,
-            this.config.input.parameters.$defs,
-          );
-          break;
-        }
         case "3.0": {
           converted = convertSchema<"3.0">("3.0", this.config.input.parameters);
-          break;
-        }
-        case "3.1": {
-          converted = convertSchema<"3.1">(
-            "3.1",
-            this.config.input.parameters,
-            this.config.input.parameters.$defs,
-          );
           break;
         }
       }

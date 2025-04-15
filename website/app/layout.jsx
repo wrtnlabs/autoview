@@ -1,11 +1,11 @@
-import { Footer, Layout, Navbar } from "nextra-theme-docs";
+import { Layout, Navbar } from "nextra-theme-docs";
 // Required for theme styles, previously was imported under the hood
 import "nextra-theme-docs/style.css";
 import { Head } from "nextra/components";
 import { getPageMap } from "nextra/page-map";
 
+import Footer from "./_components/layout/Footer";
 import "./globals.css";
-import ToastProvider from "./_providers/ToastProvider";
 
 export const metadata = {
   // ... your metadata API
@@ -17,11 +17,6 @@ const navbar = (
     logo={<b>Autoview</b>}
     projectLink="https://github.com/wrtnlabs/autoview"
   />
-);
-const footer = (
-  <Footer className="flex-col items-center md:items-start">
-    MIT {new Date().getFullYear()} © Wrtn Technologies.
-  </Footer>
 );
 
 export default async function RootLayout(props) {
@@ -90,15 +85,14 @@ export default async function RootLayout(props) {
           docsRepositoryBase="https://github.com/wrtnlabs/autoview/tree/main/website"
           editLink="Edit this page on GitHub"
           sidebar={{ defaultMenuCollapseLevel: 1 }}
-          footer={footer}
+          footer={<Footer />}
           nextThemes={{
             defaultTheme: "dark",
           }}
           darkMode={false}
-        // ...Your additional theme config options
+          // ...Your additional theme config options
         >
           {props.children}
-          <ToastProvider />
         </Layout>
       </body>
     </html>

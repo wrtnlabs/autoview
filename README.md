@@ -1,21 +1,64 @@
-# Autoview
+<p align="center">
+  <img src="./docs/logo.png" width="300" height="300" alt="Autoview Logo" />
+</p>
+<h1 align="center">Autoview</h1>
+<p align="center">
+<a href="https://www.npmjs.com/package/@autoview/agent">
+  <img src="https://img.shields.io/npm/v/@autoview/agent?style=for-the-badge" alt="npm version">
+</a>
+<a href="https://www.npmjs.com/package/@autoview/agent">
+  <img src="https://img.shields.io/npm/dm/@autoview/agent?style=for-the-badge" alt="Downloads">
+</a>
+<a href="https://opensource.org/licenses/MIT">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License">
+</a>
+<a href="https://github.com/samchon/typia">
+    <img src="https://img.shields.io/badge/poweredby-Typia-blue?style=for-the-badge" alt="Badge">
+</a>
+<a href="https://discord.gg/aMhRmzkqCx">
+  <img src="https://dcbadge.limes.pink/api/server/https://discord.gg/aMhRmzkqCx" alt="Discord">
+</a>
+</p>
+
+<p align="center">
+    <strong>Turn your blueprint into UI components</strong>
+  <br>
+    <span>Automated Frontend Viewer Development</span>
+</p>
+
+---
 
 [![AutoView Playground](https://wrtnlabs.io/autoview/images/docs/playground.png)](https://wrtnlabs.io/autoview)
 
-[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/wrtnlabs/autoview/blob/master/LICENSE)
-[![npm version](https://img.shields.io/npm/v/@autoview/interface.svg)](https://www.npmjs.com/package/@autoview/interface)
-[![Downloads](https://img.shields.io/npm/dm/@autoview/interface.svg)](https://www.npmjs.com/package/@autoview/interface)
-[![Build Status](https://github.com/wrtnlabs/autoview/workflows/build/badge.svg)](https://github.com/wrtnlabs/autoview/actions?query=workflow%3Abuild)
+<h3 align="center">
 
-Turn your blueprint into UI components.
+[Homepage](https://wrtnlabs.io/autoview) // [Documentation](https://wrtnlabs.io/autoview/docs) // [Tutorials](https://youtube.com) // [Playground](https://wrtnlabs.io/autoview/images/docs/playground.png)
 
-`@autoview` is a code generator that produces TypeScript frontend component from schema information. This schema information can be derived from either TypeScript types or Swagger/OpenAPI documents.
+</h3>
 
-Frontend developers can use `@autoview` to significantly increase productivity. Simply define TypeScript types, and the frontend code will be generated immediately. You can then refine and enhance this code to complete your application.
+--- 
 
-For backend developers, simply bring your `swagger.json` file to `@autoview`. If your API contains 200 functions, it will automatically generate 200 frontend components. If there are 300 API functions, 300 frontend components will be generated automatically.
+_Autoview_ is a code generator that transforms your schema into fully functional TypeScript frontend components. Whether you define your schema as TypeScript types or provide a Swagger/OpenAPI document, _Autoview_ automatically generates the corresponding UI code with precision.
 
-## Installation
+For frontend developers, this means you can instantly see your design take shape. Simply define your TypeScript types, and watch as _Autoview_ produces the necessary code for you to refine and integrate into your application.
+
+Backend developers benefit as well—just supply your swagger.json file and let _Autoview_ work its magic. Whether your API defines 200 functions or 300, the tool scales effortlessly by generating an equal number of frontend components, streamlining integration and boosting productivity.
+
+## 🚀 Key Features
+
+- **🤖 Automated Viewer Generation**: Uses LLM function calling to automatically compose React viewer components.
+- **💻 TypeScript Code Generation**: Generate compile-ready TypeScript code based on your schema, easing the path for rapid prototyping.
+- **🔌 Swagger/OpenAPI Integration**: Automatically generate viewer components for every API operation using your Swagger (OpenAPI) document.
+- **✅ LLM Function Calling & Validation**: Combines LLM function calling with real-time compiler and validator feedback to achieve high reliability.
+- **🚀 Boost Developer Productivity**: Streamline repetitive frontend tasks with automation that integrates directly into your workflow.
+
+---
+
+## ⚡ Quickstart
+
+### Step 1. Setup
+
+Install `@autoview/agent` along with its required dependencies:
 
 ```bash
 npm install @autoview/agent @autoview/ui openai
@@ -23,23 +66,26 @@ npm install -D @samchon/openapi typia
 npx typia setup
 ```
 
-## How to generate the component
+### Step 2. Define your own TypeScript interface to display
 
-```ts
-import { AutoViewAgent } from "@autoview/agent";
-import fs from "fs";
-import OpenAI from "openai";
-import typia, { tags } from "typia";
+```typescript
+import typia, type { tags } from "typia";
 
-// 1. Define your own TypeScript interface to display
 interface IMember {
   id: string & tags.Format<"uuid">;
   name: string;
   age: number & tags.Minimum<0> & tags.Maximum<100>;
   thumbnail: string & tags.Format<"uri"> & tags.ContentMediaType;
 }
+```
 
-// 2. Setup the AutoView agent
+### Step 3. Setup the _Autoview_ agent
+
+```typescript
+import { AutoViewAgent } from "@autoview/agent";
+import fs from "node:fs";
+import OpenAI from "openai";
+
 const agent = new AutoViewAgent({
   model: "chatgpt",
   vendor: {
@@ -54,10 +100,13 @@ const agent = new AutoViewAgent({
   transformFunctionName: "transformMember",
   experimentalAllInOne: true, // recommended for faster and less-error results
 });
+```
 
-// 3. Get the result!
-const result = await agent.generate();
+### Step 4. Lights, camera, action! 🎥
+```typescript
+const result = await agent.generate(); // generate the code
 
+// save the code
 await fs.promises.writeFile(
   "./src/transformers/transformMember.ts",
   result.transformTsCode,
@@ -65,9 +114,9 @@ await fs.promises.writeFile(
 );
 ```
 
-## How to use the generated component
+### Step 5. Use the generated component
 
-```tsx
+```typescript
 import { renderComponent } from "@autoview/ui";
 
 import { transformMember } from "./transformers/transformMember";
@@ -81,17 +130,25 @@ export default function MemberComponent(props: MemberComponentProps) {
 }
 ```
 
-## Playground
 
-You can experience how the AutoView works by playground website:
+## 💬 Community & Support
 
-💻 https://wrtnlabs.io/autoview/
+For support, questions, or to provide feedback, join our Discord community:
 
-## Guide Documents
+[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/aMhRmzkqCx)](https://discord.gg/aMhRmzkqCx)
 
-Check out the document in the [website](https://wrtnlabs.io/autoview):
+---
 
-- [🚀 Introduction](https://wrtnlabs.io/autoview/docs/)
-- [📦 Setup](https://wrtnlabs.io/autoview/docs/setup/)
-- [📜 Principles](https://wrtnlabs.io/autoview/docs/principles/)
-- [📅 Roadmap](https://wrtnlabs.io/autoview/docs/roadmap/)
+## ⚖️ License
+
+Autoview is open-source and available under the [MIT License](https://github.com/wrtnlabs/autoview/blob/master/LICENSE).
+
+---
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/2a143ef8-6a9d-4258-96ce-fb3a59137a5b" alt="Wrtn Technologies Logo" />
+</p>
+<div align="center">
+  Autoview is maintained by <a href="https://wrtnlabs.io">Wrtn Technologies</a> &mdash; Empowering developers to automate frontend viewer creation.
+</div>
+

@@ -1,18 +1,18 @@
 export const STEPPER_CONTENTS = [
   {
-    title: "Upload",
+    title: "Define",
     description:
-      "Select schema presets or upload your own schema as Swagger file format. It might takes 1 minutes for transmitting data for UI format.",
+      "Define the data schema via TypeScript interface. It guides the automatic component generation.",
   },
   {
-    title: "Converting",
+    title: "Generate",
     description:
-      "Select schema presets or upload your own schema as Swagger file format. It might takes 1 minutes for transmitting data for UI format.",
+      "The LLM analyzes the schema, generating React code. This process typically takes less than one minute.",
   },
   {
     title: "Display",
     description:
-      "Select schema presets or upload your own schema as Swagger file format. It might takes 1 minutes for transmitting data for UI format.",
+      "Pass data to the generated component for instant rendering. Enjoy efficient performance without runtime LLM calls.",
   },
 ];
 

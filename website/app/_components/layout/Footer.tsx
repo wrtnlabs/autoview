@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 import { WrtnlabsLogo } from "../icons/WrtnlabsLogo";
-import { toast } from "react-toastify/unstyled";
-import { Toast } from "../common/toast";
 
 
 const FOOTER_CONTENTS = [
@@ -12,8 +10,7 @@ const FOOTER_CONTENTS = [
     links: [
       { label: "About us", href: "https://wrtnlabs.io/about/" },
       { label: "Blog", href: "https://wrtnlabs.io/blog/" },
-      // MEMO: Toast 팝업
-      { label: "Agent OS", href: "/", onClick: () => toast.info(<Toast message="This service will be available soon." />) },
+      { label: "Agent OS", href: "https://wrtnlabs.io/" },
       { label: "Youtube", href: "https://www.youtube.com/@wrtnlabs" }
     ],
   },
@@ -24,6 +21,7 @@ const FOOTER_CONTENTS = [
       { label: "Autoview", href: "https://wrtnlabs.io/autoview/" },
       { label: "Github", href: "https://github.com/wrtnlabs" },
       { label: "Docs", href: "https://wrtnlabs.io/agentica/docs/" },
+      { label: "Discord", href: "https://discord.gg/aMhRmzkqCx" },
     ],
   },
 ];
@@ -42,8 +40,7 @@ export default function Footer() {
         <nav key={title} className="flex md:pl-6 flex-col gap-6 md:gap-3">
           <p className="text-sm md:text-lg text-gray-50">{title}</p>
           <div className="flex flex-col gap-6">
-            {links.map(({ label, href, onClick }) => {
-              if (onClick) return <p key={label} onClick={onClick} className={linkClassName}>{label}</p>
+            {links.map(({ label, href, }) => {
               return <Link className={linkClassName} key={label} href={href} target="_blank">{label}</Link>
             })}
           </div>
