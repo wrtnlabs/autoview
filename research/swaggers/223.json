@@ -1,0 +1,134 @@
+{
+  "schema": {
+    "$ref": "#/$defs/BotsView"
+  },
+  "$defs": {
+    "IApiOpenV5Bots.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "Unix timestamp value of the first bot to be retrieved in descending order",
+          "example": 1744704934781,
+          "type": "number",
+          "format": "int64"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of results (range[1, 500])",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        }
+      },
+      "required": []
+    },
+    "BotsView": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "example": 1744704934778,
+          "type": "number",
+          "format": "int64"
+        },
+        "bots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/bot.CustomBot"
+          }
+        }
+      },
+      "required": []
+    },
+    "bot.CustomBot": {
+      "required": [
+        "color",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "readOnly": true
+        },
+        "nameDescI18nMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/NameDesc"
+          },
+          "readOnly": true,
+          "properties": {},
+          "required": []
+        },
+        "createdAt": {
+          "example": 1744704940578,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "avatar": {
+          "$ref": "#/$defs/TinyFile"
+        },
+        "color": {
+          "type": "string",
+          "default": "#123456"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "ai": {
+          "type": "boolean"
+        }
+      }
+    },
+    "NameDesc": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "pattern": "^[^@#$%:/\\\\]+$",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "TinyFile": {
+      "required": [
+        "bucket",
+        "key"
+      ],
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "schema": {
+    "$ref": "#/$defs/code-scanning-default-setup"
+  },
+  "$defs": {
+    "code-scanning-default-setup": {
+      "description": "Configuration for code scanning default setup.",
+      "type": "object",
+      "properties": {
+        "state": {
+          "description": "Code scanning default setup has been configured or not.",
+          "oneOf": [
+            {
+              "const": "configured"
+            },
+            {
+              "const": "not-configured"
+            }
+          ]
+        },
+        "languages": {
+          "description": "Languages to be analyzed.",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "actions"
+              },
+              {
+                "const": "c-cpp"
+              },
+              {
+                "const": "csharp"
+              },
+              {
+                "const": "go"
+              },
+              {
+                "const": "java-kotlin"
+              },
+              {
+                "const": "javascript-typescript"
+              },
+              {
+                "const": "javascript"
+              },
+              {
+                "const": "python"
+              },
+              {
+                "const": "ruby"
+              },
+              {
+                "const": "typescript"
+              },
+              {
+                "const": "swift"
+              }
+            ]
+          }
+        },
+        "runner_type": {
+          "description": "Runner type to be used.",
+          "oneOf": [
+            {
+              "const": "standard"
+            },
+            {
+              "const": "labeled"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runner_label": {
+          "description": "Runner label to be used if the runner type is labeled.",
+          "example": "code-scanning",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "query_suite": {
+          "description": "CodeQL query suite to be used.",
+          "oneOf": [
+            {
+              "const": "default"
+            },
+            {
+              "const": "extended"
+            }
+          ]
+        },
+        "updated_at": {
+          "description": "Timestamp of latest configuration update.",
+          "example": "2023-12-06T14:20:20.000Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "schedule": {
+          "description": "The frequency of the periodic analysis.",
+          "oneOf": [
+            {
+              "const": "weekly"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}

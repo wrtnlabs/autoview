@@ -1,0 +1,64 @@
+{
+  "schema": {
+    "$ref": "#/$defs/open.marketing.CampaignUserView"
+  },
+  "$defs": {
+    "open.marketing.CampaignUserView": {
+      "type": "object",
+      "properties": {
+        "campaignUser": {
+          "$ref": "#/$defs/marketing.CampaignUser"
+        }
+      },
+      "required": []
+    },
+    "marketing.CampaignUser": {
+      "type": "object",
+      "properties": {
+        "campaignId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "msgId": {
+          "type": "string"
+        },
+        "userChatId": {
+          "type": "string"
+        },
+        "sent": {
+          "example": 1744704935089,
+          "type": "number",
+          "format": "int64"
+        },
+        "view": {
+          "example": 1744704935089,
+          "type": "number",
+          "format": "int64"
+        },
+        "goal": {
+          "example": 1744704935089,
+          "type": "number",
+          "format": "int64"
+        },
+        "click": {
+          "example": 1744704935089,
+          "type": "number",
+          "format": "int64"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "string"
+        },
+        "campaignMessageView": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    }
+  }
+}

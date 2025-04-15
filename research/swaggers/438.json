@@ -1,0 +1,139 @@
+{
+  "schema": {
+    "$ref": "#/$defs/copilot-organization-details"
+  },
+  "$defs": {
+    "copilot-organization-details": {
+      "title": "Copilot Organization Details",
+      "description": "Information about the seat breakdown and policies set for an organization with a Copilot Business or Copilot Enterprise subscription.",
+      "type": "object",
+      "properties": {
+        "seat_breakdown": {
+          "$ref": "#/$defs/copilot-organization-seat-breakdown"
+        },
+        "public_code_suggestions": {
+          "description": "The organization policy for allowing or blocking suggestions matching public code (duplication detection filter).",
+          "oneOf": [
+            {
+              "const": "allow"
+            },
+            {
+              "const": "block"
+            },
+            {
+              "const": "unconfigured"
+            }
+          ]
+        },
+        "ide_chat": {
+          "description": "The organization policy for allowing or disallowing Copilot Chat in the IDE.",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "unconfigured"
+            }
+          ]
+        },
+        "platform_chat": {
+          "description": "The organization policy for allowing or disallowing Copilot features on GitHub.com.",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "unconfigured"
+            }
+          ]
+        },
+        "cli": {
+          "description": "The organization policy for allowing or disallowing Copilot in the CLI.",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "unconfigured"
+            }
+          ]
+        },
+        "seat_management_setting": {
+          "description": "The mode of assigning new seats.",
+          "oneOf": [
+            {
+              "const": "assign_all"
+            },
+            {
+              "const": "assign_selected"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "unconfigured"
+            }
+          ]
+        },
+        "plan_type": {
+          "description": "The Copilot plan of the organization, or the parent enterprise, when applicable.",
+          "oneOf": [
+            {
+              "const": "business"
+            },
+            {
+              "const": "enterprise"
+            }
+          ]
+        }
+      },
+      "required": [
+        "seat_breakdown",
+        "public_code_suggestions",
+        "seat_management_setting"
+      ],
+      "additionalProperties": true
+    },
+    "copilot-organization-seat-breakdown": {
+      "title": "Copilot Seat Breakdown",
+      "description": "The breakdown of Copilot Business seats for the organization.",
+      "type": "object",
+      "properties": {
+        "total": {
+          "description": "The total number of seats being billed for the organization as of the current billing cycle.",
+          "type": "integer"
+        },
+        "added_this_cycle": {
+          "description": "Seats added during the current billing cycle.",
+          "type": "integer"
+        },
+        "pending_cancellation": {
+          "description": "The number of seats that are pending cancellation at the end of the current billing cycle.",
+          "type": "integer"
+        },
+        "pending_invitation": {
+          "description": "The number of users who have been invited to receive a Copilot seat through this organization.",
+          "type": "integer"
+        },
+        "active_this_cycle": {
+          "description": "The number of seats that have used Copilot during the current billing cycle.",
+          "type": "integer"
+        },
+        "inactive_this_cycle": {
+          "description": "The number of seats that have not used Copilot during the current billing cycle.",
+          "type": "integer"
+        }
+      },
+      "required": []
+    }
+  }
+}

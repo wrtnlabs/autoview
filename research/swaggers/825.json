@@ -1,0 +1,42 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/custom-property-value"
+    }
+  },
+  "$defs": {
+    "custom-property-value": {
+      "title": "Custom Property Value",
+      "description": "Custom property name and associated value",
+      "type": "object",
+      "properties": {
+        "property_name": {
+          "description": "The name of the property",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value assigned to the property",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "property_name",
+        "value"
+      ]
+    }
+  }
+}

@@ -1,0 +1,228 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4PluginView"
+  },
+  "$defs": {
+    "legacy.v4.LegacyV4Plugin": {
+      "required": [
+        "botName",
+        "color",
+        "name",
+        "profileBotMessageI18n",
+        "welcomeI18n"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "key": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "active"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdAt": {
+          "example": 1744704931007,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "color": {
+          "type": "string",
+          "default": "#123456"
+        },
+        "botName": {
+          "type": "string"
+        },
+        "textI18n": {
+          "$ref": "#/$defs/I18nText"
+        },
+        "labelButton": {
+          "type": "boolean"
+        },
+        "deskImage": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4TinyFile"
+        },
+        "deskMarginX": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deskMarginY": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deskPosition": {
+          "oneOf": [
+            {
+              "const": "left"
+            },
+            {
+              "const": "right"
+            }
+          ]
+        },
+        "mobileImage": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4TinyFile"
+        },
+        "mobileMarginX": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "mobileMarginY": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "mobilePosition": {
+          "oneOf": [
+            {
+              "const": "left"
+            },
+            {
+              "const": "right"
+            }
+          ]
+        },
+        "mobileHideButton": {
+          "type": "boolean"
+        },
+        "mobileBubblePosition": {
+          "oneOf": [
+            {
+              "const": "top"
+            },
+            {
+              "const": "bottom"
+            }
+          ]
+        },
+        "accessSecret": {
+          "type": "string",
+          "readOnly": true
+        },
+        "welcomeI18n": {
+          "$ref": "#/$defs/I18nText"
+        },
+        "profileBot": {
+          "type": "boolean"
+        },
+        "profileBotMessageI18n": {
+          "$ref": "#/$defs/I18nText"
+        },
+        "profileBotSchemaIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "urlWhitelist": {
+          "maxItems": 5,
+          "minItems": 0,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runRate": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number",
+          "format": "float"
+        },
+        "facebookPixelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "bright": {
+          "type": "boolean"
+        },
+        "borderColor": {
+          "type": "string"
+        },
+        "gradientColor": {
+          "type": "string"
+        },
+        "textColor": {
+          "type": "string"
+        },
+        "deskImageUrl": {
+          "type": "string"
+        },
+        "mobileImageUrl": {
+          "type": "string"
+        },
+        "showPoweredBy": {
+          "type": "boolean",
+          "deprecated": true
+        }
+      }
+    },
+    "I18nText": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "en": {
+          "type": "string"
+        },
+        "ja": {
+          "type": "string"
+        },
+        "ko": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4TinyFile": {
+      "required": [
+        "bucket",
+        "key"
+      ],
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "legacy.open.v4.LegacyV4PluginView": {
+      "type": "object",
+      "properties": {
+        "plugin": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4Plugin"
+        }
+      },
+      "required": []
+    }
+  }
+}

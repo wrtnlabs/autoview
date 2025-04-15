@@ -1,0 +1,703 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4MessageView"
+  },
+  "$defs": {
+    "IApiOpenV4GroupsThreadsMessages.PostQuery": {
+      "type": "object",
+      "properties": {
+        "botName": {
+          "type": "string"
+        },
+        "broadcast": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4Message": {
+      "type": "object",
+      "properties": {
+        "chatKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "mainKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "threadKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "root": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatType": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "personType": {
+          "type": "string",
+          "readOnly": true
+        },
+        "personId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "blocks": {
+          "type": "array",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Block"
+          }
+        },
+        "plainText": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "example": 1744704933192,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "buttons": {
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Button"
+          }
+        },
+        "files": {
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4File"
+          }
+        },
+        "webPage": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4WebPage"
+        },
+        "log": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4Log"
+        },
+        "reactions": {
+          "type": "array",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Reaction"
+          }
+        },
+        "profileBot": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4ProfileBotInput"
+          }
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "sending"
+            },
+            {
+              "const": "sent"
+            },
+            {
+              "const": "failed"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "options": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "actAsManager"
+              },
+              {
+                "const": "displayAsChannel"
+              },
+              {
+                "const": "doNotPost"
+              },
+              {
+                "const": "doNotSearch"
+              },
+              {
+                "const": "doNotSendApp"
+              },
+              {
+                "const": "doNotUpdateDesk"
+              },
+              {
+                "const": "immutable"
+              },
+              {
+                "const": "private"
+              },
+              {
+                "const": "silent"
+              }
+            ]
+          }
+        },
+        "marketing": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4MessageMarketing"
+        },
+        "supportBot": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4MessageSupportBot"
+        },
+        "threadMsg": {
+          "type": "boolean"
+        },
+        "broadcastedMsg": {
+          "type": "boolean"
+        },
+        "rootMessageId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4Block": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "oneOf": [
+            {
+              "const": "bullets"
+            },
+            {
+              "const": "code"
+            },
+            {
+              "const": "text"
+            }
+          ]
+        },
+        "language": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "array",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Block"
+          }
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4Button": {
+      "required": [
+        "title",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "colorVariant": {
+          "oneOf": [
+            {
+              "const": "cobalt"
+            },
+            {
+              "const": "green"
+            },
+            {
+              "const": "orange"
+            },
+            {
+              "const": "red"
+            },
+            {
+              "const": "black"
+            },
+            {
+              "const": "pink"
+            },
+            {
+              "const": "purple"
+            }
+          ]
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4File": {
+      "required": [
+        "bucket",
+        "id",
+        "key",
+        "name",
+        "size"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "number",
+          "format": "double"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "orientation": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "animated": {
+          "type": "boolean"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "chatType": {
+          "type": "string"
+        },
+        "chatId": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.LegacyV4WebPage": {
+      "required": [
+        "id",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "videoUrl": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4Log": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            {
+              "const": "changeName"
+            },
+            {
+              "const": "changeScope"
+            },
+            {
+              "const": "close"
+            },
+            {
+              "const": "create"
+            },
+            {
+              "const": "invite"
+            },
+            {
+              "const": "join"
+            },
+            {
+              "const": "assign"
+            },
+            {
+              "const": "unassign"
+            },
+            {
+              "const": "leave"
+            },
+            {
+              "const": "open"
+            },
+            {
+              "const": "remove"
+            },
+            {
+              "const": "snooze"
+            },
+            {
+              "const": "addTags"
+            },
+            {
+              "const": "removeTags"
+            }
+          ]
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4Reaction": {
+      "required": [
+        "emojiName"
+      ],
+      "type": "object",
+      "properties": {
+        "emojiName": {
+          "type": "string"
+        },
+        "personKeys": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4ProfileBotInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/AttributeValue"
+        }
+      },
+      "required": []
+    },
+    "AttributeValue": {
+      "type": "object",
+      "properties": {
+        "s": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "b": {
+          "type": "object",
+          "properties": {
+            "short": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "char": {
+              "type": "string"
+            },
+            "int": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "long": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "float": {
+              "type": "number",
+              "format": "float"
+            },
+            "double": {
+              "type": "number",
+              "format": "double"
+            },
+            "direct": {
+              "type": "boolean"
+            },
+            "readOnly": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "m": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/AttributeValue"
+          },
+          "properties": {},
+          "required": []
+        },
+        "l": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AttributeValue"
+          }
+        },
+        "ss": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "short": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "char": {
+                "type": "string"
+              },
+              "int": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "long": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "float": {
+                "type": "number",
+                "format": "float"
+              },
+              "double": {
+                "type": "number",
+                "format": "double"
+              },
+              "direct": {
+                "type": "boolean"
+              },
+              "readOnly": {
+                "type": "boolean"
+              }
+            },
+            "required": []
+          }
+        },
+        "null": {
+          "type": "boolean"
+        },
+        "bool": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4MessageMarketing": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "exposureType": {
+          "const": "fullScreen"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4MessageSupportBot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revisionId": {
+          "type": "string"
+        },
+        "sectionId": {
+          "type": "string"
+        },
+        "stepIndex": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "buttons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.LegacyV4SupportBotRouteSection$LegacyV4Button"
+          }
+        },
+        "submitButtonIndex": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4SupportBotRouteSection$LegacyV4Button": {
+      "required": [
+        "nextSectionId",
+        "text"
+      ],
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "nextSectionId": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.open.v4.LegacyV4MessageView": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4Message"
+        }
+      },
+      "required": []
+    }
+  }
+}

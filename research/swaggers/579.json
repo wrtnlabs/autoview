@@ -1,0 +1,28 @@
+{
+  "schema": {
+    "$ref": "#/$defs/oidc-custom-sub-repo"
+  },
+  "$defs": {
+    "oidc-custom-sub-repo": {
+      "title": "Actions OIDC subject customization for a repository",
+      "description": "Actions OIDC subject customization for a repository",
+      "type": "object",
+      "properties": {
+        "use_default": {
+          "description": "Whether to use the default template or not. If `true`, the `include_claim_keys` field is ignored.",
+          "type": "boolean"
+        },
+        "include_claim_keys": {
+          "description": "Array of unique strings. Each claim key can only contain alphanumeric characters and underscores.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "use_default"
+      ]
+    }
+  }
+}

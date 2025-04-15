@@ -1,0 +1,45 @@
+{
+  "schema": {
+    "$ref": "#/$defs/hovercard"
+  },
+  "$defs": {
+    "IApiUsersHovercard.GetQuery": {
+      "type": "object",
+      "properties": {
+        "subject_id": {
+          "description": "Uses the ID for the `subject_type` you specified. **Required** when using `subject_type`.",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "hovercard": {
+      "title": "Hovercard",
+      "description": "Hovercard",
+      "type": "object",
+      "properties": {
+        "contexts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              },
+              "octicon": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message",
+              "octicon"
+            ]
+          }
+        }
+      },
+      "required": [
+        "contexts"
+      ]
+    }
+  }
+}

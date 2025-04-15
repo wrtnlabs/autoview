@@ -1,0 +1,28 @@
+{
+  "schema": {
+    "$ref": "#/$defs/selected-actions"
+  },
+  "$defs": {
+    "selected-actions": {
+      "type": "object",
+      "properties": {
+        "github_owned_allowed": {
+          "description": "Whether GitHub-owned actions are allowed. For example, this includes the actions in the `actions` organization.",
+          "type": "boolean"
+        },
+        "verified_allowed": {
+          "description": "Whether actions from GitHub Marketplace verified creators are allowed. Set to `true` to allow all actions by GitHub Marketplace verified creators.",
+          "type": "boolean"
+        },
+        "patterns_allowed": {
+          "description": "Specifies a list of string-matching patterns to allow specific action(s) and reusable workflow(s). Wildcards, tags, and SHAs are allowed. For example, `monalisa/octocat@*`, `monalisa/octocat@v2`, `monalisa/*`.\n\n> [!NOTE]\n> The `patterns_allowed` setting only applies to public repositories.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    }
+  }
+}

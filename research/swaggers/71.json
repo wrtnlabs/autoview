@@ -1,0 +1,129 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingMileageHistory"
+  },
+  "$defs": {
+    "IShoppingMileageHistory": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "citizen": {
+          "$ref": "#/$defs/IShoppingCitizen"
+        },
+        "mileage": {
+          "$ref": "#/$defs/IShoppingMileage"
+        },
+        "source_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "type": "number"
+        },
+        "balance": {
+          "type": "number"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "citizen",
+        "mileage",
+        "source_id",
+        "value",
+        "balance",
+        "created_at"
+      ]
+    },
+    "IShoppingCitizen": {
+      "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "mobile": {
+          "title": "Mobile number",
+          "description": "Mobile number.",
+          "x-wrtn-payment-order-mobile": true,
+          "type": "string",
+          "pattern": "^[0-9]*$"
+        },
+        "name": {
+          "title": "Real name, or equivalent nickname",
+          "description": "Real name, or equivalent nickname.",
+          "x-wrtn-payment-order-citizen": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "mobile",
+        "name"
+      ]
+    },
+    "IShoppingMileage": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "const": -1
+            },
+            {
+              "const": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at",
+        "code",
+        "source",
+        "direction"
+      ]
+    }
+  }
+}

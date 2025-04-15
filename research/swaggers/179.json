@@ -1,0 +1,89 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4ChatTagView"
+  },
+  "$defs": {
+    "legacy.v4.LegacyV4ChatTag": {
+      "required": [
+        "key",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "colorVariant": {
+          "oneOf": [
+            {
+              "const": "red"
+            },
+            {
+              "const": "orange"
+            },
+            {
+              "const": "yellow"
+            },
+            {
+              "const": "olive"
+            },
+            {
+              "const": "green"
+            },
+            {
+              "const": "cobalt"
+            },
+            {
+              "const": "purple"
+            },
+            {
+              "const": "pink"
+            },
+            {
+              "const": "navy"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "followerIds": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        }
+      }
+    },
+    "legacy.open.v4.LegacyV4ChatTagView": {
+      "type": "object",
+      "properties": {
+        "chatTag": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4ChatTag"
+        }
+      },
+      "required": []
+    }
+  }
+}

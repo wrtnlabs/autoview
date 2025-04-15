@@ -1,0 +1,54 @@
+{
+  "schema": {
+    "$ref": "#/$defs/view-traffic"
+  },
+  "$defs": {
+    "view-traffic": {
+      "title": "View Traffic",
+      "description": "View Traffic",
+      "type": "object",
+      "properties": {
+        "count": {
+          "example": 14850,
+          "type": "integer"
+        },
+        "uniques": {
+          "example": 3782,
+          "type": "integer"
+        },
+        "views": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/traffic"
+          }
+        }
+      },
+      "required": [
+        "uniques",
+        "count",
+        "views"
+      ]
+    },
+    "traffic": {
+      "title": "Traffic",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "uniques": {
+          "type": "integer"
+        },
+        "count": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "timestamp",
+        "uniques",
+        "count"
+      ]
+    }
+  }
+}

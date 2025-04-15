@@ -1,0 +1,50 @@
+{
+  "schema": {
+    "$ref": "#/$defs/RedirectionView"
+  },
+  "$defs": {
+    "IApiOpenV5Redirections.PostBody": {
+      "required": [
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "url": {
+          "description": "original URL",
+          "type": "string"
+        },
+        "expiration": {
+          "description": "expiration duration",
+          "type": "string",
+          "default": "PT1M"
+        }
+      }
+    },
+    "RedirectionView": {
+      "type": "object",
+      "properties": {
+        "redirection": {
+          "$ref": "#/$defs/Redirection"
+        }
+      },
+      "required": []
+    },
+    "Redirection": {
+      "type": "object",
+      "properties": {
+        "originalUrl": {
+          "type": "string"
+        },
+        "expireAt": {
+          "example": 1744704938383,
+          "type": "number",
+          "format": "int64"
+        },
+        "shortUrl": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

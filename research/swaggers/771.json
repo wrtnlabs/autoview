@@ -1,0 +1,58 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposInteractionLimits.GetResponse"
+  },
+  "$defs": {
+    "IApiReposInteractionLimits.GetResponse": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/interaction-limit-response"
+        },
+        {
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      ]
+    },
+    "interaction-limit-response": {
+      "title": "Interaction Limits",
+      "description": "Interaction limit settings.",
+      "type": "object",
+      "properties": {
+        "limit": {
+          "$ref": "#/$defs/interaction-group"
+        },
+        "origin": {
+          "example": "repository",
+          "type": "string"
+        },
+        "expires_at": {
+          "example": "2018-08-17T04:18:39Z",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "limit",
+        "origin",
+        "expires_at"
+      ]
+    },
+    "interaction-group": {
+      "description": "The type of GitHub user that can comment, open issues, or create pull requests while the interaction limit is in effect.",
+      "example": "collaborators_only",
+      "oneOf": [
+        {
+          "const": "existing_users"
+        },
+        {
+          "const": "contributors_only"
+        },
+        {
+          "const": "collaborators_only"
+        }
+      ]
+    }
+  }
+}

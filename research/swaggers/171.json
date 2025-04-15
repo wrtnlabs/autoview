@@ -1,0 +1,104 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4BotsView"
+  },
+  "$defs": {
+    "IApiOpenV4Bots.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "Unix timestamp value of the first bot to be retrieved in descending order",
+          "example": 1744704927375,
+          "type": "number",
+          "format": "int64"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of results (range[1, 500])",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        }
+      },
+      "required": []
+    },
+    "legacy.open.v4.LegacyV4BotsView": {
+      "type": "object",
+      "properties": {
+        "bots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.LegacyV4Bot"
+          }
+        },
+        "next": {
+          "example": 1744704927375,
+          "type": "number",
+          "format": "int64"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4Bot": {
+      "required": [
+        "color",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdAt": {
+          "example": 1744704932421,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "avatar": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4TinyFile"
+        },
+        "avatarUrl": {
+          "type": "string",
+          "readOnly": true
+        },
+        "color": {
+          "type": "string",
+          "default": "#123456"
+        }
+      }
+    },
+    "legacy.v4.LegacyV4TinyFile": {
+      "required": [
+        "bucket",
+        "key"
+      ],
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
+}

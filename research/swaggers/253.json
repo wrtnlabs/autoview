@@ -1,0 +1,332 @@
+{
+  "schema": {
+    "$ref": "#/$defs/PluginsView"
+  },
+  "$defs": {
+    "IApiOpenV5Plugins.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "Unix timestamp value of the first plugin to be retrieved in ascending order",
+          "example": 1744704938180,
+          "type": "number",
+          "format": "int64"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of result (range[1, 500])",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        }
+      },
+      "required": []
+    },
+    "PluginsView": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "example": 1744704938170,
+          "type": "number",
+          "format": "int64"
+        },
+        "plugins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Plugin"
+          }
+        }
+      },
+      "required": []
+    },
+    "Plugin": {
+      "required": [
+        "appearance",
+        "buttonType",
+        "iconButton",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "key": {
+          "type": "string",
+          "format": "uuid",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "active"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "createdAt": {
+          "example": 1744704938311,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "appearance": {
+          "oneOf": [
+            {
+              "const": "light"
+            },
+            {
+              "const": "dark"
+            },
+            {
+              "const": "system"
+            }
+          ]
+        },
+        "labelButton": {
+          "type": "boolean"
+        },
+        "labelButtonText": {
+          "type": "string"
+        },
+        "labelButtonTextI18nMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "properties": {},
+          "required": []
+        },
+        "buttonType": {
+          "oneOf": [
+            {
+              "const": "legacy"
+            },
+            {
+              "const": "customImage"
+            },
+            {
+              "const": "iconButton"
+            }
+          ]
+        },
+        "iconButton": {
+          "oneOf": [
+            {
+              "const": "channel"
+            },
+            {
+              "const": "channel-filled"
+            },
+            {
+              "const": "chat-bubble-alt"
+            },
+            {
+              "const": "chat-bubble-alt-filled"
+            },
+            {
+              "const": "chat-bubble-filled"
+            },
+            {
+              "const": "chat-lightning-filled"
+            },
+            {
+              "const": "chat-progress"
+            },
+            {
+              "const": "chat-progress-filled"
+            },
+            {
+              "const": "chat-question"
+            },
+            {
+              "const": "chat-question-filled"
+            },
+            {
+              "const": "comment"
+            },
+            {
+              "const": "comment-filled"
+            },
+            {
+              "const": "communication"
+            },
+            {
+              "const": "headset"
+            },
+            {
+              "const": "help-filled"
+            },
+            {
+              "const": "send-forward"
+            },
+            {
+              "const": "send-forward-filled"
+            },
+            {
+              "const": "sms"
+            },
+            {
+              "const": "sms-filled"
+            }
+          ]
+        },
+        "customImage": {
+          "$ref": "#/$defs/ImageFile"
+        },
+        "deskImage": {
+          "$ref": "#/$defs/TinyFile"
+        },
+        "deskMarginX": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deskMarginY": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "deskHideButton": {
+          "type": "boolean"
+        },
+        "deskPosition": {
+          "oneOf": [
+            {
+              "const": "left"
+            },
+            {
+              "const": "right"
+            }
+          ]
+        },
+        "mobileImage": {
+          "$ref": "#/$defs/TinyFile"
+        },
+        "mobileMarginX": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "mobileMarginY": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "mobilePosition": {
+          "oneOf": [
+            {
+              "const": "left"
+            },
+            {
+              "const": "right"
+            }
+          ]
+        },
+        "mobileHideButton": {
+          "type": "boolean"
+        },
+        "mobileBubblePosition": {
+          "oneOf": [
+            {
+              "const": "top"
+            },
+            {
+              "const": "bottom"
+            }
+          ]
+        },
+        "urlWhitelist": {
+          "maxItems": 5,
+          "minItems": 0,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runRate": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "number",
+          "format": "float"
+        },
+        "facebookPixelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "customImageUrl": {
+          "type": "string"
+        },
+        "deskImageUrl": {
+          "type": "string"
+        },
+        "mobileImageUrl": {
+          "type": "string"
+        },
+        "validLabelButtonText": {
+          "type": "boolean"
+        },
+        "validLabelButtonTextI18nMap": {
+          "type": "boolean"
+        }
+      }
+    },
+    "ImageFile": {
+      "required": [
+        "bucket",
+        "key"
+      ],
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "contentType": {
+          "pattern": "^image/.*",
+          "type": "string"
+        }
+      }
+    },
+    "TinyFile": {
+      "required": [
+        "bucket",
+        "key"
+      ],
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    }
+  }
+}

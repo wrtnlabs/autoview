@@ -1,0 +1,572 @@
+{
+  "schema": {
+    "oneOf": [
+      {
+        "$ref": "#/$defs/CANNOT_FIND_ONE_REPLY_COMMENT"
+      },
+      {
+        "$ref": "#/$defs/NOT_FOUND_ARTICLE_TO_COMMENT"
+      },
+      {
+        "$ref": "#/$defs/TOO_MANY_REPORTED_ARTICLE"
+      },
+      {
+        "$ref": "#/$defs/CANNOT_FIND_IMAGE_TO_LEFT_COMMENT"
+      },
+      {
+        "$ref": "#/$defs/ResponseForm_lt_CommentType.CreateResponse_gt_"
+      }
+    ]
+  },
+  "$defs": {
+    "CreateCommentDto": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "contents": {
+          "description": "게시글 내용",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 1000
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "1000",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "imageId": {
+          "description": "이미지의 아이디로 없을 수도 있다.\n없는 경우에는 그 게시글에 달린 것으로, xPosition, yPosition을 무시한다.",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentId": {
+          "description": "'부모 댓글이 있는 경우, 즉 답글인 경우에는 부모 댓글 아이디를 받는다.'",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-metaTags": [
+                {
+                  "kind": "type",
+                  "value": "int"
+                }
+              ],
+              "x-typia-jsDocTags": [
+                {
+                  "name": "type",
+                  "text": [
+                    {
+                      "text": "int",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "xPosition": {
+          "description": "소수점을 포함한 좌표 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "pattern": "^(-?\\d+\\.?\\d*|(-?\\d+\\.?\\d*))$"
+            },
+            {
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "yPosition": {
+          "description": "소수점을 포함한 좌표 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "pattern": "^(-?\\d+\\.?\\d*|(-?\\d+\\.?\\d*))$"
+            },
+            {
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "contents"
+      ]
+    },
+    "CANNOT_FIND_ONE_REPLY_COMMENT": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4012
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "답글을 달 댓글을 찾지 못했어요."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "NOT_FOUND_ARTICLE_TO_COMMENT": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4006
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "댓글을 작성할 게시글을 찾지 못했습니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "TOO_MANY_REPORTED_ARTICLE": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4007
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "신고가 접수된 게시글이라 댓글 작성이 불가능합니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "CANNOT_FIND_IMAGE_TO_LEFT_COMMENT": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4019
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "댓글을 남길 이미지를 찾지 못했어요."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ResponseForm_lt_CommentType.CreateResponse_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/CommentType.CreateResponse"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "CommentType.CreateResponse": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "writerId": {
+          "description": "작성자의 아이디",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "integer"
+        },
+        "contents": {
+          "description": "게시글 내용",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 1000
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "1000",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "imageId": {
+          "description": "이미지의 아이디로 없을 수도 있다.\n없는 경우에는 그 게시글에 달린 것으로, xPosition, yPosition을 무시한다.",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parentId": {
+          "description": "'부모 댓글이 있는 경우, 즉 답글인 경우에는 부모 댓글 아이디를 받는다.'",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-metaTags": [
+                {
+                  "kind": "type",
+                  "value": "int"
+                }
+              ],
+              "x-typia-jsDocTags": [
+                {
+                  "name": "type",
+                  "text": [
+                    {
+                      "text": "int",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "xPosition": {
+          "description": "소수점을 포함한 좌표 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "pattern": "^(-?\\d+\\.?\\d*|(-?\\d+\\.?\\d*))$"
+            },
+            {
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "yPosition": {
+          "description": "소수점을 포함한 좌표 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "pattern": "^(-?\\d+\\.?\\d*|(-?\\d+\\.?\\d*))$"
+            },
+            {
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "articleId": {
+          "description": "댓글이 달린 게시글의 아이디",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "writerId",
+        "contents",
+        "articleId"
+      ]
+    }
+  }
+}

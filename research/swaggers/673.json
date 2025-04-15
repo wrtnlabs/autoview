@@ -1,0 +1,43 @@
+{
+  "schema": {
+    "$ref": "#/$defs/code-scanning-autofix-commits-response"
+  },
+  "$defs": {
+    "code-scanning-autofix-commits": {
+      "description": "Commit an autofix for a code scanning alert",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "target_ref": {
+              "description": "The Git reference of target branch for the commit. Branch needs to already exist.  For more information, see \"[Git References](https://git-scm.com/book/en/v2/Git-Internals-Git-References)\" in the Git documentation.",
+              "type": "string"
+            },
+            "message": {
+              "description": "Commit message to be used.",
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-autofix-commits-response": {
+      "type": "object",
+      "properties": {
+        "target_ref": {
+          "description": "The Git reference of target branch for the commit. For more information, see \"[Git References](https://git-scm.com/book/en/v2/Git-Internals-Git-References)\" in the Git documentation.",
+          "type": "string"
+        },
+        "sha": {
+          "description": "SHA of commit with autofix.",
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

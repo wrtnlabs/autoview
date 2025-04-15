@@ -1,0 +1,32 @@
+{
+  "schema": {
+    "$ref": "#/$defs/repo-codespaces-secret"
+  },
+  "$defs": {
+    "repo-codespaces-secret": {
+      "title": "Codespaces Secret",
+      "description": "Set repository secrets for GitHub Codespaces.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the secret.",
+          "example": "SECRET_TOKEN",
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

@@ -1,0 +1,199 @@
+{
+  "schema": {
+    "$ref": "#/$defs/dependency-graph-spdx-sbom"
+  },
+  "$defs": {
+    "dependency-graph-spdx-sbom": {
+      "title": "Dependency Graph SPDX SBOM",
+      "description": "A schema for the SPDX JSON format returned by the Dependency Graph.",
+      "type": "object",
+      "properties": {
+        "sbom": {
+          "type": "object",
+          "properties": {
+            "SPDXID": {
+              "description": "The SPDX identifier for the SPDX document.",
+              "example": "SPDXRef-DOCUMENT",
+              "type": "string"
+            },
+            "spdxVersion": {
+              "description": "The version of the SPDX specification that this document conforms to.",
+              "example": "SPDX-2.3",
+              "type": "string"
+            },
+            "comment": {
+              "description": "An optional comment about the SPDX document.",
+              "example": "Exact versions could not be resolved for some packages. For more information: https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/",
+              "type": "string"
+            },
+            "creationInfo": {
+              "type": "object",
+              "properties": {
+                "created": {
+                  "description": "The date and time the SPDX document was created.",
+                  "example": "2021-11-03T00:00:00Z",
+                  "type": "string"
+                },
+                "creators": {
+                  "description": "The tools that were used to generate the SPDX document.",
+                  "type": "array",
+                  "items": {
+                    "example": "GitHub",
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "created",
+                "creators"
+              ]
+            },
+            "name": {
+              "description": "The name of the SPDX document.",
+              "example": "github/github",
+              "type": "string"
+            },
+            "dataLicense": {
+              "description": "The license under which the SPDX document is licensed.",
+              "example": "CC0-1.0",
+              "type": "string"
+            },
+            "documentNamespace": {
+              "description": "The namespace for the SPDX document.",
+              "example": "https://spdx.org/spdxdocs/protobom/15e41dd2-f961-4f4d-b8dc-f8f57ad70d57",
+              "type": "string"
+            },
+            "packages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "SPDXID": {
+                    "description": "A unique SPDX identifier for the package.",
+                    "example": "SPDXRef-Package",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the package.",
+                    "example": "github/github",
+                    "type": "string"
+                  },
+                  "versionInfo": {
+                    "description": "The version of the package. If the package does not have an exact version specified,\na version range is given.",
+                    "example": "1.0.0",
+                    "type": "string"
+                  },
+                  "downloadLocation": {
+                    "description": "The location where the package can be downloaded,\nor NOASSERTION if this has not been determined.",
+                    "example": "NOASSERTION",
+                    "type": "string"
+                  },
+                  "filesAnalyzed": {
+                    "description": "Whether the package's file content has been subjected to\nanalysis during the creation of the SPDX document.",
+                    "example": false,
+                    "type": "boolean"
+                  },
+                  "licenseConcluded": {
+                    "description": "The license of the package as determined while creating the SPDX document.",
+                    "example": "MIT",
+                    "type": "string"
+                  },
+                  "licenseDeclared": {
+                    "description": "The license of the package as declared by its author, or NOASSERTION if this information\nwas not available when the SPDX document was created.",
+                    "example": "NOASSERTION",
+                    "type": "string"
+                  },
+                  "supplier": {
+                    "description": "The distribution source of this package, or NOASSERTION if this was not determined.",
+                    "example": "NOASSERTION",
+                    "type": "string"
+                  },
+                  "copyrightText": {
+                    "description": "The copyright holders of the package, and any dates present with those notices, if available.",
+                    "example": "Copyright (c) 1985 GitHub.com",
+                    "type": "string"
+                  },
+                  "externalRefs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "referenceCategory": {
+                          "description": "The category of reference to an external resource this reference refers to.",
+                          "example": "PACKAGE-MANAGER",
+                          "type": "string"
+                        },
+                        "referenceLocator": {
+                          "description": "A locator for the particular external resource this reference refers to.",
+                          "example": "pkg:gem/rails@6.0.1",
+                          "type": "string"
+                        },
+                        "referenceType": {
+                          "description": "The category of reference to an external resource this reference refers to.",
+                          "example": "purl",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "referenceCategory",
+                        "referenceLocator",
+                        "referenceType"
+                      ]
+                    }
+                  }
+                },
+                "required": []
+              },
+              "required": [
+                "SPDXID",
+                "name",
+                "versionInfo",
+                "downloadLocation",
+                "filesAnalyzed"
+              ]
+            },
+            "relationships": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "relationshipType": {
+                    "description": "The type of relationship between the two SPDX elements.",
+                    "example": "DEPENDS_ON",
+                    "type": "string"
+                  },
+                  "spdxElementId": {
+                    "description": "The SPDX identifier of the package that is the source of the relationship.",
+                    "type": "string"
+                  },
+                  "relatedSpdxElement": {
+                    "description": "The SPDX identifier of the package that is the target of the relationship.",
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "required": [
+                "relationshipType",
+                "spdxElementId",
+                "relatedSpdxElement"
+              ]
+            }
+          },
+          "required": [
+            "SPDXID",
+            "spdxVersion",
+            "creationInfo",
+            "name",
+            "dataLicense",
+            "documentNamespace",
+            "packages"
+          ]
+        }
+      },
+      "required": [
+        "sbom"
+      ]
+    }
+  }
+}

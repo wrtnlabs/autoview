@@ -1,0 +1,58 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsActionsHostedRunnersMachineSizes.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsActionsHostedRunnersMachineSizes.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "machine_specs"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "machine_specs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actions-hosted-runner-machine-spec"
+          }
+        }
+      }
+    },
+    "actions-hosted-runner-machine-spec": {
+      "title": "Github-owned VM details.",
+      "description": "Provides details of a particular machine spec.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID used for the `size` parameter when creating a new runner.",
+          "example": "8-core",
+          "type": "string"
+        },
+        "cpu_cores": {
+          "description": "The number of cores.",
+          "example": 8,
+          "type": "integer"
+        },
+        "memory_gb": {
+          "description": "The available RAM for the machine spec.",
+          "example": 32,
+          "type": "integer"
+        },
+        "storage_gb": {
+          "description": "The available SSD storage for the machine spec.",
+          "example": 300,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "cpu_cores",
+        "memory_gb",
+        "storage_gb"
+      ]
+    }
+  }
+}

@@ -1,0 +1,373 @@
+{
+  "schema": {
+    "$ref": "#/$defs/private-user"
+  },
+  "$defs": {
+    "IApiUser.PatchBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The new name of the user.",
+          "example": "Omar Jahandar",
+          "type": "string"
+        },
+        "email": {
+          "description": "The publicly visible email address of the user.",
+          "example": "omar@example.com",
+          "type": "string"
+        },
+        "blog": {
+          "description": "The new blog URL of the user.",
+          "example": "blog.example.com",
+          "type": "string"
+        },
+        "twitter_username": {
+          "description": "The new Twitter username of the user.",
+          "example": "therealomarj",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "company": {
+          "description": "The new company of the user.",
+          "example": "Acme corporation",
+          "type": "string"
+        },
+        "location": {
+          "description": "The new location of the user.",
+          "example": "Berlin, Germany",
+          "type": "string"
+        },
+        "hireable": {
+          "description": "The new hiring availability of the user.",
+          "type": "boolean"
+        },
+        "bio": {
+          "description": "The new short biography of the user.",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "private-user": {
+      "title": "Private User",
+      "description": "Private User",
+      "type": "object",
+      "properties": {
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "user_view_type": {
+          "type": "string"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "name": {
+          "example": "monalisa octocat",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "company": {
+          "example": "GitHub",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blog": {
+          "example": "https://github.com/blog",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "location": {
+          "example": "San Francisco",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "example": "octocat@github.com",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "email"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "notification_email": {
+          "example": "octocat@github.com",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "email"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hireable": {
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "bio": {
+          "example": "There once was...",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "twitter_username": {
+          "example": "monalisa",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "public_repos": {
+          "example": 2,
+          "type": "integer"
+        },
+        "public_gists": {
+          "example": 1,
+          "type": "integer"
+        },
+        "followers": {
+          "example": 20,
+          "type": "integer"
+        },
+        "following": {
+          "example": 0,
+          "type": "integer"
+        },
+        "created_at": {
+          "example": "2008-01-14T04:33:35Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "example": "2008-01-14T04:33:35Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "private_gists": {
+          "example": 81,
+          "type": "integer"
+        },
+        "total_private_repos": {
+          "example": 100,
+          "type": "integer"
+        },
+        "owned_private_repos": {
+          "example": 100,
+          "type": "integer"
+        },
+        "disk_usage": {
+          "example": 10000,
+          "type": "integer"
+        },
+        "collaborators": {
+          "example": 8,
+          "type": "integer"
+        },
+        "two_factor_authentication": {
+          "example": true,
+          "type": "boolean"
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "collaborators": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "space": {
+              "type": "integer"
+            },
+            "private_repos": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "collaborators",
+            "name",
+            "space",
+            "private_repos"
+          ]
+        },
+        "business_plus": {
+          "type": "boolean"
+        },
+        "ldap_dn": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url",
+        "bio",
+        "blog",
+        "company",
+        "email",
+        "followers",
+        "following",
+        "hireable",
+        "location",
+        "name",
+        "public_gists",
+        "public_repos",
+        "created_at",
+        "updated_at",
+        "collaborators",
+        "disk_usage",
+        "owned_private_repos",
+        "private_gists",
+        "total_private_repos",
+        "two_factor_authentication"
+      ]
+    }
+  }
+}

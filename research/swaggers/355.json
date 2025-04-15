@@ -1,0 +1,9 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "string"
+    }
+  },
+  "$defs": {}
+}

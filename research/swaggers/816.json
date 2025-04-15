@@ -1,0 +1,27 @@
+{
+  "schema": {
+    "$ref": "#/$defs/page-build-status"
+  },
+  "$defs": {
+    "page-build-status": {
+      "title": "Page Build Status",
+      "description": "Page Build Status",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/github/hello-world/pages/builds/latest",
+          "type": "string",
+          "format": "uri"
+        },
+        "status": {
+          "example": "queued",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "status"
+      ]
+    }
+  }
+}

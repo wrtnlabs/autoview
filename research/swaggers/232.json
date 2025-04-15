@@ -1,0 +1,105 @@
+{
+  "schema": {
+    "$ref": "#/$defs/EventsView"
+  },
+  "$defs": {
+    "IApiOpenV5UsersEvents.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "type": "string"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of results",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        }
+      },
+      "required": []
+    },
+    "EventsView": {
+      "type": "object",
+      "properties": {
+        "prev": {
+          "type": "string"
+        },
+        "next": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Event"
+          }
+        }
+      },
+      "required": []
+    },
+    "Event": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "property": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "properties": {},
+          "required": []
+        },
+        "createdAt": {
+          "example": 1744704935622,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "expireAt": {
+          "example": 1744704935623,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "managed": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "nameI18nMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "readOnly": true,
+          "properties": {},
+          "required": []
+        }
+      }
+    }
+  }
+}

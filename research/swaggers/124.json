@@ -1,0 +1,61 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/IShoppingDeliveryPiece.ICreate"
+    }
+  },
+  "$defs": {
+    "IShoppingDeliveryPiece.IRequest": {
+      "type": "object",
+      "properties": {
+        "publish_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "required": [
+        "publish_ids"
+      ]
+    },
+    "IShoppingDeliveryPiece.ICreate": {
+      "description": "Creation information of the delivery piece.",
+      "type": "object",
+      "properties": {
+        "publish_id": {
+          "title": "Target order's {@link IShoppingOrderPublish.id}",
+          "description": "Target order's {@link IShoppingOrderPublish.id}.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "good_id": {
+          "title": "Target good's {@link IShoppingOrderGood.id}",
+          "description": "Target good's {@link IShoppingOrderGood.id}.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "stock_id": {
+          "title": "Target stock's {@link IShoppingSaleUnitStock.id}",
+          "description": "Target stock's {@link IShoppingSaleUnitStock.id}.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "quantity": {
+          "title": "Quantity of the stock",
+          "description": "Quantity of the stock.\n\nIt can be precision value to express split shipping.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "publish_id",
+        "good_id",
+        "stock_id",
+        "quantity"
+      ]
+    }
+  }
+}

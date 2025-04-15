@@ -1,0 +1,45 @@
+{
+  "schema": {
+    "$ref": "#/$defs/ruleset-version-with-state"
+  },
+  "$defs": {
+    "ruleset-version-with-state": {
+      "type": "object",
+      "properties": {
+        "version_id": {
+          "description": "The ID of the previous version of the ruleset",
+          "type": "integer"
+        },
+        "actor": {
+          "description": "The actor who updated the ruleset",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "state": {
+          "description": "The state of the ruleset version",
+          "type": "object",
+          "properties": {},
+          "required": []
+        }
+      },
+      "required": [
+        "version_id",
+        "actor",
+        "updated_at",
+        "state"
+      ]
+    }
+  }
+}

@@ -1,0 +1,615 @@
+{
+  "schema": {
+    "$ref": "#/$defs/code-scanning-alert"
+  },
+  "$defs": {
+    "IApiReposCodeScanningAlerts.PatchBody": {
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/$defs/code-scanning-alert-set-state"
+        },
+        "dismissed_reason": {
+          "$ref": "#/$defs/code-scanning-alert-dismissed-reason"
+        },
+        "dismissed_comment": {
+          "$ref": "#/$defs/code-scanning-alert-dismissed-comment"
+        },
+        "create_request": {
+          "$ref": "#/$defs/code-scanning-alert-create-request"
+        }
+      },
+      "required": [
+        "state"
+      ]
+    },
+    "code-scanning-alert-set-state": {
+      "description": "Sets the state of the code scanning alert. You must provide `dismissed_reason` when you set the state to `dismissed`.",
+      "oneOf": [
+        {
+          "const": "open"
+        },
+        {
+          "const": "dismissed"
+        }
+      ]
+    },
+    "code-scanning-alert-dismissed-reason": {
+      "description": "**Required when the state is dismissed.** The reason for dismissing or closing the alert.",
+      "oneOf": [
+        {
+          "const": "false positive"
+        },
+        {
+          "const": "won't fix"
+        },
+        {
+          "const": "used in tests"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-alert-dismissed-comment": {
+      "description": "The dismissal comment associated with the dismissal of the alert.",
+      "oneOf": [
+        {
+          "type": "string",
+          "maxLength": 280
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-alert-create-request": {
+      "description": "If `true`, attempt to create an alert dismissal request.",
+      "type": "boolean"
+    },
+    "code-scanning-alert": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "$ref": "#/$defs/alert-number"
+        },
+        "created_at": {
+          "$ref": "#/$defs/alert-created-at"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/alert-updated-at"
+        },
+        "url": {
+          "$ref": "#/$defs/alert-url"
+        },
+        "html_url": {
+          "$ref": "#/$defs/alert-html-url"
+        },
+        "instances_url": {
+          "$ref": "#/$defs/alert-instances-url"
+        },
+        "state": {
+          "$ref": "#/$defs/code-scanning-alert-state"
+        },
+        "fixed_at": {
+          "$ref": "#/$defs/alert-fixed-at"
+        },
+        "dismissed_by": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "dismissed_at": {
+          "$ref": "#/$defs/alert-dismissed-at"
+        },
+        "dismissed_reason": {
+          "$ref": "#/$defs/code-scanning-alert-dismissed-reason"
+        },
+        "dismissed_comment": {
+          "$ref": "#/$defs/code-scanning-alert-dismissed-comment"
+        },
+        "rule": {
+          "$ref": "#/$defs/code-scanning-alert-rule"
+        },
+        "tool": {
+          "$ref": "#/$defs/code-scanning-analysis-tool"
+        },
+        "most_recent_instance": {
+          "$ref": "#/$defs/code-scanning-alert-instance"
+        },
+        "dismissal_approved_by": {
+          "$ref": "#/$defs/nullable-simple-user"
+        }
+      },
+      "required": [
+        "number",
+        "created_at",
+        "url",
+        "html_url",
+        "instances_url",
+        "state",
+        "dismissed_by",
+        "dismissed_at",
+        "dismissed_reason",
+        "rule",
+        "tool",
+        "most_recent_instance"
+      ]
+    },
+    "alert-number": {
+      "description": "The security alert number.",
+      "type": "integer",
+      "readOnly": true
+    },
+    "alert-created-at": {
+      "description": "The time that the alert was created in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "alert-updated-at": {
+      "description": "The time that the alert was last updated in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "alert-url": {
+      "description": "The REST API URL of the alert resource.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "alert-html-url": {
+      "description": "The GitHub URL of the alert resource.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "alert-instances-url": {
+      "description": "The REST API URL for fetching the list of instances for an alert.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "code-scanning-alert-state": {
+      "description": "State of a code scanning alert.",
+      "oneOf": [
+        {
+          "const": "open"
+        },
+        {
+          "const": "dismissed"
+        },
+        {
+          "const": "fixed"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "alert-fixed-at": {
+      "description": "The time that the alert was no longer detected and was considered fixed in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "alert-dismissed-at": {
+      "description": "The time that the alert was dismissed in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-alert-rule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A unique identifier for the rule used to detect the alert.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "description": "The name of the rule used to detect the alert.",
+          "type": "string"
+        },
+        "severity": {
+          "description": "The severity of the alert.",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "note"
+            },
+            {
+              "const": "warning"
+            },
+            {
+              "const": "error"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "security_severity_level": {
+          "description": "The security severity of the alert.",
+          "oneOf": [
+            {
+              "const": "low"
+            },
+            {
+              "const": "medium"
+            },
+            {
+              "const": "high"
+            },
+            {
+              "const": "critical"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "description": {
+          "description": "A short description of the rule used to detect the alert.",
+          "type": "string"
+        },
+        "full_description": {
+          "description": "A description of the rule used to detect the alert.",
+          "type": "string"
+        },
+        "tags": {
+          "description": "A set of tags applicable for the rule.",
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "help": {
+          "description": "Detailed documentation for the rule as GitHub Flavored Markdown.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "help_uri": {
+          "description": "A link to the documentation for the rule used to detect the alert.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "code-scanning-analysis-tool": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/code-scanning-analysis-tool-name"
+        },
+        "version": {
+          "$ref": "#/$defs/code-scanning-analysis-tool-version"
+        },
+        "guid": {
+          "$ref": "#/$defs/code-scanning-analysis-tool-guid"
+        }
+      },
+      "required": []
+    },
+    "code-scanning-analysis-tool-name": {
+      "description": "The name of the tool used to generate the code scanning analysis.",
+      "type": "string"
+    },
+    "code-scanning-analysis-tool-version": {
+      "description": "The version of the tool used to generate the code scanning analysis.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-analysis-tool-guid": {
+      "description": "The GUID of the tool used to generate the code scanning analysis, if provided in the uploaded SARIF data.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-alert-instance": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/code-scanning-ref"
+        },
+        "analysis_key": {
+          "$ref": "#/$defs/code-scanning-analysis-analysis-key"
+        },
+        "environment": {
+          "$ref": "#/$defs/code-scanning-alert-environment"
+        },
+        "category": {
+          "$ref": "#/$defs/code-scanning-analysis-category"
+        },
+        "state": {
+          "$ref": "#/$defs/code-scanning-alert-state"
+        },
+        "commit_sha": {
+          "type": "string"
+        },
+        "message": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "location": {
+          "$ref": "#/$defs/code-scanning-alert-location"
+        },
+        "html_url": {
+          "type": "string"
+        },
+        "classifications": {
+          "description": "Classifications that have been applied to the file that triggered the alert.\nFor example identifying it as documentation, or a generated file.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/code-scanning-alert-classification"
+          }
+        }
+      },
+      "required": []
+    },
+    "code-scanning-ref": {
+      "description": "The Git reference, formatted as `refs/pull/<number>/merge`, `refs/pull/<number>/head`,\n`refs/heads/<branch name>` or simply `<branch name>`.",
+      "type": "string"
+    },
+    "code-scanning-analysis-analysis-key": {
+      "description": "Identifies the configuration under which the analysis was executed. For example, in GitHub Actions this includes the workflow filename and job name.",
+      "type": "string"
+    },
+    "code-scanning-alert-environment": {
+      "description": "Identifies the variable values associated with the environment in which the analysis that generated this alert instance was performed, such as the language that was analyzed.",
+      "type": "string"
+    },
+    "code-scanning-analysis-category": {
+      "description": "Identifies the configuration under which the analysis was executed. Used to distinguish between multiple analyses for the same tool and commit, but performed on different languages or different parts of the code.",
+      "type": "string"
+    },
+    "code-scanning-alert-location": {
+      "description": "Describe a region within a file for the alert.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "start_line": {
+          "type": "integer"
+        },
+        "end_line": {
+          "type": "integer"
+        },
+        "start_column": {
+          "type": "integer"
+        },
+        "end_column": {
+          "type": "integer"
+        }
+      },
+      "required": []
+    },
+    "code-scanning-alert-classification": {
+      "description": "A classification of the file. For example to identify it as generated.",
+      "oneOf": [
+        {
+          "const": "source"
+        },
+        {
+          "const": "generated"
+        },
+        {
+          "const": "test"
+        },
+        {
+          "const": "library"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

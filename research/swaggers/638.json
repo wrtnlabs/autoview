@@ -1,0 +1,70 @@
+{
+  "schema": {
+    "$ref": "#/$defs/status-check-policy"
+  },
+  "$defs": {
+    "status-check-policy": {
+      "title": "Status Check Policy",
+      "description": "Status Check Policy",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks",
+          "type": "string",
+          "format": "uri"
+        },
+        "strict": {
+          "example": true,
+          "type": "boolean"
+        },
+        "contexts": {
+          "example": [
+            "continuous-integration/travis-ci"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "context": {
+                "example": "continuous-integration/travis-ci",
+                "type": "string"
+              },
+              "app_id": {
+                "oneOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "context",
+              "app_id"
+            ]
+          }
+        },
+        "contexts_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks/contexts",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "url",
+        "contexts_url",
+        "strict",
+        "contexts",
+        "checks"
+      ]
+    }
+  }
+}

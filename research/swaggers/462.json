@@ -1,0 +1,25 @@
+{
+  "schema": {
+    "$ref": "#/$defs/api-insights-summary-stats"
+  },
+  "$defs": {
+    "api-insights-summary-stats": {
+      "title": "Summary Stats",
+      "description": "API Insights usage summary stats for an organization",
+      "type": "object",
+      "properties": {
+        "total_request_count": {
+          "description": "The total number of requests within the queried time period",
+          "type": "integer",
+          "format": "int64"
+        },
+        "rate_limited_request_count": {
+          "description": "The total number of requests that were rate limited within the queried time period",
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": []
+    }
+  }
+}

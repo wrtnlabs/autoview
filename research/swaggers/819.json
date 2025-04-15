@@ -1,0 +1,80 @@
+{
+  "schema": {
+    "$ref": "#/$defs/page-deployment"
+  },
+  "$defs": {
+    "IApiReposPagesDeployments.PostBody": {
+      "description": "The object used to create GitHub Pages deployment",
+      "type": "object",
+      "properties": {
+        "artifact_id": {
+          "description": "The ID of an artifact that contains the .zip or .tar of static assets to deploy. The artifact belongs to the repository. Either `artifact_id` or `artifact_url` are required.",
+          "type": "number"
+        },
+        "artifact_url": {
+          "description": "The URL of an artifact that contains the .zip or .tar of static assets to deploy. The artifact belongs to the repository. Either `artifact_id` or `artifact_url` are required.",
+          "type": "string"
+        },
+        "environment": {
+          "description": "The target environment for this GitHub Pages deployment.",
+          "type": "string",
+          "default": "github-pages"
+        },
+        "pages_build_version": {
+          "description": "A unique string that represents the version of the build for this deployment.",
+          "type": "string",
+          "default": "GITHUB_SHA"
+        },
+        "oidc_token": {
+          "description": "The OIDC token issued by GitHub Actions certifying the origin of the deployment.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pages_build_version",
+        "oidc_token"
+      ]
+    },
+    "page-deployment": {
+      "title": "GitHub Pages",
+      "description": "The GitHub Pages deployment status.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID of the GitHub Pages deployment. This is the Git SHA of the deployed commit.",
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "status_url": {
+          "description": "The URI to monitor GitHub Pages deployment status.",
+          "example": "https://api.github.com/repos/github/hello-world/pages/deployments/4fd754f7e594640989b406850d0bc8f06a121251",
+          "type": "string",
+          "format": "uri"
+        },
+        "page_url": {
+          "description": "The URI to the deployed GitHub Pages.",
+          "example": "hello-world.github.io",
+          "type": "string",
+          "format": "uri"
+        },
+        "preview_url": {
+          "description": "The URI to the deployed GitHub Pages preview.",
+          "example": "monalisa-1231a2312sa32-23sda74.drafts.github.io",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "status_url",
+        "page_url"
+      ]
+    }
+  }
+}

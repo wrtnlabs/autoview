@@ -1,0 +1,93 @@
+{
+  "schema": {
+    "$ref": "#/$defs/Try_lt_UserType.Retuation_gt_"
+  },
+  "$defs": {
+    "Try_lt_UserType.Retuation_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/UserType.Retuation"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "UserType.Retuation": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "question": {
+          "description": "지금까지 질문을 한 횟수로, 게시글과 무관하게 질문 횟수는 한 번 더 카운트해준다.",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "answer": {
+          "description": "답변을 한 횟수",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "adopted": {
+          "description": "최상위로 채택된 답변의 수로, 시간이 지남에 따라 변동될 수 있다",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "writing": {
+          "description": "글을 작성한 수",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "likes": {
+          "description": "좋아요를 받은 수로, 게시글과 댓글 모두를 합한 것을 의미한다.",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        }
+      },
+      "required": [
+        "question",
+        "answer",
+        "adopted",
+        "writing",
+        "likes",
+        "id"
+      ]
+    }
+  }
+}

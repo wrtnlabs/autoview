@@ -1,0 +1,76 @@
+{
+  "schema": {
+    "$ref": "#/$defs/thread-subscription"
+  },
+  "$defs": {
+    "IApiNotificationsThreadsSubscription.PutBody": {
+      "properties": {
+        "ignored": {
+          "description": "Whether to block all notifications from a thread.",
+          "default": false,
+          "type": "boolean"
+        }
+      },
+      "type": "object",
+      "required": []
+    },
+    "thread-subscription": {
+      "title": "Thread Subscription",
+      "description": "Thread Subscription",
+      "type": "object",
+      "properties": {
+        "subscribed": {
+          "example": true,
+          "type": "boolean"
+        },
+        "ignored": {
+          "type": "boolean"
+        },
+        "reason": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "example": "2012-10-06T21:34:12Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/notifications/threads/1/subscription",
+          "type": "string",
+          "format": "uri"
+        },
+        "thread_url": {
+          "example": "https://api.github.com/notifications/threads/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "repository_url": {
+          "example": "https://api.github.com/repos/1",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "created_at",
+        "ignored",
+        "reason",
+        "url",
+        "subscribed"
+      ]
+    }
+  }
+}

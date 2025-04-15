@@ -1,0 +1,71 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsActionsRunnersLabels.PutResponse"
+  },
+  "$defs": {
+    "IApiOrgsActionsRunnersLabels.PutBody": {
+      "type": "object",
+      "required": [
+        "labels"
+      ],
+      "properties": {
+        "labels": {
+          "description": "The names of the custom labels to set for the runner. You can pass an empty array to remove all custom labels.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 100,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "IApiOrgsActionsRunnersLabels.PutResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "labels"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/runner-label"
+          }
+        }
+      }
+    },
+    "runner-label": {
+      "title": "Self hosted runner label",
+      "description": "A label for a self hosted runner",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the label.",
+          "type": "integer"
+        },
+        "name": {
+          "description": "Name of the label.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of label. Read-only labels are applied automatically when the runner is configured.",
+          "oneOf": [
+            {
+              "const": "read-only"
+            },
+            {
+              "const": "custom"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  }
+}

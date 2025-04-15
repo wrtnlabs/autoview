@@ -1,0 +1,26 @@
+{
+  "schema": {
+    "$ref": "#/$defs/gitignore-template"
+  },
+  "$defs": {
+    "gitignore-template": {
+      "title": "Gitignore Template",
+      "description": "Gitignore Template",
+      "type": "object",
+      "properties": {
+        "name": {
+          "example": "C",
+          "type": "string"
+        },
+        "source": {
+          "example": "# Object files\n*.o\n\n# Libraries\n*.lib\n*.a\n\n# Shared objects (inc. Windows DLLs)\n*.dll\n*.so\n*.so.*\n*.dylib\n\n# Executables\n*.exe\n*.out\n*.app\n",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "source"
+      ]
+    }
+  }
+}

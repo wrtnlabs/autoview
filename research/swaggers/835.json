@@ -1,0 +1,67 @@
+{
+  "schema": {
+    "$ref": "#/$defs/pull-request-merge-result"
+  },
+  "$defs": {
+    "IApiReposPullsMerge.PutBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "commit_title": {
+              "description": "Title for the automatic commit message.",
+              "type": "string"
+            },
+            "commit_message": {
+              "description": "Extra detail to append to automatic commit message.",
+              "type": "string"
+            },
+            "sha": {
+              "description": "SHA that pull request head must match to allow merge.",
+              "type": "string"
+            },
+            "merge_method": {
+              "description": "The merge method to use.",
+              "oneOf": [
+                {
+                  "const": "merge"
+                },
+                {
+                  "const": "squash"
+                },
+                {
+                  "const": "rebase"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pull-request-merge-result": {
+      "title": "Pull Request Merge Result",
+      "description": "Pull Request Merge Result",
+      "type": "object",
+      "properties": {
+        "sha": {
+          "type": "string"
+        },
+        "merged": {
+          "type": "boolean"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "merged",
+        "message",
+        "sha"
+      ]
+    }
+  }
+}

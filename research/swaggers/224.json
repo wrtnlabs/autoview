@@ -1,0 +1,106 @@
+{
+  "schema": {
+    "$ref": "#/$defs/BotView"
+  },
+  "$defs": {
+    "bot.CustomBot": {
+      "required": [
+        "color",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "readOnly": true
+        },
+        "nameDescI18nMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/NameDesc"
+          },
+          "readOnly": true,
+          "properties": {},
+          "required": []
+        },
+        "createdAt": {
+          "example": 1744704940578,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "avatar": {
+          "$ref": "#/$defs/TinyFile"
+        },
+        "color": {
+          "type": "string",
+          "default": "#123456"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "ai": {
+          "type": "boolean"
+        }
+      }
+    },
+    "NameDesc": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "pattern": "^[^@#$%:/\\\\]+$",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "TinyFile": {
+      "required": [
+        "bucket",
+        "key"
+      ],
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "BotView": {
+      "type": "object",
+      "properties": {
+        "bot": {
+          "$ref": "#/$defs/bot.CustomBot"
+        }
+      },
+      "required": []
+    }
+  }
+}

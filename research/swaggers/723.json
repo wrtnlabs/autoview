@@ -1,0 +1,241 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposDependencyGraphSnapshots.PostResponse"
+  },
+  "$defs": {
+    "snapshot": {
+      "title": "snapshot",
+      "description": "Create a new snapshot of a repository's dependencies.",
+      "type": "object",
+      "properties": {
+        "version": {
+          "description": "The version of the repository snapshot submission.",
+          "type": "integer"
+        },
+        "job": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "The external ID of the job.",
+              "example": "5622a2b0-63f6-4732-8c34-a1ab27e102a11",
+              "type": "string"
+            },
+            "correlator": {
+              "description": "Correlator provides a key that is used to group snapshots submitted over time. Only the \"latest\" submitted snapshot for a given combination of `job.correlator` and `detector.name` will be considered when calculating a repository's current dependencies. Correlator should be as unique as it takes to distinguish all detection runs for a given \"wave\" of CI workflow you run. If you're using GitHub Actions, a good default value for this could be the environment variables GITHUB_WORKFLOW and GITHUB_JOB concatenated together. If you're using a build matrix, then you'll also need to add additional key(s) to distinguish between each submission inside a matrix variation.",
+              "example": "yourworkflowname_yourjobname",
+              "type": "string"
+            },
+            "html_url": {
+              "description": "The url for the job.",
+              "example": "http://example.com/build",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "correlator"
+          ]
+        },
+        "sha": {
+          "description": "The commit SHA associated with this dependency snapshot. Maximum length: 40 characters.",
+          "example": "ddc951f4b1293222421f2c8df679786153acf689",
+          "type": "string",
+          "minLength": 40,
+          "maxLength": 40
+        },
+        "ref": {
+          "description": "The repository branch that triggered this snapshot.",
+          "example": "refs/heads/main",
+          "type": "string",
+          "pattern": "^refs/"
+        },
+        "detector": {
+          "description": "A description of the detector used.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "The name of the detector used.",
+              "example": "docker buildtime detector",
+              "type": "string"
+            },
+            "version": {
+              "description": "The version of the detector used.",
+              "example": "1.0.0",
+              "type": "string"
+            },
+            "url": {
+              "description": "The url of the detector used.",
+              "example": "http://example.com/docker-buildtimer-detector",
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "version",
+            "url"
+          ]
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        },
+        "manifests": {
+          "description": "A collection of package manifests, which are a collection of related dependencies declared in a file or representing a logical group of dependencies.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/manifest"
+          },
+          "properties": {},
+          "required": []
+        },
+        "scanned": {
+          "description": "The time at which the snapshot was scanned.",
+          "example": "2020-06-13T14:52:50-05:00",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "detector",
+        "version",
+        "ref",
+        "sha",
+        "job",
+        "scanned"
+      ]
+    },
+    "metadata": {
+      "title": "metadata",
+      "description": "User-defined metadata to store domain-specific information limited to 8 keys with scalar values.",
+      "type": "object",
+      "maxProperties": 8,
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "properties": {},
+      "required": []
+    },
+    "manifest": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the manifest.",
+          "example": "package-lock.json",
+          "type": "string"
+        },
+        "file": {
+          "type": "object",
+          "properties": {
+            "source_location": {
+              "description": "The path of the manifest file relative to the root of the Git repository.",
+              "example": "/src/build/package-lock.json",
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        },
+        "resolved": {
+          "description": "A collection of resolved package dependencies.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/dependency"
+          },
+          "properties": {},
+          "required": []
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "dependency": {
+      "type": "object",
+      "properties": {
+        "package_url": {
+          "description": "Package-url (PURL) of dependency. See https://github.com/package-url/purl-spec for more details.",
+          "example": "pkg:/npm/%40actions/http-client@1.0.11",
+          "type": "string",
+          "pattern": "^pkg"
+        },
+        "metadata": {
+          "$ref": "#/$defs/metadata"
+        },
+        "relationship": {
+          "description": "A notation of whether a dependency is requested directly by this manifest or is a dependency of another dependency.",
+          "example": "direct",
+          "oneOf": [
+            {
+              "const": "direct"
+            },
+            {
+              "const": "indirect"
+            }
+          ]
+        },
+        "scope": {
+          "description": "A notation of whether the dependency is required for the primary build artifact (runtime) or is only used for development. Future versions of this specification may allow for more granular scopes.",
+          "example": "runtime",
+          "oneOf": [
+            {
+              "const": "runtime"
+            },
+            {
+              "const": "development"
+            }
+          ]
+        },
+        "dependencies": {
+          "description": "Array of package-url (PURLs) of direct child dependencies.",
+          "example": "@actions/http-client",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    },
+    "IApiReposDependencyGraphSnapshots.PostResponse": {
+      "type": "object",
+      "required": [
+        "id",
+        "created_at",
+        "result",
+        "message"
+      ],
+      "properties": {
+        "id": {
+          "description": "ID of the created snapshot.",
+          "type": "integer"
+        },
+        "created_at": {
+          "description": "The time at which the snapshot was created.",
+          "type": "string"
+        },
+        "result": {
+          "description": "Either \"SUCCESS\", \"ACCEPTED\", or \"INVALID\". \"SUCCESS\" indicates that the snapshot was successfully created and the repository's dependencies were updated. \"ACCEPTED\" indicates that the snapshot was successfully created, but the repository's dependencies were not updated. \"INVALID\" indicates that the snapshot was malformed.",
+          "type": "string"
+        },
+        "message": {
+          "description": "A message providing further details about the result, such as why the dependencies were not updated.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,197 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingDeliveryJourney"
+  },
+  "$defs": {
+    "IShoppingDeliveryJourney.ICreate": {
+      "description": "Creation information of the delivery journey.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type of journey",
+          "description": "Type of journey.\n\n- preparing\n- manufacturing\n- shipping\n- delivering",
+          "oneOf": [
+            {
+              "const": "preparing"
+            },
+            {
+              "const": "manufacturing"
+            },
+            {
+              "const": "shipping"
+            },
+            {
+              "const": "delivering"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of journey",
+          "description": "Title of journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "description": {
+          "title": "Description of journey",
+          "description": "Description of journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "started_at": {
+          "title": "Start time of the journey",
+          "description": "Start time of the journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "completed_at": {
+          "title": "Completion time of the journey",
+          "description": "Completion time of the journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "title",
+        "description",
+        "started_at",
+        "completed_at"
+      ]
+    },
+    "IShoppingDeliveryJourney": {
+      "description": "Journey of delivery.\n\n`IShoppingDeliveryJourney` is a subsidiary entity of {@link IShoppingDelivery},\ndescribing each journey of the delivery. For reference, the word journey\nmeans each step of the delivery process, such as preparing, shipping, and\ndelivering {@link IShoppingOrderGood goods} to the\n{@link IShoppingCustomer customer}.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted_at": {
+          "title": "Deletion time of the record",
+          "description": "Deletion time of the record.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "type": {
+          "title": "Type of journey",
+          "description": "Type of journey.\n\n- preparing\n- manufacturing\n- shipping\n- delivering",
+          "oneOf": [
+            {
+              "const": "preparing"
+            },
+            {
+              "const": "manufacturing"
+            },
+            {
+              "const": "shipping"
+            },
+            {
+              "const": "delivering"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of journey",
+          "description": "Title of journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "description": {
+          "title": "Description of journey",
+          "description": "Description of journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "started_at": {
+          "title": "Start time of the journey",
+          "description": "Start time of the journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "completed_at": {
+          "title": "Completion time of the journey",
+          "description": "Completion time of the journey.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "deleted_at",
+        "type",
+        "title",
+        "description",
+        "started_at",
+        "completed_at"
+      ]
+    }
+  }
+}

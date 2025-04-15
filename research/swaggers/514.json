@@ -1,0 +1,1377 @@
+{
+  "schema": {
+    "$ref": "#/$defs/repository-ruleset"
+  },
+  "$defs": {
+    "IApiOrgsRulesets.PostBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the ruleset.",
+          "type": "string"
+        },
+        "target": {
+          "description": "The target of the ruleset",
+          "oneOf": [
+            {
+              "const": "branch"
+            },
+            {
+              "const": "tag"
+            },
+            {
+              "const": "push"
+            },
+            {
+              "const": "repository"
+            }
+          ]
+        },
+        "enforcement": {
+          "$ref": "#/$defs/repository-rule-enforcement"
+        },
+        "bypass_actors": {
+          "description": "The actors that can bypass the rules in this ruleset",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repository-ruleset-bypass-actor"
+          }
+        },
+        "conditions": {
+          "$ref": "#/$defs/org-ruleset-conditions"
+        },
+        "rules": {
+          "description": "An array of rules within the ruleset.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repository-rule"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "enforcement"
+      ]
+    },
+    "repository-rule-enforcement": {
+      "description": "The enforcement level of the ruleset. `evaluate` allows admins to test rules before enforcing them. Admins can view insights on the Rule Insights page (`evaluate` is only available with GitHub Enterprise).",
+      "oneOf": [
+        {
+          "const": "disabled"
+        },
+        {
+          "const": "active"
+        },
+        {
+          "const": "evaluate"
+        }
+      ]
+    },
+    "repository-ruleset-bypass-actor": {
+      "title": "Repository Ruleset Bypass Actor",
+      "description": "An actor that can bypass rules in a ruleset",
+      "type": "object",
+      "required": [
+        "actor_type"
+      ],
+      "properties": {
+        "actor_id": {
+          "description": "The ID of the actor that can bypass a ruleset. If `actor_type` is `OrganizationAdmin`, this should be `1`. If `actor_type` is `DeployKey`, this should be null. `OrganizationAdmin` is not applicable for personal repositories.",
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actor_type": {
+          "description": "The type of actor that can bypass a ruleset.",
+          "oneOf": [
+            {
+              "const": "Integration"
+            },
+            {
+              "const": "OrganizationAdmin"
+            },
+            {
+              "const": "RepositoryRole"
+            },
+            {
+              "const": "Team"
+            },
+            {
+              "const": "DeployKey"
+            }
+          ]
+        },
+        "bypass_mode": {
+          "description": "When the specified actor can bypass the ruleset. `pull_request` means that an actor can only bypass rules on pull requests. `pull_request` is not applicable for the `DeployKey` actor type. Also, `pull_request` is only applicable to branch rulesets.",
+          "oneOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "pull_request"
+            }
+          ]
+        }
+      }
+    },
+    "org-ruleset-conditions": {
+      "title": "Organization ruleset conditions",
+      "description": "Conditions for an organization ruleset.\nThe branch and tag rulesets conditions object should contain both `repository_name` and `ref_name` properties, or both `repository_id` and `ref_name` properties, or both `repository_property` and `ref_name` properties.\nThe push rulesets conditions object does not require the `ref_name` property.\nFor repository policy rulesets, the conditions object should only contain the `repository_name`, the `repository_id`, or the `repository_property`.",
+      "oneOf": [
+        {
+          "type": "object",
+          "title": "repository_name_and_ref_name",
+          "description": "Conditions to target repositories by name and refs by name",
+          "properties": {
+            "ref_name": {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "description": "Array of ref names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~DEFAULT_BRANCH` to include the default branch or `~ALL` to include all branches.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "description": "Array of ref names or patterns to exclude. The condition will not pass if any of these patterns match.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": []
+            },
+            "repository_name": {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "description": "Array of repository names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~ALL` to include all repositories.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "description": "Array of repository names or patterns to exclude. The condition will not pass if any of these patterns match.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "protected": {
+                  "description": "Whether renaming of target repositories is prevented.",
+                  "type": "boolean"
+                }
+              },
+              "required": []
+            }
+          },
+          "required": [
+            "repository_name"
+          ]
+        },
+        {
+          "type": "object",
+          "title": "repository_id_and_ref_name",
+          "description": "Conditions to target repositories by id and refs by name",
+          "properties": {
+            "ref_name": {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "description": "Array of ref names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~DEFAULT_BRANCH` to include the default branch or `~ALL` to include all branches.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "description": "Array of ref names or patterns to exclude. The condition will not pass if any of these patterns match.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": []
+            },
+            "repository_id": {
+              "type": "object",
+              "properties": {
+                "repository_ids": {
+                  "description": "The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.",
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "required": []
+            }
+          },
+          "required": [
+            "repository_id"
+          ]
+        },
+        {
+          "type": "object",
+          "title": "repository_property_and_ref_name",
+          "description": "Conditions to target repositories by property and refs by name",
+          "properties": {
+            "ref_name": {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "description": "Array of ref names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~DEFAULT_BRANCH` to include the default branch or `~ALL` to include all branches.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "exclude": {
+                  "description": "Array of ref names or patterns to exclude. The condition will not pass if any of these patterns match.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": []
+            },
+            "repository_property": {
+              "type": "object",
+              "properties": {
+                "include": {
+                  "description": "The repository properties and values to include. All of these properties must match for the condition to pass.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/repository-ruleset-conditions-repository-property-spec"
+                  }
+                },
+                "exclude": {
+                  "description": "The repository properties and values to exclude. The condition will not pass if any of these properties match.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/repository-ruleset-conditions-repository-property-spec"
+                  }
+                }
+              },
+              "required": []
+            }
+          },
+          "required": [
+            "repository_property"
+          ]
+        }
+      ]
+    },
+    "repository-ruleset-conditions-repository-property-spec": {
+      "title": "Repository ruleset property targeting definition",
+      "description": "Parameters for a targeting a repository property",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the repository property to target",
+          "type": "string"
+        },
+        "property_values": {
+          "description": "The values to match for the repository property",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source": {
+          "description": "The source of the repository property. Defaults to 'custom' if not specified.",
+          "oneOf": [
+            {
+              "const": "custom"
+            },
+            {
+              "const": "system"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "property_values"
+      ]
+    },
+    "repository-rule": {
+      "title": "Repository Rule",
+      "description": "A repository rule.",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/repository-rule-creation"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-update"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-deletion"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-required-linear-history"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-merge-queue"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-required-deployments"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-required-signatures"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-pull-request"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-required-status-checks"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-non-fast-forward"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-commit-message-pattern"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-commit-author-email-pattern"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-committer-email-pattern"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-branch-name-pattern"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-tag-name-pattern"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-file-path-restriction"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-max-file-path-length"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-file-extension-restriction"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-max-file-size"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-workflows"
+        },
+        {
+          "$ref": "#/$defs/repository-rule-code-scanning"
+        }
+      ]
+    },
+    "repository-rule-creation": {
+      "title": "creation",
+      "description": "Only allow users with bypass permission to create matching refs.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "creation"
+        }
+      }
+    },
+    "repository-rule-update": {
+      "title": "update",
+      "description": "Only allow users with bypass permission to update matching refs.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "update"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "update_allows_fetch_and_merge": {
+              "description": "Branch can pull changes from its upstream repository",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "update_allows_fetch_and_merge"
+          ]
+        }
+      }
+    },
+    "repository-rule-deletion": {
+      "title": "deletion",
+      "description": "Only allow users with bypass permissions to delete matching refs.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "deletion"
+        }
+      }
+    },
+    "repository-rule-required-linear-history": {
+      "title": "required_linear_history",
+      "description": "Prevent merge commits from being pushed to matching refs.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "required_linear_history"
+        }
+      }
+    },
+    "repository-rule-merge-queue": {
+      "title": "merge_queue",
+      "description": "Merges must be performed via a merge queue.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "merge_queue"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "check_response_timeout_minutes": {
+              "description": "Maximum time for a required status check to report a conclusion. After this much time has elapsed, checks that have not reported a conclusion will be assumed to have failed",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 360
+            },
+            "grouping_strategy": {
+              "description": "When set to ALLGREEN, the merge commit created by merge queue for each PR in the group must pass all required checks to merge. When set to HEADGREEN, only the commit at the head of the merge group, i.e. the commit containing changes from all of the PRs in the group, must pass its required checks to merge.",
+              "oneOf": [
+                {
+                  "const": "ALLGREEN"
+                },
+                {
+                  "const": "HEADGREEN"
+                }
+              ]
+            },
+            "max_entries_to_build": {
+              "description": "Limit the number of queued pull requests requesting checks and workflow runs at the same time.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "max_entries_to_merge": {
+              "description": "The maximum number of PRs that will be merged together in a group.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "merge_method": {
+              "description": "Method to use when merging changes from queued pull requests.",
+              "oneOf": [
+                {
+                  "const": "MERGE"
+                },
+                {
+                  "const": "SQUASH"
+                },
+                {
+                  "const": "REBASE"
+                }
+              ]
+            },
+            "min_entries_to_merge": {
+              "description": "The minimum number of PRs that will be merged together in a group.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "min_entries_to_merge_wait_minutes": {
+              "description": "The time merge queue should wait after the first PR is added to the queue for the minimum group size to be met. After this time has elapsed, the minimum group size will be ignored and a smaller group will be merged.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 360
+            }
+          },
+          "required": [
+            "check_response_timeout_minutes",
+            "grouping_strategy",
+            "max_entries_to_build",
+            "max_entries_to_merge",
+            "merge_method",
+            "min_entries_to_merge",
+            "min_entries_to_merge_wait_minutes"
+          ]
+        }
+      }
+    },
+    "repository-rule-required-deployments": {
+      "title": "required_deployments",
+      "description": "Choose which environments must be successfully deployed to before refs can be pushed into a ref that matches this rule.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "required_deployments"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "required_deployment_environments": {
+              "description": "The environments that must be successfully deployed to before branches can be merged.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "required_deployment_environments"
+          ]
+        }
+      }
+    },
+    "repository-rule-required-signatures": {
+      "title": "required_signatures",
+      "description": "Commits pushed to matching refs must have verified signatures.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "required_signatures"
+        }
+      }
+    },
+    "repository-rule-pull-request": {
+      "title": "pull_request",
+      "description": "Require all commits be made to a non-target branch and submitted via a pull request before they can be merged.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "pull_request"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "allowed_merge_methods": {
+              "description": "Array of allowed merge methods. Allowed values include `merge`, `squash`, and `rebase`. At least one option must be enabled.",
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "const": "merge"
+                  },
+                  {
+                    "const": "squash"
+                  },
+                  {
+                    "const": "rebase"
+                  }
+                ]
+              }
+            },
+            "automatic_copilot_code_review_enabled": {
+              "description": "Automatically request review from Copilot for new pull requests, if the author has access to Copilot code review.",
+              "type": "boolean"
+            },
+            "dismiss_stale_reviews_on_push": {
+              "description": "New, reviewable commits pushed will dismiss previous pull request review approvals.",
+              "type": "boolean"
+            },
+            "require_code_owner_review": {
+              "description": "Require an approving review in pull requests that modify files that have a designated code owner.",
+              "type": "boolean"
+            },
+            "require_last_push_approval": {
+              "description": "Whether the most recent reviewable push must be approved by someone other than the person who pushed it.",
+              "type": "boolean"
+            },
+            "required_approving_review_count": {
+              "description": "The number of approving reviews that are required before a pull request can be merged.",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "required_review_thread_resolution": {
+              "description": "All conversations on code must be resolved before a pull request can be merged.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "dismiss_stale_reviews_on_push",
+            "require_code_owner_review",
+            "require_last_push_approval",
+            "required_approving_review_count",
+            "required_review_thread_resolution"
+          ]
+        }
+      }
+    },
+    "repository-rule-required-status-checks": {
+      "title": "required_status_checks",
+      "description": "Choose which status checks must pass before the ref is updated. When enabled, commits must first be pushed to another ref where the checks pass.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "required_status_checks"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "do_not_enforce_on_create": {
+              "description": "Allow repositories and branches to be created if a check would otherwise prohibit it.",
+              "type": "boolean"
+            },
+            "required_status_checks": {
+              "description": "Status checks that are required.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/repository-rule-params-status-check-configuration"
+              }
+            },
+            "strict_required_status_checks_policy": {
+              "description": "Whether pull requests targeting a matching branch must be tested with the latest code. This setting will not take effect unless at least one status check is enabled.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "required_status_checks",
+            "strict_required_status_checks_policy"
+          ]
+        }
+      }
+    },
+    "repository-rule-params-status-check-configuration": {
+      "title": "StatusCheckConfiguration",
+      "description": "Required status check",
+      "type": "object",
+      "properties": {
+        "context": {
+          "description": "The status check context name that must be present on the commit.",
+          "type": "string"
+        },
+        "integration_id": {
+          "description": "The optional integration ID that this status check must originate from.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "context"
+      ]
+    },
+    "repository-rule-non-fast-forward": {
+      "title": "non_fast_forward",
+      "description": "Prevent users with push access from force pushing to refs.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "non_fast_forward"
+        }
+      }
+    },
+    "repository-rule-commit-message-pattern": {
+      "title": "commit_message_pattern",
+      "description": "Parameters to be used for the commit_message_pattern rule",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "commit_message_pattern"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "How this rule will appear to users.",
+              "type": "string"
+            },
+            "negate": {
+              "description": "If true, the rule will fail if the pattern matches.",
+              "type": "boolean"
+            },
+            "operator": {
+              "description": "The operator to use for matching.",
+              "oneOf": [
+                {
+                  "const": "starts_with"
+                },
+                {
+                  "const": "ends_with"
+                },
+                {
+                  "const": "contains"
+                },
+                {
+                  "const": "regex"
+                }
+              ]
+            },
+            "pattern": {
+              "description": "The pattern to match with.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "operator",
+            "pattern"
+          ]
+        }
+      }
+    },
+    "repository-rule-commit-author-email-pattern": {
+      "title": "commit_author_email_pattern",
+      "description": "Parameters to be used for the commit_author_email_pattern rule",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "commit_author_email_pattern"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "How this rule will appear to users.",
+              "type": "string"
+            },
+            "negate": {
+              "description": "If true, the rule will fail if the pattern matches.",
+              "type": "boolean"
+            },
+            "operator": {
+              "description": "The operator to use for matching.",
+              "oneOf": [
+                {
+                  "const": "starts_with"
+                },
+                {
+                  "const": "ends_with"
+                },
+                {
+                  "const": "contains"
+                },
+                {
+                  "const": "regex"
+                }
+              ]
+            },
+            "pattern": {
+              "description": "The pattern to match with.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "operator",
+            "pattern"
+          ]
+        }
+      }
+    },
+    "repository-rule-committer-email-pattern": {
+      "title": "committer_email_pattern",
+      "description": "Parameters to be used for the committer_email_pattern rule",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "committer_email_pattern"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "How this rule will appear to users.",
+              "type": "string"
+            },
+            "negate": {
+              "description": "If true, the rule will fail if the pattern matches.",
+              "type": "boolean"
+            },
+            "operator": {
+              "description": "The operator to use for matching.",
+              "oneOf": [
+                {
+                  "const": "starts_with"
+                },
+                {
+                  "const": "ends_with"
+                },
+                {
+                  "const": "contains"
+                },
+                {
+                  "const": "regex"
+                }
+              ]
+            },
+            "pattern": {
+              "description": "The pattern to match with.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "operator",
+            "pattern"
+          ]
+        }
+      }
+    },
+    "repository-rule-branch-name-pattern": {
+      "title": "branch_name_pattern",
+      "description": "Parameters to be used for the branch_name_pattern rule",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "branch_name_pattern"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "How this rule will appear to users.",
+              "type": "string"
+            },
+            "negate": {
+              "description": "If true, the rule will fail if the pattern matches.",
+              "type": "boolean"
+            },
+            "operator": {
+              "description": "The operator to use for matching.",
+              "oneOf": [
+                {
+                  "const": "starts_with"
+                },
+                {
+                  "const": "ends_with"
+                },
+                {
+                  "const": "contains"
+                },
+                {
+                  "const": "regex"
+                }
+              ]
+            },
+            "pattern": {
+              "description": "The pattern to match with.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "operator",
+            "pattern"
+          ]
+        }
+      }
+    },
+    "repository-rule-tag-name-pattern": {
+      "title": "tag_name_pattern",
+      "description": "Parameters to be used for the tag_name_pattern rule",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "tag_name_pattern"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "How this rule will appear to users.",
+              "type": "string"
+            },
+            "negate": {
+              "description": "If true, the rule will fail if the pattern matches.",
+              "type": "boolean"
+            },
+            "operator": {
+              "description": "The operator to use for matching.",
+              "oneOf": [
+                {
+                  "const": "starts_with"
+                },
+                {
+                  "const": "ends_with"
+                },
+                {
+                  "const": "contains"
+                },
+                {
+                  "const": "regex"
+                }
+              ]
+            },
+            "pattern": {
+              "description": "The pattern to match with.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "operator",
+            "pattern"
+          ]
+        }
+      }
+    },
+    "repository-rule-file-path-restriction": {
+      "title": "file_path_restriction",
+      "description": "Prevent commits that include changes in specified file and folder paths from being pushed to the commit graph. This includes absolute paths that contain file names.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "file_path_restriction"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "restricted_file_paths": {
+              "description": "The file paths that are restricted from being pushed to the commit graph.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "restricted_file_paths"
+          ]
+        }
+      }
+    },
+    "repository-rule-max-file-path-length": {
+      "title": "max_file_path_length",
+      "description": "Prevent commits that include file paths that exceed the specified character limit from being pushed to the commit graph.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "max_file_path_length"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "max_file_path_length": {
+              "description": "The maximum amount of characters allowed in file paths.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 256
+            }
+          },
+          "required": [
+            "max_file_path_length"
+          ]
+        }
+      }
+    },
+    "repository-rule-file-extension-restriction": {
+      "title": "file_extension_restriction",
+      "description": "Prevent commits that include files with specified file extensions from being pushed to the commit graph.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "file_extension_restriction"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "restricted_file_extensions": {
+              "description": "The file extensions that are restricted from being pushed to the commit graph.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "restricted_file_extensions"
+          ]
+        }
+      }
+    },
+    "repository-rule-max-file-size": {
+      "title": "max_file_size",
+      "description": "Prevent commits with individual files that exceed the specified limit from being pushed to the commit graph.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "max_file_size"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "max_file_size": {
+              "description": "The maximum file size allowed in megabytes. This limit does not apply to Git Large File Storage (Git LFS).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "max_file_size"
+          ]
+        }
+      }
+    },
+    "repository-rule-workflows": {
+      "title": "workflows",
+      "description": "Require all changes made to a targeted branch to pass the specified workflows before they can be merged.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "workflows"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "do_not_enforce_on_create": {
+              "description": "Allow repositories and branches to be created if a check would otherwise prohibit it.",
+              "type": "boolean"
+            },
+            "workflows": {
+              "description": "Workflows that must pass for this rule to pass.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/repository-rule-params-workflow-file-reference"
+              }
+            }
+          },
+          "required": [
+            "workflows"
+          ]
+        }
+      }
+    },
+    "repository-rule-params-workflow-file-reference": {
+      "title": "WorkflowFileReference",
+      "description": "A workflow that must run for this rule to pass",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "The path to the workflow file",
+          "type": "string"
+        },
+        "ref": {
+          "description": "The ref (branch or tag) of the workflow file to use",
+          "type": "string"
+        },
+        "repository_id": {
+          "description": "The ID of the repository where the workflow is defined",
+          "type": "integer"
+        },
+        "sha": {
+          "description": "The commit SHA of the workflow file to use",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "repository_id"
+      ]
+    },
+    "repository-rule-code-scanning": {
+      "title": "code_scanning",
+      "description": "Choose which tools must provide code scanning results before the reference is updated. When configured, code scanning must be enabled and have results for both the commit and the reference being updated.",
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "code_scanning"
+        },
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "code_scanning_tools": {
+              "description": "Tools that must provide code scanning results for this rule to pass.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/repository-rule-params-code-scanning-tool"
+              }
+            }
+          },
+          "required": [
+            "code_scanning_tools"
+          ]
+        }
+      }
+    },
+    "repository-rule-params-code-scanning-tool": {
+      "title": "CodeScanningTool",
+      "description": "A tool that must provide code scanning results for this rule to pass.",
+      "type": "object",
+      "properties": {
+        "alerts_threshold": {
+          "description": "The severity level at which code scanning results that raise alerts block a reference update. For more information on alert severity levels, see \"[About code scanning alerts](https://docs.github.com/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts#about-alert-severity-and-security-severity-levels).\"",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "errors"
+            },
+            {
+              "const": "errors_and_warnings"
+            },
+            {
+              "const": "all"
+            }
+          ]
+        },
+        "security_alerts_threshold": {
+          "description": "The severity level at which code scanning results that raise security alerts block a reference update. For more information on security severity levels, see \"[About code scanning alerts](https://docs.github.com/code-security/code-scanning/managing-code-scanning-alerts/about-code-scanning-alerts#about-alert-severity-and-security-severity-levels).\"",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "critical"
+            },
+            {
+              "const": "high_or_higher"
+            },
+            {
+              "const": "medium_or_higher"
+            },
+            {
+              "const": "all"
+            }
+          ]
+        },
+        "tool": {
+          "description": "The name of a code scanning tool",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alerts_threshold",
+        "security_alerts_threshold",
+        "tool"
+      ]
+    },
+    "repository-ruleset": {
+      "title": "Repository ruleset",
+      "description": "A set of rules to apply when specified conditions are met.",
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "source",
+        "enforcement"
+      ],
+      "properties": {
+        "id": {
+          "description": "The ID of the ruleset",
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the ruleset",
+          "type": "string"
+        },
+        "target": {
+          "description": "The target of the ruleset",
+          "oneOf": [
+            {
+              "const": "branch"
+            },
+            {
+              "const": "tag"
+            },
+            {
+              "const": "push"
+            },
+            {
+              "const": "repository"
+            }
+          ]
+        },
+        "source_type": {
+          "description": "The type of the source of the ruleset",
+          "oneOf": [
+            {
+              "const": "Repository"
+            },
+            {
+              "const": "Organization"
+            },
+            {
+              "const": "Enterprise"
+            }
+          ]
+        },
+        "source": {
+          "description": "The name of the source",
+          "type": "string"
+        },
+        "enforcement": {
+          "$ref": "#/$defs/repository-rule-enforcement"
+        },
+        "bypass_actors": {
+          "description": "The actors that can bypass the rules in this ruleset",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repository-ruleset-bypass-actor"
+          }
+        },
+        "current_user_can_bypass": {
+          "description": "The bypass type of the user making the API request for this ruleset. This field is only returned when\nquerying the repository-level endpoint.",
+          "oneOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "pull_requests_only"
+            },
+            {
+              "const": "never"
+            }
+          ]
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "self": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "description": "The URL of the ruleset",
+                  "type": "string"
+                }
+              },
+              "required": []
+            },
+            "html": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "href": {
+                      "description": "The html URL of the ruleset",
+                      "type": "string"
+                    }
+                  },
+                  "required": []
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        "conditions": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/repository-ruleset-conditions"
+            },
+            {
+              "$ref": "#/$defs/org-ruleset-conditions"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repository-rule"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "repository-ruleset-conditions": {
+      "title": "Repository ruleset conditions for ref names",
+      "description": "Parameters for a repository ruleset ref name condition",
+      "type": "object",
+      "properties": {
+        "ref_name": {
+          "type": "object",
+          "properties": {
+            "include": {
+              "description": "Array of ref names or patterns to include. One of these patterns must match for the condition to pass. Also accepts `~DEFAULT_BRANCH` to include the default branch or `~ALL` to include all branches.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "exclude": {
+              "description": "Array of ref names or patterns to exclude. The condition will not pass if any of these patterns match.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
+    }
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingMileage"
+  },
+  "$defs": {
+    "IShoppingMileage.ICreate": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "const": -1
+            },
+            {
+              "const": 1
+            }
+          ]
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "source",
+        "direction",
+        "value"
+      ]
+    },
+    "IShoppingMileage": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "const": -1
+            },
+            {
+              "const": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at",
+        "code",
+        "source",
+        "direction"
+      ]
+    }
+  }
+}

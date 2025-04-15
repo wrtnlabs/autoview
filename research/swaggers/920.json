@@ -1,0 +1,46 @@
+{
+  "schema": {
+    "$ref": "#/$defs/team-membership"
+  },
+  "$defs": {
+    "team-membership": {
+      "title": "Team Membership",
+      "description": "Team Membership",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "role": {
+          "description": "The role of the user in the team.",
+          "example": "member",
+          "oneOf": [
+            {
+              "const": "member"
+            },
+            {
+              "const": "maintainer"
+            }
+          ]
+        },
+        "state": {
+          "description": "The state of the user's membership in the team.",
+          "oneOf": [
+            {
+              "const": "active"
+            },
+            {
+              "const": "pending"
+            }
+          ]
+        }
+      },
+      "required": [
+        "role",
+        "state",
+        "url"
+      ]
+    }
+  }
+}

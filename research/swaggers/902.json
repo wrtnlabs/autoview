@@ -1,0 +1,145 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiSearchLabels.GetResponse"
+  },
+  "$defs": {
+    "IApiSearchLabels.GetQuery": {
+      "type": "object",
+      "properties": {
+        "repository_id": {
+          "description": "The id of the repository.",
+          "type": "integer"
+        },
+        "q": {
+          "description": "The search keywords. This endpoint does not accept qualifiers in the query. To learn more about the format of the query, see [Constructing a search query](https://docs.github.com/rest/search/search#constructing-a-search-query).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repository_id",
+        "q"
+      ]
+    },
+    "IApiSearchLabels.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "incomplete_results",
+        "items"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "incomplete_results": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/label-search-result-item"
+          }
+        }
+      }
+    },
+    "label-search-result-item": {
+      "title": "Label Search Result Item",
+      "description": "Label Search Result Item",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "type": "string"
+        },
+        "color": {
+          "type": "string"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "description": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "score": {
+          "type": "number"
+        },
+        "text_matches": {
+          "$ref": "#/$defs/search-result-text-matches"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "name",
+        "color",
+        "default",
+        "description",
+        "score"
+      ]
+    },
+    "search-result-text-matches": {
+      "title": "Search Result Text Matches",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "object_url": {
+            "type": "string"
+          },
+          "object_type": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "property": {
+            "type": "string"
+          },
+          "fragment": {
+            "type": "string"
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "indices": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "required": []
+            }
+          }
+        },
+        "required": []
+      }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schema": {
+    "$ref": "#/$defs/code-scanning-autofix"
+  },
+  "$defs": {
+    "code-scanning-autofix": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/$defs/code-scanning-autofix-status"
+        },
+        "description": {
+          "$ref": "#/$defs/code-scanning-autofix-description"
+        },
+        "started_at": {
+          "$ref": "#/$defs/code-scanning-autofix-started-at"
+        }
+      },
+      "required": [
+        "status",
+        "description",
+        "started_at"
+      ]
+    },
+    "code-scanning-autofix-status": {
+      "description": "The status of an autofix.",
+      "oneOf": [
+        {
+          "const": "pending"
+        },
+        {
+          "const": "error"
+        },
+        {
+          "const": "success"
+        },
+        {
+          "const": "outdated"
+        }
+      ]
+    },
+    "code-scanning-autofix-description": {
+      "description": "The description of an autofix.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-autofix-started-at": {
+      "description": "The start time of an autofix in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    }
+  }
+}

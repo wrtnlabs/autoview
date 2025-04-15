@@ -1,0 +1,178 @@
+{
+  "schema": {
+    "$ref": "#/$defs/root"
+  },
+  "$defs": {
+    "root": {
+      "type": "object",
+      "properties": {
+        "current_user_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "current_user_authorizations_html_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "authorizations_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "code_search_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "commit_search_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "emails_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "emojis_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "events_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "feeds_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "followers_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "following_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "gists_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "hub_url": {
+          "type": "string",
+          "format": "uri-template",
+          "deprecated": true
+        },
+        "issue_search_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "issues_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "keys_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "label_search_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "notifications_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "organization_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "organization_repositories_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "organization_teams_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "public_gists_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "rate_limit_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "repository_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "repository_search_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "current_user_repositories_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "starred_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "starred_gists_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "topic_search_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "user_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "user_organizations_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "user_repositories_url": {
+          "type": "string",
+          "format": "uri-template"
+        },
+        "user_search_url": {
+          "type": "string",
+          "format": "uri-template"
+        }
+      },
+      "required": [
+        "current_user_url",
+        "current_user_authorizations_html_url",
+        "authorizations_url",
+        "code_search_url",
+        "commit_search_url",
+        "emails_url",
+        "emojis_url",
+        "events_url",
+        "feeds_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "issue_search_url",
+        "issues_url",
+        "keys_url",
+        "label_search_url",
+        "notifications_url",
+        "organization_url",
+        "organization_repositories_url",
+        "organization_teams_url",
+        "public_gists_url",
+        "rate_limit_url",
+        "repository_url",
+        "repository_search_url",
+        "current_user_repositories_url",
+        "starred_url",
+        "starred_gists_url",
+        "user_url",
+        "user_organizations_url",
+        "user_repositories_url",
+        "user_search_url"
+      ]
+    }
+  }
+}

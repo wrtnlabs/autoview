@@ -1,0 +1,44 @@
+{
+  "schema": {
+    "$ref": "#/$defs/codespaces-public-key"
+  },
+  "$defs": {
+    "codespaces-public-key": {
+      "title": "CodespacesPublicKey",
+      "description": "The public key used for setting Codespaces secrets.",
+      "type": "object",
+      "properties": {
+        "key_id": {
+          "description": "The identifier for the key.",
+          "example": "1234567",
+          "type": "string"
+        },
+        "key": {
+          "description": "The Base64 encoded public key.",
+          "example": "hBT5WZEj8ZoOv6TYJsfWq7MxTEQopZO5/IT3ZCVQPzs=",
+          "type": "string"
+        },
+        "id": {
+          "example": 2,
+          "type": "integer"
+        },
+        "url": {
+          "example": "https://api.github.com/user/keys/2",
+          "type": "string"
+        },
+        "title": {
+          "example": "ssh-rsa AAAAB3NzaC1yc2EAAA",
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2011-01-26T19:01:12Z",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "key"
+      ]
+    }
+  }
+}

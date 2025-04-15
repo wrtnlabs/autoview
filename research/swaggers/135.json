@@ -1,0 +1,1263 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingSale"
+  },
+  "$defs": {
+    "IShoppingSaleSnapshot.ICreate": {
+      "description": "Creation information of the snapshot.",
+      "type": "object",
+      "properties": {
+        "content": {
+          "title": "Description and image content describing the sale",
+          "description": "Description and image content describing the sale.",
+          "$ref": "#/$defs/IShoppingSaleContent.ICreate"
+        },
+        "units": {
+          "title": "List of units",
+          "description": "List of units.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnit.ICreate"
+          },
+          "minItems": 1
+        },
+        "tags": {
+          "title": "List of search tags",
+          "description": "List of search tags.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "category_codes": {
+          "title": "List of target categories' {@link IShoppingChannelCategory.code}s",
+          "description": "List of target categories' {@link IShoppingChannelCategory.code}s.\n\nIf empty, it means all categories of the channel is listing the sale.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "content",
+        "units",
+        "tags",
+        "category_codes"
+      ]
+    },
+    "IShoppingSaleContent.ICreate": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "format": {
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "body": {
+          "type": "string"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        },
+        "thumbnails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "title",
+        "format",
+        "body",
+        "files",
+        "thumbnails"
+      ]
+    },
+    "IAttachmentFile.ICreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IShoppingSaleUnit.ICreate": {
+      "description": "Creation information of sale unit.",
+      "type": "object",
+      "properties": {
+        "options": {
+          "title": "List of options",
+          "description": "List of options.",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/IShoppingSaleUnitSelectableOption.ICreate"
+              },
+              {
+                "$ref": "#/$defs/IShoppingSaleUnitDescriptiveOption.ICreate"
+              }
+            ]
+          }
+        },
+        "stocks": {
+          "title": "List of final stocks",
+          "description": "List of final stocks.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitStock.ICreate"
+          },
+          "minItems": 1
+        },
+        "name": {
+          "title": "Representative name of the unit",
+          "description": "Representative name of the unit.",
+          "type": "string"
+        },
+        "primary": {
+          "title": "Whether the unit is primary or not",
+          "description": "Whether the unit is primary or not.\n\nJust a labeling value.",
+          "type": "boolean"
+        },
+        "required": {
+          "title": "Whether the unit is required or not",
+          "description": "Whether the unit is required or not.\n\nWhen the unit is required, the customer must select the unit. If do not\nselect, customer can't buy it.\n\nFor example, if there's a sale \"Macbook Set\" and one of the unit is the\n\"Main Body\", is it possible to buy the \"Macbook Set\" without the\n\"Main Body\" unit? This property is for that case.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "options",
+        "stocks",
+        "name",
+        "primary",
+        "required"
+      ]
+    },
+    "IShoppingSaleUnitSelectableOption.ICreate": {
+      "description": "Creation information of the selectable option.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Discriminant for the type of selectable option",
+          "description": "Discriminant for the type of selectable option.",
+          "const": "select"
+        },
+        "name": {
+          "title": "Represents the name of the option",
+          "description": "Represents the name of the option.",
+          "type": "string"
+        },
+        "variable": {
+          "title": "Whether the option is variable or not",
+          "description": "Whether the option is variable or not.\n\nWhen type of current option is \"select\", this attribute means whether\nselecting different candidate value affects the final stock or not.",
+          "type": "boolean"
+        },
+        "candidates": {
+          "title": "List of candidate values",
+          "description": "List of candidate values.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitOptionCandidate.ICreate"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "variable",
+        "candidates"
+      ]
+    },
+    "IShoppingSaleUnitOptionCandidate.ICreate": {
+      "description": "Creation information of the candidate value.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Represents the name of the candidate value",
+          "description": "Represents the name of the candidate value.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "IShoppingSaleUnitDescriptiveOption.ICreate": {
+      "description": "Creation information of the descriptive option.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type of descriptive option",
+          "description": "Type of descriptive option.\n\nWhich typed value should be written when purchasing.",
+          "oneOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "name": {
+          "title": "Readable name of the option",
+          "description": "Readable name of the option.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "name"
+      ]
+    },
+    "IShoppingSaleUnitStock.ICreate": {
+      "description": "Creation information of the stock.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "Representative name of the stock",
+          "description": "Representative name of the stock.",
+          "type": "string"
+        },
+        "price": {
+          "title": "Price of the stock",
+          "description": "Price of the stock.",
+          "$ref": "#/$defs/IShoppingPrice"
+        },
+        "quantity": {
+          "title": "Initial inventory quantity",
+          "description": "Initial inventory quantity.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "choices": {
+          "title": "List of choices",
+          "description": "List of choices.\n\nWhich candidate values being chosen for each option.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitStockChoice.ICreate"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "price",
+        "quantity",
+        "choices"
+      ]
+    },
+    "IShoppingPrice": {
+      "description": "Shopping price interface.",
+      "type": "object",
+      "properties": {
+        "nominal": {
+          "title": "Nominal price",
+          "description": "Nominal price.\n\nThis is not {@link real real price} to pay, but just a nominal price to show.\nIf this value is greater than the {@link real real price}, it would be shown\nlike {@link IShoppingSeller seller} is giving a discount.",
+          "type": "number",
+          "minimum": 0
+        },
+        "real": {
+          "title": "Real price to pay",
+          "description": "Real price to pay.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "nominal",
+        "real"
+      ]
+    },
+    "IShoppingSaleUnitStockChoice.ICreate": {
+      "description": "Creation information of stock choice.",
+      "type": "object",
+      "properties": {
+        "option_index": {
+          "description": "Target option's index number in\n{@link IShoppingSaleUnit.ICreate.options}.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "candidate_index": {
+          "description": "Target candidate's index number in\n{@link IShoppingSaleUnitSelectableOption.ICreate.candidates}.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "option_index",
+        "candidate_index"
+      ]
+    },
+    "IShoppingSale": {
+      "description": "Seller sales products.\n\n`IShoppingSale` is an entity that embodies \"product sales\" (sales)\ninformation registered by the {@link ISoppingSeller seller}. And the main\ninformation of the sale is recorded in the sub {@link IShoppingSaleSnapshot},\nnot in the main `IShoppingSale`. When a seller changes a previously registered\nitem, the existing `IShoppingSale` record is not changed, but a new\n{@link IShoppingSaleSnapshot snapshot} record be created.\n\nThis is to preserve the {@link IShoppingCustomer customer}'s\n{@link IShoppingOrder purchase history} flawlessly after the customer\npurchases a specific item, even if the seller changes the components or\nprice of the item. It is also intended to support sellers in so-called A/B\ntesting, which involves changing components or prices and measuring the\nperformance in each case.",
+      "type": "object",
+      "properties": {
+        "section": {
+          "title": "Belonged section",
+          "description": "Belonged section.",
+          "$ref": "#/$defs/IShoppingSection"
+        },
+        "seller": {
+          "title": "Seller who has registered the sale",
+          "description": "Seller who has registered the sale.",
+          "$ref": "#/$defs/IShoppingSeller.IInvert"
+        },
+        "id": {
+          "title": "Primary Key of Sale",
+          "description": "Primary Key of Sale.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "snapshot_id": {
+          "title": "Primary Key of Snapshot",
+          "description": "Primary Key of Snapshot.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "latest": {
+          "title": "Whether the snapshot is the latest one or not",
+          "description": "Whether the snapshot is the latest one or not.",
+          "type": "boolean"
+        },
+        "content": {
+          "title": "Description and image content describing the sale",
+          "description": "Description and image content describing the sale.",
+          "$ref": "#/$defs/IShoppingSaleContent"
+        },
+        "categories": {
+          "title": "List of categories",
+          "description": "List of categories.\n\nWhich categories the sale is registered to.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+          }
+        },
+        "tags": {
+          "title": "List of search tags",
+          "description": "List of search tags.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "units": {
+          "title": "List of units",
+          "description": "List of units.\n\nRecords about individual product composition information that are sold\nin the sale. Each {@link IShoppingSaleUnit unit} record has configurable\n{@link IShoppingSaleUnitOption options},\n{@link IShoppingSaleUnitOptionCandidate candidate} values for each\noption, and {@link IShoppingSaleUnitStock final stocks} determined by\nselecting every candidate values of each option.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnit"
+          },
+          "minItems": 1
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.\n\nNote that, this property is different with {@link opened_at},\nwhich means the timepoint of the sale is opened.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "title": "Last updated time of the record",
+          "description": "Last updated time of the record.\n\nIn another words, creation time of the last snapshot.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "paused_at": {
+          "title": "Paused time of the sale",
+          "description": "Paused time of the sale.\n\nThe sale is paused by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} can still see the sale on the\nboth list and detail pages, but the sale has a warning label\n\"The sale is paused by the seller\".",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "suspended_at": {
+          "title": "Suspended time of the sale",
+          "description": "Suspended time of the sale.\n\nThe sale is suspended by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} cannot see the sale on the\nboth list and detail pages. It is almost same with soft delettion,\nbut there's a little bit difference that the owner\n{@link IShoppingSeller seller} can still see the sale and resume it.\n\nOf course, the {@link IShoppingCustomer customers} who have\nalready purchased the sale can still see the sale on the\n{@link IShoppingOrder order} page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "opened_at": {
+          "title": "Opening time of the sale",
+          "description": "Opening time of the sale.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "closed_at": {
+          "title": "Closing time of the sale",
+          "description": "Closing time of the sale.\n\nIf this value is `null`, the sale be continued forever.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "section",
+        "seller",
+        "id",
+        "snapshot_id",
+        "latest",
+        "content",
+        "categories",
+        "tags",
+        "units",
+        "created_at",
+        "updated_at",
+        "paused_at",
+        "suspended_at",
+        "opened_at",
+        "closed_at"
+      ]
+    },
+    "IShoppingSection": {
+      "description": "Section information.\n\n`IShoppingSection` is a concept that refers to the spatial information of\nthe market.\n\nIf we compare the section mentioned here to the offline market, it means a\nspatially separated area within the store, such as the \"fruit corner\" or\n\"butcher corner\". Therefore, in the {@link IShoppingSale sale} entity, it is\nnot possible to classify multiple sections simultaneously, but only one section\ncan be classified.\n\nBy the way, if your shopping mall system requires only one section, then just\nuse only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Representative name of the section",
+          "description": "Representative name of the section.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "created_at"
+      ]
+    },
+    "IShoppingSeller.IInvert": {
+      "description": "Invert information starting from seller info.\n\nInstead of accessing to the seller information from the\n{@link IShoppingCustomer.member} -> {@link IShoppingMember.seller},\n`IShoppingSeller.IInvert` starts from the seller information\nand access to the customer, member and {@link IShoppingCitizen citizen}\ninformation inversely.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Discriminant for the type of seller",
+          "description": "Discriminant for the type of seller.",
+          "const": "seller"
+        },
+        "member": {
+          "title": "Membership joining information",
+          "description": "Membership joining information.",
+          "$ref": "#/$defs/IShoppingMember.IInvert"
+        },
+        "customer": {
+          "title": "Customer, the connection information",
+          "description": "Customer, the connection information.",
+          "$ref": "#/$defs/IShoppingCustomer.IInvert"
+        },
+        "citizen": {
+          "title": "Real-name and mobile number authentication information",
+          "description": "Real-name and mobile number authentication information.",
+          "$ref": "#/$defs/IShoppingCitizen"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation tmie of record",
+          "description": "Creation tmie of record.\n\nAnother words, the time when the seller has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "member",
+        "customer",
+        "citizen",
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingMember.IInvert": {
+      "description": "Invert information of member.\n\nThis invert member information has been designed to be used for another\ninvert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "nickname": {
+          "title": "Nickname that uniquely identifies the member",
+          "description": "Nickname that uniquely identifies the member.",
+          "type": "string"
+        },
+        "emails": {
+          "title": "List of emails",
+          "description": "List of emails.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingMemberEmail"
+          }
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the member has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "nickname",
+        "emails",
+        "created_at"
+      ]
+    },
+    "IShoppingMemberEmail": {
+      "description": "Email address of member.\n\nThis shopping mall system allows multiple email addresses to be\nregistered for one {@link IShoppingMember member}. If you don't have to\nplan such multiple email addresses, just use only one.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Email address value",
+          "description": "Email address value.",
+          "type": "string",
+          "format": "email"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at"
+      ]
+    },
+    "IShoppingCustomer.IInvert": {
+      "description": "Inverted customer information.\n\nThis inverted customer information has been designed to be used for\nanother invert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "channel": {
+          "title": "Belonged channel",
+          "description": "Belonged channel.",
+          "$ref": "#/$defs/IShoppingChannel"
+        },
+        "external_user": {
+          "title": "External user information",
+          "description": "External user information.\n\nWhen the customer has come from an external service.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingExternalUser"
+            }
+          ]
+        },
+        "href": {
+          "title": "Connection address",
+          "description": "Connection address.\n\nSame with {@link window.location.href} of client.",
+          "type": "string",
+          "format": "uri"
+        },
+        "referrer": {
+          "title": "Referrer address",
+          "description": "Referrer address.\n\nSame with {@link window.document.referrer} of client.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "string",
+              "maxLength": 0
+            }
+          ]
+        },
+        "ip": {
+          "title": "Connection IP Address",
+          "description": "Connection IP Address.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "ipv4"
+            },
+            {
+              "type": "string",
+              "format": "ipv6"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of the connection record",
+          "description": "Creation time of the connection record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "channel",
+        "external_user",
+        "href",
+        "referrer",
+        "ip",
+        "created_at"
+      ]
+    },
+    "IShoppingChannel": {
+      "description": "Channel information.\n\n`IShoppingChannel` is a concept that shapes the distribution channel in the\nmarket. Therefore, the difference in the channel in this e-commerce system\nmeans that it is another site or application.\n\nBy the way, if your shopping mall system requires only one channel, then\njust use only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name of the channel",
+          "description": "Name of the channel.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "code",
+        "name"
+      ]
+    },
+    "IShoppingExternalUser": {
+      "description": "External user information.\n\n`IShoppingExternalUser` is an entity dsigned for when this system needs\nto connect with external services and welcome their users as\n{@link IShoppingCustomer customers} of this service.\n\nFor reference, customers who connect from an external service must have\nthis record, and the external service user is identified through the two\nattributes {@link application} and {@link uid}. If a customer connected\nfrom an external service completes\n{@link IShoppingCitizen real-name authentication} from this service, each\ntime the external service user reconnects to this service and issues a\nnew customer authentication token, real-name authentication begins with\ncompleted.\n\nAnd {@link password} is the password issued to the user by the external\nservice system (the so-called permanent user authentication token), and\nis never the actual user password. However, for customers who entered the\nsame application and uid as the current external system user, this is to\ndetermine whether to view this as a correct external system user or a\nviolation.\n\nIn addition, additional information received from external services can\nbe recorded in the data field in JSON format.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "citizen": {
+          "title": "Citizen activation info",
+          "description": "Citizen activation info.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCitizen"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother word, first time when the external user connected.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "uid": {
+          "title": "Identifier key of external user from the external system",
+          "description": "Identifier key of external user from the external system.",
+          "type": "string"
+        },
+        "application": {
+          "title": "Identifier code of the external service",
+          "description": "Identifier code of the external service.\n\nIt can be same with {@link IShoppingChannel.code} in common.",
+          "type": "string"
+        },
+        "nickname": {
+          "title": "Nickname of external user in the external system",
+          "description": "Nickname of external user in the external system.",
+          "type": "string"
+        },
+        "data": {
+          "description": "Additional information about external user from the external\nsystem."
+        }
+      },
+      "required": [
+        "id",
+        "citizen",
+        "created_at",
+        "uid",
+        "application",
+        "nickname",
+        "data"
+      ]
+    },
+    "IShoppingCitizen": {
+      "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "mobile": {
+          "title": "Mobile number",
+          "description": "Mobile number.",
+          "x-wrtn-payment-order-mobile": true,
+          "type": "string",
+          "pattern": "^[0-9]*$"
+        },
+        "name": {
+          "title": "Real name, or equivalent nickname",
+          "description": "Real name, or equivalent nickname.",
+          "x-wrtn-payment-order-citizen": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "mobile",
+        "name"
+      ]
+    },
+    "IShoppingSaleContent": {
+      "description": "Content information of sale snapshot.\n\n`IShoppingSaleContent` is an entity embodies the description contents\nof {@link IShoppingSale}.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "title": "Title of the content",
+          "description": "Title of the content.",
+          "type": "string"
+        },
+        "format": {
+          "title": "Format of the body content",
+          "description": "Format of the body content.\n\nSame meaning with file extension like `html`, `md`, and `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "body": {
+          "title": "The main body content",
+          "description": "The main body content.\n\nFormat follows the {@link format}, and default is `md` (markdown).",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attached files",
+          "description": "List of attached files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile"
+          }
+        },
+        "thumbnails": {
+          "title": "List of thumbnails",
+          "description": "List of thumbnails.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "format",
+        "body",
+        "files",
+        "thumbnails"
+      ]
+    },
+    "IAttachmentFile": {
+      "description": "Attachment File.\n\nEvery attachment files that are managed in current system.\n\nFor reference, it is possible to omit one of file {@link name}\nor {@link extension} like `.gitignore` or `README` case, but not\npossible to omit both of them.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of attachment file",
+          "description": "Creation time of attachment file.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IShoppingChannelCategory.IInvert": {
+      "description": "Invert category information with parent category.",
+      "type": "object",
+      "properties": {
+        "parent": {
+          "title": "Parent category info with recursive structure",
+          "description": "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+            }
+          ]
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code of the category",
+          "description": "Identifier code of the category.\n\nThe code must be unique in the channel.",
+          "type": "string"
+        },
+        "parent_id": {
+          "title": "Parent category's ID",
+          "description": "Parent category's ID.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uuid"
+            }
+          ]
+        },
+        "name": {
+          "title": "Representative name of the category",
+          "description": "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "parent",
+        "id",
+        "code",
+        "parent_id",
+        "name",
+        "created_at"
+      ]
+    },
+    "IShoppingSaleUnit": {
+      "description": "Product composition information handled in the sale.\n\n`IShoppingSaleUnit` is an entity that embodies the \"individual product\"\ninformation handled in the {@link IShoppingSale sale}.\n\nFor reference, the reason why `IShoppingSaleUnit` is separated from\n{@link IShoppingSaleSnapshot} by an algebraic relationship of 1: N is because\nthere are some cases where multiple products are sold in one listing. This is\nthe case with so-called \"bundled products\".\n\n- Bundle from regular product (Mackbook Set)\n  - Main Body\n  - Keyboard\n  - Mouse\n  - Apple Care (Free A/S Voucher)\n\nAnd again, `IShoppingSaleUnit` does not in itself refer to the\n{@link IShoppingSaleUnitStock final stock} that the\n{@link IShoppingCustomer customer} will {@link IShoppingOrder purchase}.\nThe final stock can be found only after selecting all given\n{@link IShoppingSaleUnitOption options} and their\n{@link IShoppingSaleUnitOptionCandidate candidate values}.\n\nFor example, even if you buy a Macbook, the final stocks are determined only\nafter selecting all the options (CPU / RAM / SSD), etc.",
+      "type": "object",
+      "properties": {
+        "options": {
+          "title": "List of options",
+          "description": "List of options.",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/IShoppingSaleUnitSelectableOption"
+              },
+              {
+                "$ref": "#/$defs/IShoppingSaleUnitDescriptiveOption"
+              }
+            ]
+          }
+        },
+        "stocks": {
+          "title": "List of final stocks",
+          "description": "List of final stocks.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitStock"
+          },
+          "minItems": 1
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Representative name of the unit",
+          "description": "Representative name of the unit.",
+          "type": "string"
+        },
+        "primary": {
+          "title": "Whether the unit is primary or not",
+          "description": "Whether the unit is primary or not.\n\nJust a labeling value.",
+          "type": "boolean"
+        },
+        "required": {
+          "title": "Whether the unit is required or not",
+          "description": "Whether the unit is required or not.\n\nWhen the unit is required, the customer must select the unit. If do not\nselect, customer can't buy it.\n\nFor example, if there's a sale \"Macbook Set\" and one of the unit is the\n\"Main Body\", is it possible to buy the \"Macbook Set\" without the\n\"Main Body\" unit? This property is for that case.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "options",
+        "stocks",
+        "id",
+        "name",
+        "primary",
+        "required"
+      ]
+    },
+    "IShoppingSaleUnitSelectableOption": {
+      "description": "Individual option information on units for sale.\n\n`IShoppingSaleUnitSelectableOption` is a subsidiary entity of\n{@link IShoppingSaleUnit} that represents individual products in the\n{@link IShoppingSale sale}, and is an entity designed to represent individual\nselectable option information for the unit.\n\n- Examples of Options\n  - selectable options\n    - Computer: CPU, RAM, SSD, etc.\n    - Clothes: size, color, style, etc.\n  - descriptive options\n    - Engrave\n    - Simple question\n\nIf the {@link variable} property value is `true`, the final stock that the\n{@link IShoppingCustomer customer} will purchase changes depending on the\nselection of the {@link IShoppingSaleUnitOptionCandidate candidate value}.\n\nConversely, if it is a type other than \"select\", or if the {@link variable}\nproperty value is \"false\", , this is an option that has no meaning beyond\nsimple information transfer. Therefore, no matter what value the customer\nchooses when purchasing it, the option in this case does not affect the\n{@link IShoppingSaleUnitStock final stock}.",
+      "type": "object",
+      "properties": {
+        "candidates": {
+          "title": "List of candidate values",
+          "description": "List of candidate values.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitOptionCandidate"
+          },
+          "minItems": 1
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "title": "Discriminant for the type of selectable option",
+          "description": "Discriminant for the type of selectable option.",
+          "const": "select"
+        },
+        "name": {
+          "title": "Represents the name of the option",
+          "description": "Represents the name of the option.",
+          "type": "string"
+        },
+        "variable": {
+          "title": "Whether the option is variable or not",
+          "description": "Whether the option is variable or not.\n\nWhen type of current option is \"select\", this attribute means whether\nselecting different candidate value affects the final stock or not.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "candidates",
+        "id",
+        "type",
+        "name",
+        "variable"
+      ]
+    },
+    "IShoppingSaleUnitOptionCandidate": {
+      "description": "Selectable candidate values within an option.\n\n`IShoppingSaleUnitOptionCandidate` is an entity that represents individual\ncandidate values that can be selected from\n{@link IShoppingSaleUnitSelectableOption options of the \"select\" type}.\n\n- Example\n  - RAM: 8GB, 16GB, 32GB\n  - GPU: RTX 3060, RTX 4080, TESLA\n  - License: Private, Commercial, Educatiion\n\nBy the way, if belonged option is not \"select\" type, this entity never\nbeing used.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Represents the name of the candidate value",
+          "description": "Represents the name of the candidate value.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "IShoppingSaleUnitDescriptiveOption": {
+      "description": "Descriptive option.\n\nWhen type of the option not `\"select\"`, it means the option is descriptive\nthat requiring {@link IShoppingCustomer customers} to write some value to\n{@link IShoppingOrder purchase}. Also, whatever customer writes about the\noption, it does not affect the {@link IShoppingSaleUnitStock final stock}.\n\nAnother words, the descriptive option is just for information transfer.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "title": "Type of descriptive option",
+          "description": "Type of descriptive option.\n\nWhich typed value should be written when purchasing.",
+          "oneOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "name": {
+          "title": "Readable name of the option",
+          "description": "Readable name of the option.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "name"
+      ]
+    },
+    "IShoppingSaleUnitStock": {
+      "description": "Final component information on units for sale.\n\n`IShoppingSaleUnitStock` is a subsidiary entity of {@link IShoppingSaleUnit}\nthat represents a product catalog for sale, and is a kind of final stock that is\nconstructed by selecting all {@link IShoppingSaleUnitSelectableOption options}\n(variable \"select\" type) and their\n{@link IShoppingSaleUnitOptionCandidate candidate} values in the belonging unit.\nIt is the \"good\" itself that customers actually purchase.\n\n- Product Name) MacBook\n  - Options\n    - CPU: { i3, i5, i7, i9 }\n    - RAM: { 8GB, 16GB, 32GB, 64GB, 96GB }\n    - SSD: { 256GB, 512GB, 1TB }\n  - Number of final stocks: 4 * 5 * 3 = 60\n\nFor reference, the total number of `IShoppingSaleUnitStock` records in an\nattribution unit can be obtained using Cartesian Product. In other words, the\nvalue obtained by multiplying all the candidate values that each\n(variable \"select\" type) option can have by the number of cases is the total\nnumber of final stocks in the unit.\n\nOf course, without a single variable \"select\" type option, the final stocks\ncount in the unit is only 1.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Representative name of the stock",
+          "description": "Representative name of the stock.",
+          "type": "string"
+        },
+        "price": {
+          "title": "Price of the stock",
+          "description": "Price of the stock.",
+          "$ref": "#/$defs/IShoppingPrice"
+        },
+        "inventory": {
+          "title": "Current inventory status of the stock",
+          "description": "Current inventory status of the stock.",
+          "$ref": "#/$defs/IShoppingSaleUnitStockInventory"
+        },
+        "choices": {
+          "title": "List of choices",
+          "description": "List of choices.\n\nWhich candidate values being chosen for each option.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitStockChoice"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "price",
+        "inventory",
+        "choices"
+      ]
+    },
+    "IShoppingSaleUnitStockInventory": {
+      "description": "Inventory information of a final stock.",
+      "type": "object",
+      "properties": {
+        "income": {
+          "title": "Total income quantity",
+          "description": "Total income quantity.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "outcome": {
+          "title": "Total outcome quantity",
+          "description": "Total outcome quantity.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "income",
+        "outcome"
+      ]
+    },
+    "IShoppingSaleUnitStockChoice": {
+      "description": "Selection information of final stock.\n\n`IShoppingSaleUnitStockChoice` is an entity that represents which\n{@link IShoppingSaleUnitSelectableOption option} of each variable \"select\"\ntype was selected for each {@link IShoppingSaleUnitStock stock} and which\n{@link IShoppingSaleUnitOptionCandidate candidate value} was selected within\nit.\n\nOf course, if the bound {@link IShoppingSaleUnit unit} does not have any\noptions, this entity can also be ignored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "option_id": {
+          "description": "Target option's {@link IShoppingSaleUnitOption.id}",
+          "type": "string",
+          "format": "uuid"
+        },
+        "candidate_id": {
+          "description": "Target candidate's {@link IShoppingSaleUnitOptionCandidate.id}",
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "id",
+        "option_id",
+        "candidate_id"
+      ]
+    }
+  }
+}

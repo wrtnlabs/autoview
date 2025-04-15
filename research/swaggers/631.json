@@ -1,0 +1,1423 @@
+{
+  "schema": {
+    "$ref": "#/$defs/protected-branch"
+  },
+  "$defs": {
+    "IApiReposBranchesProtection.PutBody": {
+      "type": "object",
+      "properties": {
+        "required_status_checks": {
+          "description": "Require status checks to pass before merging. Set to `null` to disable.",
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "strict": {
+                  "description": "Require branches to be up to date before merging.",
+                  "type": "boolean"
+                },
+                "contexts": {
+                  "description": "**Closing down notice**: The list of status checks to require in order to merge into this branch. If any of these checks have recently been set by a particular GitHub App, they will be required to come from that app in future for the branch to merge. Use `checks` instead of `contexts` for more fine-grained control.",
+                  "type": "array",
+                  "deprecated": true,
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "checks": {
+                  "description": "The list of status checks to require in order to merge into this branch.",
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "context"
+                    ],
+                    "properties": {
+                      "context": {
+                        "description": "The name of the required check",
+                        "type": "string"
+                      },
+                      "app_id": {
+                        "description": "The ID of the GitHub App that must provide this check. Omit this field to automatically select the GitHub App that has recently provided this check, or any app if it was not set by a GitHub App. Pass -1 to explicitly allow any app to set the status.",
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "required": [
+                "strict",
+                "contexts"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enforce_admins": {
+          "description": "Enforce all configured restrictions for administrators. Set to `true` to enforce required status checks for repository administrators. Set to `null` to disable.",
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required_pull_request_reviews": {
+          "description": "Require at least one approving review on a pull request, before merging. Set to `null` to disable.",
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "dismissal_restrictions": {
+                  "description": "Specify which users, teams, and apps can dismiss pull request reviews. Pass an empty `dismissal_restrictions` object to disable. User and team `dismissal_restrictions` are only available for organization-owned repositories. Omit this parameter for personal repositories.",
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "description": "The list of user `login`s with dismissal access",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "teams": {
+                      "description": "The list of team `slug`s with dismissal access",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "apps": {
+                      "description": "The list of app `slug`s with dismissal access",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": []
+                },
+                "dismiss_stale_reviews": {
+                  "description": "Set to `true` if you want to automatically dismiss approving reviews when someone pushes a new commit.",
+                  "type": "boolean"
+                },
+                "require_code_owner_reviews": {
+                  "description": "Blocks merging pull requests until [code owners](https://docs.github.com/articles/about-code-owners/) review them.",
+                  "type": "boolean"
+                },
+                "required_approving_review_count": {
+                  "description": "Specify the number of reviewers required to approve pull requests. Use a number between 1 and 6 or 0 to not require reviewers.",
+                  "type": "integer"
+                },
+                "require_last_push_approval": {
+                  "description": "Whether the most recent push must be approved by someone other than the person who pushed it. Default: `false`.",
+                  "type": "boolean",
+                  "default": false
+                },
+                "bypass_pull_request_allowances": {
+                  "description": "Allow specific users, teams, or apps to bypass pull request requirements.",
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "description": "The list of user `login`s allowed to bypass pull request requirements.",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "teams": {
+                      "description": "The list of team `slug`s allowed to bypass pull request requirements.",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "apps": {
+                      "description": "The list of app `slug`s allowed to bypass pull request requirements.",
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": []
+                }
+              },
+              "required": []
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "restrictions": {
+          "description": "Restrict who can push to the protected branch. User, app, and team `restrictions` are only available for organization-owned repositories. Set to `null` to disable.",
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "users": {
+                  "description": "The list of user `login`s with push access",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "teams": {
+                  "description": "The list of team `slug`s with push access",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "apps": {
+                  "description": "The list of app `slug`s with push access",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "users",
+                "teams"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "required_linear_history": {
+          "description": "Enforces a linear commit Git history, which prevents anyone from pushing merge commits to a branch. Set to `true` to enforce a linear commit history. Set to `false` to disable a linear commit Git history. Your repository must allow squash merging or rebase merging before you can enable a linear commit history. Default: `false`. For more information, see \"[Requiring a linear commit history](https://docs.github.com/github/administering-a-repository/requiring-a-linear-commit-history)\" in the GitHub Help documentation.",
+          "type": "boolean"
+        },
+        "allow_force_pushes": {
+          "description": "Permits force pushes to the protected branch by anyone with write access to the repository. Set to `true` to allow force pushes. Set to `false` or `null` to block force pushes. Default: `false`. For more information, see \"[Enabling force pushes to a protected branch](https://docs.github.com/github/administering-a-repository/enabling-force-pushes-to-a-protected-branch)\" in the GitHub Help documentation.\"",
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "allow_deletions": {
+          "description": "Allows deletion of the protected branch by anyone with write access to the repository. Set to `false` to prevent deletion of the protected branch. Default: `false`. For more information, see \"[Enabling force pushes to a protected branch](https://docs.github.com/github/administering-a-repository/enabling-force-pushes-to-a-protected-branch)\" in the GitHub Help documentation.",
+          "type": "boolean"
+        },
+        "block_creations": {
+          "description": "If set to `true`, the `restrictions` branch protection settings which limits who can push will also block pushes which create new branches, unless the push is initiated by a user, team, or app which has the ability to push. Set to `true` to restrict new branch creation. Default: `false`.",
+          "type": "boolean"
+        },
+        "required_conversation_resolution": {
+          "description": "Requires all conversations on code to be resolved before a pull request can be merged into a branch that matches this rule. Set to `false` to disable. Default: `false`.",
+          "type": "boolean"
+        },
+        "lock_branch": {
+          "description": "Whether to set the branch as read-only. If this is true, users will not be able to push to the branch. Default: `false`.",
+          "type": "boolean",
+          "default": false
+        },
+        "allow_fork_syncing": {
+          "description": "Whether users can pull changes from upstream when the branch is locked. Set to `true` to allow fork syncing. Set to `false` to prevent fork syncing. Default: `false`.",
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "required_status_checks",
+        "enforce_admins",
+        "required_pull_request_reviews",
+        "restrictions"
+      ]
+    },
+    "protected-branch": {
+      "title": "Protected Branch",
+      "description": "Branch protections protect branches",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "required_status_checks": {
+          "$ref": "#/$defs/status-check-policy"
+        },
+        "required_pull_request_reviews": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "dismiss_stale_reviews": {
+              "type": "boolean"
+            },
+            "require_code_owner_reviews": {
+              "type": "boolean"
+            },
+            "required_approving_review_count": {
+              "type": "integer"
+            },
+            "require_last_push_approval": {
+              "description": "Whether the most recent push must be approved by someone other than the person who pushed it.",
+              "type": "boolean",
+              "default": false
+            },
+            "dismissal_restrictions": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "users_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "teams_url": {
+                  "type": "string",
+                  "format": "uri"
+                },
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/simple-user"
+                  }
+                },
+                "teams": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/team"
+                  }
+                },
+                "apps": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/integration"
+                  }
+                }
+              },
+              "required": [
+                "url",
+                "users_url",
+                "teams_url",
+                "users",
+                "teams"
+              ]
+            },
+            "bypass_pull_request_allowances": {
+              "type": "object",
+              "properties": {
+                "users": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/simple-user"
+                  }
+                },
+                "teams": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/team"
+                  }
+                },
+                "apps": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/integration"
+                  }
+                }
+              },
+              "required": [
+                "users",
+                "teams"
+              ]
+            }
+          },
+          "required": [
+            "url"
+          ]
+        },
+        "required_signatures": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_signatures",
+              "type": "string",
+              "format": "uri"
+            },
+            "enabled": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "url",
+            "enabled"
+          ]
+        },
+        "enforce_admins": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "url",
+            "enabled"
+          ]
+        },
+        "required_linear_history": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "allow_force_pushes": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "allow_deletions": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "restrictions": {
+          "$ref": "#/$defs/branch-restriction-policy"
+        },
+        "required_conversation_resolution": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "block_creations": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "enabled"
+          ]
+        },
+        "lock_branch": {
+          "description": "Whether to set the branch as read-only. If this is true, users will not be able to push to the branch.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "allow_fork_syncing": {
+          "description": "Whether users can pull changes from upstream when the branch is locked. Set to `true` to allow fork syncing. Set to `false` to prevent fork syncing.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "status-check-policy": {
+      "title": "Status Check Policy",
+      "description": "Status Check Policy",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks",
+          "type": "string",
+          "format": "uri"
+        },
+        "strict": {
+          "example": true,
+          "type": "boolean"
+        },
+        "contexts": {
+          "example": [
+            "continuous-integration/travis-ci"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "context": {
+                "example": "continuous-integration/travis-ci",
+                "type": "string"
+              },
+              "app_id": {
+                "oneOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "context",
+              "app_id"
+            ]
+          }
+        },
+        "contexts_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks/contexts",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "url",
+        "contexts_url",
+        "strict",
+        "contexts",
+        "checks"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "team": {
+      "title": "Team",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "description": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "privacy": {
+          "type": "string"
+        },
+        "notification_setting": {
+          "type": "string"
+        },
+        "permission": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "pull": {
+              "type": "boolean"
+            },
+            "triage": {
+              "type": "boolean"
+            },
+            "push": {
+              "type": "boolean"
+            },
+            "maintain": {
+              "type": "boolean"
+            },
+            "admin": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pull",
+            "triage",
+            "push",
+            "maintain",
+            "admin"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/rails/teams/core",
+          "type": "string",
+          "format": "uri"
+        },
+        "members_url": {
+          "type": "string"
+        },
+        "repositories_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent": {
+          "$ref": "#/$defs/nullable-team-simple"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "members_url",
+        "name",
+        "description",
+        "permission",
+        "html_url",
+        "repositories_url",
+        "slug",
+        "parent"
+      ]
+    },
+    "nullable-team-simple": {
+      "title": "Team Simple",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the team",
+              "example": 1,
+              "type": "integer"
+            },
+            "node_id": {
+              "example": "MDQ6VGVhbTE=",
+              "type": "string"
+            },
+            "url": {
+              "description": "URL for the team",
+              "example": "https://api.github.com/organizations/1/team/1",
+              "type": "string",
+              "format": "uri"
+            },
+            "members_url": {
+              "example": "https://api.github.com/organizations/1/team/1/members{/member}",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name of the team",
+              "example": "Justice League",
+              "type": "string"
+            },
+            "description": {
+              "description": "Description of the team",
+              "example": "A great team.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "permission": {
+              "description": "Permission that the team will have for its repositories",
+              "example": "admin",
+              "type": "string"
+            },
+            "privacy": {
+              "description": "The level of privacy this team should have",
+              "example": "closed",
+              "type": "string"
+            },
+            "notification_setting": {
+              "description": "The notification setting the team has set",
+              "example": "notifications_enabled",
+              "type": "string"
+            },
+            "html_url": {
+              "example": "https://github.com/orgs/rails/teams/core",
+              "type": "string",
+              "format": "uri"
+            },
+            "repositories_url": {
+              "example": "https://api.github.com/organizations/1/team/1/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "slug": {
+              "example": "justice-league",
+              "type": "string"
+            },
+            "ldap_dn": {
+              "description": "Distinguished Name (DN) that team maps to within LDAP environment",
+              "example": "uid=example,ou=users,dc=github,dc=com",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "url",
+            "members_url",
+            "name",
+            "description",
+            "permission",
+            "html_url",
+            "repositories_url",
+            "slug"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "integration": {
+      "title": "GitHub app",
+      "description": "GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the GitHub app",
+              "example": 37,
+              "type": "integer"
+            },
+            "slug": {
+              "description": "The slug name of the GitHub app",
+              "example": "probot-owners",
+              "type": "string"
+            },
+            "node_id": {
+              "example": "MDExOkludGVncmF0aW9uMQ==",
+              "type": "string"
+            },
+            "client_id": {
+              "example": "\"Iv1.25b5d1e65ffc4022\"",
+              "type": "string"
+            },
+            "owner": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/simple-user"
+                },
+                {
+                  "$ref": "#/$defs/enterprise"
+                }
+              ]
+            },
+            "name": {
+              "description": "The name of the GitHub app",
+              "example": "Probot Owners",
+              "type": "string"
+            },
+            "description": {
+              "example": "The description of the app.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "external_url": {
+              "example": "https://example.com",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/apps/super-ci",
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "example": "2017-07-08T16:18:44-04:00",
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "example": "2017-07-08T16:18:44-04:00",
+              "type": "string",
+              "format": "date-time"
+            },
+            "permissions": {
+              "description": "The set of permissions for the GitHub app",
+              "example": {
+                "issues": "read",
+                "deployments": "write"
+              },
+              "type": "object",
+              "properties": {
+                "issues": {
+                  "type": "string"
+                },
+                "checks": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "string"
+                },
+                "contents": {
+                  "type": "string"
+                },
+                "deployments": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": []
+            },
+            "events": {
+              "description": "The list of events for the GitHub app",
+              "example": [
+                "label",
+                "deployment"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "installations_count": {
+              "description": "The number of installations associated with the GitHub app",
+              "example": 5,
+              "type": "integer"
+            },
+            "client_secret": {
+              "example": "\"1d4b2097ac622ba702d19de498f005747a8b21d3\"",
+              "type": "string"
+            },
+            "webhook_secret": {
+              "example": "\"6fba8f2fc8a7e8f2cca5577eddd82ca7586b3b6b\"",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pem": {
+              "example": "\"-----BEGIN RSA PRIVATE KEY-----\\nMIIEogIBAAKCAQEArYxrNYD/iT5CZVpRJu4rBKmmze3PVmT/gCo2ATUvDvZTPTey\\nxcGJ3vvrJXazKk06pN05TN29o98jrYz4cengG3YGsXPNEpKsIrEl8NhbnxapEnM9\\nJCMRe0P5JcPsfZlX6hmiT7136GRWiGOUba2X9+HKh8QJVLG5rM007TBER9/z9mWm\\nrJuNh+m5l320oBQY/Qq3A7wzdEfZw8qm/mIN0FCeoXH1L6B8xXWaAYBwhTEh6SSn\\nZHlO1Xu1JWDmAvBCi0RO5aRSKM8q9QEkvvHP4yweAtK3N8+aAbZ7ovaDhyGz8r6r\\nzhU1b8Uo0Z2ysf503WqzQgIajr7Fry7/kUwpgQIDAQABAoIBADwJp80Ko1xHPZDy\\nfcCKBDfIuPvkmSW6KumbsLMaQv1aGdHDwwTGv3t0ixSay8CGlxMRtRDyZPib6SvQ\\n6OH/lpfpbMdW2ErkksgtoIKBVrDilfrcAvrNZu7NxRNbhCSvN8q0s4ICecjbbVQh\\nnueSdlA6vGXbW58BHMq68uRbHkP+k+mM9U0mDJ1HMch67wlg5GbayVRt63H7R2+r\\nVxcna7B80J/lCEjIYZznawgiTvp3MSanTglqAYi+m1EcSsP14bJIB9vgaxS79kTu\\noiSo93leJbBvuGo8QEiUqTwMw4tDksmkLsoqNKQ1q9P7LZ9DGcujtPy4EZsamSJT\\ny8OJt0ECgYEA2lxOxJsQk2kI325JgKFjo92mQeUObIvPfSNWUIZQDTjniOI6Gv63\\nGLWVFrZcvQBWjMEQraJA9xjPbblV8PtfO87MiJGLWCHFxmPz2dzoedN+2Coxom8m\\nV95CLz8QUShuao6u/RYcvUaZEoYs5bHcTmy5sBK80JyEmafJPtCQVxMCgYEAy3ar\\nZr3yv4xRPEPMat4rseswmuMooSaK3SKub19WFI5IAtB/e7qR1Rj9JhOGcZz+OQrl\\nT78O2OFYlgOIkJPvRMrPpK5V9lslc7tz1FSh3BZMRGq5jSyD7ETSOQ0c8T2O/s7v\\nbeEPbVbDe4mwvM24XByH0GnWveVxaDl51ABD65sCgYB3ZAspUkOA5egVCh8kNpnd\\nSd6SnuQBE3ySRlT2WEnCwP9Ph6oPgn+oAfiPX4xbRqkL8q/k0BdHQ4h+zNwhk7+h\\nWtPYRAP1Xxnc/F+jGjb+DVaIaKGU18MWPg7f+FI6nampl3Q0KvfxwX0GdNhtio8T\\nTj1E+SnFwh56SRQuxSh2gwKBgHKjlIO5NtNSflsUYFM+hyQiPiqnHzddfhSG+/3o\\nm5nNaSmczJesUYreH5San7/YEy2UxAugvP7aSY2MxB+iGsiJ9WD2kZzTUlDZJ7RV\\nUzWsoqBR+eZfVJ2FUWWvy8TpSG6trh4dFxImNtKejCR1TREpSiTV3Zb1dmahK9GV\\nrK9NAoGAbBxRLoC01xfxCTgt5BDiBcFVh4fp5yYKwavJPLzHSpuDOrrI9jDn1oKN\\nonq5sDU1i391zfQvdrbX4Ova48BN+B7p63FocP/MK5tyyBoT8zQEk2+vWDOw7H/Z\\nu5dTCPxTIsoIwUw1I+7yIxqJzLPFgR2gVBwY1ra/8iAqCj+zeBw=\\n-----END RSA PRIVATE KEY-----\\n\"",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "owner",
+            "name",
+            "description",
+            "external_url",
+            "html_url",
+            "created_at",
+            "updated_at",
+            "permissions",
+            "events"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "enterprise": {
+      "title": "Enterprise",
+      "description": "An enterprise on GitHub.",
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "A short description of the enterprise.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "html_url": {
+          "example": "https://github.com/enterprises/octo-business",
+          "type": "string",
+          "format": "uri"
+        },
+        "website_url": {
+          "description": "The enterprise's website URL.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "Unique identifier of the enterprise",
+          "example": 42,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the enterprise.",
+          "example": "Octo Business",
+          "type": "string"
+        },
+        "slug": {
+          "description": "The slug url identifier for the enterprise.",
+          "example": "octo-business",
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2019-01-26T19:01:12Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "example": "2019-01-26T19:14:43Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "avatar_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "name",
+        "slug",
+        "html_url",
+        "created_at",
+        "updated_at",
+        "avatar_url"
+      ]
+    },
+    "branch-restriction-policy": {
+      "title": "Branch Restriction Policy",
+      "description": "Branch Restriction Policy",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "users_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "teams_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "apps_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "login": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "avatar_url": {
+                "type": "string"
+              },
+              "gravatar_id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "followers_url": {
+                "type": "string"
+              },
+              "following_url": {
+                "type": "string"
+              },
+              "gists_url": {
+                "type": "string"
+              },
+              "starred_url": {
+                "type": "string"
+              },
+              "subscriptions_url": {
+                "type": "string"
+              },
+              "organizations_url": {
+                "type": "string"
+              },
+              "repos_url": {
+                "type": "string"
+              },
+              "events_url": {
+                "type": "string"
+              },
+              "received_events_url": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "site_admin": {
+                "type": "boolean"
+              },
+              "user_view_type": {
+                "type": "string"
+              }
+            },
+            "required": []
+          }
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "description": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "privacy": {
+                "type": "string"
+              },
+              "notification_setting": {
+                "type": "string"
+              },
+              "permission": {
+                "type": "string"
+              },
+              "members_url": {
+                "type": "string"
+              },
+              "repositories_url": {
+                "type": "string"
+              },
+              "parent": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": []
+          }
+        },
+        "apps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "owner": {
+                "type": "object",
+                "properties": {
+                  "login": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "integer"
+                  },
+                  "node_id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "repos_url": {
+                    "type": "string"
+                  },
+                  "events_url": {
+                    "type": "string"
+                  },
+                  "hooks_url": {
+                    "type": "string"
+                  },
+                  "issues_url": {
+                    "type": "string"
+                  },
+                  "members_url": {
+                    "type": "string"
+                  },
+                  "public_members_url": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "gravatar_id": {
+                    "example": "\"\"",
+                    "type": "string"
+                  },
+                  "html_url": {
+                    "example": "\"https://github.com/testorg-ea8ec76d71c3af4b\"",
+                    "type": "string"
+                  },
+                  "followers_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/followers\"",
+                    "type": "string"
+                  },
+                  "following_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/following{/other_user}\"",
+                    "type": "string"
+                  },
+                  "gists_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/gists{/gist_id}\"",
+                    "type": "string"
+                  },
+                  "starred_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/starred{/owner}{/repo}\"",
+                    "type": "string"
+                  },
+                  "subscriptions_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/subscriptions\"",
+                    "type": "string"
+                  },
+                  "organizations_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/orgs\"",
+                    "type": "string"
+                  },
+                  "received_events_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/received_events\"",
+                    "type": "string"
+                  },
+                  "type": {
+                    "example": "\"Organization\"",
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "example": false,
+                    "type": "boolean"
+                  },
+                  "user_view_type": {
+                    "example": "public",
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "name": {
+                "type": "string"
+              },
+              "client_id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "external_url": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              },
+              "permissions": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "type": "string"
+                  },
+                  "contents": {
+                    "type": "string"
+                  },
+                  "issues": {
+                    "type": "string"
+                  },
+                  "single_file": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": []
+          }
+        }
+      },
+      "required": [
+        "url",
+        "users_url",
+        "teams_url",
+        "apps_url",
+        "users",
+        "teams",
+        "apps"
+      ]
+    }
+  }
+}

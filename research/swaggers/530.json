@@ -1,0 +1,94 @@
+{
+  "schema": {
+    "$ref": "#/$defs/network-configuration"
+  },
+  "$defs": {
+    "IApiOrgsSettingsNetworkConfigurations.PatchBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the network configuration. Must be between 1 and 100 characters and may only contain upper and lowercase letters a-z, numbers 0-9, '.', '-', and '_'.",
+          "type": "string"
+        },
+        "compute_service": {
+          "description": "The hosted compute service to use for the network configuration.",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "actions"
+            }
+          ]
+        },
+        "network_settings_ids": {
+          "description": "The identifier of the network settings to use for the network configuration. Exactly one network settings must be specified.",
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    },
+    "network-configuration": {
+      "title": "Hosted compute network configuration",
+      "description": "A hosted compute network configuration.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the network configuration.",
+          "example": "123ABC456DEF789",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the network configuration.",
+          "example": "my-network-configuration",
+          "type": "string"
+        },
+        "compute_service": {
+          "description": "The hosted compute service the network configuration supports.",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "actions"
+            },
+            {
+              "const": "codespaces"
+            }
+          ]
+        },
+        "network_settings_ids": {
+          "description": "The unique identifier of each network settings in the configuration.",
+          "example": "123ABC456DEF789",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_on": {
+          "description": "The time at which the network configuration was created, in ISO 8601 format.",
+          "example": "2024-04-26T11:31:07Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "created_on"
+      ]
+    }
+  }
+}

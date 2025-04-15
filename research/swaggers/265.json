@@ -1,0 +1,16 @@
+{
+  "schema": {
+    "$ref": "#/$defs/RecordingResponse"
+  },
+  "$defs": {
+    "RecordingResponse": {
+      "type": "object",
+      "properties": {
+        "signedUrl": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

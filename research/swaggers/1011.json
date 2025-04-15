@@ -1,0 +1,36 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/ssh-signing-key"
+    }
+  },
+  "$defs": {
+    "ssh-signing-key": {
+      "title": "SSH Signing Key",
+      "description": "A public SSH key used to sign Git commits",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "key",
+        "id",
+        "title",
+        "created_at"
+      ]
+    }
+  }
+}

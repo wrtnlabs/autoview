@@ -1,0 +1,239 @@
+{
+  "schema": {
+    "$ref": "#/$defs/TryPagination_lt_UserType.ProfileList_gt_"
+  },
+  "$defs": {
+    "PaginationDto": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "page": {
+          "description": "페이지네이션의 페이지 값",
+          "x-typia-metaTags": [
+            {
+              "kind": "minimum",
+              "value": 1
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minimum",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number",
+          "minimum": 1
+        },
+        "limit": {
+          "description": "",
+          "x-typia-metaTags": [
+            {
+              "kind": "maximum",
+              "value": 100
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "maximum",
+              "text": [
+                {
+                  "text": "100",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number",
+          "maximum": 100
+        }
+      },
+      "required": [
+        "page",
+        "limit"
+      ]
+    },
+    "TryPagination_lt_UserType.ProfileList_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/PaginationResponseType_lt_UserType.ProfileList_gt_"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "PaginationResponseType_lt_UserType.ProfileList_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "list": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "array",
+          "items": {
+            "description": "",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "$ref": "#/$defs/UserType.Acquaintance"
+          }
+        },
+        "count": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "totalResult": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "totalPage": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "search": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string"
+        },
+        "page": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        }
+      },
+      "required": [
+        "list",
+        "count",
+        "totalResult",
+        "totalPage",
+        "page"
+      ]
+    },
+    "UserType.Acquaintance": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "description": "사용자의 별칭, 설정하지 않는 경우도 있다.",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "profileImage": {
+          "description": "사용자의 프로필 이미지",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "oneOf": [
+            {
+              "const": "나를 팔로우한 사람"
+            },
+            {
+              "const": "내가 팔로우한 사람"
+            }
+          ]
+        }
+      },
+      "required": [
+        "nickname",
+        "id",
+        "reason"
+      ]
+    }
+  }
+}

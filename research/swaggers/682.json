@@ -1,0 +1,101 @@
+{
+  "schema": {
+    "$ref": "#/$defs/empty-object"
+  },
+  "$defs": {
+    "code-scanning-default-setup-update": {
+      "description": "Configuration for code scanning default setup.",
+      "type": "object",
+      "properties": {
+        "state": {
+          "description": "The desired state of code scanning default setup.",
+          "oneOf": [
+            {
+              "const": "configured"
+            },
+            {
+              "const": "not-configured"
+            }
+          ]
+        },
+        "runner_type": {
+          "description": "Runner type to be used.",
+          "oneOf": [
+            {
+              "const": "standard"
+            },
+            {
+              "const": "labeled"
+            }
+          ]
+        },
+        "runner_label": {
+          "description": "Runner label to be used if the runner type is labeled.",
+          "example": "code-scanning",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "query_suite": {
+          "description": "CodeQL query suite to be used.",
+          "oneOf": [
+            {
+              "const": "default"
+            },
+            {
+              "const": "extended"
+            }
+          ]
+        },
+        "languages": {
+          "description": "CodeQL languages to be analyzed.",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "actions"
+              },
+              {
+                "const": "c-cpp"
+              },
+              {
+                "const": "csharp"
+              },
+              {
+                "const": "go"
+              },
+              {
+                "const": "java-kotlin"
+              },
+              {
+                "const": "javascript-typescript"
+              },
+              {
+                "const": "python"
+              },
+              {
+                "const": "ruby"
+              },
+              {
+                "const": "swift"
+              }
+            ]
+          }
+        }
+      },
+      "required": []
+    },
+    "empty-object": {
+      "title": "Empty Object",
+      "description": "An object without any properties.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+}

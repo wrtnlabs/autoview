@@ -1,0 +1,86 @@
+{
+  "schema": {
+    "oneOf": [
+      {
+        "$ref": "#/$defs/CANNOT_FINDONE_ARTICLE"
+      },
+      {
+        "$ref": "#/$defs/ResponseForm_lt_boolean_gt_"
+      }
+    ]
+  },
+  "$defs": {
+    "CANNOT_FINDONE_ARTICLE": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4004
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "게시글을 찾지 못했습니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ResponseForm_lt_boolean_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    }
+  }
+}

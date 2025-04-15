@@ -1,0 +1,493 @@
+{
+  "schema": {
+    "$ref": "#/$defs/pull-request-review-comment"
+  },
+  "$defs": {
+    "IApiReposPullsComments.PatchBody": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "description": "The text of the reply to the review comment.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "body"
+      ]
+    },
+    "pull-request-review-comment": {
+      "title": "Pull Request Review Comment",
+      "description": "Pull Request Review Comments are comments on a portion of the Pull Request's diff.",
+      "type": "object",
+      "properties": {
+        "url": {
+          "description": "URL for the pull request review comment",
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls/comments/1",
+          "type": "string"
+        },
+        "pull_request_review_id": {
+          "description": "The ID of the pull request review to which the comment belongs.",
+          "example": 42,
+          "oneOf": [
+            {
+              "type": "integer",
+              "format": "int64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "The ID of the pull request review comment.",
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "description": "The node ID of the pull request review comment.",
+          "example": "MDI0OlB1bGxSZXF1ZXN0UmV2aWV3Q29tbWVudDEw",
+          "type": "string"
+        },
+        "diff_hunk": {
+          "description": "The diff of the line that the comment refers to.",
+          "example": "@@ -16,33 +16,40 @@ public class Connection : IConnection...",
+          "type": "string"
+        },
+        "path": {
+          "description": "The relative path of the file to which the comment applies.",
+          "example": "config/database.yaml",
+          "type": "string"
+        },
+        "position": {
+          "description": "The line index in the diff to which the comment applies. This field is closing down; use `line` instead.",
+          "example": 1,
+          "type": "integer"
+        },
+        "original_position": {
+          "description": "The index of the original line in the diff to which the comment applies. This field is closing down; use `original_line` instead.",
+          "example": 4,
+          "type": "integer"
+        },
+        "commit_id": {
+          "description": "The SHA of the commit to which the comment applies.",
+          "example": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string"
+        },
+        "original_commit_id": {
+          "description": "The SHA of the original commit to which the comment applies.",
+          "example": "9c48853fa3dc5c1c3d6f1f1cd1f2743e72652840",
+          "type": "string"
+        },
+        "in_reply_to_id": {
+          "description": "The comment ID to reply to.",
+          "example": 8,
+          "type": "integer"
+        },
+        "user": {
+          "$ref": "#/$defs/simple-user"
+        },
+        "body": {
+          "description": "The text of the comment.",
+          "example": "We should probably include a check for null values here.",
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2011-04-14T16:00:49Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "example": "2011-04-14T16:00:49Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "html_url": {
+          "description": "HTML URL for the pull request review comment.",
+          "example": "https://github.com/octocat/Hello-World/pull/1#discussion-diff-1",
+          "type": "string",
+          "format": "uri"
+        },
+        "pull_request_url": {
+          "description": "URL for the pull request that the review comment belongs to.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "author_association": {
+          "$ref": "#/$defs/author-association"
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "self": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "example": "https://api.github.com/repos/octocat/Hello-World/pulls/comments/1",
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "href"
+              ]
+            },
+            "html": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "example": "https://github.com/octocat/Hello-World/pull/1#discussion-diff-1",
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "href"
+              ]
+            },
+            "pull_request": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "example": "https://api.github.com/repos/octocat/Hello-World/pulls/1",
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "href"
+              ]
+            }
+          },
+          "required": [
+            "self",
+            "html",
+            "pull_request"
+          ]
+        },
+        "start_line": {
+          "description": "The first line of the range for a multi-line comment.",
+          "example": 2,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "original_start_line": {
+          "description": "The first line of the range for a multi-line comment.",
+          "example": 2,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "start_side": {
+          "description": "The side of the first line of the range for a multi-line comment.",
+          "oneOf": [
+            {
+              "const": "LEFT"
+            },
+            {
+              "const": "RIGHT"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "line": {
+          "description": "The line of the blob to which the comment applies. The last line of the range for a multi-line comment",
+          "example": 2,
+          "type": "integer"
+        },
+        "original_line": {
+          "description": "The line of the blob to which the comment applies. The last line of the range for a multi-line comment",
+          "example": 2,
+          "type": "integer"
+        },
+        "side": {
+          "description": "The side of the diff to which the comment applies. The side of the last line of the range for a multi-line comment",
+          "oneOf": [
+            {
+              "const": "LEFT"
+            },
+            {
+              "const": "RIGHT"
+            }
+          ]
+        },
+        "subject_type": {
+          "description": "The level at which the comment is targeted, can be a diff line or a file.",
+          "oneOf": [
+            {
+              "const": "line"
+            },
+            {
+              "const": "file"
+            }
+          ]
+        },
+        "reactions": {
+          "$ref": "#/$defs/reaction-rollup"
+        },
+        "body_html": {
+          "example": "\"<p>comment body</p>\"",
+          "type": "string"
+        },
+        "body_text": {
+          "example": "\"comment body\"",
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "id",
+        "node_id",
+        "pull_request_review_id",
+        "diff_hunk",
+        "path",
+        "commit_id",
+        "original_commit_id",
+        "user",
+        "body",
+        "created_at",
+        "updated_at",
+        "html_url",
+        "pull_request_url",
+        "author_association",
+        "_links"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "author-association": {
+      "title": "author_association",
+      "description": "How the author is associated with the repository.",
+      "example": "OWNER",
+      "oneOf": [
+        {
+          "const": "COLLABORATOR"
+        },
+        {
+          "const": "CONTRIBUTOR"
+        },
+        {
+          "const": "FIRST_TIMER"
+        },
+        {
+          "const": "FIRST_TIME_CONTRIBUTOR"
+        },
+        {
+          "const": "MANNEQUIN"
+        },
+        {
+          "const": "MEMBER"
+        },
+        {
+          "const": "NONE"
+        },
+        {
+          "const": "OWNER"
+        }
+      ]
+    },
+    "reaction-rollup": {
+      "title": "Reaction Rollup",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "total_count": {
+          "type": "integer"
+        },
+        "+1": {
+          "type": "integer"
+        },
+        "-1": {
+          "type": "integer"
+        },
+        "laugh": {
+          "type": "integer"
+        },
+        "confused": {
+          "type": "integer"
+        },
+        "heart": {
+          "type": "integer"
+        },
+        "hooray": {
+          "type": "integer"
+        },
+        "eyes": {
+          "type": "integer"
+        },
+        "rocket": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "url",
+        "total_count",
+        "+1",
+        "-1",
+        "laugh",
+        "confused",
+        "heart",
+        "hooray",
+        "eyes",
+        "rocket"
+      ]
+    }
+  }
+}

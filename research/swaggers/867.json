@@ -1,0 +1,406 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/secret-scanning-alert"
+    }
+  },
+  "$defs": {
+    "secret-scanning-alert": {
+      "type": "object",
+      "properties": {
+        "number": {
+          "$ref": "#/$defs/alert-number"
+        },
+        "created_at": {
+          "$ref": "#/$defs/alert-created-at"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/nullable-alert-updated-at"
+        },
+        "url": {
+          "$ref": "#/$defs/alert-url"
+        },
+        "html_url": {
+          "$ref": "#/$defs/alert-html-url"
+        },
+        "locations_url": {
+          "description": "The REST API URL of the code locations for this alert.",
+          "type": "string",
+          "format": "uri"
+        },
+        "state": {
+          "$ref": "#/$defs/secret-scanning-alert-state"
+        },
+        "resolution": {
+          "$ref": "#/$defs/secret-scanning-alert-resolution"
+        },
+        "resolved_at": {
+          "description": "The time that the alert was resolved in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "resolved_by": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "resolution_comment": {
+          "description": "An optional comment to resolve an alert.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "secret_type": {
+          "description": "The type of secret that secret scanning detected.",
+          "type": "string"
+        },
+        "secret_type_display_name": {
+          "description": "User-friendly name for the detected secret, matching the `secret_type`.\nFor a list of built-in patterns, see \"[Supported secret scanning patterns](https://docs.github.com/code-security/secret-scanning/introduction/supported-secret-scanning-patterns#supported-secrets).\"",
+          "type": "string"
+        },
+        "secret": {
+          "description": "The secret that was detected.",
+          "type": "string"
+        },
+        "push_protection_bypassed": {
+          "description": "Whether push protection was bypassed for the detected secret.",
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "push_protection_bypassed_by": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "push_protection_bypassed_at": {
+          "description": "The time that push protection was bypassed in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "push_protection_bypass_request_reviewer": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "push_protection_bypass_request_reviewer_comment": {
+          "description": "An optional comment when reviewing a push protection bypass.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "push_protection_bypass_request_comment": {
+          "description": "An optional comment when requesting a push protection bypass.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "push_protection_bypass_request_html_url": {
+          "description": "The URL to a push protection bypass request.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "validity": {
+          "description": "The token status as of the latest validity check.",
+          "oneOf": [
+            {
+              "const": "active"
+            },
+            {
+              "const": "inactive"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        },
+        "publicly_leaked": {
+          "description": "Whether the detected secret was publicly leaked.",
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "multi_repo": {
+          "description": "Whether the detected secret was found in multiple repositories under the same organization or enterprise.",
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "is_base64_encoded": {
+          "description": "A boolean value representing whether or not alert is base64 encoded",
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "alert-number": {
+      "description": "The security alert number.",
+      "type": "integer",
+      "readOnly": true
+    },
+    "alert-created-at": {
+      "description": "The time that the alert was created in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "nullable-alert-updated-at": {
+      "description": "The time that the alert was last updated in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "alert-url": {
+      "description": "The REST API URL of the alert resource.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "alert-html-url": {
+      "description": "The GitHub URL of the alert resource.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "secret-scanning-alert-state": {
+      "description": "Sets the state of the secret scanning alert. You must provide `resolution` when you set the state to `resolved`.",
+      "oneOf": [
+        {
+          "const": "open"
+        },
+        {
+          "const": "resolved"
+        }
+      ]
+    },
+    "secret-scanning-alert-resolution": {
+      "description": "**Required when the `state` is `resolved`.** The reason for resolving the alert.",
+      "oneOf": [
+        {
+          "const": "false_positive"
+        },
+        {
+          "const": "wont_fix"
+        },
+        {
+          "const": "revoked"
+        },
+        {
+          "const": "used_in_tests"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

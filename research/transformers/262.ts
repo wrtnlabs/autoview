@@ -1,0 +1,355 @@
+import { tags } from "typia";
+import type * as IAutoView from "@autoview/interface";
+namespace IPageIShoppingSaleReview {
+    /**
+     * A page.
+     *
+     * Collection of records with pagination indformation.
+    */
+    export type ISummary = {
+        /**
+         * Page information.
+         *
+         * @title Page information
+        */
+        pagination: IPage.IPagination;
+        /**
+         * List of records.
+         *
+         * @title List of records
+        */
+        data: IShoppingSaleReview.ISummary[];
+    };
+}
+namespace IPage {
+    /**
+     * Page information.
+    */
+    export type IPagination = {
+        /**
+         * Current page number.
+         *
+         * @title Current page number
+        */
+        current: number & tags.Type<"int32">;
+        /**
+         * Limitation of records per a page.
+         *
+         * @title Limitation of records per a page
+        */
+        limit: number & tags.Type<"int32">;
+        /**
+         * Total records in the database.
+         *
+         * @title Total records in the database
+        */
+        records: number & tags.Type<"int32">;
+        /**
+         * Total pages.
+         *
+         * Equal to {@link records} / {@link limit} with ceiling.
+         *
+         * @title Total pages
+        */
+        pages: number & tags.Type<"int32">;
+    };
+}
+namespace IShoppingSaleReview {
+    /**
+     * Summarized information of the review.
+    */
+    export type ISummary = {
+        /**
+         * Score of the review.
+         *
+         * @title Score of the review
+        */
+        score: number;
+        /**
+         * Customer who wrote the inquiry.
+         *
+         * @title Customer who wrote the inquiry
+        */
+        customer: IShoppingCustomer;
+        /**
+         * Formal answer for the inquiry by the seller.
+         *
+         * @title Formal answer for the inquiry by the seller
+        */
+        answer: null | any;
+        /**
+         * Whether the seller has viewed the inquiry or not.
+         *
+         * @title Whether the seller has viewed the inquiry or not
+        */
+        read_by_seller: boolean;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Title of the last snapshot.
+         *
+         * @title Title of the last snapshot
+        */
+        title: string;
+        /**
+         * Creation time of the article.
+         *
+         * @title Creation time of the article
+        */
+        created_at: string;
+        /**
+         * Modification time of the article.
+         *
+         * In other words, the time when the last snapshot was created.
+         *
+         * @title Modification time of the article
+        */
+        updated_at: string;
+    };
+}
+/**
+ * Customer information, but not a person but a connection basis.
+ *
+ * `IShoppingCustomer` is an entity that literally embodies the information of
+ * those who participated in the market as customers. By the way, the
+ * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+ * even if the same person connects to the shopping mall multiple, multiple
+ * records are created in `IShoppingCustomer`.
+ *
+ * The first purpose of this is to track the customer's inflow path in detail,
+ * and it is for cases where the same person enters as a non-member,
+ * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+ * and only authenticates their {@link IShoppingCitizen real name} or
+ * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+ * It is the second. Lastly, it is to accurately track the activities that
+ * a person performs at the shopping mall in various ways like below.
+ *
+ * - Same person comes from an {@link IShoppingExternalUser external service}
+ * - Same person creates multiple accounts
+ * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+ * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+ *
+ * Therefore, `IShoppingCustomer` can have multiple records with the same
+ * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+ * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+ * membership after verifying their real name or signs up for our service after
+ * being a user of an external service, all related records are changed at once.
+ * Therefore, identification and tracking of customers can be done very
+ * systematically.
+*/
+type IShoppingCustomer = {
+    /**
+     * Discriminant for the type of customer.
+     *
+     * @title Discriminant for the type of customer
+    */
+    type: "customer";
+    /**
+     * Membership information.
+     *
+     * If the customer has joined as a member.
+     *
+     * @title Membership information
+    */
+    member: null | any;
+    /**
+     * Citizen information.
+     *
+     * If the customer has verified his real name and mobile number.
+     *
+     * @title Citizen information
+    */
+    citizen: null | any;
+    /**
+     * Primary Key.
+     *
+     * @title Primary Key
+    */
+    id: string;
+    /**
+     * Belonged channel.
+     *
+     * @title Belonged channel
+    */
+    channel: IShoppingChannel;
+    /**
+     * External user information.
+     *
+     * When the customer has come from an external service.
+     *
+     * @title External user information
+    */
+    external_user: null | any;
+    /**
+     * Connection address.
+     *
+     * Same with {@link window.location.href} of client.
+     *
+     * @title Connection address
+    */
+    href: string;
+    /**
+     * Referrer address.
+     *
+     * Same with {@link window.document.referrer} of client.
+     *
+     * @title Referrer address
+    */
+    referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+    /**
+     * Connection IP Address.
+     *
+     * @title Connection IP Address
+    */
+    ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+    /**
+     * Creation time of the connection record.
+     *
+     * @title Creation time of the connection record
+    */
+    created_at: string;
+};
+type IShoppingMember = any;
+type IShoppingCitizen = any;
+/**
+ * Channel information.
+ *
+ * `IShoppingChannel` is a concept that shapes the distribution channel in the
+ * market. Therefore, the difference in the channel in this e-commerce system
+ * means that it is another site or application.
+ *
+ * By the way, if your shopping mall system requires only one channel, then
+ * just use only one. This concept is designed to be expandable in the future.
+*/
+type IShoppingChannel = {
+    /**
+     * Primary Key.
+     *
+     * @title Primary Key
+    */
+    id: string;
+    /**
+     * Creation time of record.
+     *
+     * @title Creation time of record
+    */
+    created_at: string;
+    /**
+     * Identifier code.
+     *
+     * @title Identifier code
+    */
+    code: string;
+    /**
+     * Name of the channel.
+     *
+     * @title Name of the channel
+    */
+    name: string;
+};
+type IShoppingExternalUser = any;
+namespace IShoppingSaleInquiryAnswer {
+    export type ISummary = any;
+}
+type IAutoViewTransformerInputType = IPageIShoppingSaleReview.ISummary;
+export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
+    return visualizeData($input);
+}
+
+
+
+function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
+  // If there are no reviews, return a simple markdown component indicating no available data.
+  if (!input.data || input.data.length === 0) {
+    return {
+      type: "Markdown",
+      content: "### No reviews available.\n\nThere are currently no reviews to display."
+    };
+  }
+
+  // Utility function to determine a color for the rating icon based on the score.
+  const getRatingColor = (score: number): "red" | "orange" | "yellow" => {
+    if (score >= 4) return "yellow";
+    if (score === 3) return "orange";
+    return "red";
+  };
+
+  // Transform each review summary into a vertical card component.
+  const cards = input.data.map((review) => {
+    // Determine the color for the rating icon.
+    const ratingColor = getRatingColor(review.score);
+
+    // Convert the answer object to a string if available; otherwise, use a fallback message.
+    // (Assuming review.answer may be an object, so we serialize it if not null.)
+    const answerText = review.answer !== null ? JSON.stringify(review.answer) : "No answer provided.";
+
+    // Compose the vertical card for this review.
+    return {
+      type: "VerticalCard",
+      // The childrenProps array contains the header, content and footer components of the card.
+      childrenProps: [
+        // Card Header:
+        {
+          type: "CardHeader",
+          title: review.title,
+          description: `Score: ${review.score}`,
+          // Use an icon as a visual indicator for the review score.
+          startElement: {
+            type: "Icon",
+            id: "star", // Using the "star" icon to represent rating.
+            color: ratingColor,
+            size: 24
+          }
+        },
+        // Card Content:
+        {
+          type: "CardContent",
+          // For text representation, we use markdown to render details in a friendly visual format.
+          childrenProps: {
+            type: "Markdown",
+            content: 
+`**Review Details**
+
+- **Review ID:** ${review.id}  
+- **Created At:** ${review.created_at}  
+- **Updated At:** ${review.updated_at}  
+- **Read by Seller:** ${review.read_by_seller ? "Yes" : "No"}  
+- **Customer ID:** ${review.customer.id}  
+- **Answer:** ${answerText}`
+          }
+        },
+        // Card Footer:
+        {
+          type: "CardFooter",
+          childrenProps: {
+            type: "Text",
+            variant: "caption",
+            // Simple text to indicate last update time.
+            content: `Last updated on ${review.updated_at}`
+          }
+        }
+      ]
+    } as IAutoView.IAutoViewVerticalCardProps;
+  });
+
+  // If there is more than one review, aggregate cards into a carousel to allow swipeable navigation.
+  if (cards.length > 1) {
+    return {
+      type: "Carousel",
+      autoPlay: false,
+      infinite: false,
+      interval: 30, // Using a moderate interval value based on physical simulation guidelines.
+      navControls: true,
+      indicators: true,
+      // Carousel children can be an array of vertical card components.
+      childrenProps: cards
+    } as IAutoView.IAutoViewCarouselProps;
+  }
+
+  // Otherwise, if only one review exists, return the single vertical card.
+  return cards[0];
+}

@@ -1,0 +1,3708 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4UserChatView"
+  },
+  "$defs": {
+    "userchat.UserChat": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "alfStateKey": {
+          "type": "string"
+        },
+        "contactKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "contactMediumType": {
+          "type": "string",
+          "readOnly": true
+        },
+        "liveMeetId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "sync": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "closed"
+            },
+            {
+              "const": "opened"
+            },
+            {
+              "const": "snoozed"
+            },
+            {
+              "const": "queued"
+            }
+          ]
+        },
+        "missedReason": {
+          "oneOf": [
+            {
+              "const": "notInOperation"
+            },
+            {
+              "const": "userLeft"
+            },
+            {
+              "const": "ringTimeOver"
+            },
+            {
+              "const": "inboundRateLimit"
+            },
+            {
+              "const": "noOperator"
+            },
+            {
+              "const": "exceededQueue"
+            },
+            {
+              "const": "abandonedInQueue"
+            },
+            {
+              "const": "workflow"
+            },
+            {
+              "const": "preservedNumber"
+            },
+            {
+              "const": "unregisteredNumber"
+            },
+            {
+              "const": "blockedUser"
+            }
+          ]
+        },
+        "managed": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "priority": {
+          "oneOf": [
+            {
+              "const": "low"
+            },
+            {
+              "const": "medium"
+            },
+            {
+              "const": "high"
+            }
+          ]
+        },
+        "userId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "xerId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "readOnly": true
+        },
+        "title": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "subtextType": {
+          "oneOf": [
+            {
+              "const": "description"
+            },
+            {
+              "const": "incoming"
+            }
+          ]
+        },
+        "handling": {
+          "$ref": "#/$defs/userchat.handling.UserChatHandling"
+        },
+        "source": {
+          "$ref": "#/$defs/userchat.UserChatSource"
+        },
+        "managerIds": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "assigneeId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "teamId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "tags": {
+          "maxItems": 8,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "required": []
+        },
+        "goalEventName": {
+          "type": "string",
+          "readOnly": true
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalCheckedAt": {
+          "example": 1744704941944,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "goalState": {
+          "oneOf": [
+            {
+              "const": "achieved"
+            },
+            {
+              "const": "notAchieved"
+            },
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "none"
+            }
+          ]
+        },
+        "firstOpenedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "openedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "firstQueuedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "queuedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704941947,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941948,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "frontMessageId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "frontUpdatedAt": {
+          "example": 1744704941947,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "deskMessageId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "summarizedMessageId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "deskUpdatedAt": {
+          "example": 1744704941950,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "userLastMessageId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "followUpTriggeredAt": {
+          "example": 1744704941944,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "firstAssigneeIdAfterOpen": {
+          "type": "string",
+          "readOnly": true
+        },
+        "firstRepliedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "firstRepliedAtAfterOpen": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "oneStop": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "waitingTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "avgReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "totalReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "replyCount": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "resolutionTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationWaitingTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationAvgReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationTotalReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationReplyCount": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "operationResolutionTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "askedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "firstAskedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "closedAt": {
+          "example": 1744704941945,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "snoozedAt": {
+          "example": 1744704941944,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "expiresAt": {
+          "example": 1744704941961,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "lastInboundEmailId": {
+          "type": "string"
+        },
+        "alfRequestedAt": {
+          "example": 1744704941963,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        }
+      },
+      "required": []
+    },
+    "userchat.handling.UserChatHandling": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "userchat.UserChatSource": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "string"
+        },
+        "marketing": {
+          "$ref": "#/$defs/userchat.UserChatSource$Marketing"
+        },
+        "supportBot": {
+          "$ref": "#/$defs/userchat.UserChatSource$SupportBot"
+        },
+        "workflow": {
+          "$ref": "#/$defs/userchat.UserChatSource$Workflow"
+        },
+        "appMessenger": {
+          "$ref": "#/$defs/userchat.UserChatSource$AppMessenger"
+        }
+      },
+      "required": []
+    },
+    "userchat.UserChatSource$Marketing": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "userchat.UserChatSource$SupportBot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revisionId": {
+          "type": "string"
+        },
+        "sectionPath": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    },
+    "userchat.UserChatSource$Workflow": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revisionId": {
+          "type": "string"
+        },
+        "traceId": {
+          "type": "string"
+        },
+        "sectionPath": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "causeOfEnd": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "userchat.UserChatSource$AppMessenger": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "mediumType": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "Expression": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "oneOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "list"
+            },
+            {
+              "const": "listOfNumber"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "string"
+            },
+            {
+              "const": "listOfObject"
+            }
+          ]
+        },
+        "operator": {
+          "$ref": "#/$defs/Operator"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          }
+        },
+        "and": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "or": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        }
+      },
+      "required": []
+    },
+    "Operator": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "legacy.open.v4.LegacyV4UserChatView": {
+      "type": "object",
+      "properties": {
+        "campaign": {
+          "$ref": "#/$defs/legacy.v4.marketing.LegacyV4Campaign"
+        },
+        "bookmark": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4ChatBookmark"
+        },
+        "session": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4ChatSession"
+        },
+        "userSession": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4ChatSession"
+        },
+        "chatTags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.LegacyV4ChatTag"
+          }
+        },
+        "message": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4Message"
+        },
+        "oneTimeMsg": {
+          "$ref": "#/$defs/legacy.v4.marketing.LegacyV4OneTimeMsg"
+        },
+        "supportBot": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4SupportBot"
+        },
+        "user": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4User"
+        },
+        "userChat": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4UserChat"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.marketing.LegacyV4Campaign": {
+      "description": "### 이벤트 기록\n\n- 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)",
+      "required": [
+        "advertising",
+        "enableSupportBot",
+        "name",
+        "sendMedium",
+        "sendMode",
+        "triggerEventName",
+        "waitingTime"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "active"
+            },
+            {
+              "const": "stopped"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "triggerEventName": {
+          "type": "string"
+        },
+        "triggerEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "waitingTime": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "filterEventName": {
+          "type": "string"
+        },
+        "filterEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "filterMatch": {
+          "oneOf": [
+            {
+              "const": "positive"
+            },
+            {
+              "const": "negative"
+            }
+          ]
+        },
+        "goalEventName": {
+          "type": "string"
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "enableSupportBot": {
+          "type": "boolean"
+        },
+        "followingSupportBotId": {
+          "type": "string"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "cooldown": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "sendMode": {
+          "oneOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "away"
+            },
+            {
+              "const": "inOperation"
+            },
+            {
+              "const": "customUsingSenderTime"
+            },
+            {
+              "const": "customUsingReceiverTime"
+            },
+            {
+              "const": "custom"
+            }
+          ]
+        },
+        "sendTimeRanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "startAt": {
+          "example": 1744704933151,
+          "type": "number",
+          "format": "int64"
+        },
+        "endAt": {
+          "example": 1744704933151,
+          "type": "number",
+          "format": "int64"
+        },
+        "draft": {
+          "$ref": "#/$defs/marketing.CampaignDraft"
+        },
+        "createdAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string"
+        }
+      }
+    },
+    "TimeRange": {
+      "required": [
+        "dayOfWeeks",
+        "from",
+        "to"
+      ],
+      "type": "object",
+      "properties": {
+        "dayOfWeeks": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "mon"
+              },
+              {
+                "const": "tue"
+              },
+              {
+                "const": "wed"
+              },
+              {
+                "const": "thu"
+              },
+              {
+                "const": "fri"
+              },
+              {
+                "const": "sat"
+              },
+              {
+                "const": "sun"
+              }
+            ]
+          }
+        },
+        "from": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
+        },
+        "to": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "marketing.CampaignDraft": {
+      "required": [
+        "campaign",
+        "msgs"
+      ],
+      "type": "object",
+      "properties": {
+        "campaign": {
+          "$ref": "#/$defs/marketing.Campaign"
+        },
+        "msgs": {
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marketing.CampaignMsg"
+          }
+        }
+      }
+    },
+    "marketing.Campaign": {
+      "description": "### 이벤트 기록\n\n- 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)",
+      "required": [
+        "advertising",
+        "name",
+        "sendMedium",
+        "sendMode",
+        "triggerEventName",
+        "waitingTime"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "active"
+            },
+            {
+              "const": "stopped"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "triggerEventName": {
+          "type": "string"
+        },
+        "triggerEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "waitingTime": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "filterEventName": {
+          "type": "string"
+        },
+        "filterEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "filterMatch": {
+          "oneOf": [
+            {
+              "const": "positive"
+            },
+            {
+              "const": "negative"
+            }
+          ]
+        },
+        "filterHpc": {
+          "$ref": "#/$defs/marketing.HoldingPropertyConstant"
+        },
+        "goalEventName": {
+          "type": "string"
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "goalHpc": {
+          "$ref": "#/$defs/marketing.HoldingPropertyConstant"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "cooldown": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "sendMode": {
+          "oneOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "away"
+            },
+            {
+              "const": "inOperation"
+            },
+            {
+              "const": "customUsingSenderTime"
+            },
+            {
+              "const": "customUsingReceiverTime"
+            },
+            {
+              "const": "custom"
+            }
+          ]
+        },
+        "channelOperationId": {
+          "type": "string"
+        },
+        "sendTimeRanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "startAt": {
+          "example": 1744704941659,
+          "type": "number",
+          "format": "int64"
+        },
+        "endAt": {
+          "example": 1744704941659,
+          "type": "number",
+          "format": "int64"
+        },
+        "deleteMessageAfterStop": {
+          "type": "boolean"
+        },
+        "draft": {
+          "$ref": "#/$defs/marketing.CampaignDraft"
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string"
+        },
+        "recipeCaseId": {
+          "type": "string"
+        }
+      }
+    },
+    "marketing.HoldingPropertyConstant": {
+      "required": [
+        "baseEventKey",
+        "baseEventName",
+        "baseEventType"
+      ],
+      "type": "object",
+      "properties": {
+        "baseEventName": {
+          "type": "string"
+        },
+        "baseEventKey": {
+          "type": "string"
+        },
+        "eventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "baseEventType": {
+          "oneOf": [
+            {
+              "const": "triggerEvent"
+            },
+            {
+              "const": "additionalFilter"
+            }
+          ]
+        },
+        "operator": {
+          "$ref": "#/$defs/EventSchema"
+        },
+        "values": {
+          "type": "object",
+          "writeOnly": true,
+          "properties": {},
+          "required": []
+        }
+      }
+    },
+    "EventSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "eventName": {
+          "type": "string",
+          "readOnly": true
+        },
+        "key": {
+          "type": "string"
+        },
+        "parentKey": {
+          "type": "string"
+        },
+        "type": {
+          "oneOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "list"
+            },
+            {
+              "const": "listOfNumber"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "string"
+            },
+            {
+              "const": "listOfObject"
+            }
+          ]
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "icon": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "marketing.CampaignMsg": {
+      "required": [
+        "id",
+        "name",
+        "sendMedium",
+        "settings"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "campaignId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "settings": {
+          "$ref": "#/$defs/marketing.SendMediumSettings"
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        }
+      }
+    },
+    "marketing.SendMediumSettings": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "legacy.v4.LegacyV4ChatBookmark": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "bookmarkKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "chatType": {
+          "type": "string"
+        },
+        "personType": {
+          "type": "string"
+        },
+        "personId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4ChatSession": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "updatedKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "unreadKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "alert": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "unread": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "watch": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "info"
+            },
+            {
+              "const": "none"
+            }
+          ]
+        },
+        "readAt": {
+          "example": 1744704933179,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "receivedAt": {
+          "example": 1744704933179,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "postedAt": {
+          "example": 1744704933179,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704933192,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704933192,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string"
+        },
+        "chatType": {
+          "type": "string"
+        },
+        "personType": {
+          "type": "string"
+        },
+        "personId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4ChatTag": {
+      "required": [
+        "key",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "colorVariant": {
+          "oneOf": [
+            {
+              "const": "red"
+            },
+            {
+              "const": "orange"
+            },
+            {
+              "const": "yellow"
+            },
+            {
+              "const": "olive"
+            },
+            {
+              "const": "green"
+            },
+            {
+              "const": "cobalt"
+            },
+            {
+              "const": "purple"
+            },
+            {
+              "const": "pink"
+            },
+            {
+              "const": "navy"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "followerIds": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4Message": {
+      "type": "object",
+      "properties": {
+        "chatKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "mainKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "threadKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "root": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatType": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "personType": {
+          "type": "string",
+          "readOnly": true
+        },
+        "personId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "requestId": {
+          "type": "string"
+        },
+        "language": {
+          "type": "string",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "blocks": {
+          "type": "array",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Block"
+          }
+        },
+        "plainText": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "example": 1744704933192,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "buttons": {
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Button"
+          }
+        },
+        "files": {
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4File"
+          }
+        },
+        "webPage": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4WebPage"
+        },
+        "log": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4Log"
+        },
+        "reactions": {
+          "type": "array",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Reaction"
+          }
+        },
+        "profileBot": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4ProfileBotInput"
+          }
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "sending"
+            },
+            {
+              "const": "sent"
+            },
+            {
+              "const": "failed"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "options": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "actAsManager"
+              },
+              {
+                "const": "displayAsChannel"
+              },
+              {
+                "const": "doNotPost"
+              },
+              {
+                "const": "doNotSearch"
+              },
+              {
+                "const": "doNotSendApp"
+              },
+              {
+                "const": "doNotUpdateDesk"
+              },
+              {
+                "const": "immutable"
+              },
+              {
+                "const": "private"
+              },
+              {
+                "const": "silent"
+              }
+            ]
+          }
+        },
+        "marketing": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4MessageMarketing"
+        },
+        "supportBot": {
+          "$ref": "#/$defs/legacy.v4.message.LegacyV4MessageSupportBot"
+        },
+        "threadMsg": {
+          "type": "boolean"
+        },
+        "broadcastedMsg": {
+          "type": "boolean"
+        },
+        "rootMessageId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4Block": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "oneOf": [
+            {
+              "const": "bullets"
+            },
+            {
+              "const": "code"
+            },
+            {
+              "const": "text"
+            }
+          ]
+        },
+        "language": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "array",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "items": {
+            "$ref": "#/$defs/legacy.v4.message.LegacyV4Block"
+          }
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4Button": {
+      "required": [
+        "title",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "colorVariant": {
+          "oneOf": [
+            {
+              "const": "cobalt"
+            },
+            {
+              "const": "green"
+            },
+            {
+              "const": "orange"
+            },
+            {
+              "const": "red"
+            },
+            {
+              "const": "black"
+            },
+            {
+              "const": "pink"
+            },
+            {
+              "const": "purple"
+            }
+          ]
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4File": {
+      "required": [
+        "bucket",
+        "id",
+        "key",
+        "name",
+        "size"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "number",
+          "format": "double"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "orientation": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "animated": {
+          "type": "boolean"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "chatType": {
+          "type": "string"
+        },
+        "chatId": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.LegacyV4WebPage": {
+      "required": [
+        "id",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "videoUrl": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4Log": {
+      "type": "object",
+      "properties": {
+        "action": {
+          "oneOf": [
+            {
+              "const": "changeName"
+            },
+            {
+              "const": "changeScope"
+            },
+            {
+              "const": "close"
+            },
+            {
+              "const": "create"
+            },
+            {
+              "const": "invite"
+            },
+            {
+              "const": "join"
+            },
+            {
+              "const": "assign"
+            },
+            {
+              "const": "unassign"
+            },
+            {
+              "const": "leave"
+            },
+            {
+              "const": "open"
+            },
+            {
+              "const": "remove"
+            },
+            {
+              "const": "snooze"
+            },
+            {
+              "const": "addTags"
+            },
+            {
+              "const": "removeTags"
+            }
+          ]
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4Reaction": {
+      "required": [
+        "emojiName"
+      ],
+      "type": "object",
+      "properties": {
+        "emojiName": {
+          "type": "string"
+        },
+        "personKeys": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "empty": {
+          "type": "boolean"
+        }
+      }
+    },
+    "legacy.v4.message.LegacyV4ProfileBotInput": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/AttributeValue"
+        }
+      },
+      "required": []
+    },
+    "AttributeValue": {
+      "type": "object",
+      "properties": {
+        "s": {
+          "type": "string"
+        },
+        "n": {
+          "type": "string"
+        },
+        "b": {
+          "type": "object",
+          "properties": {
+            "short": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "char": {
+              "type": "string"
+            },
+            "int": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "long": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "float": {
+              "type": "number",
+              "format": "float"
+            },
+            "double": {
+              "type": "number",
+              "format": "double"
+            },
+            "direct": {
+              "type": "boolean"
+            },
+            "readOnly": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "m": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/AttributeValue"
+          },
+          "properties": {},
+          "required": []
+        },
+        "l": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/AttributeValue"
+          }
+        },
+        "ss": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "bs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "short": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "char": {
+                "type": "string"
+              },
+              "int": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "long": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "float": {
+                "type": "number",
+                "format": "float"
+              },
+              "double": {
+                "type": "number",
+                "format": "double"
+              },
+              "direct": {
+                "type": "boolean"
+              },
+              "readOnly": {
+                "type": "boolean"
+              }
+            },
+            "required": []
+          }
+        },
+        "null": {
+          "type": "boolean"
+        },
+        "bool": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4MessageMarketing": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "exposureType": {
+          "const": "fullScreen"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.message.LegacyV4MessageSupportBot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revisionId": {
+          "type": "string"
+        },
+        "sectionId": {
+          "type": "string"
+        },
+        "stepIndex": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "buttons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.LegacyV4SupportBotRouteSection$LegacyV4Button"
+          }
+        },
+        "submitButtonIndex": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4SupportBotRouteSection$LegacyV4Button": {
+      "required": [
+        "nextSectionId",
+        "text"
+      ],
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "nextSectionId": {
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.marketing.LegacyV4OneTimeMsg": {
+      "required": [
+        "advertising",
+        "enableSupportBot",
+        "name",
+        "state"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "sent"
+            },
+            {
+              "const": "canceled"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "sendMode": {
+          "oneOf": [
+            {
+              "const": "immediately"
+            },
+            {
+              "const": "reservedWithSenderTime"
+            },
+            {
+              "const": "reservedWithReceiverTime"
+            }
+          ]
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "settings": {
+          "$ref": "#/$defs/marketing.SendMediumSettings"
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventName": {
+          "type": "string"
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "enableSupportBot": {
+          "type": "boolean"
+        },
+        "followingSupportBotId": {
+          "type": "string"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "startAt": {
+          "example": 1744704933151,
+          "type": "number",
+          "format": "int64"
+        },
+        "draft": {
+          "$ref": "#/$defs/marketing.OneTimeMsgDraft"
+        },
+        "createdAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        }
+      }
+    },
+    "marketing.OneTimeMsgDraft": {
+      "required": [
+        "oneTimeMsg"
+      ],
+      "type": "object",
+      "properties": {
+        "oneTimeMsg": {
+          "$ref": "#/$defs/marketing.OneTimeMsg"
+        }
+      }
+    },
+    "marketing.OneTimeMsg": {
+      "required": [
+        "advertising",
+        "name",
+        "state"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "sent"
+            },
+            {
+              "const": "canceled"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "sendMode": {
+          "oneOf": [
+            {
+              "const": "immediately"
+            },
+            {
+              "const": "reservedWithSenderTime"
+            },
+            {
+              "const": "reservedWithReceiverTime"
+            }
+          ]
+        },
+        "channelOperationId": {
+          "type": "string"
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "settings": {
+          "$ref": "#/$defs/marketing.SendMediumSettings"
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventName": {
+          "type": "string"
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "startAt": {
+          "example": 1744704941659,
+          "type": "number",
+          "format": "int64"
+        },
+        "localStartAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "draft": {
+          "$ref": "#/$defs/marketing.OneTimeMsgDraft"
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        }
+      }
+    },
+    "legacy.v4.LegacyV4SupportBot": {
+      "required": [
+        "botName",
+        "channelId",
+        "name",
+        "order",
+        "runMode",
+        "state"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "pluginId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "botName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "order": {
+          "minimum": 0,
+          "type": "number",
+          "format": "float"
+        },
+        "pageQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "draft": {
+          "$ref": "#/$defs/supportbot.SupportBotDraft"
+        },
+        "revisionId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "active"
+            },
+            {
+              "const": "stopped"
+            }
+          ]
+        },
+        "runMode": {
+          "oneOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "away"
+            },
+            {
+              "const": "inOperation"
+            },
+            {
+              "const": "private"
+            }
+          ]
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "stop": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "chatOpen": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string"
+        }
+      }
+    },
+    "supportbot.SupportBotDraft": {
+      "type": "object",
+      "properties": {
+        "supportBot": {
+          "$ref": "#/$defs/supportbot.SupportBot"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/supportbot.SupportBotSection"
+          }
+        }
+      },
+      "required": []
+    },
+    "supportbot.SupportBot": {
+      "required": [
+        "botName",
+        "channelId",
+        "name",
+        "order",
+        "runMode",
+        "state"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "botName": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "order": {
+          "minimum": 0,
+          "type": "number",
+          "format": "float"
+        },
+        "pageQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "draft": {
+          "$ref": "#/$defs/supportbot.SupportBotDraft"
+        },
+        "revisionId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "active"
+            },
+            {
+              "const": "stopped"
+            }
+          ]
+        },
+        "runMode": {
+          "oneOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "away"
+            },
+            {
+              "const": "inOperation"
+            },
+            {
+              "const": "private"
+            }
+          ]
+        },
+        "start": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "stop": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "chatOpen": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string"
+        }
+      }
+    },
+    "supportbot.SupportBotSection": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "actions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/userchat.UserChatStaticAction"
+          }
+        },
+        "id": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/supportbot.SupportBotSection$Step"
+          }
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "userchat.UserChatStaticAction": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "supportbot.SupportBotSection$Step": {
+      "required": [
+        "message"
+      ],
+      "type": "object",
+      "properties": {
+        "message": {
+          "$ref": "#/$defs/message.NestedMessage"
+        }
+      }
+    },
+    "message.NestedMessage": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.Block"
+          }
+        },
+        "buttons": {
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.Button"
+          }
+        },
+        "files": {
+          "maxItems": 30,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.File"
+          }
+        },
+        "webPage": {
+          "$ref": "#/$defs/message.WebPage"
+        },
+        "form": {
+          "$ref": "#/$defs/message.form.Form"
+        }
+      },
+      "required": []
+    },
+    "message.Block": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "oneOf": [
+            {
+              "const": "bullets"
+            },
+            {
+              "const": "code"
+            },
+            {
+              "const": "text"
+            }
+          ]
+        },
+        "language": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.Block"
+          }
+        }
+      }
+    },
+    "message.Button": {
+      "required": [
+        "action",
+        "title"
+      ],
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "colorVariant": {
+          "oneOf": [
+            {
+              "const": "cobalt"
+            },
+            {
+              "const": "green"
+            },
+            {
+              "const": "orange"
+            },
+            {
+              "const": "red"
+            },
+            {
+              "const": "black"
+            },
+            {
+              "const": "pink"
+            },
+            {
+              "const": "purple"
+            }
+          ]
+        },
+        "action": {
+          "$ref": "#/$defs/message.action.Action"
+        },
+        "url": {
+          "type": "string",
+          "deprecated": true
+        }
+      }
+    },
+    "message.action.Action": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "#/$defs/message.action.Attributes"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "message.action.Attributes": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "message.File": {
+      "required": [
+        "bucket",
+        "id",
+        "key",
+        "name",
+        "size"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "number",
+          "format": "double"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "orientation": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "animated": {
+          "type": "boolean"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "chatType": {
+          "type": "string"
+        },
+        "chatId": {
+          "type": "string"
+        }
+      }
+    },
+    "message.WebPage": {
+      "required": [
+        "id",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "videoUrl": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "message.form.Form": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "submittedAt": {
+          "example": 1744704943127,
+          "type": "number",
+          "format": "int64"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.form.FormInput"
+          }
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "message.form.FormInput": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "type": {
+          "oneOf": [
+            {
+              "const": "text"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "bool"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "radio"
+            },
+            {
+              "const": "singleSelect"
+            },
+            {
+              "const": "checkbox"
+            },
+            {
+              "const": "multiSelect"
+            }
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "bindingKey": {
+          "type": "string"
+        },
+        "dataType": {
+          "oneOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "list"
+            },
+            {
+              "const": "listOfNumber"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "userChatProfileBindingKey": {
+          "type": "boolean"
+        },
+        "userProfileBindingKey": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "memberId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "veilId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "unifiedId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "readOnly": true
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            },
+            "mobileNumber": {
+              "type": "string",
+              "default": "+18004424000"
+            },
+            "landlineNumber": {
+              "type": "string",
+              "default": "+18004424000"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "recentPurchaseCount": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "recentPurchaseAmount": {
+              "type": "number"
+            },
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "required": []
+        },
+        "profileOnce": {
+          "$ref": "#/$defs/profile.UserProfile"
+        },
+        "tags": {
+          "maxItems": 10,
+          "minItems": 0,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alert": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "unread": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "popUpChatId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "blocked": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "unsubscribed": {
+          "type": "boolean"
+        },
+        "hasChat": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "hasPushToken": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "language": {
+          "type": "string",
+          "default": "en"
+        },
+        "country": {
+          "type": "string",
+          "readOnly": true
+        },
+        "city": {
+          "type": "string",
+          "readOnly": true
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double",
+          "readOnly": true
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double",
+          "readOnly": true
+        },
+        "web": {
+          "$ref": "#/$defs/WebInfo"
+        },
+        "mobile": {
+          "$ref": "#/$defs/MobileInfo"
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "lastSeenAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "expireAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "managedKey": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "member": {
+          "type": "boolean"
+        },
+        "email": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "managed": {
+          "type": "boolean"
+        },
+        "mobileNumber": {
+          "type": "string",
+          "default": "+18004424000"
+        },
+        "systemLanguage": {
+          "type": "string",
+          "default": "en"
+        }
+      },
+      "required": []
+    },
+    "profile.UserProfile": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "mobileNumber": {
+          "type": "string",
+          "default": "+18004424000"
+        },
+        "landlineNumber": {
+          "type": "string",
+          "default": "+18004424000"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "recentPurchaseCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "recentPurchaseAmount": {
+          "type": "number"
+        },
+        "empty": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "required": []
+    },
+    "WebInfo": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "osName": {
+          "type": "string"
+        },
+        "browser": {
+          "type": "string"
+        },
+        "browserName": {
+          "type": "string"
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastSeenAt": {
+          "example": 1744704942814,
+          "type": "number",
+          "format": "int64"
+        }
+      },
+      "required": []
+    },
+    "MobileInfo": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "osName": {
+          "type": "string"
+        },
+        "appName": {
+          "type": "string"
+        },
+        "appVersion": {
+          "type": "string"
+        },
+        "sdkName": {
+          "type": "string"
+        },
+        "sdkVersion": {
+          "type": "string"
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastSeenAt": {
+          "example": 1744704942814,
+          "type": "number",
+          "format": "int64"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4UserChat": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "appUserKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "closed"
+            },
+            {
+              "const": "opened"
+            },
+            {
+              "const": "snoozed"
+            },
+            {
+              "const": "queued"
+            }
+          ]
+        },
+        "managed": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "userId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "handling": {
+          "oneOf": [
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "supportBot"
+            }
+          ]
+        },
+        "supportBot": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4UserChat$LegacyV4UserChatSupportBot"
+        },
+        "marketing": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4UserChat$LegacyV4UserChatMarketing"
+        },
+        "pluginId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "sourcePage": {
+          "type": "string",
+          "readOnly": true
+        },
+        "messengerType": {
+          "type": "string",
+          "readOnly": true
+        },
+        "messengerId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "managerIds": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "assigneeId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "tags": {
+          "maxItems": 8,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "firstOpenedAt": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "openedAt": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704933192,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "frontMessageId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "frontUpdatedAt": {
+          "example": 1744704933192,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "deskMessageId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "deskUpdatedAt": {
+          "example": 1744704933279,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "firstAssigneeIdAfterOpen": {
+          "type": "string",
+          "readOnly": true
+        },
+        "firstRepliedAtAfterOpen": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "oneStop": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "waitingTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "avgReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "totalReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "replyCount": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "resolutionTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationWaitingTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationAvgReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationTotalReplyTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "operationReplyCount": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "operationResolutionTime": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "firstAskedAt": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "askedAt": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "closedAt": {
+          "example": 1744704933199,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "snoozedAt": {
+          "example": 1744704933285,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "expiresAt": {
+          "example": 1744704933286,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4UserChat$LegacyV4UserChatSupportBot": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "revisionId": {
+          "type": "string"
+        },
+        "sectionPath": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4UserChat$LegacyV4UserChatMarketing": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "enableSupportBot": {
+          "type": "boolean"
+        },
+        "supportBotId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

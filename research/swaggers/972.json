@@ -1,0 +1,128 @@
+{
+  "schema": {
+    "$ref": "#/$defs/package-version"
+  },
+  "$defs": {
+    "package-version": {
+      "title": "Package Version",
+      "description": "A version of a software package",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the package version.",
+          "example": 1,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the package version.",
+          "example": "latest",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://api.github.com/orgs/github/packages/container/super-linter/versions/786068",
+          "type": "string"
+        },
+        "package_html_url": {
+          "example": "https://github.com/orgs/github/packages/container/package/super-linter",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/github/packages/container/super-linter/786068",
+          "type": "string"
+        },
+        "license": {
+          "example": "MIT",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2011-04-10T20:09:31Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "example": "2014-03-03T18:58:10Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted_at": {
+          "example": "2014-03-03T18:58:10Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "title": "Package Version Metadata",
+          "type": "object",
+          "properties": {
+            "package_type": {
+              "example": "docker",
+              "oneOf": [
+                {
+                  "const": "npm"
+                },
+                {
+                  "const": "maven"
+                },
+                {
+                  "const": "rubygems"
+                },
+                {
+                  "const": "docker"
+                },
+                {
+                  "const": "nuget"
+                },
+                {
+                  "const": "container"
+                }
+              ]
+            },
+            "container": {
+              "title": "Container Metadata",
+              "type": "object",
+              "properties": {
+                "tags": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "tags"
+              ]
+            },
+            "docker": {
+              "title": "Docker Metadata",
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "tags"
+              ]
+            }
+          },
+          "required": [
+            "package_type"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "url",
+        "package_html_url",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

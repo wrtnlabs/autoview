@@ -1,0 +1,258 @@
+{
+  "schema": {
+    "$ref": "#/$defs/import"
+  },
+  "$defs": {
+    "IApiRepos_Import.PutBody": {
+      "type": "object",
+      "properties": {
+        "vcs_url": {
+          "description": "The URL of the originating repository.",
+          "type": "string"
+        },
+        "vcs": {
+          "description": "The originating VCS type. Without this parameter, the import job will take additional time to detect the VCS type before beginning the import. This detection step will be reflected in the response.",
+          "oneOf": [
+            {
+              "const": "subversion"
+            },
+            {
+              "const": "git"
+            },
+            {
+              "const": "mercurial"
+            },
+            {
+              "const": "tfvc"
+            }
+          ]
+        },
+        "vcs_username": {
+          "description": "If authentication is required, the username to provide to `vcs_url`.",
+          "type": "string"
+        },
+        "vcs_password": {
+          "description": "If authentication is required, the password to provide to `vcs_url`.",
+          "type": "string"
+        },
+        "tfvc_project": {
+          "description": "For a tfvc import, the name of the project that is being imported.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "vcs_url"
+      ]
+    },
+    "import": {
+      "title": "Import",
+      "description": "A repository import from an external source.",
+      "type": "object",
+      "properties": {
+        "vcs": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "use_lfs": {
+          "type": "boolean"
+        },
+        "vcs_url": {
+          "description": "The URL of the originating repository.",
+          "type": "string"
+        },
+        "svc_root": {
+          "type": "string"
+        },
+        "tfvc_project": {
+          "type": "string"
+        },
+        "status": {
+          "oneOf": [
+            {
+              "const": "auth"
+            },
+            {
+              "const": "error"
+            },
+            {
+              "const": "none"
+            },
+            {
+              "const": "detecting"
+            },
+            {
+              "const": "choose"
+            },
+            {
+              "const": "auth_failed"
+            },
+            {
+              "const": "importing"
+            },
+            {
+              "const": "mapping"
+            },
+            {
+              "const": "waiting_to_push"
+            },
+            {
+              "const": "pushing"
+            },
+            {
+              "const": "complete"
+            },
+            {
+              "const": "setup"
+            },
+            {
+              "const": "unknown"
+            },
+            {
+              "const": "detection_found_multiple"
+            },
+            {
+              "const": "detection_found_nothing"
+            },
+            {
+              "const": "detection_needs_auth"
+            }
+          ]
+        },
+        "status_text": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "failed_step": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error_message": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "import_percent": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "commit_count": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "push_percent": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "has_large_files": {
+          "type": "boolean"
+        },
+        "large_files_size": {
+          "type": "integer"
+        },
+        "large_files_count": {
+          "type": "integer"
+        },
+        "project_choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "vcs": {
+                "type": "string"
+              },
+              "tfvc_project": {
+                "type": "string"
+              },
+              "human_name": {
+                "type": "string"
+              }
+            },
+            "required": []
+          }
+        },
+        "message": {
+          "type": "string"
+        },
+        "authors_count": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "authors_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "repository_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "svn_root": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vcs",
+        "vcs_url",
+        "status",
+        "url",
+        "repository_url",
+        "html_url",
+        "authors_url"
+      ]
+    }
+  }
+}

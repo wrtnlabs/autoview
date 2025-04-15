@@ -1,0 +1,28 @@
+{
+  "schema": {
+    "$ref": "#/$defs/codespaces-user-public-key"
+  },
+  "$defs": {
+    "codespaces-user-public-key": {
+      "title": "CodespacesUserPublicKey",
+      "description": "The public key used for setting user Codespaces' Secrets.",
+      "type": "object",
+      "properties": {
+        "key_id": {
+          "description": "The identifier for the key.",
+          "example": "1234567",
+          "type": "string"
+        },
+        "key": {
+          "description": "The Base64 encoded public key.",
+          "example": "hBT5WZEj8ZoOv6TYJsfWq7MxTEQopZO5/IT3ZCVQPzs=",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key_id",
+        "key"
+      ]
+    }
+  }
+}

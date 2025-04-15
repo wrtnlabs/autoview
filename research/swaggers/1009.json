@@ -1,0 +1,29 @@
+{
+  "schema": {
+    "$ref": "#/$defs/combined-billing-usage"
+  },
+  "$defs": {
+    "combined-billing-usage": {
+      "type": "object",
+      "properties": {
+        "days_left_in_billing_cycle": {
+          "description": "Numbers of days left in billing cycle.",
+          "type": "integer"
+        },
+        "estimated_paid_storage_for_month": {
+          "description": "Estimated storage space (GB) used in billing cycle.",
+          "type": "integer"
+        },
+        "estimated_storage_for_month": {
+          "description": "Estimated sum of free and paid storage space (GB) used in billing cycle.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "days_left_in_billing_cycle",
+        "estimated_paid_storage_for_month",
+        "estimated_storage_for_month"
+      ]
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-organization-permissions"
+  },
+  "$defs": {
+    "actions-organization-permissions": {
+      "type": "object",
+      "properties": {
+        "enabled_repositories": {
+          "$ref": "#/$defs/enabled-repositories"
+        },
+        "selected_repositories_url": {
+          "description": "The API URL to use to get or set the selected repositories that are allowed to run GitHub Actions, when `enabled_repositories` is set to `selected`.",
+          "type": "string"
+        },
+        "allowed_actions": {
+          "$ref": "#/$defs/allowed-actions"
+        },
+        "selected_actions_url": {
+          "$ref": "#/$defs/selected-actions-url"
+        }
+      },
+      "required": [
+        "enabled_repositories"
+      ]
+    },
+    "enabled-repositories": {
+      "description": "The policy that controls the repositories in the organization that are allowed to run GitHub Actions.",
+      "oneOf": [
+        {
+          "const": "all"
+        },
+        {
+          "const": "none"
+        },
+        {
+          "const": "selected"
+        }
+      ]
+    },
+    "allowed-actions": {
+      "description": "The permissions policy that controls the actions and reusable workflows that are allowed to run.",
+      "oneOf": [
+        {
+          "const": "all"
+        },
+        {
+          "const": "local_only"
+        },
+        {
+          "const": "selected"
+        }
+      ]
+    },
+    "selected-actions-url": {
+      "description": "The API URL to use to get or set the actions and reusable workflows that are allowed to run, when `allowed_actions` is set to `selected`.",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schema": {
+    "$ref": "#/$defs/dependabot-secret"
+  },
+  "$defs": {
+    "dependabot-secret": {
+      "title": "Dependabot Secret",
+      "description": "Set secrets for Dependabot.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the secret.",
+          "example": "MY_ARTIFACTORY_PASSWORD",
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

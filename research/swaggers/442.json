@@ -1,0 +1,70 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsDependabotSecrets.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsDependabotSecrets.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "secrets"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "secrets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/organization-dependabot-secret"
+          }
+        }
+      }
+    },
+    "organization-dependabot-secret": {
+      "title": "Dependabot Secret for an Organization",
+      "description": "Secrets for GitHub Dependabot for an organization.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the secret.",
+          "example": "SECRET_TOKEN",
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "visibility": {
+          "description": "Visibility of a secret",
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "private"
+            },
+            {
+              "const": "selected"
+            }
+          ]
+        },
+        "selected_repositories_url": {
+          "example": "https://api.github.com/organizations/org/dependabot/secrets/my_secret/repositories",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "name",
+        "created_at",
+        "updated_at",
+        "visibility"
+      ]
+    }
+  }
+}

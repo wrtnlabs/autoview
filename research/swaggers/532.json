@@ -1,0 +1,203 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/team"
+    }
+  },
+  "$defs": {
+    "team": {
+      "title": "Team",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "description": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "privacy": {
+          "type": "string"
+        },
+        "notification_setting": {
+          "type": "string"
+        },
+        "permission": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "pull": {
+              "type": "boolean"
+            },
+            "triage": {
+              "type": "boolean"
+            },
+            "push": {
+              "type": "boolean"
+            },
+            "maintain": {
+              "type": "boolean"
+            },
+            "admin": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pull",
+            "triage",
+            "push",
+            "maintain",
+            "admin"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/rails/teams/core",
+          "type": "string",
+          "format": "uri"
+        },
+        "members_url": {
+          "type": "string"
+        },
+        "repositories_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent": {
+          "$ref": "#/$defs/nullable-team-simple"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "members_url",
+        "name",
+        "description",
+        "permission",
+        "html_url",
+        "repositories_url",
+        "slug",
+        "parent"
+      ]
+    },
+    "nullable-team-simple": {
+      "title": "Team Simple",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the team",
+              "example": 1,
+              "type": "integer"
+            },
+            "node_id": {
+              "example": "MDQ6VGVhbTE=",
+              "type": "string"
+            },
+            "url": {
+              "description": "URL for the team",
+              "example": "https://api.github.com/organizations/1/team/1",
+              "type": "string",
+              "format": "uri"
+            },
+            "members_url": {
+              "example": "https://api.github.com/organizations/1/team/1/members{/member}",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name of the team",
+              "example": "Justice League",
+              "type": "string"
+            },
+            "description": {
+              "description": "Description of the team",
+              "example": "A great team.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "permission": {
+              "description": "Permission that the team will have for its repositories",
+              "example": "admin",
+              "type": "string"
+            },
+            "privacy": {
+              "description": "The level of privacy this team should have",
+              "example": "closed",
+              "type": "string"
+            },
+            "notification_setting": {
+              "description": "The notification setting the team has set",
+              "example": "notifications_enabled",
+              "type": "string"
+            },
+            "html_url": {
+              "example": "https://github.com/orgs/rails/teams/core",
+              "type": "string",
+              "format": "uri"
+            },
+            "repositories_url": {
+              "example": "https://api.github.com/organizations/1/team/1/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "slug": {
+              "example": "justice-league",
+              "type": "string"
+            },
+            "ldap_dn": {
+              "description": "Distinguished Name (DN) that team maps to within LDAP environment",
+              "example": "uid=example,ou=users,dc=github,dc=com",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "url",
+            "members_url",
+            "name",
+            "description",
+            "permission",
+            "html_url",
+            "repositories_url",
+            "slug"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

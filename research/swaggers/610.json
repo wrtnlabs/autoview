@@ -1,0 +1,50 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposActionsSecrets.GetResponse"
+  },
+  "$defs": {
+    "IApiReposActionsSecrets.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "secrets"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "secrets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actions-secret"
+          }
+        }
+      }
+    },
+    "actions-secret": {
+      "title": "Actions Secret",
+      "description": "Set secrets for GitHub Actions.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the secret.",
+          "example": "SECRET_TOKEN",
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

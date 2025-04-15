@@ -1,0 +1,73 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/classroom-assignment-grade"
+    }
+  },
+  "$defs": {
+    "classroom-assignment-grade": {
+      "title": "Classroom Assignment Grade",
+      "description": "Grade for a student or groups GitHub Classroom assignment",
+      "type": "object",
+      "properties": {
+        "assignment_name": {
+          "description": "Name of the assignment",
+          "type": "string"
+        },
+        "assignment_url": {
+          "description": "URL of the assignment",
+          "type": "string"
+        },
+        "starter_code_url": {
+          "description": "URL of the starter code for the assignment",
+          "type": "string"
+        },
+        "github_username": {
+          "description": "GitHub username of the student",
+          "type": "string"
+        },
+        "roster_identifier": {
+          "description": "Roster identifier of the student",
+          "type": "string"
+        },
+        "student_repository_name": {
+          "description": "Name of the student's assignment repository",
+          "type": "string"
+        },
+        "student_repository_url": {
+          "description": "URL of the student's assignment repository",
+          "type": "string"
+        },
+        "submission_timestamp": {
+          "description": "Timestamp of the student's assignment submission",
+          "type": "string"
+        },
+        "points_awarded": {
+          "description": "Number of points awarded to the student",
+          "type": "integer"
+        },
+        "points_available": {
+          "description": "Number of points available for the assignment",
+          "type": "integer"
+        },
+        "group_name": {
+          "description": "If a group assignment, name of the group the student is in",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assignment_name",
+        "assignment_url",
+        "starter_code_url",
+        "github_username",
+        "roster_identifier",
+        "student_repository_name",
+        "student_repository_url",
+        "submission_timestamp",
+        "points_awarded",
+        "points_available"
+      ]
+    }
+  }
+}

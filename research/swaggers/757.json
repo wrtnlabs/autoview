@@ -1,0 +1,233 @@
+{
+  "schema": {
+    "$ref": "#/$defs/hook"
+  },
+  "$defs": {
+    "IApiReposHooks.PostBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "Use `web` to create a webhook. Default: `web`. This parameter only accepts the value `web`.",
+              "type": "string"
+            },
+            "config": {
+              "description": "Key/value pairs to provide settings for this webhook.",
+              "type": "object",
+              "properties": {
+                "url": {
+                  "$ref": "#/$defs/webhook-config-url"
+                },
+                "content_type": {
+                  "$ref": "#/$defs/webhook-config-content-type"
+                },
+                "secret": {
+                  "$ref": "#/$defs/webhook-config-secret"
+                },
+                "insecure_ssl": {
+                  "$ref": "#/$defs/webhook-config-insecure-ssl"
+                }
+              },
+              "required": []
+            },
+            "events": {
+              "description": "Determines what [events](https://docs.github.com/webhooks/event-payloads) the hook is triggered for.",
+              "type": "array",
+              "default": [
+                "push"
+              ],
+              "items": {
+                "type": "string"
+              }
+            },
+            "active": {
+              "description": "Determines if notifications are sent when the webhook is triggered. Set to `true` to send notifications.",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "webhook-config-url": {
+      "description": "The URL to which the payloads will be delivered.",
+      "example": "https://example.com/webhook",
+      "type": "string",
+      "format": "uri"
+    },
+    "webhook-config-content-type": {
+      "description": "The media type used to serialize the payloads. Supported values include `json` and `form`. The default is `form`.",
+      "example": "\"json\"",
+      "type": "string"
+    },
+    "webhook-config-secret": {
+      "description": "If provided, the `secret` will be used as the `key` to generate the HMAC hex digest value for [delivery signature headers](https://docs.github.com/webhooks/event-payloads/#delivery-headers).",
+      "example": "\"********\"",
+      "type": "string"
+    },
+    "webhook-config-insecure-ssl": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Determines whether the SSL certificate of the host for `url` will be verified when delivering payloads. Supported values include `0` (verification is performed) and `1` (verification is not performed). The default is `0`. **We strongly recommend not setting this to `1` as you are subject to man-in-the-middle and other attacks.**",
+          "example": "\"0\""
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "hook": {
+      "title": "Webhook",
+      "description": "Webhooks for repositories.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "id": {
+          "description": "Unique identifier of the webhook.",
+          "example": 42,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of a valid service, use 'web' for a webhook.",
+          "example": "web",
+          "type": "string"
+        },
+        "active": {
+          "description": "Determines whether the hook is actually triggered on pushes.",
+          "example": true,
+          "type": "boolean"
+        },
+        "events": {
+          "description": "Determines what events the hook is triggered for. Default: ['push'].",
+          "example": [
+            "push",
+            "pull_request"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "config": {
+          "$ref": "#/$defs/webhook-config"
+        },
+        "updated_at": {
+          "example": "2011-09-06T20:39:23Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "example": "2011-09-06T17:26:27Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/hooks/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "test_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/hooks/1/test",
+          "type": "string",
+          "format": "uri"
+        },
+        "ping_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/hooks/1/pings",
+          "type": "string",
+          "format": "uri"
+        },
+        "deliveries_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/hooks/1/deliveries",
+          "type": "string",
+          "format": "uri"
+        },
+        "last_response": {
+          "$ref": "#/$defs/hook-response"
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "type",
+        "name",
+        "active",
+        "events",
+        "config",
+        "ping_url",
+        "created_at",
+        "updated_at",
+        "last_response",
+        "test_url"
+      ]
+    },
+    "webhook-config": {
+      "title": "Webhook Configuration",
+      "description": "Configuration object of the webhook",
+      "type": "object",
+      "properties": {
+        "url": {
+          "$ref": "#/$defs/webhook-config-url"
+        },
+        "content_type": {
+          "$ref": "#/$defs/webhook-config-content-type"
+        },
+        "secret": {
+          "$ref": "#/$defs/webhook-config-secret"
+        },
+        "insecure_ssl": {
+          "$ref": "#/$defs/webhook-config-insecure-ssl"
+        }
+      },
+      "required": []
+    },
+    "hook-response": {
+      "title": "Hook Response",
+      "type": "object",
+      "properties": {
+        "code": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "status",
+        "message"
+      ]
+    }
+  }
+}

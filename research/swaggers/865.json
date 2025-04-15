@@ -1,0 +1,43 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/ruleset-version"
+    }
+  },
+  "$defs": {
+    "ruleset-version": {
+      "title": "Ruleset version",
+      "description": "The historical version of a ruleset",
+      "type": "object",
+      "required": [
+        "version_id",
+        "actor",
+        "updated_at"
+      ],
+      "properties": {
+        "version_id": {
+          "description": "The ID of the previous version of the ruleset",
+          "type": "integer"
+        },
+        "actor": {
+          "description": "The actor who updated the ruleset",
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "type": {
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

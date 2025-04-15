@@ -1,0 +1,145 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IPerformance"
+  },
+  "$defs": {
+    "IPerformance": {
+      "type": "object",
+      "properties": {
+        "cpu": {
+          "$ref": "#/$defs/process.global.NodeJS.CpuUsage"
+        },
+        "memory": {
+          "$ref": "#/$defs/process.global.NodeJS.MemoryUsage"
+        },
+        "resource": {
+          "$ref": "#/$defs/process.global.NodeJS.ResourceUsage"
+        }
+      },
+      "required": [
+        "cpu",
+        "memory",
+        "resource"
+      ]
+    },
+    "process.global.NodeJS.CpuUsage": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "number"
+        },
+        "system": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "user",
+        "system"
+      ]
+    },
+    "process.global.NodeJS.MemoryUsage": {
+      "type": "object",
+      "properties": {
+        "rss": {
+          "description": "Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the\nprocess, including all C++ and JavaScript objects and code.",
+          "type": "number"
+        },
+        "heapTotal": {
+          "title": "Refers to V8's memory usage",
+          "description": "Refers to V8's memory usage.",
+          "type": "number"
+        },
+        "heapUsed": {
+          "title": "Refers to V8's memory usage",
+          "description": "Refers to V8's memory usage.",
+          "type": "number"
+        },
+        "external": {
+          "type": "number"
+        },
+        "arrayBuffers": {
+          "description": "Refers to memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s, including all Node.js Buffers. This is also included\nin the external value. When Node.js is used as an embedded library, this value may be `0` because allocations for `ArrayBuffer`s\nmay not be tracked in that case.",
+          "type": "number"
+        }
+      },
+      "required": [
+        "rss",
+        "heapTotal",
+        "heapUsed",
+        "external",
+        "arrayBuffers"
+      ]
+    },
+    "process.global.NodeJS.ResourceUsage": {
+      "type": "object",
+      "properties": {
+        "fsRead": {
+          "type": "number"
+        },
+        "fsWrite": {
+          "type": "number"
+        },
+        "involuntaryContextSwitches": {
+          "type": "number"
+        },
+        "ipcReceived": {
+          "type": "number"
+        },
+        "ipcSent": {
+          "type": "number"
+        },
+        "majorPageFault": {
+          "type": "number"
+        },
+        "maxRSS": {
+          "type": "number"
+        },
+        "minorPageFault": {
+          "type": "number"
+        },
+        "sharedMemorySize": {
+          "type": "number"
+        },
+        "signalsCount": {
+          "type": "number"
+        },
+        "swappedOut": {
+          "type": "number"
+        },
+        "systemCPUTime": {
+          "type": "number"
+        },
+        "unsharedDataSize": {
+          "type": "number"
+        },
+        "unsharedStackSize": {
+          "type": "number"
+        },
+        "userCPUTime": {
+          "type": "number"
+        },
+        "voluntaryContextSwitches": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "fsRead",
+        "fsWrite",
+        "involuntaryContextSwitches",
+        "ipcReceived",
+        "ipcSent",
+        "majorPageFault",
+        "maxRSS",
+        "minorPageFault",
+        "sharedMemorySize",
+        "signalsCount",
+        "swappedOut",
+        "systemCPUTime",
+        "unsharedDataSize",
+        "unsharedStackSize",
+        "userCPUTime",
+        "voluntaryContextSwitches"
+      ]
+    }
+  }
+}

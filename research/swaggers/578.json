@@ -1,0 +1,32 @@
+{
+  "schema": {
+    "$ref": "#/$defs/empty-object"
+  },
+  "$defs": {
+    "IApiReposActionsJobsRerun.PostBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "enable_debug_logging": {
+              "description": "Whether to enable debug logging for the re-run.",
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "empty-object": {
+      "title": "Empty Object",
+      "description": "An object without any properties.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+}

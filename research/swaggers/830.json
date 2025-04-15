@@ -1,0 +1,253 @@
+{
+  "schema": {
+    "$ref": "#/$defs/reaction"
+  },
+  "$defs": {
+    "IApiReposPullsCommentsReactions.PostBody": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "description": "The [reaction type](https://docs.github.com/rest/reactions/reactions#about-reactions) to add to the pull request review comment.",
+          "oneOf": [
+            {
+              "const": "+1"
+            },
+            {
+              "const": "-1"
+            },
+            {
+              "const": "laugh"
+            },
+            {
+              "const": "confused"
+            },
+            {
+              "const": "heart"
+            },
+            {
+              "const": "hooray"
+            },
+            {
+              "const": "rocket"
+            },
+            {
+              "const": "eyes"
+            }
+          ]
+        }
+      },
+      "required": [
+        "content"
+      ]
+    },
+    "reaction": {
+      "title": "Reaction",
+      "description": "Reactions to conversations provide a way to help people express their feelings more simply and effectively.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 1,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDg6UmVhY3Rpb24x",
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "content": {
+          "description": "The reaction to use",
+          "example": "heart",
+          "oneOf": [
+            {
+              "const": "+1"
+            },
+            {
+              "const": "-1"
+            },
+            {
+              "const": "laugh"
+            },
+            {
+              "const": "confused"
+            },
+            {
+              "const": "heart"
+            },
+            {
+              "const": "hooray"
+            },
+            {
+              "const": "rocket"
+            },
+            {
+              "const": "eyes"
+            }
+          ]
+        },
+        "created_at": {
+          "example": "2016-05-20T20:09:31Z",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "user",
+        "content",
+        "created_at"
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

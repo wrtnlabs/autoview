@@ -1,0 +1,267 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IPageIShoppingChannel.IHierarchical"
+  },
+  "$defs": {
+    "IShoppingChannel.IRequest": {
+      "description": "Request of the channels with pagination and searching/sorting options.",
+      "type": "object",
+      "properties": {
+        "search": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingChannel.IRequest.ISearch"
+            }
+          ]
+        },
+        "sort": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "const": "-channel.code"
+                  },
+                  {
+                    "const": "-channel.name"
+                  },
+                  {
+                    "const": "-channel.created_at"
+                  },
+                  {
+                    "const": "+channel.code"
+                  },
+                  {
+                    "const": "+channel.name"
+                  },
+                  {
+                    "const": "+channel.created_at"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "page": {
+          "title": "Page number",
+          "description": "Page number.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingChannel.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "name": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IPageIShoppingChannel.IHierarchical": {
+      "description": "A page.\n\nCollection of records with pagination indformation.",
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "title": "Page information",
+          "description": "Page information.",
+          "$ref": "#/$defs/IPage.IPagination"
+        },
+        "data": {
+          "title": "List of records",
+          "description": "List of records.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannel.IHierarchical"
+          }
+        }
+      },
+      "required": [
+        "pagination",
+        "data"
+      ]
+    },
+    "IPage.IPagination": {
+      "description": "Page information.",
+      "type": "object",
+      "properties": {
+        "current": {
+          "title": "Current page number",
+          "description": "Current page number.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "records": {
+          "title": "Total records in the database",
+          "description": "Total records in the database.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "title": "Total pages",
+          "description": "Total pages.\n\nEqual to {@link records} / {@link limit} with ceiling.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "current",
+        "limit",
+        "records",
+        "pages"
+      ]
+    },
+    "IShoppingChannel.IHierarchical": {
+      "description": "Hierarchical channel information with children categories.",
+      "type": "object",
+      "properties": {
+        "categories": {
+          "title": "Children categories with hierarchical structure",
+          "description": "Children categories with hierarchical structure.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannelCategory.IHierarchical"
+          }
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name of the channel",
+          "description": "Name of the channel.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "categories",
+        "id",
+        "created_at",
+        "code",
+        "name"
+      ]
+    },
+    "IShoppingChannelCategory.IHierarchical": {
+      "description": "Hierarchical category information with children categories.",
+      "type": "object",
+      "properties": {
+        "children": {
+          "title": "List of children categories with hierarchical structure",
+          "description": "List of children categories with hierarchical structure.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannelCategory.IHierarchical"
+          }
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code of the category",
+          "description": "Identifier code of the category.\n\nThe code must be unique in the channel.",
+          "type": "string"
+        },
+        "parent_id": {
+          "title": "Parent category's ID",
+          "description": "Parent category's ID.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uuid"
+            }
+          ]
+        },
+        "name": {
+          "title": "Representative name of the category",
+          "description": "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "children",
+        "id",
+        "code",
+        "parent_id",
+        "name",
+        "created_at"
+      ]
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "IApiReposBranchesProtectionRequiredStatusChecksContexts.PutBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "contexts": {
+              "description": "The name of the status checks",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "contexts"
+          ],
+          "example": {
+            "contexts": [
+              "contexts"
+            ]
+          }
+        },
+        {
+          "type": "array",
+          "description": "The name of the status checks",
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    }
+  }
+}

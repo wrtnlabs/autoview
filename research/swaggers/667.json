@@ -1,0 +1,14 @@
+{
+  "schema": {
+    "$ref": "#/$defs/empty-object"
+  },
+  "$defs": {
+    "empty-object": {
+      "title": "Empty Object",
+      "description": "An object without any properties.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+}

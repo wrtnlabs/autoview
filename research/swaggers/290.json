@@ -1,0 +1,276 @@
+{
+  "schema": {
+    "$ref": "#/$defs/TryPagination_lt_ArticleType.GetAllArticlesReponse_gt_"
+  },
+  "$defs": {
+    "ArticleType.GetAllArtcleDto": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "writerId": {
+          "description": "",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "integer"
+        },
+        "searchKeyword": {
+          "description": "검색할 키워드로, 중간에 빈 문자가 있을 경우 해당 문자를 기준으로 split 하여 검색한다.\n즉, '초코 우유' 검색 시 초코와 우유가 동시에 있는 글만 볼 수 있다.",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "page": {
+          "description": "페이지네이션의 페이지 값",
+          "x-typia-metaTags": [
+            {
+              "kind": "minimum",
+              "value": 1
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minimum",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number",
+          "minimum": 1
+        },
+        "limit": {
+          "description": "",
+          "x-typia-metaTags": [
+            {
+              "kind": "maximum",
+              "value": 100
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "maximum",
+              "text": [
+                {
+                  "text": "100",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number",
+          "maximum": 100
+        }
+      },
+      "required": [
+        "page",
+        "limit"
+      ]
+    },
+    "TryPagination_lt_ArticleType.GetAllArticlesReponse_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/PaginationResponseType_lt_ArticleType.GetAllArticlesReponse_gt_"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "PaginationResponseType_lt_ArticleType.GetAllArticlesReponse_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "list": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "array",
+          "items": {
+            "description": "",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "$ref": "#/$defs/ArticleType.Element"
+          }
+        },
+        "count": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "totalResult": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "totalPage": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "search": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string"
+        },
+        "page": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        }
+      },
+      "required": [
+        "list",
+        "count",
+        "totalResult",
+        "totalPage",
+        "page"
+      ]
+    },
+    "ArticleType.Element": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "contents": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string"
+        },
+        "createdAt": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/Date"
+        },
+        "thumbnail": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "oneOf": [
+            {
+              "x-typia-required": true,
+              "x-typia-optional": false,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "myPick": {
+          "description": "내가 pick(좋아요) 한 게시글인지 아닌지 여부를 의미하며 기본 값은 false이다.",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "boolean"
+        },
+        "isMine": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "boolean"
+        },
+        "writer": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false
+        },
+        "comments": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "array",
+          "items": {
+            "description": "",
+            "x-typia-required": true,
+            "x-typia-optional": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "contents",
+        "createdAt",
+        "thumbnail",
+        "myPick",
+        "isMine",
+        "writer",
+        "comments"
+      ]
+    },
+    "Date": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+}

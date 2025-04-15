@@ -1,0 +1,640 @@
+{
+  "schema": {
+    "$ref": "#/$defs/code-security-configuration"
+  },
+  "$defs": {
+    "IApiEnterprisesCodeSecurityConfigurations.PostBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the code security configuration. Must be unique within the enterprise.",
+          "type": "string"
+        },
+        "description": {
+          "description": "A description of the code security configuration",
+          "type": "string",
+          "maxLength": 255
+        },
+        "advanced_security": {
+          "description": "The enablement status of GitHub Advanced Security",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            }
+          ]
+        },
+        "dependency_graph": {
+          "description": "The enablement status of Dependency Graph",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "dependency_graph_autosubmit_action": {
+          "description": "The enablement status of Automatic dependency submission",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "dependency_graph_autosubmit_action_options": {
+          "description": "Feature options for Automatic dependency submission",
+          "type": "object",
+          "properties": {
+            "labeled_runners": {
+              "description": "Whether to use runners labeled with 'dependency-submission' or standard GitHub runners.",
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": []
+        },
+        "dependabot_alerts": {
+          "description": "The enablement status of Dependabot alerts",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "dependabot_security_updates": {
+          "description": "The enablement status of Dependabot security updates",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "code_scanning_default_setup": {
+          "description": "The enablement status of code scanning default setup",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "code_scanning_default_setup_options": {
+          "$ref": "#/$defs/code-scanning-default-setup-options"
+        },
+        "code_scanning_delegated_alert_dismissal": {
+          "description": "The enablement status of code scanning delegated alert dismissal",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning": {
+          "description": "The enablement status of secret scanning",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_push_protection": {
+          "description": "The enablement status of secret scanning push protection",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_validity_checks": {
+          "description": "The enablement status of secret scanning validity checks",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_non_provider_patterns": {
+          "description": "The enablement status of secret scanning non provider patterns",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_generic_secrets": {
+          "description": "The enablement status of Copilot secret scanning",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_delegated_alert_dismissal": {
+          "description": "The enablement status of secret scanning delegated alert dismissal",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "private_vulnerability_reporting": {
+          "description": "The enablement status of private vulnerability reporting",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "enforcement": {
+          "description": "The enforcement status for a security configuration",
+          "oneOf": [
+            {
+              "const": "enforced"
+            },
+            {
+              "const": "unenforced"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "description"
+      ]
+    },
+    "code-scanning-default-setup-options": {
+      "description": "Feature options for code scanning default setup",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "runner_type": {
+              "description": "Whether to use labeled runners or standard GitHub runners.",
+              "oneOf": [
+                {
+                  "const": "standard"
+                },
+                {
+                  "const": "labeled"
+                },
+                {
+                  "const": "not_set"
+                }
+              ]
+            },
+            "runner_label": {
+              "description": "The label of the runner to use for code scanning default setup when runner_type is 'labeled'.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-security-configuration": {
+      "description": "A code security configuration",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID of the code security configuration",
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the code security configuration. Must be unique within the organization.",
+          "type": "string"
+        },
+        "target_type": {
+          "description": "The type of the code security configuration.",
+          "oneOf": [
+            {
+              "const": "global"
+            },
+            {
+              "const": "organization"
+            },
+            {
+              "const": "enterprise"
+            }
+          ]
+        },
+        "description": {
+          "description": "A description of the code security configuration",
+          "type": "string"
+        },
+        "advanced_security": {
+          "description": "The enablement status of GitHub Advanced Security",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            }
+          ]
+        },
+        "dependency_graph": {
+          "description": "The enablement status of Dependency Graph",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "dependency_graph_autosubmit_action": {
+          "description": "The enablement status of Automatic dependency submission",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "dependency_graph_autosubmit_action_options": {
+          "description": "Feature options for Automatic dependency submission",
+          "type": "object",
+          "properties": {
+            "labeled_runners": {
+              "description": "Whether to use runners labeled with 'dependency-submission' or standard GitHub runners.",
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "dependabot_alerts": {
+          "description": "The enablement status of Dependabot alerts",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "dependabot_security_updates": {
+          "description": "The enablement status of Dependabot security updates",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "code_scanning_default_setup": {
+          "description": "The enablement status of code scanning default setup",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "code_scanning_default_setup_options": {
+          "description": "Feature options for code scanning default setup",
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "runner_type": {
+                  "description": "Whether to use labeled runners or standard GitHub runners.",
+                  "oneOf": [
+                    {
+                      "const": "standard"
+                    },
+                    {
+                      "const": "labeled"
+                    },
+                    {
+                      "const": "not_set"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "runner_label": {
+                  "description": "The label of the runner to use for code scanning when runner_type is 'labeled'.",
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": []
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "code_scanning_delegated_alert_dismissal": {
+          "description": "The enablement status of code scanning delegated alert dismissal",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning": {
+          "description": "The enablement status of secret scanning",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_push_protection": {
+          "description": "The enablement status of secret scanning push protection",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_delegated_bypass": {
+          "description": "The enablement status of secret scanning delegated bypass",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_delegated_bypass_options": {
+          "description": "Feature options for secret scanning delegated bypass",
+          "type": "object",
+          "properties": {
+            "reviewers": {
+              "description": "The bypass reviewers for secret scanning delegated bypass",
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": [
+                  "reviewer_id",
+                  "reviewer_type"
+                ],
+                "properties": {
+                  "reviewer_id": {
+                    "description": "The ID of the team or role selected as a bypass reviewer",
+                    "type": "integer"
+                  },
+                  "reviewer_type": {
+                    "description": "The type of the bypass reviewer",
+                    "oneOf": [
+                      {
+                        "const": "TEAM"
+                      },
+                      {
+                        "const": "ROLE"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": []
+        },
+        "secret_scanning_validity_checks": {
+          "description": "The enablement status of secret scanning validity checks",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_non_provider_patterns": {
+          "description": "The enablement status of secret scanning non-provider patterns",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_generic_secrets": {
+          "description": "The enablement status of Copilot secret scanning",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "secret_scanning_delegated_alert_dismissal": {
+          "description": "The enablement status of secret scanning delegated alert dismissal",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "private_vulnerability_reporting": {
+          "description": "The enablement status of private vulnerability reporting",
+          "oneOf": [
+            {
+              "const": "enabled"
+            },
+            {
+              "const": "disabled"
+            },
+            {
+              "const": "not_set"
+            }
+          ]
+        },
+        "enforcement": {
+          "description": "The enforcement status for a security configuration",
+          "oneOf": [
+            {
+              "const": "enforced"
+            },
+            {
+              "const": "unenforced"
+            }
+          ]
+        },
+        "url": {
+          "description": "The URL of the configuration",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "description": "The URL of the configuration",
+          "type": "string",
+          "format": "uri"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": []
+    }
+  }
+}

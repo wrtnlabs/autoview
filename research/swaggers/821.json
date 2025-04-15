@@ -1,0 +1,454 @@
+{
+  "schema": {
+    "$ref": "#/$defs/pages-health-check"
+  },
+  "$defs": {
+    "pages-health-check": {
+      "title": "Pages Health Check Status",
+      "description": "Pages Health Check Status",
+      "type": "object",
+      "properties": {
+        "domain": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string"
+            },
+            "uri": {
+              "type": "string"
+            },
+            "nameservers": {
+              "type": "string"
+            },
+            "dns_resolves": {
+              "type": "boolean"
+            },
+            "is_proxied": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_cloudflare_ip": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_fastly_ip": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_old_ip_address": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_a_record": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "has_cname_record": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "has_mx_records_present": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_valid_domain": {
+              "type": "boolean"
+            },
+            "is_apex_domain": {
+              "type": "boolean"
+            },
+            "should_be_a_record": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_cname_to_github_user_domain": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_cname_to_pages_dot_github_dot_com": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_cname_to_fastly": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_pointed_to_github_pages_ip": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_non_github_pages_ip_present": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_pages_domain": {
+              "type": "boolean"
+            },
+            "is_served_by_pages": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_valid": {
+              "type": "boolean"
+            },
+            "reason": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "responds_to_https": {
+              "type": "boolean"
+            },
+            "enforces_https": {
+              "type": "boolean"
+            },
+            "https_error": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "is_https_eligible": {
+              "oneOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "caa_error": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        "alt_domain": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type": "string"
+                },
+                "uri": {
+                  "type": "string"
+                },
+                "nameservers": {
+                  "type": "string"
+                },
+                "dns_resolves": {
+                  "type": "boolean"
+                },
+                "is_proxied": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_cloudflare_ip": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_fastly_ip": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_old_ip_address": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_a_record": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "has_cname_record": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "has_mx_records_present": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_valid_domain": {
+                  "type": "boolean"
+                },
+                "is_apex_domain": {
+                  "type": "boolean"
+                },
+                "should_be_a_record": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_cname_to_github_user_domain": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_cname_to_pages_dot_github_dot_com": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_cname_to_fastly": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_pointed_to_github_pages_ip": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_non_github_pages_ip_present": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_pages_domain": {
+                  "type": "boolean"
+                },
+                "is_served_by_pages": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_valid": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "responds_to_https": {
+                  "type": "boolean"
+                },
+                "enforces_https": {
+                  "type": "boolean"
+                },
+                "https_error": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "is_https_eligible": {
+                  "oneOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "caa_error": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": []
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}

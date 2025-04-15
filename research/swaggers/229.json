@@ -1,0 +1,109 @@
+{
+  "schema": {
+    "$ref": "#/$defs/desk.ChatTagsView"
+  },
+  "$defs": {
+    "IApiOpenV5ChatTags.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": []
+    },
+    "desk.ChatTagsView": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "type": "string"
+        },
+        "chatTags": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatTag"
+          }
+        }
+      },
+      "required": []
+    },
+    "ChatTag": {
+      "required": [
+        "key",
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "colorVariant": {
+          "oneOf": [
+            {
+              "const": "red"
+            },
+            {
+              "const": "orange"
+            },
+            {
+              "const": "yellow"
+            },
+            {
+              "const": "olive"
+            },
+            {
+              "const": "green"
+            },
+            {
+              "const": "cobalt"
+            },
+            {
+              "const": "purple"
+            },
+            {
+              "const": "pink"
+            },
+            {
+              "const": "navy"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "followerIds": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "deprecated": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        }
+      }
+    }
+  }
+}

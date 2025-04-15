@@ -1,0 +1,88 @@
+{
+  "schema": {
+    "$ref": "#/$defs/git-tree"
+  },
+  "$defs": {
+    "IApiReposGitTrees.GetQuery": {
+      "type": "object",
+      "properties": {
+        "recursive": {
+          "description": "Setting this parameter to any value returns the objects or subtrees referenced by the tree specified in `:tree_sha`. For example, setting `recursive` to any of the following will enable returning objects or subtrees: `0`, `1`, `\"true\"`, and `\"false\"`. Omit this parameter to prevent recursively returning objects or subtrees.",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "git-tree": {
+      "title": "Git Tree",
+      "description": "The hierarchy between files in a Git repository.",
+      "type": "object",
+      "properties": {
+        "sha": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "tree": {
+          "description": "Objects specifying a tree structure",
+          "example": [
+            {
+              "path": "file.rb",
+              "mode": "100644",
+              "type": "blob",
+              "size": 30,
+              "sha": "44b4fc6d56897b048c772eb4087f854f46256132",
+              "url": "https://api.github.com/repos/octocat/Hello-World/git/blobs/44b4fc6d56897b048c772eb4087f854f46256132"
+            }
+          ],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "mode",
+              "type",
+              "sha"
+            ],
+            "properties": {
+              "path": {
+                "example": "test/file.rb",
+                "type": "string"
+              },
+              "mode": {
+                "example": "040000",
+                "type": "string"
+              },
+              "type": {
+                "example": "tree",
+                "type": "string"
+              },
+              "sha": {
+                "example": "23f6827669e43831def8a7ad935069c8bd418261",
+                "type": "string"
+              },
+              "size": {
+                "example": 12,
+                "type": "integer"
+              },
+              "url": {
+                "example": "https://api.github.com/repos/owner-482f3203ecf01f67e9deb18e/BBB_Private_Repo/git/blobs/23f6827669e43831def8a7ad935069c8bd418261",
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "sha",
+        "tree",
+        "truncated"
+      ]
+    }
+  }
+}

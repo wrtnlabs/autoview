@@ -1,0 +1,261 @@
+{
+  "schema": {
+    "$ref": "#/$defs/api-overview"
+  },
+  "$defs": {
+    "api-overview": {
+      "title": "Api Overview",
+      "description": "Api Overview",
+      "type": "object",
+      "properties": {
+        "verifiable_password_authentication": {
+          "example": true,
+          "type": "boolean"
+        },
+        "ssh_key_fingerprints": {
+          "type": "object",
+          "properties": {
+            "SHA256_RSA": {
+              "type": "string"
+            },
+            "SHA256_DSA": {
+              "type": "string"
+            },
+            "SHA256_ECDSA": {
+              "type": "string"
+            },
+            "SHA256_ED25519": {
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "ssh_keys": {
+          "example": [
+            "ssh-ed25519 ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hooks": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "github_enterprise_importer": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "web": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "api": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "git": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "packages": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pages": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "importer": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions_macos": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "codespaces": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dependabot": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "copilot": {
+          "example": [
+            "192.0.2.1"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "domains": {
+          "type": "object",
+          "properties": {
+            "website": {
+              "type": "array",
+              "items": {
+                "example": [
+                  "example.com"
+                ],
+                "type": "string"
+              }
+            },
+            "codespaces": {
+              "type": "array",
+              "items": {
+                "example": [
+                  "example.com"
+                ],
+                "type": "string"
+              }
+            },
+            "copilot": {
+              "type": "array",
+              "items": {
+                "example": [
+                  "example.com"
+                ],
+                "type": "string"
+              }
+            },
+            "packages": {
+              "type": "array",
+              "items": {
+                "example": [
+                  "example.com"
+                ],
+                "type": "string"
+              }
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "example": [
+                  "example.com"
+                ],
+                "type": "string"
+              }
+            },
+            "actions_inbound": {
+              "type": "object",
+              "properties": {
+                "full_domains": {
+                  "type": "array",
+                  "items": {
+                    "example": [
+                      "example.com"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "wildcard_domains": {
+                  "type": "array",
+                  "items": {
+                    "example": [
+                      "example.com"
+                    ],
+                    "type": "string"
+                  }
+                }
+              },
+              "required": []
+            },
+            "artifact_attestations": {
+              "type": "object",
+              "properties": {
+                "trust_domain": {
+                  "example": [
+                    "example"
+                  ],
+                  "type": "string"
+                },
+                "services": {
+                  "type": "array",
+                  "items": {
+                    "example": [
+                      "example.com"
+                    ],
+                    "type": "string"
+                  }
+                }
+              },
+              "required": []
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "verifiable_password_authentication"
+      ]
+    }
+  }
+}

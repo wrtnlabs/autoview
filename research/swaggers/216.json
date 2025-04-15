@@ -1,0 +1,350 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4UserView"
+  },
+  "$defs": {
+    "legacy.v4.LegacyV4User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "memberId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "veilId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "unifiedId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "readOnly": true
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string"
+            },
+            "mobileNumber": {
+              "type": "string",
+              "default": "+18004424000"
+            },
+            "landlineNumber": {
+              "type": "string",
+              "default": "+18004424000"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "recentPurchaseCount": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "recentPurchaseAmount": {
+              "type": "number"
+            },
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "required": []
+        },
+        "profileOnce": {
+          "$ref": "#/$defs/profile.UserProfile"
+        },
+        "tags": {
+          "maxItems": 10,
+          "minItems": 0,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "alert": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "unread": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "popUpChatId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "blocked": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "unsubscribed": {
+          "type": "boolean"
+        },
+        "hasChat": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "hasPushToken": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "language": {
+          "type": "string",
+          "default": "en"
+        },
+        "country": {
+          "type": "string",
+          "readOnly": true
+        },
+        "city": {
+          "type": "string",
+          "readOnly": true
+        },
+        "latitude": {
+          "type": "number",
+          "format": "double",
+          "readOnly": true
+        },
+        "longitude": {
+          "type": "number",
+          "format": "double",
+          "readOnly": true
+        },
+        "web": {
+          "$ref": "#/$defs/WebInfo"
+        },
+        "mobile": {
+          "$ref": "#/$defs/MobileInfo"
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "lastSeenAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "expireAt": {
+          "example": 1744704934127,
+          "type": "number",
+          "format": "int64"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "managedKey": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "member": {
+          "type": "boolean"
+        },
+        "email": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "managed": {
+          "type": "boolean"
+        },
+        "mobileNumber": {
+          "type": "string",
+          "default": "+18004424000"
+        },
+        "systemLanguage": {
+          "type": "string",
+          "default": "en"
+        }
+      },
+      "required": []
+    },
+    "profile.UserProfile": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "mobileNumber": {
+          "type": "string",
+          "default": "+18004424000"
+        },
+        "landlineNumber": {
+          "type": "string",
+          "default": "+18004424000"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "recentPurchaseCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "recentPurchaseAmount": {
+          "type": "number"
+        },
+        "empty": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      },
+      "required": []
+    },
+    "WebInfo": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "osName": {
+          "type": "string"
+        },
+        "browser": {
+          "type": "string"
+        },
+        "browserName": {
+          "type": "string"
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastSeenAt": {
+          "example": 1744704942814,
+          "type": "number",
+          "format": "int64"
+        }
+      },
+      "required": []
+    },
+    "MobileInfo": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string"
+        },
+        "osName": {
+          "type": "string"
+        },
+        "appName": {
+          "type": "string"
+        },
+        "appVersion": {
+          "type": "string"
+        },
+        "sdkName": {
+          "type": "string"
+        },
+        "sdkVersion": {
+          "type": "string"
+        },
+        "sessionsCount": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "lastSeenAt": {
+          "example": 1744704942814,
+          "type": "number",
+          "format": "int64"
+        }
+      },
+      "required": []
+    },
+    "legacy.open.v4.LegacyV4UserView": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4User"
+        },
+        "online": {
+          "$ref": "#/$defs/Online"
+        }
+      },
+      "required": []
+    },
+    "Online": {
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "personType": {
+          "type": "string"
+        },
+        "personId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

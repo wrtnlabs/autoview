@@ -1,0 +1,82 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsSettingsNetworkConfigurations.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsSettingsNetworkConfigurations.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "network_configurations"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "network_configurations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/network-configuration"
+          }
+        }
+      }
+    },
+    "network-configuration": {
+      "title": "Hosted compute network configuration",
+      "description": "A hosted compute network configuration.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the network configuration.",
+          "example": "123ABC456DEF789",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the network configuration.",
+          "example": "my-network-configuration",
+          "type": "string"
+        },
+        "compute_service": {
+          "description": "The hosted compute service the network configuration supports.",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "actions"
+            },
+            {
+              "const": "codespaces"
+            }
+          ]
+        },
+        "network_settings_ids": {
+          "description": "The unique identifier of each network settings in the configuration.",
+          "example": "123ABC456DEF789",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_on": {
+          "description": "The time at which the network configuration was created, in ISO 8601 format.",
+          "example": "2024-04-26T11:31:07Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "created_on"
+      ]
+    }
+  }
+}

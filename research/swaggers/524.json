@@ -1,0 +1,96 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-billing-usage"
+  },
+  "$defs": {
+    "actions-billing-usage": {
+      "type": "object",
+      "properties": {
+        "total_minutes_used": {
+          "description": "The sum of the free and paid GitHub Actions minutes used.",
+          "type": "integer"
+        },
+        "total_paid_minutes_used": {
+          "description": "The total paid GitHub Actions minutes used.",
+          "type": "integer"
+        },
+        "included_minutes": {
+          "description": "The amount of free GitHub Actions minutes available.",
+          "type": "integer"
+        },
+        "minutes_used_breakdown": {
+          "type": "object",
+          "properties": {
+            "UBUNTU": {
+              "description": "Total minutes used on Ubuntu runner machines.",
+              "type": "integer"
+            },
+            "MACOS": {
+              "description": "Total minutes used on macOS runner machines.",
+              "type": "integer"
+            },
+            "WINDOWS": {
+              "description": "Total minutes used on Windows runner machines.",
+              "type": "integer"
+            },
+            "ubuntu_4_core": {
+              "description": "Total minutes used on Ubuntu 4 core runner machines.",
+              "type": "integer"
+            },
+            "ubuntu_8_core": {
+              "description": "Total minutes used on Ubuntu 8 core runner machines.",
+              "type": "integer"
+            },
+            "ubuntu_16_core": {
+              "description": "Total minutes used on Ubuntu 16 core runner machines.",
+              "type": "integer"
+            },
+            "ubuntu_32_core": {
+              "description": "Total minutes used on Ubuntu 32 core runner machines.",
+              "type": "integer"
+            },
+            "ubuntu_64_core": {
+              "description": "Total minutes used on Ubuntu 64 core runner machines.",
+              "type": "integer"
+            },
+            "windows_4_core": {
+              "description": "Total minutes used on Windows 4 core runner machines.",
+              "type": "integer"
+            },
+            "windows_8_core": {
+              "description": "Total minutes used on Windows 8 core runner machines.",
+              "type": "integer"
+            },
+            "windows_16_core": {
+              "description": "Total minutes used on Windows 16 core runner machines.",
+              "type": "integer"
+            },
+            "windows_32_core": {
+              "description": "Total minutes used on Windows 32 core runner machines.",
+              "type": "integer"
+            },
+            "windows_64_core": {
+              "description": "Total minutes used on Windows 64 core runner machines.",
+              "type": "integer"
+            },
+            "macos_12_core": {
+              "description": "Total minutes used on macOS 12 core runner machines.",
+              "type": "integer"
+            },
+            "total": {
+              "description": "Total minutes used on all runner machines.",
+              "type": "integer"
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "total_minutes_used",
+        "total_paid_minutes_used",
+        "included_minutes",
+        "minutes_used_breakdown"
+      ]
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposCodespacesDevcontainers.GetResponse"
+  },
+  "$defs": {
+    "IApiReposCodespacesDevcontainers.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "devcontainers"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "devcontainers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path"
+            ],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "display_name": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

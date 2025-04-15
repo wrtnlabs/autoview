@@ -1,0 +1,60 @@
+{
+  "schema": {
+    "$ref": "#/$defs/porter-author"
+  },
+  "$defs": {
+    "IApiRepos_ImportAuthors.PatchBody": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "description": "The new Git author email.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The new Git author name.",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "porter-author": {
+      "title": "Porter Author",
+      "description": "Porter Author",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "remote_id": {
+          "type": "string"
+        },
+        "remote_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "import_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "remote_id",
+        "remote_name",
+        "email",
+        "name",
+        "url",
+        "import_url"
+      ]
+    }
+  }
+}

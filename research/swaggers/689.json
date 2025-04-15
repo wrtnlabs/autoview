@@ -1,0 +1,109 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposCodespacesMachines.GetResponse"
+  },
+  "$defs": {
+    "IApiReposCodespacesMachines.GetQuery": {
+      "type": "object",
+      "properties": {
+        "location": {
+          "description": "The location to check for available machines. Assigned by IP if not provided.",
+          "example": "WestUs2",
+          "type": "string"
+        },
+        "client_ip": {
+          "description": "IP for location auto-detection when proxying a request",
+          "type": "string"
+        },
+        "ref": {
+          "description": "The branch or commit to check for prebuild availability and devcontainer restrictions.",
+          "example": "main",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "IApiReposCodespacesMachines.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "machines"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "machines": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/codespace-machine"
+          }
+        }
+      }
+    },
+    "codespace-machine": {
+      "title": "Codespace machine",
+      "description": "A description of the machine powering a codespace.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the machine.",
+          "example": "standardLinux",
+          "type": "string"
+        },
+        "display_name": {
+          "description": "The display name of the machine includes cores, memory, and storage.",
+          "example": "4 cores, 16 GB RAM, 64 GB storage",
+          "type": "string"
+        },
+        "operating_system": {
+          "description": "The operating system of the machine.",
+          "example": "linux",
+          "type": "string"
+        },
+        "storage_in_bytes": {
+          "description": "How much storage is available to the codespace.",
+          "example": 68719476736,
+          "type": "integer"
+        },
+        "memory_in_bytes": {
+          "description": "How much memory is available to the codespace.",
+          "example": 17179869184,
+          "type": "integer"
+        },
+        "cpus": {
+          "description": "How many cores are available to the codespace.",
+          "example": 4,
+          "type": "integer"
+        },
+        "prebuild_availability": {
+          "description": "Whether a prebuild is currently available when creating a codespace for this machine and repository. If a branch was not specified as a ref, the default branch will be assumed. Value will be \"null\" if prebuilds are not supported or prebuild availability could not be determined. Value will be \"none\" if no prebuild is available. Latest values \"ready\" and \"in_progress\" indicate the prebuild availability status.",
+          "example": "ready",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "ready"
+            },
+            {
+              "const": "in_progress"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "display_name",
+        "operating_system",
+        "storage_in_bytes",
+        "memory_in_bytes",
+        "cpus",
+        "prebuild_availability"
+      ]
+    }
+  }
+}

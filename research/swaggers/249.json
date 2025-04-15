@@ -1,0 +1,80 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/CallLog"
+    }
+  },
+  "$defs": {
+    "IApiOpenV5MeetCallLog.GetQuery": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "to": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ]
+    },
+    "CallLog": {
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "missedReason": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "createdAt": {
+          "example": 1744704937775,
+          "type": "number",
+          "format": "int64"
+        },
+        "updatedAt": {
+          "example": 1744704937775,
+          "type": "number",
+          "format": "int64"
+        },
+        "engagedAt": {
+          "example": 1744704937775,
+          "type": "number",
+          "format": "int64"
+        },
+        "closedAt": {
+          "example": 1744704937775,
+          "type": "number",
+          "format": "int64"
+        },
+        "userChatId": {
+          "type": "string"
+        },
+        "managerIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": []
+    }
+  }
+}

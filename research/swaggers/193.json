@@ -1,0 +1,259 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4ManagerView"
+  },
+  "$defs": {
+    "legacy.open.v4.LegacyV4ManagerView": {
+      "type": "object",
+      "properties": {
+        "manager": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4Manager"
+        },
+        "online": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4Online"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4Manager": {
+      "required": [
+        "email",
+        "name",
+        "role"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "accountId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string",
+          "readOnly": true
+        },
+        "showDescriptionToFront": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "nameDescI18nMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/NameDesc"
+          },
+          "readOnly": true,
+          "properties": {},
+          "required": []
+        },
+        "profile": {
+          "type": "object",
+          "properties": {
+            "empty": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "readOnly": true,
+          "required": []
+        },
+        "email": {
+          "type": "string",
+          "readOnly": true
+        },
+        "showEmailToFront": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "mobileNumber": {
+          "type": "string",
+          "readOnly": true,
+          "default": "+18004424000"
+        },
+        "showMobileNumberToFront": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "role": {
+          "oneOf": [
+            {
+              "const": "owner"
+            },
+            {
+              "const": "member"
+            }
+          ]
+        },
+        "removed": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704932155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "displayAsChannel": {
+          "type": "boolean"
+        },
+        "defaultGroupWatch": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "info"
+            },
+            {
+              "const": "none"
+            }
+          ]
+        },
+        "defaultDirectChatWatch": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "info"
+            },
+            {
+              "const": "none"
+            }
+          ]
+        },
+        "defaultUserChatWatch": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "info"
+            },
+            {
+              "const": "none"
+            }
+          ]
+        },
+        "operatorScore": {
+          "type": "number",
+          "format": "float",
+          "readOnly": true
+        },
+        "touchScore": {
+          "type": "number",
+          "format": "float",
+          "readOnly": true
+        },
+        "avatar": {
+          "$ref": "#/$defs/TinyFile"
+        },
+        "operatorEmailReminder": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "operator": {
+          "type": "boolean"
+        },
+        "statusEmoji": {
+          "type": "string",
+          "readOnly": true
+        },
+        "statusText": {
+          "type": "string",
+          "readOnly": true
+        },
+        "statusClearAt": {
+          "example": 1744704932173,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "managerId": {
+          "type": "string"
+        },
+        "avatarUrl": {
+          "type": "string"
+        },
+        "emailForFront": {
+          "type": "string"
+        },
+        "mobileNumberForFront": {
+          "type": "string",
+          "default": "+18004424000"
+        }
+      }
+    },
+    "NameDesc": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "name": {
+          "pattern": "^[^@#$%:/\\\\]+$",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "TinyFile": {
+      "required": [
+        "bucket",
+        "key"
+      ],
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "legacy.v4.LegacyV4Online": {
+      "type": "object",
+      "properties": {
+        "channelId": {
+          "type": "string"
+        },
+        "personType": {
+          "type": "string"
+        },
+        "personId": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

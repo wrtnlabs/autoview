@@ -1,0 +1,28 @@
+{
+  "schema": {
+    "$ref": "#/$defs/check-automated-security-fixes"
+  },
+  "$defs": {
+    "check-automated-security-fixes": {
+      "title": "Check Dependabot security updates",
+      "description": "Check Dependabot security updates",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether Dependabot security updates are enabled for the repository.",
+          "example": true,
+          "type": "boolean"
+        },
+        "paused": {
+          "description": "Whether Dependabot security updates are paused for the repository.",
+          "example": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled",
+        "paused"
+      ]
+    }
+  }
+}

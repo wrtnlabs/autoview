@@ -1,0 +1,89 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/organization-simple"
+    }
+  },
+  "$defs": {
+    "organization-simple": {
+      "title": "Organization Simple",
+      "description": "A GitHub organization.",
+      "type": "object",
+      "properties": {
+        "login": {
+          "example": "github",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEyOk9yZ2FuaXphdGlvbjE=",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://api.github.com/orgs/github",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/orgs/github/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/orgs/github/events",
+          "type": "string",
+          "format": "uri"
+        },
+        "hooks_url": {
+          "example": "https://api.github.com/orgs/github/hooks",
+          "type": "string"
+        },
+        "issues_url": {
+          "example": "https://api.github.com/orgs/github/issues",
+          "type": "string"
+        },
+        "members_url": {
+          "example": "https://api.github.com/orgs/github/members{/member}",
+          "type": "string"
+        },
+        "public_members_url": {
+          "example": "https://api.github.com/orgs/github/public_members{/member}",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string"
+        },
+        "description": {
+          "example": "A great organization",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "login",
+        "url",
+        "id",
+        "node_id",
+        "repos_url",
+        "events_url",
+        "hooks_url",
+        "issues_url",
+        "members_url",
+        "public_members_url",
+        "avatar_url",
+        "description"
+      ]
+    }
+  }
+}

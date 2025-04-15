@@ -1,0 +1,69 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingDeliveryShipper"
+  },
+  "$defs": {
+    "IShoppingDeliveryShipper.ICreate": {
+      "type": "object",
+      "properties": {
+        "company": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "mobile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "company",
+        "name",
+        "mobile"
+      ]
+    },
+    "IShoppingDeliveryShipper": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "company": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "mobile": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "company",
+        "name",
+        "mobile"
+      ]
+    }
+  }
+}

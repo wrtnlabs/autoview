@@ -1,0 +1,189 @@
+{
+  "schema": {
+    "oneOf": [
+      {
+        "$ref": "#/$defs/CANNOT_FINDONE_ARTICLE"
+      },
+      {
+        "$ref": "#/$defs/ResponseForm_lt_boolean_gt_"
+      },
+      {
+        "$ref": "#/$defs/IS_NOT_WRITER_OF_THIS_ARTICLE"
+      }
+    ]
+  },
+  "$defs": {
+    "ArticleType.UpdateArticleDto": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "contents": {
+          "description": "글의 내용물로, 최대 3,000자",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 3000
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "3000",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": false,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        },
+        "type": {
+          "description": "게시글 작성 시 디자이너님은 아래 4가지 중 하나를 반드시 골라야 한다.\nquestion은 질문하기 유형의 게시글,\ndraw는 그림 그리기로, 그림 위 댓글을 달 수 있는 유형의 피그마 식 게시글,\nevent는 모임이나 행사 등, 약속을 공유할 수 있도록 달력 기능을 제공하는 게시글,\nwriting은 그 외 어떠한 글이든 포함되는 타입을 말한다.",
+          "x-typia-required": false,
+          "x-typia-optional": false,
+          "oneOf": [
+            {
+              "const": "question"
+            },
+            {
+              "const": "draw"
+            },
+            {
+              "const": "event"
+            },
+            {
+              "const": "writing"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "CANNOT_FINDONE_ARTICLE": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4004
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "게시글을 찾지 못했습니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ResponseForm_lt_boolean_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "IS_NOT_WRITER_OF_THIS_ARTICLE": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4015
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "이 게시글의 작성자만이 수정할 수 있습니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    }
+  }
+}

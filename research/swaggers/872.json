@@ -1,0 +1,119 @@
+{
+  "schema": {
+    "$ref": "#/$defs/secret-scanning-scan-history"
+  },
+  "$defs": {
+    "secret-scanning-scan-history": {
+      "type": "object",
+      "properties": {
+        "incremental_scans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/secret-scanning-scan"
+          }
+        },
+        "pattern_update_scans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/secret-scanning-scan"
+          }
+        },
+        "backfill_scans": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/secret-scanning-scan"
+          }
+        },
+        "custom_pattern_backfill_scans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "description": "The type of scan",
+                "type": "string"
+              },
+              "status": {
+                "description": "The state of the scan. Either \"completed\", \"running\", or \"pending\"",
+                "type": "string"
+              },
+              "completed_at": {
+                "description": "The time that the scan was completed. Empty if the scan is running",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "started_at": {
+                "description": "The time that the scan was started. Empty if the scan is pending",
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "pattern_name": {
+                "description": "Name of the custom pattern for custom pattern scans",
+                "type": "string"
+              },
+              "pattern_scope": {
+                "description": "Level at which the custom pattern is defined, one of \"repository\", \"organization\", or \"enterprise\"",
+                "type": "string"
+              }
+            },
+            "required": []
+          }
+        }
+      },
+      "required": []
+    },
+    "secret-scanning-scan": {
+      "description": "Information on a single scan performed by secret scanning on the repository",
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The type of scan",
+          "type": "string"
+        },
+        "status": {
+          "description": "The state of the scan. Either \"completed\", \"running\", or \"pending\"",
+          "type": "string"
+        },
+        "completed_at": {
+          "description": "The time that the scan was completed. Empty if the scan is running",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "started_at": {
+          "description": "The time that the scan was started. Empty if the scan is pending",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}
