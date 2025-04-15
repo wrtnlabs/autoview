@@ -1,5 +1,4 @@
 import { HttpLlm, IHttpLlmFunction } from "@samchon/openapi";
-import { assertGuard } from "typia";
 
 export interface CrawledOpenApi {
   url: string;
@@ -20,26 +19,22 @@ async function crawlOpenApiFromUrl(
   const document = await res.json();
 
   try {
-    assertGuard<Parameters<typeof HttpLlm.application>[0]["document"]>(
+    const application = HttpLlm.application({
+      model: "3.1",
       document,
-    );
+      options: {
+        reference: true,
+      },
+    });
+
+    return {
+      url,
+      functions: application.functions,
+    };
   } catch (error: unknown) {
     console.warn(
       `the url "${url}" does not have valid openapi schema:\n${error}`,
     );
     return null;
   }
-
-  const application = HttpLlm.application({
-    model: "3.1",
-    document,
-    options: {
-      reference: true,
-    },
-  });
-
-  return {
-    url,
-    functions: application.functions,
-  };
 }
