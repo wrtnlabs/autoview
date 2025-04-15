@@ -1,0 +1,17 @@
+{
+  "name": "@autoview/research",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "prepare": "ts-patch install"
+  },
+  "dependencies": {
+    "@samchon/openapi": "^4.0.0",
+    "typia": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.8.3"
+  }
+}
