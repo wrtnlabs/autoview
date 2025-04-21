@@ -1,10 +1,13 @@
+import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace shared {
-    export type StringView = {
-        result?: string;
-    };
+namespace Schema {
+    export namespace shared {
+        export type IntegerView = {
+            result?: number & tags.Type<"int32">;
+        };
+    }
 }
-type IAutoViewTransformerInputType = shared.StringView;
+type IAutoViewTransformerInputType = Schema.shared.IntegerView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -12,47 +15,68 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract the input content; if it's missing, we use a default message.
-  const content: string = input.result ? input.result : "No data provided.";
+  const result = input.result;
 
-  // Create a Card Header to introduce the data visualization.
-  // We use an icon as the starting element to create a visual cue.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Data Visualization",
-    description: "Overview of the provided data",
-    // Use an icon to signal the data content. The id 'database' is in kebab-case.
-    startElement: {
-      type: "Icon",
-      id: "database",
-      size: 24,
-      color: "blue"
-    }
-  };
-
-  // Create a Card Content component using markdown.
-  // Markdown lets us format text (e.g. with headers, lists, etc.) and to embed images if needed.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // The markdown component is our preferred way to represent text.
-    childrenProps: {
+  // Handle missing or null result gracefully with markdown fallback
+  if (result == null) {
+    return {
       type: "Markdown",
-      content: content
-    }
-  };
+      content: "### No Result Available\n\nThe integer result could not be retrieved."
+    };
+  }
 
-  // Optionally, if further visual elements are desired, you could extend this transformation.
-  // For example, you might detect URLs in the input string and display them via an Image component,
-  // or add additional icons/chips based on recognized keywords.
-  // For production, the transformation logic should be enhanced according to actual requirements.
+  // Determine a sensible badge maxCount to abbreviate large numbers
+  const MAX_BADGE_COUNT = 9999;
+  const badgeMax = result > MAX_BADGE_COUNT ? MAX_BADGE_COUNT : undefined;
 
-  // Compose the final vertical card component.
-  // A vertical card can arrange the header and content in a responsive layout, suitable for mobile devices.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Use a vertical card to structure the UI: header, main content, and footer
+  return {
     type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent]
+    childrenProps: [
+      // Card header with icon and title
+      {
+        type: "CardHeader",
+        title: "Integer Result",
+        startElement: {
+          type: "Icon",
+          id: "hashtag",       // fa-hashtag icon for numeric context
+          size: 24,
+          color: "blue"
+        }
+      },
+      // Card content: badge with icon and large text display
+      {
+        type: "CardContent",
+        childrenProps: [
+          {
+            type: "Badge",
+            count: result,
+            maxCount: badgeMax,
+            color: "info",
+            childrenProps: {
+              type: "Icon",
+              id: "calculator", // calculator icon to emphasize computation
+              size: 32,
+              color: "cyan"
+            }
+          },
+          {
+            type: "Text",
+            variant: "h4",
+            content: `${result}` // large text for easy reading on small screens
+          }
+        ]
+      },
+      // Card footer with explanatory caption
+      {
+        type: "CardFooter",
+        childrenProps: {
+          type: "Text",
+          variant: "caption",
+          color: "gray",
+          content: "Retrieved integer value"
+        }
+      }
+    ]
   };
-
-  // Return the composed component props.
-  return verticalCard;
 }

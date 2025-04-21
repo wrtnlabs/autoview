@@ -1,170 +1,682 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace desk {
-    export type UserView = {
-        user?: user.User;
-        online?: Online;
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4UserChatView = {
+                    campaign?: Schema.legacy.v4.marketing.LegacyV4Campaign;
+                    bookmark?: Schema.legacy.v4.LegacyV4ChatBookmark;
+                    session?: Schema.legacy.v4.LegacyV4ChatSession;
+                    userSession?: Schema.legacy.v4.LegacyV4ChatSession;
+                    chatTags?: Schema.legacy.v4.LegacyV4ChatTag[];
+                    message?: Schema.legacy.v4.message.LegacyV4Message;
+                    oneTimeMsg?: Schema.legacy.v4.marketing.LegacyV4OneTimeMsg;
+                    supportBot?: Schema.legacy.v4.LegacyV4SupportBot;
+                    user?: Schema.legacy.v4.LegacyV4User;
+                    userChat?: Schema.legacy.v4.LegacyV4UserChat;
+                };
+            }
+        }
+        export namespace v4 {
+            export namespace marketing {
+                /**
+                 * ### 이벤트 기록
+                 *
+                 * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
+                */
+                export type LegacyV4Campaign = {
+                    id?: string;
+                    channelId?: string;
+                    name: string;
+                    state?: "draft" | "active" | "stopped" | "removed";
+                    sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+                    userQuery?: Schema.Expression;
+                    triggerEventName: string;
+                    triggerEventQuery?: Schema.Expression;
+                    waitingTime: string;
+                    filterEventName?: string;
+                    filterEventQuery?: Schema.Expression;
+                    filterMatch?: "positive" | "negative";
+                    goalEventName?: string;
+                    goalEventQuery?: Schema.Expression;
+                    advertising: boolean;
+                    enableSupportBot: boolean;
+                    followingSupportBotId?: string;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    cooldown?: string;
+                    sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
+                    sendTimeRanges?: Schema.TimeRange[];
+                    startAt?: number;
+                    endAt?: number;
+                    draft?: Schema.marketing.CampaignDraft;
+                    createdAt?: number;
+                    updatedAt?: number;
+                    sent?: number & tags.Type<"int32">;
+                    view?: number & tags.Type<"int32">;
+                    goal?: number & tags.Type<"int32">;
+                    click?: number & tags.Type<"int32">;
+                    userChatExpireDuration?: string;
+                    managerId?: string;
+                };
+                export type LegacyV4OneTimeMsg = {
+                    id?: string;
+                    channelId?: string;
+                    name: string;
+                    state: "draft" | "waiting" | "sent" | "canceled" | "removed";
+                    sendMode?: "immediately" | "reservedWithSenderTime" | "reservedWithReceiverTime";
+                    sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+                    settings?: Schema.marketing.SendMediumSettings;
+                    userQuery?: Schema.Expression;
+                    goalEventName?: string;
+                    goalEventQuery?: Schema.Expression;
+                    enableSupportBot: boolean;
+                    followingSupportBotId?: string;
+                    advertising: boolean;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    startAt?: number;
+                    draft?: Schema.marketing.OneTimeMsgDraft;
+                    createdAt?: number;
+                    updatedAt?: number;
+                    sent?: number & tags.Type<"int32">;
+                    view?: number & tags.Type<"int32">;
+                    goal?: number & tags.Type<"int32">;
+                    click?: number & tags.Type<"int32">;
+                    userChatExpireDuration?: string;
+                };
+            }
+            export type LegacyV4ChatBookmark = {
+                key?: string;
+                chatId?: string;
+                chatKey?: string;
+                bookmarkKey?: string;
+                channelId?: string;
+                version?: number & tags.Type<"int32">;
+                chatType?: string;
+                personType?: string;
+                personId?: string;
+            };
+            export type LegacyV4ChatSession = {
+                key?: string;
+                chatId?: string;
+                chatKey?: string;
+                updatedKey?: string;
+                unreadKey?: string;
+                channelId?: string;
+                alert?: number & tags.Type<"int32">;
+                unread?: number & tags.Type<"int32">;
+                watch?: "all" | "info" | "none";
+                readAt?: number;
+                receivedAt?: number;
+                postedAt?: number;
+                updatedAt?: number;
+                createdAt?: number;
+                version?: number & tags.Type<"int32">;
+                id?: string;
+                chatType?: string;
+                personType?: string;
+                personId?: string;
+            };
+            export type LegacyV4ChatTag = {
+                id?: string;
+                channelId?: string;
+                colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
+                name: string;
+                key: string;
+                description?: string;
+                followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+                createdAt?: number;
+            };
+            export namespace message {
+                export type LegacyV4Message = {
+                    chatKey?: string;
+                    id?: string;
+                    mainKey?: string;
+                    threadKey?: string;
+                    root?: boolean;
+                    channelId?: string;
+                    chatType?: string;
+                    chatId?: string;
+                    personType?: string;
+                    personId?: string;
+                    requestId?: string;
+                    language?: string;
+                    createdAt?: number;
+                    version?: number & tags.Type<"int32">;
+                    blocks?: Schema.legacy.v4.message.LegacyV4Block[];
+                    plainText?: string;
+                    updatedAt?: number;
+                    buttons?: Schema.legacy.v4.message.LegacyV4Button[] & tags.MinItems<1> & tags.MaxItems<2>;
+                    files?: Schema.legacy.v4.message.LegacyV4File[] & tags.MinItems<1> & tags.MaxItems<4>;
+                    webPage?: Schema.legacy.v4.LegacyV4WebPage;
+                    log?: Schema.legacy.v4.message.LegacyV4Log;
+                    reactions?: Schema.legacy.v4.message.LegacyV4Reaction[];
+                    profileBot?: Schema.legacy.v4.message.LegacyV4ProfileBotInput[] & tags.MinItems<1> & tags.MaxItems<2147483647>;
+                    state?: "sending" | "sent" | "failed" | "removed";
+                    options?: ("actAsManager" | "displayAsChannel" | "doNotPost" | "doNotSearch" | "doNotSendApp" | "doNotUpdateDesk" | "immutable" | "private" | "silent")[] & tags.UniqueItems;
+                    marketing?: Schema.legacy.v4.message.LegacyV4MessageMarketing;
+                    supportBot?: Schema.legacy.v4.message.LegacyV4MessageSupportBot;
+                    threadMsg?: boolean;
+                    broadcastedMsg?: boolean;
+                    rootMessageId?: string;
+                };
+                export type LegacyV4Block = {
+                    type: "bullets" | "code" | "text";
+                    language?: string;
+                    value?: string;
+                    blocks?: Schema.legacy.v4.message.LegacyV4Block[];
+                };
+                export type LegacyV4Button = {
+                    title: string;
+                    colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
+                    url: string;
+                };
+                export type LegacyV4File = {
+                    id: string;
+                    type?: string;
+                    name: string;
+                    size: number & tags.Type<"int32">;
+                    contentType?: string;
+                    duration?: number;
+                    width?: number & tags.Type<"int32">;
+                    height?: number & tags.Type<"int32">;
+                    orientation?: number & tags.Type<"int32">;
+                    animated?: boolean;
+                    bucket: string;
+                    key: string;
+                    previewKey?: string;
+                    channelId?: string;
+                    chatType?: string;
+                    chatId?: string;
+                };
+                export type LegacyV4Log = {
+                    action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
+                    values?: string[];
+                };
+                export type LegacyV4Reaction = {
+                    emojiName: string;
+                    personKeys?: string[] & tags.UniqueItems;
+                    empty?: boolean;
+                };
+                export type LegacyV4ProfileBotInput = {
+                    id?: string;
+                    key?: string;
+                    type?: string;
+                    name?: string;
+                    value?: Schema.AttributeValue;
+                };
+                export type LegacyV4MessageMarketing = {
+                    type?: string;
+                    id?: string;
+                    advertising?: boolean;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    exposureType?: "fullScreen";
+                };
+                export type LegacyV4MessageSupportBot = {
+                    id?: string;
+                    revisionId?: string;
+                    sectionId?: string;
+                    stepIndex?: number & tags.Type<"int32">;
+                    buttons?: Schema.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
+                    submitButtonIndex?: number & tags.Type<"int32">;
+                };
+            }
+            export type LegacyV4WebPage = {
+                id: string;
+                url: string;
+                title?: string;
+                description?: string;
+                imageUrl?: string;
+                videoUrl?: string;
+                publisher?: string;
+                author?: string;
+                width?: number & tags.Type<"int32">;
+                height?: number & tags.Type<"int32">;
+                bucket?: string;
+                previewKey?: string;
+                logo?: string;
+                name?: string;
+            };
+            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+                text: string;
+                nextSectionId: string;
+            };
+            export type LegacyV4SupportBot = {
+                id?: string;
+                channelId: string;
+                pluginId?: string;
+                botName: string;
+                name: string;
+                order: number & tags.Minimum<0>;
+                pageQuery?: Schema.Expression;
+                userQuery?: Schema.Expression;
+                draft?: Schema.supportbot.SupportBotDraft;
+                revisionId?: string;
+                state: "draft" | "active" | "stopped";
+                runMode: "always" | "away" | "inOperation" | "private";
+                start?: number & tags.Type<"int32">;
+                stop?: number & tags.Type<"int32">;
+                chatOpen?: number & tags.Type<"int32">;
+                createdAt?: number;
+                updatedAt?: number;
+                userChatExpireDuration?: string;
+                managerId?: string;
+            };
+            export type LegacyV4User = {
+                id?: string;
+                channelId?: string;
+                memberId?: string;
+                veilId?: string;
+                unifiedId?: string;
+                name?: string;
+                profile?: {
+                    [key: string]: {};
+                };
+                profileOnce?: Schema.profile.UserProfile;
+                tags?: string[] & tags.MinItems<0> & tags.MaxItems<10> & tags.UniqueItems;
+                alert?: number & tags.Type<"int32">;
+                unread?: number & tags.Type<"int32">;
+                popUpChatId?: string;
+                blocked?: boolean;
+                unsubscribed?: boolean;
+                hasChat?: boolean;
+                hasPushToken?: boolean;
+                language?: string & tags.Default<"en">;
+                country?: string;
+                city?: string;
+                latitude?: number;
+                longitude?: number;
+                web?: Schema.WebInfo;
+                mobile?: Schema.MobileInfo;
+                sessionsCount?: number & tags.Type<"int32">;
+                lastSeenAt?: number;
+                createdAt?: number;
+                updatedAt?: number;
+                expireAt?: number;
+                version?: number & tags.Type<"int32">;
+                managedKey?: number & tags.Type<"int32">;
+                member?: boolean;
+                email?: string;
+                userId?: string;
+                avatarUrl?: string;
+                managed?: boolean;
+                mobileNumber?: string & tags.Default<"+18004424000">;
+                systemLanguage?: string & tags.Default<"en">;
+            };
+            export type LegacyV4UserChat = {
+                id?: string;
+                channelId?: string;
+                appUserKey?: string;
+                state?: "closed" | "opened" | "snoozed" | "queued";
+                managed?: boolean;
+                userId?: string;
+                name?: string;
+                description?: string;
+                handling?: "waiting" | "supportBot";
+                supportBot?: Schema.legacy.v4.LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot;
+                marketing?: Schema.legacy.v4.LegacyV4UserChat_dollar_LegacyV4UserChatMarketing;
+                pluginId?: string;
+                sourcePage?: string;
+                messengerType?: string;
+                messengerId?: string;
+                managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+                assigneeId?: string;
+                tags?: string[] & tags.MinItems<1> & tags.MaxItems<8> & tags.UniqueItems;
+                firstOpenedAt?: number;
+                openedAt?: number;
+                createdAt?: number;
+                frontMessageId?: string;
+                frontUpdatedAt?: number;
+                deskMessageId?: string;
+                deskUpdatedAt?: number;
+                firstAssigneeIdAfterOpen?: string;
+                firstRepliedAtAfterOpen?: number;
+                oneStop?: boolean;
+                waitingTime?: number & tags.Type<"int32">;
+                avgReplyTime?: number & tags.Type<"int32">;
+                totalReplyTime?: number & tags.Type<"int32">;
+                replyCount?: number & tags.Type<"int32">;
+                resolutionTime?: number & tags.Type<"int32">;
+                operationWaitingTime?: number & tags.Type<"int32">;
+                operationAvgReplyTime?: number & tags.Type<"int32">;
+                operationTotalReplyTime?: number & tags.Type<"int32">;
+                operationReplyCount?: number & tags.Type<"int32">;
+                operationResolutionTime?: number & tags.Type<"int32">;
+                firstAskedAt?: number;
+                askedAt?: number;
+                closedAt?: number;
+                snoozedAt?: number;
+                expiresAt?: number;
+                version?: number & tags.Type<"int32">;
+            };
+            export type LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot = {
+                id?: string;
+                revisionId?: string;
+                sectionPath?: string[];
+            };
+            export type LegacyV4UserChat_dollar_LegacyV4UserChatMarketing = {
+                type?: string;
+                id?: string;
+                enableSupportBot?: boolean;
+                supportBotId?: string;
+            };
+        }
+    }
+    export type Expression = {
+        key?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        operator?: Schema.Operator;
+        values?: {}[];
+        and?: Schema.Expression[];
+        or?: Schema.Expression[];
     };
-}
-namespace user {
-    export type User = {
-        id?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        channelId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        memberId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        veilId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        unifiedId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        type?: "member" | "lead" | "unified";
-        name?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        mobileNumberQualified?: boolean & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        emailQualified?: boolean & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        profile?: {
+    export type Operator = {};
+    export type TimeRange = {
+        dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
+        from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+        to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+    };
+    export namespace marketing {
+        export type CampaignDraft = {
+            campaign: Schema.marketing.Campaign;
+            msgs: Schema.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
+        };
+        /**
+         * ### 이벤트 기록
+         *
+         * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
+        */
+        export type Campaign = {
+            id?: string;
+            channelId?: string;
+            name: string;
+            state?: "draft" | "active" | "stopped" | "removed";
+            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            userQuery?: Schema.Expression;
+            triggerEventName: string;
+            triggerEventQuery?: Schema.Expression;
+            waitingTime: string;
+            filterEventName?: string;
+            filterEventQuery?: Schema.Expression;
+            filterMatch?: "positive" | "negative";
+            filterHpc?: Schema.marketing.HoldingPropertyConstant;
+            goalEventName?: string;
+            goalEventQuery?: Schema.Expression;
+            goalEventDuration?: string;
+            goalHpc?: Schema.marketing.HoldingPropertyConstant;
+            advertising: boolean;
+            sendToOfflineXms?: boolean;
+            sendToOfflineEmail?: boolean;
+            cooldown?: string;
+            sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
+            channelOperationId?: string;
+            sendTimeRanges?: Schema.TimeRange[];
+            startAt?: number;
+            endAt?: number;
+            deleteMessageAfterStop?: boolean;
+            draft?: Schema.marketing.CampaignDraft;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+            userChatExpireDuration?: string;
+            managerId?: string;
+            recipeCaseId?: string;
+        };
+        export type HoldingPropertyConstant = {
+            baseEventName: string;
+            baseEventKey: string;
+            eventQuery?: Schema.Expression;
+            baseEventType: "triggerEvent" | "additionalFilter";
+            operator?: Schema.EventSchema;
+            values?: {};
+        };
+        export type CampaignMsg = {
+            id: string;
+            campaignId?: string;
+            channelId?: string;
+            name: string;
+            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            settings: Schema.marketing.SendMediumSettings;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+        };
+        export type SendMediumSettings = {
+            type: string;
+        };
+        export type OneTimeMsgDraft = {
+            oneTimeMsg: Schema.marketing.OneTimeMsg;
+        };
+        export type OneTimeMsg = {
+            id?: string;
+            channelId?: string;
+            name: string;
+            state: "draft" | "waiting" | "sent" | "canceled" | "removed";
+            sendMode?: "immediately" | "reservedWithSenderTime" | "reservedWithReceiverTime";
+            channelOperationId?: string;
+            sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            settings?: Schema.marketing.SendMediumSettings;
+            userQuery?: Schema.Expression;
+            goalEventName?: string;
+            goalEventQuery?: Schema.Expression;
+            goalEventDuration?: string;
+            advertising: boolean;
+            sendToOfflineXms?: boolean;
+            sendToOfflineEmail?: boolean;
+            startAt?: number;
+            localStartAt?: string & tags.Format<"date-time">;
+            draft?: Schema.marketing.OneTimeMsgDraft;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+            userChatExpireDuration?: string;
+        };
+    }
+    export type EventSchema = {
+        id?: string;
+        channelId?: string;
+        eventName?: string;
+        key?: string;
+        parentKey?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        createdAt?: number;
+        updatedAt?: number;
+        icon?: string;
+    };
+    export type AttributeValue = {
+        s?: string;
+        n?: string;
+        b?: {
+            short?: number & tags.Type<"int32">;
+            char?: string;
+            int?: number & tags.Type<"int32">;
+            long?: number & tags.Type<"int32">;
+            float?: number;
+            double?: number;
+            direct?: boolean;
+            readOnly?: boolean;
+        };
+        m?: {
+            [key: string]: Schema.AttributeValue;
+        };
+        l?: Schema.AttributeValue[];
+        ss?: string[];
+        ns?: string[];
+        bs?: {
+            short?: number & tags.Type<"int32">;
+            char?: string;
+            int?: number & tags.Type<"int32">;
+            long?: number & tags.Type<"int32">;
+            float?: number;
+            double?: number;
+            direct?: boolean;
+            readOnly?: boolean;
+        }[];
+        "null"?: boolean;
+        bool?: boolean;
+    };
+    export namespace supportbot {
+        export type SupportBotDraft = {
+            supportBot?: Schema.supportbot.SupportBot;
+            sections?: Schema.supportbot.SupportBotSection[];
+        };
+        export type SupportBot = {
+            id?: string;
+            channelId: string;
+            botName: string;
+            name: string;
+            order: number & tags.Minimum<0>;
+            pageQuery?: Schema.Expression;
+            userQuery?: Schema.Expression;
+            draft?: Schema.supportbot.SupportBotDraft;
+            revisionId?: string;
+            state: "draft" | "active" | "stopped";
+            runMode: "always" | "away" | "inOperation" | "private";
+            start?: number & tags.Type<"int32">;
+            stop?: number & tags.Type<"int32">;
+            chatOpen?: number & tags.Type<"int32">;
+            createdAt?: number;
+            updatedAt?: number;
+            userChatExpireDuration?: string;
+            managerId?: string;
+        };
+        export type SupportBotSection = {
+            name?: string;
+            actions?: Schema.userchat.UserChatStaticAction[];
+            id?: string;
+            steps?: Schema.supportbot.SupportBotSection_dollar_Step[];
+            type: string;
+        };
+        export type SupportBotSection_dollar_Step = {
+            message: Schema.message.NestedMessage;
+        };
+    }
+    export namespace userchat {
+        export type UserChatStaticAction = {
+            type: string;
+        };
+    }
+    export namespace message {
+        export type NestedMessage = {
+            blocks?: Schema.message.Block[];
+            buttons?: Schema.message.Button[] & tags.MinItems<1> & tags.MaxItems<2>;
+            files?: Schema.message.File[] & tags.MinItems<1> & tags.MaxItems<30>;
+            webPage?: Schema.message.WebPage;
+            form?: Schema.message.form.Form;
+        };
+        export type Block = {
+            type: "bullets" | "code" | "text";
+            language?: string;
+            value?: string;
+            blocks?: Schema.message.Block[];
+        };
+        export type Button = {
+            title: string;
+            colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
+            action: Schema.message.action.Action;
+            /**
+             * @deprecated
+            */
+            url?: string;
+        };
+        export namespace action {
+            export type Action = {
+                attributes?: Schema.message.action.Attributes;
+                type: string;
+            };
+            export type Attributes = {};
+        }
+        export type File = {
+            id: string;
+            type?: string;
+            name: string;
+            size: number & tags.Type<"int32">;
+            contentType?: string;
+            duration?: number;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            orientation?: number & tags.Type<"int32">;
+            animated?: boolean;
+            bucket: string;
+            key: string;
+            previewKey?: string;
+            channelId?: string;
+            chatType?: string;
+            chatId?: string;
+        };
+        export type WebPage = {
+            id: string;
+            url: string;
+            title?: string;
+            description?: string;
+            imageUrl?: string;
+            videoUrl?: string;
+            publisher?: string;
+            author?: string;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            bucket?: string;
+            previewKey?: string;
+            logo?: string;
+            name?: string;
+        };
+        export namespace form {
+            export type Form = {
+                submittedAt?: number;
+                inputs?: Schema.message.form.FormInput[];
+                type: string;
+            };
+            export type FormInput = {
+                value?: {};
+                readOnly?: boolean;
+                type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
+                label?: string;
+                bindingKey?: string;
+                dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
+                userChatProfileBindingKey?: boolean;
+                userProfileBindingKey?: boolean;
+            };
+        }
+    }
+    export namespace profile {
+        export type UserProfile = {
             [key: string]: {};
         };
-        profileOnce?: profile.UserProfile;
-        tags?: string[] & tags.MinItems<0> & tags.MaxItems<20> & tags.UniqueItems;
-        userImportTags?: string[] & tags.MinItems<0> & tags.MaxItems<30>;
-        alert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-            format: "int32",
-            readOnly: true
-        }>;
-        unread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-            format: "int32",
-            readOnly: true
-        }>;
-        popUpChatId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        blocked?: boolean;
-        blockedKey?: string;
-        unsubscribeEmail?: boolean;
-        unsubscribeEmailUpdatedAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64"
-        }>;
-        unsubscribeTexting?: boolean;
-        unsubscribeTextingUpdatedAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64"
-        }>;
-        hasChat?: boolean & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        mainChatId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        hasPushToken?: boolean & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        language?: string & tags.Default<"en">;
-        country?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        timeZone?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        province?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        city?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        latitude?: number & tags.JsonSchemaPlugin<{
-            format: "double",
-            readOnly: true
-        }>;
-        longitude?: number & tags.JsonSchemaPlugin<{
-            format: "double",
-            readOnly: true
-        }>;
-        web?: WebInfo;
-        mobile?: MobileInfo;
-        sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-            format: "int32",
-            readOnly: true
-        }>;
-        lastSeenAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        createdAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        updatedAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        managedKey?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-            format: "int64"
-        }>;
-        named?: boolean;
-        member?: boolean;
-        email?: string;
-        avatarUrl?: string;
-        mobileNumber?: string & tags.Default<"+18004424000">;
-        landlineNumber?: string & tags.Default<"+18004424000">;
-        constrainted?: boolean;
-        systemLanguage?: string & tags.Default<"en">;
+    }
+    export type WebInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        browser?: string;
+        browserName?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
+    };
+    export type MobileInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        appName?: string;
+        appVersion?: string;
+        sdkName?: string;
+        sdkVersion?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
     };
 }
-namespace profile {
-    export type UserProfile = {
-        [key: string]: {};
-    };
-}
-type WebInfo = {
-    device?: string;
-    os?: string;
-    osName?: string;
-    browser?: string;
-    browserName?: string;
-    sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    lastSeenAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64"
-    }>;
-};
-type MobileInfo = {
-    device?: string;
-    os?: string;
-    osName?: string;
-    appName?: string;
-    appVersion?: string;
-    sdkName?: string;
-    sdkVersion?: string;
-    sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    lastSeenAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64"
-    }>;
-};
-type Online = {
-    channelId?: string;
-    personType?: string;
-    personId?: string;
-    id?: string;
-};
-type IAutoViewTransformerInputType = desk.UserView;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4UserChatView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -172,81 +684,212 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract "user" and "online" data from the input.
-  const { user, online } = input;
+  // Aggregate items for a DataList
+  const items: IAutoView.IAutoViewDataListItemProps[] = [];
 
-  // Prepare an Avatar component if user data is available.
-  // This component will serve as the starting visual element in our card header.
-  const avatar: IAutoView.IAutoViewAvatarProps | undefined = user && (user.avatarUrl || user.name)
-    ? {
-        type: "Avatar", // discriminator for the avatar component
-        src: user.avatarUrl, // use avatarUrl if provided
-        name: user.name,     // fallback name in the Avatar component
-        size: 40             // using a moderate size that works well on mobile and desktop
-      }
-    : undefined;
-
-  // Compose the card header component with a title and description.
-  // Use "Avatar" as the startElement to make the UI visually appealing.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader", // discriminator for the card header
-    title: user && user.name ? user.name : "Unknown User",
-    description: user && user.email ? user.email : "No email provided",
-    startElement: avatar // allowed because CardHeader.startElement accepts IAutoViewAvatarProps, among others
-  };
-
-  // Create a Markdown component to display additional user details in a table format.
-  // This approach minimizes plain text clutter and leverages markdown formatting for better readability.
-  let markdownContent = "";
-  if (user) {
-    // Construct a markdown table with available user properties.
-    // Edge values are handled with a fallback "N/A" if the field is missing.
-    markdownContent = `| Property      | Value                |
-| ------------- | -------------------- |
-| ID            | ${user.id ?? "N/A"}  |
-| Type          | ${user.type ?? "N/A"}|
-| Mobile Number | ${user.mobileNumber ?? "N/A"} |
-| Country       | ${user.country ?? "N/A"} |
-| City          | ${user.city ?? "N/A"} |
-`;
-  } else {
-    markdownContent = "No user details available.";
+  // 1. User info with avatar and email
+  if (input.user) {
+    const u = input.user;
+    const avatar: IAutoView.IAutoViewAvatarProps = {
+      type: "Avatar",
+      src: u.avatarUrl,
+      name: u.name,
+    };
+    const emailText: IAutoView.IAutoViewTextProps = {
+      type: "Text",
+      variant: "body2",
+      content: u.email || "N/A",
+    };
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**User**" }],
+      value: [avatar, emailText],
+    });
   }
-  const cardMarkdown: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown", // discriminator for markdown component
-    content: markdownContent
+
+  // 2. Chat session summary
+  if (input.session) {
+    const s = input.session;
+    const lines: string[] = [];
+    if (s.chatId) lines.push(`- Chat ID: ${s.chatId}`);
+    lines.push(`- Unread: ${s.unread ?? 0}`);
+    if (s.watch) lines.push(`- Watch: ${s.watch}`);
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**Session**" }],
+      value: [
+        {
+          type: "Markdown",
+          content: lines.join("\n"),
+        },
+      ],
+    });
+  }
+
+  // 3. Chat tags as chips
+  if (input.chatTags && input.chatTags.length > 0) {
+    const chipProps = input.chatTags.map((tag) => ({
+      type: "Chip" as const,
+      label: tag.name,
+      variant: "filled" as const,
+      color: mapTagColor(tag.colorVariant),
+    }));
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**Tags**" }],
+      value: {
+        type: "ChipGroup" as const,
+        childrenProps: chipProps,
+      },
+    });
+  }
+
+  // 4. Last message preview
+  if (input.message) {
+    const m = input.message;
+    let msgContent = "";
+    if (m.plainText) {
+      msgContent = m.plainText;
+    } else if (m.blocks) {
+      msgContent = m.blocks
+        .map((b) => b.value)
+        .filter(Boolean)
+        .join("\n\n");
+    } else {
+      msgContent = "No message content.";
+    }
+    // Wrap in code block for readability
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**Last Message**" }],
+      value: [
+        {
+          type: "Markdown",
+          content: "text\n" + msgContent + "\n```",
+        },
+      ],
+    });
+  }
+
+  // 5. Campaign statistics
+  if (input.campaign) {
+    const c = input.campaign;
+    const lines = [
+      `- Name: ${c.name}`,
+      `- State: ${c.state}`,
+      `- Sent: ${c.sent ?? 0}`,
+      `- View: ${c.view ?? 0}`,
+    ];
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**Campaign**" }],
+      value: [
+        {
+          type: "Markdown",
+          content: lines.join("\n"),
+        },
+      ],
+    });
+  }
+
+  // 6. One-time message stats
+  if (input.oneTimeMsg) {
+    const o = input.oneTimeMsg;
+    const lines = [
+      `- Name: ${o.name}`,
+      `- State: ${o.state}`,
+      `- Sent: ${o.sent ?? 0}`,
+      `- View: ${o.view ?? 0}`,
+    ];
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**One-Time Message**" }],
+      value: [
+        {
+          type: "Markdown",
+          content: lines.join("\n"),
+        },
+      ],
+    });
+  }
+
+  // 7. Support bot summary
+  if (input.supportBot) {
+    const sb = input.supportBot;
+    const lines = [
+      `- Bot Name: ${sb.botName}`,
+      `- State: ${sb.state}`,
+    ];
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**Support Bot**" }],
+      value: [
+        {
+          type: "Markdown",
+          content: lines.join("\n"),
+        },
+      ],
+    });
+  }
+
+  // 8. UserChat overview
+  if (input.userChat) {
+    const uc = input.userChat;
+    const lines = [
+      `- State: ${uc.state}`,
+      `- First opened: ${uc.firstOpenedAt ?? "N/A"}`,
+      `- Reply Count: ${uc.replyCount ?? 0}`,
+    ];
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "**Chat Overview**" }],
+      value: [
+        {
+          type: "Markdown",
+          content: lines.join("\n"),
+        },
+      ],
+    });
+  }
+
+  // Fallback for empty data
+  if (items.length === 0) {
+    items.push({
+      type: "DataListItem",
+      label: [{ type: "Markdown", content: "No data available." }],
+      value: [{ type: "Markdown", content: "" }],
+    });
+  }
+
+  // Return a responsive DataList that displays all collected items
+  return {
+    type: "DataList",
+    childrenProps: items,
   };
 
-  // Prepare an Icon component to visually represent the user's online status.
-  // Here, "circle" is chosen as an assumed icon.
-  // The color is set to green for online, otherwise gray.
-  const onlineIcon: IAutoView.IAutoViewIconProps = {
-    type: "Icon", // discriminator for icon component
-    id: "circle", // assumed icon that represents a status indicator
-    color: online ? "green" : "gray",
-    size: 16      // ensure the icon is not too prominent for mobile screens
-  };
-
-  // Compose the card content by combining the markdown and the online indicator icon.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent", // discriminator for card content
-    // Both markdown and icon components are valid children of the card content.
-    childrenProps: [
-      cardMarkdown,
-      onlineIcon
-    ]
-  };
-
-  // Finally, compose a vertical card that encapsulates the header and content.
-  // This card layout is responsive and works well across devices.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard", // discriminator for vertical card layout
-    childrenProps: [
-      cardHeader,
-      cardContent
-    ]
-  };
-
-  // Return the final composed UI component.
-  return verticalCard;
+  /**
+   * Map legacy tag color variants to supported chip colors.
+   */
+  function mapTagColor(
+    variant?: string
+  ): IAutoView.IAutoViewChipProps["color"] {
+    switch (variant) {
+      case "red":
+      case "orange":
+      case "yellow":
+      case "green":
+      case "pink":
+        return variant;
+      case "olive":
+        return "lime";
+      case "cobalt":
+        return "blue";
+      case "purple":
+        return "violet";
+      case "navy":
+        return "indigo";
+      default:
+        return "gray";
+    }
+  }
 }

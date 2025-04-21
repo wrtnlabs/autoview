@@ -55,7 +55,11 @@ All the AutoView interfaces have a pattern like \`IAutoView.IAutoViewXProps\`, w
 - \`IAutoView.IAutoViewCardHeaderProps\`
 - \`IAutoView.IAutoViewMarkdownProps\`
 - \`IAutoView.IAutoViewDataListProps\`
-The only exception is the \`IAutoViewTransformerInputType\` type and its sub-types and components, which is not part of the \`IAutoView\` namespace.
+
+Sub-types and components of the \`IAutoViewTransformerInputType\` (input) type is prefixed with \`Schema.\`. Prefix them if you need to explicitly mention them in your code. For example:
+- \`Schema.user_data\`
+- \`Schema.ServerResponse.StatusCode\`
+Note that the \`IAutoViewTransformerInputType\` itself should not be prefixed with \`Schema.\`.
 
 You must understand that some of the AutoView components accept \`childrenProps\` as an array of components or a single component. For example, \`IAutoView.IAutoViewVerticalCardProps.childrenProps\` is an array of components, but \`IAutoView.IAutoViewCardHeaderProps.startElement\` is a single component.
 But you cannot put any components into that property; each of them accepts a specific type of component. For example, \`IAutoView.IAutoViewCardHeaderProps.startElement\` only accepts below type of components:

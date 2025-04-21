@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "crawl": "ts-node src/crawl-openapis.ts",
+    "clear": "ts-node src/clear-all-transformers.ts",
     "generate": "ts-node src/generate-all-transformers.ts",
     "prepare": "ts-patch install"
   },
@@ -11,7 +12,7 @@
     "@autoview/agent": "workspace:^",
     "@autoview/interface": "^7.3.1",
     "@samchon/openapi": "^4.0.0",
-    "openai": "^4.90.0",
+    "openai": "^4.95.0",
     "typia": "^9.1.0"
   },
   "devDependencies": {

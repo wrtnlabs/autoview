@@ -1,43 +1,263 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4WebhookView = {
-                webhook?: legacy.v4.LegacyV4Webhook;
-            };
-        }
-    }
-    export namespace v4 {
-        export type LegacyV4Webhook = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name: string;
-            url: string;
-            token?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            watchUserChats?: boolean;
-            watchGroups?: boolean;
-            apiVersion: string;
-            lastBlockedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            blocked?: boolean;
+namespace Schema {
+    export namespace IPageIShoppingSaleReview {
+        /**
+         * A page.
+         *
+         * Collection of records with pagination indformation.
+        */
+        export type ISummary = {
+            /**
+             * Page information.
+             *
+             * @title Page information
+            */
+            pagination: Schema.IPage.IPagination;
+            /**
+             * List of records.
+             *
+             * @title List of records
+            */
+            data: Schema.IShoppingSaleReview.ISummary[];
         };
     }
+    export namespace IPage {
+        /**
+         * Page information.
+        */
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
+    export namespace IShoppingSaleReview {
+        /**
+         * Summarized information of the review.
+        */
+        export type ISummary = {
+            /**
+             * Score of the review.
+             *
+             * @title Score of the review
+            */
+            score: number;
+            /**
+             * Customer who wrote the inquiry.
+             *
+             * @title Customer who wrote the inquiry
+            */
+            customer: Schema.IShoppingCustomer;
+            /**
+             * Formal answer for the inquiry by the seller.
+             *
+             * @title Formal answer for the inquiry by the seller
+            */
+            answer: null | any;
+            /**
+             * Whether the seller has viewed the inquiry or not.
+             *
+             * @title Whether the seller has viewed the inquiry or not
+            */
+            read_by_seller: boolean;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Title of the last snapshot.
+             *
+             * @title Title of the last snapshot
+            */
+            title: string;
+            /**
+             * Creation time of the article.
+             *
+             * @title Creation time of the article
+            */
+            created_at: string;
+            /**
+             * Modification time of the article.
+             *
+             * In other words, the time when the last snapshot was created.
+             *
+             * @title Modification time of the article
+            */
+            updated_at: string;
+        };
+    }
+    /**
+     * Customer information, but not a person but a connection basis.
+     *
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
+     *
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
+     *
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
+    */
+    export type IShoppingCustomer = {
+        /**
+         * Discriminant for the type of customer.
+         *
+         * @title Discriminant for the type of customer
+        */
+        type: "customer";
+        /**
+         * Membership information.
+         *
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
+        */
+        member: null | any;
+        /**
+         * Citizen information.
+         *
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
+        */
+        citizen: null | any;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Belonged channel.
+         *
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
+         *
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
+    };
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier code.
+         *
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Name of the channel.
+         *
+         * @title Name of the channel
+        */
+        name: string;
+    };
+    export type IShoppingExternalUser = any;
+    export namespace IShoppingSaleInquiryAnswer {
+        export type ISummary = any;
+    }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4WebhookView;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingSaleReview.ISummary;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -45,106 +265,71 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Check if webhook data exists in the input.
-  if (input.webhook) {
-    const webhook = input.webhook;
-    
-    // ---------------------------------------------------------------------
-    // Create the Card Header component.
-    // We use CardHeader to display the primary information.
-    // The startElement shows a visual icon (using the "link" icon) to make the header engaging.
-    // ---------------------------------------------------------------------
-    const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-      type: "CardHeader",
-      title: webhook.name,
-      description: webhook.id ? `Identifier: ${webhook.id}` : "No ID provided",
-      startElement: {
+  // Generate a list of reviews using the List component
+  const items: IAutoView.IAutoViewListItemProps[] = input.data.map((review) => {
+    const {
+      title,
+      created_at,
+      score,
+      read_by_seller,
+      customer,
+    } = review;
+
+    // Round score to nearest integer for star icons
+    const starCount = Math.max(0, Math.min(5, Math.round(score)));
+
+    // Build star icons array
+    const stars: IAutoView.IAutoViewIconProps[] = Array.from(
+      { length: starCount },
+      () => ({
         type: "Icon",
-        id: "link",
-        color: "blue",
-        size: 24,
-      }
+        id: "star",
+        color: "yellow",
+        size: 16,
+      })
+    );
+
+    // Build a chip indicating read/unread status
+    const statusChip: IAutoView.IAutoViewChipProps = {
+      type: "Chip",
+      label: read_by_seller ? "Read" : "New",
+      color: read_by_seller ? "success" : "error",
+      variant: "outlined",
+      size: "small",
     };
 
-    // ---------------------------------------------------------------------
-    // Create the Card Content component.
-    // We generate a markdown string that nicely formats the details
-    // about the webhook (URL, API version, keywords, blocked status).
-    // Markdown is used for rich-text formatting and for responsiveness.
-    // ---------------------------------------------------------------------
-    let markdownContent = `**URL:** [${webhook.url}](${webhook.url})\n\n`;
-    markdownContent += `**API Version:** ${webhook.apiVersion}\n\n`;
-    if (webhook.keywords && webhook.keywords.length > 0) {
-      markdownContent += "**Keywords:**\n";
-      webhook.keywords.forEach(keyword => {
-        markdownContent += `- ${keyword}\n`;
-      });
-      markdownContent += "\n";
-    }
-    if (webhook.blocked) {
-      // Using an emoji to immediately convey the blocked state.
-      markdownContent += "🚫 **This webhook is currently blocked.**\n";
-    }
-    
-    const cardContent: IAutoView.IAutoViewCardContentProps = {
-      type: "CardContent",
-      // childrenProps accepts either an array or a single component.
-      // Here we use the Markdown component to render rich text.
-      childrenProps: {
-        type: "Markdown",
-        content: markdownContent,
-      } as IAutoView.IAutoViewMarkdownProps
+    // Combine stars and status chip for the endElement
+    const endElements = [...stars, statusChip];
+
+    // Use a user icon as the startElement
+    const userIcon: IAutoView.IAutoViewIconProps = {
+      type: "Icon",
+      id: "user",
+      color: "gray",
+      size: 24,
     };
 
-    // ---------------------------------------------------------------------
-    // Create the Card Footer component.
-    // This component displays additional metadata such as creation date
-    // and information on watching chats and groups.
-    // We use markdown here as well to afford flexibility and styling.
-    // ---------------------------------------------------------------------
-    let footerContent = "";
-    if (webhook.createdAt) {
-      const createdDate = new Date(webhook.createdAt);
-      footerContent += `**Created On:** ${createdDate.toLocaleDateString()}\n\n`;
+    // Build a human‐friendly date label
+    let dateLabel: string;
+    try {
+      dateLabel = new Date(created_at).toLocaleDateString();
+    } catch {
+      dateLabel = created_at;
     }
-    if (webhook.watchUserChats) {
-      footerContent += "💬 Watching User Chats\n\n";
-    }
-    if (webhook.watchGroups) {
-      footerContent += "👥 Watching Groups\n\n";
-    }
-    if (!footerContent) {
-      footerContent = "No additional metadata.";
-    }
-    
-    const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-      type: "CardFooter",
-      childrenProps: {
-        type: "Markdown",
-        content: footerContent,
-      } as IAutoView.IAutoViewMarkdownProps
-    };
 
-    // ---------------------------------------------------------------------
-    // Compose the main visual component using a Vertical Card.
-    // The VerticalCard is responsive and suitable for all screen sizes.
-    // We pass the header, content, and footer as children.
-    // ---------------------------------------------------------------------
-    const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-      type: "VerticalCard",
-      childrenProps: [cardHeader, cardContent, cardFooter],
+    // Compose the list item
+    return {
+      type: "ListItem",
+      title,
+      description: `Posted on ${dateLabel} via ${customer.channel.name}`,
+      startElement: userIcon,
+      endElement: endElements,
     };
+  });
 
-    return verticalCard;
-  } else {
-    // ---------------------------------------------------------------------
-    // If no webhook data is provided, we return a Markdown component
-    // that informs the user that no data is available.
-    // ---------------------------------------------------------------------
-    const noDataMarkdown: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: "## No Webhook Data Available\nPlease provide valid webhook data to visualize.",
-    };
-    return noDataMarkdown;
-  }
+  // Return the List component wrapping all the review items
+  return {
+    type: "List",
+    childrenProps: items,
+  };
 }

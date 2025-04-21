@@ -1,74 +1,59 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4SessionsView = {
-                sessions?: legacy.v4.LegacyV4ChatSession[];
-            };
-        }
-    }
-    export namespace v4 {
-        export type LegacyV4ChatSession = {
-            key?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            updatedKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            unreadKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            alert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            unread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            watch?: "all" | "info" | "none";
-            readAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            receivedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            postedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            id?: string;
-            chatType?: string;
-            personType?: string;
-            personId?: string;
+namespace Schema {
+    export namespace IShoppingChannelCategory {
+        /**
+         * Invert category information with parent category.
+        */
+        export type IInvert = {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | any;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
         };
     }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4SessionsView;
+type IAutoViewTransformerInputType = Schema.IShoppingChannelCategory.IInvert;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -76,111 +61,96 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // This transform function aggregates chat session data from the input
-  // and returns a responsive UI component to display the sessions.
-  //
-  // The chosen layout is a VerticalCard which holds a header and a content section.
-  // The header shows an icon and title while the content displays a DataList (if available)
-  // where each session is represented by a DataListItem with an icon and formatted markdown details.
-  //
-  // In case no chat sessions are provided, a friendly markdown message is shown instead.
-
-  // 1. Create a card header component for clearly labeling the UI.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Chat Sessions",
-    description: "Overview of current chat sessions",
-    // The startElement accepts specific component types (e.g., Icon), so we use an Icon for visual engagement.
-    startElement: {
-      type: "Icon",
-      id: "chat", // Assuming "chat" is a valid kebab-case icon name from the icon library.
-      color: "blue",
-      size: 24
-    }
-  };
-
-  // 2. Process the sessions from input.
-  // Ensure sessions is an array. If not provided, use an empty array.
-  const sessions = input.sessions ?? [];
-  // This array will hold our DataList items.
-  let listItems: IAutoView.IAutoViewDataListItemProps[] = [];
-
-  if (sessions.length > 0) {
-    listItems = sessions.map((session) => {
-      // Compose the label for the session using an icon and text.
-      // Allowed types for label are strictly enforced, so we use Icon and Text components.
-      const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
-        {
-          type: "Icon",
-          id: "chat", // Reusing the chat icon for clarity.
-          color: "blue",
-          size: 16
-        },
-        {
-          type: "Text",
-          variant: "h6",
-          color: "primary",
-          content: session.id ? session.id : "Unknown Session"
+    // Helper to flatten the parent chain into an array of { name, code }
+    const flattenParents = (node: any): { name: string; code: string }[] => {
+        const chain: { name: string; code: string }[] = [];
+        let current: any = node;
+        while (current) {
+            // Protect against unexpected shapes
+            if (typeof current.name === "string" && typeof current.code === "string") {
+                chain.push({ name: current.name, code: current.code });
+            }
+            // Move to next parent
+            current = current.parent;
         }
-      ];
-
-      // Compose session details using a markdown component for a better visual presentation.
-      // Markdown is used to minimize raw text and make content more engaging.
-      const detailsMarkdown = `
-**Chat ID:** ${session.chatId ?? 'N/A'}  
-**Chat Type:** ${session.chatType ?? 'N/A'}  
-**Person Type:** ${session.personType ?? 'N/A'}  
-**Unread Messages:** ${session.unread ?? 0}
-      `.trim();
-
-      const valueComponent: IAutoView.IAutoViewMarkdownProps = {
-        type: "Markdown",
-        content: detailsMarkdown
-      };
-
-      // Return the DataListItem for this session.
-      return {
-        type: "DataListItem",
-        label: labelComponents,
-        value: valueComponent
-      };
-    });
-  }
-
-  // 3. Build the content section of the card depending on the data.
-  let cardContentComponent: IAutoView.IAutoViewCardContentProps;
-  if (listItems.length > 0) {
-    // When sessions are available, wrap the DataList in a CardContent component.
-    const dataList: IAutoView.IAutoViewDataListProps = {
-      type: "DataList",
-      childrenProps: listItems
+        // We want root-first order
+        return chain.reverse();
     };
-    cardContentComponent = {
-      type: "CardContent",
-      childrenProps: dataList
-    };
-  } else {
-    // If there are no sessions, display a markdown message.
-    const noSessionMessage: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: "**No chat sessions available.**"
-    };
-    cardContentComponent = {
-      type: "CardContent",
-      childrenProps: noSessionMessage
-    };
-  }
 
-  // 4. Compose the final VerticalCard component.
-  // VerticalCard is chosen for clarity and responsive design, making it suitable for mobiles.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [
-      cardHeader,
-      cardContentComponent
-    ]
-  };
+    const parentChain = input.parent ? flattenParents(input.parent) : [];
 
-  // Return the composed value of type IAutoView.IAutoViewComponentProps.
-  return verticalCard;
+    // Build a DataList of parent categories, or a Markdown note if none exist
+    let contentChildren: IAutoView.IAutoViewPresentationComponentProps;
+    if (parentChain.length > 0) {
+        const items: IAutoView.IAutoViewDataListItemProps[] = parentChain.map(item => {
+            // Label: parent name
+            const labelText: IAutoView.IAutoViewTextProps = {
+                type: "Text",
+                content: item.name,
+                variant: "body1",
+            };
+            // Value: parent code
+            const valueText: IAutoView.IAutoViewTextProps = {
+                type: "Text",
+                content: item.code,
+                variant: "body2",
+                color: "gray",
+            };
+            return {
+                type: "DataListItem",
+                label: [labelText],
+                value: [valueText],
+            };
+        });
+
+        contentChildren = {
+            type: "DataList",
+            childrenProps: items,
+        };
+    } else {
+        // No parent: show a friendly markdown message
+        contentChildren = {
+            type: "Markdown",
+            content: "*No parent category*",
+        };
+    }
+
+    // Card header with icon, category name, and code
+    const header: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: input.name,
+        description: `Code: ${input.code}`,
+        startElement: {
+            type: "Icon",
+            id: "folder",
+            color: "blue",
+            size: 24,
+        },
+    };
+
+    // Card content wrapping our DataList or Markdown
+    const content: IAutoView.IAutoViewCardContentProps = {
+        type: "CardContent",
+        childrenProps: contentChildren,
+    };
+
+    // Card footer with creation timestamp
+    const footerText: IAutoView.IAutoViewTextProps = {
+        type: "Text",
+        content: `Created At: ${new Date(input.created_at).toLocaleString()}`,
+        variant: "caption",
+        color: "tertiary",
+    };
+    const footer: IAutoView.IAutoViewCardFooterProps = {
+        type: "CardFooter",
+        childrenProps: [footerText],
+    };
+
+    // Assemble a vertical card containing the header, content, and footer
+    const card: IAutoView.IAutoViewVerticalCardProps = {
+        type: "VerticalCard",
+        childrenProps: [header, content, footer],
+    };
+
+    return card;
 }

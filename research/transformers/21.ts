@@ -1,81 +1,214 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * Reviews for sale snapshots.
- *
- * `IShoppingSaleReview` is a subtype entity of {@link IShoppingSaleInquiry},
- * and is used when a {@link IShoppingCustomer customer} purchases a
- * {@link IShoppingSale sale} ({@link IShoppingSaleSnapshot snapshot} at the time)
- * registered by the {@link IShoppingSeller seller} as a product and leaves a
- * review and rating for it.
- *
- * For reference, `IShoppingSaleReview` and
- * {@link IShoppingOrderGod shopping_order_goods} have a logarithmic relationship
- * of N: 1, but this does not mean that customers can continue to write reviews
- * for the same product indefinitely. Wouldn't there be restrictions, such as
- * if you write a review once, you can write an additional review a month later?
-*/
-type IShoppingSaleReview = {
-    /**
-     * Type of the derived inquiry.
-     *
-     * - `question`: {@link IShoppingSaleQuestion}
-     * - `review`: {@link IShoppingSaleReview}
-     *
-     * @title Type of the derived inquiry
-    */
-    type: "review";
-    /**
-     * Customer who wrote the inquiry.
-     *
-     * @title Customer who wrote the inquiry
-    */
-    customer: IShoppingCustomer;
-    /**
-     * Formal answer for the inquiry by the seller.
-     *
-     * @title Formal answer for the inquiry by the seller
-    */
-    answer: null | any;
-    /**
-     * Whether the seller has viewed the inquiry or not.
-     *
-     * @title Whether the seller has viewed the inquiry or not
-    */
-    read_by_seller: boolean;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when an article is created, and is
-     * accumulated every time the article is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IShoppingSaleReview.ISnapshot[];
-    /**
-     * Creation time of article.
-     *
-     * @title Creation time of article
-    */
-    created_at: string;
-};
-namespace IShoppingSaleReview {
-    /**
-     * Snapshot content of the review article.
-    */
-    export type ISnapshot = {
+namespace Schema {
+    export namespace IPageIShoppingSale {
         /**
-         * Score of the review.
+         * A page.
          *
-         * @title Score of the review
+         * Collection of records with pagination indformation.
         */
-        score: number;
+        export type ISummary = {
+            /**
+             * Page information.
+             *
+             * @title Page information
+            */
+            pagination: Schema.IPage.IPagination;
+            /**
+             * List of records.
+             *
+             * @title List of records
+            */
+            data: Schema.IShoppingSale.ISummary[];
+        };
+    }
+    export namespace IPage {
+        /**
+         * Page information.
+        */
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
+    export namespace IShoppingSale {
+        /**
+         * Summarized information of sale.
+         *
+         * This summarized information being used for pagination.
+        */
+        export type ISummary = {
+            /**
+             * Belonged section.
+             *
+             * @title Belonged section
+            */
+            section: Schema.IShoppingSection;
+            /**
+             * Seller who has registered the sale.
+             *
+             * @title Seller who has registered the sale
+            */
+            seller: Schema.IShoppingSeller.ISummary;
+            /**
+             * Price range of the unit.
+             *
+             * @title Price range of the unit
+            */
+            price_range: Schema.IShoppingSalePriceRange;
+            /**
+             * Primary Key of Sale.
+             *
+             * @title Primary Key of Sale
+            */
+            id: string;
+            /**
+             * Primary Key of Snapshot.
+             *
+             * @title Primary Key of Snapshot
+            */
+            snapshot_id: string;
+            /**
+             * Whether the snapshot is the latest one or not.
+             *
+             * @title Whether the snapshot is the latest one or not
+            */
+            latest: boolean;
+            /**
+             * Description and image content describing the sale.
+             *
+             * @title Description and image content describing the sale
+            */
+            content: Schema.IShoppingSaleContent.IInvert;
+            /**
+             * List of categories.
+             *
+             * Which categories the sale is registered to.
+             *
+             * @title List of categories
+            */
+            categories: Schema.IShoppingChannelCategory.IInvert[];
+            /**
+             * List of search tags.
+             *
+             * @title List of search tags
+            */
+            tags: string[];
+            /**
+             * List of units.
+             *
+             * Records about individual product composition information that are sold
+             * in the sale. Each {@link IShoppingSaleUnit unit} record has configurable
+             * {@link IShoppingSaleUnitOption options},
+             * {@link IShoppingSaleUnitOptionCandidate candidate} values for each
+             * option, and {@link IShoppingSaleUnitStock final stocks} determined by
+             * selecting every candidate values of each option.
+             *
+             * @title List of units
+            */
+            units: Schema.IShoppingSaleUnit.ISummary[];
+            /**
+             * Creation time of the record.
+             *
+             * Note that, this property is different with {@link opened_at},
+             * which means the timepoint of the sale is opened.
+             *
+             * @title Creation time of the record
+            */
+            created_at: string;
+            /**
+             * Last updated time of the record.
+             *
+             * In another words, creation time of the last snapshot.
+             *
+             * @title Last updated time of the record
+            */
+            updated_at: string;
+            /**
+             * Paused time of the sale.
+             *
+             * The sale is paused by the seller, for some reason.
+             *
+             * {@link IShoppingCustomer Customers} can still see the sale on the
+             * both list and detail pages, but the sale has a warning label
+             * "The sale is paused by the seller".
+             *
+             * @title Paused time of the sale
+            */
+            paused_at: null | (string & tags.Format<"date-time">);
+            /**
+             * Suspended time of the sale.
+             *
+             * The sale is suspended by the seller, for some reason.
+             *
+             * {@link IShoppingCustomer Customers} cannot see the sale on the
+             * both list and detail pages. It is almost same with soft delettion,
+             * but there's a little bit difference that the owner
+             * {@link IShoppingSeller seller} can still see the sale and resume it.
+             *
+             * Of course, the {@link IShoppingCustomer customers} who have
+             * already purchased the sale can still see the sale on the
+             * {@link IShoppingOrder order} page.
+             *
+             * @title Suspended time of the sale
+            */
+            suspended_at: null | (string & tags.Format<"date-time">);
+            /**
+             * Opening time of the sale.
+             *
+             * @title Opening time of the sale
+            */
+            opened_at: null | (string & tags.Format<"date-time">);
+            /**
+             * Closing time of the sale.
+             *
+             * If this value is `null`, the sale be continued forever.
+             *
+             * @title Closing time of the sale
+            */
+            closed_at: null | (string & tags.Format<"date-time">);
+        };
+    }
+    /**
+     * Section information.
+     *
+     * `IShoppingSection` is a concept that refers to the spatial information of
+     * the market.
+     *
+     * If we compare the section mentioned here to the offline market, it means a
+     * spatially separated area within the store, such as the "fruit corner" or
+     * "butcher corner". Therefore, in the {@link IShoppingSale sale} entity, it is
+     * not possible to classify multiple sections simultaneously, but only one section
+     * can be classified.
+     *
+     * By the way, if your shopping mall system requires only one section, then just
+     * use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingSection = {
         /**
          * Primary Key.
          *
@@ -83,185 +216,224 @@ namespace IShoppingSaleReview {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Identifier code.
          *
-         * In other words, creation time or update time or article.
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Representative name of the section.
          *
-         * @title Creation time of snapshot record
+         * @title Representative name of the section
+        */
+        name: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    };
+    export namespace IShoppingSeller {
+        /**
+         * Summary of seller information.
+        */
+        export type ISummary = {
+            /**
+             * Discriminant for the type of seller.
+             *
+             * @title Discriminant for the type of seller
+            */
+            type: "seller";
+            /**
+             * Membership joining information.
+             *
+             * @title Membership joining information
+            */
+            member: Schema.IShoppingMember.IInvert;
+            /**
+             * Real-name and mobile number authentication information.
+             *
+             * @title Real-name and mobile number authentication information
+            */
+            citizen: Schema.IShoppingCitizen;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation tmie of record.
+             *
+             * Another words, the time when the seller has signed up.
+             *
+             * @title Creation tmie of record
+            */
+            created_at: string;
+        };
+    }
+    export namespace IShoppingMember {
+        /**
+         * Invert information of member.
+         *
+         * This invert member information has been designed to be used for another
+         * invert information of sellers and administrators like below.
+         *
+         * - {@link IShoppingSeller.IInvert}
+         * - {@link IShoppingAdministrator.IInvert}
+        */
+        export type IInvert = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Nickname that uniquely identifies the member.
+             *
+             * @title Nickname that uniquely identifies the member
+            */
+            nickname: string;
+            /**
+             * List of emails.
+             *
+             * @title List of emails
+            */
+            emails: Schema.IShoppingMemberEmail[];
+            /**
+             * Creation time of record.
+             *
+             * Another words, the time when the member has signed up.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
+    /**
+     * Email address of member.
+     *
+     * This shopping mall system allows multiple email addresses to be
+     * registered for one {@link IShoppingMember member}. If you don't have to
+     * plan such multiple email addresses, just use only one.
+    */
+    export type IShoppingMemberEmail = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Email address value.
+         *
+         * @title Email address value
+        */
+        value: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    };
+    /**
+     * Citizen verification information.
+     *
+     * `IShoppingCitizen` is an entity that records the user's
+     * {@link name real name} and {@link mobile} input information.
+     *
+     * For reference, in South Korea, real name authentication is required for
+     * e-commerce participants, so the name attribute is important. However, the
+     * situation is different overseas, so in reality, mobile attributes are the
+     * most important, and identification of individual person is also done based
+     * on this mobile.
+     *
+     * Of course, real name and mobile phone authentication information are
+     * encrypted and stored.
+    */
+    export type IShoppingCitizen = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Mobile number.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Mobile number
         */
-        format: "html" | "md" | "txt";
+        mobile: string;
         /**
-         * Title of article.
+         * Real name, or equivalent nickname.
          *
-         * @title Title of article
+         * @title Real name, or equivalent nickname
         */
-        title: string;
-        /**
-         * Content body of article.
-         *
-         * @title Content body of article
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
+        name: string;
     };
-}
-/**
- * Customer information, but not a person but a connection basis.
- *
- * `IShoppingCustomer` is an entity that literally embodies the information of
- * those who participated in the market as customers. By the way, the
- * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
- * even if the same person connects to the shopping mall multiple, multiple
- * records are created in `IShoppingCustomer`.
- *
- * The first purpose of this is to track the customer's inflow path in detail,
- * and it is for cases where the same person enters as a non-member,
- * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
- * and only authenticates their {@link IShoppingCitizen real name} or
- * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
- * It is the second. Lastly, it is to accurately track the activities that
- * a person performs at the shopping mall in various ways like below.
- *
- * - Same person comes from an {@link IShoppingExternalUser external service}
- * - Same person creates multiple accounts
- * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
- * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
- *
- * Therefore, `IShoppingCustomer` can have multiple records with the same
- * {@link IShoppingCitizen}, {@link IShoppingMember}, and
- * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
- * membership after verifying their real name or signs up for our service after
- * being a user of an external service, all related records are changed at once.
- * Therefore, identification and tracking of customers can be done very
- * systematically.
-*/
-type IShoppingCustomer = {
+    export type IShoppingSalePriceRange = {
+        lowest: Schema.IShoppingPrice;
+        highest: Schema.IShoppingPrice;
+    };
     /**
-     * Discriminant for the type of customer.
-     *
-     * @title Discriminant for the type of customer
+     * Shopping price interface.
     */
-    type: "customer";
+    export type IShoppingPrice = {
+        /**
+         * Nominal price.
+         *
+         * This is not {@link real real price} to pay, but just a nominal price to show.
+         * If this value is greater than the {@link real real price}, it would be shown
+         * like {@link IShoppingSeller seller} is giving a discount.
+         *
+         * @title Nominal price
+        */
+        nominal: number;
+        /**
+         * Real price to pay.
+         *
+         * @title Real price to pay
+        */
+        real: number;
+    };
+    export namespace IShoppingSaleContent {
+        export type IInvert = {
+            id: string & tags.Format<"uuid">;
+            title: string;
+            thumbnails: Schema.IAttachmentFile[];
+        };
+    }
     /**
-     * Membership information.
+     * Attachment File.
      *
-     * If the customer has joined as a member.
+     * Every attachment files that are managed in current system.
      *
-     * @title Membership information
+     * For reference, it is possible to omit one of file {@link name}
+     * or {@link extension} like `.gitignore` or `README` case, but not
+     * possible to omit both of them.
     */
-    member: null | any;
-    /**
-     * Citizen information.
-     *
-     * If the customer has verified his real name and mobile number.
-     *
-     * @title Citizen information
-    */
-    citizen: null | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Belonged channel.
-     *
-     * @title Belonged channel
-    */
-    channel: IShoppingChannel;
-    /**
-     * External user information.
-     *
-     * When the customer has come from an external service.
-     *
-     * @title External user information
-    */
-    external_user: null | any;
-    /**
-     * Connection address.
-     *
-     * Same with {@link window.location.href} of client.
-     *
-     * @title Connection address
-    */
-    href: string;
-    /**
-     * Referrer address.
-     *
-     * Same with {@link window.document.referrer} of client.
-     *
-     * @title Referrer address
-    */
-    referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
-    /**
-     * Connection IP Address.
-     *
-     * @title Connection IP Address
-    */
-    ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
-    /**
-     * Creation time of the connection record.
-     *
-     * @title Creation time of the connection record
-    */
-    created_at: string;
-};
-type IShoppingMember = any;
-type IShoppingCitizen = any;
-/**
- * Channel information.
- *
- * `IShoppingChannel` is a concept that shapes the distribution channel in the
- * market. Therefore, the difference in the channel in this e-commerce system
- * means that it is another site or application.
- *
- * By the way, if your shopping mall system requires only one channel, then
- * just use only one. This concept is designed to be expandable in the future.
-*/
-type IShoppingChannel = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-    /**
-     * Identifier code.
-     *
-     * @title Identifier code
-    */
-    code: string;
-    /**
-     * Name of the channel.
-     *
-     * @title Name of the channel
-    */
-    name: string;
-};
-type IShoppingExternalUser = any;
-type IShoppingSaleInquiryAnswer = any;
-namespace IAttachmentFile {
-    export type ICreate = {
+    export type IAttachmentFile = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of attachment file.
+         *
+         * @title Creation time of attachment file
+        */
+        created_at: string;
         /**
          * File name, except extension.
          *
@@ -285,97 +457,159 @@ namespace IAttachmentFile {
         */
         url: string;
     };
+    export namespace IShoppingChannelCategory {
+        /**
+         * Invert category information with parent category.
+        */
+        export type IInvert = {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | any;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
+    export namespace IShoppingSaleUnit {
+        export type ISummary = {
+            price_range: Schema.IShoppingSalePriceRange;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Representative name of the unit.
+             *
+             * @title Representative name of the unit
+            */
+            name: string;
+            /**
+             * Whether the unit is primary or not.
+             *
+             * Just a labeling value.
+             *
+             * @title Whether the unit is primary or not
+            */
+            primary: boolean;
+            /**
+             * Whether the unit is required or not.
+             *
+             * When the unit is required, the customer must select the unit. If do not
+             * select, customer can't buy it.
+             *
+             * For example, if there's a sale "Macbook Set" and one of the unit is the
+             * "Main Body", is it possible to buy the "Macbook Set" without the
+             * "Main Body" unit? This property is for that case.
+             *
+             * @title Whether the unit is required or not
+            */
+            required: boolean;
+        };
+    }
 }
-type IAutoViewTransformerInputType = IShoppingSaleReview;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingSale.ISummary;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
-// This function transforms an IShoppingSaleReview input into a visual component tree.
-// We choose to represent the review using a VerticalCard that contains:
-// 1. A CardHeader which displays primary information such as review ID, creation date,
-//    and a visual avatar for the customer.
-// 2. A CardContent which displays each snapshot in markdown format.
-// 3. Optionally, a CardFooter displaying the seller's answer if available.
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Build the CardHeader using customer's information.
-  // We use the customer's id as the name for the avatar (since no other display name is provided).
-  const header: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: `Review ${input.id}`,
-    description: `Created at: ${input.created_at}`,
-    // startElement accepts only specific types; here we use the Avatar type.
-    startElement: {
-      type: "Avatar",
-      name: input.customer.id,
-      variant: "primary",
-      size: 32, // chosen size for a balanced visual
-    }
-  };
+  // Helper: format a number as currency (US Dollars shown here; adjust locale as needed).
+  const formatCurrency = (value: number): string =>
+    `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  // Helper function: construct markdown content from the snapshots array.
-  // Each snapshot is formatted with header, score, creation time, and a list of attachment files (if any).
-  const buildSnapshotsMarkdown = (): string => {
-    if (!input.snapshots || input.snapshots.length === 0) {
-      return "No snapshots available for this review.";
-    }
-    // Use markdown header formatting to clearly delineate snapshots.
-    let markdown = "## Review Snapshots\n";
-    input.snapshots.forEach((snapshot) => {
-      markdown += `\n### ${snapshot.title}\n`;
-      markdown += `- **Score:** ${snapshot.score}\n`;
-      markdown += `- **Created:** ${snapshot.created_at}\n`;
-      markdown += `- **Format:** ${snapshot.format}\n`;
-      // Display a preview of the body content.
-      // If the body is lengthy, we might wish to truncate it; here we assume the viewer can scroll.
-      markdown += `\n${snapshot.body}\n`;
-      
-      // If there are any attachment files, list them as markdown links.
-      if (snapshot.files && snapshot.files.length > 0) {
-        markdown += "\n**Attachments:**\n";
-        snapshot.files.forEach((file) => {
-          // Construct file full name, handling potential null for extension.
-          const fullName = file.extension ? `${file.name}.${file.extension}` : file.name;
-          markdown += `- [${fullName}](${file.url})\n`;
-        });
-      }
-    });
-    return markdown;
-  };
-
-  // Build the CardContent using a Markdown component.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: [
-      {
-        type: "Markdown",
-        content: buildSnapshotsMarkdown(),
-      }
-    ]
-  };
-
-  // Optionally add a CardFooter if a seller's answer exists.
-  let cardFooter: IAutoView.IAutoViewCardFooterProps | undefined = undefined;
-  if (input.answer) {
-    cardFooter = {
-      type: "CardFooter",
-      childrenProps: [
-        {
-          type: "Markdown",
-          content: `**Seller Answer:**\n\n${input.answer}`,
-        }
-      ]
+  // If there are no sale records, display a friendly markdown message.
+  if (!input.data || input.data.length === 0) {
+    return {
+      type: "Markdown",
+      content: "### No sales found."
     };
   }
 
-  // Compose the final VerticalCard.
-  // The VerticalCard's childrenProps accepts an array of the contained components.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: cardFooter ? [header, cardContent, cardFooter] : [header, cardContent],
-  };
+  // Transform each sale summary into a DataListItem component.
+  const items: IAutoView.IAutoViewDataListItemProps[] = input.data.map((sale) => {
+    // Compose the title and subtitle for the label area.
+    const titleText: IAutoView.IAutoViewTextProps = {
+      type: "Text",
+      variant: "h6",
+      content: sale.content.title
+    };
 
-  return verticalCard;
+    const subtitleParts: string[] = [
+      sale.section.name,
+      sale.seller.member.nickname,
+      sale.latest ? "(Latest)" : ""
+    ].filter(Boolean);
+
+    const subtitleText: IAutoView.IAutoViewTextProps = {
+      type: "Text",
+      variant: "body2",
+      color: "gray",
+      content: subtitleParts.join(" • ")
+    };
+
+    // Compose the price range string.
+    const lowReal = sale.price_range.lowest.real;
+    const highReal = sale.price_range.highest.real;
+    const priceRangeText: IAutoView.IAutoViewTextProps = {
+      type: "Text",
+      variant: "body1",
+      content: formatCurrency(lowReal) + (lowReal !== highReal ? ` - ${formatCurrency(highReal)}` : "")
+    };
+
+    return {
+      type: "DataListItem",
+      // Left side: title and subtitle stacked vertically.
+      label: [ titleText, subtitleText ],
+      // Right side: display the formatted price range.
+      value: priceRangeText
+    };
+  });
+
+  // Return a DataList component containing all items.
+  return {
+    type: "DataList",
+    childrenProps: items
+  };
 }

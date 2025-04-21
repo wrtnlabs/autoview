@@ -1,7 +1,34 @@
+import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type SELECT_MORE_THAN_ONE_IMAGE = any;
-type ResponseForm_lt_Array_lt_string_gt__gt_ = any;
-type IAutoViewTransformerInputType = any | any;
+namespace Schema {
+    export type ChatSessionsView = {
+        sessions?: Schema.ChatSession[];
+    };
+    export type ChatSession = {
+        key?: string;
+        chatId?: string;
+        teamChatSectionId?: string;
+        chatKey?: string;
+        updatedKey?: string;
+        unreadKey?: string;
+        channelId?: string;
+        alert?: number & tags.Type<"int32">;
+        unread?: number & tags.Type<"int32">;
+        watch?: "all" | "info" | "none";
+        allMentionImportant?: boolean;
+        readAt?: number;
+        receivedAt?: number;
+        postedAt?: number;
+        updatedAt?: number;
+        createdAt?: number;
+        version?: number & tags.Type<"int32">;
+        id?: string;
+        chatType?: string;
+        personType?: string;
+        personId?: string;
+    };
+}
+type IAutoViewTransformerInputType = Schema.ChatSessionsView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -9,89 +36,80 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // If the input is not an object (or is null), fall back to rendering JSON using markdown.
-  if (typeof input !== "object" || input === null) {
-    const fallbackMarkdown: IAutoView.IAutoViewMarkdownProps = {
-      content: "json\n" + JSON.stringify(input, null, 2) + "\n```",
-      type: "Markdown"
+  // Helper to format optional timestamp into a human-readable string.
+  const formatTimestamp = (ts?: number): string =>
+    ts ? new Date(ts).toLocaleString() : "N/A";
+
+  const sessions = input.sessions || [];
+
+  // If there are no sessions, render a friendly markdown message.
+  if (sessions.length === 0) {
+    return {
+      type: "Markdown",
+      content: "**No chat sessions available.**"
     };
-    return fallbackMarkdown;
   }
 
-  // Prepare an array of DataListItems to represent key-value pairs from the input data.
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = [];
+  // Map each session into a ListItem component.
+  const items: IAutoView.IAutoViewListItemProps[] = sessions.map(session => {
+    const unreadCount = session.unread ?? 0;
+    const watchStatus = session.watch || "none";
 
-  // Iterate over each key in the input object.
-  for (const key in input) {
-    if (Object.prototype.hasOwnProperty.call(input, key)) {
-      const value = input[key];
+    // Icon color: highlight if there are unread messages.
+    const iconColor = unreadCount > 0 ? "blue" : "gray";
 
-      // Determine how to visually represent the value.
-      // If value is a string that appears to be an image URL, use an Image component.
-      let valueComponent: IAutoView.IAutoViewComponentProps;
-      if (
-        typeof value === "string" &&
-        /^(http|https):\/\/.*\.(jpg|jpeg|png|gif|svg)$/.test(value)
-      ) {
-        valueComponent = {
-          src: value,
-          type: "Image"
-        } as IAutoView.IAutoViewImageProps;
-      } else {
-        // Otherwise, use a Markdown component to render the value as formatted text.
-        // This keeps the UI visually engaging while still providing detailed data.
-        valueComponent = {
-          content: `**${key}:** ${JSON.stringify(value)}`,
-          type: "Markdown"
-        } as IAutoView.IAutoViewMarkdownProps;
+    // Badge to indicate number of unread messages.
+    const unreadBadge: IAutoView.IAutoViewBadgeProps = {
+      type: "Badge",
+      count: unreadCount,
+      showZero: false,
+      color: unreadCount > 0 ? "error" : "gray",
+      maxCount: 99,
+      childrenProps: {
+        type: "Icon",
+        id: "envelope",
+        size: 20,
+        color: unreadCount > 0 ? "red" : "gray"
       }
+    };
 
-      // For the label, we use a Markdown element that highlights the key.
-      const labelComponent: IAutoView.IAutoViewMarkdownProps = {
-        content: `**${key}**`,
-        type: "Markdown"
-      };
+    // Chip to indicate watch status of the session.
+    const watchChip: IAutoView.IAutoViewChipProps = {
+      type: "Chip",
+      label: watchStatus,
+      variant: "outlined",
+      size: "small",
+      color:
+        watchStatus === "all"
+          ? "success"
+          : watchStatus === "info"
+          ? "info"
+          : "gray"
+    };
 
-      // Append the new DataListItem to our array.
-      dataListItems.push({
-        label: labelComponent,
-        value: valueComponent,
-        type: "DataListItem"
-      });
-    }
-  }
+    return {
+      type: "ListItem",
+      // Use chatId or fallback if missing.
+      title: session.chatId || "[Unknown Chat]",
+      // Display last updated timestamp in description.
+      description: `Last updated: ${formatTimestamp(session.updatedAt)}`,
+      // Use a comment icon as the leading element.
+      startElement: {
+        type: "Icon",
+        id: "comment",
+        size: 24,
+        color: iconColor
+      },
+      // Show both unread badge and watch status chip on the right.
+      endElement: [unreadBadge, watchChip]
+    };
+  });
 
-  // Create a DataList component to display all key-value pairs in a list format.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    childrenProps: dataListItems,
-    type: "DataList"
+  // Compose the final List component with all chat sessions.
+  const listProps: IAutoView.IAutoViewListProps = {
+    type: "List",
+    childrenProps: items
   };
 
-  // Create a CardHeader component with an icon to make the UI visually appealing.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    title: "Data Overview",
-    description: "This card summarizes the input data visually.",
-    startElement: {
-      id: "info",  // assuming "info" is a valid icon name in kebab-case
-      type: "Icon",
-      size: 24,
-      color: "blue"
-    } as IAutoView.IAutoViewIconProps,
-    type: "CardHeader"
-  };
-
-  // Package the DataList inside a CardContent component.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    childrenProps: dataList,
-    type: "CardContent"
-  };
-
-  // Compose the final UI card as a VerticalCard, a container suited for responsive layouts.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    childrenProps: [cardHeader, cardContent],
-    type: "VerticalCard"
-  };
-
-  // Return the composed component structure to be rendered.
-  return verticalCard;
+  return listProps;
 }

@@ -1,70 +1,232 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace IPageIShoppingChannel {
-    /**
-     * A page.
-     *
-     * Collection of records with pagination indformation.
-    */
-    export type IHierarchical = {
+namespace Schema {
+    export namespace IPageIShoppingSaleReview {
+        /**
+         * A page.
+         *
+         * Collection of records with pagination indformation.
+        */
+        export type ISummary = {
+            /**
+             * Page information.
+             *
+             * @title Page information
+            */
+            pagination: Schema.IPage.IPagination;
+            /**
+             * List of records.
+             *
+             * @title List of records
+            */
+            data: Schema.IShoppingSaleReview.ISummary[];
+        };
+    }
+    export namespace IPage {
         /**
          * Page information.
-         *
-         * @title Page information
         */
-        pagination: IPage.IPagination;
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
+    export namespace IShoppingSaleReview {
         /**
-         * List of records.
-         *
-         * @title List of records
+         * Summarized information of the review.
         */
-        data: IShoppingChannel.IHierarchical[];
-    };
-}
-namespace IPage {
+        export type ISummary = {
+            /**
+             * Score of the review.
+             *
+             * @title Score of the review
+            */
+            score: number;
+            /**
+             * Customer who wrote the inquiry.
+             *
+             * @title Customer who wrote the inquiry
+            */
+            customer: Schema.IShoppingCustomer;
+            /**
+             * Formal answer for the inquiry by the seller.
+             *
+             * @title Formal answer for the inquiry by the seller
+            */
+            answer: null | any;
+            /**
+             * Whether the seller has viewed the inquiry or not.
+             *
+             * @title Whether the seller has viewed the inquiry or not
+            */
+            read_by_seller: boolean;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Title of the last snapshot.
+             *
+             * @title Title of the last snapshot
+            */
+            title: string;
+            /**
+             * Creation time of the article.
+             *
+             * @title Creation time of the article
+            */
+            created_at: string;
+            /**
+             * Modification time of the article.
+             *
+             * In other words, the time when the last snapshot was created.
+             *
+             * @title Modification time of the article
+            */
+            updated_at: string;
+        };
+    }
     /**
-     * Page information.
+     * Customer information, but not a person but a connection basis.
+     *
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
+     *
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
+     *
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
     */
-    export type IPagination = {
+    export type IShoppingCustomer = {
         /**
-         * Current page number.
+         * Discriminant for the type of customer.
          *
-         * @title Current page number
+         * @title Discriminant for the type of customer
         */
-        current: number & tags.Type<"int32">;
+        type: "customer";
         /**
-         * Limitation of records per a page.
+         * Membership information.
          *
-         * @title Limitation of records per a page
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
         */
-        limit: number & tags.Type<"int32">;
+        member: null | any;
         /**
-         * Total records in the database.
+         * Citizen information.
          *
-         * @title Total records in the database
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
         */
-        records: number & tags.Type<"int32">;
+        citizen: null | any;
         /**
-         * Total pages.
+         * Primary Key.
          *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
+         * @title Primary Key
         */
-        pages: number & tags.Type<"int32">;
+        id: string;
+        /**
+         * Belonged channel.
+         *
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
+         *
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
     };
-}
-namespace IShoppingChannel {
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
     /**
-     * Hierarchical channel information with children categories.
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IHierarchical = {
-        /**
-         * Children categories with hierarchical structure.
-         *
-         * @title Children categories with hierarchical structure
-        */
-        categories: IShoppingChannelCategory.IHierarchical[];
+    export type IShoppingChannel = {
         /**
          * Primary Key.
          *
@@ -90,57 +252,12 @@ namespace IShoppingChannel {
         */
         name: string;
     };
+    export type IShoppingExternalUser = any;
+    export namespace IShoppingSaleInquiryAnswer {
+        export type ISummary = any;
+    }
 }
-namespace IShoppingChannelCategory {
-    /**
-     * Hierarchical category information with children categories.
-    */
-    export type IHierarchical = {
-        /**
-         * List of children categories with hierarchical structure.
-         *
-         * @title List of children categories with hierarchical structure
-        */
-        children: IShoppingChannelCategory.IHierarchical[];
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Identifier code of the category.
-         *
-         * The code must be unique in the channel.
-         *
-         * @title Identifier code of the category
-        */
-        code: string;
-        /**
-         * Parent category's ID.
-         *
-         * @title Parent category's ID
-        */
-        parent_id: null | (string & tags.Format<"uuid">);
-        /**
-         * Representative name of the category.
-         *
-         * The name must be unique within the parent category. If no parent exists,
-         * then the name must be unique within the channel between no parent
-         * categories.
-         *
-         * @title Representative name of the category
-        */
-        name: string;
-        /**
-         * Creation time of record.
-         *
-         * @title Creation time of record
-        */
-        created_at: string;
-    };
-}
-type IAutoViewTransformerInputType = IPageIShoppingChannel.IHierarchical;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingSaleReview.ISummary;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -148,97 +265,86 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // The strategy of this transformer is to visually represent shopping channels in a responsive card layout.
-  // We use a VerticalCard container that includes a CardHeader (with pagination information)
-  // and a CardContent that embeds a DataList. Each channel is displayed as a DataListItem whose label combines an icon and the channel’s name,
-  // and whose value contains additional info (code and category count) rendered via a Text (or markdown) component.
-  
-  // Create the CardHeader component showing overall title and pagination info.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Shopping Channels",
-    description: `Page ${input.pagination.current} of ${input.pagination.pages} | Total channels: ${input.pagination.records}`,
-    // Use an icon to add a visual cue. Allowed types: Avatar, Icon, Chip, Badge, IconButton, Text.
-    startElement: {
-      type: "Icon",
-      id: "shopping-bag", // an icon representing a shopping bag (assumed to be available in your icon set)
-      color: "blue",
-      size: 24,
-    },
-  };
-
-  // Transform each channel into a DataListItem.
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = input.data.map((channel) => {
-    // Construct the label as an array of presentation components.
-    // Combine an icon and a text component for the channel name.
-    const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
-      {
-        type: "Icon",
-        id: "shopping-bag", // icon representing a channel
-        color: "indigo",
-        size: 20,
-      },
-      {
-        type: "Text",
-        content: channel.name,
-        variant: "h6",
-        color: "primary",
-      },
-    ];
-    
-    // Construct the value with channel code and the count of child categories.
-    // Using a markdown component to achieve styled text formatting in a mobile-friendly way.
-    const valueComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
-      {
-        type: "Markdown",
-        content: `**Code:** ${channel.code}  \n**Categories:** ${channel.categories ? channel.categories.length : 0}`,
-      },
-    ];
-    
-    return {
-      type: "DataListItem",
-      label: labelComponents,
-      value: valueComponents,
+    // Helper to format ISO date strings into a human-readable form
+    const formatDate = (iso: string): string => {
+        try {
+            const d = new Date(iso);
+            return d.toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+            });
+        } catch {
+            // Fallback to raw string if parsing fails
+            return iso;
+        }
     };
-  });
 
-  // Handle edge-case: if there are no channels available, show a single DataListItem indicating this.
-  if (dataListItems.length === 0) {
-    dataListItems.push({
-      type: "DataListItem",
-      label: [
-        {
-          type: "Text",
-          content: "No channels available",
-          variant: "body1",
-          color: "gray",
-        },
-      ],
-      value: [],
+    const reviews = input.data || [];
+
+    // If there are no reviews, provide a simple text notification
+    if (reviews.length === 0) {
+        return {
+            type: "Text",
+            variant: "body1",
+            content: "No reviews found.",
+        };
+    }
+
+    // Build a list of items for the List component
+    const listItems: IAutoView.IAutoViewListItemProps[] = reviews.map((review) => {
+        // Determine color of the score chip based on score thresholds
+        let scoreColor: IAutoView.IAutoViewChipProps["color"] = "primary";
+        if (review.score >= 4) scoreColor = "success";
+        else if (review.score >= 2) scoreColor = "warning";
+        else scoreColor = "error";
+
+        // Icon to indicate whether the seller has read the review
+        const readIcon: IAutoView.IAutoViewIconProps = {
+            type: "Icon",
+            id: review.read_by_seller ? "eye" : "eye-slash",
+            color: review.read_by_seller ? "green" : "gray",
+            size: 16,
+        };
+
+        // Avatar showing the channel as an initial or fallback text
+        const channelAvatar: IAutoView.IAutoViewAvatarProps = {
+            type: "Avatar",
+            name: review.customer.channel.name,
+            variant: "info",
+            size: 32,
+        };
+
+        // Secondary actions: score chip and read-status icon
+        const endElements: Array<IAutoView.IAutoViewChipProps | IAutoView.IAutoViewIconProps> = [
+            {
+                type: "Chip",
+                label: `Score: ${review.score}`,
+                color: scoreColor,
+                size: "small",
+                variant: "filled",
+            },
+            readIcon,
+        ];
+
+        return {
+            type: "ListItem",
+            // Primary text is the review title
+            title: review.title,
+            // Subtitle contains customer ID and creation date
+            description: `By ${review.customer.id} on ${formatDate(review.created_at)}`,
+            // Show the channel avatar on the left
+            startElement: channelAvatar,
+            // Show score and read-status on the right
+            endElement: endElements,
+            // Make each item linkable if desired (could be extended)
+            href: review.id ? `/reviews/${review.id}` : undefined,
+        };
     });
-  }
 
-  // Compose the DataList that will list all channels.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems,
-  };
-
-  // Place the DataList inside a CardContent container.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: [dataList],
-  };
-
-  // Finally, build the VerticalCard that contains the header and content.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [
-      cardHeader,
-      cardContent,
-    ],
-  };
-
-  // Return the composed UI component that adheres to the IAutoView.IAutoViewComponentProps type.
-  return verticalCard;
+    // Return a responsive List component containing all reviews
+    return {
+        type: "List",
+        childrenProps: listItems,
+    };
 }

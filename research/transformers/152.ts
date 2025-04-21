@@ -1,139 +1,393 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4WebhookView = {
-                webhook?: legacy.v4.LegacyV4Webhook;
-            };
-        }
+namespace Schema {
+    /**
+     * Reviews for sale snapshots.
+     *
+     * `IShoppingSaleReview` is a subtype entity of {@link IShoppingSaleInquiry},
+     * and is used when a {@link IShoppingCustomer customer} purchases a
+     * {@link IShoppingSale sale} ({@link IShoppingSaleSnapshot snapshot} at the time)
+     * registered by the {@link IShoppingSeller seller} as a product and leaves a
+     * review and rating for it.
+     *
+     * For reference, `IShoppingSaleReview` and
+     * {@link IShoppingOrderGod shopping_order_goods} have a logarithmic relationship
+     * of N: 1, but this does not mean that customers can continue to write reviews
+     * for the same product indefinitely. Wouldn't there be restrictions, such as
+     * if you write a review once, you can write an additional review a month later?
+    */
+    export type IShoppingSaleReview = {
+        /**
+         * Type of the derived inquiry.
+         *
+         * - `question`: {@link IShoppingSaleQuestion}
+         * - `review`: {@link IShoppingSaleReview}
+         *
+         * @title Type of the derived inquiry
+        */
+        type: "review";
+        /**
+         * Customer who wrote the inquiry.
+         *
+         * @title Customer who wrote the inquiry
+        */
+        customer: Schema.IShoppingCustomer;
+        /**
+         * Formal answer for the inquiry by the seller.
+         *
+         * @title Formal answer for the inquiry by the seller
+        */
+        answer: null | any;
+        /**
+         * Whether the seller has viewed the inquiry or not.
+         *
+         * @title Whether the seller has viewed the inquiry or not
+        */
+        read_by_seller: boolean;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * List of snapshot contents.
+         *
+         * It is created for the first time when an article is created, and is
+         * accumulated every time the article is modified.
+         *
+         * @title List of snapshot contents
+        */
+        snapshots: Schema.IShoppingSaleReview.ISnapshot[];
+        /**
+         * Creation time of article.
+         *
+         * @title Creation time of article
+        */
+        created_at: string;
+    };
+    export namespace IShoppingSaleReview {
+        /**
+         * Snapshot content of the review article.
+        */
+        export type ISnapshot = {
+            /**
+             * Score of the review.
+             *
+             * @title Score of the review
+            */
+            score: number;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or article.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Title of article.
+             *
+             * @title Title of article
+            */
+            title: string;
+            /**
+             * Content body of article.
+             *
+             * @title Content body of article
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
     }
-    export namespace v4 {
-        export type LegacyV4Webhook = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
+    /**
+     * Customer information, but not a person but a connection basis.
+     *
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
+     *
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
+     *
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
+    */
+    export type IShoppingCustomer = {
+        /**
+         * Discriminant for the type of customer.
+         *
+         * @title Discriminant for the type of customer
+        */
+        type: "customer";
+        /**
+         * Membership information.
+         *
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
+        */
+        member: null | any;
+        /**
+         * Citizen information.
+         *
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
+        */
+        citizen: null | any;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Belonged channel.
+         *
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
+         *
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
+    };
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier code.
+         *
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Name of the channel.
+         *
+         * @title Name of the channel
+        */
+        name: string;
+    };
+    export type IShoppingExternalUser = any;
+    export type IShoppingSaleInquiryAnswer = any;
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
             name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
             url: string;
-            token?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            watchUserChats?: boolean;
-            watchGroups?: boolean;
-            apiVersion: string;
-            lastBlockedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            blocked?: boolean;
         };
     }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4WebhookView;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleReview;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
+// Function to transform a Schema.IShoppingSaleReview into an AutoView component tree.
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract the webhook data from input
-  const webhook = input.webhook;
+  // Safely pick the latest snapshot or provide a minimal fallback.
+  const snapshots = input.snapshots || [];
+  const latestSnapshot = snapshots.length > 0
+    ? snapshots[snapshots.length - 1]
+    : {
+        id: "",
+        score: 0,
+        title: "",
+        body: "",
+        format: "txt" as const,
+        created_at: input.created_at,
+        files: [],
+      };
 
-  // If no webhook data is provided, return a simple VerticalCard indicating this.
-  if (!webhook) {
-    return {
-      type: "VerticalCard",
-      childrenProps: {
-        type: "CardContent",
-        // Use a Markdown component to display a message when there's no data
-        childrenProps: {
-          type: "Markdown",
-          content: "## No Webhook Data Available\n\nThere is no webhook data to display at the moment."
-        }
-      }
-    };
+  // Attempt to extract a human‐readable name for the reviewer.
+  // If 'citizen' or 'member' objects contain a 'name' property, use it.
+  // Otherwise, fall back to the raw customer ID.
+  let reviewerName = input.customer.id;
+  if (input.customer.citizen && (input.customer.citizen as any).name) {
+    reviewerName = (input.customer.citizen as any).name;
+  } else if (input.customer.member && (input.customer.member as any).name) {
+    reviewerName = (input.customer.member as any).name;
   }
-  
-  // Prepare markdown content for the webhook details.
-  // Only include the fields that are present.
-  const details: string[] = [];
-  
-  if (webhook.id) {
-    details.push(`- **ID:** \`${webhook.id}\``);
-  }
-  if (webhook.channelId) {
-    details.push(`- **Channel ID:** \`${webhook.channelId}\``);
-  }
-  if (webhook.url) {
-    details.push(`- **URL:** [${webhook.url}](${webhook.url})`);
-  }
-  if (webhook.token) {
-    // Token is sensitive; display only a masked version if needed.
-    details.push(`- **Token:** \`${webhook.token.substr(0, 4)}****\``);
-  }
-  if (webhook.keywords && webhook.keywords.length > 0) {
-    details.push(`- **Keywords:** ${webhook.keywords.map(k => `\`${k}\``).join(", ")}`);
-  }
-  if (typeof webhook.watchUserChats === "boolean") {
-    details.push(`- **Watch User Chats:** ${webhook.watchUserChats ? "Yes" : "No"}`);
-  }
-  if (typeof webhook.watchGroups === "boolean") {
-    details.push(`- **Watch Groups:** ${webhook.watchGroups ? "Yes" : "No"}`);
-  }
-  if (webhook.apiVersion) {
-    details.push(`- **API Version:** \`${webhook.apiVersion}\``);
-  }
-  if (webhook.lastBlockedAt) {
-    // Convert timestamp to a readable date format if possible.
-    const dateStr = new Date(webhook.lastBlockedAt).toLocaleString();
-    details.push(`- **Last Blocked At:** \`${dateStr}\``);
-  }
-  if (typeof webhook.blocked === "boolean") {
-    details.push(`- **Blocked:** ${webhook.blocked ? "Yes" : "No"}`);
-  }
-  
-  // Combine the details into a single markdown string.
-  const markdownContent = [
-    `## Webhook Details`,
-    "",
-    ...details
-  ].join("\n");
 
-  // Compose the UI components
-  // A VerticalCard is used to support responsive layout.
+  // Format the review timestamp for display.
+  const reviewDateStr = new Date(latestSnapshot.created_at).toLocaleDateString();
+
+  // Color‐code the score: green for high, amber for medium, red for low.
+  const scoreColor: IAutoView.IAutoViewChipProps["color"] =
+    latestSnapshot.score >= 4
+      ? "success"
+      : latestSnapshot.score >= 2
+      ? "warning"
+      : "error";
+
+  // Compose a vertical card that contains:
+  // 1. CardHeader with avatar, title, and date.
+  // 2. CardContent showing the review body as markdown.
+  // 3. CardFooter with a score chip and metadata.
   return {
     type: "VerticalCard",
     childrenProps: [
+      // Header: reviewer avatar + title + review date
       {
-        // CardHeader component for displaying the webhook's main information.
         type: "CardHeader",
-        title: webhook.name,
-        description: webhook.apiVersion ? `API Version: ${webhook.apiVersion}` : undefined,
-        // startElement is set to an Icon to visually represent a webhook/link.
+        title: latestSnapshot.title || "No Title",
+        description: `Reviewed on ${reviewDateStr}`,
         startElement: {
-          type: "Icon",
-          id: "link", // Assuming "link" is a valid icon id in the icon set.
-          color: "blue",
-          size: 24
-        }
+          type: "Avatar",
+          name: reviewerName,
+          variant: "primary",
+          size: 40,
+        },
       },
+      // Content: markdown body for rich text
       {
-        // CardContent component for displaying detailed webhook info using Markdown.
         type: "CardContent",
         childrenProps: {
           type: "Markdown",
-          content: markdownContent
-        }
-      }
-    ]
+          content: latestSnapshot.body || "_No content provided_",
+        },
+      },
+      // Footer: score chip + channel + exact timestamp
+      {
+        type: "CardFooter",
+        childrenProps: [
+          {
+            type: "Chip",
+            label: String(latestSnapshot.score),
+            startElement: {
+              type: "Icon",
+              id: "star",
+              color: "yellow",
+            },
+            variant: "filled",
+            color: scoreColor,
+          },
+          {
+            type: "Text",
+            variant: "caption",
+            color: "secondary",
+            content: `Channel: ${input.customer.channel.name}`,
+          },
+          {
+            type: "Text",
+            variant: "caption",
+            color: "tertiary",
+            content: `At: ${latestSnapshot.created_at}`,
+          },
+        ],
+      },
+    ],
   };
 }

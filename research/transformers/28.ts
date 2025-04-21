@@ -1,96 +1,31 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * Category of channel.
- *
- * `IShoppingChannelCategory` is a concept that refers to classification
- * categories within a specific {@link IShoppingChannel channel}, and is exactly
- * the same as the concept commonly referred to as "category" in shopping malls.
- *
- * And `IShoppingChannelCategory` is different with {@link IShoppingSection}.
- * {@link IShoppingSection} refers to a "corner" that is independent spatial
- * information in the offline market, which cannot simultaneously classified in
- * a {@link IShoppingSale sale}. Besides, `IShoppingChannelCategory` can be
- * classified into multiple categories in a sale simultaneously.
- *
- * Product	| Section (corner) | Categories
- * ---------|------------------|-----------------------------------
- * Beef	    | Butcher corner   | Frozen food, Meat, Favorite food
- * Grape    | Fruit corner     | Fresh food, Favorite food
- *
- * In addition, as `IShoppingChannelCategory` has 1:N self recursive relationship,
- * it is possible to express below hierarchical structures. Thus, each channel
- * can set their own category classification as they want.
- *
- * - Food > Meat > Frozen
- * - Electronics > Notebook > 15 inches
- * - Miscellaneous > Wallet
- *
- * Furthermore, `IShoppingChannelCategory` is designed to merge between themselves,
- * so there is no burden to edit the category at any time.
-*/
-type IShoppingChannelCategory = {
+namespace Schema {
     /**
-     * Parent category info.
+     * A comment written on an inquiry article.
      *
-     * @title Parent category info
+     * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
+     * and is used when you want to communicate with multiple people about an
+     * {@link IShoppingSaleInquiry inquiry} written by a
+     * {@link IShoppingCustomer customer}.
+     *
+     * For reference, only related parties can write comments for
+     * {@link IShoppingSeller sellers}, but there is no limit to
+     * {@link IShoppingCustomer customers}. In other words, anyone customer can
+     * freely write a comment, even if they are not the person who wrote the inquiry.
     */
-    parent: null | any;
-    /**
-     * List of children categories with hierarchical structure.
-     *
-     * @title List of children categories with hierarchical structure
-    */
-    children: IShoppingChannelCategory.IHierarchical[];
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Identifier code of the category.
-     *
-     * The code must be unique in the channel.
-     *
-     * @title Identifier code of the category
-    */
-    code: string;
-    /**
-     * Parent category's ID.
-     *
-     * @title Parent category's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * Representative name of the category.
-     *
-     * The name must be unique within the parent category. If no parent exists,
-     * then the name must be unique within the channel between no parent
-     * categories.
-     *
-     * @title Representative name of the category
-    */
-    name: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-};
-namespace IShoppingChannelCategory {
-    export type IInvert = any;
-    /**
-     * Hierarchical category information with children categories.
-    */
-    export type IHierarchical = {
+    export type IShoppingSaleInquiryComment = {
         /**
-         * List of children categories with hierarchical structure.
+         * Writer of the comment.
          *
-         * @title List of children categories with hierarchical structure
+         * Both customer and seller can write comment on the sale inquiry.
+         *
+         * By the way, no restriction on the customer, but seller must be the
+         * person who've registered the sale.
+         *
+         * @title Writer of the comment
         */
-        children: IShoppingChannelCategory.IHierarchical[];
+        writer: any | any | any;
         /**
          * Primary Key.
          *
@@ -98,38 +33,109 @@ namespace IShoppingChannelCategory {
         */
         id: string;
         /**
-         * Identifier code of the category.
+         * Parent comment's ID.
          *
-         * The code must be unique in the channel.
-         *
-         * @title Identifier code of the category
-        */
-        code: string;
-        /**
-         * Parent category's ID.
-         *
-         * @title Parent category's ID
+         * @title Parent comment's ID
         */
         parent_id: null | (string & tags.Format<"uuid">);
         /**
-         * Representative name of the category.
+         * List of snapshot contents.
          *
-         * The name must be unique within the parent category. If no parent exists,
-         * then the name must be unique within the channel between no parent
-         * categories.
+         * It is created for the first time when a comment being created, and is
+         * accumulated every time the comment is modified.
          *
-         * @title Representative name of the category
+         * @title List of snapshot contents
         */
-        name: string;
+        snapshots: Schema.IBbsArticleComment.ISnapshot[];
         /**
-         * Creation time of record.
+         * Creation time of comment.
          *
-         * @title Creation time of record
+         * @title Creation time of comment
         */
         created_at: string;
     };
+    export namespace IShoppingAdministrator {
+        export type IInvert = any;
+    }
+    export type IShoppingCustomer = any;
+    export namespace IShoppingSeller {
+        export type IInvert = any;
+    }
+    export namespace IBbsArticleComment {
+        /**
+         * Snapshot of comment.
+         *
+         * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
+         * the contents of the comment.
+         *
+         * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
+         * and prevent fraud.
+        */
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or comment.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Content body of comment.
+             *
+             * @title Content body of comment
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
+    }
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
+            name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
+        };
+    }
 }
-type IAutoViewTransformerInputType = IShoppingChannelCategory;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleInquiryComment;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -137,75 +143,86 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // We use a vertical card to display the category details.
-  // The card header will show the main category name and a representative icon.
-  // The card content will show additional details in markdown format,
-  // and, if any, a data list of the immediate children categories.
+  // Sort snapshots chronologically and pick the latest
+  const sortedSnapshots = [...input.snapshots].sort((a, b) =>
+    a.created_at.localeCompare(b.created_at)
+  );
+  const latestSnapshot = sortedSnapshots[sortedSnapshots.length - 1];
 
-  // Build the card header with an icon representing a category.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: input.name,
-    description: `Code: ${input.code}`,
-    // Use an icon as the start element for a more visual UI.
-    // "category" is a generic icon meant to represent a category.
-    startElement: {
-      type: "Icon",
-      id: "category", // the icon id in kebab-case; adjust if necessary to match available icons
-      color: "blue",
-      size: 16,
-    },
-  };
-
-  // Build a markdown component to show details about the category.
-  // Markdown is used here to avoid plain text rendering.
-  const detailsMarkdown: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: `**ID**: ${input.id}\n\n**Parent ID**: ${input.parent_id ? input.parent_id : "None"}\n\n**Created At**: ${input.created_at}`,
-  };
-
-  // If there are any child categories, build a data list component.
-  let childrenDataList: IAutoView.IAutoViewDataListProps | null = null;
-  if (input.children && input.children.length > 0) {
-    // Map each child into a DataListItem with a visual start element.
-    const childrenItems: IAutoView.IAutoViewDataListItemProps[] = input.children.map((child) => {
-      return {
-        type: "DataListItem",
-        // Display the child's name as the title.
-        title: child.name,
-        // Use the child's code as a brief description.
-        description: `Code: ${child.code}`,
-        // Add an icon to indicate this is a nested sub-category.
-        startElement: {
-          type: "Icon",
-          id: "subdirectory-arrow-right", // generic icon id to show child relation
-          color: "gray",
-          size: 12,
-        },
-      };
-    });
-    childrenDataList = {
+  // Helper to render attachment list if files are present
+  function renderAttachments() : IAutoView.IAutoViewDataListProps | undefined {
+    if (!latestSnapshot || !latestSnapshot.files || latestSnapshot.files.length === 0) {
+      return undefined;
+    }
+    return {
       type: "DataList",
-      childrenProps: childrenItems,
+      childrenProps: latestSnapshot.files.map((file) => {
+        // Compose a button linking to the file URL, labeled by its full name
+        const fileName = file.extension ? `${file.name}.${file.extension}` : file.name;
+        return {
+          type: "DataListItem",
+          label: {
+            type: "Icon",
+            id: "file",
+            color: "gray",
+            size: 20
+          },
+          value: {
+            type: "Button",
+            variant: "text",
+            label: fileName,
+            href: file.url
+          }
+        };
+      })
     };
   }
 
-  // Compose the main card content.
-  // We embed both the details markdown and, if available, the children list within the card content.
-  // Since CardContent's childrenProps accepts any presentation component,
-  // we can include both IAutoViewMarkdownProps and IAutoViewDataListProps.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: childrenDataList ? [detailsMarkdown, childrenDataList] : detailsMarkdown,
-  };
+  // Build the list of children for the card content
+  const contentChildren: IAutoView.IAutoViewPresentationComponentProps[] = [];
 
-  // Finally, assemble the vertical card.
-  // VerticalCard accepts children such as CardHeader and CardContent.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  if (latestSnapshot) {
+    // Use Markdown component for the body (supports md, txt, html)
+    contentChildren.push({
+      type: "Markdown",
+      content: latestSnapshot.body
+    });
+    // Push attachments list if any
+    const attachmentsList = renderAttachments();
+    if (attachmentsList) {
+      contentChildren.push(attachmentsList);
+    }
+  } else {
+    // Fallback text if there is no snapshot
+    contentChildren.push({
+      type: "Text",
+      content: "No content available.",
+      variant: "body2"
+    });
+  }
+
+  // Main UI: a vertical card showing writer, timestamp, content, and attachments
+  return {
     type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent],
+    childrenProps: [
+      {
+        type: "CardHeader",
+        // Display writer identity as the title (fallback to string conversion)
+        title: String(input.writer),
+        // Show creation time of the comment
+        description: `Posted at ${new Date(input.created_at).toLocaleString()}`,
+        // Use an avatar with the writer's name initials
+        startElement: {
+          type: "Avatar",
+          name: String(input.writer),
+          variant: "gray",
+          size: 32
+        }
+      },
+      {
+        type: "CardContent",
+        childrenProps: contentChildren
+      }
+    ]
   };
-
-  // Return the composed UI component props.
-  return verticalCard;
 }

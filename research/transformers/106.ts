@@ -1,48 +1,96 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type IShoppingMileageDonation = {
-    id: string & tags.Format<"uuid">;
-    administrator: IShoppingAdministrator.IInvert;
-    citizen: IShoppingCitizen;
-    value: number;
-    reason: string;
-    created_at: string & tags.Format<"date-time">;
-};
-namespace IShoppingAdministrator {
+namespace Schema {
     /**
-     * Invert information starting from administrator info.
+     * Snapshot record of sale.
      *
-     * Instead of accessing to the administrator information from the
-     * {@link IShoppingCustomer.member} -> {@link IShoppingMember.administrator},
-     * `IShoppingAdministrator.IInvert` starts from the administrator information
-     * and access to the customer, member and {@link IShoppingCitizen citizen}
-     * information inversely.
+     * `IShoppingSaleSnapshot` is an entity that embodies a snapshot of a sale,
+     * and the ERD (Entity Relationship Diagram) describes the role of the
+     * `shopping_sale_snapshots` table as follows:
+     *
+     * > {@link IShoppingSale shopping_sales} is an entity that embodies
+     * > "product sales" (sales) information registered by the
+     * > {@link IShoppingSeller seller}. And the main information of the sale is
+     * > recorded in the sub `shopping_sale_snapshots`, not in the main
+     * > {@link IShoppingSale shopping_sales}. When a seller changes a previously
+     * > registered item, the existing {@link IShoppingSale shopping_sales} record
+     * > is not changed, but a new snapshot record is created.
+     * >
+     * > This is to preserve the {@link IShoppingCustomer customer}'s
+     * > {@link IShoppingOrder purchase history} flawlessly after the customer
+     * > purchases a specific item, even if the seller changes the components or price
+     * > of the item. It is also intended to support sellers in so-called A/B testing,
+     * > which involves changing components or prices and measuring the performance
+     * > in each case.
+     *
+     * By the way, DTO (Data Transfer Object) level used by the front-end developer,
+     * it does not distinguish {@link IShoppingSale} and `IShoppingSaleSnapshot`
+     * strictly, and generally handles {@link IShoppingSale} and snapshot together.
+     *
+     * But even though the DTO level does not strictly distinguish them, the word and
+     * concept of "snapshot" is still important, so it is recommended to understand
+     * the concept of "snapshot" properly.
     */
-    export type IInvert = {
+    export type IShoppingSaleSnapshot = {
         /**
-         * Discriminant for the type of customer.
+         * Primary Key of Sale.
          *
-         * @title Discriminant for the type of customer
+         * @title Primary Key of Sale
         */
-        type: "administrator";
+        id: string;
         /**
-         * Membership joining information.
+         * Primary Key of Snapshot.
          *
-         * @title Membership joining information
+         * @title Primary Key of Snapshot
         */
-        member: IShoppingMember.IInvert;
+        snapshot_id: string;
         /**
-         * Customer, the connection information.
+         * Whether the snapshot is the latest one or not.
          *
-         * @title Customer, the connection information
+         * @title Whether the snapshot is the latest one or not
         */
-        customer: IShoppingCustomer.IInvert;
+        latest: boolean;
         /**
-         * Real-name and mobile number authentication information.
+         * Description and image content describing the sale.
          *
-         * @title Real-name and mobile number authentication information
+         * @title Description and image content describing the sale
         */
-        citizen: IShoppingCitizen;
+        content: Schema.IShoppingSaleContent;
+        /**
+         * List of categories.
+         *
+         * Which categories the sale is registered to.
+         *
+         * @title List of categories
+        */
+        categories: Schema.IShoppingChannelCategory.IInvert[];
+        /**
+         * List of search tags.
+         *
+         * @title List of search tags
+        */
+        tags: string[];
+        /**
+         * List of units.
+         *
+         * Records about individual product composition information that are sold
+         * in the sale. Each {@link IShoppingSaleUnit unit} record has configurable
+         * {@link IShoppingSaleUnitOption options},
+         * {@link IShoppingSaleUnitOptionCandidate candidate} values for each
+         * option, and {@link IShoppingSaleUnitStock final stocks} determined by
+         * selecting every candidate values of each option.
+         *
+         * @title List of units
+        */
+        units: Schema.IShoppingSaleUnit[];
+    };
+    /**
+     * Content information of sale snapshot.
+     *
+     * `IShoppingSaleContent` is an entity embodies the description contents
+     * of {@link IShoppingSale}.
+    */
+    export type IShoppingSaleContent = {
         /**
          * Primary Key.
          *
@@ -50,26 +98,50 @@ namespace IShoppingAdministrator {
         */
         id: string;
         /**
-         * Creation time of record.
+         * Title of the content.
          *
-         * Another words, the time when the administrator has signed up.
-         *
-         * @title Creation time of record
+         * @title Title of the content
         */
-        created_at: string;
+        title: string;
+        /**
+         * Format of the body content.
+         *
+         * Same meaning with file extension like `html`, `md`, and `txt`.
+         *
+         * @title Format of the body content
+        */
+        format: "html" | "md" | "txt";
+        /**
+         * The main body content.
+         *
+         * Format follows the {@link format}, and default is `md` (markdown).
+         *
+         * @title The main body content
+        */
+        body: string;
+        /**
+         * List of attached files.
+         *
+         * @title List of attached files
+        */
+        files: Schema.IAttachmentFile[];
+        /**
+         * List of thumbnails.
+         *
+         * @title List of thumbnails
+        */
+        thumbnails: Schema.IAttachmentFile[];
     };
-}
-namespace IShoppingMember {
     /**
-     * Invert information of member.
+     * Attachment File.
      *
-     * This invert member information has been designed to be used for another
-     * invert information of sellers and administrators like below.
+     * Every attachment files that are managed in current system.
      *
-     * - {@link IShoppingSeller.IInvert}
-     * - {@link IShoppingAdministrator.IInvert}
+     * For reference, it is possible to omit one of file {@link name}
+     * or {@link extension} like `.gitignore` or `README` case, but not
+     * possible to omit both of them.
     */
-    export type IInvert = {
+    export type IAttachmentFile = {
         /**
          * Primary Key.
          *
@@ -77,65 +149,125 @@ namespace IShoppingMember {
         */
         id: string;
         /**
-         * Nickname that uniquely identifies the member.
+         * Creation time of attachment file.
          *
-         * @title Nickname that uniquely identifies the member
-        */
-        nickname: string;
-        /**
-         * List of emails.
-         *
-         * @title List of emails
-        */
-        emails: IShoppingMemberEmail[];
-        /**
-         * Creation time of record.
-         *
-         * Another words, the time when the member has signed up.
-         *
-         * @title Creation time of record
+         * @title Creation time of attachment file
         */
         created_at: string;
+        /**
+         * File name, except extension.
+         *
+         * If there's file `.gitignore`, then its name is an empty string.
+         *
+         * @title File name, except extension
+        */
+        name: string;
+        /**
+         * Extension.
+         *
+         * Possible to omit like `README` case.
+         *
+         * @title Extension
+        */
+        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+        /**
+         * URL path of the real file.
+         *
+         * @title URL path of the real file
+        */
+        url: string;
     };
-}
-/**
- * Email address of member.
- *
- * This shopping mall system allows multiple email addresses to be
- * registered for one {@link IShoppingMember member}. If you don't have to
- * plan such multiple email addresses, just use only one.
-*/
-type IShoppingMemberEmail = {
+    export namespace IShoppingChannelCategory {
+        /**
+         * Invert category information with parent category.
+        */
+        export type IInvert = {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | any;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
     /**
-     * Primary Key.
+     * Product composition information handled in the sale.
      *
-     * @title Primary Key
+     * `IShoppingSaleUnit` is an entity that embodies the "individual product"
+     * information handled in the {@link IShoppingSale sale}.
+     *
+     * For reference, the reason why `IShoppingSaleUnit` is separated from
+     * {@link IShoppingSaleSnapshot} by an algebraic relationship of 1: N is because
+     * there are some cases where multiple products are sold in one listing. This is
+     * the case with so-called "bundled products".
+     *
+     * - Bundle from regular product (Mackbook Set)
+     *   - Main Body
+     *   - Keyboard
+     *   - Mouse
+     *   - Apple Care (Free A/S Voucher)
+     *
+     * And again, `IShoppingSaleUnit` does not in itself refer to the
+     * {@link IShoppingSaleUnitStock final stock} that the
+     * {@link IShoppingCustomer customer} will {@link IShoppingOrder purchase}.
+     * The final stock can be found only after selecting all given
+     * {@link IShoppingSaleUnitOption options} and their
+     * {@link IShoppingSaleUnitOptionCandidate candidate values}.
+     *
+     * For example, even if you buy a Macbook, the final stocks are determined only
+     * after selecting all the options (CPU / RAM / SSD), etc.
     */
-    id: string;
-    /**
-     * Email address value.
-     *
-     * @title Email address value
-    */
-    value: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-};
-namespace IShoppingCustomer {
-    /**
-     * Inverted customer information.
-     *
-     * This inverted customer information has been designed to be used for
-     * another invert information of sellers and administrators like below.
-     *
-     * - {@link IShoppingSeller.IInvert}
-     * - {@link IShoppingAdministrator.IInvert}
-    */
-    export type IInvert = {
+    export type IShoppingSaleUnit = {
+        /**
+         * List of options.
+         *
+         * @title List of options
+        */
+        options: (any | any)[];
+        /**
+         * List of final stocks.
+         *
+         * @title List of final stocks
+        */
+        stocks: Schema.IShoppingSaleUnitStock[];
         /**
          * Primary Key.
          *
@@ -143,132 +275,163 @@ namespace IShoppingCustomer {
         */
         id: string;
         /**
-         * Belonged channel.
+         * Representative name of the unit.
          *
-         * @title Belonged channel
+         * @title Representative name of the unit
         */
-        channel: IShoppingChannel;
+        name: string;
         /**
-         * External user information.
+         * Whether the unit is primary or not.
          *
-         * When the customer has come from an external service.
+         * Just a labeling value.
          *
-         * @title External user information
+         * @title Whether the unit is primary or not
         */
-        external_user: null | any;
+        primary: boolean;
         /**
-         * Connection address.
+         * Whether the unit is required or not.
          *
-         * Same with {@link window.location.href} of client.
+         * When the unit is required, the customer must select the unit. If do not
+         * select, customer can't buy it.
          *
-         * @title Connection address
+         * For example, if there's a sale "Macbook Set" and one of the unit is the
+         * "Main Body", is it possible to buy the "Macbook Set" without the
+         * "Main Body" unit? This property is for that case.
+         *
+         * @title Whether the unit is required or not
         */
-        href: string;
+        required: boolean;
+    };
+    export type IShoppingSaleUnitSelectableOption = any;
+    export type IShoppingSaleUnitDescriptiveOption = any;
+    /**
+     * Final component information on units for sale.
+     *
+     * `IShoppingSaleUnitStock` is a subsidiary entity of {@link IShoppingSaleUnit}
+     * that represents a product catalog for sale, and is a kind of final stock that is
+     * constructed by selecting all {@link IShoppingSaleUnitSelectableOption options}
+     * (variable "select" type) and their
+     * {@link IShoppingSaleUnitOptionCandidate candidate} values in the belonging unit.
+     * It is the "good" itself that customers actually purchase.
+     *
+     * - Product Name) MacBook
+     *   - Options
+     *     - CPU: { i3, i5, i7, i9 }
+     *     - RAM: { 8GB, 16GB, 32GB, 64GB, 96GB }
+     *     - SSD: { 256GB, 512GB, 1TB }
+     *   - Number of final stocks: 4 * 5 * 3 = 60
+     *
+     * For reference, the total number of `IShoppingSaleUnitStock` records in an
+     * attribution unit can be obtained using Cartesian Product. In other words, the
+     * value obtained by multiplying all the candidate values that each
+     * (variable "select" type) option can have by the number of cases is the total
+     * number of final stocks in the unit.
+     *
+     * Of course, without a single variable "select" type option, the final stocks
+     * count in the unit is only 1.
+    */
+    export type IShoppingSaleUnitStock = {
         /**
-         * Referrer address.
+         * Primary Key.
          *
-         * Same with {@link window.document.referrer} of client.
-         *
-         * @title Referrer address
+         * @title Primary Key
         */
-        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        id: string;
         /**
-         * Connection IP Address.
+         * Representative name of the stock.
          *
-         * @title Connection IP Address
+         * @title Representative name of the stock
         */
-        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        name: string;
         /**
-         * Creation time of the connection record.
+         * Price of the stock.
          *
-         * @title Creation time of the connection record
+         * @title Price of the stock
         */
-        created_at: string;
+        price: Schema.IShoppingPrice;
+        /**
+         * Current inventory status of the stock.
+         *
+         * @title Current inventory status of the stock
+        */
+        inventory: Schema.IShoppingSaleUnitStockInventory;
+        /**
+         * List of choices.
+         *
+         * Which candidate values being chosen for each option.
+         *
+         * @title List of choices
+        */
+        choices: Schema.IShoppingSaleUnitStockChoice[];
+    };
+    /**
+     * Shopping price interface.
+    */
+    export type IShoppingPrice = {
+        /**
+         * Nominal price.
+         *
+         * This is not {@link real real price} to pay, but just a nominal price to show.
+         * If this value is greater than the {@link real real price}, it would be shown
+         * like {@link IShoppingSeller seller} is giving a discount.
+         *
+         * @title Nominal price
+        */
+        nominal: number;
+        /**
+         * Real price to pay.
+         *
+         * @title Real price to pay
+        */
+        real: number;
+    };
+    /**
+     * Inventory information of a final stock.
+    */
+    export type IShoppingSaleUnitStockInventory = {
+        /**
+         * Total income quantity.
+         *
+         * @title Total income quantity
+        */
+        income: number & tags.Type<"int32">;
+        /**
+         * Total outcome quantity.
+         *
+         * @title Total outcome quantity
+        */
+        outcome: number & tags.Type<"int32">;
+    };
+    /**
+     * Selection information of final stock.
+     *
+     * `IShoppingSaleUnitStockChoice` is an entity that represents which
+     * {@link IShoppingSaleUnitSelectableOption option} of each variable "select"
+     * type was selected for each {@link IShoppingSaleUnitStock stock} and which
+     * {@link IShoppingSaleUnitOptionCandidate candidate value} was selected within
+     * it.
+     *
+     * Of course, if the bound {@link IShoppingSaleUnit unit} does not have any
+     * options, this entity can also be ignored.
+    */
+    export type IShoppingSaleUnitStockChoice = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Target option's {@link IShoppingSaleUnitOption.id}
+        */
+        option_id: string;
+        /**
+         * Target candidate's {@link IShoppingSaleUnitOptionCandidate.id}
+        */
+        candidate_id: string;
     };
 }
-/**
- * Channel information.
- *
- * `IShoppingChannel` is a concept that shapes the distribution channel in the
- * market. Therefore, the difference in the channel in this e-commerce system
- * means that it is another site or application.
- *
- * By the way, if your shopping mall system requires only one channel, then
- * just use only one. This concept is designed to be expandable in the future.
-*/
-type IShoppingChannel = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-    /**
-     * Identifier code.
-     *
-     * @title Identifier code
-    */
-    code: string;
-    /**
-     * Name of the channel.
-     *
-     * @title Name of the channel
-    */
-    name: string;
-};
-type IShoppingExternalUser = any;
-/**
- * Citizen verification information.
- *
- * `IShoppingCitizen` is an entity that records the user's
- * {@link name real name} and {@link mobile} input information.
- *
- * For reference, in South Korea, real name authentication is required for
- * e-commerce participants, so the name attribute is important. However, the
- * situation is different overseas, so in reality, mobile attributes are the
- * most important, and identification of individual person is also done based
- * on this mobile.
- *
- * Of course, real name and mobile phone authentication information are
- * encrypted and stored.
-*/
-type IShoppingCitizen = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-    /**
-     * Mobile number.
-     *
-     * @title Mobile number
-    */
-    mobile: string & tags.JsonSchemaPlugin<{
-        "x-wrtn-payment-order-mobile": true
-    }>;
-    /**
-     * Real name, or equivalent nickname.
-     *
-     * @title Real name, or equivalent nickname
-    */
-    name: string & tags.JsonSchemaPlugin<{
-        "x-wrtn-payment-order-citizen": true
-    }>;
-};
-type IAutoViewTransformerInputType = IShoppingMileageDonation;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleSnapshot;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -276,75 +439,91 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // We aggregate the donation information into a visually engaging vertical card.
-  // The vertical card contains:
-  // - A card header with an icon, title, and an avatar extracted from the administrator's member nickname.
-  // - Card content using a markdown component to render donation details in a formatted way.
-  // - A card footer showing supplemental information such as the administrator's signup date.
-  
-  // Create a card header component.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // 1. Prepare CardHeader with title and a note about the content format
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: "Donation Record",
-    // Display the donation amount in the description.
-    description: `Donation: $${input.value}`,
-    // Use an icon to visually represent the donation.
-    startElement: {
-      type: "Icon",
-      id: "gift",  // using a "gift" icon to symbolize donation
-      color: "blue",
-      size: 24
-    },
-    // Use an avatar representing the administrator's member nickname.
-    endElement: {
-      type: "Avatar",
-      name: input.administrator.member.nickname,
-      size: 40,
-      variant: "primary"  // you can choose a variant to style the avatar
-    }
+    title: input.content.title,
+    // Show the body format (e.g., MD, HTML) as a subtitle
+    description: `Format: ${input.content.format.toUpperCase()}`,
   };
 
-  // Compose markdown content to display detailed donation information.
-  const markdownContent = `
-## Donation Details
+  // 2. If there's at least one thumbnail, render it as CardMedia
+  const firstThumbnailUrl = input.content.thumbnails?.[0]?.url;
+  const media: IAutoView.IAutoViewCardMediaProps | undefined = firstThumbnailUrl
+    ? {
+        type: "CardMedia",
+        src: firstThumbnailUrl,
+      }
+    : undefined;
 
-- **Donation ID:** ${input.id}
-- **Amount:** $${input.value}
-- **Reason:** ${input.reason}
-- **Created At:** ${input.created_at}
-
-### Citizen Information
-- **Name:** ${input.citizen.name}
-- **Mobile:** ${input.citizen.mobile}
-`;
-
-  // Create a card content component with markdown presentation.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
+  // 3. Show the main body as markdown for rich text rendering
+  const content: IAutoView.IAutoViewCardContentProps = {
     type: "CardContent",
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent
-    }
+    childrenProps: [
+      {
+        type: "Markdown",
+        content: input.content.body,
+      },
+    ],
   };
 
-  // Create a card footer component to show additional administrative info.
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
+  // 4. Build a ChipGroup for categories (outlined style)
+  const categoryGroup: IAutoView.IAutoViewChipGroupProps = {
+    type: "ChipGroup",
+    childrenProps: input.categories.map((cat) => ({
+      type: "Chip",
+      label: cat.name,
+      variant: "outlined",
+    })),
+  };
+
+  // 5. Build a ChipGroup for search tags (filled style)
+  const tagGroup: IAutoView.IAutoViewChipGroupProps = {
+    type: "ChipGroup",
+    childrenProps: input.tags.map((t) => ({
+      type: "Chip",
+      label: t,
+      variant: "filled",
+    })),
+  };
+
+  // 6. For each unit, compute a price range and render it in a data list
+  const unitList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: input.units.map((unit) => {
+      // Extract all final-stock real prices
+      const prices = unit.stocks.map((s) => s.price.real);
+      const min = Math.min(...prices);
+      const max = Math.max(...prices);
+      const priceText =
+        min === max
+          ? `$${min.toFixed(2)}`
+          : `$${min.toFixed(2)} - $${max.toFixed(2)}`;
+
+      return {
+        type: "DataListItem",
+        // Label: unit name
+        label: { type: "Text", content: unit.name },
+        // Value: computed price range
+        value: { type: "Text", content: priceText },
+      };
+    }),
+  };
+
+  // 7. Combine categories, tags, and the unit list into the CardFooter
+  const footer: IAutoView.IAutoViewCardFooterProps = {
     type: "CardFooter",
-    childrenProps: {
-      type: "Text",
-      // Display the administrator's signup date.
-      content: `Admin Signed Up: ${input.administrator.created_at}`,
-      variant: "caption",
-      color: "gray"
-    }
+    childrenProps: [categoryGroup, tagGroup, unitList],
   };
 
-  // Aggregate the header, content, and footer into a vertical card.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // 8. Assemble the VerticalCard children, filtering out undefined media
+  const children = [header, media, content, footer].filter(
+    (c): c is NonNullable<typeof c> => Boolean(c)
+  );
+
+  // 9. Return the top-level VerticalCard component props
+  return {
     type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent, cardFooter]
+    childrenProps: children,
   };
-
-  // Return the aggregated component which conforms to IAutoView.IAutoViewComponentProps.
-  return verticalCard;
 }

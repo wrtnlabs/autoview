@@ -33,6 +33,7 @@ export const test_compiler_failure = async (): Promise<void> => {
         type: "GridList",
       };
   `,
+    "Schema",
     "test_compiler_failure",
   );
   TestValidator.equals("failure")(result.type)("failure");

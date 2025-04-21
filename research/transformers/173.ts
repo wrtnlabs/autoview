@@ -1,191 +1,176 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A page.
- *
- * Collection of records with pagination indformation.
-*/
-type IPageIShoppingSaleInquiryComment = {
-    /**
-     * Page information.
-     *
-     * @title Page information
-    */
-    pagination: IPage.IPagination;
-    /**
-     * List of records.
-     *
-     * @title List of records
-    */
-    data: IShoppingSaleInquiryComment[];
-};
-namespace IPage {
-    /**
-     * Page information.
-    */
-    export type IPagination = {
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4CampaignsView = {
+                    campaigns?: Schema.legacy.v4.marketing.LegacyV4Campaign[];
+                    msgs?: Schema.legacy.v4.marketing.LegacyV4CampaignMsg[];
+                    next?: number;
+                };
+            }
+        }
+        export namespace v4 {
+            export namespace marketing {
+                /**
+                 * ### 이벤트 기록
+                 *
+                 * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
+                */
+                export type LegacyV4Campaign = {
+                    id?: string;
+                    channelId?: string;
+                    name: string;
+                    state?: "draft" | "active" | "stopped" | "removed";
+                    sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+                    userQuery?: Schema.Expression;
+                    triggerEventName: string;
+                    triggerEventQuery?: Schema.Expression;
+                    waitingTime: string;
+                    filterEventName?: string;
+                    filterEventQuery?: Schema.Expression;
+                    filterMatch?: "positive" | "negative";
+                    goalEventName?: string;
+                    goalEventQuery?: Schema.Expression;
+                    advertising: boolean;
+                    enableSupportBot: boolean;
+                    followingSupportBotId?: string;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    cooldown?: string;
+                    sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
+                    sendTimeRanges?: Schema.TimeRange[];
+                    startAt?: number;
+                    endAt?: number;
+                    draft?: Schema.marketing.CampaignDraft;
+                    createdAt?: number;
+                    updatedAt?: number;
+                    sent?: number & tags.Type<"int32">;
+                    view?: number & tags.Type<"int32">;
+                    goal?: number & tags.Type<"int32">;
+                    click?: number & tags.Type<"int32">;
+                    userChatExpireDuration?: string;
+                    managerId?: string;
+                };
+                export type LegacyV4CampaignMsg = {
+                    id: string;
+                    campaignId?: string;
+                    name: string;
+                    sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+                    settings?: Schema.marketing.SendMediumSettings;
+                    createdAt?: number;
+                    updatedAt?: number;
+                    sent?: number & tags.Type<"int32">;
+                    view?: number & tags.Type<"int32">;
+                    goal?: number & tags.Type<"int32">;
+                    click?: number & tags.Type<"int32">;
+                };
+            }
+        }
+    }
+    export type Expression = {
+        key?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        operator?: Schema.Operator;
+        values?: {}[];
+        and?: Schema.Expression[];
+        or?: Schema.Expression[];
+    };
+    export type Operator = {};
+    export type TimeRange = {
+        dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
+        from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+        to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+    };
+    export namespace marketing {
+        export type CampaignDraft = {
+            campaign: Schema.marketing.Campaign;
+            msgs: Schema.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
+        };
         /**
-         * Current page number.
+         * ### 이벤트 기록
          *
-         * @title Current page number
+         * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
         */
-        current: number & tags.Type<"int32">;
-        /**
-         * Limitation of records per a page.
-         *
-         * @title Limitation of records per a page
-        */
-        limit: number & tags.Type<"int32">;
-        /**
-         * Total records in the database.
-         *
-         * @title Total records in the database
-        */
-        records: number & tags.Type<"int32">;
-        /**
-         * Total pages.
-         *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
-        */
-        pages: number & tags.Type<"int32">;
+        export type Campaign = {
+            id?: string;
+            channelId?: string;
+            name: string;
+            state?: "draft" | "active" | "stopped" | "removed";
+            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            userQuery?: Schema.Expression;
+            triggerEventName: string;
+            triggerEventQuery?: Schema.Expression;
+            waitingTime: string;
+            filterEventName?: string;
+            filterEventQuery?: Schema.Expression;
+            filterMatch?: "positive" | "negative";
+            filterHpc?: Schema.marketing.HoldingPropertyConstant;
+            goalEventName?: string;
+            goalEventQuery?: Schema.Expression;
+            goalEventDuration?: string;
+            goalHpc?: Schema.marketing.HoldingPropertyConstant;
+            advertising: boolean;
+            sendToOfflineXms?: boolean;
+            sendToOfflineEmail?: boolean;
+            cooldown?: string;
+            sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
+            channelOperationId?: string;
+            sendTimeRanges?: Schema.TimeRange[];
+            startAt?: number;
+            endAt?: number;
+            deleteMessageAfterStop?: boolean;
+            draft?: Schema.marketing.CampaignDraft;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+            userChatExpireDuration?: string;
+            managerId?: string;
+            recipeCaseId?: string;
+        };
+        export type HoldingPropertyConstant = {
+            baseEventName: string;
+            baseEventKey: string;
+            eventQuery?: Schema.Expression;
+            baseEventType: "triggerEvent" | "additionalFilter";
+            operator?: Schema.EventSchema;
+            values?: {};
+        };
+        export type CampaignMsg = {
+            id: string;
+            campaignId?: string;
+            channelId?: string;
+            name: string;
+            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            settings: Schema.marketing.SendMediumSettings;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+        };
+        export type SendMediumSettings = {
+            type: string;
+        };
+    }
+    export type EventSchema = {
+        id?: string;
+        channelId?: string;
+        eventName?: string;
+        key?: string;
+        parentKey?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        createdAt?: number;
+        updatedAt?: number;
+        icon?: string;
     };
 }
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
-    /**
-     * Writer of the comment.
-     *
-     * Both customer and seller can write comment on the sale inquiry.
-     *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
-     *
-     * @title Writer of the comment
-    */
-    writer: any | any | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Creation time of snapshot record.
-         *
-         * In other words, creation time or update time or comment.
-         *
-         * @title Creation time of snapshot record
-        */
-        created_at: string;
-        /**
-         * Format of body.
-         *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
-        */
-        format: "html" | "md" | "txt";
-        /**
-         * Content body of comment.
-         *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
-    };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
-        */
-        name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
-    };
-}
-type IAutoViewTransformerInputType = IPageIShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4CampaignsView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -193,124 +178,125 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Transform the input data into a structured UI presentation using a VerticalCard component.
-  // We'll display the page header (with pagination info) and a list of comments
-  // Each comment is displayed as a DataListItem with a leading avatar (or icon) and its content rendered via Markdown.
-  
-  // Map each comment to a DataListItem component
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = input.data.map(comment => {
-    // Attempt to extract the writer's name and avatar if available.
-    // We assume writer may be an object with a 'name' field and optionally an 'avatar' URL.
-    let writerName: string = "";
-    let writerAvatar: string | undefined = undefined;
-    if (typeof comment.writer === "object" && comment.writer !== null) {
-      writerName = comment.writer.name || "Unknown Writer";
-      writerAvatar = comment.writer.avatar; // if exists, otherwise undefined
-    } else {
-      // If writer is not an object, simply use its string representation.
-      writerName = String(comment.writer);
-    }
-    
-    // Determine the most up-to-date snapshot to display.
-    // Use the last snapshot in the snapshots list if available.
-    const snapshot = (Array.isArray(comment.snapshots) && comment.snapshots.length > 0)
-      ? comment.snapshots[comment.snapshots.length - 1]
-      : null;
-    
-    // Create a Markdown component to render the comment content.
-    // If no snapshot exists, show a fallback message.
-    const markdownContent: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: snapshot ? snapshot.body : "No content available."
-    };
+    // Destructure campaigns and pagination cursor
+    const { campaigns, next } = input;
 
-    // Prepare the label using a Markdown component that displays writer name and creation date.
-    const label: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: `${writerName} • ${new Date(comment.created_at).toLocaleString()}`
-    };
-
-    // Set up the startElement as an Avatar if a valid avatar URL is provided,
-    // Otherwise, fall back to an Icon component (e.g., a default user icon).
-    let startElement: IAutoView.IAutoViewAvatarProps | IAutoView.IAutoViewIconProps;
-    if (writerAvatar) {
-      startElement = {
-        type: "Avatar",
-        src: writerAvatar,
-        name: writerName,
-        variant: "primary",
-        size: 32
-      };
-    } else {
-      startElement = {
-        type: "Icon",
-        id: "user", // icon name in kebab-case without set prefix
-        size: 32,
-        color: "gray"
-      };
+    // If there are no campaigns, render a friendly markdown message
+    if (!campaigns || campaigns.length === 0) {
+        return {
+            type: "Markdown",
+            content: "### No campaigns to display.\n\nThere are currently no marketing campaigns available."
+        };
     }
-    
-    // If the comment is a reply (has a parent_id), we add an endElement icon to indicate this.
-    const endElement = comment.parent_id
-      ? {
-          type: "Icon",
-          id: "reply",  // use a 'reply' icon to indicate a reply comment
-          size: 24,
-          color: "blue"
+
+    // Map each campaign to a DataListItem, showing its name and key metrics as chips
+    const dataListItems: IAutoView.IAutoViewDataListItemProps[] = campaigns.map(campaign => {
+        // Build chips for each metric if present
+        const metricChips: IAutoView.IAutoViewChipProps[] = [];
+
+        if (campaign.sent !== undefined) {
+            metricChips.push({
+                type: "Chip",
+                label: `${campaign.sent}`,
+                color: "primary",
+                size: "small",
+                variant: "filled"
+            });
         }
-      : undefined;
-    
-    // Construct and return the DataListItem for this comment.
-    return {
-      type: "DataListItem",
-      // Using the label property to indicate writer and date information.
-      label: label,
-      // Using the value property to display the comment content rendered in markdown.
-      value: markdownContent,
-      startElement: startElement,
-      endElement: endElement
+        if (campaign.view !== undefined) {
+            metricChips.push({
+                type: "Chip",
+                label: `${campaign.view}`,
+                color: "info",
+                size: "small",
+                variant: "filled"
+            });
+        }
+        if (campaign.goal !== undefined) {
+            metricChips.push({
+                type: "Chip",
+                label: `${campaign.goal}`,
+                color: "success",
+                size: "small",
+                variant: "filled"
+            });
+        }
+        if (campaign.click !== undefined) {
+            metricChips.push({
+                type: "Chip",
+                label: `${campaign.click}`,
+                color: "warning",
+                size: "small",
+                variant: "filled"
+            });
+        }
+
+        // Compose the label as a Text component showing the campaign name
+        const labelComponent: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            variant: "subtitle1",
+            color: "primary",
+            content: campaign.name
+        };
+
+        // The DataListItem.value can be a single component or an array
+        const valueComponent =
+            metricChips.length === 1
+                ? metricChips[0]
+                : metricChips; // array if multiple chips
+
+        return {
+            type: "DataListItem",
+            label: labelComponent,
+            value: metricChips.length > 0 ? valueComponent : undefined
+        };
+    });
+
+    // Wrap the items into a DataList
+    const dataList: IAutoView.IAutoViewDataListProps = {
+        type: "DataList",
+        childrenProps: dataListItems
     };
-  });
-  
-  // Create a DataList component to contain all comment items.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems
-  };
-  
-  // Create a CardHeader component to display the title and pagination information.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Sale Inquiry Comments",
-    description: `Page ${input.pagination.current} of ${input.pagination.pages}`
-    // Optional: add startElement or endElement if needed.
-  };
-  
-  // Optionally, we can add pagination details in the CardFooter.
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-    type: "CardFooter",
-    childrenProps: {
-      type: "Text",
-      content: `Showing ${input.data.length} comment${input.data.length !== 1 ? "s" : ""} out of ${input.pagination.records} total record${input.pagination.records !== 1 ? "s" : ""}.`,
-      variant: "caption",
-      color: "gray"
-    }
-  };
-  
-  // Wrap the header, comment list (in CardContent), and footer inside a VerticalCard for a structured layout.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [
-      cardHeader,
-      {
+
+    // Construct the card header with an icon
+    const header: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: "Campaigns Overview",
+        startElement: {
+            type: "Icon",
+            id: "bullhorn",
+            color: "blue",
+            size: 20
+        }
+    };
+
+    // Use the DataList as the card content
+    const content: IAutoView.IAutoViewCardContentProps = {
         type: "CardContent",
-        // Use the data list as the main content area to display all comments.
         childrenProps: dataList
-      },
-      cardFooter
-    ]
-  };
-  
-  // Return the final composed component.
-  return verticalCard;
+    };
+
+    // If there is a next cursor, add a "Load More" button in the footer
+    let footer: IAutoView.IAutoViewCardFooterProps | undefined;
+    if (next !== undefined) {
+        footer = {
+            type: "CardFooter",
+            childrenProps: {
+                type: "Button",
+                label: "Load more",
+                variant: "outlined",
+                color: "primary",
+                size: "medium"
+            }
+        };
+    }
+
+    // Assemble everything into a vertical card for responsiveness on mobile
+    const card: IAutoView.IAutoViewVerticalCardProps = {
+        type: "VerticalCard",
+        // Include header, content, and conditionally footer
+        childrenProps: footer ? [header, content, footer] : [header, content]
+    };
+
+    return card;
 }

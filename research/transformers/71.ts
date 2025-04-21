@@ -1,76 +1,31 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
+namespace Schema {
+    export type IShoppingMileageHistory = {
+        id: string & tags.Format<"uuid">;
+        citizen: Schema.IShoppingCitizen;
+        mileage: Schema.IShoppingMileage;
+        source_id: string & tags.Format<"uuid">;
+        value: number;
+        balance: number;
+        created_at: string & tags.Format<"date-time">;
+    };
     /**
-     * Writer of the comment.
+     * Citizen verification information.
      *
-     * Both customer and seller can write comment on the sale inquiry.
+     * `IShoppingCitizen` is an entity that records the user's
+     * {@link name real name} and {@link mobile} input information.
      *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
+     * For reference, in South Korea, real name authentication is required for
+     * e-commerce participants, so the name attribute is important. However, the
+     * situation is different overseas, so in reality, mobile attributes are the
+     * most important, and identification of individual person is also done based
+     * on this mobile.
      *
-     * @title Writer of the comment
+     * Of course, real name and mobile phone authentication information are
+     * encrypted and stored.
     */
-    writer: any | any | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
+    export type IShoppingCitizen = {
         /**
          * Primary Key.
          *
@@ -78,62 +33,34 @@ namespace IBbsArticleComment {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Creation time of record.
          *
-         * In other words, creation time or update time or comment.
-         *
-         * @title Creation time of snapshot record
+         * @title Creation time of record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Mobile number.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Mobile number
         */
-        format: "html" | "md" | "txt";
+        mobile: string;
         /**
-         * Content body of comment.
+         * Real name, or equivalent nickname.
          *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
-    };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
+         * @title Real name, or equivalent nickname
         */
         name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
+    };
+    export type IShoppingMileage = {
+        id: string & tags.Format<"uuid">;
+        value: null | number;
+        created_at: string & tags.Format<"date-time">;
+        code: string;
+        source: string;
+        direction: -1 | 1;
     };
 }
-type IAutoViewTransformerInputType = IShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.IShoppingMileageHistory;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -141,68 +68,89 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Create a CardHeader to display key metadata about the comment.
-  // We use an Icon as the start element to add a visual cue.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    // If input.writer is a string, use it directly; otherwise, we default to a generic label.
-    title: typeof input.writer === "string" ? `Comment by ${input.writer}` : "Comment",
-    description: `Created at: ${input.created_at}`,
+  // Destructure input for easier access
+  const { citizen, mileage, value, balance, source_id, created_at } = input;
+
+  // Format the timestamp into a human-readable string
+  const date = new Date(created_at);
+  const formattedDate = isNaN(date.getTime())
+    ? 'Invalid date'
+    : date.toLocaleString(); // e.g. "9/1/2023, 10:23 AM"
+
+  // Determine transaction direction and styling
+  const direction = mileage.direction;
+  const amount = typeof value === 'number' ? value : 0;
+  const sign = direction === 1 ? '+' : '-';
+  // Use semantic color names for better UX
+  const transactionColor = direction === 1 ? 'success' : 'error';
+
+  // Card header: Avatar (initials), user name, and a colored chip showing the delta
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: 'CardHeader',
+    title: citizen.name || 'Unknown User',
+    description: formattedDate,
     startElement: {
-      type: "Icon",
-      id: "comment", // using a comment icon (must be in kebab-case)
-      size: 20,
-      color: "blue"
-    }
+      type: 'Avatar',
+      name: citizen.name || 'User',
+      variant: 'primary',
+    },
+    endElement: {
+      type: 'Chip',
+      label: `${sign}${amount}`,
+      color: transactionColor,
+      size: 'medium',
+      variant: 'filled',
+    },
   };
 
-  // Process each snapshot from the comment to provide rich markdown details.
-  // If there are no snapshots, we display a fallback markdown message.
-  let markdownComponents: IAutoView.IAutoViewMarkdownProps[] = [];
-  if (Array.isArray(input.snapshots) && input.snapshots.length > 0) {
-    markdownComponents = input.snapshots.map((snapshot) => {
-      // Prepare attachment details if available.
-      let attachmentsMarkdown = "";
-      if (Array.isArray(snapshot.files) && snapshot.files.length > 0) {
-        // Each attachment will be shown as a markdown list item with a hyperlink.
-        attachmentsMarkdown = "\n\n**Attachments:**\n" + snapshot.files.map((file) => {
-          // If file.name is empty, a fallback will be used.
-          const fileName = file.name || "file";
-          // Display as a link; the markdown is responsive and works well on all screen sizes.
-          return `- [${fileName}${file.extension ? "." + file.extension : ""}](${file.url})`;
-        }).join("\n");
-      }
-      // Construct markdown content with snapshot metadata and content body.
-      const content = `**Snapshot ID:** ${snapshot.id}\n\n` +
-                      `**Created at:** ${snapshot.created_at}\n\n` +
-                      `${snapshot.body}` +
-                      attachmentsMarkdown;
-      return {
-        type: "Markdown",
-        content
-      };
-    });
-  } else {
-    // If snapshots array is empty, provide a friendly message.
-    markdownComponents = [{
-      type: "Markdown",
-      content: "No snapshot details available for this comment."
-    }];
-  }
+  // Build a data list of key-value pairs for the transaction details
+  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = [
+    {
+      type: 'DataListItem',
+      label: { type: 'Text', content: 'Mobile' },
+      value: { type: 'Text', content: citizen.mobile || 'N/A' },
+    },
+    {
+      type: 'DataListItem',
+      label: { type: 'Text', content: 'Source' },
+      value: { type: 'Text', content: mileage.source },
+    },
+    {
+      type: 'DataListItem',
+      label: { type: 'Text', content: 'Code' },
+      value: { type: 'Text', content: mileage.code },
+    },
+    {
+      type: 'DataListItem',
+      label: { type: 'Text', content: 'Balance' },
+      value: { type: 'Text', content: balance.toString() },
+    },
+  ];
 
-  // Compose the CardContent by including the markdown components.
-  // If there is only one markdown component, we pass it directly; otherwise, we pass as an array.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: markdownComponents.length === 1 ? markdownComponents[0] : markdownComponents
+  // Wrap the data list into a CardContent component
+  const content: IAutoView.IAutoViewCardContentProps = {
+    type: 'CardContent',
+    childrenProps: {
+      type: 'DataList',
+      childrenProps: dataListItems,
+    },
   };
 
-  // Finally, combine the header and content into a VerticalCard.
-  // VerticalCard supports responsive layouts on desktop and mobile.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent]
+  // Footer with a button linking to a detailed view (responsive and accessible)
+  const footer: IAutoView.IAutoViewCardFooterProps = {
+    type: 'CardFooter',
+    childrenProps: {
+      type: 'Button',
+      label: 'View Details',
+      variant: 'text',
+      color: 'primary',
+      href: `/mileage/${source_id}`, // assumes a route to view details by source_id
+    },
   };
 
-  return verticalCard;
+  // Combine header, content, and footer into a vertical card for responsive display
+  return {
+    type: 'VerticalCard',
+    childrenProps: [header, content, footer],
+  };
 }

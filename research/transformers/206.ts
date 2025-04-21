@@ -1,296 +1,682 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * Question about sale snapshot.
- *
- * `IShoppingSaleQuestion` is a subtype entity of {@link IShoppingSaleInquiry},
- * and is used when a {@link IShoppingCustomer customer} wants to ask something
- * about a {@link IShoppingSale sale} ({@link IShoppingSaleSnapshot snapshot} at
- * the time) registered by the {@link IShoppingSeller seller}.
- *
- * And, like most shopping malls, `IShoppingSaleQuestion` also provides
- * a {@link secret} attribute, allowing you to create a "secret message" that can
- * only be viewed by the seller and the customer who wrote the question.
-*/
-type IShoppingSaleQuestion = {
-    /**
-     * Whether the question article is secret or not.
-     *
-     * If secret article, only the writer customer and related seller can see
-     * the detailed content.
-     *
-     * @title Whether the question article is secret or not
-    */
-    secret: boolean;
-    /**
-     * Type of the derived inquiry.
-     *
-     * - `question`: {@link IShoppingSaleQuestion}
-     * - `review`: {@link IShoppingSaleReview}
-     *
-     * @title Type of the derived inquiry
-    */
-    type: "question";
-    /**
-     * Customer who wrote the inquiry.
-     *
-     * @title Customer who wrote the inquiry
-    */
-    customer: IShoppingCustomer;
-    /**
-     * Formal answer for the inquiry by the seller.
-     *
-     * @title Formal answer for the inquiry by the seller
-    */
-    answer: null | any;
-    /**
-     * Whether the seller has viewed the inquiry or not.
-     *
-     * @title Whether the seller has viewed the inquiry or not
-    */
-    read_by_seller: boolean;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when an article is created, and is
-     * accumulated every time the article is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticle.ISnapshot[];
-    /**
-     * Creation time of article.
-     *
-     * @title Creation time of article
-    */
-    created_at: string;
-};
-/**
- * Customer information, but not a person but a connection basis.
- *
- * `IShoppingCustomer` is an entity that literally embodies the information of
- * those who participated in the market as customers. By the way, the
- * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
- * even if the same person connects to the shopping mall multiple, multiple
- * records are created in `IShoppingCustomer`.
- *
- * The first purpose of this is to track the customer's inflow path in detail,
- * and it is for cases where the same person enters as a non-member,
- * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
- * and only authenticates their {@link IShoppingCitizen real name} or
- * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
- * It is the second. Lastly, it is to accurately track the activities that
- * a person performs at the shopping mall in various ways like below.
- *
- * - Same person comes from an {@link IShoppingExternalUser external service}
- * - Same person creates multiple accounts
- * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
- * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
- *
- * Therefore, `IShoppingCustomer` can have multiple records with the same
- * {@link IShoppingCitizen}, {@link IShoppingMember}, and
- * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
- * membership after verifying their real name or signs up for our service after
- * being a user of an external service, all related records are changed at once.
- * Therefore, identification and tracking of customers can be done very
- * systematically.
-*/
-type IShoppingCustomer = {
-    /**
-     * Discriminant for the type of customer.
-     *
-     * @title Discriminant for the type of customer
-    */
-    type: "customer";
-    /**
-     * Membership information.
-     *
-     * If the customer has joined as a member.
-     *
-     * @title Membership information
-    */
-    member: null | any;
-    /**
-     * Citizen information.
-     *
-     * If the customer has verified his real name and mobile number.
-     *
-     * @title Citizen information
-    */
-    citizen: null | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Belonged channel.
-     *
-     * @title Belonged channel
-    */
-    channel: IShoppingChannel;
-    /**
-     * External user information.
-     *
-     * When the customer has come from an external service.
-     *
-     * @title External user information
-    */
-    external_user: null | any;
-    /**
-     * Connection address.
-     *
-     * Same with {@link window.location.href} of client.
-     *
-     * @title Connection address
-    */
-    href: string;
-    /**
-     * Referrer address.
-     *
-     * Same with {@link window.document.referrer} of client.
-     *
-     * @title Referrer address
-    */
-    referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
-    /**
-     * Connection IP Address.
-     *
-     * @title Connection IP Address
-    */
-    ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
-    /**
-     * Creation time of the connection record.
-     *
-     * @title Creation time of the connection record
-    */
-    created_at: string;
-};
-type IShoppingMember = any;
-type IShoppingCitizen = any;
-/**
- * Channel information.
- *
- * `IShoppingChannel` is a concept that shapes the distribution channel in the
- * market. Therefore, the difference in the channel in this e-commerce system
- * means that it is another site or application.
- *
- * By the way, if your shopping mall system requires only one channel, then
- * just use only one. This concept is designed to be expandable in the future.
-*/
-type IShoppingChannel = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-    /**
-     * Identifier code.
-     *
-     * @title Identifier code
-    */
-    code: string;
-    /**
-     * Name of the channel.
-     *
-     * @title Name of the channel
-    */
-    name: string;
-};
-type IShoppingExternalUser = any;
-type IShoppingSaleInquiryAnswer = any;
-namespace IBbsArticle {
-    /**
-     * Snapshot of article.
-     *
-     * `IBbsArticle.ISnapshot` is a snapshot entity that contains the contents of
-     * the article, as mentioned in {@link IBbsArticle}, the contents of the article
-     * are separated from the article record to keep evidence and prevent fraud.
-    */
-    export type ISnapshot = {
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4UserChatView = {
+                    campaign?: Schema.legacy.v4.marketing.LegacyV4Campaign;
+                    bookmark?: Schema.legacy.v4.LegacyV4ChatBookmark;
+                    session?: Schema.legacy.v4.LegacyV4ChatSession;
+                    userSession?: Schema.legacy.v4.LegacyV4ChatSession;
+                    chatTags?: Schema.legacy.v4.LegacyV4ChatTag[];
+                    message?: Schema.legacy.v4.message.LegacyV4Message;
+                    oneTimeMsg?: Schema.legacy.v4.marketing.LegacyV4OneTimeMsg;
+                    supportBot?: Schema.legacy.v4.LegacyV4SupportBot;
+                    user?: Schema.legacy.v4.LegacyV4User;
+                    userChat?: Schema.legacy.v4.LegacyV4UserChat;
+                };
+            }
+        }
+        export namespace v4 {
+            export namespace marketing {
+                /**
+                 * ### 이벤트 기록
+                 *
+                 * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
+                */
+                export type LegacyV4Campaign = {
+                    id?: string;
+                    channelId?: string;
+                    name: string;
+                    state?: "draft" | "active" | "stopped" | "removed";
+                    sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+                    userQuery?: Schema.Expression;
+                    triggerEventName: string;
+                    triggerEventQuery?: Schema.Expression;
+                    waitingTime: string;
+                    filterEventName?: string;
+                    filterEventQuery?: Schema.Expression;
+                    filterMatch?: "positive" | "negative";
+                    goalEventName?: string;
+                    goalEventQuery?: Schema.Expression;
+                    advertising: boolean;
+                    enableSupportBot: boolean;
+                    followingSupportBotId?: string;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    cooldown?: string;
+                    sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
+                    sendTimeRanges?: Schema.TimeRange[];
+                    startAt?: number;
+                    endAt?: number;
+                    draft?: Schema.marketing.CampaignDraft;
+                    createdAt?: number;
+                    updatedAt?: number;
+                    sent?: number & tags.Type<"int32">;
+                    view?: number & tags.Type<"int32">;
+                    goal?: number & tags.Type<"int32">;
+                    click?: number & tags.Type<"int32">;
+                    userChatExpireDuration?: string;
+                    managerId?: string;
+                };
+                export type LegacyV4OneTimeMsg = {
+                    id?: string;
+                    channelId?: string;
+                    name: string;
+                    state: "draft" | "waiting" | "sent" | "canceled" | "removed";
+                    sendMode?: "immediately" | "reservedWithSenderTime" | "reservedWithReceiverTime";
+                    sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+                    settings?: Schema.marketing.SendMediumSettings;
+                    userQuery?: Schema.Expression;
+                    goalEventName?: string;
+                    goalEventQuery?: Schema.Expression;
+                    enableSupportBot: boolean;
+                    followingSupportBotId?: string;
+                    advertising: boolean;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    startAt?: number;
+                    draft?: Schema.marketing.OneTimeMsgDraft;
+                    createdAt?: number;
+                    updatedAt?: number;
+                    sent?: number & tags.Type<"int32">;
+                    view?: number & tags.Type<"int32">;
+                    goal?: number & tags.Type<"int32">;
+                    click?: number & tags.Type<"int32">;
+                    userChatExpireDuration?: string;
+                };
+            }
+            export type LegacyV4ChatBookmark = {
+                key?: string;
+                chatId?: string;
+                chatKey?: string;
+                bookmarkKey?: string;
+                channelId?: string;
+                version?: number & tags.Type<"int32">;
+                chatType?: string;
+                personType?: string;
+                personId?: string;
+            };
+            export type LegacyV4ChatSession = {
+                key?: string;
+                chatId?: string;
+                chatKey?: string;
+                updatedKey?: string;
+                unreadKey?: string;
+                channelId?: string;
+                alert?: number & tags.Type<"int32">;
+                unread?: number & tags.Type<"int32">;
+                watch?: "all" | "info" | "none";
+                readAt?: number;
+                receivedAt?: number;
+                postedAt?: number;
+                updatedAt?: number;
+                createdAt?: number;
+                version?: number & tags.Type<"int32">;
+                id?: string;
+                chatType?: string;
+                personType?: string;
+                personId?: string;
+            };
+            export type LegacyV4ChatTag = {
+                id?: string;
+                channelId?: string;
+                colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
+                name: string;
+                key: string;
+                description?: string;
+                followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+                createdAt?: number;
+            };
+            export namespace message {
+                export type LegacyV4Message = {
+                    chatKey?: string;
+                    id?: string;
+                    mainKey?: string;
+                    threadKey?: string;
+                    root?: boolean;
+                    channelId?: string;
+                    chatType?: string;
+                    chatId?: string;
+                    personType?: string;
+                    personId?: string;
+                    requestId?: string;
+                    language?: string;
+                    createdAt?: number;
+                    version?: number & tags.Type<"int32">;
+                    blocks?: Schema.legacy.v4.message.LegacyV4Block[];
+                    plainText?: string;
+                    updatedAt?: number;
+                    buttons?: Schema.legacy.v4.message.LegacyV4Button[] & tags.MinItems<1> & tags.MaxItems<2>;
+                    files?: Schema.legacy.v4.message.LegacyV4File[] & tags.MinItems<1> & tags.MaxItems<4>;
+                    webPage?: Schema.legacy.v4.LegacyV4WebPage;
+                    log?: Schema.legacy.v4.message.LegacyV4Log;
+                    reactions?: Schema.legacy.v4.message.LegacyV4Reaction[];
+                    profileBot?: Schema.legacy.v4.message.LegacyV4ProfileBotInput[] & tags.MinItems<1> & tags.MaxItems<2147483647>;
+                    state?: "sending" | "sent" | "failed" | "removed";
+                    options?: ("actAsManager" | "displayAsChannel" | "doNotPost" | "doNotSearch" | "doNotSendApp" | "doNotUpdateDesk" | "immutable" | "private" | "silent")[] & tags.UniqueItems;
+                    marketing?: Schema.legacy.v4.message.LegacyV4MessageMarketing;
+                    supportBot?: Schema.legacy.v4.message.LegacyV4MessageSupportBot;
+                    threadMsg?: boolean;
+                    broadcastedMsg?: boolean;
+                    rootMessageId?: string;
+                };
+                export type LegacyV4Block = {
+                    type: "bullets" | "code" | "text";
+                    language?: string;
+                    value?: string;
+                    blocks?: Schema.legacy.v4.message.LegacyV4Block[];
+                };
+                export type LegacyV4Button = {
+                    title: string;
+                    colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
+                    url: string;
+                };
+                export type LegacyV4File = {
+                    id: string;
+                    type?: string;
+                    name: string;
+                    size: number & tags.Type<"int32">;
+                    contentType?: string;
+                    duration?: number;
+                    width?: number & tags.Type<"int32">;
+                    height?: number & tags.Type<"int32">;
+                    orientation?: number & tags.Type<"int32">;
+                    animated?: boolean;
+                    bucket: string;
+                    key: string;
+                    previewKey?: string;
+                    channelId?: string;
+                    chatType?: string;
+                    chatId?: string;
+                };
+                export type LegacyV4Log = {
+                    action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
+                    values?: string[];
+                };
+                export type LegacyV4Reaction = {
+                    emojiName: string;
+                    personKeys?: string[] & tags.UniqueItems;
+                    empty?: boolean;
+                };
+                export type LegacyV4ProfileBotInput = {
+                    id?: string;
+                    key?: string;
+                    type?: string;
+                    name?: string;
+                    value?: Schema.AttributeValue;
+                };
+                export type LegacyV4MessageMarketing = {
+                    type?: string;
+                    id?: string;
+                    advertising?: boolean;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    exposureType?: "fullScreen";
+                };
+                export type LegacyV4MessageSupportBot = {
+                    id?: string;
+                    revisionId?: string;
+                    sectionId?: string;
+                    stepIndex?: number & tags.Type<"int32">;
+                    buttons?: Schema.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
+                    submitButtonIndex?: number & tags.Type<"int32">;
+                };
+            }
+            export type LegacyV4WebPage = {
+                id: string;
+                url: string;
+                title?: string;
+                description?: string;
+                imageUrl?: string;
+                videoUrl?: string;
+                publisher?: string;
+                author?: string;
+                width?: number & tags.Type<"int32">;
+                height?: number & tags.Type<"int32">;
+                bucket?: string;
+                previewKey?: string;
+                logo?: string;
+                name?: string;
+            };
+            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+                text: string;
+                nextSectionId: string;
+            };
+            export type LegacyV4SupportBot = {
+                id?: string;
+                channelId: string;
+                pluginId?: string;
+                botName: string;
+                name: string;
+                order: number & tags.Minimum<0>;
+                pageQuery?: Schema.Expression;
+                userQuery?: Schema.Expression;
+                draft?: Schema.supportbot.SupportBotDraft;
+                revisionId?: string;
+                state: "draft" | "active" | "stopped";
+                runMode: "always" | "away" | "inOperation" | "private";
+                start?: number & tags.Type<"int32">;
+                stop?: number & tags.Type<"int32">;
+                chatOpen?: number & tags.Type<"int32">;
+                createdAt?: number;
+                updatedAt?: number;
+                userChatExpireDuration?: string;
+                managerId?: string;
+            };
+            export type LegacyV4User = {
+                id?: string;
+                channelId?: string;
+                memberId?: string;
+                veilId?: string;
+                unifiedId?: string;
+                name?: string;
+                profile?: {
+                    [key: string]: {};
+                };
+                profileOnce?: Schema.profile.UserProfile;
+                tags?: string[] & tags.MinItems<0> & tags.MaxItems<10> & tags.UniqueItems;
+                alert?: number & tags.Type<"int32">;
+                unread?: number & tags.Type<"int32">;
+                popUpChatId?: string;
+                blocked?: boolean;
+                unsubscribed?: boolean;
+                hasChat?: boolean;
+                hasPushToken?: boolean;
+                language?: string & tags.Default<"en">;
+                country?: string;
+                city?: string;
+                latitude?: number;
+                longitude?: number;
+                web?: Schema.WebInfo;
+                mobile?: Schema.MobileInfo;
+                sessionsCount?: number & tags.Type<"int32">;
+                lastSeenAt?: number;
+                createdAt?: number;
+                updatedAt?: number;
+                expireAt?: number;
+                version?: number & tags.Type<"int32">;
+                managedKey?: number & tags.Type<"int32">;
+                member?: boolean;
+                email?: string;
+                userId?: string;
+                avatarUrl?: string;
+                managed?: boolean;
+                mobileNumber?: string & tags.Default<"+18004424000">;
+                systemLanguage?: string & tags.Default<"en">;
+            };
+            export type LegacyV4UserChat = {
+                id?: string;
+                channelId?: string;
+                appUserKey?: string;
+                state?: "closed" | "opened" | "snoozed" | "queued";
+                managed?: boolean;
+                userId?: string;
+                name?: string;
+                description?: string;
+                handling?: "waiting" | "supportBot";
+                supportBot?: Schema.legacy.v4.LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot;
+                marketing?: Schema.legacy.v4.LegacyV4UserChat_dollar_LegacyV4UserChatMarketing;
+                pluginId?: string;
+                sourcePage?: string;
+                messengerType?: string;
+                messengerId?: string;
+                managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+                assigneeId?: string;
+                tags?: string[] & tags.MinItems<1> & tags.MaxItems<8> & tags.UniqueItems;
+                firstOpenedAt?: number;
+                openedAt?: number;
+                createdAt?: number;
+                frontMessageId?: string;
+                frontUpdatedAt?: number;
+                deskMessageId?: string;
+                deskUpdatedAt?: number;
+                firstAssigneeIdAfterOpen?: string;
+                firstRepliedAtAfterOpen?: number;
+                oneStop?: boolean;
+                waitingTime?: number & tags.Type<"int32">;
+                avgReplyTime?: number & tags.Type<"int32">;
+                totalReplyTime?: number & tags.Type<"int32">;
+                replyCount?: number & tags.Type<"int32">;
+                resolutionTime?: number & tags.Type<"int32">;
+                operationWaitingTime?: number & tags.Type<"int32">;
+                operationAvgReplyTime?: number & tags.Type<"int32">;
+                operationTotalReplyTime?: number & tags.Type<"int32">;
+                operationReplyCount?: number & tags.Type<"int32">;
+                operationResolutionTime?: number & tags.Type<"int32">;
+                firstAskedAt?: number;
+                askedAt?: number;
+                closedAt?: number;
+                snoozedAt?: number;
+                expiresAt?: number;
+                version?: number & tags.Type<"int32">;
+            };
+            export type LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot = {
+                id?: string;
+                revisionId?: string;
+                sectionPath?: string[];
+            };
+            export type LegacyV4UserChat_dollar_LegacyV4UserChatMarketing = {
+                type?: string;
+                id?: string;
+                enableSupportBot?: boolean;
+                supportBotId?: string;
+            };
+        }
+    }
+    export type Expression = {
+        key?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        operator?: Schema.Operator;
+        values?: {}[];
+        and?: Schema.Expression[];
+        or?: Schema.Expression[];
+    };
+    export type Operator = {};
+    export type TimeRange = {
+        dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
+        from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+        to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+    };
+    export namespace marketing {
+        export type CampaignDraft = {
+            campaign: Schema.marketing.Campaign;
+            msgs: Schema.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
+        };
         /**
-         * Primary Key.
+         * ### 이벤트 기록
          *
-         * @title Primary Key
+         * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
         */
-        id: string;
-        /**
-         * Creation time of snapshot record.
-         *
-         * In other words, creation time or update time or article.
-         *
-         * @title Creation time of snapshot record
-        */
-        created_at: string;
-        /**
-         * Format of body.
-         *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
-        */
-        format: "html" | "md" | "txt";
-        /**
-         * Title of article.
-         *
-         * @title Title of article
-        */
-        title: string;
-        /**
-         * Content body of article.
-         *
-         * @title Content body of article
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
+        export type Campaign = {
+            id?: string;
+            channelId?: string;
+            name: string;
+            state?: "draft" | "active" | "stopped" | "removed";
+            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            userQuery?: Schema.Expression;
+            triggerEventName: string;
+            triggerEventQuery?: Schema.Expression;
+            waitingTime: string;
+            filterEventName?: string;
+            filterEventQuery?: Schema.Expression;
+            filterMatch?: "positive" | "negative";
+            filterHpc?: Schema.marketing.HoldingPropertyConstant;
+            goalEventName?: string;
+            goalEventQuery?: Schema.Expression;
+            goalEventDuration?: string;
+            goalHpc?: Schema.marketing.HoldingPropertyConstant;
+            advertising: boolean;
+            sendToOfflineXms?: boolean;
+            sendToOfflineEmail?: boolean;
+            cooldown?: string;
+            sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
+            channelOperationId?: string;
+            sendTimeRanges?: Schema.TimeRange[];
+            startAt?: number;
+            endAt?: number;
+            deleteMessageAfterStop?: boolean;
+            draft?: Schema.marketing.CampaignDraft;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+            userChatExpireDuration?: string;
+            managerId?: string;
+            recipeCaseId?: string;
+        };
+        export type HoldingPropertyConstant = {
+            baseEventName: string;
+            baseEventKey: string;
+            eventQuery?: Schema.Expression;
+            baseEventType: "triggerEvent" | "additionalFilter";
+            operator?: Schema.EventSchema;
+            values?: {};
+        };
+        export type CampaignMsg = {
+            id: string;
+            campaignId?: string;
+            channelId?: string;
+            name: string;
+            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            settings: Schema.marketing.SendMediumSettings;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+        };
+        export type SendMediumSettings = {
+            type: string;
+        };
+        export type OneTimeMsgDraft = {
+            oneTimeMsg: Schema.marketing.OneTimeMsg;
+        };
+        export type OneTimeMsg = {
+            id?: string;
+            channelId?: string;
+            name: string;
+            state: "draft" | "waiting" | "sent" | "canceled" | "removed";
+            sendMode?: "immediately" | "reservedWithSenderTime" | "reservedWithReceiverTime";
+            channelOperationId?: string;
+            sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            settings?: Schema.marketing.SendMediumSettings;
+            userQuery?: Schema.Expression;
+            goalEventName?: string;
+            goalEventQuery?: Schema.Expression;
+            goalEventDuration?: string;
+            advertising: boolean;
+            sendToOfflineXms?: boolean;
+            sendToOfflineEmail?: boolean;
+            startAt?: number;
+            localStartAt?: string & tags.Format<"date-time">;
+            draft?: Schema.marketing.OneTimeMsgDraft;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+            userChatExpireDuration?: string;
+        };
+    }
+    export type EventSchema = {
+        id?: string;
+        channelId?: string;
+        eventName?: string;
+        key?: string;
+        parentKey?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        createdAt?: number;
+        updatedAt?: number;
+        icon?: string;
+    };
+    export type AttributeValue = {
+        s?: string;
+        n?: string;
+        b?: {
+            short?: number & tags.Type<"int32">;
+            char?: string;
+            int?: number & tags.Type<"int32">;
+            long?: number & tags.Type<"int32">;
+            float?: number;
+            double?: number;
+            direct?: boolean;
+            readOnly?: boolean;
+        };
+        m?: {
+            [key: string]: Schema.AttributeValue;
+        };
+        l?: Schema.AttributeValue[];
+        ss?: string[];
+        ns?: string[];
+        bs?: {
+            short?: number & tags.Type<"int32">;
+            char?: string;
+            int?: number & tags.Type<"int32">;
+            long?: number & tags.Type<"int32">;
+            float?: number;
+            double?: number;
+            direct?: boolean;
+            readOnly?: boolean;
+        }[];
+        "null"?: boolean;
+        bool?: boolean;
+    };
+    export namespace supportbot {
+        export type SupportBotDraft = {
+            supportBot?: Schema.supportbot.SupportBot;
+            sections?: Schema.supportbot.SupportBotSection[];
+        };
+        export type SupportBot = {
+            id?: string;
+            channelId: string;
+            botName: string;
+            name: string;
+            order: number & tags.Minimum<0>;
+            pageQuery?: Schema.Expression;
+            userQuery?: Schema.Expression;
+            draft?: Schema.supportbot.SupportBotDraft;
+            revisionId?: string;
+            state: "draft" | "active" | "stopped";
+            runMode: "always" | "away" | "inOperation" | "private";
+            start?: number & tags.Type<"int32">;
+            stop?: number & tags.Type<"int32">;
+            chatOpen?: number & tags.Type<"int32">;
+            createdAt?: number;
+            updatedAt?: number;
+            userChatExpireDuration?: string;
+            managerId?: string;
+        };
+        export type SupportBotSection = {
+            name?: string;
+            actions?: Schema.userchat.UserChatStaticAction[];
+            id?: string;
+            steps?: Schema.supportbot.SupportBotSection_dollar_Step[];
+            type: string;
+        };
+        export type SupportBotSection_dollar_Step = {
+            message: Schema.message.NestedMessage;
+        };
+    }
+    export namespace userchat {
+        export type UserChatStaticAction = {
+            type: string;
+        };
+    }
+    export namespace message {
+        export type NestedMessage = {
+            blocks?: Schema.message.Block[];
+            buttons?: Schema.message.Button[] & tags.MinItems<1> & tags.MaxItems<2>;
+            files?: Schema.message.File[] & tags.MinItems<1> & tags.MaxItems<30>;
+            webPage?: Schema.message.WebPage;
+            form?: Schema.message.form.Form;
+        };
+        export type Block = {
+            type: "bullets" | "code" | "text";
+            language?: string;
+            value?: string;
+            blocks?: Schema.message.Block[];
+        };
+        export type Button = {
+            title: string;
+            colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
+            action: Schema.message.action.Action;
+            /**
+             * @deprecated
+            */
+            url?: string;
+        };
+        export namespace action {
+            export type Action = {
+                attributes?: Schema.message.action.Attributes;
+                type: string;
+            };
+            export type Attributes = {};
+        }
+        export type File = {
+            id: string;
+            type?: string;
+            name: string;
+            size: number & tags.Type<"int32">;
+            contentType?: string;
+            duration?: number;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            orientation?: number & tags.Type<"int32">;
+            animated?: boolean;
+            bucket: string;
+            key: string;
+            previewKey?: string;
+            channelId?: string;
+            chatType?: string;
+            chatId?: string;
+        };
+        export type WebPage = {
+            id: string;
+            url: string;
+            title?: string;
+            description?: string;
+            imageUrl?: string;
+            videoUrl?: string;
+            publisher?: string;
+            author?: string;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            bucket?: string;
+            previewKey?: string;
+            logo?: string;
+            name?: string;
+        };
+        export namespace form {
+            export type Form = {
+                submittedAt?: number;
+                inputs?: Schema.message.form.FormInput[];
+                type: string;
+            };
+            export type FormInput = {
+                value?: {};
+                readOnly?: boolean;
+                type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
+                label?: string;
+                bindingKey?: string;
+                dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
+                userChatProfileBindingKey?: boolean;
+                userProfileBindingKey?: boolean;
+            };
+        }
+    }
+    export namespace profile {
+        export type UserProfile = {
+            [key: string]: {};
+        };
+    }
+    export type WebInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        browser?: string;
+        browserName?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
+    };
+    export type MobileInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        appName?: string;
+        appVersion?: string;
+        sdkName?: string;
+        sdkVersion?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
     };
 }
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
-        */
-        name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
-    };
-}
-type IAutoViewTransformerInputType = IShoppingSaleQuestion;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4UserChatView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -298,82 +684,212 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // We use a VerticalCard to present the sale question in a card format.
-  // The card will contain a header with an icon and secret indicator,
-  // a content area showing the snapshot details in markdown,
-  // and an optional footer displaying the seller's answer if available.
+  // Helper to format timestamps into human‐readable strings
+  const formatDate = (ts?: number): string =>
+    ts ? new Date(ts).toLocaleString() : "N/A";
 
-  // Extract the most recent snapshot (if any) for display
-  const snapshot = input.snapshots && input.snapshots.length > 0 
-    ? input.snapshots[input.snapshots.length - 1] 
-    : null;
+  // Map legacy tag colors to AutoView chip color variants
+  const tagColorMap: Record<string, IAutoView.IAutoViewChipProps["color"]> = {
+    red: "red",
+    orange: "orange",
+    yellow: "yellow",
+    olive: "lime",
+    green: "green",
+    cobalt: "blue",
+    purple: "violet",
+    pink: "pink",
+    navy: "indigo",
+  };
 
-  // Compose markdown content from snapshot data (if available)
-  let markdownContent = "";
-  if (snapshot) {
-    // Use markdown header for the snapshot title and then the body.
-    markdownContent = `# ${snapshot.title}\n\n${snapshot.body}`;
-  } else {
-    markdownContent = "_No additional details available._";
-  }
-
-  // Compose the CardHeader.
-  // - Display a fixed title identifying the inquiry and the customer.
-  // - Use a question icon as the start element.
-  // - If the question is secret, show a lock icon as the end element.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // Build the CardHeader: user avatar or fallback icon + summary
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: `Sale Question (${input.id})`,
-    description: `Asked by Customer: ${input.customer?.id || "Unknown"} at ${input.created_at}`,
-    startElement: {
-      type: "Icon",
-      id: "question", // using "question" icon to denote inquiry
-      color: "blue",
-      size: 24,
-    },
-    // Conditionally add a lock icon for secret questions.
-    endElement: input.secret
-      ? {
-          type: "Icon",
-          id: "lock", // using "lock" icon to indicate secret content
-          color: "red",
-          size: 16,
-        }
-      : undefined,
+    title: input.user?.name ?? input.user?.id ?? "Unknown User",
+    description:
+      input.session != null
+        ? `Session Alerts: ${input.session.alert ?? 0}, Unreads: ${
+            input.session.unread ?? 0
+          }`
+        : undefined,
+    startElement:
+      input.user?.avatarUrl != null
+        ? {
+            type: "Avatar",
+            src: input.user.avatarUrl,
+            name: input.user.name,
+            variant: "primary",
+          }
+        : {
+            type: "Icon",
+            id: "user",
+            size: 24,
+            color: "gray",
+          },
   };
 
-  // Compose the CardContent using a Markdown component to render rich text.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent,
-    },
-  };
+  // Prepare an array of presentation components for the CardContent
+  const contentChildren: IAutoView.IAutoViewPresentationComponentProps[] = [];
 
-  // Optionally, if an answer is provided, compose the CardFooter.
-  // We assume answer is a string. If not, we convert it to a string representation.
-  let cardFooter: IAutoView.IAutoViewCardFooterProps | undefined = undefined;
-  if (input.answer !== null && input.answer !== undefined) {
-    const answerText = typeof input.answer === "string" ? input.answer : JSON.stringify(input.answer);
-    cardFooter = {
-      type: "CardFooter",
-      childrenProps: {
-        type: "Markdown",
-        content: `**Seller Answer:**\n\n${answerText}`,
-      },
-    };
+  // If there are chat tags, display them as a ChipGroup
+  if (Array.isArray(input.chatTags) && input.chatTags.length > 0) {
+    const chips: IAutoView.IAutoViewChipProps[] = input.chatTags.map((tag) => ({
+      type: "Chip",
+      label: tag.name,
+      color: tag.colorVariant
+        ? tagColorMap[tag.colorVariant] ?? "gray"
+        : "gray",
+      variant: "outlined",
+      size: "small",
+    }));
+    contentChildren.push({
+      type: "ChipGroup",
+      childrenProps: chips,
+    });
   }
 
-  // Aggregate the components in a VerticalCard.
-  // The card's childrenProps accepts an array of presentation components.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: cardFooter
-      ? [ cardHeader, cardContent, cardFooter ]
-      : [ cardHeader, cardContent ],
+  // If there is a session, show some key session fields in a DataList
+  if (input.session != null) {
+    const items: IAutoView.IAutoViewDataListItemProps[] = [
+      {
+        type: "DataListItem",
+        label: [
+          {
+            type: "Text",
+            content: "Last Updated",
+            variant: "subtitle2",
+          },
+        ],
+        value: [
+          {
+            type: "Text",
+            content: formatDate(input.session.updatedAt),
+            variant: "body2",
+          },
+        ],
+      },
+      {
+        type: "DataListItem",
+        label: [
+          {
+            type: "Text",
+            content: "Unread Count",
+            variant: "subtitle2",
+          },
+        ],
+        value: [
+          {
+            type: "Text",
+            content: String(input.session.unread ?? 0),
+            variant: "body2",
+          },
+        ],
+      },
+    ];
+    contentChildren.push({
+      type: "DataList",
+      childrenProps: items,
+    });
+  }
+
+  // Show the latest message content, preferring plainText, then block values
+  if (input.message != null) {
+    let md = "";
+    if (typeof input.message.plainText === "string") {
+      md = input.message.plainText;
+    } else if (Array.isArray(input.message.blocks)) {
+      // Concatenate block values into markdown
+      md = input.message.blocks
+        .map((b) => (b.value ? b.value : ""))
+        .join("\n\n");
+    }
+    // Only push if there's some content
+    if (md.trim()) {
+      contentChildren.push({
+        type: "Markdown",
+        content: md,
+      });
+    }
+  }
+
+  // If a one-time message exists, show its send state and schedule
+  if (input.oneTimeMsg != null) {
+    const ot = input.oneTimeMsg;
+    contentChildren.push({
+      type: "DataList",
+      childrenProps: [
+        {
+          type: "DataListItem",
+          label: [{ type: "Text", content: "OTM Name", variant: "subtitle2" }],
+          value: [{ type: "Text", content: ot.name, variant: "body2" }],
+        },
+        {
+          type: "DataListItem",
+          label: [{ type: "Text", content: "State", variant: "subtitle2" }],
+          value: [{ type: "Text", content: ot.state, variant: "body2" }],
+        },
+        {
+          type: "DataListItem",
+          label: [
+            { type: "Text", content: "Scheduled At", variant: "subtitle2" },
+          ],
+          value: [
+            {
+              type: "Text",
+              content: formatDate(ot.startAt),
+              variant: "body2",
+            },
+          ],
+        },
+      ],
+    });
+  }
+
+  // If there's an associated campaign, show its key metrics
+  if (input.campaign != null) {
+    const c = input.campaign;
+    contentChildren.push({
+      type: "DataList",
+      childrenProps: [
+        {
+          type: "DataListItem",
+          label: [{ type: "Text", content: "Campaign", variant: "subtitle2" }],
+          value: [{ type: "Text", content: c.name, variant: "body2" }],
+        },
+        {
+          type: "DataListItem",
+          label: [{ type: "Text", content: "Sent", variant: "subtitle2" }],
+          value: [
+            { type: "Text", content: String(c.sent ?? 0), variant: "body2" },
+          ],
+        },
+        {
+          type: "DataListItem",
+          label: [{ type: "Text", content: "Views", variant: "subtitle2" }],
+          value: [
+            { type: "Text", content: String(c.view ?? 0), variant: "body2" },
+          ],
+        },
+      ],
+    });
+  }
+
+  // If nothing to display, show a fallback message
+  if (contentChildren.length === 0) {
+    contentChildren.push({
+      type: "Markdown",
+      content: "No data available for this view.",
+    });
+  }
+
+  // Wrap all content in a CardContent
+  const content: IAutoView.IAutoViewCardContentProps = {
+    type: "CardContent",
+    childrenProps: contentChildren,
   };
 
-  // Return the visualized data component.
-  return verticalCard;
+  // Assemble the VerticalCard
+  return {
+    type: "VerticalCard",
+    childrenProps: [header, content],
+  };
 }

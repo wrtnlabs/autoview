@@ -1,104 +1,27 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace TryPagination_lt_UserType {
-    export type ProfileList_gt_ = {
-        result: true & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        code: 1000 & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        requestToResponse?: string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>;
-        data: PaginationResponseType_lt_UserType.ProfileList_gt_;
+namespace Schema {
+    export type EventView = {
+        event?: Schema.Event;
+    };
+    export type Event = {
+        userId?: string;
+        id?: string;
+        channelId?: string;
+        name: string;
+        property?: {
+            [key: string]: {};
+        };
+        createdAt?: number;
+        expireAt?: number;
+        managed?: boolean;
+        version?: number & tags.Type<"int32">;
+        nameI18nMap?: {
+            [key: string]: string;
+        };
     };
 }
-namespace PaginationResponseType_lt_UserType {
-    export type ProfileList_gt_ = {
-        list: UserType.Acquaintance[] & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        count: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        totalResult: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        totalPage: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        search?: string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>;
-        page: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-    };
-}
-namespace UserType {
-    export type Acquaintance = {
-        /**
-         * 사용자의 별칭, 설정하지 않는 경우도 있다.
-        */
-        nickname: string & tags.JsonSchemaPlugin<{
-            "x-typia-metaTags": [
-                {
-                    kind: "minLength",
-                    value: 1
-                },
-                {
-                    kind: "maxLength",
-                    value: 50
-                }
-            ],
-            "x-typia-jsDocTags": [
-                {
-                    name: "minLength",
-                    text: [
-                        {
-                            text: "1",
-                            kind: "text"
-                        }
-                    ]
-                },
-                {
-                    name: "maxLength",
-                    text: [
-                        {
-                            text: "50",
-                            kind: "text"
-                        }
-                    ]
-                }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        id: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        /**
-         * 사용자의 프로필 이미지
-        */
-        profileImage?: (string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>) | null;
-        reason: "\uB098\uB97C \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C" | "\uB0B4\uAC00 \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C";
-    };
-}
-type IAutoViewTransformerInputType = TryPagination_lt_UserType.ProfileList_gt_;
+type IAutoViewTransformerInputType = Schema.EventView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -106,98 +29,125 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract pagination and list data from the input
-  const { data } = input;
-  const { list, count, totalResult, totalPage, page } = data;
-  
-  // Helper: Build a data list item for each user profile
-  const dataListItems = (list && list.length > 0 ? list : []).map<IAutoView.IAutoViewDataListItemProps>((user) => {
-    // For the avatar component, use the profile image if available,
-    // otherwise use the nickname initials via the 'name' property.
-    const avatar: IAutoView.IAutoViewAvatarProps = {
-      type: "Avatar",
-      src: (user.profileImage || undefined) as any, // 'as any' used due to string & tags.Format<"uri"> constraint
-      name: user.nickname,
-      size: 40, // choose an appropriate size from allowed sizes (e.g., 40)
-      // variant can be assigned if needed. Leaving it undefined uses default styling.
-    };
+  // Extract the event from the input
+  const event = input.event;
 
-    // Use a markdown component to visually present additional user information.
-    // We include the user id and the reason string formatted in markdown.
-    const markdownContent = `**ID:** ${user.id}\n\n**Reason:** ${user.reason}`;
-
-    const details: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: markdownContent
-    };
-
-    // Compose the data list item where label is the avatar and value is the markdown component.
+  // If there's no event data, render a simple markdown notice
+  if (!event) {
     return {
-      type: "DataListItem",
-      label: avatar,
-      value: details
+      type: "Markdown",
+      content: "### No event data available",
     };
-  });
+  }
 
-  // If there are no items, display a friendly empty state using markdown.
-  const emptyState: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: `### No User Profiles Found\n\nThere are no profiles to display at this time.`
-  };
+  // Helper to display string or number fields, falling back to "N/A"
+  const display = (value?: string | number): string =>
+    value !== undefined && value !== null && value !== ""
+      ? String(value)
+      : "N/A";
 
-  // Build data list component: if there are items, use them; otherwise, show the empty state.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems.length > 0 ? dataListItems : [ {
+  // Helper to format UNIX timestamps into localized date‐time strings
+  const formatTimestamp = (ts?: number): string =>
+    ts !== undefined ? new Date(ts).toLocaleString() : "N/A";
+
+  // Helper to count keys of an object, safely handling undefined
+  const countKeys = (obj?: Record<string, unknown>): number =>
+    obj ? Object.keys(obj).length : 0;
+
+  // Build a list of labeled data points for the DataList component
+  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = [
+    {
       type: "DataListItem",
-      label: emptyState, // reuse markdown as label to show the message
-    } ]
-  };
-
-  // Create a CardHeader component to display title and summary info.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "User Profiles",
-    description: `Showing ${list.length} of ${totalResult} results. Page ${page} of ${totalPage}.`,
-    // For visual interest, display an icon on the left side.
-    startElement: {
-      type: "Icon",
-      id: "user",  // icon name "user" in kebab-case; ensure it exists in the icon library
-      size: 24,
-      color: "blue"  // choose a suitable color
-    }
-  };
-
-  // Create a CardContent component that encapsulates the data list.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: [ dataList ]
-  };
-
-  // Create a CardFooter component for pagination information.
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-    type: "CardFooter",
-    childrenProps: [
-      {
+      label: { type: "Text", content: "Name" },
+      value: { type: "Text", content: display(event.name) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "User ID" },
+      value: { type: "Text", content: display(event.userId) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "Event ID" },
+      value: { type: "Text", content: display(event.id) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "Channel ID" },
+      value: { type: "Text", content: display(event.channelId) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "Created At" },
+      value: { type: "Text", content: formatTimestamp(event.createdAt) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "Expires At" },
+      value: { type: "Text", content: formatTimestamp(event.expireAt) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "Properties Count" },
+      value: { type: "Text", content: String(countKeys(event.property)) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "i18n Keys" },
+      value: { type: "Text", content: String(countKeys(event.nameI18nMap)) },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "Version" },
+      value: {
         type: "Text",
-        content: `Page ${page} of ${totalPage} | Total Profiles: ${totalResult}`,
-        variant: "footnote",
-        color: "gray"
-      }
-    ]
-  };
+        content:
+          event.version !== undefined ? String(event.version) : "N/A",
+      },
+    },
+    {
+      type: "DataListItem",
+      label: { type: "Text", content: "Managed" },
+      value: {
+        type: "Text",
+        content: event.managed ? "Yes" : "No",
+      },
+    },
+  ];
 
-  // Compose the final UI component using a Vertical Card.
-  // This card is responsive and its children (header, content, and footer) will be displayed
-  // in a layout suitable for a web browser on mobile and desktop.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Compose the top‐level UI using a VerticalCard for responsiveness
+  return {
     type: "VerticalCard",
     childrenProps: [
-      cardHeader,
-      cardContent,
-      cardFooter
-    ]
+      // Card header with an icon, title, description, and version badge
+      {
+        type: "CardHeader",
+        title: event.name,
+        description: `ID: ${display(event.id)} | Channel: ${display(
+          event.channelId,
+        )}`,
+        startElement: {
+          type: "Icon",
+          id: "user",
+          size: 24,
+          color: "blue",
+        },
+        endElement: {
+          type: "Chip",
+          label: `v${display(event.version)}`,
+          variant: "outlined",
+          size: "small",
+          color: "info",
+        },
+      },
+      // Card content showing all event fields in a DataList
+      {
+        type: "CardContent",
+        childrenProps: {
+          type: "DataList",
+          childrenProps: dataListItems,
+        },
+      },
+    ],
   };
-
-  return verticalCard;
 }

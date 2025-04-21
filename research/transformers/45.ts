@@ -1,122 +1,250 @@
+import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace IShoppingDeliveryPiece {
-    /**
-     * Creation information of the delivery piece.
-    */
-    export type ICreate = {
+namespace Schema {
+    export namespace IPageIShoppingChannel {
         /**
-         * Target order's {@link IShoppingOrderPublish.id}.
+         * A page.
          *
-         * @title Target order's {@link IShoppingOrderPublish.id}
+         * Collection of records with pagination indformation.
         */
-        publish_id: string;
+        export type IHierarchical = {
+            /**
+             * Page information.
+             *
+             * @title Page information
+            */
+            pagination: Schema.IPage.IPagination;
+            /**
+             * List of records.
+             *
+             * @title List of records
+            */
+            data: Schema.IShoppingChannel.IHierarchical[];
+        };
+    }
+    export namespace IPage {
         /**
-         * Target good's {@link IShoppingOrderGood.id}.
-         *
-         * @title Target good's {@link IShoppingOrderGood.id}
+         * Page information.
         */
-        good_id: string;
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
+    export namespace IShoppingChannel {
         /**
-         * Target stock's {@link IShoppingSaleUnitStock.id}.
-         *
-         * @title Target stock's {@link IShoppingSaleUnitStock.id}
+         * Hierarchical channel information with children categories.
         */
-        stock_id: string;
+        export type IHierarchical = {
+            /**
+             * Children categories with hierarchical structure.
+             *
+             * @title Children categories with hierarchical structure
+            */
+            categories: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+            /**
+             * Identifier code.
+             *
+             * @title Identifier code
+            */
+            code: string;
+            /**
+             * Name of the channel.
+             *
+             * @title Name of the channel
+            */
+            name: string;
+        };
+    }
+    export namespace IShoppingChannelCategory {
         /**
-         * Quantity of the stock.
-         *
-         * It can be precision value to express split shipping.
-         *
-         * @title Quantity of the stock
+         * Hierarchical category information with children categories.
         */
-        quantity: number;
-    };
+        export type IHierarchical = {
+            /**
+             * List of children categories with hierarchical structure.
+             *
+             * @title List of children categories with hierarchical structure
+            */
+            children: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
 }
-type IAutoViewTransformerInputType = IShoppingDeliveryPiece.ICreate[];
+type IAutoViewTransformerInputType = Schema.IPageIShoppingChannel.IHierarchical;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
-function visualizeData(input: IShoppingDeliveryPiece.ICreate[]): IAutoView.IAutoViewComponentProps {
-  // We will create a vertical card that summarizes the delivery pieces.
-  // The card contains a header with an icon and a content section that displays 
-  // delivery details in a data list. Each delivery piece is represented as a list item 
-  // with markdown components for a rich visual display.
-
-  // Create the list items by mapping the input array elements to IAutoViewDataListItemProps objects.
-  const listItems: IAutoView.IAutoViewDataListItemProps[] = input.length > 0 ? input.map((item, index) => {
-    // For each item, we create a markdown content summarizing the details.
-    // We use markdown to list properties like publish ID, good ID, stock ID, and quantity.
-    const markdownContent = `**Publish ID:** ${item.publish_id}  
-**Good ID:** ${item.good_id}  
-**Stock ID:** ${item.stock_id}  
-**Quantity:** ${item.quantity}`;
-    
+function visualizeData(
+  input: IAutoViewTransformerInputType
+): IAutoView.IAutoViewComponentProps {
+  // Recursive helper to transform hierarchical categories into a DataList
+  function buildCategoryList(
+    categories: Schema.IShoppingChannelCategory.IHierarchical[]
+  ): IAutoView.IAutoViewDataListProps {
+    const items: IAutoView.IAutoViewDataListItemProps[] = categories.map(
+      (cat) => {
+        // If this category has children, nest another DataList; otherwise show the category code
+        const valueComponent: IAutoView.IAutoViewComponentProps = cat.children.length
+          ? buildCategoryList(cat.children)
+          : {
+              type: "Text",
+              variant: "caption",
+              content: cat.code,
+            };
+        return {
+          type: "DataListItem",
+          label: {
+            // Category name as the label
+            type: "Text",
+            variant: "body1",
+            content: cat.name,
+          },
+          value: valueComponent,
+        };
+      }
+    );
     return {
-      type: "DataListItem",
-      // Use a markdown component for the label that can serve as a header for the delivery item.
-      label: {
-        type: "Markdown",
-        content: `### Delivery Piece ${index + 1}`
-      },
-      // Use a markdown component for the value to display details in bullet-like format.
-      value: {
-        type: "Markdown",
-        content: markdownContent
-      }
+      type: "DataList",
+      childrenProps: items,
     };
-  }) : [
-    // In case there is no delivery piece, show a placeholder DataListItem with a message.
-    {
+  }
+
+  const { pagination, data: channels } = input;
+
+  // Build DataListItems for each shopping channel
+  const channelItems: IAutoView.IAutoViewDataListItemProps[] = channels.map(
+    (channel) => ({
       type: "DataListItem",
       label: {
-        type: "Markdown",
-        content: `### No Delivery Data`
+        // Channel name in a larger heading style
+        type: "Text",
+        variant: "h6",
+        content: channel.name,
       },
-      value: {
-        type: "Markdown",
-        content: "No delivery pieces were provided."
-      }
-    }
-  ];
+      value: buildCategoryList(channel.categories),
+    })
+  );
 
-  // Compose the central DataList component to house the list items.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: listItems
+  // If there are no channels, show a friendly message
+  const channelListComponent: IAutoView.IAutoViewComponentProps =
+    channelItems.length > 0
+      ? { type: "DataList", childrenProps: channelItems }
+      : {
+          type: "Text",
+          variant: "body1",
+          content: "No shopping channels available.",
+        };
+
+  // Markdown block summarizing pagination info
+  const paginationSummary: IAutoView.IAutoViewMarkdownProps = {
+    type: "Markdown",
+    content:
+      `**Page**: ${pagination.current} / ${pagination.pages}\n\n` +
+      `**Limit per page**: ${pagination.limit}\n\n` +
+      `**Total records**: ${pagination.records}`,
   };
 
-  // Create the CardContent component with the DataList as its child.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: dataList
-  };
-
-  // Create the CardHeader component to provide a title and description.
-  // The startElement uses an icon (truck) that visually represents deliveries.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // Card header with an icon and summary
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: "Delivery Pieces Overview",
-    description: "A summary of your delivery pieces rendered in an engaging visual format.",
+    title: "Shopping Channels Overview",
+    description: `${channels.length} channel${channels.length === 1 ? "" : "s"}`,
     startElement: {
-      id: "truck", // using a truck icon to denote deliveries; ensure the icon is available in your icon library.
       type: "Icon",
+      id: "layer-group", // FontAwesome icon: layers of channels
+      color: "blue",
       size: 24,
-      color: "blue"
-    }
+    },
   };
 
-  // Compose the final vertical card which organizes header and content.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Compose final VerticalCard with header, pagination, and channel list
+  return {
     type: "VerticalCard",
     childrenProps: [
-      cardHeader,
-      cardContent
-    ]
+      header,
+      {
+        type: "CardContent",
+        childrenProps: [paginationSummary],
+      },
+      {
+        type: "CardContent",
+        childrenProps: [channelListComponent],
+      },
+    ],
   };
-
-  // Return the composed vertical card which is of type IAutoView.IAutoViewComponentProps.
-  return verticalCard;
 }

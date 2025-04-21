@@ -1,42 +1,137 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4GroupsInfiniteScrollingView = {
-                groups?: legacy.v4.LegacyV4Group[];
-                next?: string;
-            };
-        }
-    }
-    export namespace v4 {
-        export type LegacyV4Group = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name: string & tags.Pattern<"[\\p{L}\\p{N}-_()]+">;
-            scope: "all" | "public" | "private";
-            managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            icon?: string & tags.Pattern<"\\S+">;
-            description?: string;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            active?: boolean;
+namespace Schema {
+    /**
+     * Category of channel.
+     *
+     * `IShoppingChannelCategory` is a concept that refers to classification
+     * categories within a specific {@link IShoppingChannel channel}, and is exactly
+     * the same as the concept commonly referred to as "category" in shopping malls.
+     *
+     * And `IShoppingChannelCategory` is different with {@link IShoppingSection}.
+     * {@link IShoppingSection} refers to a "corner" that is independent spatial
+     * information in the offline market, which cannot simultaneously classified in
+     * a {@link IShoppingSale sale}. Besides, `IShoppingChannelCategory` can be
+     * classified into multiple categories in a sale simultaneously.
+     *
+     * Product	| Section (corner) | Categories
+     * ---------|------------------|-----------------------------------
+     * Beef	    | Butcher corner   | Frozen food, Meat, Favorite food
+     * Grape    | Fruit corner     | Fresh food, Favorite food
+     *
+     * In addition, as `IShoppingChannelCategory` has 1:N self recursive relationship,
+     * it is possible to express below hierarchical structures. Thus, each channel
+     * can set their own category classification as they want.
+     *
+     * - Food > Meat > Frozen
+     * - Electronics > Notebook > 15 inches
+     * - Miscellaneous > Wallet
+     *
+     * Furthermore, `IShoppingChannelCategory` is designed to merge between themselves,
+     * so there is no burden to edit the category at any time.
+    */
+    export type IShoppingChannelCategory = {
+        /**
+         * Parent category info.
+         *
+         * @title Parent category info
+        */
+        parent: null | any;
+        /**
+         * List of children categories with hierarchical structure.
+         *
+         * @title List of children categories with hierarchical structure
+        */
+        children: Schema.IShoppingChannelCategory.IHierarchical[];
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Identifier code of the category.
+         *
+         * The code must be unique in the channel.
+         *
+         * @title Identifier code of the category
+        */
+        code: string;
+        /**
+         * Parent category's ID.
+         *
+         * @title Parent category's ID
+        */
+        parent_id: null | (string & tags.Format<"uuid">);
+        /**
+         * Representative name of the category.
+         *
+         * The name must be unique within the parent category. If no parent exists,
+         * then the name must be unique within the channel between no parent
+         * categories.
+         *
+         * @title Representative name of the category
+        */
+        name: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    };
+    export namespace IShoppingChannelCategory {
+        export type IInvert = any;
+        /**
+         * Hierarchical category information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * List of children categories with hierarchical structure.
+             *
+             * @title List of children categories with hierarchical structure
+            */
+            children: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
         };
     }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4GroupsInfiniteScrollingView;
+type IAutoViewTransformerInputType = Schema.IShoppingChannelCategory;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -44,72 +139,79 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // If there are no groups in the input, display a friendly Markdown message.
-  if (!input.groups || input.groups.length === 0) {
-    // Using a Markdown component to render the "no data" message for better styling and responsiveness.
-    return {
-      type: "Markdown",
-      content: "### No Groups Available\n\nThere are currently no groups to display. Please check back later."
-    } as IAutoView.IAutoViewMarkdownProps;
+  /**
+   * Recursively convert a list of hierarchical categories into DataListItemProps.
+   * For each category:
+   *  - Label shows a folder icon, the category name, and a chip with its code.
+   *  - Value shows either its child categories (as a nested DataList) or a creation date text.
+   */
+  function buildDataListItems(
+    categories: Schema.IShoppingChannelCategory.IHierarchical[],
+  ): IAutoView.IAutoViewDataListItemProps[] {
+    return categories.map((cat) => {
+      // Compose the label: an icon, the category name, and a small chip for the code.
+      const label: IAutoView.IAutoViewPresentationComponentProps[] = [
+        {
+          // Folder icon to represent a category
+          type: "Icon",
+          id: "folder",
+          size: 16,
+          color: "blue",
+        },
+        {
+          // Category name
+          type: "Text",
+          content: cat.name,
+          variant: "body1",
+        },
+        {
+          // Code as an outlined chip
+          type: "Chip",
+          label: cat.code,
+          variant: "outlined",
+          size: "small",
+          color: "info",
+        },
+      ];
+
+      // If the category has children, build a nested DataList for them.
+      if (Array.isArray(cat.children) && cat.children.length > 0) {
+        const nestedList: IAutoView.IAutoViewDataListProps = {
+          type: "DataList",
+          // Recursively build items for children
+          childrenProps: buildDataListItems(cat.children),
+        };
+
+        return {
+          type: "DataListItem",
+          label,
+          // Show the nested list as the value area
+          value: nestedList,
+        };
+      } else {
+        // Leaf node: show the creation date as a caption
+        const createdText: IAutoView.IAutoViewTextProps = {
+          type: "Text",
+          content: `Created at ${new Date(cat.created_at).toLocaleDateString()}`,
+          variant: "caption",
+          color: "gray",
+        };
+
+        return {
+          type: "DataListItem",
+          label,
+          // Value can be an array of Presentation components
+          value: [createdText],
+        };
+      }
+    });
   }
 
-  // Map each group to a vertical card for a visually engaging display.
-  const verticalCards: IAutoView.IAutoViewVerticalCardProps[] = input.groups.map((group) => {
-    // Create a card header displaying the group's name.
-    // Optionally include an icon if the 'icon' property is provided.
-    const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-      type: "CardHeader",
-      title: group.name,
-      // Display the group's scope (all / public / private) as a subtitle.
-      description: group.scope,
-      // Use the group's icon (if exists) as the start element.
-      startElement: group.icon
-        ? {
-            id: group.icon,
-            type: "Icon",
-            size: 16,
-            // Optionally, adjust the color based on the group's active state.
-            color: group.active ? "green" : "gray"
-          }
-        : undefined
-    };
+  // Top-level DataList showing all root categories
+  const rootList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: buildDataListItems(input.children),
+  };
 
-    // Create card content that uses a Markdown component to render the group's description.
-    // Markdown helps in responsive text rendering and allows for formatting.
-    const cardContent: IAutoView.IAutoViewCardContentProps = {
-      type: "CardContent",
-      childrenProps: group.description
-        ? [
-            {
-              type: "Markdown",
-              content: group.description
-            } as IAutoView.IAutoViewMarkdownProps
-          ]
-        : []
-    };
-
-    // Compose the vertical card with header and content.
-    return {
-      type: "VerticalCard",
-      childrenProps: [cardHeader, cardContent]
-    };
-  });
-
-  // If there is more than one group, wrap the vertical cards inside a carousel,
-  // which provides an engaging, swipeable interface on mobile devices.
-  if (verticalCards.length > 1) {
-    const carousel: IAutoView.IAutoViewCarouselProps = {
-      type: "Carousel",
-      autoPlay: false,
-      infinite: true,
-      gutter: 16, // spacing between the cards, adjusted for responsiveness
-      navControls: true,
-      indicators: true,
-      childrenProps: verticalCards
-    };
-    return carousel;
-  }
-
-  // If there is only one group, return the vertical card directly for simplicity.
-  return verticalCards[0];
+  return rootList;
 }

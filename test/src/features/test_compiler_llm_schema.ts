@@ -33,6 +33,7 @@ export const test_compiler_llm_schema = async (): Promise<void> => {
         items: [],
       };
   `,
+    "Schema",
     "test_compiler_llm_schema",
   );
   if (result.type === "success")

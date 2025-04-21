@@ -1,66 +1,29 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace TryPagination_lt_CategoryType {
-    export type FindAllResponse_gt_ = {
-        result: true & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        code: 1000 & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        requestToResponse?: string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>;
-        data: PaginationResponseType_lt_CategoryType.FindAllResponse_gt_;
+namespace Schema {
+    export type EventsView = {
+        prev?: string;
+        next?: string;
+        events?: Schema.Event[];
+    };
+    export type Event = {
+        userId?: string;
+        id?: string;
+        channelId?: string;
+        name: string;
+        property?: {
+            [key: string]: {};
+        };
+        createdAt?: number;
+        expireAt?: number;
+        managed?: boolean;
+        version?: number & tags.Type<"int32">;
+        nameI18nMap?: {
+            [key: string]: string;
+        };
     };
 }
-namespace PaginationResponseType_lt_CategoryType {
-    export type FindAllResponse_gt_ = {
-        list: CategoryType.Element[] & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        count: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        totalResult: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        totalPage: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        search?: string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>;
-        page: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-    };
-}
-namespace CategoryType {
-    export type Element = {
-        /**
-         * 카테고리의 이름으로, 디자인 계열의 카테고리 이름
-        */
-        name: string & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        id: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-    };
-}
-type IAutoViewTransformerInputType = TryPagination_lt_CategoryType.FindAllResponse_gt_;
+type IAutoViewTransformerInputType = Schema.EventsView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -68,84 +31,121 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract data from the input
-  const { data } = input;
-  const { list, totalPage, totalResult, page } = data;
-
-  // For each category element, create a DataListItem component.
-  // Here we use an Avatar as the label to visually represent the category,
-  // and a Markdown component as the value to display additional details.
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = list.map((category) => {
-    // Create an Avatar for the category label:
-    // We use the category name as the avatar's name.
-    const avatarLabel: IAutoView.IAutoViewAvatarProps = {
-      type: "Avatar",
-      name: category.name,
-      variant: "primary",
-      size: 32
-    };
-
-    // Create a Markdown component to display category details (e.g., its ID)
-    const detailMarkdown: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: `**ID:** ${category.id}`
-    };
-
-    return {
-      type: "DataListItem",
-      // Use the avatar for a visual label instead of plain text
-      label: avatarLabel,
-      value: detailMarkdown
-    };
-  });
-
-  // Create a DataList component that will contain all the DataListItems.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems
-  };
-
-  // Create a CardHeader to introduce the list.
-  // Using an Icon in the startElement to enhance the visual appeal.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Categories",
-    description: `Found ${list.length} categor${list.length === 1 ? "y" : "ies"}.`,
-    startElement: {
-      type: "Icon",
-      id: "list", // icon name depicting a list; must be in kebab-case without prefix
-      size: 16,
-      color: "blue"
+    // If there are no events, show a friendly markdown message
+    if (!input.events || input.events.length === 0) {
+        return {
+            type: "Markdown",
+            content: "### No events available\nThere are currently no events to display."
+        };
     }
-  };
 
-  // Create a CardContent that embeds our DataList.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: dataList
-  };
+    // Helper to format a timestamp (if present) to locale string
+    const formatTime = (ts?: number): string | null => {
+        if (typeof ts !== "number") return null;
+        try {
+            return new Date(ts).toLocaleString();
+        } catch {
+            return null;
+        }
+    };
 
-  // Create a CardFooter to display pagination info using a Markdown component.
-  const paginationMarkdown: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: `**Page:** ${page} / ${totalPage}\n**Total Items:** ${totalResult}`
-  };
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-    type: "CardFooter",
-    childrenProps: paginationMarkdown
-  };
+    // Build a DataListItem for each event, using icons and text
+    const dataListItems: IAutoView.IAutoViewDataListItemProps[] = input.events.map((event) => {
+        const valueChildren: IAutoView.IAutoViewPresentationComponentProps[] = [];
 
-  // Compose the final UI component using a VerticalCard to wrap header, content, and footer.
-  // A VerticalCard is chosen for its responsive design and ease of arranging components vertically.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [
-      cardHeader,
-      cardContent,
-      cardFooter
-    ]
-  };
+        // User icon + ID
+        if (event.userId) {
+            valueChildren.push(
+                { type: "Icon", id: "user", size: 16, color: "blue" },
+                { type: "Text", content: ` ${event.userId}`, variant: "body2" }
+            );
+        }
 
-  // Return the composed UI component.
-  return verticalCard;
+        // Channel icon + channelId
+        if (event.channelId) {
+            valueChildren.push(
+                { type: "Icon", id: "hashtag", size: 16, color: "teal" },
+                { type: "Text", content: ` ${event.channelId}`, variant: "body2" }
+            );
+        }
+
+        // Created at timestamp
+        const created = formatTime(event.createdAt);
+        if (created) {
+            valueChildren.push(
+                { type: "Icon", id: "calendar", size: 16, color: "gray" },
+                { type: "Text", content: ` ${created}`, variant: "body2" }
+            );
+        }
+
+        // Expiration timestamp
+        const expires = formatTime(event.expireAt);
+        if (expires) {
+            valueChildren.push(
+                { type: "Icon", id: "hourglass", size: 16, color: "orange" },
+                { type: "Text", content: ` ${expires}`, variant: "body2" }
+            );
+        }
+
+        // Version chip
+        if (typeof event.version === "number") {
+            valueChildren.push({
+                type: "Chip",
+                label: `v${event.version}`,
+                variant: "outlined",
+                size: "small",
+                color: "secondary"
+            });
+        }
+
+        // Build the DataListItem
+        return {
+            type: "DataListItem",
+            // Use the event's name as the label, styled as a header
+            label: { type: "Text", content: event.name, variant: "subtitle1", color: "primary" },
+            // Inline children for the value field
+            value: valueChildren
+        };
+    });
+
+    // Build pagination buttons if prev/next cursors are present
+    const paginationButtons: IAutoView.IAutoViewButtonProps[] = [];
+    if (input.prev) {
+        paginationButtons.push({
+            type: "Button",
+            label: "Previous",
+            variant: "outlined",
+            size: "small",
+            href: input.prev
+        });
+    }
+    if (input.next) {
+        paginationButtons.push({
+            type: "Button",
+            label: "Next",
+            variant: "contained",
+            size: "small",
+            href: input.next
+        });
+    }
+
+    // Compose the final VerticalCard with the data list and pagination
+    return {
+        type: "VerticalCard",
+        childrenProps: [
+            // Main content: the list of events
+            {
+                type: "CardContent",
+                childrenProps: {
+                    type: "DataList",
+                    childrenProps: dataListItems
+                }
+            },
+            // Footer: pagination controls (if any)
+            {
+                type: "CardFooter",
+                childrenProps: paginationButtons.length > 0 ? paginationButtons : undefined
+            }
+        ]
+    };
 }

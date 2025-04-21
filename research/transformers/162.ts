@@ -1,76 +1,69 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
+namespace Schema {
     /**
-     * Writer of the comment.
+     * A page.
      *
-     * Both customer and seller can write comment on the sale inquiry.
-     *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
-     *
-     * @title Writer of the comment
+     * Collection of records with pagination indformation.
     */
-    writer: any | any | any;
+    export type IPageIShoppingChannel = {
+        /**
+         * Page information.
+         *
+         * @title Page information
+        */
+        pagination: Schema.IPage.IPagination;
+        /**
+         * List of records.
+         *
+         * @title List of records
+        */
+        data: Schema.IShoppingChannel[];
+    };
+    export namespace IPage {
+        /**
+         * Page information.
+        */
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
     /**
-     * Primary Key.
+     * Channel information.
      *
-     * @title Primary Key
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
     */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
+    export type IShoppingChannel = {
         /**
          * Primary Key.
          *
@@ -78,62 +71,26 @@ namespace IBbsArticleComment {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Creation time of record.
          *
-         * In other words, creation time or update time or comment.
-         *
-         * @title Creation time of snapshot record
+         * @title Creation time of record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Identifier code.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Identifier code
         */
-        format: "html" | "md" | "txt";
+        code: string;
         /**
-         * Content body of comment.
+         * Name of the channel.
          *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
-    };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
+         * @title Name of the channel
         */
         name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
     };
 }
-type IAutoViewTransformerInputType = IShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingChannel;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -141,113 +98,83 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Determine a display name for the writer.
-  // If the writer has a "name" property, use it; otherwise, convert it to a string.
-  const writerName =
-    input.writer && typeof input.writer === "object" && "name" in input.writer
-      ? (input.writer as any).name
-      : String(input.writer);
+    // Destructure pagination and channel list
+    const { pagination, data: channels } = input;
+    const { current, pages } = pagination;
 
-  // Create an avatar component that will be used in the header.
-  // Using a neutral size (32) so that it's visible on both desktop and mobile.
-  const avatarHeader: IAutoView.IAutoViewAvatarProps = {
-    type: "Avatar",
-    name: writerName,
-    size: 32,
-  };
+    // Build a DataListItemProps array for each shopping channel
+    const listItems: IAutoView.IAutoViewDataListItemProps[] = channels.map((channel) => {
+        // Avatar showing the first letter of channel name
+        const avatar: IAutoView.IAutoViewAvatarProps = {
+            type: "Avatar",
+            name: channel.name.charAt(0).toUpperCase(),
+            variant: "primary",
+            size: 32,
+        };
 
-  // Build a CardHeader to display general information about the comment.
-  // The header uses the avatar as its startElement.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: `Comment ID: ${input.id}`,
-    description: `Created at: ${input.created_at}`,
-    startElement: avatarHeader,
-    // endElement could be used for additional metadata if available.
-  };
+        // Text component for full channel name
+        const nameText: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            content: channel.name,
+            variant: "body1",
+        };
 
-  // Retrieve the most recent snapshot if available.
-  const latestSnapshot = input.snapshots && input.snapshots.length > 0
-    ? input.snapshots[input.snapshots.length - 1]
-    : null;
+        // Chip component for channel code
+        const codeChip: IAutoView.IAutoViewChipProps = {
+            type: "Chip",
+            label: channel.code,
+            color: "secondary",
+            variant: "filled",
+            size: "small",
+        };
 
-  // Construct markdown content.
-  // We use a markdown component rather than plain text to allow for more engaging UI formatting.
-  // In this case, we insert the snapshot body into a markdown block.
-  const markdownContent: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: latestSnapshot
-      ? `### Comment Snapshot\n\n${latestSnapshot.body}`
-      : "### No snapshot available",
-  };
+        // Text component for creation date
+        const dateText: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            content: new Date(channel.created_at).toLocaleDateString(),
+            variant: "caption",
+            color: "#888888",
+        };
 
-  // Prepare the main content of the card by embedding the markdown.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: markdownContent,
-  };
-
-  // If the latest snapshot includes file attachments, create a list to display them.
-  // Each attachment is represented as a DataListItem with a textual label and a download button.
-  let cardFooter: IAutoView.IAutoViewCardFooterProps | undefined = undefined;
-  if (latestSnapshot && latestSnapshot.files && latestSnapshot.files.length > 0) {
-    // Transform each attachment file into a DataListItem.
-    const attachmentItems: IAutoView.IAutoViewDataListItemProps[] = latestSnapshot.files.map((file) => {
-      // Create a text component to show the file name with its extension (if any)
-      const fileName = file.extension ? `${file.name}.${file.extension}` : file.name;
-      const fileText: IAutoView.IAutoViewTextProps = {
-        type: "Text",
-        content: fileName,
-        variant: "body1",
-      };
-
-      // Create a button component linking to the file URL for downloading.
-      const downloadButton: IAutoView.IAutoViewButtonProps = {
-        type: "Button",
-        label: "Download",
-        href: file.url,
-        variant: "outlined",
-        size: "small",
-      };
-
-      // Return a DataListItem combining both the file name and the download button.
-      return {
-        type: "DataListItem",
-        // Using label to display the file name; additional info is provided in the value.
-        label: fileText,
-        value: downloadButton,
-      };
+        return {
+            type: "DataListItem",
+            // Label area: avatar + channel name
+            label: [avatar, nameText],
+            // Value area: code chip + creation date
+            value: [codeChip, dateText],
+        };
     });
 
-    // Create a DataList to encapsulate all attachment items.
-    const attachmentsList: IAutoView.IAutoViewDataListProps = {
-      type: "DataList",
-      childrenProps: attachmentItems,
+    // DataList wrapping all items
+    const dataList: IAutoView.IAutoViewDataListProps = {
+        type: "DataList",
+        childrenProps: listItems,
     };
 
-    // Place the DataList inside a CardFooter for visual separation.
-    cardFooter = {
-      type: "CardFooter",
-      childrenProps: [
-        // Optionally, include a header text via a Text component.
-        {
-          type: "Text",
-          content: "Attachments",
-          variant: "subtitle2",
+    // CardHeader with an icon and pagination info
+    const header: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: "Shopping Channels",
+        description: `Page ${current} of ${pages}`,
+        startElement: {
+            type: "Icon",
+            id: "shopping-cart",
+            color: "blue",
+            size: 24,
         },
-        attachmentsList,
-      ],
     };
-  }
 
-  // Compose the final UI component using a Vertical Card.
-  // The vertical card arranges the header, content, and (optionally) footer vertically.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: cardFooter
-      ? [cardHeader, cardContent, cardFooter]
-      : [cardHeader, cardContent],
-  };
+    // CardContent containing the data list
+    const content: IAutoView.IAutoViewCardContentProps = {
+        type: "CardContent",
+        childrenProps: dataList,
+    };
 
-  return verticalCard;
+    // Wrap in a vertical card for responsive display
+    const card: IAutoView.IAutoViewVerticalCardProps = {
+        type: "VerticalCard",
+        childrenProps: [header, content],
+    };
+
+    return card;
 }

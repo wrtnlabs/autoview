@@ -4,6 +4,7 @@ import ts from "typescript";
 
 import { FilePrinter } from "../utils/FilePrinter";
 import { MapUtil } from "../utils/MapUtil";
+import { StringUtil } from "../utils/StringUtil";
 import { AutoViewSchemaProgrammer } from "./AutoViewSchemaProgrammer";
 import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
 
@@ -12,8 +13,8 @@ export namespace AutoViewDtoProgrammer {
     ctx: IAutoViewProgrammerContext,
     components: OpenApi.IComponents,
     schema: OpenApi.IJsonSchema,
-    exportAll: boolean = false,
-  ): ts.Statement[] => {
+    dtoPrefix: string,
+  ): ts.ModuleDeclaration => {
     const references: Map<string, OpenApi.IJsonSchema> = new Map();
     OpenApiTypeChecker.visit({
       closure: (schema) => {
@@ -40,7 +41,15 @@ export namespace AutoViewDtoProgrammer {
         location = modulo.children;
       });
     }
-    return writeModulo(ctx, components, schema, dict, exportAll);
+
+    const statements = writeModulo(ctx, components, schema, dict, dtoPrefix);
+
+    return ts.factory.createModuleDeclaration(
+      undefined,
+      ts.factory.createIdentifier(dtoPrefix),
+      ts.factory.createModuleBlock(statements),
+      ts.NodeFlags.Namespace,
+    );
   };
 
   const writeModulo = (
@@ -48,7 +57,7 @@ export namespace AutoViewDtoProgrammer {
     components: OpenApi.IComponents,
     schema: OpenApi.IJsonSchema,
     dict: Map<string, IModulo>,
-    inline: boolean,
+    dtoPrefix: string,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [];
     for (const [key, value] of dict) {
@@ -56,12 +65,14 @@ export namespace AutoViewDtoProgrammer {
         statements.push(
           FilePrinter.description(
             ts.factory.createTypeAliasDeclaration(
-              inline === true
-                ? [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)]
-                : [],
-              key,
+              [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+              ts.factory.createIdentifier(StringUtil.escapeNonVariable(key)),
               undefined,
-              AutoViewSchemaProgrammer.writeSchema(ctx, value.schema),
+              AutoViewSchemaProgrammer.writeSchema(
+                ctx,
+                value.schema,
+                `${dtoPrefix}.`,
+              ),
             ),
             writeComment(value.schema),
           ),
@@ -69,12 +80,10 @@ export namespace AutoViewDtoProgrammer {
       if (value.children.size)
         statements.push(
           ts.factory.createModuleDeclaration(
-            inline === true
-              ? [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)]
-              : [],
-            ts.factory.createIdentifier(key),
+            [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+            ts.factory.createIdentifier(StringUtil.escapeNonVariable(key)),
             ts.factory.createModuleBlock(
-              writeModulo(ctx, components, schema, value.children, true),
+              writeModulo(ctx, components, schema, value.children, dtoPrefix),
             ),
             ts.NodeFlags.Namespace,
           ),

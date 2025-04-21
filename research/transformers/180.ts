@@ -1,184 +1,33 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace desk {
-    export type ManagerView = {
-        manager?: Manager;
-        online?: Online;
-    };
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4EventsView = {
+                    events?: Schema.legacy.v4.LegacyV4Event[];
+                    prev?: string;
+                    next?: string;
+                };
+            }
+        }
+        export namespace v4 {
+            export type LegacyV4Event = {
+                userId?: string;
+                id?: string;
+                channelId?: string;
+                name: string;
+                property?: {
+                    [key: string]: {};
+                };
+                createdAt?: number;
+                expireAt?: number;
+                version?: number & tags.Type<"int32">;
+            };
+        }
+    }
 }
-type Manager = {
-    id?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    channelId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    accountId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    name: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    description?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    showDescriptionToFront?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    nameDescI18nMap?: {
-        [key: string]: NameDesc;
-    };
-    profile?: {
-        [key: string]: {};
-    };
-    email?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    showEmailToFront?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    mobileNumber?: string & tags.Default<"+18004424000"> & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    showMobileNumberToFront?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    roleId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    removed?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    createdAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    updatedAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    removedAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    displayAsChannel?: boolean;
-    defaultGroupWatch?: "all" | "info" | "none";
-    defaultDirectChatWatch?: "all" | "info" | "none";
-    defaultUserChatWatch?: "all" | "info" | "none";
-    chatAlertSound?: "none" | "drop" | "woody" | "bounce" | "crystal" | "xylo" | "quickKnock" | "candy" | "shine";
-    meetAlertSound?: "cute" | "basic" | "gentle" | "marimba";
-    showPrivateMessagePreview?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    operatorScore?: number & tags.JsonSchemaPlugin<{
-        format: "float",
-        readOnly: true
-    }>;
-    touchScore?: number & tags.JsonSchemaPlugin<{
-        format: "float",
-        readOnly: true
-    }>;
-    avatar?: TinyFile;
-    operatorEmailReminder?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    receiveUnassignedAlert?: boolean;
-    receiveUnassignedChatAlert?: boolean;
-    receiveUnassignedMeetAlert?: boolean;
-    operator?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    operatorStatusId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    defaultAllMentionImportant?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    userMessageImportant?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    assignableUserChatTypes?: ("sync" | "async")[] & tags.UniqueItems;
-    autoAssignCapacity?: number & tags.Type<"uint32"> & tags.Maximum<100> & tags.JsonSchemaPlugin<{
-        format: "int32",
-        readOnly: true
-    }>;
-    enableAutoAssignOnSync?: boolean;
-    statusEmoji?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    statusText?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    statusClearAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    doNotDisturb?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    doNotDisturbClearAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    accountDoNotDisturb?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    accountDoNotDisturbClearAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    enableReactedMessageIndex?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    enableTeamMentionedMessageIndex?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    operatorUpdatedAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    pcInboxMeetAlert?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    mobileInboxMeetAlert?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    pcTeamChatMeetAlert?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    mobileTeamChatMeetAlert?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    managerId?: string;
-    avatarUrl?: string;
-    /**
-     * @deprecated
-    */
-    meetOperator?: boolean;
-    emailForFront?: string;
-    mobileNumberForFront?: string & tags.Default<"+18004424000">;
-};
-type NameDesc = {
-    name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
-    description?: string;
-};
-type TinyFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    height?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-};
-type Online = {
-    channelId?: string;
-    personType?: string;
-    personId?: string;
-    id?: string;
-};
-type IAutoViewTransformerInputType = desk.ManagerView;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4EventsView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -186,77 +35,114 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract manager and online data from the input.
-  const manager = input.manager;
-  const online = input.online;
+  // Ensure we have a list to work with
+  const events = input.events ?? [];
 
-  // If there is no manager data, return a simple Markdown component indicating that.
-  if (!manager) {
+  // If there are no events, render a simple markdown message
+  if (events.length === 0) {
     return {
       type: "Markdown",
-      content: "## No Manager Data Available\n\nPlease check back later."
-    } as IAutoView.IAutoViewMarkdownProps;
+      content: "### No events to display\n\nThere are currently no events in the data source.",
+    };
   }
 
-  // Build a CardHeader component.
-  // Use manager's avatar URL if available, otherwise display a default user icon.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // Helper to format a timestamp into a human-readable string
+  const formatDate = (ts?: number): string =>
+    ts != null ? new Date(ts).toLocaleString() : "N/A";
+
+  // Create a DataListItem for each event
+  const items: IAutoView.IAutoViewDataListItemProps[] = events.map((event) => {
+    // Build a markdown block with the event details
+    const detailsLines: string[] = [
+      `**ID:** ${event.id ?? "N/A"}`,
+      `**User:** ${event.userId ?? "N/A"}`,
+      event.channelId ? `**Channel:** ${event.channelId}` : "",
+      `**Version:** ${event.version ?? "N/A"}`,
+      `**Created At:** ${formatDate(event.createdAt)}`,
+      `**Expired At:** ${formatDate(event.expireAt)}`,
+    ].filter(Boolean);
+
+    return {
+      type: "DataListItem",
+      // Use Text component for the primary label
+      label: [
+        {
+          type: "Text",
+          variant: "subtitle1",
+          content: [event.name],
+        },
+      ],
+      // Use Markdown for the details, which supports lists and bold text
+      value: {
+        type: "Markdown",
+        content: detailsLines.join("\n\n"),
+      },
+    };
+  });
+
+  // Wrap the list of items in a DataList component
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: items,
+  };
+
+  // Card header with an icon and summary
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: manager.name,
-    description: manager.description || "",
-    // The startElement can either be an Avatar or an Icon.
-    startElement: manager.avatarUrl
-      ? {
-          type: "Avatar",
-          src: manager.avatarUrl,
-          name: manager.name,
-          // Select a standard size for responsiveness.
-          size: 40
-        }
-      : {
-          type: "Icon",
-          id: "user", // using a generic user icon id in kebab-case (without fa prefix)
-          // Optionally set a default color and size to make the icon more prominent.
-          color: "blue",
-          size: 24
-        }
+    title: `Events (${events.length})`,
+    description: `${events.length} event${events.length > 1 ? "s" : ""} fetched.`,
+    startElement: {
+      type: "Icon",
+      id: "calendar",    // Assumes `calendar` icon is available
+      size: 24,
+      color: "blue",
+    },
   };
 
-  // Create a Markdown string showing additional manager details.
-  // Markdown is used to allow rich text rendering and mobile-friendly formatting.
-  const markdownContentLines: string[] = [];
-  markdownContentLines.push("## Manager Profile");
-  // Display email if available.
-  markdownContentLines.push(`**Email:** ${manager.email ? manager.email : "Not provided"}`);
-  // Display mobile number if available.
-  markdownContentLines.push(`**Mobile:** ${manager.mobileNumber ? manager.mobileNumber : "Not provided"}`);
-  // Add online status information if available.
-  if (online && (online.id || online.personId)) {
-    markdownContentLines.push(`**Status:** Online`);
-  } else {
-    markdownContentLines.push(`**Status:** Offline`);
-  }
-  // Additional details can be added here as necessary.
-  const markdownContent = markdownContentLines.join("\n\n");
-
-  // Build a CardContent component using the Markdown component.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
+  // Card content wrapping the data list
+  const content: IAutoView.IAutoViewCardContentProps = {
     type: "CardContent",
-    // childrenProps can be a single component; here we use the Markdown component.
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent
-    } as IAutoView.IAutoViewMarkdownProps
+    childrenProps: dataList,
   };
 
-  // Finally, assemble everything in a Vertical Card to create an engaging UI.
-  // A Vertical Card is chosen for its simplicity and responsiveness.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Optionally render navigation buttons in the footer
+  const navButtons: IAutoView.IAutoViewPresentationComponentProps[] = [];
+  if (input.prev) {
+    navButtons.push({
+      type: "Button",
+      label: ["Previous"],
+      href: input.prev,
+      variant: "text",
+      size: "small",
+    });
+  }
+  if (input.next) {
+    navButtons.push({
+      type: "Button",
+      label: ["Next"],
+      href: input.next,
+      variant: "text",
+      size: "small",
+    });
+  }
+
+  // Assemble the card children
+  const cardChildren: (
+    | IAutoView.IAutoViewCardHeaderProps
+    | IAutoView.IAutoViewCardContentProps
+    | IAutoView.IAutoViewCardFooterProps
+  )[] = [header, content];
+
+  if (navButtons.length > 0) {
+    cardChildren.push({
+      type: "CardFooter",
+      childrenProps: navButtons,
+    });
+  }
+
+  // Return a vertical card component that encapsulates everything
+  return {
     type: "VerticalCard",
-    // childrenProps is an array of presentation components.
-    childrenProps: [cardHeader, cardContent]
+    childrenProps: cardChildren,
   };
-
-  // Return the assembled UI component.
-  return verticalCard;
 }

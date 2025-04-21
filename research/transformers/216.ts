@@ -1,39 +1,92 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type WebhookView = {
-    webhook?: webhook.Webhook;
-};
-namespace webhook {
-    export type Webhook = {
-        id?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        channelId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        name: string;
-        url: string;
-        token?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        createdAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        scopes: ("userChat.opened" | "message.created.userChat" | "message.created.teamChat" | "lead.upserted.contact" | "lead.upserted.subscription" | "lead.deleted" | "member.upserted.contact" | "member.upserted.subscription" | "member.deleted")[] & tags.UniqueItems;
-        /**
-         * @deprecated
-        */
-        keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
-        apiVersion: string;
-        lastBlockedAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        blocked?: boolean;
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4UserView = {
+                    user?: Schema.legacy.v4.LegacyV4User;
+                    online?: Schema.Online;
+                };
+            }
+        }
+        export namespace v4 {
+            export type LegacyV4User = {
+                id?: string;
+                channelId?: string;
+                memberId?: string;
+                veilId?: string;
+                unifiedId?: string;
+                name?: string;
+                profile?: {
+                    [key: string]: {};
+                };
+                profileOnce?: Schema.profile.UserProfile;
+                tags?: string[] & tags.MinItems<0> & tags.MaxItems<10> & tags.UniqueItems;
+                alert?: number & tags.Type<"int32">;
+                unread?: number & tags.Type<"int32">;
+                popUpChatId?: string;
+                blocked?: boolean;
+                unsubscribed?: boolean;
+                hasChat?: boolean;
+                hasPushToken?: boolean;
+                language?: string & tags.Default<"en">;
+                country?: string;
+                city?: string;
+                latitude?: number;
+                longitude?: number;
+                web?: Schema.WebInfo;
+                mobile?: Schema.MobileInfo;
+                sessionsCount?: number & tags.Type<"int32">;
+                lastSeenAt?: number;
+                createdAt?: number;
+                updatedAt?: number;
+                expireAt?: number;
+                version?: number & tags.Type<"int32">;
+                managedKey?: number & tags.Type<"int32">;
+                member?: boolean;
+                email?: string;
+                userId?: string;
+                avatarUrl?: string;
+                managed?: boolean;
+                mobileNumber?: string & tags.Default<"+18004424000">;
+                systemLanguage?: string & tags.Default<"en">;
+            };
+        }
+    }
+    export namespace profile {
+        export type UserProfile = {
+            [key: string]: {};
+        };
+    }
+    export type WebInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        browser?: string;
+        browserName?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
+    };
+    export type MobileInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        appName?: string;
+        appVersion?: string;
+        sdkName?: string;
+        sdkVersion?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
+    };
+    export type Online = {
+        channelId?: string;
+        personType?: string;
+        personId?: string;
+        id?: string;
     };
 }
-type IAutoViewTransformerInputType = WebhookView;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4UserView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -41,93 +94,149 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Check if the webhook data exists.
-  if (input.webhook) {
-    const webhookData = input.webhook;
+    const user = input.user;
 
-    // Create a Card Header component.
-    // We use an icon as the start element to add a visual cue.
-    const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-      type: "CardHeader",
-      title: webhookData.name,
-      // Using a generic "link" icon to represent the webhook visually.
-      startElement: {
-        type: "Icon",
-        id: "link",
-        // Optionally, choose a color that fits the design. Here we use "blue" for a link.
-        color: "blue",
-        size: 20,
-      }
+    // If there's no user data, render a simple message
+    if (!user) {
+        return {
+            type: "Text",
+            content: "No user data available",
+        };
+    }
+
+    // Helper to format timestamps into human-readable strings
+    const formatDate = (ts?: number): string =>
+        ts ? new Date(ts).toLocaleString() : "Unknown";
+
+    // Build tag chips if any tags exist
+    const tagsComponent: IAutoView.IAutoViewComponentProps =
+        user.tags && user.tags.length > 0
+            ? {
+                  type: "ChipGroup",
+                  childrenProps: user.tags.map((tag) => ({
+                      type: "Chip",
+                      label: tag,
+                  })),
+              }
+            : {
+                  type: "Text",
+                  content: "No tags",
+              };
+
+    // Build the main card header with avatar, name, email, and online badge
+    const header: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: user.name || "Unnamed User",
+        description: user.email,
+        startElement: {
+            type: "Avatar",
+            // Use the user's avatar URL if provided, otherwise fallback to initials
+            src: user.avatarUrl,
+            name: user.name,
+            variant: "secondary",
+            size: 40,
+        },
+        endElement: input.online
+            ? {
+                  type: "Badge",
+                  dot: true,
+                  color: "green",
+                  // A dot badge with no count
+                  childrenProps: {
+                      type: "Icon",
+                      id: "circle", // small circle icon to attach the dot to
+                      size: 8,
+                      color: "green",
+                  },
+              }
+            : undefined,
     };
 
-    // Compose markdown content to display key webhook details.
-    // We use markdown formatting to reduce plain text exposure.
-    // Note: Only include fields that are available.
-    let markdownContent = `**Webhook Details**\n\n`;
-    if (webhookData.url) {
-      markdownContent += `- **URL:** [${webhookData.url}](${webhookData.url})\n`;
-    }
-    if (webhookData.channelId) {
-      markdownContent += `- **Channel ID:** ${webhookData.channelId}\n`;
-    }
-    if (webhookData.apiVersion) {
-      markdownContent += `- **API Version:** ${webhookData.apiVersion}\n`;
-    }
-    if (webhookData.scopes && webhookData.scopes.length > 0) {
-      markdownContent += `- **Scopes:** ${webhookData.scopes.join(", ")}\n`;
-    }
-    if (typeof webhookData.blocked === "boolean") {
-      markdownContent += `- **Blocked:** ${webhookData.blocked ? "Yes" : "No"}\n`;
-    }
-    // Optionally, show a truncated token if available.
-    if (webhookData.token) {
-      const truncatedToken = webhookData.token.length > 4
-        ? "…" + webhookData.token.slice(-4)
-        : webhookData.token;
-      markdownContent += `- **Token (last 4 digits):** ${truncatedToken}\n`;
-    }
-    // Optionally, display creation date if provided.
-    if (webhookData.createdAt) {
-      const createdDate = new Date(webhookData.createdAt);
-      markdownContent += `- **Created At:** ${createdDate.toLocaleString()}\n`;
-    }
-    // Optionally, display last blocked date if provided.
-    if (webhookData.lastBlockedAt) {
-      const blockedDate = new Date(webhookData.lastBlockedAt);
-      markdownContent += `- **Last Blocked At:** ${blockedDate.toLocaleString()}\n`;
-    }
+    // Build a list of key user statistics
+    const dataListItems: IAutoView.IAutoViewDataListItemProps[] = [
+        {
+            type: "DataListItem",
+            // Display tags
+            label: { type: "Icon", id: "tags", color: "gray", size: 16 },
+            value: tagsComponent,
+        },
+        {
+            type: "DataListItem",
+            // Display alert count with a bell icon badge
+            label: { type: "Icon", id: "bell", color: "orange", size: 16 },
+            value: {
+                type: "Badge",
+                count: user.alert ?? 0,
+                showZero: true,
+                maxCount: 99,
+                childrenProps: { type: "Icon", id: "bell", color: "orange", size: 16 },
+            },
+        },
+        {
+            type: "DataListItem",
+            // Display unread messages with an envelope icon badge
+            label: { type: "Icon", id: "envelope", color: "blue", size: 16 },
+            value: {
+                type: "Badge",
+                count: user.unread ?? 0,
+                showZero: true,
+                maxCount: 99,
+                childrenProps: { type: "Icon", id: "envelope", color: "blue", size: 16 },
+            },
+        },
+        {
+            type: "DataListItem",
+            // Display location icon + city, country
+            label: { type: "Icon", id: "map-marker-alt", color: "red", size: 16 },
+            value: {
+                type: "Text",
+                content: `${user.city ?? "Unknown city"}${user.country ? `, ${user.country}` : ""}`,
+            },
+        },
+        {
+            type: "DataListItem",
+            // Display last seen timestamp
+            label: { type: "Icon", id: "clock", color: "gray", size: 16 },
+            value: {
+                type: "Text",
+                content: formatDate(user.lastSeenAt),
+            },
+        },
+        {
+            type: "DataListItem",
+            // Display account creation date
+            label: { type: "Icon", id: "calendar-alt", color: "gray", size: 16 },
+            value: {
+                type: "Text",
+                content: formatDate(user.createdAt),
+            },
+        },
+        {
+            type: "DataListItem",
+            // Display total sessions count
+            label: { type: "Icon", id: "users", color: "teal", size: 16 },
+            value: {
+                type: "Text",
+                content: `${user.sessionsCount ?? 0}`,
+            },
+        },
+    ];
 
-    // Create a Markdown component for rendering the details.
-    const markdownComponent: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: markdownContent,
+    // Wrap the items into a DataList
+    const dataList: IAutoView.IAutoViewDataListProps = {
+        type: "DataList",
+        childrenProps: dataListItems,
     };
 
-    // Create a Card Content component which will include our markdown details.
-    const cardContent: IAutoView.IAutoViewCardContentProps = {
-      type: "CardContent",
-      // The childrenProps here accepts a single presentation component.
-      childrenProps: markdownComponent,
+    // Compose the vertical card presenting all the information
+    return {
+        type: "VerticalCard",
+        childrenProps: [
+            header,
+            {
+                type: "CardContent",
+                childrenProps: dataList,
+            },
+        ],
     };
-
-    // Compose the final Vertical Card component.
-    // A vertical card container helps ensure responsiveness across devices.
-    const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-      type: "VerticalCard",
-      // Include the header and content as children.
-      childrenProps: [cardHeader, cardContent],
-    };
-
-    // Return the composed visual component.
-    return verticalCard;
-  } else {
-    // If there is no webhook data, fall back to a Markdown component displaying a friendly message.
-    const fallbackMarkdown: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: "**No webhook data available.**",
-    };
-
-    // Return the fallback UI component.
-    return fallbackMarkdown;
-  }
 }

@@ -8,11 +8,11 @@ import {
   IAutoViewCompilerResult,
   IAutoViewComponentProps,
 } from "@autoview/interface";
-import { ChatGptTypeChecker } from "@samchon/openapi";
+import { ChatGptTypeChecker, ILlmSchemaV3_1 } from "@samchon/openapi";
 import * as fs from "fs/promises";
 import OpenAI from "openai";
 import * as path from "path";
-import typia from "typia";
+import typia, { assertGuard } from "typia";
 
 import { TestGlobal } from "../TestGlobal";
 import * as Report from "./collect_ts_errors_report_agent";
@@ -503,25 +503,23 @@ async function collectSchemaList(): Promise<ISchema[]> {
       continue;
     }
 
-    const schema: unknown = JSON.parse(
+    const schema = JSON.parse(
       await fs.readFile(
         path.join(__dirname, "collect_ts_errors_schemas", file),
         "utf-8",
       ),
     );
 
-    if (typeof schema !== "object" || schema === null) {
-      continue;
+    interface RawSchema {
+      schema: ILlmSchemaV3_1;
+      $defs: Record<string, ILlmSchemaV3_1>;
     }
 
-    const $defs = "$defs" in schema ? schema["$defs"] : {};
+    assertGuard<RawSchema>(schema);
 
     schemaList.push({
       name: file,
-      schema: {
-        $defs: $defs as any,
-        schema: schema as any,
-      },
+      schema,
     });
   }
 

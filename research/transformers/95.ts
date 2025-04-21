@@ -1,326 +1,85 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A page.
- *
- * Collection of records with pagination indformation.
-*/
-type IPageIShoppingMileageDonation = {
-    /**
-     * Page information.
-     *
-     * @title Page information
-    */
-    pagination: IPage.IPagination;
-    /**
-     * List of records.
-     *
-     * @title List of records
-    */
-    data: IShoppingMileageDonation[];
-};
-namespace IPage {
-    /**
-     * Page information.
-    */
-    export type IPagination = {
+namespace Schema {
+    export namespace IBbsArticle {
         /**
-         * Current page number.
+         * Snapshot of article.
          *
-         * @title Current page number
+         * `IBbsArticle.ISnapshot` is a snapshot entity that contains the contents of
+         * the article, as mentioned in {@link IBbsArticle}, the contents of the article
+         * are separated from the article record to keep evidence and prevent fraud.
         */
-        current: number & tags.Type<"int32">;
-        /**
-         * Limitation of records per a page.
-         *
-         * @title Limitation of records per a page
-        */
-        limit: number & tags.Type<"int32">;
-        /**
-         * Total records in the database.
-         *
-         * @title Total records in the database
-        */
-        records: number & tags.Type<"int32">;
-        /**
-         * Total pages.
-         *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
-        */
-        pages: number & tags.Type<"int32">;
-    };
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or article.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Title of article.
+             *
+             * @title Title of article
+            */
+            title: string;
+            /**
+             * Content body of article.
+             *
+             * @title Content body of article
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
+    }
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
+            name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
+        };
+    }
 }
-type IShoppingMileageDonation = {
-    id: string & tags.Format<"uuid">;
-    administrator: IShoppingAdministrator.IInvert;
-    citizen: IShoppingCitizen;
-    value: number;
-    reason: string;
-    created_at: string & tags.Format<"date-time">;
-};
-namespace IShoppingAdministrator {
-    /**
-     * Invert information starting from administrator info.
-     *
-     * Instead of accessing to the administrator information from the
-     * {@link IShoppingCustomer.member} -> {@link IShoppingMember.administrator},
-     * `IShoppingAdministrator.IInvert` starts from the administrator information
-     * and access to the customer, member and {@link IShoppingCitizen citizen}
-     * information inversely.
-    */
-    export type IInvert = {
-        /**
-         * Discriminant for the type of customer.
-         *
-         * @title Discriminant for the type of customer
-        */
-        type: "administrator";
-        /**
-         * Membership joining information.
-         *
-         * @title Membership joining information
-        */
-        member: IShoppingMember.IInvert;
-        /**
-         * Customer, the connection information.
-         *
-         * @title Customer, the connection information
-        */
-        customer: IShoppingCustomer.IInvert;
-        /**
-         * Real-name and mobile number authentication information.
-         *
-         * @title Real-name and mobile number authentication information
-        */
-        citizen: IShoppingCitizen;
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Creation time of record.
-         *
-         * Another words, the time when the administrator has signed up.
-         *
-         * @title Creation time of record
-        */
-        created_at: string;
-    };
-}
-namespace IShoppingMember {
-    /**
-     * Invert information of member.
-     *
-     * This invert member information has been designed to be used for another
-     * invert information of sellers and administrators like below.
-     *
-     * - {@link IShoppingSeller.IInvert}
-     * - {@link IShoppingAdministrator.IInvert}
-    */
-    export type IInvert = {
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Nickname that uniquely identifies the member.
-         *
-         * @title Nickname that uniquely identifies the member
-        */
-        nickname: string;
-        /**
-         * List of emails.
-         *
-         * @title List of emails
-        */
-        emails: IShoppingMemberEmail[];
-        /**
-         * Creation time of record.
-         *
-         * Another words, the time when the member has signed up.
-         *
-         * @title Creation time of record
-        */
-        created_at: string;
-    };
-}
-/**
- * Email address of member.
- *
- * This shopping mall system allows multiple email addresses to be
- * registered for one {@link IShoppingMember member}. If you don't have to
- * plan such multiple email addresses, just use only one.
-*/
-type IShoppingMemberEmail = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Email address value.
-     *
-     * @title Email address value
-    */
-    value: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-};
-namespace IShoppingCustomer {
-    /**
-     * Inverted customer information.
-     *
-     * This inverted customer information has been designed to be used for
-     * another invert information of sellers and administrators like below.
-     *
-     * - {@link IShoppingSeller.IInvert}
-     * - {@link IShoppingAdministrator.IInvert}
-    */
-    export type IInvert = {
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Belonged channel.
-         *
-         * @title Belonged channel
-        */
-        channel: IShoppingChannel;
-        /**
-         * External user information.
-         *
-         * When the customer has come from an external service.
-         *
-         * @title External user information
-        */
-        external_user: null | any;
-        /**
-         * Connection address.
-         *
-         * Same with {@link window.location.href} of client.
-         *
-         * @title Connection address
-        */
-        href: string;
-        /**
-         * Referrer address.
-         *
-         * Same with {@link window.document.referrer} of client.
-         *
-         * @title Referrer address
-        */
-        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
-        /**
-         * Connection IP Address.
-         *
-         * @title Connection IP Address
-        */
-        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
-        /**
-         * Creation time of the connection record.
-         *
-         * @title Creation time of the connection record
-        */
-        created_at: string;
-    };
-}
-/**
- * Channel information.
- *
- * `IShoppingChannel` is a concept that shapes the distribution channel in the
- * market. Therefore, the difference in the channel in this e-commerce system
- * means that it is another site or application.
- *
- * By the way, if your shopping mall system requires only one channel, then
- * just use only one. This concept is designed to be expandable in the future.
-*/
-type IShoppingChannel = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-    /**
-     * Identifier code.
-     *
-     * @title Identifier code
-    */
-    code: string;
-    /**
-     * Name of the channel.
-     *
-     * @title Name of the channel
-    */
-    name: string;
-};
-type IShoppingExternalUser = any;
-/**
- * Citizen verification information.
- *
- * `IShoppingCitizen` is an entity that records the user's
- * {@link name real name} and {@link mobile} input information.
- *
- * For reference, in South Korea, real name authentication is required for
- * e-commerce participants, so the name attribute is important. However, the
- * situation is different overseas, so in reality, mobile attributes are the
- * most important, and identification of individual person is also done based
- * on this mobile.
- *
- * Of course, real name and mobile phone authentication information are
- * encrypted and stored.
-*/
-type IShoppingCitizen = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-    /**
-     * Mobile number.
-     *
-     * @title Mobile number
-    */
-    mobile: string & tags.JsonSchemaPlugin<{
-        "x-wrtn-payment-order-mobile": true
-    }>;
-    /**
-     * Real name, or equivalent nickname.
-     *
-     * @title Real name, or equivalent nickname
-    */
-    name: string & tags.JsonSchemaPlugin<{
-        "x-wrtn-payment-order-citizen": true
-    }>;
-};
-type IAutoViewTransformerInputType = IPageIShoppingMileageDonation;
+type IAutoViewTransformerInputType = Schema.IBbsArticle.ISnapshot;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -328,102 +87,93 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // For visual engagement, we render the donation records inside a vertical card.
-  // The card contains a header (with an icon), a content section (listing each donation using a data list)
-  // and a footer with pagination information.
-  
-  // Transform each donation record into a DataListItem.
-  // Each DataListItem will present its donation information using a Markdown component for rich text.
-  const donationItems: IAutoView.IAutoViewDataListItemProps[] =
-    input.data && input.data.length > 0
-      ? input.data.map((donation) => {
-          // Construct the markdown text for each donation.
-          // We use markdown headers and bold formatting for clarity.
-          const markdownContent = 
-            "### Donation from " + donation.citizen.name + "\n\n" +
-            "**Donation ID**: " + donation.id + "\n\n" +
-            "**Value**: " + donation.value + "\n\n" +
-            "**Reason**: " + donation.reason + "\n\n" +
-            "**Received At**: " + donation.created_at;
-          
-          return {
-            type: "DataListItem",
-            // Use a Markdown component to display donation details instead of plain text.
-            label: {
-              type: "Markdown",
-              content: markdownContent,
-            },
-            // Optional: You could place additional elements in `value` if needed.
-          } as IAutoView.IAutoViewDataListItemProps;
-        })
-      : [
-          // In case there are no donation records, display an informative message.
-          {
-            type: "DataListItem",
-            label: {
-              type: "Markdown",
-              content: "### No donation records found.",
-            },
-          } as IAutoView.IAutoViewDataListItemProps,
-        ];
+  // Select an icon based on the file format
+  let formatIconId: string;
+  switch (input.format) {
+    case 'md':
+      formatIconId = 'file-lines';
+      break;
+    case 'html':
+      formatIconId = 'file-code';
+      break;
+    case 'txt':
+      formatIconId = 'file-alt';
+      break;
+    default:
+      formatIconId = 'file';
+  }
 
-  // Create a DataList component that will hold all donation items.
-  const donationList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: donationItems,
-  };
+  // Human‐readable creation date
+  const createdAt = new Date(input.created_at).toLocaleString();
 
-  // Prepare pagination information using a Markdown component.
-  // This ensures that even textual information uses rich formatting.
-  const paginationMarkdownContent = 
-    "**Page " + input.pagination.current + " of " + input.pagination.pages + "**\n\n" +
-    "Total Records: " + input.pagination.records + " | " +
-    "Records per Page: " + input.pagination.limit;
-
-  const paginationComponent: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: paginationMarkdownContent,
-  };
-
-  // Compose the card header.
-  // We use an icon (of type Icon) on the left to enhance visual appeal.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Shopping Mileage Donations",
-    description: "Overview of donation records.",
+  // Card header with title, date, and format icon
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: 'CardHeader',
+    title: input.title,
+    description: createdAt,
     startElement: {
-      // Using a donation- or gift-themed icon.
-      type: "Icon",
-      id: "gift", // Assuming 'gift' is a valid icon id in kebab-case.
-      color: "blue",
-      size: 24,
-    } as IAutoView.IAutoViewIconProps,
-    // Optionally, endElement can be added if needed.
+      type: 'Icon',
+      id: formatIconId,
+      size: 20,
+      color: 'blue'
+    }
   };
 
-  // Compose the card content, which contains the data list.
+  // Main body rendered as markdown for rich formatting
+  const markdown: IAutoView.IAutoViewMarkdownProps = {
+    type: 'Markdown',
+    content: input.body
+  };
   const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // childrenProps accepts a single component or array; here we pass our donation list.
-    childrenProps: donationList,
+    type: 'CardContent',
+    childrenProps: [markdown]
   };
 
-  // Compose the card footer to show pagination info.
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-    type: "CardFooter",
-    childrenProps: paginationComponent,
+  // If there are attachments, list them in the footer
+  let cardFooter: IAutoView.IAutoViewCardFooterProps | undefined;
+  if (input.files && input.files.length > 0) {
+    const items: IAutoView.IAutoViewDataListItemProps[] = input.files.map(file => {
+      // Reconstruct the full filename
+      const fileName =
+        file.extension && file.extension.length > 0
+          ? `${file.name}.${file.extension}`
+          : file.name;
+
+      return {
+        type: 'DataListItem',
+        // Show a paperclip icon next to the filename
+        label: [
+          { type: 'Icon', id: 'paperclip', size: 16, color: 'gray' },
+          { type: 'Text', content: fileName, variant: 'body2' }
+        ],
+        // Provide a download link via a text button
+        value: {
+          type: 'Button',
+          variant: 'text',
+          label: 'Download',
+          href: file.url
+        }
+      };
+    });
+
+    const dataList: IAutoView.IAutoViewDataListProps = {
+      type: 'DataList',
+      childrenProps: items
+    };
+
+    cardFooter = {
+      type: 'CardFooter',
+      childrenProps: [dataList]
+    };
+  }
+
+  // Assemble the vertical card; include footer only if attachments exist
+  const card: IAutoView.IAutoViewVerticalCardProps = {
+    type: 'VerticalCard',
+    childrenProps: cardFooter
+      ? [header, cardContent, cardFooter]
+      : [header, cardContent]
   };
 
-  // Finally, build the vertical card composing the above components.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [
-      cardHeader,
-      cardContent,
-      cardFooter,
-    ],
-  };
-
-  // Return the final component props which conforms to IAutoView.IAutoViewComponentProps.
-  return verticalCard;
+  return card;
 }

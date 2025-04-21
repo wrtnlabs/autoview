@@ -1,277 +1,294 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4ChannelView = {
-                channel?: legacy.v4.LegacyV4Channel;
-                manager?: legacy.v4.LegacyV4Manager;
-                managerBadge?: legacy.v4.LegacyV4ManagerBadge;
-            };
-        }
+namespace Schema {
+    /**
+     * Reviews for sale snapshots.
+     *
+     * `IShoppingSaleReview` is a subtype entity of {@link IShoppingSaleInquiry},
+     * and is used when a {@link IShoppingCustomer customer} purchases a
+     * {@link IShoppingSale sale} ({@link IShoppingSaleSnapshot snapshot} at the time)
+     * registered by the {@link IShoppingSeller seller} as a product and leaves a
+     * review and rating for it.
+     *
+     * For reference, `IShoppingSaleReview` and
+     * {@link IShoppingOrderGod shopping_order_goods} have a logarithmic relationship
+     * of N: 1, but this does not mean that customers can continue to write reviews
+     * for the same product indefinitely. Wouldn't there be restrictions, such as
+     * if you write a review once, you can write an additional review a month later?
+    */
+    export type IShoppingSaleReview = {
+        /**
+         * Type of the derived inquiry.
+         *
+         * - `question`: {@link IShoppingSaleQuestion}
+         * - `review`: {@link IShoppingSaleReview}
+         *
+         * @title Type of the derived inquiry
+        */
+        type: "review";
+        /**
+         * Customer who wrote the inquiry.
+         *
+         * @title Customer who wrote the inquiry
+        */
+        customer: Schema.IShoppingCustomer;
+        /**
+         * Formal answer for the inquiry by the seller.
+         *
+         * @title Formal answer for the inquiry by the seller
+        */
+        answer: null | any;
+        /**
+         * Whether the seller has viewed the inquiry or not.
+         *
+         * @title Whether the seller has viewed the inquiry or not
+        */
+        read_by_seller: boolean;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * List of snapshot contents.
+         *
+         * It is created for the first time when an article is created, and is
+         * accumulated every time the article is modified.
+         *
+         * @title List of snapshot contents
+        */
+        snapshots: Schema.IShoppingSaleReview.ISnapshot[];
+        /**
+         * Creation time of article.
+         *
+         * @title Creation time of article
+        */
+        created_at: string;
+    };
+    export namespace IShoppingSaleReview {
+        /**
+         * Snapshot content of the review article.
+        */
+        export type ISnapshot = {
+            /**
+             * Score of the review.
+             *
+             * @title Score of the review
+            */
+            score: number;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or article.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Title of article.
+             *
+             * @title Title of article
+            */
+            title: string;
+            /**
+             * Content body of article.
+             *
+             * @title Content body of article
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
     }
-    export namespace v4 {
-        export type LegacyV4Channel = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
-            homepageUrl?: string;
-            description?: string;
-            nameDescI18nMap?: {
-                [key: string]: NameDesc;
-            };
-            country?: string;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            domain?: string & tags.Pattern<"^[0-9a-z][0-9a-z-]*[0-9a-z]$">;
-            color: string & tags.Default<"#123456">;
-            userInfoUrl?: string;
-            timeZone: string & tags.Default<"UTC">;
-            inOperation?: boolean;
-            operationTimeScheduling?: boolean;
-            operationTimeRanges?: TimeRange[];
-            trafficSource?: {
-                [key: string]: {};
-            };
-            phoneNumber?: string & tags.Default<"+18004424000">;
-            avatar?: TinyFile;
-            billAccountId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            servicePlan?: "xsmall" | "small" | "medium" | "large" | "entA" | "entAA";
-            operationFeature?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            mktFeature?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            whiteLabelFeature?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            billingPeriod?: "yearly" | "monthly";
-            billingDay?: number & tags.Type<"int32"> & tags.Minimum<1> & tags.Maximum<31> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            stopRenewal?: boolean;
-            mau?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            enableTexting: boolean;
-            enableEmail: boolean;
-            state?: "waiting" | "active" | "restricted" | "preIndebted" | "indebted" | "banned" | "removed";
-            bizGrade: "AA" | "A" | "B" | "C" | "D" | "F" | "unknown";
+    /**
+     * Customer information, but not a person but a connection basis.
+     *
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
+     *
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
+     *
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
+    */
+    export type IShoppingCustomer = {
+        /**
+         * Discriminant for the type of customer.
+         *
+         * @title Discriminant for the type of customer
+        */
+        type: "customer";
+        /**
+         * Membership information.
+         *
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
+        */
+        member: null | any;
+        /**
+         * Citizen information.
+         *
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
+        */
+        citizen: null | any;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Belonged channel.
+         *
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
+         *
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
+    };
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier code.
+         *
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Name of the channel.
+         *
+         * @title Name of the channel
+        */
+        name: string;
+    };
+    export type IShoppingExternalUser = any;
+    export type IShoppingSaleInquiryAnswer = any;
+    export namespace IAttachmentFile {
+        export type ICreate = {
             /**
-             * - 2022 BM 개편으로 인해 메인 모델에서 필드가 사라짐.
-             * - SDK 에서 mapping 은 하지만 사용하지 않아서 null 처리.
-             * - https://desk.channel.io/root/threads/groups/(TF)BM개편_개발-176808/62ff2b5fa88ef94f0923/62ff2b5fa88ef94f0923
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
             */
-            trialBeginDate?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
+            name: string;
             /**
-             * - 2022 BM 개편으로 인해 메인 모델에서 필드가 사라짐.
-             * - SDK 에서 mapping 은 하지만 사용하지 않아서 null 처리.
-             * - https://desk.channel.io/root/threads/groups/(TF)BM개편_개발-176808/62ff2b5fa88ef94f0923/62ff2b5fa88ef94f0923
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
             */
-            trialEndDate?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
             /**
-             * @deprecated
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
             */
-            autoSolvingTimeMinutes?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            blockReplyingAfterClosed?: boolean;
-            blockReplyingAfterClosedTime?: string;
-            defaultPluginId?: string;
-            expectedResponseDelay?: "instant" | "normal" | "delayed";
-            workingType?: "always" | "never" | "custom";
-            awayOption?: "active" | "disabled" | "hidden";
-            sourceSurvey?: {
-                [key: string]: {};
-            };
-            bizCategory?: string;
-            staffs?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            appCommerceId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            appCommerceType?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            enableMemberHash?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            memberHashSalt?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            defaultEmailDomainId?: string;
-            enableMfa?: boolean;
-            hideAppMessenger?: boolean;
-            /**
-             * @deprecated
-            */
-            useSecureFile?: boolean;
-            /**
-             * @deprecated
-            */
-            limited?: boolean;
-            messengerPlan?: "none" | "standard" | "pro";
-            blocked?: boolean;
-            working?: boolean;
-            avatarUrl?: string;
-            trial?: boolean;
-            textColor?: string;
-            nextOperatingAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64"
-            }>;
-            initial?: string;
-            utcOffset?: string;
-            systemDomain?: string;
-        };
-        export type LegacyV4Manager = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            accountId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            description?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            showDescriptionToFront?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            nameDescI18nMap?: {
-                [key: string]: NameDesc;
-            };
-            profile?: {
-                [key: string]: {};
-            };
-            email: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            showEmailToFront?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            mobileNumber?: string & tags.Default<"+18004424000"> & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            showMobileNumberToFront?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            role: "owner" | "member";
-            removed?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            displayAsChannel?: boolean;
-            defaultGroupWatch?: "all" | "info" | "none";
-            defaultDirectChatWatch?: "all" | "info" | "none";
-            defaultUserChatWatch?: "all" | "info" | "none";
-            operatorScore?: number & tags.JsonSchemaPlugin<{
-                format: "float",
-                readOnly: true
-            }>;
-            touchScore?: number & tags.JsonSchemaPlugin<{
-                format: "float",
-                readOnly: true
-            }>;
-            avatar?: TinyFile;
-            operatorEmailReminder?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            operator?: boolean;
-            statusEmoji?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            statusText?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            statusClearAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            managerId?: string;
-            avatarUrl?: string;
-            emailForFront?: string;
-            mobileNumberForFront?: string & tags.Default<"+18004424000">;
-        };
-        export type LegacyV4ManagerBadge = {
-            id?: string;
-            teamChatAlert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            teamChatUnread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            userChatAlert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            userChatUnread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            teamChatThreadAlert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            teamChatThreadUnread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64"
-            }>;
-            version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64"
-            }>;
-            managerId?: string;
-            alert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
-            unread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32"
-            }>;
+            url: string;
         };
     }
 }
-type NameDesc = {
-    name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
-    description?: string;
-};
-type TimeRange = {
-    dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
-    from: number & tags.Type<"uint32"> & tags.Maximum<1440> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    to: number & tags.Type<"uint32"> & tags.Maximum<1440> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-};
-type TinyFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    height?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-};
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4ChannelView;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleReview;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -279,103 +296,109 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // We extract legacy channel view properties from input
-  const { channel, manager, managerBadge } = input;
-
-  // Prepare a Card Header component to display channel basic information.
-  // If an avatar URL is available, we use it in the startElement.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // 1. Header: show review author and creation date
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: channel?.name,
-    description: channel?.description,
-    // Use an Avatar component as startElement if we have an avatar URL available.
-    startElement: channel && (channel.avatarUrl || (channel.avatar && channel.avatar.bucket && channel.avatar.key))
-      ? {
-          type: "Avatar",
-          // Prefer channel.avatarUrl if available; otherwise, fake a URL by combining bucket/key (assumes production provides valid URIs)
-          src: channel.avatarUrl ? channel.avatarUrl : `https://cdn.example.com/${channel.avatar!.bucket}/${channel.avatar!.key}`,
-          name: channel.name,
-          variant: "primary",
-          size: 40
-        }
-      : undefined,
-    // Optionally if we want, add an icon on the end representing channel state (for instance, use a default icon)
-    endElement: !channel ? {
+    title: `Review by ${input.customer.id}`,
+    description: `Created on ${new Date(input.created_at).toLocaleDateString()}`,
+    startElement: {
       type: "Icon",
-      id: "alert",
-      color: "red",
-      size: 16
-    } : undefined
+      id: "user",
+      size: 32,
+      color: "gray"
+    }
   };
 
-  // Prepare a Markdown component to display additional information,
-  // including manager details and manager badge information if available.
-  // We use markdown for better formatting.
-  let markdownContent = "";
-  if (manager) {
-    markdownContent += `**Manager Information**\n\n`;
-    markdownContent += `- **Name:** ${manager.name}\n`;
-    markdownContent += `- **Email:** ${manager.email}\n`;
-    if (manager.mobileNumber) {
-      markdownContent += `- **Mobile:** ${manager.mobileNumber}\n`;
-    }
-    markdownContent += `- **Role:** ${manager.role}\n\n`;
-  }
-  if (managerBadge) {
-    markdownContent += `**Manager Badge Alerts**\n\n`;
-    // List some badge metrics if they exist (only include if the values are defined).
-    if (typeof managerBadge.teamChatAlert === "number") {
-      markdownContent += `- **Team Chat Alert:** ${managerBadge.teamChatAlert}\n`;
-    }
-    if (typeof managerBadge.teamChatUnread === "number") {
-      markdownContent += `- **Team Chat Unread:** ${managerBadge.teamChatUnread}\n`;
-    }
-    if (typeof managerBadge.userChatAlert === "number") {
-      markdownContent += `- **User Chat Alert:** ${managerBadge.userChatAlert}\n`;
-    }
-    if (typeof managerBadge.userChatUnread === "number") {
-      markdownContent += `- **User Chat Unread:** ${managerBadge.userChatUnread}\n`;
-    }
-    // In case there are no badge numbers, we can leave it empty.
-  }
-  // If no extra information, provide a fallback message.
-  if (!markdownContent) {
-    markdownContent = "No additional details available.";
-  }
+  // 2. Build a DataListItem for each snapshot
+  const items: IAutoView.IAutoViewDataListItemProps[] = input.snapshots.map(snapshot => {
+    // Determine star count (rounded)
+    const starCount = Math.round(snapshot.score);
+    // Generate star icons
+    const stars: IAutoView.IAutoViewIconProps[] = Array(starCount)
+      .fill(undefined)
+      .map(() => ({
+        type: "Icon",
+        id: "star",
+        size: 16,
+        color: "yellow"
+      }));
 
-  // Prepare a Card Content component that wraps the markdown element.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // childrenProps accepts a component (or array) and here we use a Markdown component
-    childrenProps: {
+    // Main body as markdown
+    const bodyMd: IAutoView.IAutoViewMarkdownProps = {
       type: "Markdown",
-      content: markdownContent
+      content: snapshot.body
+    };
+
+    // Attachments, if any, rendered as markdown links
+    let attachmentsMd: IAutoView.IAutoViewMarkdownProps | undefined;
+    if (snapshot.files && snapshot.files.length) {
+      const list = snapshot.files
+        .map(file => {
+          const ext = file.extension ? `.${file.extension}` : "";
+          const name = `${file.name}${ext}`;
+          return `- [${name}](${file.url})`;
+        })
+        .join("\n");
+      attachmentsMd = {
+        type: "Markdown",
+        content: `**Attachments:**\n${list}`
+      };
+    }
+
+    // Combine stars, body, and attachments into the value field
+    const valueComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
+      ...stars,
+      bodyMd
+    ];
+    if (attachmentsMd) {
+      valueComponents.push(attachmentsMd);
+    }
+
+    return {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: snapshot.title,
+        variant: "subtitle1"
+      },
+      value: valueComponents
+    };
+  });
+
+  // 3. Wrap snapshots in a DataList
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: items
+  };
+
+  // 4. Badge to show read/unread status
+  const readBadge: IAutoView.IAutoViewBadgeProps = {
+    type: "Badge",
+    dot: !input.read_by_seller,
+    color: input.read_by_seller ? "green" : "red",
+    childrenProps: {
+      type: "Icon",
+      id: "eye",
+      size: 16,
+      color: input.read_by_seller ? "green" : "red"
     }
   };
 
-  // Optionally prepare a Card Media component if a homepage image is available.
-  // Here we treat channel.homepageUrl as an image source if provided.
-  let cardMedia: IAutoView.IAutoViewCardMediaProps | undefined = undefined;
-  if (channel?.homepageUrl) {
-    cardMedia = {
-      type: "CardMedia",
-      src: channel.homepageUrl
-    };
-  }
-
-  // Compose children for the vertical card.
-  // We include the Card Header, then optionally the Card Media, and then Card Content.
-  const childrenComponents: (IAutoView.IAutoViewCardHeaderProps | IAutoView.IAutoViewCardMediaProps | IAutoView.IAutoViewCardContentProps)[] = [];
-  childrenComponents.push(cardHeader);
-  if (cardMedia) {
-    childrenComponents.push(cardMedia);
-  }
-  childrenComponents.push(cardContent);
-
-  // Return a Vertical Card that aggregates all the components.
-  // Vertical cards naturally support different viewport sizes and are responsive.
-  return {
+  // 5. Compose the final vertical card
+  const card: IAutoView.IAutoViewVerticalCardProps = {
     type: "VerticalCard",
-    childrenProps: childrenComponents
+    childrenProps: [
+      header,
+      {
+        type: "CardContent",
+        childrenProps: dataList
+      },
+      {
+        type: "CardFooter",
+        childrenProps: [readBadge]
+      }
+    ]
   };
+
+  return card;
 }

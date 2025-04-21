@@ -24,6 +24,7 @@ export const test_compiler_json_schema = async (): Promise<void> => {
         items: [],
       };
   `,
+    "Schema",
     "test_compiler_json_schema",
   );
   if (result.type === "success")

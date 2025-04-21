@@ -1,213 +1,83 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace IPageIShoppingSaleSnapshot {
+namespace Schema {
     /**
      * A page.
      *
      * Collection of records with pagination indformation.
     */
-    export type ISummary = {
+    export type IPageIShoppingSaleInquiryComment = {
         /**
          * Page information.
          *
          * @title Page information
         */
-        pagination: IPage.IPagination;
+        pagination: Schema.IPage.IPagination;
         /**
          * List of records.
          *
          * @title List of records
         */
-        data: IShoppingSaleSnapshot.ISummary[];
+        data: Schema.IShoppingSaleInquiryComment[];
     };
-}
-namespace IPage {
+    export namespace IPage {
+        /**
+         * Page information.
+        */
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
     /**
-     * Page information.
-    */
-    export type IPagination = {
-        /**
-         * Current page number.
-         *
-         * @title Current page number
-        */
-        current: number & tags.Type<"int32">;
-        /**
-         * Limitation of records per a page.
-         *
-         * @title Limitation of records per a page
-        */
-        limit: number & tags.Type<"int32">;
-        /**
-         * Total records in the database.
-         *
-         * @title Total records in the database
-        */
-        records: number & tags.Type<"int32">;
-        /**
-         * Total pages.
-         *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
-        */
-        pages: number & tags.Type<"int32">;
-    };
-}
-namespace IShoppingSaleSnapshot {
-    /**
-     * Summarized information of the sale snapshot.
-    */
-    export type ISummary = {
-        /**
-         * Price range of the unit.
-         *
-         * @title Price range of the unit
-        */
-        price_range: IShoppingSalePriceRange;
-        /**
-         * Primary Key of Sale.
-         *
-         * @title Primary Key of Sale
-        */
-        id: string;
-        /**
-         * Primary Key of Snapshot.
-         *
-         * @title Primary Key of Snapshot
-        */
-        snapshot_id: string;
-        /**
-         * Whether the snapshot is the latest one or not.
-         *
-         * @title Whether the snapshot is the latest one or not
-        */
-        latest: boolean;
-        /**
-         * Description and image content describing the sale.
-         *
-         * @title Description and image content describing the sale
-        */
-        content: IShoppingSaleContent.IInvert;
-        /**
-         * List of categories.
-         *
-         * Which categories the sale is registered to.
-         *
-         * @title List of categories
-        */
-        categories: IShoppingChannelCategory.IInvert[];
-        /**
-         * List of search tags.
-         *
-         * @title List of search tags
-        */
-        tags: string[];
-        /**
-         * List of units.
-         *
-         * Records about individual product composition information that are sold
-         * in the sale. Each {@link IShoppingSaleUnit unit} record has configurable
-         * {@link IShoppingSaleUnitOption options},
-         * {@link IShoppingSaleUnitOptionCandidate candidate} values for each
-         * option, and {@link IShoppingSaleUnitStock final stocks} determined by
-         * selecting every candidate values of each option.
-         *
-         * @title List of units
-        */
-        units: IShoppingSaleUnit.ISummary[];
-    };
-}
-type IShoppingSalePriceRange = {
-    lowest: IShoppingPrice;
-    highest: IShoppingPrice;
-};
-/**
- * Shopping price interface.
-*/
-type IShoppingPrice = {
-    /**
-     * Nominal price.
+     * A comment written on an inquiry article.
      *
-     * This is not {@link real real price} to pay, but just a nominal price to show.
-     * If this value is greater than the {@link real real price}, it would be shown
-     * like {@link IShoppingSeller seller} is giving a discount.
+     * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
+     * and is used when you want to communicate with multiple people about an
+     * {@link IShoppingSaleInquiry inquiry} written by a
+     * {@link IShoppingCustomer customer}.
      *
-     * @title Nominal price
+     * For reference, only related parties can write comments for
+     * {@link IShoppingSeller sellers}, but there is no limit to
+     * {@link IShoppingCustomer customers}. In other words, anyone customer can
+     * freely write a comment, even if they are not the person who wrote the inquiry.
     */
-    nominal: number;
-    /**
-     * Real price to pay.
-     *
-     * @title Real price to pay
-    */
-    real: number;
-};
-namespace IShoppingSaleContent {
-    export type IInvert = {
-        id: string & tags.Format<"uuid">;
-        title: string;
-        thumbnails: IAttachmentFile[];
-    };
-}
-/**
- * Attachment File.
- *
- * Every attachment files that are managed in current system.
- *
- * For reference, it is possible to omit one of file {@link name}
- * or {@link extension} like `.gitignore` or `README` case, but not
- * possible to omit both of them.
-*/
-type IAttachmentFile = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of attachment file.
-     *
-     * @title Creation time of attachment file
-    */
-    created_at: string;
-    /**
-     * File name, except extension.
-     *
-     * If there's file `.gitignore`, then its name is an empty string.
-     *
-     * @title File name, except extension
-    */
-    name: string;
-    /**
-     * Extension.
-     *
-     * Possible to omit like `README` case.
-     *
-     * @title Extension
-    */
-    extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-    /**
-     * URL path of the real file.
-     *
-     * @title URL path of the real file
-    */
-    url: string;
-};
-namespace IShoppingChannelCategory {
-    /**
-     * Invert category information with parent category.
-    */
-    export type IInvert = {
+    export type IShoppingSaleInquiryComment = {
         /**
-         * Parent category info with recursive structure.
+         * Writer of the comment.
          *
-         * If no parent exists, then be `null`.
+         * Both customer and seller can write comment on the sale inquiry.
          *
-         * @title Parent category info with recursive structure
+         * By the way, no restriction on the customer, but seller must be the
+         * person who've registered the sale.
+         *
+         * @title Writer of the comment
         */
-        parent: null | any;
+        writer: any | any | any;
         /**
          * Primary Key.
          *
@@ -215,76 +85,109 @@ namespace IShoppingChannelCategory {
         */
         id: string;
         /**
-         * Identifier code of the category.
+         * Parent comment's ID.
          *
-         * The code must be unique in the channel.
-         *
-         * @title Identifier code of the category
-        */
-        code: string;
-        /**
-         * Parent category's ID.
-         *
-         * @title Parent category's ID
+         * @title Parent comment's ID
         */
         parent_id: null | (string & tags.Format<"uuid">);
         /**
-         * Representative name of the category.
+         * List of snapshot contents.
          *
-         * The name must be unique within the parent category. If no parent exists,
-         * then the name must be unique within the channel between no parent
-         * categories.
+         * It is created for the first time when a comment being created, and is
+         * accumulated every time the comment is modified.
          *
-         * @title Representative name of the category
+         * @title List of snapshot contents
         */
-        name: string;
+        snapshots: Schema.IBbsArticleComment.ISnapshot[];
         /**
-         * Creation time of record.
+         * Creation time of comment.
          *
-         * @title Creation time of record
+         * @title Creation time of comment
         */
         created_at: string;
     };
+    export namespace IShoppingAdministrator {
+        export type IInvert = any;
+    }
+    export type IShoppingCustomer = any;
+    export namespace IShoppingSeller {
+        export type IInvert = any;
+    }
+    export namespace IBbsArticleComment {
+        /**
+         * Snapshot of comment.
+         *
+         * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
+         * the contents of the comment.
+         *
+         * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
+         * and prevent fraud.
+        */
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or comment.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Content body of comment.
+             *
+             * @title Content body of comment
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
+    }
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
+            name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
+        };
+    }
 }
-namespace IShoppingSaleUnit {
-    export type ISummary = {
-        price_range: IShoppingSalePriceRange;
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Representative name of the unit.
-         *
-         * @title Representative name of the unit
-        */
-        name: string;
-        /**
-         * Whether the unit is primary or not.
-         *
-         * Just a labeling value.
-         *
-         * @title Whether the unit is primary or not
-        */
-        primary: boolean;
-        /**
-         * Whether the unit is required or not.
-         *
-         * When the unit is required, the customer must select the unit. If do not
-         * select, customer can't buy it.
-         *
-         * For example, if there's a sale "Macbook Set" and one of the unit is the
-         * "Main Body", is it possible to buy the "Macbook Set" without the
-         * "Main Body" unit? This property is for that case.
-         *
-         * @title Whether the unit is required or not
-        */
-        required: boolean;
-    };
-}
-type IAutoViewTransformerInputType = IPageIShoppingSaleSnapshot.ISummary;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingSaleInquiryComment;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -292,94 +195,77 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // If input contains sale records, we transform each record into a list item,
-  // otherwise we return a simple message.
-  if (input && input.data && input.data.length > 0) {
-    // Map each sale record to a DataListItem component that represents a sale snapshot.
-    const listItems: IAutoView.IAutoViewDataListItemProps[] = input.data.map(record => {
-      // Use the first thumbnail (if exists) as the image for the sale.
-      // The Image component accepts a src (with format “uri”) and an optional alt text.
-      const thumbnail = (record.content && record.content.thumbnails && record.content.thumbnails[0]) || null;
-      const imageElement: IAutoView.IAutoViewImageProps | undefined = thumbnail
-        ? {
-            type: "Image",
-            src: thumbnail.url,
-            alt: record.content.title
-          }
-        : undefined;
+    // Create list items for each comment
+    const listItems: IAutoView.IAutoViewDataListItemProps[] = input.data.map((comment) => {
+        // Use the latest snapshot (last in the array), or fallback to first if empty
+        const snapshots = comment.snapshots || [];
+        const latestSnapshot = snapshots[snapshots.length - 1] || snapshots[0];
 
-      // Build markdown content for sale details.
-      // We include the nominal price range, list of category names, tags and units information.
-      let markdownContent = "";
-      if (record.price_range && record.price_range.lowest && record.price_range.highest) {
-        markdownContent += `**Price Range:** \$${record.price_range.lowest.nominal} - \$${record.price_range.highest.nominal}\n\n`;
-      }
-      if (record.categories && record.categories.length > 0) {
-        // Concatenate category names with commas.
-        const categoryList = record.categories.map(category => category.name).join(", ");
-        markdownContent += `**Categories:** ${categoryList}\n\n`;
-      }
-      if (record.tags && record.tags.length > 0) {
-        markdownContent += `**Tags:** ${record.tags.join(", ")}\n\n`;
-      }
-      if (record.units && record.units.length > 0) {
-        markdownContent += `**Units Available:** ${record.units.length}\n\n`;
-      }
-      // Include the sale unique identifier as reference.
-      markdownContent += `**Sale ID:** ${record.id}`;
-
-      // If the sale is marked as the latest record, attach a badge with an icon.
-      // The Badge component requires its childrenProps to be either an Avatar or an Icon.
-      const badgeElement: IAutoView.IAutoViewBadgeProps | undefined = record.latest
-        ? {
-            type: "Badge",
-            // Use an Icon component to visually indicate "new" status.
-            childrenProps: {
-              type: "Icon",
-              id: "star", // A common icon to represent "featured" or "new" status in kebab-case.
-              size: 16
+        // Build a label with a user icon and comment identifier
+        const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
+            {
+                type: "Icon",
+                id: "user",       // user silhouette icon
+                color: "gray",
+                size: 20,
             },
-            color: "success"
-          }
-        : undefined;
+            {
+                type: "Text",
+                // Fallback to comment.id if writer has no name property
+                content: [typeof (comment as any).writer?.name === "string"
+                    ? (comment as any).writer.name
+                    : comment.id],
+                variant: "subtitle2",
+            },
+        ];
 
-      // Compose the DataListItem with two prominent sections:
-      // - label: renders the sale title using a Markdown component for enhanced visuals.
-      // - value: an array including detailed markdown info, optional badge, and image elements.
-      const listItem: IAutoView.IAutoViewDataListItemProps = {
-        type: "DataListItem",
-        label: {
-          type: "Markdown",
-          content: `# ${record.content.title}`
-        },
-        value: [
-          {
+        // If the snapshot has markdown or html, we render it directly
+        // Use Markdown component for richer formatting support
+        const valueComponent: IAutoView.IAutoViewMarkdownProps = {
             type: "Markdown",
-            content: markdownContent
-          },
-          // Conditionally include the badge if the sale is marked as latest.
-          ...(badgeElement ? [badgeElement] : []),
-          // Optionally include the image element if a thumbnail exists.
-          ...(imageElement ? [imageElement] : [])
-        ]
-      };
+            content: latestSnapshot?.body ?? "",
+        };
 
-      return listItem;
+        return {
+            type: "DataListItem",
+            label: labelComponents,
+            value: valueComponent,
+        };
     });
 
-    // Wrap the list items inside a DataList component for structured display.
-    const dataList: IAutoView.IAutoViewDataListProps = {
-      type: "DataList",
-      childrenProps: listItems
-    };
+    // Build a DataList or fallback text if no comments
+    const commentsSection: IAutoView.IAutoViewPresentationComponentProps = listItems.length > 0
+        ? {
+            type: "DataList",
+            childrenProps: listItems,
+        }
+        : {
+            type: "Text",
+            // Inform the user there are no comments
+            content: ["No comments found for this inquiry."],
+            variant: "body2",
+        };
 
-    return dataList;
-  } else {
-    // In case there is no sale data, provide a fallback UI using a Text component.
-    // We use a simple text message which, if needed, could be replaced by markdown.
+    // Wrap everything in a VerticalCard to be responsive on mobile
     return {
-      type: "Text",
-      content: "No sale records available."
+        type: "VerticalCard",
+        childrenProps: [
+            {
+                type: "CardHeader",
+                title: `Comments (Page ${input.pagination.current} of ${input.pagination.pages})`,
+                description: `Total: ${input.pagination.records}`,
+                startElement: {
+                    type: "Icon",
+                    id: "comment",  // comment bubble icon
+                    color: "blue",
+                    size: 24,
+                },
+            },
+            {
+                type: "CardContent",
+                // Embed the comments list or empty message
+                childrenProps: commentsSection,
+            },
+        ],
     };
-  }
 }

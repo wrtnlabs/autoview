@@ -1,14 +1,137 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type IShoppingMileage = {
-    id: string & tags.Format<"uuid">;
-    value: null | number;
-    created_at: string & tags.Format<"date-time">;
-    code: string;
-    source: string;
-    direction: -1 | 1;
-};
-type IAutoViewTransformerInputType = IShoppingMileage;
+namespace Schema {
+    /**
+     * Category of channel.
+     *
+     * `IShoppingChannelCategory` is a concept that refers to classification
+     * categories within a specific {@link IShoppingChannel channel}, and is exactly
+     * the same as the concept commonly referred to as "category" in shopping malls.
+     *
+     * And `IShoppingChannelCategory` is different with {@link IShoppingSection}.
+     * {@link IShoppingSection} refers to a "corner" that is independent spatial
+     * information in the offline market, which cannot simultaneously classified in
+     * a {@link IShoppingSale sale}. Besides, `IShoppingChannelCategory` can be
+     * classified into multiple categories in a sale simultaneously.
+     *
+     * Product	| Section (corner) | Categories
+     * ---------|------------------|-----------------------------------
+     * Beef	    | Butcher corner   | Frozen food, Meat, Favorite food
+     * Grape    | Fruit corner     | Fresh food, Favorite food
+     *
+     * In addition, as `IShoppingChannelCategory` has 1:N self recursive relationship,
+     * it is possible to express below hierarchical structures. Thus, each channel
+     * can set their own category classification as they want.
+     *
+     * - Food > Meat > Frozen
+     * - Electronics > Notebook > 15 inches
+     * - Miscellaneous > Wallet
+     *
+     * Furthermore, `IShoppingChannelCategory` is designed to merge between themselves,
+     * so there is no burden to edit the category at any time.
+    */
+    export type IShoppingChannelCategory = {
+        /**
+         * Parent category info.
+         *
+         * @title Parent category info
+        */
+        parent: null | any;
+        /**
+         * List of children categories with hierarchical structure.
+         *
+         * @title List of children categories with hierarchical structure
+        */
+        children: Schema.IShoppingChannelCategory.IHierarchical[];
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Identifier code of the category.
+         *
+         * The code must be unique in the channel.
+         *
+         * @title Identifier code of the category
+        */
+        code: string;
+        /**
+         * Parent category's ID.
+         *
+         * @title Parent category's ID
+        */
+        parent_id: null | (string & tags.Format<"uuid">);
+        /**
+         * Representative name of the category.
+         *
+         * The name must be unique within the parent category. If no parent exists,
+         * then the name must be unique within the channel between no parent
+         * categories.
+         *
+         * @title Representative name of the category
+        */
+        name: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    };
+    export namespace IShoppingChannelCategory {
+        export type IInvert = any;
+        /**
+         * Hierarchical category information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * List of children categories with hierarchical structure.
+             *
+             * @title List of children categories with hierarchical structure
+            */
+            children: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
+}
+type IAutoViewTransformerInputType = Schema.IShoppingChannelCategory;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -16,66 +139,66 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // We choose to render the input data as a VerticalCard component.
-  // The card is divided into three sections:
-  // 1. Card Header: Displays a title (using the code), description (using the source),
-  //    and an icon representing the direction (up for positive, down for negative).
-  // 2. Card Content: Uses a Markdown component to visually list the details in a user-friendly manner.
-  // 3. Card Footer: Displays the creation time in a text component.
-  
-  // Determine the direction icon based on the "direction" field.
-  // We map positive direction to "arrow-up" and negative to "arrow-down" icons.
-  // The icon color is set accordingly (green for positive and red for negative).
-  const directionIcon: IAutoView.IAutoViewIconProps = {
-    id: input.direction === 1 ? "arrow-up" : "arrow-down",
-    color: input.direction === 1 ? "green" : "red",
-    size: 24,
-    type: "Icon"
+  // Compose the card header with a folder icon, category name, and code
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: "CardHeader",
+    title: input.name,
+    description: input.code,
+    startElement: {
+      type: "Icon",
+      id: "folder",
+      size: 24,
+      color: "blue"
+    }
   };
 
-  // Build the Card Header using the input fields.
-  // The header displays the 'code' and 'source' along with the directional icon.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    title: input.code,
-    description: `Source: ${input.source}`,
-    startElement: directionIcon,  // Allowed: Icon component is valid for startElement.
-    type: "CardHeader"
+  // Use a markdown component to show the creation timestamp in bold
+  const createdAtMarkdown: IAutoView.IAutoViewMarkdownProps = {
+    type: "Markdown",
+    content: `**Created At:** ${new Date(input.created_at).toLocaleString()}`
   };
 
-  // Compose Markdown content to visually render the details of the record.
-  // We use a markdown bullet list to display the id, value, and created_at fields.
-  // If 'value' is null, we use 'N/A' to denote no available numerical value.
-  const markdownContent = `
-- **ID:** ${input.id}
-- **Value:** ${input.value !== null ? input.value : "N/A"}
-- **Created At:** ${input.created_at}
-  `;
+  // Collect children props for the CardContent
+  const contentChildren: IAutoView.IAutoViewPresentationComponentProps[] = [createdAtMarkdown];
 
-  // Build the Card Content component using Markdown.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    childrenProps: {
-      content: markdownContent,
-      type: "Markdown"
-    },
-    type: "CardContent"
+  // If there is a parent category, show it as an outlined chip
+  if (input.parent && typeof (input.parent as any).name === "string") {
+    const parentName = (input.parent as any).name;
+    const parentChip: IAutoView.IAutoViewChipProps = {
+      type: "Chip",
+      label: parentName,
+      variant: "outlined",
+      color: "gray"
+    };
+    contentChildren.push(parentChip);
+  }
+
+  // If there are child categories, display them in a responsive chip group
+  if (Array.isArray(input.children) && input.children.length > 0) {
+    const childChips: IAutoView.IAutoViewChipProps[] = input.children.map((child) => ({
+      type: "Chip",
+      label: child.name,
+      variant: "filled",
+      color: "primary"
+    }));
+    const chipGroup: IAutoView.IAutoViewChipGroupProps = {
+      type: "ChipGroup",
+      childrenProps: childChips,
+      // Show up to 5 chips before collapsing
+      maxItems: 5
+    };
+    contentChildren.push(chipGroup);
+  }
+
+  // Wrap the assembled children in a CardContent component
+  const content: IAutoView.IAutoViewCardContentProps = {
+    type: "CardContent",
+    childrenProps: contentChildren
   };
 
-  // Build the Card Footer to display the creation time in a more prominent text style.
-  // We prepare a Text component that shows the creation timestamp.
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-    childrenProps: {
-      content: `Created on: ${input.created_at}`,
-      variant: "caption",
-      type: "Text"
-    },
-    type: "CardFooter"
+  // Return a vertical card that is mobile-friendly and stacks header + content
+  return {
+    type: "VerticalCard",
+    childrenProps: [header, content]
   };
-
-  // Assemble the full vertical card with the header, content, and footer.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    childrenProps: [cardHeader, cardContent, cardFooter],
-    type: "VerticalCard"
-  };
-
-  return verticalCard;
 }

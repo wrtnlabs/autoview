@@ -1,242 +1,274 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4UserView = {
-                user?: legacy.v4.LegacyV4User;
-                online?: Online;
-            };
-        }
+namespace Schema {
+    /**
+     * Answers to questions about sale snapshots.
+     *
+     * `IShoppingSaleInquiryAnswer` is an entity that embodies the official
+     * answer written by the {@link IShoppingSeller seller} to the
+     * {@link IShoppingSaleInquiry inquiry} written by the
+     * {@link IShoppingCustomer customer}.
+     *
+     * Of course, in addition to writing an official response like this, it is
+     * also possible for the seller to communicate with the inqjuiry written
+     * customer and multiple customers through
+     * {@link IShoppingSaleInquiryComment comments} in the attribution inquiry.
+     *
+     * For reference, it is not possible to write comments on this answer.
+     * Encourage people to write comments on the inquiry article. This is to
+     * prevent comments from being scattered in both inquiry and answer
+     * articles.
+    */
+    export type IShoppingSaleInquiryAnswer = {
+        /**
+         * Seller who've written the answer.
+         *
+         * @title Seller who've written the answer
+        */
+        seller: Schema.IShoppingSeller;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * List of snapshot contents.
+         *
+         * It is created for the first time when an article is created, and is
+         * accumulated every time the article is modified.
+         *
+         * @title List of snapshot contents
+        */
+        snapshots: Schema.IBbsArticle.ISnapshot[];
+        /**
+         * Creation time of article.
+         *
+         * @title Creation time of article
+        */
+        created_at: string;
+    };
+    /**
+     * Seller information.
+     *
+     * `IShoppingSeller` is an entity that embodies a person who registers
+     * {@link IShoppingSale sales} to operate selling activities, with
+     * {@link IShoppingMember membership} joining.
+     *
+     * For reference, unlike {@link IShoppingCustomer customers} which can
+     * participate even without membership joining, seller must join membership
+     * to operate sales. Also, seller must do the
+     * {@link IShoppingCitizen real-name and mobile authentication}, too.
+    */
+    export type IShoppingSeller = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation tmie of record.
+         *
+         * Another words, the time when the seller has signed up.
+         *
+         * @title Creation tmie of record
+        */
+        created_at: string;
+    };
+    export namespace IBbsArticle {
+        /**
+         * Snapshot of article.
+         *
+         * `IBbsArticle.ISnapshot` is a snapshot entity that contains the contents of
+         * the article, as mentioned in {@link IBbsArticle}, the contents of the article
+         * are separated from the article record to keep evidence and prevent fraud.
+        */
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or article.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Title of article.
+             *
+             * @title Title of article
+            */
+            title: string;
+            /**
+             * Content body of article.
+             *
+             * @title Content body of article
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
     }
-    export namespace v4 {
-        export type LegacyV4User = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            memberId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            veilId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            unifiedId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            profile?: {
-                [key: string]: {};
-            };
-            profileOnce?: profile.UserProfile;
-            tags?: string[] & tags.MinItems<0> & tags.MaxItems<10> & tags.UniqueItems;
-            alert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            unread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            popUpChatId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            blocked?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            unsubscribed?: boolean;
-            hasChat?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            hasPushToken?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            language?: string & tags.Default<"en">;
-            country?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            city?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            latitude?: number & tags.JsonSchemaPlugin<{
-                format: "double",
-                readOnly: true
-            }>;
-            longitude?: number & tags.JsonSchemaPlugin<{
-                format: "double",
-                readOnly: true
-            }>;
-            web?: WebInfo;
-            mobile?: MobileInfo;
-            sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            lastSeenAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            expireAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64"
-            }>;
-            version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            managedKey?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64"
-            }>;
-            member?: boolean;
-            email?: string;
-            userId?: string;
-            avatarUrl?: string;
-            managed?: boolean;
-            mobileNumber?: string & tags.Default<"+18004424000">;
-            systemLanguage?: string & tags.Default<"en">;
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
+            name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
         };
     }
 }
-namespace profile {
-    export type UserProfile = {
-        [key: string]: {};
-    };
-}
-type WebInfo = {
-    device?: string;
-    os?: string;
-    osName?: string;
-    browser?: string;
-    browserName?: string;
-    sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    lastSeenAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64"
-    }>;
-};
-type MobileInfo = {
-    device?: string;
-    os?: string;
-    osName?: string;
-    appName?: string;
-    appVersion?: string;
-    sdkName?: string;
-    sdkVersion?: string;
-    sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    lastSeenAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64"
-    }>;
-};
-type Online = {
-    channelId?: string;
-    personType?: string;
-    personId?: string;
-    id?: string;
-};
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4UserView;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleInquiryAnswer;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
+// Transforms a shopping sale inquiry answer into an AutoView component tree.
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract user and online status from the input.
-  const user = input.user;
-  const online = input.online;
+  // Attempt to format the creation timestamp for readability.
+  let formattedDate = input.created_at;
+  try {
+    const d = new Date(input.created_at);
+    if (!isNaN(d.getTime())) formattedDate = d.toLocaleString();
+  } catch {
+    // swallow any formatting errors and fall back to raw string
+  }
 
-  // If no user data is provided, fallback to a Markdown component indicating absence of data.
-  if (!user) {
+  // Build a list item for each snapshot in the answer's history.
+  const snapshotItems: IAutoView.IAutoViewDataListItemProps[] = input.snapshots.map(snapshot => {
+    // If there are attachments, render them as markdown links under the body.
+    const attachmentsMd = snapshot.files && snapshot.files.length > 0
+      ? "\n\n**Attachments:**\n" +
+        snapshot.files
+          .map(file => {
+            const ext = file.extension ? `.${file.extension}` : "";
+            const name = file.name || "(no name)";
+            return `- [${name}${ext}](${file.url})`;
+          })
+          .join("\n")
+      : "";
+
+    // Merge the body and attachments into one markdown string.
+    const markdownBody = `${snapshot.body}${attachmentsMd}`;
+
     return {
-      type: "Markdown",
-      content: "### No User Data\nUser information is not available at the moment."
-    } as IAutoView.IAutoViewMarkdownProps;
-  }
+      type: "DataListItem",
+      // Use a heading text component to show the snapshot title.
+      label: [
+        {
+          type: "Text",
+          variant: "h6",
+          content: [snapshot.title],
+        },
+      ],
+      // Render the body (and attachments) via the markdown component.
+      value: [
+        {
+          type: "Markdown",
+          content: markdownBody,
+        },
+      ],
+    };
+  });
 
-  // Create an Avatar component for the user if an avatar URL is provided.
-  const avatarComponent: IAutoView.IAutoViewAvatarProps | undefined = user.avatarUrl
-    ? {
-        type: "Avatar",
-        src: user.avatarUrl,
-        name: user.name || "User",
-        // Choose a moderate size; available sizes are predefined numbers,
-        // adjust as necessary for responsiveness.
-        size: 56,
-        // Use a primary variant color for the avatar.
-        variant: "primary"
-      }
-    : undefined;
+  // If there are no snapshots, show a friendly placeholder.
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps:
+      snapshotItems.length > 0
+        ? snapshotItems
+        : [
+            {
+              type: "DataListItem",
+              label: [
+                {
+                  type: "Text",
+                  variant: "body2",
+                  content: ["No snapshots available."],
+                },
+              ],
+            },
+          ],
+  };
 
-  // Create a CardHeader component to display the user's name and optionally an avatar icon.
-  const headerComponent: IAutoView.IAutoViewCardHeaderProps = {
+  // Card header shows seller ID and when the answer was created.
+  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: user.name || "Unnamed User",
-    // Optionally include a description with online status.
-    description: online && online.personType ? `Status: ${online.personType}` : undefined,
-    // Use the avatar component if available.
-    startElement: avatarComponent
+    title: `Seller: ${input.seller.id}`,
+    description: `Answered on ${formattedDate}`,
+    // A simple user icon to make the header more visual.
+    startElement: {
+      type: "Icon",
+      id: "user",
+      color: "blue",
+      size: 32,
+    },
   };
 
-  // Compose content detail.
-  // Instead of a plain text string, we leverage Markdown to format multi-line details.
-  // This markdown block will display key user information.
-  const markdownContent = `
-**User ID:** ${user.id || "N/A"}  
-**Email:** ${user.email || "N/A"}  
-**Member ID:** ${user.memberId || "N/A"}
-  `.trim();
-
-  // Create a CardContent component that uses a Markdown component to show detailed info.
-  const contentComponent: IAutoView.IAutoViewCardContentProps = {
+  // Card content holds the chronological list of snapshots.
+  const cardContent: IAutoView.IAutoViewCardContentProps = {
     type: "CardContent",
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent
-    } as IAutoView.IAutoViewMarkdownProps
+    childrenProps: dataList,
   };
 
-  // Optionally, add an IconButton to represent online status if the online object is present.
-  // The IconButton will use a green circle icon if online; otherwise, it is not rendered.
-  const onlineIndicator = online
-    ? {
-        type: "IconButton",
-        icon: "circle", // Assuming "circle" is a valid kebab-case icon name from the icon set.
-        // We set color to "green" if online is present.
-        color: "green",
-        size: "small"
-      } as IAutoView.IAutoViewIconButtonProps
-    : undefined;
-
-  // If the online indicator exists, we add it to the CardHeader's endElement for improved visualization.
-  if (onlineIndicator) {
-    // As per allowed types, endElement can be a single component from the allowed list.
-    headerComponent.endElement = onlineIndicator;
-  }
-
-  // Finally, compose a VerticalCard component that groups the header and content together.
-  // Using a vertical card ensures the UI is responsive and adapts well to mobile devices.
-  const cardComponent: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
+  // Card footer summarizes the answer ID and snapshot count.
+  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
+    type: "CardFooter",
     childrenProps: [
-      headerComponent,
-      contentComponent
-    ]
+      {
+        type: "Text",
+        variant: "caption",
+        content: [`Answer ID: ${input.id}`],
+      },
+      {
+        type: "Text",
+        variant: "caption",
+        content: [`Total snapshots: ${input.snapshots.length}`],
+      },
+    ],
   };
 
-  // Return the full composed component as the visualization of the input data.
-  return cardComponent;
+  // Assemble everything into a vertical card for responsive rendering.
+  return {
+    type: "VerticalCard",
+    childrenProps: [cardHeader, cardContent, cardFooter],
+  };
 }

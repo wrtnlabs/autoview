@@ -96,7 +96,11 @@ Note that your code will be attached to the following boilerplate code, generate
 
 You should access all the AutoView interfaces and types by prefixing \`IAutoView.\` to the type name, as they are inside the namespace \`IAutoView\`.
 But the type names are still prefixed with \`IAutoView.\`. For example, \`IAutoView.IAutoViewComponentProps\` is the type of the component props.
-The only exception is the \`IAutoViewTransformerInputType\` type and its sub-types and components, which is not part of the \`IAutoView\` namespace.
+
+Sub-types and components of the \`IAutoViewTransformerInputType\` (input) type is prefixed with \`Schema.\`. Prefix them if you need to explicitly mention them in your code. For example:
+- \`Schema.user_data\`
+- \`Schema.ServerResponse.StatusCode\`
+Note that the \`IAutoViewTransformerInputType\` itself should not be prefixed with \`Schema.\`.
 
 Do not copy-paste and/or repeat the boilerplate code in your response. They will be attached automatically by the compiler.
 

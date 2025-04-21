@@ -1,128 +1,83 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A page.
- *
- * Collection of records with pagination indformation.
-*/
-type IPageIShoppingSaleInquiryComment = {
+namespace Schema {
     /**
-     * Page information.
+     * A page.
      *
-     * @title Page information
+     * Collection of records with pagination indformation.
     */
-    pagination: IPage.IPagination;
-    /**
-     * List of records.
-     *
-     * @title List of records
-    */
-    data: IShoppingSaleInquiryComment[];
-};
-namespace IPage {
-    /**
-     * Page information.
-    */
-    export type IPagination = {
+    export type IPageIShoppingMileageHistory = {
         /**
-         * Current page number.
+         * Page information.
          *
-         * @title Current page number
+         * @title Page information
         */
-        current: number & tags.Type<"int32">;
+        pagination: Schema.IPage.IPagination;
         /**
-         * Limitation of records per a page.
+         * List of records.
          *
-         * @title Limitation of records per a page
+         * @title List of records
         */
-        limit: number & tags.Type<"int32">;
-        /**
-         * Total records in the database.
-         *
-         * @title Total records in the database
-        */
-        records: number & tags.Type<"int32">;
-        /**
-         * Total pages.
-         *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
-        */
-        pages: number & tags.Type<"int32">;
+        data: Schema.IShoppingMileageHistory[];
     };
-}
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
+    export namespace IPage {
+        /**
+         * Page information.
+        */
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
+    export type IShoppingMileageHistory = {
+        id: string & tags.Format<"uuid">;
+        citizen: Schema.IShoppingCitizen;
+        mileage: Schema.IShoppingMileage;
+        source_id: string & tags.Format<"uuid">;
+        value: number;
+        balance: number;
+        created_at: string & tags.Format<"date-time">;
+    };
     /**
-     * Writer of the comment.
+     * Citizen verification information.
      *
-     * Both customer and seller can write comment on the sale inquiry.
+     * `IShoppingCitizen` is an entity that records the user's
+     * {@link name real name} and {@link mobile} input information.
      *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
+     * For reference, in South Korea, real name authentication is required for
+     * e-commerce participants, so the name attribute is important. However, the
+     * situation is different overseas, so in reality, mobile attributes are the
+     * most important, and identification of individual person is also done based
+     * on this mobile.
      *
-     * @title Writer of the comment
+     * Of course, real name and mobile phone authentication information are
+     * encrypted and stored.
     */
-    writer: any | any | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
+    export type IShoppingCitizen = {
         /**
          * Primary Key.
          *
@@ -130,62 +85,34 @@ namespace IBbsArticleComment {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Creation time of record.
          *
-         * In other words, creation time or update time or comment.
-         *
-         * @title Creation time of snapshot record
+         * @title Creation time of record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Mobile number.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Mobile number
         */
-        format: "html" | "md" | "txt";
+        mobile: string;
         /**
-         * Content body of comment.
+         * Real name, or equivalent nickname.
          *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
-    };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
+         * @title Real name, or equivalent nickname
         */
         name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
+    };
+    export type IShoppingMileage = {
+        id: string & tags.Format<"uuid">;
+        value: null | number;
+        created_at: string & tags.Format<"date-time">;
+        code: string;
+        source: string;
+        direction: -1 | 1;
     };
 }
-type IAutoViewTransformerInputType = IPageIShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingMileageHistory;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -193,66 +120,86 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // We will use an AutoView DataList to display a list of Sale Inquiry Comments.
-  // Each comment will be transformed into a DataListItem with the writer represented as an Avatar in the label,
-  // and the snapshot content rendered with a Markdown component in the value.
-  //
-  // This approach leverages visual components (Avatar and Markdown) to avoid a plain text presentation.
-  // Additionally, for mobile responsiveness, these components can adapt to various screen sizes in the final UI.
-  
-  // Map each comment to a IAutoViewDataListItemProps representation.
-  const listItems: IAutoView.IAutoViewDataListItemProps[] = input.data.map((comment) => {
-    // Extract writer information.
-    // If "writer" is not a string, we convert it using JSON.stringify; in a production scenario,
-    // you might have a more sophisticated mapping from writer objects to visual representations.
-    const writerName =
-      typeof comment.writer === "string" ? comment.writer : JSON.stringify(comment.writer);
+    // If there are no history records, show a friendly message using markdown
+    if (!input.data || input.data.length === 0) {
+        return {
+            type: "Markdown",
+            content: "### No mileage history available"
+        } as IAutoView.IAutoViewMarkdownProps;
+    }
 
-    // Pick the latest snapshot if available. If multiple snapshots exist, show the most recent snapshot.
-    const latestSnapshot =
-      (comment.snapshots && comment.snapshots.length > 0)
-        ? comment.snapshots[comment.snapshots.length - 1]
-        : null;
-    
-    // Compose the markdown content.
-    // We use markdown formatting to show snapshot details; if no snapshot exists, indicate that no content is available.
-    const markdownContent = latestSnapshot
-      ? `**Snapshot Time:** ${latestSnapshot.created_at}\n\n**Format:** ${latestSnapshot.format}\n\n${latestSnapshot.body}`
-      : "No content available.";
+    // Map each record to a DataListItemProps
+    const items: IAutoView.IAutoViewDataListItemProps[] = input.data.map(record => {
+        // Format the created_at timestamp in a locale-aware way
+        const dateLabel = new Date(record.created_at).toLocaleString();
 
-    // Create an Avatar component for the writer.
-    // The Avatar component visually represents the writer.
-    const avatarComponent: IAutoView.IAutoViewAvatarProps = {
-      type: "Avatar",
-      name: writerName,
-      size: 32, // chosen size for visual clarity across devices
-      // Optionally, you might set the variant based on writer's role if such logic is needed.
-    };
+        // Choose direction icon and color based on positive/negative direction
+        const directionIcon: IAutoView.IAutoViewIconProps = {
+            type: "Icon",
+            id: record.mileage.direction === 1 ? "arrow-up" : "arrow-down",
+            color: record.mileage.direction === 1 ? "green" : "red",
+            size: 16
+        };
 
-    // Create a Markdown component to display the snapshot content.
-    const markdownComponent: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: markdownContent,
-    };
+        // Chip to visualize the change in mileage
+        const changeChip: IAutoView.IAutoViewChipProps = {
+            type: "Chip",
+            label: `${record.value > 0 ? "+" : ""}${record.value}`,
+            color: record.value > 0 ? "green" : "red",
+            variant: "filled",
+            size: "small",
+            startElement: directionIcon
+        };
 
-    // Compose the DataListItem.
-    // The label displays the avatar and the value shows the snapshot details in markdown.
-    const dataListItem: IAutoView.IAutoViewDataListItemProps = {
-      type: "DataListItem",
-      label: avatarComponent,
-      value: markdownComponent,
-    };
+        // Text showing the resulting balance after the change
+        const balanceText: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            content: `Balance: ${record.balance}`,
+            variant: "caption",
+            color: "secondary"
+        };
 
-    return dataListItem;
-  });
+        // Text showing the citizen's name
+        const nameText: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            content: record.citizen.name,
+            variant: "body1",
+            color: "primary"
+        };
 
-  // In addition to the comments, you might want to include pagination information somewhere in your UI.
-  // Here, however, we solely focus on visualizing the list of comments in a DataList component.
-  // The DataList provides a responsive, mobile-friendly layout.
-  const dataListComponent: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: listItems,
-  };
+        // Text showing the transaction code for reference
+        const codeText: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            content: record.mileage.code,
+            variant: "body2",
+            color: "gray"
+        };
 
-  return dataListComponent;
+        return {
+            type: "DataListItem",
+            // Label section combines a calendar icon and the date text
+            label: [
+                {
+                    type: "Icon",
+                    id: "calendar",
+                    size: 16,
+                    color: "blue"
+                },
+                {
+                    type: "Text",
+                    content: dateLabel,
+                    variant: "body2",
+                    color: "gray"
+                }
+            ],
+            // Value section shows name, change chip, balance, and transaction code
+            value: [nameText, changeChip, balanceText, codeText]
+        } as IAutoView.IAutoViewDataListItemProps;
+    });
+
+    // Return a DataList of all items, suitable for responsive display
+    return {
+        type: "DataList",
+        childrenProps: items
+    } as IAutoView.IAutoViewDataListProps;
 }

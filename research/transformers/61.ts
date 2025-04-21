@@ -1,76 +1,19 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
+namespace Schema {
     /**
-     * Writer of the comment.
+     * Discount coupon ticket issuance details.
      *
-     * Both customer and seller can write comment on the sale inquiry.
+     * `IShoppingCouponTicket` is an entity that symbolizes
+     * {@link IShoppingCoupon discount coupon} tickets issued by
+     * {@link IShoppingCustomer customers}.
      *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
-     *
-     * @title Writer of the comment
+     * And if the target discount coupon specification itself has an expiration
+     * date, the expiration date is recorded in expired_at and is automatically
+     * discarded after that expiration date. Of course, it doesn't matter if you
+     * use the discount coupon for your order within the deadline.
     */
-    writer: any | any | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
+    export type IShoppingCouponTicket = {
         /**
          * Primary Key.
          *
@@ -78,62 +21,396 @@ namespace IBbsArticleComment {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Customer who've taken the coupon ticket.
          *
-         * In other words, creation time or update time or comment.
+         * @title Customer who've taken the coupon ticket
+        */
+        customer: Schema.IShoppingCustomer;
+        /**
+         * Target coupon.
          *
-         * @title Creation time of snapshot record
+         * @title Target coupon
+        */
+        coupon: Schema.IShoppingCoupon;
+        /**
+         * Creation time of the record.
+         *
+         * @title Creation time of the record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Expiration time of the ticket.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Expiration time of the ticket
         */
-        format: "html" | "md" | "txt";
-        /**
-         * Content body of comment.
-         *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
+        expired_at: null | (string & tags.Format<"date-time">);
     };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
+    /**
+     * Customer information, but not a person but a connection basis.
+     *
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
+     *
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
+     *
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
+    */
+    export type IShoppingCustomer = {
         /**
-         * File name, except extension.
+         * Discriminant for the type of customer.
          *
-         * If there's file `.gitignore`, then its name is an empty string.
+         * @title Discriminant for the type of customer
+        */
+        type: "customer";
+        /**
+         * Membership information.
          *
-         * @title File name, except extension
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
+        */
+        member: null | any;
+        /**
+         * Citizen information.
+         *
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
+        */
+        citizen: null | any;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Belonged channel.
+         *
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
+         *
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
+    };
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier code.
+         *
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Name of the channel.
+         *
+         * @title Name of the channel
+        */
+        name: string;
+    };
+    export type IShoppingExternalUser = any;
+    /**
+     * Discount coupon.
+     *
+     * `IShoppingCoupon` is an entity that symbolizes discount coupons at
+     * a shopping mall.
+     *
+     * Note that, `IShoppingCoupon` only contains specification information
+     * about discount coupons. Please keep in mind that this is a different
+     * concept from {@link IShoppingCouponTicket}, which refers to the issuance
+     * of a discount coupon, or {@link IShoppingCouponTicketPayment}, which
+     * refers to its payment.
+     *
+     * Additionally, discount coupons are applied on an order-by-order basis,
+     * but each has its own unique restrictions. For example, a coupon with
+     * {@link IShoppingCouponSellerCriteria} may or may not be used only for
+     * {@link IShoppingSale} of listings registered by the {@link IShoppingSeller}.
+     * Also, there are restrictions such as
+     * {@link IShoppingCouponDiscount.threshold minimum amount restrictions} for
+     * using discount coupons and
+     * {@link IShoppingCouponDiscount.limit maximum discount amount limits}.
+     *
+     * In addition, you can set whether to issue discount coupons publicly or
+     * give them only to people who know the specific issuing code. In addition,
+     * there are restrictions such as issued discount coupons having an
+     * {@link IShoppingCouponRestriction.expired_at expiration date} or being
+     * issued only to customers who came in through a
+     * {@link IShoppingCouponFunnelCriteria specific funnel}.
+     *
+     * For more information, please refer to the properties below and the
+     * subsidiary entities described later.
+    */
+    export type IShoppingCoupon = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Designer who've made the coupon.
+         *
+         * @title Designer who've made the coupon
+        */
+        designer: any | any;
+        /**
+         * Inventory information.
+         *
+         * @title Inventory information
+        */
+        inventory: Schema.IShoppingCouponInventory;
+        /**
+         * List of criteria information.
+         *
+         * @title List of criteria information
+        */
+        criterias: (any | any | any | any)[];
+        /**
+         * Discount information.
+         *
+         * @title Discount information
+        */
+        discount: any | any;
+        /**
+         * Restriction information.
+         *
+         * @title Restriction information
+        */
+        restriction: Schema.IShoppingCouponRestriction;
+        /**
+         * Representative name of the coupon.
+         *
+         * @title Representative name of the coupon
         */
         name: string;
         /**
-         * Extension.
+         * Opening time of the coupon.
          *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
+         * @title Opening time of the coupon
         */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+        opened_at: null | (string & tags.Format<"date-time">);
         /**
-         * URL path of the real file.
+         * Closing time of the coupon.
          *
-         * @title URL path of the real file
+         * Tickets cannot be issued after this time.
+         *
+         * However, previously issued tickets can still be used until their
+         * expiration date.
+         *
+         * @title Closing time of the coupon
         */
-        url: string;
+        closed_at: null | (string & tags.Format<"date-time">);
+        /**
+         * Creation tie of the record.
+         *
+         * @title Creation tie of the record
+        */
+        created_at: string;
+    };
+    export type IShoppingAdministrator = any;
+    export type IShoppingSeller = any;
+    /**
+     * Inventory information of the coupon.
+     *
+     * If a {@link IShoppingCoupon coupon} has been designed with limited
+     * inventory, this `IShoppingCouponInventory` structure represents the
+     * remaining inventory information.
+    */
+    export type IShoppingCouponInventory = {
+        /**
+         * Remaining volume for everyone.
+         *
+         * If there is a limit to the quantity issued, it becomes impossible to
+         * issue tickets exceeding this value.
+         *
+         * In other words, the concept of N coupons being issued on a first-come,
+         * first-served basis is created.
+         *
+         * @title Remaining volume for everyone
+        */
+        volume: null | (number & tags.Type<"uint32">);
+        /**
+         * Remaining volume per citizen.
+         *
+         * As a limit to the total amount of issuance per person, it is common to
+         * assign 1 to limit duplicate issuance to the same citizen, or to use the
+         * `nul`` value to set no limit.
+         *
+         * Of course, by assigning a value of N, the total amount issued to the
+         * same citizen can be limited.
+         *
+         * @title Remaining volume per citizen
+        */
+        volume_per_citizen: null | (number & tags.Type<"uint32">);
+    };
+    export type IShoppingCouponSectionCriteria = any;
+    export type IShoppingCouponSellerCriteria = any;
+    export type IShoppingCouponSaleCriteria = any;
+    export type IShoppingCouponFunnelCriteria = any;
+    export namespace IShoppingCouponDiscount {
+        export type IAmount = any;
+        export type IPercent = any;
+    }
+    /**
+     * Restriction information of the coupon.
+    */
+    export type IShoppingCouponRestriction = {
+        /**
+         * Access level of coupon.
+         *
+         * - public: possible to find from public API
+         * - private: unable to find from public API
+         *   - arbitrarily assigned by the seller or administrator
+         *   - issued from one-time link
+         *
+         * @title Access level of coupon
+        */
+        access: "public" | "private";
+        /**
+         * Exclusivity or not.
+         *
+         * An exclusive discount coupon refers to a discount coupon that has an
+         * exclusive relationship with other discount coupons and can only be
+         * used alone. That is, when an exclusive discount coupon is used, no
+         * other discount coupon can be used for the same
+         * {@link IShoppingOrder order} or {@link IShoppingOrderGood good}.
+         *
+         * Please note that this exclusive attribute is a very different concept
+         * from multiplicative, which means whether the same coupon can be
+         * multiplied and applied to multiple coupons of the same order, so
+         * please do not confuse them.
+         *
+         * @title Exclusivity or not
+        */
+        exclusive: boolean;
+        /**
+         * Limited quantity issued.
+         *
+         * If there is a limit to the quantity issued, it becomes impossible
+         * to issue tickets exceeding this value.
+         *
+         * In other words, the concept of N coupons being issued on
+         * a first-come, first-served basis is created.
+         *
+         * @title Limited quantity issued
+        */
+        volume: null | (number & tags.Type<"uint32">);
+        /**
+         * Limited quantity issued per person.
+         *
+         * As a limit to the total amount of issuance per person, it is
+         * common to assign 1 to limit duplicate issuance to the same citizen,
+         * or to use the NULL value to set no limit.
+         *
+         * Of course, by assigning a value of N, the total amount issued
+         * to the same citizen can be limited.
+         *
+         * @title Limited quantity issued per person
+        */
+        volume_per_citizen: null | (number & tags.Type<"uint32">);
+        /**
+         * Expiration day(s) value.
+         *
+         * The concept of expiring N days after a discount coupon ticket is issued.
+         *
+         * Therefore, customers must use the ticket within N days, if possible,
+         * from the time it is issued.
+         *
+         * @title Expiration day(s) value
+        */
+        expired_in: null | (number & tags.Type<"uint32">);
+        /**
+         * Expiration date.
+         *
+         * A concept that expires after YYYY-MM-DD after a discount coupon ticket
+         * is issued.
+         *
+         * Double restrictions are possible with expired_in, of which the one
+         * with the shorter expiration date is used.
+         *
+         * @title Expiration date
+        */
+        expired_at: null | (string & tags.Format<"date-time">);
     };
 }
-type IAutoViewTransformerInputType = IShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.IShoppingCouponTicket;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -141,88 +418,91 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract writer information safely.
-  // We attempt to use "name" if available, otherwise fall back to stringified value.
-  const writerName = (input.writer && typeof input.writer === "object" && "name" in input.writer)
-    ? (input.writer as any).name
-    : String(input.writer);
+    // Helpers to format optional fields
+    const formatDateTime = (dt: string | null | undefined): string =>
+        dt ? new Date(dt).toLocaleString() : "N/A";
+    const formatVolume = (v: number | null | undefined): string =>
+        v != null ? v.toString() : "Unlimited";
 
-  // Create a simple icon to represent the writer.
-  const writerIcon: IAutoView.IAutoViewIconProps = {
-    // We assume a generic "user" icon is available. The ID must be in kebab-case and without any prefix.
-    id: "user",
-    color: "blue", // using a color from the accepted options
-    size: 20,      // a moderate size for icons
-    type: "Icon",
-  };
+    // Build a single markdown string summarizing all parts
+    const markdownLines: string[] = [];
 
-  // Compose markdown content from snapshots.
-  // If there are multiple snapshots, we list them out with their creation time and body.
-  let markdownContent = "";
-  if (input.snapshots && input.snapshots.length > 0) {
-    // Iterate over snapshots and compose markdown text.
-    markdownContent = input.snapshots.map(snapshot => {
-      // For each snapshot, include creation time and the body, and list attached files if any.
-      let fileList = "";
-      if (snapshot.files && snapshot.files.length > 0) {
-        fileList = snapshot.files.map(file => `- [${file.name}${file.extension ? "." + file.extension : ""}](${file.url})`).join("\n");
-        // Prepend files list header if needed.
-        fileList = "\n**Attachments:**\n" + fileList;
-      }
-      return `### Snapshot on ${snapshot.created_at}\n\n${snapshot.body}${fileList}\n`;
-    }).join("\n---\n");
-  }
-  else {
-    // When no snapshot is provided, fallback to a simple message.
-    markdownContent = "No comment content available.";
-  }
+    // Ticket overview
+    markdownLines.push("## 🎫 Coupon Ticket");
+    markdownLines.push(`- **Ticket ID**: \`${input.id}\``);
+    markdownLines.push(`- **Issued At**: ${formatDateTime(input.created_at)}`);
+    markdownLines.push(`- **Expires At**: ${formatDateTime(input.expired_at)}`);
+    markdownLines.push("");
 
-  // Create a markdown component to visualize the snapshot content.
-  const contentMarkdown: IAutoView.IAutoViewMarkdownProps = {
-    content: markdownContent,
-    type: "Markdown",
-  };
+    // Customer info
+    markdownLines.push("## 👤 Customer");
+    markdownLines.push(`- **Customer ID**: \`${input.customer.id}\``);
+    markdownLines.push(`- **Channel**: \`${input.customer.channel.name}\``);
+    markdownLines.push("");
 
-  // Compose the CardHeader component.
-  // This component displays the writer's name and creation date.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    title: writerName,
-    description: `Created at: ${input.created_at}`,
-    // Use the writer icon in the startElement slot.
-    startElement: writerIcon,
-    type: "CardHeader",
-  };
+    // Coupon spec
+    markdownLines.push("## 🎟️ Coupon");
+    markdownLines.push(`- **Name**: ${input.coupon.name}`);
+    markdownLines.push(`- **Available From**: ${formatDateTime(input.coupon.opened_at)}`);
+    markdownLines.push(`- **Available Until**: ${formatDateTime(input.coupon.closed_at)}`);
+    markdownLines.push("");
 
-  // Compose the CardContent component.
-  // It embeds the markdown component to render the snapshots.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    childrenProps: contentMarkdown,
-    type: "CardContent",
-  };
+    // Inventory
+    markdownLines.push("### 🗃️ Inventory");
+    markdownLines.push(`- **Total Volume**: ${formatVolume(input.coupon.inventory.volume)}`);
+    markdownLines.push(
+        `- **Per Citizen**: ${formatVolume(input.coupon.inventory.volume_per_citizen)}`
+    );
+    markdownLines.push("");
 
-  // Optionally, compose the CardFooter component.
-  // Here we show the ID of the comment as a plain text element embedded in a markdown,
-  // since visualizing an identifier with plain text is unavoidable.
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-    childrenProps: {
-      content: `**Comment ID:** ${input.id}`,
-      type: "Text",
-    } as IAutoView.IAutoViewTextProps,
-    type: "CardFooter",
-  };
+    // Discount (render JSON for detail)
+    markdownLines.push("### 💰 Discount Details");
+    markdownLines.push("json");
+    markdownLines.push(
+        JSON.stringify(input.coupon.discount, (_key, val) => (val === undefined ? null : val), 2)
+    );
+    markdownLines.push("```");
+    markdownLines.push("");
 
-  // Finally, compose a vertical card to aggregate all the sections.
-  // Using a vertical card makes it responsive and easy to view on mobile devices.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    childrenProps: [
-      cardHeader,
-      cardContent,
-      cardFooter
-    ],
-    type: "VerticalCard",
-  };
+    // Restrictions
+    markdownLines.push("### 🚧 Restrictions");
+    markdownLines.push("```json");
+    markdownLines.push(
+        JSON.stringify(input.coupon.restriction, (_key, val) =>
+            val === undefined ? null : val
+        , 2)
+    );
+    markdownLines.push("```");
 
-  // In production scenarios, additional error handling or alternative visualizations
-  // may be included if the input is missing some expected properties.
-  return verticalCard;
+    const markdownContent = markdownLines.join("\n");
+
+    // Compose the card header with a ticket icon
+    const header: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: `Ticket #${input.id}`,
+        description: input.coupon.name,
+        startElement: {
+            type: "Icon",
+            id: "ticket-alt",
+            color: "cyan",
+            size: 24,
+        },
+    };
+
+    // Compose the card content using a Markdown component
+    const content: IAutoView.IAutoViewCardContentProps = {
+        type: "CardContent",
+        childrenProps: [
+            {
+                type: "Markdown",
+                content: markdownContent,
+            },
+        ],
+    };
+
+    // Return a vertical card that holds the ticket overview
+    return {
+        type: "VerticalCard",
+        childrenProps: [header, content],
+    };
 }

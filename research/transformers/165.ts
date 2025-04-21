@@ -1,44 +1,94 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type EventsView = {
-    prev?: string;
-    next?: string;
-    events?: Event[];
-};
-type Event = {
-    userId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    id?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    channelId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    name: string;
-    property?: {
-        [key: string]: {};
-    };
-    createdAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    expireAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    managed?: boolean & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    nameI18nMap?: {
-        [key: string]: string;
-    };
-};
-type IAutoViewTransformerInputType = EventsView;
+namespace Schema {
+    export namespace IShoppingChannel {
+        /**
+         * Hierarchical channel information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * Children categories with hierarchical structure.
+             *
+             * @title Children categories with hierarchical structure
+            */
+            categories: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+            /**
+             * Identifier code.
+             *
+             * @title Identifier code
+            */
+            code: string;
+            /**
+             * Name of the channel.
+             *
+             * @title Name of the channel
+            */
+            name: string;
+        };
+    }
+    export namespace IShoppingChannelCategory {
+        /**
+         * Hierarchical category information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * List of children categories with hierarchical structure.
+             *
+             * @title List of children categories with hierarchical structure
+            */
+            children: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
+}
+type IAutoViewTransformerInputType = Schema.IShoppingChannel.IHierarchical;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -46,88 +96,68 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // If there are no events available, show a Markdown component informing the user.
-  if (!input.events || input.events.length === 0) {
-    return {
-      type: "Markdown",
-      content: "## No events available\n\nThere are currently no events to display. Please check back later."
-    } as IAutoView.IAutoViewMarkdownProps;
-  }
-
-  // Initialize an array to collect list children components.
-  const listChildren: (IAutoView.IAutoViewListSubheaderProps | IAutoView.IAutoViewListItemProps)[] = [];
-
-  // Add a subheader at the top of the list to title the event list.
-  listChildren.push({
-    type: "ListSubheader",
-    stickToTop: true,
-    // Use a Text component (allowed as a presentation component) to render the header with markdown-like emphasis
-    childrenProps: {
-      type: "Text",
-      content: "Event List",
-      variant: "subtitle1",
-      color: "primary"
-    } as IAutoView.IAutoViewTextProps
-  });
-
-  // Iterate over each event and transform it into a ListItem.
-  input.events.forEach((event) => {
-    // Compose a description string from available event details.
-    // We prefer minimal text, so we include the event's id if present.
-    const descriptionText = event.id ? `ID: ${event.id}` : undefined;
-
-    // Each event list item includes an icon (e.g., a calendar) to create a more engaging UI.
-    // Note: The icon id should be in kebab-case without any prefix.
-    const listItem: IAutoView.IAutoViewListItemProps = {
-      type: "ListItem",
-      title: event.name,
-      description: descriptionText,
-      startElement: {
-        type: "Icon",
-        id: "calendar", // using "calendar" as a generic icon representing event scheduling
-        color: "blue",
-        size: 16
-      }
+    // Helper to sanitize IDs for mermaid (must start with letter, no hyphens)
+    const sanitize = (id: string): string => {
+        // Replace non-alphanumeric with underscore, prefix with 'n' if starting with digit
+        let clean = id.replace(/[^a-zA-Z0-9]/g, "_");
+        if (/^[0-9]/.test(clean)) clean = "n" + clean;
+        return clean;
     };
 
-    listChildren.push(listItem);
-  });
+    // Traverse the category tree to build mermaid nodes and edges
+    const nodes: Set<string> = new Set();
+    const edges: string[] = [];
 
-  // If navigation URLs (prev/next) are provided, add an extra list item with navigation buttons.
-  if (input.prev || input.next) {
-    const navButtons: IAutoView.IAutoViewButtonProps[] = [];
+    const traverse = (node: Schema.IShoppingChannelCategory.IHierarchical) => {
+        const nodeId = sanitize(node.id);
+        // Define the node label using the category name (escape brackets)
+        const label = node.name.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
+        nodes.add(`${nodeId}["${label}"]`);
+        for (const child of node.children || []) {
+            const childId = sanitize(child.id);
+            // Ensure the child node is defined
+            traverse(child);
+            // Create an edge from parent to child
+            edges.push(`${nodeId} --> ${childId}`);
+        }
+    };
 
-    if (input.prev) {
-      navButtons.push({
-        type: "Button",
-        label: "Prev",
-        variant: "outlined",
-        color: "primary",
-        href: input.prev // Utilizing the provided URI for navigating to previous events
-      });
+    // Build mermaid definitions for all top-level categories
+    if (input.categories && input.categories.length > 0) {
+        for (const top of input.categories) {
+            traverse(top);
+        }
+        // Compose mermaid diagram code
+        const mermaidLines = [
+            "graph TD",
+            // Node definitions
+            ...Array.from(nodes),
+            // Edge definitions
+            ...edges,
+        ];
+        const mermaid = mermaidLines.join("\n");
+
+        // Compose markdown content with title and mermaid diagram
+        const content = [
+            `## Channel: ${input.name}`,
+            `*Code:* \`${input.code}\`  `,
+            `*Created:* ${new Date(input.created_at).toLocaleString()}`,
+            "",
+            "mermaid",
+            mermaid,
+            "```",
+        ].join("\n");
+
+        return {
+            type: "Markdown",
+            content,
+        };
+    } else {
+        // Fallback: no categories to display, show a friendly message
+        return {
+            type: "Text",
+            variant: "body1",
+            content: "No categories available for this channel.",
+        };
     }
-
-    if (input.next) {
-      navButtons.push({
-        type: "Button",
-        label: "Next",
-        variant: "outlined",
-        color: "primary",
-        href: input.next // Utilizing the provided URI for navigating to next events
-      });
-    }
-
-    // Create a list item for navigation. The endElement can accept a single component or an array.
-    listChildren.push({
-      type: "ListItem",
-      title: "Navigation",
-      endElement: navButtons.length === 1 ? navButtons[0] : navButtons
-    });
-  }
-
-  // Finally, return the constructed List component with all children.
-  return {
-    type: "List",
-    childrenProps: listChildren
-  } as IAutoView.IAutoViewListProps;
 }

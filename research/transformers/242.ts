@@ -1,104 +1,299 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace TryPagination_lt_UserType {
-    export type ProfileList_gt_ = {
-        result: true & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        code: 1000 & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        requestToResponse?: string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>;
-        data: PaginationResponseType_lt_UserType.ProfileList_gt_;
+namespace Schema {
+    export namespace desk {
+        export namespace message {
+            export type ThreadStreamMessagesView = {
+                prev?: string;
+                next?: string;
+                messages?: Schema.Message[];
+                bots?: Schema.bot.Bot[];
+                savedMessages?: Schema.IndexedMessage[];
+            };
+        }
+    }
+    export type Message = {
+        chatKey: string;
+        id: string;
+        mainKey?: string;
+        threadKey?: string;
+        meetKey?: string;
+        frontKey?: string;
+        channelId: string;
+        chatType: string;
+        chatId: string;
+        personType: string;
+        personId: string;
+        requestId?: string;
+        language?: string;
+        createdAt: number;
+        version?: number & tags.Type<"int32">;
+        blocks?: Schema.message.Block[];
+        plainText?: string;
+        updatedAt?: number;
+        inboundEmailId?: string;
+        thread?: Schema.message.MessageThread;
+        meet?: Schema.message.meet.MessageMeet;
+        removerKey?: string;
+        buttons?: Schema.message.Button[] & tags.MinItems<1> & tags.MaxItems<2>;
+        files?: Schema.message.File[] & tags.MinItems<1> & tags.MaxItems<30>;
+        webPage?: Schema.message.WebPage;
+        log?: Schema.message.Log;
+        reactions?: Schema.message.Reaction[];
+        form?: Schema.message.form.Form;
+        state?: "sending" | "sent" | "failed" | "removed";
+        options?: ("actAsManager" | "displayAsChannel" | "doNotPost" | "doNotSearch" | "doNotSendApp" | "doNotUpdateDesk" | "immutable" | "private" | "silent" | "silentToManager" | "silentToUser")[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+        marketing?: Schema.message.userchat.MessageMarketing;
+        supportBot?: Schema.message.userchat.MessageSupportBot;
+        workflow?: Schema.message.userchat.MessageWorkflow;
+        alf?: Schema.message.alf.MessageAlf;
+        alertLevel?: "alert" | "unread" | "none";
+        ivr?: Schema.meet.ivr.MessageIvr;
+        threadMsg?: boolean;
+        meetMsg?: boolean;
+        broadcastedMsg?: boolean;
+        workflowButton?: boolean;
+        rootMessageId?: string;
+        removedByWriter?: boolean;
+        threadRoot?: boolean;
+        meetRoot?: boolean;
+    };
+    export namespace message {
+        export type Block = {
+            type: "bullets" | "code" | "text";
+            language?: string;
+            value?: string;
+            blocks?: Schema.message.Block[];
+        };
+        export type MessageThread = {
+            id?: string;
+            managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+            repliedManagerIds?: string[] & tags.UniqueItems;
+            replyCount?: number & tags.Type<"int32">;
+            chatType?: string;
+            chatId?: string;
+            rootMessageId?: string;
+        };
+        export namespace meet {
+            export type MessageMeet = {
+                id?: string;
+                chatType?: string;
+                channelId?: string;
+                state?: "live" | "ended" | "transcribing" | "transcribed" | "transcribeFailed";
+                mode?: "audio" | "video";
+                amassedPersons?: string[] & tags.UniqueItems;
+                roomStartedAt?: number;
+                call?: Schema.message.meet.Call;
+                front?: Schema.message.meet.Front;
+                recording?: Schema.message.meet.Recording;
+                country?: string;
+                stateV2?: "live" | "ended" | "transcribing" | "transcribed" | "transcribeFailed";
+                meetEndedAt?: number;
+                managerIds?: string[] & tags.UniqueItems;
+                meetType?: "front" | "call" | "team";
+            };
+            export type Call = {
+                id?: string;
+                from?: string & tags.Default<"+18004424000">;
+                to?: string & tags.Default<"+18004424000">;
+                direction?: "inbound" | "outbound";
+                callServerIp?: string;
+                missedReason?: "notInOperation" | "userLeft" | "ringTimeOver" | "inboundRateLimit" | "noOperator" | "exceededQueue" | "abandonedInQueue" | "workflow" | "preservedNumber" | "unregisteredNumber" | "blockedUser";
+                firstWaitingStartedAt?: number;
+                createAt?: number;
+                engagedAt?: number;
+                closedAt?: number;
+                missedHandledAt?: number;
+                voiceMail?: boolean;
+                userPhoneNumberType?: "mobileNumber" | "landlineNumber";
+            };
+            export type Front = {
+                id?: string;
+                direction?: "inbound" | "outbound";
+                missedReason?: "notInOperation" | "userLeft" | "ringTimeOver" | "inboundRateLimit" | "noOperator" | "exceededQueue" | "abandonedInQueue" | "workflow" | "preservedNumber" | "unregisteredNumber" | "blockedUser";
+                engagedAt?: number;
+                firstWaitingStartedAt?: number;
+                missedHandledAt?: number;
+            };
+            export type Recording = {
+                id: string;
+                bucket: string;
+                key: string;
+                contentType?: string;
+                duration?: number;
+                size?: number & tags.Type<"int32"> & tags.Maximum<10485760>;
+                name?: string;
+                type?: "file" | "image" | "video" | "audio";
+                channelId?: string;
+                chatType?: string;
+                chatId?: string;
+            };
+        }
+        export type Button = {
+            title: string;
+            colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
+            action: Schema.message.action.Action;
+            /**
+             * @deprecated
+            */
+            url?: string;
+        };
+        export namespace action {
+            export type Action = {
+                attributes?: Schema.message.action.Attributes;
+                type: string;
+            };
+            export type Attributes = {};
+        }
+        export type File = {
+            id: string;
+            type?: string;
+            name: string;
+            size: number & tags.Type<"int32">;
+            contentType?: string;
+            duration?: number;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            orientation?: number & tags.Type<"int32">;
+            animated?: boolean;
+            bucket: string;
+            key: string;
+            previewKey?: string;
+            channelId?: string;
+            chatType?: string;
+            chatId?: string;
+        };
+        export type WebPage = {
+            id: string;
+            url: string;
+            title?: string;
+            description?: string;
+            imageUrl?: string;
+            videoUrl?: string;
+            publisher?: string;
+            author?: string;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            bucket?: string;
+            previewKey?: string;
+            logo?: string;
+            name?: string;
+        };
+        export type Log = {
+            action?: "changeName" | "changeScope" | "close" | "autoClose" | "create" | "invite" | "join" | "assign" | "autoAssign" | "unassign" | "leave" | "open" | "autoOpen" | "enqueue" | "remove" | "snooze" | "addTags" | "removeTags" | "assignTeam" | "unassignTeam" | "joinMeet" | "leaveMeet" | "inviteMeet" | "missMeet" | "callbackMeet" | "processBranch" | "sendXms" | "addUserTags" | "removeUserTags" | "updatePriority" | "startWorkflow" | "endWorkflow" | "interruptWorkflow" | "interruptWorkflowByBot" | "tryOpenWithAlf";
+            values?: string[];
+            triggerType?: string;
+            triggerId?: string;
+        };
+        export type Reaction = {
+            emojiName: string;
+            personKeys?: string[] & tags.UniqueItems;
+        };
+        export namespace form {
+            export type Form = {
+                submittedAt?: number;
+                inputs?: Schema.message.form.FormInput[];
+                type: string;
+            };
+            export type FormInput = {
+                value?: {};
+                readOnly?: boolean;
+                type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
+                label?: string;
+                bindingKey?: string;
+                dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
+                userChatProfileBindingKey?: boolean;
+                userProfileBindingKey?: boolean;
+            };
+        }
+        export namespace userchat {
+            export type MessageMarketing = {
+                type?: string;
+                id?: string;
+                advertising?: boolean;
+                sendToOfflineXms?: boolean;
+                sendToOfflineEmail?: boolean;
+                exposureType?: "fullScreen";
+            };
+            /**
+             * @deprecated
+            */
+            export type MessageSupportBot = {
+                id?: string;
+                revisionId?: string;
+                sectionId?: string;
+                stepIndex?: number & tags.Type<"int32">;
+                buttons?: Schema.supportbot.SupportBotRouteSection_dollar_Button[];
+                submitButtonIndex?: number & tags.Type<"int32">;
+            };
+            export type MessageWorkflow = {
+                id?: string;
+                revisionId?: string;
+                sectionId?: string;
+                actionIndex?: number & tags.Type<"int32">;
+                submitButtonId?: string;
+                buttonBotMessage?: boolean;
+            };
+        }
+        export namespace alf {
+            export type MessageAlf = {
+                type?: "complete" | "rag" | "incomplete" | "impossible" | "command" | "faq" | "failed" | "rateLimited" | "openUserChat" | "system";
+                references?: Schema.message.alf.Reference[];
+                mentionAlfAnswered?: boolean;
+            };
+            export type Reference = {
+                index?: string;
+                type: string;
+            };
+        }
+    }
+    export namespace supportbot {
+        export type SupportBotRouteSection_dollar_Button = {
+            text: string;
+            nextSectionId: string;
+        };
+    }
+    export namespace meet {
+        export namespace ivr {
+            export type MessageIvr = {
+                audioFile?: Schema.message.File;
+            };
+        }
+    }
+    export namespace bot {
+        export type Bot = {
+            color?: string & tags.Default<"#123456">;
+            createdAt?: number;
+            avatarUrl?: string;
+            ai?: boolean;
+            name?: string;
+            channelId?: string;
+            id?: string;
+            description?: string;
+            nameDescI18nMap?: {
+                [key: string]: Schema.NameDesc;
+            };
+        };
+    }
+    export type NameDesc = {
+        name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
+        description?: string;
+    };
+    export type IndexedMessage = {
+        messageId?: string;
+        indexedAt?: number;
+        type?: "mentioned" | "teamMentioned" | "reacted" | "saved";
+        chatId?: string;
+        chatType?: string;
+        personId?: string;
+        personType?: string;
+        channelId?: string;
+        expireAt?: number;
+        updatedAt?: number;
+        createdAt?: number;
     };
 }
-namespace PaginationResponseType_lt_UserType {
-    export type ProfileList_gt_ = {
-        list: UserType.Acquaintance[] & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        count: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        totalResult: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        totalPage: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        search?: string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>;
-        page: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-    };
-}
-namespace UserType {
-    export type Acquaintance = {
-        /**
-         * 사용자의 별칭, 설정하지 않는 경우도 있다.
-        */
-        nickname: string & tags.JsonSchemaPlugin<{
-            "x-typia-metaTags": [
-                {
-                    kind: "minLength",
-                    value: 1
-                },
-                {
-                    kind: "maxLength",
-                    value: 50
-                }
-            ],
-            "x-typia-jsDocTags": [
-                {
-                    name: "minLength",
-                    text: [
-                        {
-                            text: "1",
-                            kind: "text"
-                        }
-                    ]
-                },
-                {
-                    name: "maxLength",
-                    text: [
-                        {
-                            text: "50",
-                            kind: "text"
-                        }
-                    ]
-                }
-            ],
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        id: number & tags.JsonSchemaPlugin<{
-            "x-typia-required": true,
-            "x-typia-optional": false
-        }>;
-        /**
-         * 사용자의 프로필 이미지
-        */
-        profileImage?: (string & tags.JsonSchemaPlugin<{
-            "x-typia-required": false,
-            "x-typia-optional": true
-        }>) | null;
-        reason: "\uB098\uB97C \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C" | "\uB0B4\uAC00 \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C";
-    };
-}
-type IAutoViewTransformerInputType = TryPagination_lt_UserType.ProfileList_gt_;
+type IAutoViewTransformerInputType = Schema.desk.message.ThreadStreamMessagesView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -106,79 +301,104 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Destructure the data object from input
-  const { data } = input;
-  
-  // Transform each user into a DataListItem component.
-  // We use an Avatar component if a profile image is provided,
-  // otherwise we default to using an Icon component with a "user" icon.
-  const listItems: IAutoView.IAutoViewDataListItemProps[] = data.list.map((user) => {
-    // Prepare the label component:
-    let labelComponent: IAutoView.IAutoViewComponentProps;
-    if (user.profileImage) {
-      // Use an Avatar when a profile image exists
-      labelComponent = {
-        type: "Avatar",
-        src: user.profileImage,
-        name: user.nickname,
-        // Choose a size that works well on mobile devices
-        size: 40,
-        variant: "primary"
-      } as IAutoView.IAutoViewAvatarProps;
-    } else {
-      // Use an Icon as a fallback visual representation
-      labelComponent = {
-        type: "Icon",
-        id: "user",
-        size: 40,
-        // Choose a color that stands out
-        color: "blue"
-      } as IAutoView.IAutoViewIconProps;
-    }
-    
-    // Create a markdown content string to visually represent the user's details.
-    // Markdown is used to format the text in a more engaging way.
-    const markdownContent = `**Nickname:** ${user.nickname}\n\n**Relation:** ${user.reason}\n\n**ID:** ${user.id}`;
-    const valueComponent: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: markdownContent
-    };
-    
-    // Return the DataListItem component composed of the label and value components.
+  // Helper to turn blocks into a single markdown string
+  function flattenBlocks(blocks: Schema.message.Block[]): string {
+    return blocks
+      .map((block) => {
+        switch (block.type) {
+          case "code":
+            // Render code fences
+            return [
+              "" + (block.language || ""),
+              block.value || "",
+              "```",
+            ].join("\n");
+          case "bullets":
+            // Render each sub-block as a bullet point
+            if (block.blocks) {
+              return block.blocks
+                .map((sub) => "- " + (sub.value || ""))
+                .join("\n");
+            }
+            return "";
+          case "text":
+          default:
+            // Plain text
+            return block.value || "";
+        }
+      })
+      .filter((segment) => segment.length > 0)
+      .join("\n\n");
+  }
+
+  // If there are no messages, show a placeholder text
+  if (!input.messages || input.messages.length === 0) {
     return {
-      type: "DataListItem",
-      label: labelComponent,
-      value: valueComponent
-    };
-  });
-  
-  // Compose a DataList component that contains all user list items.
-  const dataList: IAutoView.IAutoViewDataListProps = {
+      type: "Text",
+      content: "No messages in this thread.",
+    } as IAutoView.IAutoViewTextProps;
+  }
+
+  // Map each message to a DataListItem
+  const items: IAutoView.IAutoViewDataListItemProps[] = input.messages.map(
+    (msg) => {
+      // Determine an avatar variant by person type
+      const isBot = msg.personType === "bot";
+      const avatar: IAutoView.IAutoViewAvatarProps = {
+        type: "Avatar",
+        name: msg.personType.charAt(0).toUpperCase(),
+        variant: isBot ? "violet" : "blue",
+        size: 28,
+      };
+
+      // Format timestamp
+      const date = new Date(msg.createdAt);
+      const timeLabel = date.toLocaleTimeString([], { hour12: false });
+
+      // Compose the label: avatar + name + time
+      const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
+        avatar,
+        {
+          type: "Text",
+          content: [` ${msg.personType} • ${timeLabel}`],
+        } as IAutoView.IAutoViewTextProps,
+      ];
+
+      // Determine the message body
+      let bodyMarkdown = "";
+      if (msg.plainText) {
+        // Prefer plainText if available
+        bodyMarkdown = msg.plainText;
+      } else if (msg.blocks) {
+        // Otherwise flatten structured blocks
+        bodyMarkdown = flattenBlocks(msg.blocks);
+      }
+
+      const valueComponents: IAutoView.IAutoViewPresentationComponentProps[] = [];
+      if (bodyMarkdown.trim().length > 0) {
+        valueComponents.push({
+          type: "Markdown",
+          content: bodyMarkdown,
+        } as IAutoView.IAutoViewMarkdownProps);
+      } else {
+        // Fallback if there's no body
+        valueComponents.push({
+          type: "Text",
+          content: "[No content]",
+        } as IAutoView.IAutoViewTextProps);
+      }
+
+      return {
+        type: "DataListItem",
+        label: labelComponents,
+        value: valueComponents,
+      };
+    }
+  );
+
+  // Return a DataList containing all message items
+  return {
     type: "DataList",
-    childrenProps: listItems
-  };
-  
-  // Compose a CardHeader component to display an overview of the list.
-  // This includes the title and additional information about pagination.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "User Profiles",
-    description: `Showing ${data.count} of ${data.totalResult} results (Page ${data.page} of ${data.totalPage})`
-  };
-  
-  // Compose a CardContent component that contains the DataList.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: dataList
-  };
-  
-  // Wrap everything in a VerticalCard to ensure a responsive and engaging layout.
-  // VerticalCard can hold multiple children components, here a header and content.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent]
-  };
-  
-  // Return the final composed component props.
-  return verticalCard;
+    childrenProps: items,
+  } as IAutoView.IAutoViewDataListProps;
 }

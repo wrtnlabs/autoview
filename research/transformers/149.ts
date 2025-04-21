@@ -1,43 +1,75 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4WebhookView = {
-                webhook?: legacy.v4.LegacyV4Webhook;
-            };
-        }
+namespace Schema {
+    export namespace IShoppingSaleInquiryComment {
+        /**
+         * Snapshot content of the comment.
+        */
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or comment.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Content body of comment.
+             *
+             * @title Content body of comment
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
     }
-    export namespace v4 {
-        export type LegacyV4Webhook = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
             name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
             url: string;
-            token?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            watchUserChats?: boolean;
-            watchGroups?: boolean;
-            apiVersion: string;
-            lastBlockedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            blocked?: boolean;
         };
     }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4WebhookView;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleInquiryComment.ISnapshot;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -45,100 +77,96 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract the webhook data from the input. This may be undefined.
-  const webhook = input.webhook;
+  const { id, created_at, format, body, files } = input;
 
-  // If there is no webhook data, return a simple vertical card with an informative message.
-  if (!webhook) {
-    return {
-      type: "VerticalCard",
-      childrenProps: [
-        {
-          type: "CardHeader",
-          title: "No Webhook Data",
-          description: "The webhook data is not available.",
-          // Use an icon to denote informational status.
-          startElement: {
-            id: "info",
+  // Format creation timestamp into a human-readable form; fall back to raw if invalid
+  let formattedDate: string;
+  const parsed = new Date(created_at);
+  if (!isNaN(parsed.getTime())) {
+    formattedDate = parsed.toLocaleString();
+  } else {
+    formattedDate = created_at;
+  }
+
+  // Card header with a comment icon, truncated ID, and timestamp
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: "CardHeader",
+    title: `Comment ${id.slice(0, 8)}`,
+    description: `Created at ${formattedDate}`,
+    startElement: {
+      type: "Icon",
+      id: "comment",
+      color: "blue",
+      size: 24,
+    },
+  };
+
+  // Pick Markdown for markdown-format bodies, otherwise plain text
+  const bodyComponent:
+    | IAutoView.IAutoViewMarkdownProps
+    | IAutoView.IAutoViewTextProps =
+    format === "md"
+      ? {
+          type: "Markdown",
+          content: body,
+        }
+      : {
+          type: "Text",
+          content: body,
+          variant: "body1",
+        };
+
+  const content: IAutoView.IAutoViewCardContentProps = {
+    type: "CardContent",
+    childrenProps: [bodyComponent],
+  };
+
+  // If attachments exist, render a DataList of download buttons
+  let footerComponent: IAutoView.IAutoViewCardFooterProps | undefined;
+  if (files && files.length > 0) {
+    const listItems: IAutoView.IAutoViewDataListItemProps[] = files.map((file) => {
+      // Build display name including extension
+      const name = file.extension ? `${file.name}.${file.extension}` : file.name;
+
+      return {
+        type: "DataListItem",
+        label: [
+          {
             type: "Icon",
-            size: 24,
-            color: "blue",
+            id: "file",
+            color: "gray",
+            size: 20,
           },
-        },
-        {
-          type: "CardContent",
-          childrenProps: {
-            type: "Markdown",
-            content: "*No webhook data was provided. Please verify your configuration.*",
+          {
+            type: "Text",
+            content: name,
+            variant: "body1",
           },
+        ],
+        value: {
+          type: "Button",
+          label: "Download",
+          href: file.url,
+          variant: "text",
         },
-      ],
+      };
+    });
+
+    footerComponent = {
+      type: "CardFooter",
+      childrenProps: {
+        type: "DataList",
+        childrenProps: listItems,
+      },
     };
   }
 
-  // Build a markdown string to elegantly display the webhook details.
-  // Markdown is used in order to provide a rich text presentation.
-  let markdownContent = "";
-  markdownContent += `**Webhook Name:** ${webhook.name}\n\n`;
-  if (webhook.id) {
-    markdownContent += `**ID:** ${webhook.id}\n\n`;
-  }
-  markdownContent += `**URL:** ${webhook.url}\n\n`;
-  if (webhook.token) {
-    markdownContent += `**Token:** ${webhook.token}\n\n`;
-  }
-  if (webhook.apiVersion) {
-    markdownContent += `**API Version:** ${webhook.apiVersion}\n\n`;
-  }
-  if (webhook.keywords && webhook.keywords.length > 0) {
-    markdownContent += `**Keywords:** ${webhook.keywords.join(", ")}\n\n`;
-  }
-  if (typeof webhook.watchUserChats === "boolean") {
-    markdownContent += `**Watch User Chats:** ${webhook.watchUserChats ? "Yes" : "No"}\n\n`;
-  }
-  if (typeof webhook.watchGroups === "boolean") {
-    markdownContent += `**Watch Groups:** ${webhook.watchGroups ? "Yes" : "No"}\n\n`;
-  }
-  if (typeof webhook.blocked === "boolean") {
-    markdownContent += `**Blocked:** ${webhook.blocked ? "Yes" : "No"}\n\n`;
-  }
-  if (webhook.lastBlockedAt !== undefined) {
-    // Convert timestamp to a locale readable string.
-    markdownContent += `**Last Blocked At:** ${new Date(webhook.lastBlockedAt).toLocaleString()}\n\n`;
-  }
-  if (webhook.createdAt !== undefined) {
-    markdownContent += `**Created At:** ${new Date(webhook.createdAt).toLocaleString()}\n\n`;
-  }
-
-  // Build the Card Header component.
-  // We use an icon as a visual representation of the webhook (using "link" as a typical symbol).
-  const header: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: webhook.name,
-    description: "Webhook Overview",
-    startElement: {
-      id: "link",
-      type: "Icon",
-      size: 32,
-      color: "blue",
-    },
-  };
-
-  // Build the Card Content component
-  // The detailed information is rendered as markdown for a rich text experience.
-  const content: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent,
-    },
-  };
-
-  // Compose the overall Vertical Card component.
-  // The Vertical Card aggregates header and content ensuring responsiveness and a clear UI on all devices.
+  // Assemble into a vertical card
   const card: IAutoView.IAutoViewVerticalCardProps = {
     type: "VerticalCard",
-    childrenProps: [header, content],
+    childrenProps: footerComponent
+      ? [header, content, footerComponent]
+      : [header, content],
   };
 
   return card;

@@ -1,73 +1,91 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace IShoppingSaleInquiryComment {
-    /**
-     * Snapshot content of the comment.
-    */
-    export type ISnapshot = {
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Creation time of snapshot record.
-         *
-         * In other words, creation time or update time or comment.
-         *
-         * @title Creation time of snapshot record
-        */
-        created_at: string;
-        /**
-         * Format of body.
-         *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
-        */
-        format: "html" | "md" | "txt";
-        /**
-         * Content body of comment.
-         *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4OneTimeMsgView = {
+                    oneTimeMsg?: Schema.legacy.v4.marketing.LegacyV4OneTimeMsg;
+                };
+            }
+        }
+        export namespace v4 {
+            export namespace marketing {
+                export type LegacyV4OneTimeMsg = {
+                    id?: string;
+                    channelId?: string;
+                    name: string;
+                    state: "draft" | "waiting" | "sent" | "canceled" | "removed";
+                    sendMode?: "immediately" | "reservedWithSenderTime" | "reservedWithReceiverTime";
+                    sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+                    settings?: Schema.marketing.SendMediumSettings;
+                    userQuery?: Schema.Expression;
+                    goalEventName?: string;
+                    goalEventQuery?: Schema.Expression;
+                    enableSupportBot: boolean;
+                    followingSupportBotId?: string;
+                    advertising: boolean;
+                    sendToOfflineXms?: boolean;
+                    sendToOfflineEmail?: boolean;
+                    startAt?: number;
+                    draft?: Schema.marketing.OneTimeMsgDraft;
+                    createdAt?: number;
+                    updatedAt?: number;
+                    sent?: number & tags.Type<"int32">;
+                    view?: number & tags.Type<"int32">;
+                    goal?: number & tags.Type<"int32">;
+                    click?: number & tags.Type<"int32">;
+                    userChatExpireDuration?: string;
+                };
+            }
+        }
+    }
+    export namespace marketing {
+        export type SendMediumSettings = {
+            type: string;
+        };
+        export type OneTimeMsgDraft = {
+            oneTimeMsg: Schema.marketing.OneTimeMsg;
+        };
+        export type OneTimeMsg = {
+            id?: string;
+            channelId?: string;
+            name: string;
+            state: "draft" | "waiting" | "sent" | "canceled" | "removed";
+            sendMode?: "immediately" | "reservedWithSenderTime" | "reservedWithReceiverTime";
+            channelOperationId?: string;
+            sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            settings?: Schema.marketing.SendMediumSettings;
+            userQuery?: Schema.Expression;
+            goalEventName?: string;
+            goalEventQuery?: Schema.Expression;
+            goalEventDuration?: string;
+            advertising: boolean;
+            sendToOfflineXms?: boolean;
+            sendToOfflineEmail?: boolean;
+            startAt?: number;
+            localStartAt?: string & tags.Format<"date-time">;
+            draft?: Schema.marketing.OneTimeMsgDraft;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+            userChatExpireDuration?: string;
+        };
+    }
+    export type Expression = {
+        key?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        operator?: Schema.Operator;
+        values?: {}[];
+        and?: Schema.Expression[];
+        or?: Schema.Expression[];
     };
+    export type Operator = {};
 }
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
-        */
-        name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
-    };
-}
-type IAutoViewTransformerInputType = IShoppingSaleInquiryComment.ISnapshot;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4OneTimeMsgView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -75,89 +93,148 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // The goal is to transform the snapshot data into a card-style view
-  // We use a VerticalCard that composes a header (with an icon), a markdown body for the comment,
-  // and if there are any attachment files, a footer with chips representing each file.
+  const msg = input.oneTimeMsg;
+  // If there's no message data, show a simple markdown notice
+  if (!msg) {
+    return {
+      type: "Markdown",
+      content: "### No message data available."
+    };
+  }
 
-  // Create a header component using CardHeader props.
+  // Helper: format timestamps (milliseconds) into a locale string
+  const formatDate = (ts?: number): string =>
+    ts != null ? new Date(ts).toLocaleString() : "-";
+
+  // Map message state to a chip color
+  const stateColorMap: Record<string, IAutoView.IAutoViewChipProps["color"]> = {
+    draft: "gray",
+    waiting: "yellow",
+    sent: "green",
+    canceled: "red",
+    removed: "darkGray"
+  };
+
+  // Map send mediums to icons
+  const mediumIconMap: Record<string, string> = {
+    appAlimtalk: "comment",
+    appLine: "line",
+    email: "envelope",
+    inAppChat: "comments",
+    xms: "sms"
+  };
+
+  // Build header: show name, channel, an icon and a state badge
   const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    // Title includes the primary identifier of the comment.
-    title: `Comment ID: ${input.id}`,
-    // Description shows a formatted creation date.
-    description: `Created at: ${input.created_at}`,
-    // Use an icon to visually indicate a comment.
+    title: msg.name,
+    description: msg.channelId ? `Channel: ${msg.channelId}` : undefined,
+    // Marketing bullhorn icon
     startElement: {
       type: "Icon",
-      // Using "message" icon to denote discussion/comment. This should be a valid kebab-case icon.
-      id: "message",
+      id: "bullhorn",
       color: "blue",
-      size: 20,
+      size: 24
+    },
+    // State chip on the right
+    endElement: {
+      type: "Chip",
+      label: msg.state,
+      color: stateColorMap[msg.state] ?? "primary",
+      variant: "filled"
     }
   };
 
-  // Create a content section using the Markdown component.
-  // We assume the body content is suitable for rendering as markdown regardless of its original format.
+  // Build a data list of key properties
+  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = [
+    { key: "ID",             value: msg.id ?? "-",           icon: "hashtag"   },
+    { key: "State",          value: msg.state,               icon: "info-circle" },
+    { key: "Send Mode",      value: msg.sendMode ?? "-",      icon: "clock"     },
+    { key: "Medium",         value: msg.sendMedium ?? "-",    icon: mediumIconMap[msg.sendMedium ?? ""] ?? "question" },
+    { key: "Start At",       value: formatDate(msg.startAt),  icon: "calendar"  },
+    { key: "Created At",     value: formatDate(msg.createdAt),icon: "calendar-check" },
+    { key: "Updated At",     value: formatDate(msg.updatedAt),icon: "edit"      }
+  ].map(item => {
+    // For each entry, use DataListItem with an icon + markdown label and markdown value
+    const labelMd = `![icon](/icon/${item.icon}) **${item.key}**`;
+    return {
+      type: "DataListItem",
+      label: [
+        {
+          type: "Markdown",
+          content: labelMd
+        }
+      ],
+      value: [
+        {
+          type: "Text",
+          content: item.value
+        }
+      ]
+    };
+  });
+
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: dataListItems
+  };
+
+  // Build a set of metric chips for sent/view/click/goal
+  const metricChips: IAutoView.IAutoViewChipProps[] = [];
+  if (msg.sent != null) {
+    metricChips.push({ type: "Chip", label: `Sent: ${msg.sent}`, color: "primary", variant: "outlined" });
+  }
+  if (msg.view != null) {
+    metricChips.push({ type: "Chip", label: `Viewed: ${msg.view}`, color: "secondary", variant: "outlined" });
+  }
+  if (msg.click != null) {
+    metricChips.push({ type: "Chip", label: `Clicked: ${msg.click}`, color: "success", variant: "outlined" });
+  }
+  if (msg.goal != null) {
+    metricChips.push({ type: "Chip", label: `Goal: ${msg.goal}`, color: "info", variant: "outlined" });
+  }
+
+  const metricsGroup: IAutoView.IAutoViewChipGroupProps | undefined =
+    metricChips.length > 0
+      ? {
+          type: "ChipGroup",
+          childrenProps: metricChips,
+          maxItems: 4
+        }
+      : undefined;
+
+  // Assemble the card content: DataList and metrics
+  const contentChildren: IAutoView.IAutoViewPresentationComponentProps[] = [
+    dataList,
+    { type: "Divider", orientation: "horizontal", color: "#eee" }
+  ];
+  if (metricsGroup) {
+    contentChildren.push(metricsGroup);
+  }
+
   const content: IAutoView.IAutoViewCardContentProps = {
     type: "CardContent",
-    // We wrap the text body in a markdown component for improved presentation.
-    childrenProps: {
-      type: "Markdown",
-      content: input.body
-    }
+    childrenProps: contentChildren
   };
 
-  // Prepare an array to hold any attachment file chips.
-  let attachmentChips: IAutoView.IAutoViewChipProps[] = [];
-  // Only create chips if there exists at least one file attachment.
-  if (input.files && input.files.length > 0) {
-    attachmentChips = input.files.map(file => {
-      // Concatenate file name and extension (if provided) for display.
-      const displayName = file.extension ? `${file.name}.${file.extension}` : file.name;
-      return {
+  // Footer: a chip summarizing send mode, if available
+  const footerChild: IAutoView.IAutoViewChipProps | undefined = msg.sendMode
+    ? {
         type: "Chip",
-        label: displayName,
-        // Use a chip with an icon to indicate the file attachment.
-        startElement: {
-          type: "Icon",
-          // Using "attachment" icon to represent files.
-          id: "attachment",
-          color: "gray",
-          size: 16,
-        },
-        // Use a subtle outlined style for chip presentation.
+        label: `Mode: ${msg.sendMode}`,
         variant: "outlined",
-        size: "small"
-      };
-    });
-  }
+        color: "gray"
+      }
+    : undefined;
 
-  // Create a footer component only if there are attachment chips to display.
-  let footer: IAutoView.IAutoViewCardFooterProps | undefined = undefined;
-  if (attachmentChips.length > 0) {
-    // Use a ChipGroup to visually group attachment chips.
-    const chipGroup: IAutoView.IAutoViewChipGroupProps = {
-      type: "ChipGroup",
-      childrenProps: attachmentChips,
-      // Optionally, you might limit the number of visible items.
-      maxItems: attachmentChips.length
-    };
-    footer = {
-      type: "CardFooter",
-      // The footer holds the chip group as its child.
-      childrenProps: chipGroup
-    };
-  }
-
-  // Compose the Vertical Card which organizes header, content, and footer.
-  // The childrenProps accepts either a single component or an array.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: footer
-      ? [header, content, footer]
-      : [header, content]
+  const footer: IAutoView.IAutoViewCardFooterProps = {
+    type: "CardFooter",
+    childrenProps: footerChild ? footerChild : []
   };
 
-  // Return the final composed component.
-  return verticalCard;
+  // Return a vertical card with header, content, footer
+  return {
+    type: "VerticalCard",
+    childrenProps: [header, content, footer]
+  };
 }

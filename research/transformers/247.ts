@@ -1,24 +1,89 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type Try_lt_string_gt_ = {
-    result: true & tags.JsonSchemaPlugin<{
-        "x-typia-required": true,
-        "x-typia-optional": false
-    }>;
-    code: 1000 & tags.JsonSchemaPlugin<{
-        "x-typia-required": true,
-        "x-typia-optional": false
-    }>;
-    requestToResponse?: string & tags.JsonSchemaPlugin<{
-        "x-typia-required": false,
-        "x-typia-optional": true
-    }>;
-    data: string & tags.JsonSchemaPlugin<{
-        "x-typia-required": true,
-        "x-typia-optional": false
-    }>;
-};
-type IAutoViewTransformerInputType = Try_lt_string_gt_;
+namespace Schema {
+    export namespace desk {
+        export type ManagersView = {
+            managers?: Schema.Manager[];
+        };
+    }
+    export type Manager = {
+        id?: string;
+        channelId?: string;
+        accountId?: string;
+        name: string;
+        description?: string;
+        showDescriptionToFront?: boolean;
+        nameDescI18nMap?: {
+            [key: string]: Schema.NameDesc;
+        };
+        profile?: {
+            [key: string]: {};
+        };
+        email?: string;
+        showEmailToFront?: boolean;
+        mobileNumber?: string & tags.Default<"+18004424000">;
+        showMobileNumberToFront?: boolean;
+        roleId?: string;
+        removed?: boolean;
+        createdAt?: number;
+        updatedAt?: number;
+        removedAt?: number;
+        displayAsChannel?: boolean;
+        defaultGroupWatch?: "all" | "info" | "none";
+        defaultDirectChatWatch?: "all" | "info" | "none";
+        defaultUserChatWatch?: "all" | "info" | "none";
+        chatAlertSound?: "none" | "drop" | "woody" | "bounce" | "crystal" | "xylo" | "quickKnock" | "candy" | "shine";
+        meetAlertSound?: "cute" | "basic" | "gentle" | "marimba";
+        showPrivateMessagePreview?: boolean;
+        operatorScore?: number;
+        touchScore?: number;
+        avatar?: Schema.TinyFile;
+        operatorEmailReminder?: boolean;
+        receiveUnassignedAlert?: boolean;
+        receiveUnassignedChatAlert?: boolean;
+        receiveUnassignedMeetAlert?: boolean;
+        operator?: boolean;
+        operatorStatusId?: string;
+        defaultAllMentionImportant?: boolean;
+        userMessageImportant?: boolean;
+        assignableUserChatTypes?: ("sync" | "async")[] & tags.UniqueItems;
+        autoAssignCapacity?: number & tags.Type<"uint32"> & tags.Maximum<100>;
+        enableAutoAssignOnSync?: boolean;
+        statusEmoji?: string;
+        statusText?: string;
+        statusClearAt?: number;
+        doNotDisturb?: boolean;
+        doNotDisturbClearAt?: number;
+        accountDoNotDisturb?: boolean;
+        accountDoNotDisturbClearAt?: number;
+        enableReactedMessageIndex?: boolean;
+        enableTeamMentionedMessageIndex?: boolean;
+        operatorUpdatedAt?: number;
+        pcInboxMeetAlert?: boolean;
+        mobileInboxMeetAlert?: boolean;
+        pcTeamChatMeetAlert?: boolean;
+        mobileTeamChatMeetAlert?: boolean;
+        managerId?: string;
+        avatarUrl?: string;
+        /**
+         * @deprecated
+        */
+        meetOperator?: boolean;
+        emailForFront?: string;
+        mobileNumberForFront?: string & tags.Default<"+18004424000">;
+    };
+    export type NameDesc = {
+        name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
+        description?: string;
+    };
+    export type TinyFile = {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+    };
+}
+type IAutoViewTransformerInputType = Schema.desk.ManagersView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -26,57 +91,90 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // In this function we transform input data into a visual representation by composing a vertical card.
-  // We use a CardHeader with an icon to attract attention and a CardContent with Markdown for detailed insights.
-  // This approach leverages visual elements (an icon and card layout) to present data in an engaging manner,
-  // while resorting to markdown formatting for text details where necessary.
-
-  // Create a CardHeader component that displays a title, description, and an icon.
-  // Allowed element for startElement is IAutoView.IconProps. Here we choose an icon (e.g., "chart-bar")
-  // which can represent data visualization.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Data Transformation",
-    description: "Visual representation of the transformation output.",
-    startElement: {
-      type: "Icon",
-      // The icon id should conform to the kebab-case naming convention without a prefix.
-      // "chart-bar" is chosen to imply visualization; adjust as needed to your icon set.
-      id: "chart-bar",
-      size: 24,
-      color: "blue",
-    },
-  };
-
-  // Construct a markdown string that summarizes the input data.
-  // Using markdown makes the textual data easier to read and visually appealing.
-  let markdownContent = "### Transformation Output\n";
-  markdownContent += `- **Result:** \`${input.result}\`\n`;
-  markdownContent += `- **Code:** \`${input.code}\`\n`;
-
-  // Optionally include the 'requestToResponse' field if provided.
-  if (input.requestToResponse) {
-    markdownContent += `- **Request To Response:** \`${input.requestToResponse}\`\n`;
-  }
-  markdownContent += `- **Data:** \`${input.data}\`\n`;
-
-  // Create a CardContent component that uses a Markdown component to render the text.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: {
+  // If there are no managers, show a friendly markdown message
+  if (!input.managers || input.managers.length === 0) {
+    return {
       type: "Markdown",
-      content: markdownContent,
-    } as IAutoView.IAutoViewMarkdownProps,
-  };
+      content: "### No managers available\n\nThere are currently no managers to display."
+    };
+  }
 
-  // Compose all the parts into a VerticalCard.
-  // VerticalCard's childrenProps accepts an array of components so that header and content are arranged vertically.
-  // This layout is responsive and should render well on mobile devices.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent],
-  };
+  // Map each manager into a DataListItem with rich visual elements
+  const childrenProps: IAutoView.IAutoViewDataListItemProps[] = input.managers.map((manager) => {
+    // Build the "label" column: avatar + name + optional description
+    const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [];
 
-  // Return the composed UI component ensuring it fulfills the IAutoView.IAutoViewComponentProps type.
-  return verticalCard as IAutoView.IAutoViewComponentProps;
+    // Avatar: use the URL if available, otherwise fallback to initials via `name`
+    labelComponents.push({
+      type: "Avatar",
+      src: manager.avatarUrl,
+      name: manager.name,
+      variant: "primary",
+      size: 40
+    });
+
+    // Manager name as a subtitle
+    labelComponents.push({
+      type: "Text",
+      content: manager.name,
+      variant: "subtitle1"
+    });
+
+    // If allowed, insert their description as markdown for better readability
+    if (manager.showDescriptionToFront && manager.description) {
+      labelComponents.push({
+        type: "Markdown",
+        content: manager.description
+      });
+    }
+
+    // Build the "value" column: contact chips (email & phone)
+    const valueComponents: IAutoView.IAutoViewPresentationComponentProps[] = [];
+
+    if (manager.email && manager.showEmailToFront) {
+      valueComponents.push({
+        type: "Chip",
+        label: manager.email,
+        size: "small",
+        variant: "outlined",
+        color: "cyan",
+        startElement: {
+          type: "Icon",
+          id: "envelope",
+          size: 12,
+          color: "gray"
+        }
+      });
+    }
+
+    if (manager.mobileNumber && manager.showMobileNumberToFront) {
+      valueComponents.push({
+        type: "Chip",
+        label: manager.mobileNumber,
+        size: "small",
+        variant: "outlined",
+        color: "teal",
+        startElement: {
+          type: "Icon",
+          id: "phone",
+          size: 12,
+          color: "gray"
+        }
+      });
+    }
+
+    return {
+      type: "DataListItem",
+      // An array of components for the left column
+      label: labelComponents,
+      // Only include "value" if we have at least one contact chip
+      value: valueComponents.length > 0 ? valueComponents : undefined
+    };
+  });
+
+  // Wrap all items in a responsive two-column data list
+  return {
+    type: "DataList",
+    childrenProps
+  };
 }

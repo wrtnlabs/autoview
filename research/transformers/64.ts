@@ -1,76 +1,66 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
+namespace Schema {
+    export type IShoppingDepositCharge = {
+        id: string & tags.Format<"uuid">;
+        customer: Schema.IShoppingCustomer;
+        publish: null | any;
+        created_at: string & tags.Format<"date-time">;
+        value: number;
+    };
     /**
-     * Writer of the comment.
+     * Customer information, but not a person but a connection basis.
      *
-     * Both customer and seller can write comment on the sale inquiry.
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
      *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
      *
-     * @title Writer of the comment
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
     */
-    writer: any | any | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
+    export type IShoppingCustomer = {
+        /**
+         * Discriminant for the type of customer.
+         *
+         * @title Discriminant for the type of customer
+        */
+        type: "customer";
+        /**
+         * Membership information.
+         *
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
+        */
+        member: null | any;
+        /**
+         * Citizen information.
+         *
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
+        */
+        citizen: null | any;
         /**
          * Primary Key.
          *
@@ -78,62 +68,90 @@ namespace IBbsArticleComment {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Belonged channel.
          *
-         * In other words, creation time or update time or comment.
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
          *
-         * @title Creation time of snapshot record
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
+    };
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Identifier code.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Identifier code
         */
-        format: "html" | "md" | "txt";
+        code: string;
         /**
-         * Content body of comment.
+         * Name of the channel.
          *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
-    };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
+         * @title Name of the channel
         */
         name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
     };
+    export type IShoppingExternalUser = any;
+    export type IShoppingDepositChargePublish = any;
 }
-type IAutoViewTransformerInputType = IShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.IShoppingDepositCharge;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -141,81 +159,85 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Construct a card header to display writer information and creation time.
-  // Use an icon to visually indicate the writer.
-  const header: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    // If writer is a string, use it; otherwise, if not available or not a string, fallback to "Anonymous"
-    title: typeof input.writer === "string" ? input.writer : "Anonymous",
-    description: `Comment created at: ${input.created_at}`,
-    startElement: {
-      type: "Icon",
-      id: "user", // using a generic user icon
-      color: "blue",
-      size: 24,
-    },
-  };
+    // Destructure frequently used fields
+    const { id, created_at, value, customer } = input;
 
-  // Combine all snapshot data into a markdown content block.
-  // For each snapshot, include the creation time as a header and the body.
-  // If there are file attachments, include them as markdown image links.
-  let combinedMarkdown = "";
-  if (input.snapshots && input.snapshots.length > 0) {
-    // Sort snapshots by creation time (ascending) so the earliest appears first.
-    const sortedSnapshots = [...input.snapshots].sort((a, b) => a.created_at.localeCompare(b.created_at));
-    combinedMarkdown = sortedSnapshots.map(snapshot => {
-      // Start with the snapshot timestamp and body text.
-      let snapshotMd = `#### Snapshot from ${snapshot.created_at}\n${snapshot.body}`;
-      // If there are file attachments, append an image markdown for each file.
-      if (snapshot.files && snapshot.files.length > 0) {
-        const attachmentsMd = snapshot.files.map(file => {
-          // Build the file name with extension if available.
-          const fileName = file.extension ? `${file.name}.${file.extension}` : file.name;
-          // Use markdown image syntax to visually represent the attachment.
-          return `![](${file.url})\n*${fileName}*`;
-        }).join("\n");
-        snapshotMd += `\n\n${attachmentsMd}`;
-      }
-      return snapshotMd;
-    }).join("\n\n---\n\n"); // Separate snapshots with a horizontal rule in markdown.
-  } else {
-    // In case there are no snapshots available, show a default message.
-    combinedMarkdown = "#### No snapshot available\nNo content to display.";
-  }
+    // Format creation timestamp for readability
+    const formattedDate = (() => {
+        try {
+            return new Date(created_at).toLocaleString();
+        } catch {
+            return created_at; // fallback to raw string if invalid
+        }
+    })();
 
-  // Create a markdown component to render the combined snapshot content.
-  const content: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: {
-      type: "Markdown",
-      content: combinedMarkdown,
-    },
-  };
+    // Format monetary value; assume USD by default
+    const formattedValue = new Intl.NumberFormat(undefined, {
+        style: "currency",
+        currency: "USD",
+    }).format(value);
 
-  // Create a footer to display additional metadata such as Comment ID and Parent Comment ID.
-  // Use a text component for a compact and declarative display.
-  const footer: IAutoView.IAutoViewCardFooterProps = {
-    type: "CardFooter",
-    childrenProps: {
-      type: "Text",
-      // Use markdown-like text to clearly denote metadata.
-      content: `Comment ID: ${input.id}${input.parent_id ? ` (Reply to: ${input.parent_id})` : ""}`,
-      variant: "caption",
-      color: "gray",
-    },
-  };
+    // Safely extract nested customer info with fallbacks
+    const channelName = customer?.channel?.name ?? "Unknown";
+    const ipAddress = customer?.ip ?? "Unknown";
+    const referrer = customer?.referrer ?? null;
 
-  // Combine the header, content, and footer into a vertical card
-  // This vertical card provides a unified visual representation that is both responsive and engaging.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [
-      header,
-      content,
-      footer,
-    ],
-  };
+    // Build a list of key/value pairs to display in a DataList
+    const dataListItems: IAutoView.IAutoViewDataListItemProps[] = [
+        {
+            type: "DataListItem",
+            label: { type: "Text", content: "Deposit ID" },
+            value: { type: "Text", content: id },
+        },
+        {
+            type: "DataListItem",
+            label: { type: "Text", content: "Channel" },
+            value: { type: "Text", content: channelName },
+        },
+        {
+            type: "DataListItem",
+            label: { type: "Text", content: "IP Address" },
+            value: { type: "Text", content: ipAddress },
+        },
+        // Only include referrer if present
+        ...(referrer
+            ? [
+                  {
+                      type: "DataListItem",
+                      label: { type: "Text", content: "Referrer" },
+                      // Use Markdown so that links are clickable
+                      value: {
+                          type: "Markdown",
+                          content: `[${referrer}](${referrer})`,
+                      },
+                  } as IAutoView.IAutoViewDataListItemProps,
+              ]
+            : []),
+    ];
 
-  // Return the composed vertical card as the final transformed UI component.
-  return verticalCard;
+    // Compose the final VerticalCard with a header and content section
+    return {
+        type: "VerticalCard",
+        childrenProps: [
+            // Card header shows the formatted value and timestamp, with an icon
+            {
+                type: "CardHeader",
+                title: formattedValue,
+                description: formattedDate,
+                startElement: {
+                    type: "Icon",
+                    id: "dollar-sign", // FontAwesome "dollar-sign" icon
+                    color: "green",
+                },
+            },
+            // Card content holds the DataList of detailed properties
+            {
+                type: "CardContent",
+                childrenProps: {
+                    type: "DataList",
+                    childrenProps: dataListItems,
+                },
+            },
+        ],
+    };
 }

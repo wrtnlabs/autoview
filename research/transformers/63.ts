@@ -1,128 +1,118 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A page.
- *
- * Collection of records with pagination indformation.
-*/
-type IPageIShoppingSaleInquiryComment = {
+namespace Schema {
     /**
-     * Page information.
+     * A page.
      *
-     * @title Page information
+     * Collection of records with pagination indformation.
     */
-    pagination: IPage.IPagination;
-    /**
-     * List of records.
-     *
-     * @title List of records
-    */
-    data: IShoppingSaleInquiryComment[];
-};
-namespace IPage {
-    /**
-     * Page information.
-    */
-    export type IPagination = {
+    export type IPageIShoppingDepositCharge = {
         /**
-         * Current page number.
+         * Page information.
          *
-         * @title Current page number
+         * @title Page information
         */
-        current: number & tags.Type<"int32">;
+        pagination: Schema.IPage.IPagination;
         /**
-         * Limitation of records per a page.
+         * List of records.
          *
-         * @title Limitation of records per a page
+         * @title List of records
         */
-        limit: number & tags.Type<"int32">;
-        /**
-         * Total records in the database.
-         *
-         * @title Total records in the database
-        */
-        records: number & tags.Type<"int32">;
-        /**
-         * Total pages.
-         *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
-        */
-        pages: number & tags.Type<"int32">;
+        data: Schema.IShoppingDepositCharge[];
     };
-}
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
+    export namespace IPage {
+        /**
+         * Page information.
+        */
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
+    export type IShoppingDepositCharge = {
+        id: string & tags.Format<"uuid">;
+        customer: Schema.IShoppingCustomer;
+        publish: null | any;
+        created_at: string & tags.Format<"date-time">;
+        value: number;
+    };
     /**
-     * Writer of the comment.
+     * Customer information, but not a person but a connection basis.
      *
-     * Both customer and seller can write comment on the sale inquiry.
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
      *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
      *
-     * @title Writer of the comment
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
     */
-    writer: any | any | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
+    export type IShoppingCustomer = {
+        /**
+         * Discriminant for the type of customer.
+         *
+         * @title Discriminant for the type of customer
+        */
+        type: "customer";
+        /**
+         * Membership information.
+         *
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
+        */
+        member: null | any;
+        /**
+         * Citizen information.
+         *
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
+        */
+        citizen: null | any;
         /**
          * Primary Key.
          *
@@ -130,62 +120,90 @@ namespace IBbsArticleComment {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Belonged channel.
          *
-         * In other words, creation time or update time or comment.
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
          *
-         * @title Creation time of snapshot record
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
+    };
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Identifier code.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Identifier code
         */
-        format: "html" | "md" | "txt";
+        code: string;
         /**
-         * Content body of comment.
+         * Name of the channel.
          *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
-    };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
+         * @title Name of the channel
         */
         name: string;
-        /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
-        */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
     };
+    export type IShoppingExternalUser = any;
+    export type IShoppingDepositChargePublish = any;
 }
-type IAutoViewTransformerInputType = IPageIShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingDepositCharge;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -193,73 +211,94 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // First, extract pagination information and data comments from the input.
-  const { pagination, data: comments } = input;
-  
-  // Create a DataListItem for each comment.
-  // We use the writer information in a Text component as label,
-  // and the most recent snapshot's body (if available) in a Markdown component as value.
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = (comments || []).map(comment => {
-    // If snapshots are available, pick the most recent one.
-    // Assuming snapshots are stored in chronological order, the last element is the latest.
-    const snapshots = comment.snapshots || [];
-    const latestSnapshot = snapshots.length > 0 ? snapshots[snapshots.length - 1] : null;
-    
-    // Compose the writer information.
-    // Since comment.writer type is any, we coerce it to string; if missing, we display "Unknown".
-    const writerText = typeof comment.writer === "string" ? comment.writer : "Unknown";
-    
-    return {
-      type: "DataListItem",
-      // Use a Text component to display the writer info.
-      label: {
-        type: "Text",
-        // Use a markdown-like emphasis if preferred. Here we simply include the writer name.
-        content: `**Comment by:** ${writerText}`,
-        variant: "subtitle2"
-      } as IAutoView.IAutoViewTextProps,
-      // Use a Markdown component to render the comment content.
-      value: {
+    const { pagination, data } = input;
+
+    // Header summary as markdown: shows page, total records
+    const headerMarkdown: IAutoView.IAutoViewMarkdownProps = {
         type: "Markdown",
-        content: latestSnapshot && latestSnapshot.body 
-                  ? latestSnapshot.body 
-                  : "_No content available_"
-      } as IAutoView.IAutoViewMarkdownProps,
+        content: `### Deposit Charges — Page ${pagination.current}/${pagination.pages}  
+_Total records: ${pagination.records}_`
     };
-  });
-  
-  // Compose a DataList component to list all comments.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems
-  };
 
-  // Compose a CardHeader to show an overview including pagination details.
-  const header: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Comments",
-    description: `Page ${pagination.current} of ${pagination.pages}`,
-    // Use an Icon as the start element (e.g., a comment icon) to make the UI visually engaging.
-    startElement: {
-      type: "Icon",
-      id: "comment",
-      size: 24,
-      color: "blue"
-    } as IAutoView.IAutoViewIconProps,
-  };
+    // Transform each record into a DataListItem
+    const listItems: IAutoView.IAutoViewDataListItemProps[] = data.map((record) => {
+        // 1) Record ID and created date with icon
+        const rawDate = record.created_at;
+        const dateObj = new Date(rawDate);
+        const formattedDate = isNaN(dateObj.getTime())
+            ? rawDate
+            : dateObj.toLocaleString();
 
-  // Compose a CardContent component containing the DataList.
-  const content: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: dataList
-  };
+        const idText: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            variant: "body2",
+            content: [`ID: ${record.id}`]
+        };
 
-  // Finally, wrap the header and content inside a VerticalCard.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [header, content]
-  };
+        // Date with calendar icon
+        const dateText: IAutoView.IAutoViewTextProps = {
+            type: "Text",
+            variant: "caption",
+            content: [
+                { type: "Icon", id: "calendar", size: 12, color: "gray" },
+                ` ${formattedDate}`
+            ]
+        };
 
-  // Return the final composed component which conforms to IAutoView.IAutoViewComponentProps.
-  return verticalCard;
+        // 2) Channel as a chip
+        const channelName = record.customer?.channel?.name ?? "Unknown channel";
+        const channelChip: IAutoView.IAutoViewChipProps = {
+            type: "Chip",
+            label: channelName,
+            variant: "outlined",
+            color: "info",
+            size: "small"
+        };
+
+        // 3) Deposit value as a filled chip with currency formatting
+        const valueLabel = record.value.toLocaleString(undefined, {
+            style: "currency",
+            currency: "USD"
+        });
+        const valueChip: IAutoView.IAutoViewChipProps = {
+            type: "Chip",
+            label: valueLabel,
+            variant: "filled",
+            color: "success",
+            size: "small"
+        };
+
+        return {
+            type: "DataListItem",
+            // Combine ID, date, and channel chip in the label section
+            label: [idText, dateText, channelChip],
+            // Show the monetary value as the value section
+            value: valueChip
+        };
+    });
+
+    // Compose the data list
+    const dataList: IAutoView.IAutoViewDataListProps = {
+        type: "DataList",
+        childrenProps: listItems
+    };
+
+    // Wrap everything in a card for responsiveness and mobile friendliness
+    const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: "Shopping Deposit Charges",
+        description: `Page ${pagination.current} of ${pagination.pages}`
+    };
+
+    const cardContent: IAutoView.IAutoViewCardContentProps = {
+        type: "CardContent",
+        childrenProps: [headerMarkdown, dataList]
+    };
+
+    const rootCard: IAutoView.IAutoViewVerticalCardProps = {
+        type: "VerticalCard",
+        childrenProps: [cardHeader, cardContent]
+    };
+
+    return rootCard;
 }

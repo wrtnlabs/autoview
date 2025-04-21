@@ -1,39 +1,92 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type WebhookView = {
-    webhook?: webhook.Webhook;
-};
-namespace webhook {
-    export type Webhook = {
-        id?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        channelId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        name: string;
-        url: string;
-        token?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        createdAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        scopes: ("userChat.opened" | "message.created.userChat" | "message.created.teamChat" | "lead.upserted.contact" | "lead.upserted.subscription" | "lead.deleted" | "member.upserted.contact" | "member.upserted.subscription" | "member.deleted")[] & tags.UniqueItems;
-        /**
-         * @deprecated
-        */
-        keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
-        apiVersion: string;
-        lastBlockedAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        blocked?: boolean;
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4UserView = {
+                    user?: Schema.legacy.v4.LegacyV4User;
+                    online?: Schema.Online;
+                };
+            }
+        }
+        export namespace v4 {
+            export type LegacyV4User = {
+                id?: string;
+                channelId?: string;
+                memberId?: string;
+                veilId?: string;
+                unifiedId?: string;
+                name?: string;
+                profile?: {
+                    [key: string]: {};
+                };
+                profileOnce?: Schema.profile.UserProfile;
+                tags?: string[] & tags.MinItems<0> & tags.MaxItems<10> & tags.UniqueItems;
+                alert?: number & tags.Type<"int32">;
+                unread?: number & tags.Type<"int32">;
+                popUpChatId?: string;
+                blocked?: boolean;
+                unsubscribed?: boolean;
+                hasChat?: boolean;
+                hasPushToken?: boolean;
+                language?: string & tags.Default<"en">;
+                country?: string;
+                city?: string;
+                latitude?: number;
+                longitude?: number;
+                web?: Schema.WebInfo;
+                mobile?: Schema.MobileInfo;
+                sessionsCount?: number & tags.Type<"int32">;
+                lastSeenAt?: number;
+                createdAt?: number;
+                updatedAt?: number;
+                expireAt?: number;
+                version?: number & tags.Type<"int32">;
+                managedKey?: number & tags.Type<"int32">;
+                member?: boolean;
+                email?: string;
+                userId?: string;
+                avatarUrl?: string;
+                managed?: boolean;
+                mobileNumber?: string & tags.Default<"+18004424000">;
+                systemLanguage?: string & tags.Default<"en">;
+            };
+        }
+    }
+    export namespace profile {
+        export type UserProfile = {
+            [key: string]: {};
+        };
+    }
+    export type WebInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        browser?: string;
+        browserName?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
+    };
+    export type MobileInfo = {
+        device?: string;
+        os?: string;
+        osName?: string;
+        appName?: string;
+        appVersion?: string;
+        sdkName?: string;
+        sdkVersion?: string;
+        sessionsCount?: number & tags.Type<"int32">;
+        lastSeenAt?: number;
+    };
+    export type Online = {
+        channelId?: string;
+        personType?: string;
+        personId?: string;
+        id?: string;
     };
 }
-type IAutoViewTransformerInputType = WebhookView;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4UserView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -41,81 +94,93 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // If there is no webhook data provided, display a minimal markdown message.
-  if (!input.webhook) {
-    // Using a Markdown component to inform the user that no data is available.
+    const user = input.user;
+    const online = input.online;
+
+    // If there is no user data, render a friendly markdown message
+    if (!user) {
+        return {
+            type: "Markdown",
+            content: "**No user data available**",
+        };
+    }
+
+    // Helper to format timestamps into human-readable strings
+    const formatDate = (ts?: number): string =>
+        ts != null ? new Date(ts).toLocaleString() : "-";
+
+    // Determine online status
+    const isOnline = online != null;
+
+    // Build a list of key/value pairs to display in the details section
+    const details: Array<[string, string]> = [
+        ["User ID", user.id ?? "-"],
+        ["Channel ID", user.channelId ?? "-"],
+        ["Member ID", user.memberId ?? "-"],
+        ["Unified ID", user.unifiedId ?? "-"],
+        ["Email", user.email ?? "-"],
+        ["Country", user.country ?? "-"],
+        ["City", user.city ?? "-"],
+        ["Language", user.language ?? "-"],
+        ["Sessions", user.sessionsCount != null ? String(user.sessionsCount) : "-"],
+        ["Last Seen", formatDate(user.lastSeenAt)],
+        ["Created At", formatDate(user.createdAt)],
+        ["Updated At", formatDate(user.updatedAt)],
+    ];
+
+    // Transform each detail into a DataListItemProps
+    const detailItems: IAutoView.IAutoViewDataListItemProps[] = details.map(
+        ([labelText, valueText]) => ({
+            type: "DataListItem",
+            // label rendered in smaller gray text
+            label: {
+                type: "Text",
+                content: labelText,
+                variant: "body2",
+                color: "gray",
+            },
+            // value in primary body text
+            value: {
+                type: "Text",
+                content: valueText,
+                variant: "body1",
+            },
+        })
+    );
+
+    // Compose the overall card UI
     return {
-      type: "Markdown",
-      content: "### No Webhook Data Available\nPlease configure a webhook to view its details."
+        type: "VerticalCard",
+        childrenProps: [
+            {
+                type: "CardHeader",
+                title: user.name,
+                // Show channel ID as subtitle
+                description: user.channelId,
+                // Show avatar if available
+                startElement: {
+                    type: "Avatar",
+                    src: user.avatarUrl,
+                    name: user.name,
+                    size: 40,
+                },
+                // Show an online/offline chip
+                endElement: {
+                    type: "Chip",
+                    label: isOnline ? "Online" : "Offline",
+                    color: isOnline ? "success" : "gray",
+                    size: "small",
+                    variant: "filled",
+                },
+            },
+            {
+                type: "CardContent",
+                // Wrap the details list in a DataList for structured layout
+                childrenProps: {
+                    type: "DataList",
+                    childrenProps: detailItems,
+                },
+            },
+        ],
     };
-  }
-
-  // Destructure the webhook for easier access.
-  const { webhook } = input;
-
-  // Create a header component using the CardHeader interface.
-  // This header uses an icon as a visual cue to represent the webhook.
-  const header: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: webhook.name,
-    description: `API Version: ${webhook.apiVersion}`,
-    // startElement accepts an icon, which helps visually represent the webhook.
-    startElement: {
-      type: "Icon",
-      id: "link", // Using 'link' as an icon to symbolize connectivity.
-      color: "blue",
-      size: 24
-    }
-  };
-
-  // Assemble markdown content to display webhook details.
-  // We use markdown formatting to break down key information to improve readability.
-  let markdownContent = "### Webhook Details\n\n";
-  if (webhook.id) {
-    markdownContent += `**ID:** ${webhook.id}\n\n`;
-  }
-  markdownContent += `**URL:** ${webhook.url}\n\n`;
-  if (webhook.token) {
-    markdownContent += `**Token:** ${webhook.token}\n\n`;
-  }
-  if (webhook.channelId) {
-    markdownContent += `**Channel ID:** ${webhook.channelId}\n\n`;
-  }
-  if (webhook.scopes && webhook.scopes.length > 0) {
-    markdownContent += `**Scopes:** ${webhook.scopes.join(", ")}\n\n`;
-  }
-  if (typeof webhook.blocked === "boolean") {
-    markdownContent += `**Blocked:** ${webhook.blocked}\n\n`;
-  }
-  if (webhook.createdAt) {
-    // Converting the timestamp to a human-readable format; this ensures better UX especially on mobile devices.
-    markdownContent += `**Created At:** ${new Date(webhook.createdAt).toLocaleString()}\n\n`;
-  }
-  if (webhook.lastBlockedAt) {
-    markdownContent += `**Last Blocked At:** ${new Date(webhook.lastBlockedAt).toLocaleString()}\n\n`;
-  }
-  if (webhook.keywords && webhook.keywords.length > 0) {
-    markdownContent += `**Keywords:** ${webhook.keywords.join(", ")}\n\n`;
-  }
-
-  // Create a content component using the CardContent interface,
-  // embedding a Markdown component to visually format detailed information.
-  const content: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: {
-      // Markdown component is ideal for rendering rich text in a responsive way.
-      type: "Markdown",
-      content: markdownContent
-    }
-  };
-
-  // Compose the final vertical card that encapsulates the header and content.
-  // The VerticalCard component is chosen for its flexibility on various screen sizes.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [header, content]
-  };
-
-  // Return the assembled UI component which adheres to IAutoView.IAutoViewComponentProps.
-  return verticalCard;
 }

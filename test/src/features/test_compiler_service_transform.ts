@@ -51,6 +51,7 @@ const test_service = async (): Promise<string> => {
         items: [],
       };
   `,
+      "Schema",
       "test_compiler_service_transform",
     );
     if (result.type !== "success")

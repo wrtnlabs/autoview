@@ -1,9 +1,96 @@
+import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type CANNOT_FIND_DESIGNER_PROFILE = any;
-namespace ResponseForm_lt_UserType {
-    export type DetailProfileWithRelation_gt_ = any;
+namespace Schema {
+    export namespace desk {
+        export type ManagerView = {
+            manager?: Schema.Manager;
+            online?: Schema.Online;
+        };
+    }
+    export type Manager = {
+        id?: string;
+        channelId?: string;
+        accountId?: string;
+        name: string;
+        description?: string;
+        showDescriptionToFront?: boolean;
+        nameDescI18nMap?: {
+            [key: string]: Schema.NameDesc;
+        };
+        profile?: {
+            [key: string]: {};
+        };
+        email?: string;
+        showEmailToFront?: boolean;
+        mobileNumber?: string & tags.Default<"+18004424000">;
+        showMobileNumberToFront?: boolean;
+        roleId?: string;
+        removed?: boolean;
+        createdAt?: number;
+        updatedAt?: number;
+        removedAt?: number;
+        displayAsChannel?: boolean;
+        defaultGroupWatch?: "all" | "info" | "none";
+        defaultDirectChatWatch?: "all" | "info" | "none";
+        defaultUserChatWatch?: "all" | "info" | "none";
+        chatAlertSound?: "none" | "drop" | "woody" | "bounce" | "crystal" | "xylo" | "quickKnock" | "candy" | "shine";
+        meetAlertSound?: "cute" | "basic" | "gentle" | "marimba";
+        showPrivateMessagePreview?: boolean;
+        operatorScore?: number;
+        touchScore?: number;
+        avatar?: Schema.TinyFile;
+        operatorEmailReminder?: boolean;
+        receiveUnassignedAlert?: boolean;
+        receiveUnassignedChatAlert?: boolean;
+        receiveUnassignedMeetAlert?: boolean;
+        operator?: boolean;
+        operatorStatusId?: string;
+        defaultAllMentionImportant?: boolean;
+        userMessageImportant?: boolean;
+        assignableUserChatTypes?: ("sync" | "async")[] & tags.UniqueItems;
+        autoAssignCapacity?: number & tags.Type<"uint32"> & tags.Maximum<100>;
+        enableAutoAssignOnSync?: boolean;
+        statusEmoji?: string;
+        statusText?: string;
+        statusClearAt?: number;
+        doNotDisturb?: boolean;
+        doNotDisturbClearAt?: number;
+        accountDoNotDisturb?: boolean;
+        accountDoNotDisturbClearAt?: number;
+        enableReactedMessageIndex?: boolean;
+        enableTeamMentionedMessageIndex?: boolean;
+        operatorUpdatedAt?: number;
+        pcInboxMeetAlert?: boolean;
+        mobileInboxMeetAlert?: boolean;
+        pcTeamChatMeetAlert?: boolean;
+        mobileTeamChatMeetAlert?: boolean;
+        managerId?: string;
+        avatarUrl?: string;
+        /**
+         * @deprecated
+        */
+        meetOperator?: boolean;
+        emailForFront?: string;
+        mobileNumberForFront?: string & tags.Default<"+18004424000">;
+    };
+    export type NameDesc = {
+        name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
+        description?: string;
+    };
+    export type TinyFile = {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+    };
+    export type Online = {
+        channelId?: string;
+        personType?: string;
+        personId?: string;
+        id?: string;
+    };
 }
-type IAutoViewTransformerInputType = any | any;
+type IAutoViewTransformerInputType = Schema.desk.ManagerView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -11,64 +98,139 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // The goal of this transformation is to create a visually engaging card that represents the input data.
-  // The card uses a header with an icon for a visual cue, and the content displays data in a markdown component.
-  //
-  // We use a VerticalCard that contains a CardHeader and a CardContent.
-  // If the input data is null/undefined, we display a markdown message indicating that no data is available.
-  // Otherwise, we format the input using JSON.stringify and include it in a markdown code block.
-  //
-  // Note: We assume that the input adheres to any required validations (done elsewhere) so we don't do heavy validation here.
+  // Destructure input for easier access
+  const { manager, online } = input;
 
-  // Prepare the markdown content based on input.
-  let markdownContent: string;
-  if (input === null || input === undefined) {
-    markdownContent = "markdown\nNo data available.\n```";
-  } else {
-    // Using a markdown code block to present the JSON formatted input
-    try {
-      const formattedJson = JSON.stringify(input, null, 2);
-      markdownContent = "```json\n" + formattedJson + "\n```";
-    } catch (error) {
-      // Fallback in the unlikely event that the input cannot be stringified
-      markdownContent = "```markdown\nError processing input data.\n```";
-    }
+  // If there's no manager data, render a simple markdown informing the user
+  if (!manager) {
+    return {
+      type: "Markdown",
+      content: "### No manager data available\nPlease check back later or contact support."
+    };
   }
 
-  // Create the header component with a visual icon.
+  // Build the card header: show avatar if available, otherwise a generic user icon
   const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: "Data Visualization",
-    description: "Below is the visual representation of the input data.",
-    // The startElement accepts an Icon component; here we use a chart icon for better UI recognition.
-    startElement: {
-      type: "Icon",
-      id: "chart-bar", // This should be a valid icon name in kebab-case as required.
-      color: "blue",
-      size: 24,
-    },
+    title: manager.name,
+    description: manager.showDescriptionToFront === false ? undefined : manager.description,
+    startElement: manager.avatarUrl
+      ? {
+          type: "Avatar",
+          src: manager.avatarUrl,
+          name: manager.name,
+          variant: "primary",
+          size: 40
+        }
+      : {
+          type: "Icon",
+          id: "user-circle",
+          size: 40,
+          color: "gray"
+        },
+    // If the manager is currently online, show a status chip
+    endElement: online
+      ? {
+          type: "Chip",
+          label: "Online",
+          color: "success",
+          size: "small",
+          variant: "filled"
+        }
+      : undefined
   };
 
-  // Create the content component using a markdown component.
-  const content: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // The childrenProps can be a single component or an array; here we supply a markdown component.
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent,
-    },
-  };
+  // Prepare a list of data items (email, phone, role)
+  const dataItems: IAutoView.IAutoViewDataListItemProps[] = [];
 
-  // Optionally, you could add a footer or additional components if needed.
-  // For now, we compose the UI into a VerticalCard with the header and content.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Email row
+  if (manager.email) {
+    dataItems.push({
+      type: "DataListItem",
+      label: [
+        {
+          type: "Icon",
+          id: "envelope",
+          size: 16,
+          color: "gray"
+        },
+        {
+          type: "Text",
+          content: "Email",
+          variant: "caption",
+          color: "gray"
+        }
+      ],
+      value: {
+        type: "Text",
+        content: manager.email,
+        variant: "body2"
+      }
+    });
+  }
+
+  // Mobile number row
+  if (manager.mobileNumber) {
+    dataItems.push({
+      type: "DataListItem",
+      label: [
+        {
+          type: "Icon",
+          id: "phone",
+          size: 16,
+          color: "gray"
+        },
+        {
+          type: "Text",
+          content: "Phone",
+          variant: "caption",
+          color: "gray"
+        }
+      ],
+      value: {
+        type: "Text",
+        content: manager.mobileNumber,
+        variant: "body2"
+      }
+    });
+  }
+
+  // Role row
+  if (manager.roleId) {
+    dataItems.push({
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Role",
+        variant: "caption",
+        color: "gray"
+      },
+      value: {
+        type: "Chip",
+        label: manager.roleId,
+        variant: "outlined",
+        color: "secondary",
+        size: "small"
+      }
+    });
+  }
+
+  // If there are no details to show, inform the user via markdown
+  const contentChildren: IAutoView.IAutoViewPresentationComponentProps = dataItems.length
+    ? { type: "DataList", childrenProps: dataItems }
+    : {
+        type: "Markdown",
+        content: "_No additional details available._"
+      };
+
+  // Assemble the vertical card
+  const card: IAutoView.IAutoViewVerticalCardProps = {
     type: "VerticalCard",
     childrenProps: [
       header,
-      content
-    ],
+      { type: "CardContent", childrenProps: contentChildren }
+    ]
   };
 
-  // Return the composed value that matches IAutoView.IAutoViewComponentProps.
-  return verticalCard;
+  return card;
 }

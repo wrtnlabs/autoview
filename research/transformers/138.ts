@@ -1,74 +1,78 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4SessionsView = {
-                sessions?: legacy.v4.LegacyV4ChatSession[];
-            };
-        }
+namespace Schema {
+    export namespace IShoppingSaleInquiryAnswer {
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or article.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Title of article.
+             *
+             * @title Title of article
+            */
+            title: string;
+            /**
+             * Content body of article.
+             *
+             * @title Content body of article
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
     }
-    export namespace v4 {
-        export type LegacyV4ChatSession = {
-            key?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            updatedKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            unreadKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            alert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            unread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            watch?: "all" | "info" | "none";
-            readAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            receivedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            postedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            id?: string;
-            chatType?: string;
-            personType?: string;
-            personId?: string;
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
+            name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
         };
     }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4SessionsView;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleInquiryAnswer.ISnapshot;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -76,78 +80,93 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // If no sessions exist, return a Markdown component indicating the empty state.
-  if (!input.sessions || input.sessions.length === 0) {
-    return {
-      content: "## No Sessions Available\nThere are no chat sessions to display at this time.",
-      type: "Markdown",
-    } as IAutoView.IAutoViewMarkdownProps;
-  }
+  // Attempt to parse and format the creation date; fallback to raw string if invalid
+  const parsedDate = new Date(input.created_at);
+  const formattedDate =
+    isNaN(parsedDate.getTime()) 
+      ? input.created_at 
+      : parsedDate.toLocaleString();
 
-  // Map each LegacyV4ChatSession to a DataListItem component
-  const listItems: IAutoView.IAutoViewDataListItemProps[] = input.sessions.map((session) => {
-    // Compose label: We prefer an icon accompanied by key text information.
-    // The allowed types for label include Icon and Text components.
-    const labelComponents: (IAutoView.IAutoViewIconProps | IAutoView.IAutoViewTextProps)[] = [];
+  // Choose a renderer for the body: Markdown for markup formats, Text for plain text
+  const bodyComponent: IAutoView.IAutoViewPresentationComponentProps =
+    input.format === "txt"
+      ? {
+          type: "Text",
+          content: input.body,
+          variant: "body1",
+        }
+      : {
+          type: "Markdown",
+          content: input.body,
+        };
 
-    // If a chat type is provided, add an icon to represent the session visually.
-    if (session.chatType) {
-      labelComponents.push({
-        id: "chat", // Assuming a generic "chat" icon from the icon set; the id should be in kebab-case.
-        type: "Icon",
-        color: "blue",
-        size: 16,
-      } as IAutoView.IAutoViewIconProps);
+  // Build a DataListItem for each attachment: label is file name, value is a download button
+  const attachmentItems: IAutoView.IAutoViewDataListItemProps[] = input.files.map(
+    (file) => {
+      // Construct display name with extension if present
+      const filename = file.extension
+        ? `${file.name}.${file.extension}`
+        : file.name || "(unnamed)";
+      return {
+        type: "DataListItem",
+        // Show the file name
+        label: {
+          type: "Text",
+          content: filename,
+          variant: "body2",
+        },
+        // Provide a download link
+        value: {
+          type: "Button",
+          label: "Download",
+          variant: "text",
+          size: "small",
+          href: file.url,
+        },
+      };
     }
-    // Add a text component representing the session ID or fallback value.
-    labelComponents.push({
-      content: `**Session ID:** ${session.id ?? "N/A"}`,
-      type: "Text",
-      variant: "subtitle2",
-      color: "primary",
-    } as IAutoView.IAutoViewTextProps);
+  );
 
-    // Compose session details using Markdown formatting.
-    // We list any relevant session values in a concise bullet list.
-    const details: string[] = [];
-    if (session.chatId) {
-      details.push(`- **Chat ID:** ${session.chatId}`);
-    }
-    if (session.channelId) {
-      details.push(`- **Channel ID:** ${session.channelId}`);
-    }
-    if (session.chatType) {
-      details.push(`- **Type:** ${session.chatType}`);
-    }
-    // Show numeric fields if available.
-    if (typeof session.unread === "number") {
-      details.push(`- **Unread Count:** ${session.unread}`);
-    }
-    if (typeof session.alert === "number") {
-      details.push(`- **Alert Level:** ${session.alert}`);
-    }
-    if (session.personId) {
-      details.push(`- **Person ID:** ${session.personId}`);
-    }
-    // If no details are provided, display a fallback message.
-    const markdownContent = details.length > 0 ? details.join("\n") : "No additional details provided.";
+  // Compose the card: header with icon, content with body, and footer with attachments (if any)
+  const cardChildren: Array<
+    IAutoView.IAutoViewCardHeaderProps |
+    IAutoView.IAutoViewCardContentProps |
+    IAutoView.IAutoViewCardFooterProps
+  > = [];
 
-    // Build and return the DataListItem for this session.
-    return {
-      label: labelComponents,
-      value: {
-        // Use a Markdown component for the value to make the display engaging.
-        content: markdownContent,
-        type: "Markdown",
-      } as IAutoView.IAutoViewMarkdownProps,
-      type: "DataListItem",
-    } as IAutoView.IAutoViewDataListItemProps;
+  // Header: show title and creation date, with a file icon
+  cardChildren.push({
+    type: "CardHeader",
+    title: input.title,
+    description: formattedDate,
+    startElement: {
+      type: "Icon",
+      id: "file",
+      color: "blue",
+      size: 20,
+    },
   });
 
-  // Compose the final DataList component aggregating all session items.
-  // This component will be responsive and is suitable for both web and mobile displays.
+  // Content: render the body
+  cardChildren.push({
+    type: "CardContent",
+    childrenProps: [bodyComponent],
+  });
+
+  // Footer: show attachments list if there are any files
+  if (attachmentItems.length > 0) {
+    cardChildren.push({
+      type: "CardFooter",
+      childrenProps: {
+        type: "DataList",
+        childrenProps: attachmentItems,
+      },
+    });
+  }
+
+  // Return a VerticalCard that adapts well to mobile and desktop
   return {
-    childrenProps: listItems,
-    type: "DataList",
-  } as IAutoView.IAutoViewDataListProps;
+    type: "VerticalCard",
+    childrenProps: cardChildren,
+  };
 }

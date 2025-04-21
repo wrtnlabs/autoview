@@ -10,14 +10,24 @@ export namespace AutoViewRandomProgrammer {
     ctx: IAutoViewProgrammerContext,
     inputComponents: OpenApi.IComponents,
     inputSchema: OpenApi.IJsonSchema,
+    inputSchemaPrefix: string,
   ): ts.Statement[] => {
     const statements = [
-      ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
+      AutoViewDtoProgrammer.write(
+        ctx,
+        inputComponents,
+        inputSchema,
+        inputSchemaPrefix,
+      ),
       ts.factory.createTypeAliasDeclaration(
         undefined,
         ts.factory.createIdentifier("IAutoViewTransformerInputType"),
         undefined,
-        AutoViewSchemaProgrammer.writeSchema(ctx, inputSchema),
+        AutoViewSchemaProgrammer.writeSchema(
+          ctx,
+          inputSchema,
+          inputSchemaPrefix,
+        ),
       ),
       ts.factory.createFunctionDeclaration(
         [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],

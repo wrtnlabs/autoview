@@ -1,13 +1,48 @@
-import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type IShoppingDeliveryShipper = {
-    id: string & tags.Format<"uuid">;
-    created_at: string & tags.Format<"date-time">;
-    company: null | string;
-    name: string;
-    mobile: string;
-};
-type IAutoViewTransformerInputType = IShoppingDeliveryShipper;
+namespace Schema {
+    /**
+     * Section information.
+     *
+     * `IShoppingSection` is a concept that refers to the spatial information of
+     * the market.
+     *
+     * If we compare the section mentioned here to the offline market, it means a
+     * spatially separated area within the store, such as the "fruit corner" or
+     * "butcher corner". Therefore, in the {@link IShoppingSale sale} entity, it is
+     * not possible to classify multiple sections simultaneously, but only one section
+     * can be classified.
+     *
+     * By the way, if your shopping mall system requires only one section, then just
+     * use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingSection = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Identifier code.
+         *
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Representative name of the section.
+         *
+         * @title Representative name of the section
+        */
+        name: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    };
+}
+type IAutoViewTransformerInputType = Schema.IShoppingSection;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -15,53 +50,82 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Create a CardHeader to display the shipper's basic info.
-  // We use an Avatar as the start element; it uses the shipper's name for display.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // Format the creation date; fallback to raw string if invalid
+  const createdDate = new Date(input.created_at);
+  const formattedCreatedAt = isNaN(createdDate.getTime())
+    ? input.created_at
+    : createdDate.toLocaleString();
+
+  // Card header with an icon to represent a shopping section
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
     title: input.name,
-    description: "Delivery Shipper", // A fixed descriptive text to provide context.
-    // startElement must be one of the allowed types: here we use an Avatar.
+    description: `Code: ${input.code}`,
     startElement: {
-      type: "Avatar",
-      name: input.name,
-      // Choose a size that looks good on both mobile and desktop.
-      size: 40,
-      variant: "primary"
-    }
+      type: "Icon",
+      id: "store",
+      color: "teal",
+      size: 24,
+    },
   };
 
-  // Compose a markdown string to elegantly present additional details.
-  // Markdown helps to keep text readable and visually engaging.
-  const markdownContent = `
-### Shipper Details
-
-- **ID:** ${input.id}  
-- **Created At:** ${input.created_at}  
-- **Company:** ${input.company !== null ? input.company : 'N/A'}  
-- **Mobile:** ${input.mobile}
-`;
-
-  // Create a Markdown component to render the detailed information.
-  const markdownComponent: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: markdownContent
+  // Detail list of fields: ID and Created At
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: [
+      {
+        type: "DataListItem",
+        label: {
+          type: "Text",
+          content: "Identifier (ID)",
+          variant: "subtitle2",
+        },
+        value: {
+          type: "Text",
+          content: input.id,
+          variant: "body1",
+        },
+      },
+      {
+        type: "DataListItem",
+        label: {
+          type: "Text",
+          content: "Created At",
+          variant: "subtitle2",
+        },
+        value: {
+          type: "Text",
+          content: formattedCreatedAt,
+          variant: "body1",
+        },
+      },
+    ],
   };
 
-  // Wrap the markdown component into a CardContent. This ensures the UI is sectioned
-  // and that details are clearly separated from the header.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
+  // Wrap the list inside card content
+  const content: IAutoView.IAutoViewCardContentProps = {
     type: "CardContent",
-    // childrenProps for CardContent can be a single component (here the markdown component)
-    childrenProps: markdownComponent
+    // Single component is acceptable, or you may provide an array
+    childrenProps: dataList,
   };
 
-  // Compose the final output as a VerticalCard.
-  // A vertical card is chosen to arrange the header and content vertically,
-  // making it naturally responsive and easy to use on small screens.
-  return {
-    type: "VerticalCard",
-    // The childrenProps accepts an array of card components.
-    childrenProps: [cardHeader, cardContent]
+  // Footer chip to highlight the section ID in a compact form
+  const footer: IAutoView.IAutoViewCardFooterProps = {
+    type: "CardFooter",
+    childrenProps: {
+      type: "Chip",
+      label: input.id,
+      color: "info",
+      size: "small",
+      variant: "outlined",
+    },
   };
+
+  // Compose the vertical card
+  const card: IAutoView.IAutoViewVerticalCardProps = {
+    type: "VerticalCard",
+    childrenProps: [header, content, footer],
+  };
+
+  return card;
 }

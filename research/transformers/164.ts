@@ -1,141 +1,149 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace desk {
-    export type ChatTagView = {
-        chatTag?: ChatTag;
-    };
+namespace Schema {
+    export namespace IShoppingChannel {
+        /**
+         * Hierarchical channel information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * Children categories with hierarchical structure.
+             *
+             * @title Children categories with hierarchical structure
+            */
+            categories: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+            /**
+             * Identifier code.
+             *
+             * @title Identifier code
+            */
+            code: string;
+            /**
+             * Name of the channel.
+             *
+             * @title Name of the channel
+            */
+            name: string;
+        };
+    }
+    export namespace IShoppingChannelCategory {
+        /**
+         * Hierarchical category information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * List of children categories with hierarchical structure.
+             *
+             * @title List of children categories with hierarchical structure
+            */
+            children: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
 }
-type ChatTag = {
-    id?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    channelId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
-    name: string;
-    key: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    description?: string;
-    /**
-     * @deprecated
-    */
-    followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
-    createdAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-};
-type IAutoViewTransformerInputType = desk.ChatTagView;
+type IAutoViewTransformerInputType = Schema.IShoppingChannel.IHierarchical;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
-function mapColor(colorVariant?: string): "primary" | "secondary" | "success" | "error" | "warning" | "info" | "red" | "orange" | "yellow" | "lime" | "green" | "teal" | "cyan" | "blue" | "indigo" | "violet" | "pink" | "gray" | "darkGray" {
-  // Maps the ChatTag colorVariant (from desk.ChatTag) to a valid Avatar variant.
-  switch (colorVariant) {
-    case "red":
-      return "red";
-    case "orange":
-      return "orange";
-    case "yellow":
-      return "yellow";
-    case "olive":
-      // olive can be represented by green in our allowed list
-      return "green";
-    case "green":
-      return "green";
-    case "cobalt":
-      // cobalt can be approximated with blue
-      return "blue";
-    case "purple":
-      // purple mapped to violet
-      return "violet";
-    case "pink":
-      return "pink";
-    case "navy":
-      // navy approximated with indigo
-      return "indigo";
-    default:
-      // Fallback to a default variant if none provided or mapping not found
-      return "primary";
-  }
-}
-
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Check if the input contains a ChatTag
-  if (input.chatTag) {
-    const chatTag = input.chatTag;
-    
-    // Prepare the card header with visual elements
-    const header: IAutoView.IAutoViewCardHeaderProps = {
-      type: "CardHeader",
-      title: chatTag.name,
-      // Use the 'key' field as a secondary descriptor; if not available, leave it undefined
-      description: chatTag.key,
-      // Use an avatar as a visual identifier for the chat tag.
-      startElement: {
-        type: "Avatar",
-        name: chatTag.name,
-        variant: mapColor(chatTag.colorVariant),
-        // Choosing a moderate size suited for responsive design across devices.
-        size: 36
-      }
-    };
+  // We will render the entire hierarchy as a mermaid graph for a visual tree.
+  // Mermaid diagrams render well on both desktop and mobile in Markdown.
+  const lines: string[] = ["mermaid", "graph TD"];
 
-    // Build markdown content to display additional ChatTag details.
-    // Markdown is chosen over plain text to improve readability and UI engagement.
-    let markdownLines: string[] = [];
-    if (chatTag.channelId) {
-      markdownLines.push(`**Channel ID:** ${chatTag.channelId}`);
-    }
-    if (chatTag.description) {
-      markdownLines.push(`**Description:** ${chatTag.description}`);
-    }
-    if (chatTag.createdAt !== undefined) {
-      // Converting the UNIX timestamp (assumed to be in milliseconds or seconds) to a locale string.
-      // Note: In production, consider validating the timestamp unit.
-      const date = new Date(chatTag.createdAt);
-      markdownLines.push(`**Created At:** ${date.toLocaleString()}`);
-    }
-    // Optionally display follower IDs if provided (even though deprecated)
-    if (chatTag.followerIds && chatTag.followerIds.length > 0) {
-      markdownLines.push(`**Followers:** ${chatTag.followerIds.join(", ")}`);
-    }
-    
-    // Join markdown lines into a single markdown content string.
-    const markdownContent = markdownLines.length > 0 ? markdownLines.join("\n\n") : "No additional details available.";
+  // Sanitize an ID to a valid mermaid node identifier (must start with a letter, no spaces)
+  const sanitizeId = (raw: string): string =>
+    "N" + raw.replace(/[^a-zA-Z0-9_]/g, "_");
 
-    // Prepare the card content using a markdown component for rich text formatting.
-    const content: IAutoView.IAutoViewCardContentProps = {
-      type: "CardContent",
-      childrenProps: {
-        type: "Markdown",
-        content: markdownContent
-      }
-    };
+  // Escape quotes in labels
+  const escapeLabel = (label: string): string =>
+    label.replace(/"/g, '\\"');
 
-    // Compose the final UI component as a vertical card, which allows stacking of header and content.
-    // VerticalCard is responsive and adapts well for both web and mobile devices.
-    const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-      type: "VerticalCard",
-      childrenProps: [header, content]
-    };
+  // Recursive function to declare nodes and edges
+  function traverse(
+    node: Schema.IShoppingChannelCategory.IHierarchical
+  ): void {
+    const nodeId = sanitizeId(node.id);
+    const label = `${escapeLabel(node.name)} (${escapeLabel(node.code)})`;
+    // Declare the node with a label
+    lines.push(`  ${nodeId}["${label}"]`);
 
-    return verticalCard;
-  } else {
-    // In case there is no ChatTag data in the input, provide a fallback UI element.
-    // Here we use a text component with markdown-like syntax embedded for consistency.
-    const fallbackText: IAutoView.IAutoViewTextProps = {
-      type: "Text",
-      // The content informs the user that no chat tag data was provided.
-      content: "### No Chat Tag Data Available\n\nPlease provide valid chat tag information to display the details.",
-      variant: "subtitle1",
-      color: "gray"
-    };
-    return fallbackText;
+    // Recurse into children
+    for (const child of node.children) {
+      const childId = sanitizeId(child.id);
+      // Draw an edge from this node to its child
+      lines.push(`  ${nodeId} --> ${childId}`);
+      traverse(child);
+    }
   }
+
+  // Root channel node
+  const rootId = sanitizeId(input.id);
+  const rootLabel = `${escapeLabel(input.name)} (${escapeLabel(input.code)})`;
+  lines.push(`  ${rootId}["${rootLabel}"]`);
+
+  // Connect root channel to top‐level categories
+  for (const cat of input.categories) {
+    const catId = sanitizeId(cat.id);
+    lines.push(`  ${rootId} --> ${catId}`);
+    traverse(cat);
+  }
+
+  lines.push("```");
+  const content = lines.join("\n");
+
+  // Return a markdown component that includes our mermaid diagram
+  return {
+    type: "Markdown",
+    content,
+  };
 }

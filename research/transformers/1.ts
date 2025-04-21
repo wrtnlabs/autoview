@@ -1,97 +1,99 @@
 import type * as IAutoView from "@autoview/interface";
-/**
- * System Information.
-*/
-type ISystem = {
+namespace Schema {
     /**
-     * Random Unique ID.
-     *
-     * @title Random Unique ID
+     * System Information.
     */
-    uid: number;
-    /**
-     * `process.argv`
-    */
-    arguments: string[];
-    /**
-     * Git commit info.
-     *
-     * @title Git commit info
-    */
-    commit: ISystem.ICommit;
-    /**
-     * `package.json`
-    */
-    "package": ISystem.IPackage;
-    /**
-     * Creation time of this server.
-     *
-     * @title Creation time of this server
-    */
-    created_at: string;
-};
-namespace ISystem {
-    /**
-     * Git commit info.
-    */
-    export type ICommit = {
-        shortHash: string;
-        branch: string;
-        hash: string;
-        subject: string;
-        sanitizedSubject: string;
-        body: string;
-        author: ISystem.ICommit.IUser;
-        committer: ISystem.ICommit.IUser;
-        authored_at: string;
-        committed_at: string;
-        notes?: string;
-        tags: string[];
-    };
-    export namespace ICommit {
+    export type ISystem = {
         /**
-         * Git user account info.
+         * Random Unique ID.
+         *
+         * @title Random Unique ID
         */
-        export type IUser = {
+        uid: number;
+        /**
+         * `process.argv`
+        */
+        arguments: string[];
+        /**
+         * Git commit info.
+         *
+         * @title Git commit info
+        */
+        commit: Schema.ISystem.ICommit;
+        /**
+         * `package.json`
+        */
+        "package": Schema.ISystem.IPackage;
+        /**
+         * Creation time of this server.
+         *
+         * @title Creation time of this server
+        */
+        created_at: string;
+    };
+    export namespace ISystem {
+        /**
+         * Git commit info.
+        */
+        export type ICommit = {
+            shortHash: string;
+            branch: string;
+            hash: string;
+            subject: string;
+            sanitizedSubject: string;
+            body: string;
+            author: Schema.ISystem.ICommit.IUser;
+            committer: Schema.ISystem.ICommit.IUser;
+            authored_at: string;
+            committed_at: string;
+            notes?: string;
+            tags: string[];
+        };
+        export namespace ICommit {
+            /**
+             * Git user account info.
+            */
+            export type IUser = {
+                name: string;
+                email: string;
+            };
+        }
+        /**
+         * NPM package info.
+        */
+        export type IPackage = {
             name: string;
-            email: string;
+            version: string;
+            description: string;
+            main?: string;
+            typings?: string;
+            scripts: Schema.Recordstringstring;
+            repository: {
+                type: "git";
+                url: string;
+            };
+            author: string;
+            license: string;
+            bugs: {
+                url: string;
+            };
+            homepage: string;
+            devDependencies?: Schema.Recordstringstring;
+            dependencies: Schema.Recordstringstring;
+            publishConfig?: {
+                registry: string;
+            };
+            files?: string[];
         };
     }
     /**
-     * NPM package info.
+     * Construct a type with a set of properties K of type T
     */
-    export type IPackage = {
-        name: string;
-        version: string;
-        description: string;
-        main?: string;
-        typings?: string;
-        scripts: Recordstringstring;
-        repository: {
-            type: "git";
-            url: string;
-        };
-        author: string;
-        license: string;
-        bugs: {
-            url: string;
-        };
-        homepage: string;
-        devDependencies?: Recordstringstring;
-        dependencies: Recordstringstring;
-        publishConfig?: {
-            registry: string;
-        };
-        files?: string[];
+    export type Recordstringstring = {
+        [key: string]: string;
     };
 }
-/**
- * Construct a type with a set of properties K of type T
-*/
-type Recordstringstring = {
-    [key: string]: string;
-};
-type IAutoViewTransformerInputType = ISystem;
+type IAutoViewTransformerInputType = Schema.ISystem;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -99,71 +101,152 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Aggregate commit and package data to be displayed as markdown content.
-  // Using markdown to present data in a visually engaging manner.
-  const markdownContent = `## Commit Information
-- **Branch**: ${input.commit.branch}
-- **Commit Hash**: ${input.commit.shortHash}
-- **Subject**: ${input.commit.subject}
-- **Author**: ${input.commit.author.name} (<${input.commit.author.email}>)
-- **Committed At**: ${input.commit.committed_at}
+  // Destructure the system info input for easy access
+  const { uid, arguments: argsArray, commit, package: pkg, created_at } = input;
 
-## Package Information
-- **Name**: ${input.package.name}
-- **Version**: ${input.package.version}
-- **Description**: ${input.package.description}
+  // Convert arguments array to a human-readable string
+  const argsString = argsArray.length ? argsArray.join(' ') : '(none)';
 
-## Runtime Information
-- **UID**: ${input.uid}
-- **Created At**: ${input.created_at}
+  // Prepare DataList items to display key pieces of system information
+  const listItems: IAutoView.IAutoViewDataListItemProps[] = [
+    {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "UID",
+        variant: "body2",
+      },
+      value: {
+        type: "Text",
+        content: uid.toString(),
+        variant: "body2",
+      },
+    },
+    {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Created At",
+        variant: "body2",
+      },
+      value: {
+        type: "Text",
+        content: created_at,
+        variant: "body2",
+      },
+    },
+    {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Arguments",
+        variant: "body2",
+      },
+      value: {
+        type: "Text",
+        content: argsString,
+        variant: "body2",
+      },
+    },
+    {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Commit",
+        variant: "body2",
+      },
+      value: [
+        // Commit subject with markdown styling to highlight the message
+        {
+          type: "Markdown",
+          content: `**${commit.subject}**`,
+        },
+        // Short hash in a code-like Chip
+        {
+          type: "Chip",
+          label: commit.shortHash,
+          size: "small",
+          variant: "outlined",
+          color: "secondary",
+        },
+      ],
+    },
+    {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Author",
+        variant: "body2",
+      },
+      value: {
+        type: "Text",
+        content: `${commit.author.name} <${commit.author.email}>`,
+        variant: "body2",
+      },
+    },
+    {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Committed At",
+        variant: "body2",
+      },
+      value: {
+        type: "Text",
+        content: commit.committed_at,
+        variant: "body2",
+      },
+    },
+    {
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Package",
+        variant: "body2",
+      },
+      value: [
+        // Package name
+        {
+          type: "Text",
+          content: pkg.name,
+          variant: "body2",
+        },
+        // Version as a visual chip
+        {
+          type: "Chip",
+          label: pkg.version,
+          size: "small",
+          variant: "outlined",
+          color: "primary",
+        },
+      ],
+    },
+  ];
 
-## Process Arguments
-${input.arguments.length > 0 ? input.arguments.map(arg => `- ${arg}`).join("\n") : "- No arguments provided."}
-`;
-
-  // Compose the UI using a Vertical Card component from AutoView.
-  // The vertical card aggregates a header (with icons), content (markdown), and a footer (button linking to repository).
+  // Compose the main card structure: a vertical card with a header and content
   return {
     type: "VerticalCard",
     childrenProps: [
-      // Card Header: Provides a quick summary with icons.
       {
         type: "CardHeader",
         title: "System Information",
-        description: `Server UID: ${input.uid} • Created: ${input.created_at}`,
-        // Using an icon to visually indicate system info.
+        description: `UID: ${uid}`,
+        // Use an illustrative icon for system/server
         startElement: {
-          id: "info",         // icon id in kebab-case (example: "info")
-          size: 24,           // icon size
-          color: "blue",      // a representative blue color
-          type: "Icon"
+          type: "Icon",
+          id: "server",
+          size: 28,
+          color: "blue",
         },
-        // Optionally, an end icon can be used to indicate time or status.
-        endElement: {
-          id: "clock",
-          size: 24,
-          color: "gray",
-          type: "Icon"
-        }
       },
-      // Card Content: Using a Markdown component for rich text display.
       {
         type: "CardContent",
-        // Markdown content is preferred to encode structured information.
+        // Embed our data list to display the detailed info
         childrenProps: {
-          type: "Markdown",
-          content: markdownContent
-        }
+          type: "DataList",
+          childrenProps: listItems,
+        },
       },
-      // Card Footer: Provides a call to action, for example, a button linking to the repository.
-      {
-        type: "CardFooter",
-        childrenProps: {
-          type: "Button",
-          label: "View Repository",
-          href: input.package.repository.url
-        }
-      }
-    ]
+    ],
   };
 }

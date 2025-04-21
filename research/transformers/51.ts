@@ -1,66 +1,131 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A page.
- *
- * Collection of records with pagination indformation.
-*/
-type IPageIShoppingMileage = {
+namespace Schema {
+    export namespace IShoppingCustomer {
+        export type IAuthorized = {
+            setHeaders: {
+                Authorization: string;
+            };
+            token: Schema.IShoppingCustomer.IToken;
+            /**
+             * Discriminant for the type of customer.
+             *
+             * @title Discriminant for the type of customer
+            */
+            type: "customer";
+            /**
+             * Membership information.
+             *
+             * If the customer has joined as a member.
+             *
+             * @title Membership information
+            */
+            member: null | any;
+            /**
+             * Citizen information.
+             *
+             * If the customer has verified his real name and mobile number.
+             *
+             * @title Citizen information
+            */
+            citizen: null | any;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Belonged channel.
+             *
+             * @title Belonged channel
+            */
+            channel: Schema.IShoppingChannel;
+            /**
+             * External user information.
+             *
+             * When the customer has come from an external service.
+             *
+             * @title External user information
+            */
+            external_user: null | any;
+            /**
+             * Connection address.
+             *
+             * Same with {@link window.location.href} of client.
+             *
+             * @title Connection address
+            */
+            href: string;
+            /**
+             * Referrer address.
+             *
+             * Same with {@link window.document.referrer} of client.
+             *
+             * @title Referrer address
+            */
+            referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+            /**
+             * Connection IP Address.
+             *
+             * @title Connection IP Address
+            */
+            ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+            /**
+             * Creation time of the connection record.
+             *
+             * @title Creation time of the connection record
+            */
+            created_at: string;
+        };
+        export type IToken = {
+            access: string;
+            refresh: string;
+            expired_at: string & tags.Format<"date-time">;
+            refreshable_until: string & tags.Format<"date-time">;
+        };
+    }
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
     /**
-     * Page information.
+     * Channel information.
      *
-     * @title Page information
-    */
-    pagination: IPage.IPagination;
-    /**
-     * List of records.
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
      *
-     * @title List of records
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
     */
-    data: IShoppingMileage[];
-};
-namespace IPage {
-    /**
-     * Page information.
-    */
-    export type IPagination = {
+    export type IShoppingChannel = {
         /**
-         * Current page number.
+         * Primary Key.
          *
-         * @title Current page number
+         * @title Primary Key
         */
-        current: number & tags.Type<"int32">;
+        id: string;
         /**
-         * Limitation of records per a page.
+         * Creation time of record.
          *
-         * @title Limitation of records per a page
+         * @title Creation time of record
         */
-        limit: number & tags.Type<"int32">;
+        created_at: string;
         /**
-         * Total records in the database.
+         * Identifier code.
          *
-         * @title Total records in the database
+         * @title Identifier code
         */
-        records: number & tags.Type<"int32">;
+        code: string;
         /**
-         * Total pages.
+         * Name of the channel.
          *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
+         * @title Name of the channel
         */
-        pages: number & tags.Type<"int32">;
+        name: string;
     };
+    export type IShoppingExternalUser = any;
 }
-type IShoppingMileage = {
-    id: string & tags.Format<"uuid">;
-    value: null | number;
-    created_at: string & tags.Format<"date-time">;
-    code: string;
-    source: string;
-    direction: -1 | 1;
-};
-type IAutoViewTransformerInputType = IPageIShoppingMileage;
+type IAutoViewTransformerInputType = Schema.IShoppingCustomer.IAuthorized;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -68,92 +133,93 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Destructure pagination and data from input for easier reference.
-  const { pagination, data } = input;
+  // Destructure relevant fields for easier reference
+  const { id, channel, created_at, href, referrer, ip, token } = input;
 
-  // Transform each record into a DataListItem.
-  // Each item shows a markdown summary in the label (code and creation date) along with an icon representing the direction,
-  // and the value details in the value property.
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = data.map((record) => {
-    // Choose an icon for the direction: "arrow-up" for a positive direction, "arrow-down" for a negative direction.
-    // We also choose icon colors accordingly.
-    const directionIconId = record.direction === 1 ? "arrow-up" : "arrow-down";
-    const directionIconColor = record.direction === 1 ? "green" : "red";
-
-    // Format the created_at timestamp nicely. This is a simple transformation;
-    // if needed, further formatting (using libraries) can be done here.
-    const formattedDate = new Date(record.created_at).toLocaleString();
-
-    // Build the label as an array of components:
-    // - A Markdown component displaying the code and the formatted creation date.
-    // - An Icon component to visually indicate the direction.
-    const labelComponents: (IAutoView.IAutoViewMarkdownProps | IAutoView.IAutoViewIconProps)[] = [
-      {
-        type: "Markdown",
-        // Using markdown formatting to emphasize the code and date information.
-        // Two new lines are used to separate lines.
-        content: `**Code:** ${record.code}\n\n**Created:** ${formattedDate}`
-      },
-      {
-        type: "Icon",
-        id: directionIconId,
-        size: 16,
-        color: directionIconColor
-      }
-    ];
-
-    // Build the value component with additional details:
-    // Use Markdown to render the source and value information.
-    const valueContent = `**Source:** ${record.source}\n\n**Value:** ${record.value !== null ? record.value : "N/A"}`;
-
+  /**
+   * Helper to build a DataListItemProps entry.
+   * Wraps label and value in Text components for consistency.
+   */
+  function createItem(
+    label: string,
+    value: string
+  ): IAutoView.IAutoViewDataListItemProps {
     return {
       type: "DataListItem",
-      label: labelComponents,
-      value: {
-        type: "Markdown",
-        content: valueContent
-      }
+      // Labels rendered in a muted style
+      label: [
+        {
+          type: "Text",
+          content: label,
+          variant: "subtitle2",
+          color: "gray"
+        }
+      ],
+      // Values rendered prominently
+      value: [
+        {
+          type: "Text",
+          content: value,
+          variant: "body1"
+        }
+      ]
     };
-  });
+  }
 
-  // Compose the DataList component holding all the data list items. 
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems
-  };
+  // Fallback for missing referrer
+  const referrerText = referrer && referrer.length ? referrer : "N/A";
 
-  // Compose the card header with a title, a description, and visual elements.
-  // The startElement and endElement properties are used to add icons to enhance visual appeal.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Shopping Mileage",
-    description: `Page ${pagination.current} of ${pagination.pages}\nTotal records: ${pagination.records}`,
-    startElement: {
-      type: "Icon",
-      id: "list", // icon id representing list (assumes the icon exists in the icon library)
-      size: 24,
-      color: "blue"
-    },
-    endElement: {
-      type: "Icon",
-      id: "calendar", // icon representing calendar/time
-      size: 24,
-      color: "gray"
-    }
-  };
-
-  // Compose the CardContent component that wraps the DataList.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: [ dataList ]
-  };
-
-  // Finally, wrap everything in a VerticalCard component which is responsive and adapts well to mobile devices.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Build a VerticalCard to organize the information
+  return {
     type: "VerticalCard",
-    childrenProps: [ cardHeader, cardContent ]
+    childrenProps: [
+      // Header: Customer identity
+      {
+        type: "CardHeader",
+        title: id,
+        description: channel.name,
+        startElement: {
+          type: "Icon",
+          id: "user",
+          size: 32,
+          color: "blue"
+        }
+      },
+      // Main content: data list and token details
+      {
+        type: "CardContent",
+        childrenProps: [
+          // List of key connection attributes
+          {
+            type: "DataList",
+            childrenProps: [
+              createItem("Channel Code", channel.code),
+              createItem("Channel Created At", channel.created_at),
+              createItem("Connection Created At", created_at),
+              createItem("IP Address", ip),
+              createItem("Referrer", referrerText),
+              createItem("Current URL", href)
+            ]
+          },
+          // Visual separator
+          {
+            type: "Divider",
+            orientation: "horizontal",
+            color: "#e0e0e0"
+          },
+          // Token information in markdown for code formatting
+          {
+            type: "Markdown",
+            content: [
+              "### Token Information",
+              `- **Access**: \`${token.access}\``,
+              `- **Refresh**: \`${token.refresh}\``,
+              `- **Expires At**: ${token.expired_at}`,
+              `- **Refreshable Until**: ${token.refreshable_until}`
+            ].join("\n")
+          }
+        ]
+      }
+    ]
   };
-
-  // Return the fully composed component structure.
-  return verticalCard;
 }

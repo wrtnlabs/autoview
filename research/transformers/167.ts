@@ -1,43 +1,48 @@
-import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace desk {
-    export type GroupsInfiniteScrollingView = {
-        next?: string;
-        groups?: Group[];
+namespace Schema {
+    /**
+     * Section information.
+     *
+     * `IShoppingSection` is a concept that refers to the spatial information of
+     * the market.
+     *
+     * If we compare the section mentioned here to the offline market, it means a
+     * spatially separated area within the store, such as the "fruit corner" or
+     * "butcher corner". Therefore, in the {@link IShoppingSale sale} entity, it is
+     * not possible to classify multiple sections simultaneously, but only one section
+     * can be classified.
+     *
+     * By the way, if your shopping mall system requires only one section, then just
+     * use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingSection = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Identifier code.
+         *
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Representative name of the section.
+         *
+         * @title Representative name of the section
+        */
+        name: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
     };
 }
-type Group = {
-    id?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    channelId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    title: string & tags.Pattern<"[\\p{L}\\p{N}-_()]+">;
-    scope: "all" | "public" | "private";
-    managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    icon?: string & tags.Pattern<"\\S+">;
-    liveMeetId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    description?: string;
-    createdAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    updatedAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-    /**
-     * @deprecated
-    */
-    name?: string;
-    active?: boolean;
-};
-type IAutoViewTransformerInputType = desk.GroupsInfiniteScrollingView;
+type IAutoViewTransformerInputType = Schema.IShoppingSection;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -45,78 +50,93 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // If no groups are provided, return a Markdown component with a friendly message.
-  if (!input.groups || input.groups.length === 0) {
-    return {
-      type: "Markdown",
-      content: "## No Groups Available\n\nThere are currently no groups to display. Please check back later."
-    } as IAutoView.IAutoViewMarkdownProps;
-  }
-
-  // Map each group into a DataListItem component.
-  const items: IAutoView.IAutoViewDataListItemProps[] = input.groups.map((group) => {
-    // Build an array of visual components for the label.
-    // We use an icon (if defined) alongside a text label displaying the group's title.
-    const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [];
-
-    // If a group icon is defined, use it as an icon component.
-    // The icon is visual and reinforces the identity of each group.
-    if (group.icon) {
-      labelComponents.push({
+    // Create a store icon to visually represent the shopping section
+    const storeIcon: IAutoView.IAutoViewIconProps = {
         type: "Icon",
-        id: group.icon, // Assumes group.icon is a valid kebab-case icon name.
-        size: 16,
-        color: "blue"
-      } as IAutoView.IAutoViewIconProps);
-    }
+        id: "store",             // Use FontAwesome "store" icon
+        size: 24,                // Medium size for header
+        color: "blue",           // Emphasize with a primary color
+    };
 
-    // Always include the group's title as a Text component.
-    labelComponents.push({
-      type: "Text",
-      content: group.title,
-      variant: "h4",
-      color: "primary"
-    } as IAutoView.IAutoViewTextProps);
+    // Header of the card: shows the section name and its code
+    const header: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: input.name,       // Section name, e.g., "Fruit Corner"
+        description: input.code, // Identifier code
+        startElement: storeIcon, // Leading icon for better UX
+    };
 
-    // Prepare a Markdown string to visually present additional group details.
-    let markdownContent = "";
+    // Helper to format ISO date to a more user-friendly representation
+    const formatDate = (iso: string): string => {
+        const date = new Date(iso);
+        if (isNaN(date.getTime())) {
+            // Fallback for invalid dates
+            return iso;
+        }
+        return date.toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+    };
 
-    // If a description exists, show it at the top.
-    if (group.description) {
-      markdownContent += group.description;
-      markdownContent += "\n\n---\n\n";
-    }
-    // Add key properties in a formatted markdown style.
-    markdownContent += `**Scope:** ${group.scope}`;
-    if (typeof group.active === "boolean") {
-      markdownContent += `\n\n**Active:** ${group.active ? "Yes" : "No"}`;
-    }
-    if (group.createdAt) {
-      // Convert the timestamp into a locale date string for readability.
-      const createdDate = new Date(group.createdAt).toLocaleDateString();
-      markdownContent += `\n\n**Created At:** ${createdDate}`;
-    }
-    if (group.updatedAt) {
-      const updatedDate = new Date(group.updatedAt).toLocaleDateString();
-      markdownContent += `\n\n**Updated At:** ${updatedDate}`;
-    }
+    // Build a list of key/value pairs for detailed metadata
+    const dataListItems: IAutoView.IAutoViewDataListItemProps[] = [
+        {
+            type: "DataListItem",
+            label: [
+                {
+                    type: "Text",
+                    variant: "subtitle2",
+                    content: "ID",
+                },
+            ],
+            value: [
+                {
+                    type: "Text",
+                    variant: "body2",
+                    content: input.id,
+                },
+            ],
+        },
+        {
+            type: "DataListItem",
+            label: [
+                {
+                    type: "Text",
+                    variant: "subtitle2",
+                    content: "Created",
+                },
+            ],
+            value: [
+                {
+                    type: "Text",
+                    variant: "body2",
+                    content: formatDate(input.created_at),
+                },
+            ],
+        },
+    ];
 
-    // Return a DataListItem for the current group.
-    return {
-      type: "DataListItem",
-      // The label field takes an array of presentation components.
-      label: labelComponents,
-      // The value field is a Markdown component that displays more detailed information.
-      value: {
-        type: "Markdown",
-        content: markdownContent
-      } as IAutoView.IAutoViewMarkdownProps
-    } as IAutoView.IAutoViewDataListItemProps;
-  });
+    // DataList to display the metadata in a structured way
+    const details: IAutoView.IAutoViewDataListProps = {
+        type: "DataList",
+        childrenProps: dataListItems,
+    };
 
-  // Wrap all group items in a DataList component to support responsive and interactive lists.
-  return {
-    type: "DataList",
-    childrenProps: items
-  } as IAutoView.IAutoViewDataListProps;
+    // Content section of the card wrapping the metadata list
+    const content: IAutoView.IAutoViewCardContentProps = {
+        type: "CardContent",
+        childrenProps: details,
+    };
+
+    // Assemble a vertical card: header + content, responsive on mobile
+    const card: IAutoView.IAutoViewVerticalCardProps = {
+        type: "VerticalCard",
+        childrenProps: [header, content],
+    };
+
+    return card;
 }

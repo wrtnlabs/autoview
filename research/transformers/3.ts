@@ -1,81 +1,104 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * Reviews for sale snapshots.
- *
- * `IShoppingSaleReview` is a subtype entity of {@link IShoppingSaleInquiry},
- * and is used when a {@link IShoppingCustomer customer} purchases a
- * {@link IShoppingSale sale} ({@link IShoppingSaleSnapshot snapshot} at the time)
- * registered by the {@link IShoppingSeller seller} as a product and leaves a
- * review and rating for it.
- *
- * For reference, `IShoppingSaleReview` and
- * {@link IShoppingOrderGod shopping_order_goods} have a logarithmic relationship
- * of N: 1, but this does not mean that customers can continue to write reviews
- * for the same product indefinitely. Wouldn't there be restrictions, such as
- * if you write a review once, you can write an additional review a month later?
-*/
-type IShoppingSaleReview = {
-    /**
-     * Type of the derived inquiry.
-     *
-     * - `question`: {@link IShoppingSaleQuestion}
-     * - `review`: {@link IShoppingSaleReview}
-     *
-     * @title Type of the derived inquiry
-    */
-    type: "review";
-    /**
-     * Customer who wrote the inquiry.
-     *
-     * @title Customer who wrote the inquiry
-    */
-    customer: IShoppingCustomer;
-    /**
-     * Formal answer for the inquiry by the seller.
-     *
-     * @title Formal answer for the inquiry by the seller
-    */
-    answer: null | any;
-    /**
-     * Whether the seller has viewed the inquiry or not.
-     *
-     * @title Whether the seller has viewed the inquiry or not
-    */
-    read_by_seller: boolean;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when an article is created, and is
-     * accumulated every time the article is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IShoppingSaleReview.ISnapshot[];
-    /**
-     * Creation time of article.
-     *
-     * @title Creation time of article
-    */
-    created_at: string;
-};
-namespace IShoppingSaleReview {
-    /**
-     * Snapshot content of the review article.
-    */
-    export type ISnapshot = {
+namespace Schema {
+    export namespace IShoppingAdministrator {
         /**
-         * Score of the review.
+         * Invert information starting from administrator info.
          *
-         * @title Score of the review
+         * Instead of accessing to the administrator information from the
+         * {@link IShoppingCustomer.member} -> {@link IShoppingMember.administrator},
+         * `IShoppingAdministrator.IInvert` starts from the administrator information
+         * and access to the customer, member and {@link IShoppingCitizen citizen}
+         * information inversely.
         */
-        score: number;
+        export type IInvert = {
+            /**
+             * Discriminant for the type of customer.
+             *
+             * @title Discriminant for the type of customer
+            */
+            type: "administrator";
+            /**
+             * Membership joining information.
+             *
+             * @title Membership joining information
+            */
+            member: Schema.IShoppingMember.IInvert;
+            /**
+             * Customer, the connection information.
+             *
+             * @title Customer, the connection information
+            */
+            customer: Schema.IShoppingCustomer.IInvert;
+            /**
+             * Real-name and mobile number authentication information.
+             *
+             * @title Real-name and mobile number authentication information
+            */
+            citizen: Schema.IShoppingCitizen;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of record.
+             *
+             * Another words, the time when the administrator has signed up.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
+    export namespace IShoppingMember {
+        /**
+         * Invert information of member.
+         *
+         * This invert member information has been designed to be used for another
+         * invert information of sellers and administrators like below.
+         *
+         * - {@link IShoppingSeller.IInvert}
+         * - {@link IShoppingAdministrator.IInvert}
+        */
+        export type IInvert = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Nickname that uniquely identifies the member.
+             *
+             * @title Nickname that uniquely identifies the member
+            */
+            nickname: string;
+            /**
+             * List of emails.
+             *
+             * @title List of emails
+            */
+            emails: Schema.IShoppingMemberEmail[];
+            /**
+             * Creation time of record.
+             *
+             * Another words, the time when the member has signed up.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
+    /**
+     * Email address of member.
+     *
+     * This shopping mall system allows multiple email addresses to be
+     * registered for one {@link IShoppingMember member}. If you don't have to
+     * plan such multiple email addresses, just use only one.
+    */
+    export type IShoppingMemberEmail = {
         /**
          * Primary Key.
          *
@@ -83,210 +106,159 @@ namespace IShoppingSaleReview {
         */
         id: string;
         /**
-         * Creation time of snapshot record.
+         * Email address value.
          *
-         * In other words, creation time or update time or article.
+         * @title Email address value
+        */
+        value: string;
+        /**
+         * Creation time of record.
          *
-         * @title Creation time of snapshot record
+         * @title Creation time of record
+        */
+        created_at: string;
+    };
+    export namespace IShoppingCustomer {
+        /**
+         * Inverted customer information.
+         *
+         * This inverted customer information has been designed to be used for
+         * another invert information of sellers and administrators like below.
+         *
+         * - {@link IShoppingSeller.IInvert}
+         * - {@link IShoppingAdministrator.IInvert}
+        */
+        export type IInvert = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Belonged channel.
+             *
+             * @title Belonged channel
+            */
+            channel: Schema.IShoppingChannel;
+            /**
+             * External user information.
+             *
+             * When the customer has come from an external service.
+             *
+             * @title External user information
+            */
+            external_user: null | any;
+            /**
+             * Connection address.
+             *
+             * Same with {@link window.location.href} of client.
+             *
+             * @title Connection address
+            */
+            href: string;
+            /**
+             * Referrer address.
+             *
+             * Same with {@link window.document.referrer} of client.
+             *
+             * @title Referrer address
+            */
+            referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+            /**
+             * Connection IP Address.
+             *
+             * @title Connection IP Address
+            */
+            ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+            /**
+             * Creation time of the connection record.
+             *
+             * @title Creation time of the connection record
+            */
+            created_at: string;
+        };
+    }
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
         */
         created_at: string;
         /**
-         * Format of body.
+         * Identifier code.
          *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
+         * @title Identifier code
         */
-        format: "html" | "md" | "txt";
+        code: string;
         /**
-         * Title of article.
+         * Name of the channel.
          *
-         * @title Title of article
-        */
-        title: string;
-        /**
-         * Content body of article.
-         *
-         * @title Content body of article
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
-    };
-}
-/**
- * Customer information, but not a person but a connection basis.
- *
- * `IShoppingCustomer` is an entity that literally embodies the information of
- * those who participated in the market as customers. By the way, the
- * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
- * even if the same person connects to the shopping mall multiple, multiple
- * records are created in `IShoppingCustomer`.
- *
- * The first purpose of this is to track the customer's inflow path in detail,
- * and it is for cases where the same person enters as a non-member,
- * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
- * and only authenticates their {@link IShoppingCitizen real name} or
- * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
- * It is the second. Lastly, it is to accurately track the activities that
- * a person performs at the shopping mall in various ways like below.
- *
- * - Same person comes from an {@link IShoppingExternalUser external service}
- * - Same person creates multiple accounts
- * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
- * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
- *
- * Therefore, `IShoppingCustomer` can have multiple records with the same
- * {@link IShoppingCitizen}, {@link IShoppingMember}, and
- * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
- * membership after verifying their real name or signs up for our service after
- * being a user of an external service, all related records are changed at once.
- * Therefore, identification and tracking of customers can be done very
- * systematically.
-*/
-type IShoppingCustomer = {
-    /**
-     * Discriminant for the type of customer.
-     *
-     * @title Discriminant for the type of customer
-    */
-    type: "customer";
-    /**
-     * Membership information.
-     *
-     * If the customer has joined as a member.
-     *
-     * @title Membership information
-    */
-    member: null | any;
-    /**
-     * Citizen information.
-     *
-     * If the customer has verified his real name and mobile number.
-     *
-     * @title Citizen information
-    */
-    citizen: null | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Belonged channel.
-     *
-     * @title Belonged channel
-    */
-    channel: IShoppingChannel;
-    /**
-     * External user information.
-     *
-     * When the customer has come from an external service.
-     *
-     * @title External user information
-    */
-    external_user: null | any;
-    /**
-     * Connection address.
-     *
-     * Same with {@link window.location.href} of client.
-     *
-     * @title Connection address
-    */
-    href: string;
-    /**
-     * Referrer address.
-     *
-     * Same with {@link window.document.referrer} of client.
-     *
-     * @title Referrer address
-    */
-    referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
-    /**
-     * Connection IP Address.
-     *
-     * @title Connection IP Address
-    */
-    ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
-    /**
-     * Creation time of the connection record.
-     *
-     * @title Creation time of the connection record
-    */
-    created_at: string;
-};
-type IShoppingMember = any;
-type IShoppingCitizen = any;
-/**
- * Channel information.
- *
- * `IShoppingChannel` is a concept that shapes the distribution channel in the
- * market. Therefore, the difference in the channel in this e-commerce system
- * means that it is another site or application.
- *
- * By the way, if your shopping mall system requires only one channel, then
- * just use only one. This concept is designed to be expandable in the future.
-*/
-type IShoppingChannel = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-    /**
-     * Identifier code.
-     *
-     * @title Identifier code
-    */
-    code: string;
-    /**
-     * Name of the channel.
-     *
-     * @title Name of the channel
-    */
-    name: string;
-};
-type IShoppingExternalUser = any;
-type IShoppingSaleInquiryAnswer = any;
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
+         * @title Name of the channel
         */
         name: string;
+    };
+    export type IShoppingExternalUser = any;
+    /**
+     * Citizen verification information.
+     *
+     * `IShoppingCitizen` is an entity that records the user's
+     * {@link name real name} and {@link mobile} input information.
+     *
+     * For reference, in South Korea, real name authentication is required for
+     * e-commerce participants, so the name attribute is important. However, the
+     * situation is different overseas, so in reality, mobile attributes are the
+     * most important, and identification of individual person is also done based
+     * on this mobile.
+     *
+     * Of course, real name and mobile phone authentication information are
+     * encrypted and stored.
+    */
+    export type IShoppingCitizen = {
         /**
-         * Extension.
+         * Primary Key.
          *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
+         * @title Primary Key
         */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+        id: string;
         /**
-         * URL path of the real file.
+         * Creation time of record.
          *
-         * @title URL path of the real file
+         * @title Creation time of record
         */
-        url: string;
+        created_at: string;
+        /**
+         * Mobile number.
+         *
+         * @title Mobile number
+        */
+        mobile: string;
+        /**
+         * Real name, or equivalent nickname.
+         *
+         * @title Real name, or equivalent nickname
+        */
+        name: string;
     };
 }
-type IAutoViewTransformerInputType = IShoppingSaleReview;
+type IAutoViewTransformerInputType = Schema.IShoppingAdministrator.IInvert;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -294,70 +266,144 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // We are expecting the input to be a review with potentially multiple snapshots.
-  // For a visually engaging UI, we compose a vertical card that shows:
-  // - A header with an icon representing the reviewer (using an Icon) and the customer id.
-  // - Main content rendered as Markdown to display the review details.
-  // - A footer providing meta information (such as creation time).
-  
-  // Select the most recent snapshot if available; if not, provide fallback values.
-  const latestSnapshot = input.snapshots && input.snapshots.length > 0
-    ? input.snapshots[input.snapshots.length - 1]
-    : {
-        score: 0,
-        title: "No Review Content",
-        body: "The review details are not available.",
-      };
+    // Helper to create a simple text component
+    const createText = (text: string): IAutoView.IAutoViewTextProps => ({
+        type: "Text",
+        content: text,
+        variant: "body2",
+    });
 
-  // Compose the card header using IAutoViewCardHeaderProps.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: `Review by ${input.customer.id}`,
-    // Provide additional detail regarding whether the seller has read the review.
-    description: input.read_by_seller ? "Seller has read this review." : "Seller has not read this review.",
-    // Use an Icon to depict the user; using the "user" icon (kebab-case) as a visual cue.
-    startElement: {
-      type: "Icon",
-      id: "user",
-      size: 20,
-      color: "blue",
-    },
-  };
+    // Helper to create an icon component
+    const createIcon = (
+        id: string,
+        color: IAutoView.IAutoViewIconProps["color"] = "gray",
+        size: IAutoView.IAutoViewIconProps["size"] = 20
+    ): IAutoView.IAutoViewIconProps => ({
+        type: "Icon",
+        id,
+        color,
+        size,
+    });
 
-  // Compose the card content using a Markdown element to enhance text appearance.
-  // The markdown shows the score (with an emoji) and then the review title and body.
-  const cardContentMarkdown: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: `**Score:** ${latestSnapshot.score}\n\n# ${latestSnapshot.title}\n\n${latestSnapshot.body}`,
-  };
+    // Helper to create a chip component
+    const createChip = (label: string): IAutoView.IAutoViewChipProps => ({
+        type: "Chip",
+        label,
+        variant: "outlined",
+        size: "small",
+    });
 
-  // Wrap the markdown in CardContent component.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    childrenProps: cardContentMarkdown,
-  };
+    // Build DataListItems for a given record, accepts a mapping array
+    const buildDataList = (
+        items: Array<{
+            label: string;
+            value?: string | IAutoView.IAutoViewPresentationComponentProps;
+        }>
+    ): IAutoView.IAutoViewDataListProps => {
+        const childrenProps = items
+            .filter((item) => item.value !== undefined)
+            .map<IBaseDataListItem>((item) => {
+                // Determine the value component: either plain text or a provided component
+                const valueComponent =
+                    typeof item.value === "string"
+                        ? createText(item.value)
+                        : (item.value as IAutoView.IAutoViewPresentationComponentProps);
 
-  // Compose a footer to show meta data using a Text component.
-  const cardFooterText: IAutoView.IAutoViewTextProps = {
-    type: "Text",
-    variant: "caption",
-    // Using markdown-like emphasis for meta info.
-    content: `Review created at: ${input.created_at}`,
-    color: "gray",
-  };
+                return {
+                    type: "DataListItem",
+                    label: [createText(item.label)],
+                    value: [valueComponent],
+                };
+            });
 
-  const cardFooter: IAutoView.IAutoViewCardFooterProps = {
-    type: "CardFooter",
-    childrenProps: cardFooterText,
-  };
+        return {
+            type: "DataList",
+            childrenProps,
+        };
+    };
 
-  // Compose the VerticalCard with the header, content, and footer as children.
-  // This card layout adapts well to multiple device sizes and is visually engaging.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent, cardFooter],
-  };
+    // Member section
+    const memberList = buildDataList([
+        { label: "Member ID", value: input.member.id },
+        { label: "Nickname", value: input.member.nickname },
+        { label: "Joined At", value: input.member.created_at },
+        // Emails as a ChipGroup
+        {
+            label: "Emails",
+            value: {
+                type: "ChipGroup",
+                childrenProps: input.member.emails.map((email) =>
+                    createChip(email.value)
+                ),
+                maxItems: 5,
+            } as IAutoView.IAutoViewChipGroupProps,
+        },
+    ]);
 
-  // Return the composed component.
-  return verticalCard;
+    // Customer section
+    const customerItems: Array<{
+        label: string;
+        value?: string | IAutoView.IAutoViewPresentationComponentProps;
+    }> = [
+        { label: "Customer ID", value: input.customer.id },
+        { label: "Channel", value: input.customer.channel.name },
+        { label: "Channel Code", value: input.customer.channel.code },
+        { label: "Connected At", value: input.customer.created_at },
+        { label: "IP Address", value: input.customer.ip },
+    ];
+    if (input.customer.href) {
+        customerItems.push({
+            label: "URL",
+            // Use a button to link out
+            value: {
+                type: "Button",
+                label: "Open",
+                href: input.customer.href,
+                variant: "text",
+                color: "primary",
+            } as IAutoView.IAutoViewButtonProps,
+        });
+    }
+    if (input.customer.referrer) {
+        customerItems.push({ label: "Referrer", value: input.customer.referrer });
+    }
+    const customerList = buildDataList(customerItems);
+
+    // Citizen section
+    const citizenList = buildDataList([
+        { label: "Citizen ID", value: input.citizen.id },
+        { label: "Name", value: input.citizen.name },
+        { label: "Mobile", value: input.citizen.mobile },
+        { label: "Verified At", value: input.citizen.created_at },
+    ]);
+
+    // Compose CardHeader
+    const header: IAutoView.IAutoViewCardHeaderProps = {
+        type: "CardHeader",
+        title: "Administrator",
+        description: `ID: ${input.id}`,
+        startElement: createIcon("user", "blue", 28),
+        endElement: {
+            type: "Text",
+            content: `Since ${input.created_at}`,
+            variant: "caption",
+        },
+    };
+
+    // Compose CardContent with the three lists
+    const content: IAutoView.IAutoViewCardContentProps = {
+        type: "CardContent",
+        childrenProps: [memberList, customerList, citizenList],
+    };
+
+    // Wrap everything in a VerticalCard for responsive layout
+    const card: IAutoView.IAutoViewVerticalCardProps = {
+        type: "VerticalCard",
+        childrenProps: [header, content],
+    };
+
+    return card;
 }
+
+// Aliases to satisfy type inference
+interface IBaseDataListItem extends IAutoView.IAutoViewDataListItemProps {}

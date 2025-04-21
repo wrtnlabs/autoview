@@ -1,247 +1,254 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4UserView = {
-                user?: legacy.v4.LegacyV4User;
-                online?: Online;
-            };
-        }
+namespace Schema {
+    /**
+     * A comment written on an inquiry article.
+     *
+     * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
+     * and is used when you want to communicate with multiple people about an
+     * {@link IShoppingSaleInquiry inquiry} written by a
+     * {@link IShoppingCustomer customer}.
+     *
+     * For reference, only related parties can write comments for
+     * {@link IShoppingSeller sellers}, but there is no limit to
+     * {@link IShoppingCustomer customers}. In other words, anyone customer can
+     * freely write a comment, even if they are not the person who wrote the inquiry.
+    */
+    export type IShoppingSaleInquiryComment = {
+        /**
+         * Writer of the comment.
+         *
+         * Both customer and seller can write comment on the sale inquiry.
+         *
+         * By the way, no restriction on the customer, but seller must be the
+         * person who've registered the sale.
+         *
+         * @title Writer of the comment
+        */
+        writer: any | any | any;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Parent comment's ID.
+         *
+         * @title Parent comment's ID
+        */
+        parent_id: null | (string & tags.Format<"uuid">);
+        /**
+         * List of snapshot contents.
+         *
+         * It is created for the first time when a comment being created, and is
+         * accumulated every time the comment is modified.
+         *
+         * @title List of snapshot contents
+        */
+        snapshots: Schema.IBbsArticleComment.ISnapshot[];
+        /**
+         * Creation time of comment.
+         *
+         * @title Creation time of comment
+        */
+        created_at: string;
+    };
+    export namespace IShoppingAdministrator {
+        export type IInvert = any;
     }
-    export namespace v4 {
-        export type LegacyV4User = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            memberId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            veilId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            unifiedId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            profile?: {
-                [key: string]: {};
-            };
-            profileOnce?: profile.UserProfile;
-            tags?: string[] & tags.MinItems<0> & tags.MaxItems<10> & tags.UniqueItems;
-            alert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            unread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            popUpChatId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            blocked?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            unsubscribed?: boolean;
-            hasChat?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            hasPushToken?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            language?: string & tags.Default<"en">;
-            country?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            city?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            latitude?: number & tags.JsonSchemaPlugin<{
-                format: "double",
-                readOnly: true
-            }>;
-            longitude?: number & tags.JsonSchemaPlugin<{
-                format: "double",
-                readOnly: true
-            }>;
-            web?: WebInfo;
-            mobile?: MobileInfo;
-            sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            lastSeenAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            expireAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64"
-            }>;
-            version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            managedKey?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64"
-            }>;
-            member?: boolean;
-            email?: string;
-            userId?: string;
-            avatarUrl?: string;
-            managed?: boolean;
-            mobileNumber?: string & tags.Default<"+18004424000">;
-            systemLanguage?: string & tags.Default<"en">;
+    export type IShoppingCustomer = any;
+    export namespace IShoppingSeller {
+        export type IInvert = any;
+    }
+    export namespace IBbsArticleComment {
+        /**
+         * Snapshot of comment.
+         *
+         * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
+         * the contents of the comment.
+         *
+         * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
+         * and prevent fraud.
+        */
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or comment.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Content body of comment.
+             *
+             * @title Content body of comment
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
+    }
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
+            name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
         };
     }
 }
-namespace profile {
-    export type UserProfile = {
-        [key: string]: {};
-    };
-}
-type WebInfo = {
-    device?: string;
-    os?: string;
-    osName?: string;
-    browser?: string;
-    browserName?: string;
-    sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    lastSeenAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64"
-    }>;
-};
-type MobileInfo = {
-    device?: string;
-    os?: string;
-    osName?: string;
-    appName?: string;
-    appVersion?: string;
-    sdkName?: string;
-    sdkVersion?: string;
-    sessionsCount?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    lastSeenAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64"
-    }>;
-};
-type Online = {
-    channelId?: string;
-    personType?: string;
-    personId?: string;
-    id?: string;
-};
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4UserView;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleInquiryComment;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
-function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract the user and online info from the input
-  const { user, online } = input;
+function visualizeData(
+  input: IAutoViewTransformerInputType
+): IAutoView.IAutoViewComponentProps {
+  // Transform each snapshot into a DataListItem for visual display
+  const snapshotItems: IAutoView.IAutoViewDataListItemProps[] =
+    input.snapshots?.map((snapshot) => {
+      // Header label components: timestamp and format chip
+      const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
+        {
+          type: "Text",
+          // Show when this snapshot was created
+          content: `At ${new Date(snapshot.created_at).toLocaleString()}`,
+          variant: "subtitle2",
+        },
+        {
+          type: "Chip",
+          label: snapshot.format.toUpperCase(),
+          size: "small",
+          variant: "outlined",
+        },
+      ];
 
-  // Build the card header, which will display the user's name and avatar (or fallback icon)
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: user && user.name ? user.name : "Unknown User",
-    // Optionally add a description if desired (can include extra user details)
-    description: user && user.userId ? `User ID: ${user.userId}` : undefined,
-    // Use startElement to display the user's avatar or a default icon if no avatar URL available
-    startElement: user && user.avatarUrl
-      ? {
-          type: "Avatar",
-          src: user.avatarUrl,
-          name: user.name ? user.name : "Avatar",
-          // Choose a variant based on available user information (this can be adjusted as needed)
-          variant: "primary",
-          size: 40
-        }
-      : {
-          // Fallback: using an icon to represent the user
-          type: "Icon",
-          id: "user", // assumes 'user' is a valid icon name in kebab-case (without prefix)
-          color: "blue",
-          size: 20
-        }
-  };
+      // Markdown component for the body content
+      const bodyComponent: IAutoView.IAutoViewMarkdownProps = {
+        type: "Markdown",
+        content: snapshot.body,
+      };
 
-  // Aggregate various user details that merit being presented.
-  // We prefer visual markdown formatting to present the data in an engaging manner.
-  const details: string[] = [];
-  if (user) {
-    if (user.email) {
-      details.push(`**Email:** ${user.email}`);
-    }
-    if (user.mobileNumber) {
-      details.push(`**Mobile:** ${user.mobileNumber}`);
-    }
-    if (user.country) {
-      details.push(`**Country:** ${user.country}`);
-    }
-    if (user.city) {
-      details.push(`**City:** ${user.city}`);
-    }
-    // Add additional user details if needed.
-  } else {
-    details.push("No user data available.");
-  }
-  // Combine details into a markdown-friendly string with bold labels.
-  const markdownContent = details.join("\n\n");
+      // If there are attachments, render them as a group of chips
+      const fileChips: IAutoView.IAutoViewChipProps[] = snapshot.files.map(
+        (file) => ({
+          type: "Chip",
+          label: file.name + (file.extension ? `.${file.extension}` : ""),
+          size: "small",
+          variant: "outlined",
+        })
+      );
 
-  // Create a card content component that uses a markdown component
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // Wrap the markdown component as the content for the card.
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent
-    } as IAutoView.IAutoViewMarkdownProps
-  };
+      // Only include the chip group if there are files
+      const fileChipsGroup: IAutoView.IAutoViewChipGroupProps | undefined =
+        fileChips.length > 0
+          ? {
+              type: "ChipGroup",
+              childrenProps: fileChips,
+              // Show up to 5 chips, collapse the rest
+              maxItems: 5,
+            }
+          : undefined;
 
-  // Optionally, if online info is provided, add a card footer to display online status.
-  let cardFooter: IAutoView.IAutoViewCardFooterProps | undefined = undefined;
-  if (online) {
-    // Use a button component to highlight online status visually.
-    cardFooter = {
-      type: "CardFooter",
+      // Compose the value section: markdown body and optional file group
+      const valueComponents: IAutoView.IAutoViewPresentationComponentProps[] = [
+        bodyComponent,
+      ];
+      if (fileChipsGroup) valueComponents.push(fileChipsGroup);
+
+      return {
+        type: "DataListItem",
+        label: labelComponents,
+        value: valueComponents,
+      };
+    }) ?? [];
+
+  // If there are no snapshots, show a friendly message
+  if (snapshotItems.length === 0) {
+    return {
+      type: "VerticalCard",
       childrenProps: {
-        type: "Button",
-        label: "Online",
-        color: "success",
-        variant: "contained",
-        // Optionally, you could expand here by adding an icon inside the button via startElement.
-        // Ensure that the icon component is one of the allowed types.
-      } as IAutoView.IAutoViewButtonProps
+        type: "CardContent",
+        childrenProps: {
+          type: "Text",
+          content: "No snapshots available for this comment.",
+          variant: "body2",
+        },
+      },
     };
   }
 
-  // Compose the final UI as a vertical card, which is responsive and suitable for mobile.
-  // The card includes header, content and optionally a footer if online data is available.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    // childrenProps accepts an array of components. We include cardHeader and cardContent,
-    // and conditionally include cardFooter.
-    childrenProps: cardFooter ? [cardHeader, cardContent, cardFooter] : [cardHeader, cardContent]
+  // DataList wrapping all snapshot items
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: snapshotItems,
   };
 
-  // Return the vertical card as the final output.
-  return verticalCard as IAutoView.IAutoViewComponentProps;
+  // Card header showing the comment ID and parent relationship
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: "CardHeader",
+    title: `Comment ID: ${input.id}`,
+    description: input.parent_id ? `Reply to: ${input.parent_id}` : undefined,
+    startElement: {
+      type: "Icon",
+      id: "comment",
+      size: 24,
+      color: "blue",
+    },
+  };
+
+  // Card content embedding the DataList of snapshots
+  const content: IAutoView.IAutoViewCardContentProps = {
+    type: "CardContent",
+    childrenProps: dataList,
+  };
+
+  // Assemble everything into a VerticalCard for a responsive layout
+  const card: IAutoView.IAutoViewVerticalCardProps = {
+    type: "VerticalCard",
+    childrenProps: [header, content],
+  };
+
+  return card;
 }

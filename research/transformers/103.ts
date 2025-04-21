@@ -1,157 +1,146 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4ChatTagsView = {
-                chatTags?: legacy.v4.LegacyV4ChatTag[];
-                next?: string;
-            };
-        }
+namespace Schema {
+    export namespace IShoppingSaleReview {
+        /**
+         * Snapshot content of the review article.
+        */
+        export type ISnapshot = {
+            /**
+             * Score of the review.
+             *
+             * @title Score of the review
+            */
+            score: number;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or article.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Title of article.
+             *
+             * @title Title of article
+            */
+            title: string;
+            /**
+             * Content body of article.
+             *
+             * @title Content body of article
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
     }
-    export namespace v4 {
-        export type LegacyV4ChatTag = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
             name: string;
-            key: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            description?: string;
-            followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
         };
     }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4ChatTagsView;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleReview.ISnapshot;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
-  
-// Helper function to map legacy colorVariant to supported chip color.
-function mapColor(colorVariant: string): 
-  "primary" | "secondary" | "success" | "error" | "warning" | "info" | 
-  "red" | "orange" | "yellow" | "lime" | "green" | "teal" | "cyan" | 
-  "blue" | "indigo" | "violet" | "pink" | "gray" | "darkGray" {
-  switch (colorVariant) {
-    case "red":
-      return "red";
-    case "orange":
-      return "orange";
-    case "yellow":
-      return "yellow";
-    case "olive":
-      return "green";
-    case "green":
-      return "green";
-    case "cobalt":
-      return "blue";
-    case "purple":
-      return "violet";
-    case "pink":
-      return "pink";
-    case "navy":
-      return "indigo";
-    default:
-      return "gray";
-  }
-}
+function visualizeData(
+  input: IAutoViewTransformerInputType,
+): IAutoView.IAutoViewComponentProps {
+  // Format the creation date for display
+  const createdDate = new Date(input.created_at).toLocaleString();
 
-function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract the chat tags from input; if not present, use an empty array.
-  const chatTags = input.chatTags || [];
+  // Choose a chip color based on the review score
+  let scoreColor: IAutoView.IAutoViewChipProps["color"];
+  if (input.score >= 8) scoreColor = "green";
+  else if (input.score >= 5) scoreColor = "orange";
+  else scoreColor = "red";
 
-  // Create data list items for each chat tag. Each item will include:
-  // - a Chip (used in the label) showing the tag name with its associated color.
-  // - a Markdown component (used in the value) showing the description and extra info.
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = chatTags.map((tag) => {
-    // Compose the markdown content.
-    let markdownContent = tag.description ? tag.description : "No description provided.";
-    if (tag.followerIds && tag.followerIds.length > 0) {
-      // Append follower count information in markdown format.
-      markdownContent += `\n\n*Followers: ${tag.followerIds.length}*`;
-    }
-    
-    return {
-      type: "DataListItem",
-      // The label uses a Chip component to visually display the tag name.
-      label: {
-        type: "Chip",
-        label: tag.name,
-        color: mapColor(tag.colorVariant || ""),
-        // Optionally, size can be adjusted if needed.
-        size: "small"
-      } as IAutoView.IAutoViewChipProps,
-      // The value uses a Markdown component to render the description with markdown styling.
-      value: {
-        type: "Markdown",
-        content: markdownContent
-      } as IAutoView.IAutoViewMarkdownProps
-    };
-  });
-
-  // If no chat tags are available, create a fallback message.
-  const dataListComponent: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems.length > 0 ? dataListItems : [
-      {
-        type: "DataListItem",
-        label: {
-          type: "Chip",
-          label: "No Chat Tags",
-          color: "gray",
-          size: "small"
-        } as IAutoView.IAutoViewChipProps,
-        value: {
-          type: "Markdown",
-          content: "There are no chat tags available to display."
-        } as IAutoView.IAutoViewMarkdownProps
-      }
-    ]
-  };
-
-  // Create a vertical card to encapsulate the header and the data list content.
-  // The card header displays the title and a brief description.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // Build the CardHeader: title, date, and a score chip
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: "Chat Tags Overview",
-    description: "A visual list of available chat tags with their descriptions and follower counts.",
-    // Using an icon in the startElement can improve visual appeal.
+    title: input.title,
+    description: `Reviewed on ${createdDate}`,
     startElement: {
-      type: "Icon",
-      id: "tags", // This icon id should correspond to an existing icon in the icon set.
-      color: "blue",
-      size: 20
-    } as IAutoView.IAutoViewIconProps
+      type: "Chip",
+      label: `${input.score}`,
+      color: scoreColor,
+      variant: "filled",
+      size: "small",
+    },
   };
 
-  // The card content consists of the data list component.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
+  // Assemble the markdown body
+  // If there are attachments, append them as markdown links under an "Attachments" heading
+  let markdownContent = input.body;
+  if (input.files && input.files.length > 0) {
+    const listItems = input.files
+      .map((file) => {
+        const ext = file.extension ? `.${file.extension}` : "";
+        // If the filename is empty (e.g. ".gitignore"), show placeholder text
+        const filename = file.name !== "" ? file.name : "(no name)";
+        return `- [${filename}${ext}](${file.url})`;
+      })
+      .join("\n");
+    markdownContent += `\n\n### Attachments\n${listItems}`;
+  }
+
+  // Build the CardContent with a Markdown component
+  const content: IAutoView.IAutoViewCardContentProps = {
     type: "CardContent",
-    childrenProps: dataListComponent
+    childrenProps: {
+      type: "Markdown",
+      content: markdownContent,
+    },
   };
 
-  // Compose the vertical card with header and content.
-  // Using vertical cards enhances responsiveness and organizes the UI for mobile devices.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Return a vertical card with header and content
+  return {
     type: "VerticalCard",
-    childrenProps: [
-      cardHeader,
-      cardContent
-    ]
+    childrenProps: [header, content],
   };
-
-  // Return the visual component composed of a vertical card.
-  return verticalCard;
 }

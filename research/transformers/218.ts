@@ -1,127 +1,225 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type WebhookView = {
-    webhook?: webhook.Webhook;
-};
-namespace webhook {
-    export type Webhook = {
-        id?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        channelId?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        name: string;
-        url: string;
-        token?: string & tags.JsonSchemaPlugin<{
-            readOnly: true
-        }>;
-        createdAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        scopes: ("userChat.opened" | "message.created.userChat" | "message.created.teamChat" | "lead.upserted.contact" | "lead.upserted.subscription" | "lead.deleted" | "member.upserted.contact" | "member.upserted.subscription" | "member.deleted")[] & tags.UniqueItems;
-        /**
-         * @deprecated
-        */
-        keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
-        apiVersion: string;
-        lastBlockedAt?: number & tags.JsonSchemaPlugin<{
-            format: "int64",
-            readOnly: true
-        }>;
-        blocked?: boolean;
-    };
+namespace Schema {
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export type LegacyV4WebhookView = {
+                    webhook?: Schema.legacy.v4.LegacyV4Webhook;
+                };
+            }
+        }
+        export namespace v4 {
+            export type LegacyV4Webhook = {
+                id?: string;
+                channelId?: string;
+                name: string;
+                url: string;
+                token?: string;
+                keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
+                createdAt?: number;
+                watchUserChats?: boolean;
+                watchGroups?: boolean;
+                apiVersion: string;
+                lastBlockedAt?: number;
+                blocked?: boolean;
+            };
+        }
+    }
 }
-type IAutoViewTransformerInputType = WebhookView;
+type IAutoViewTransformerInputType = Schema.legacy.open.v4.LegacyV4WebhookView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
-function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Check if we have a webhook available in input.
-  if (input.webhook) {
-    const webhookData = input.webhook;
-
-    // Create a header icon representing a link (webhook). Using "link" as a conventional id.
-    const headerIcon: IAutoView.IAutoViewIconProps = {
-      type: "Icon",
-      id: "link",
-      color: "blue", // use blue to indicate a link; can be modified as needed
-      size: 16,
-    };
-
-    // If the webhook is blocked, we want to visually indicate that.
-    // We'll create a badge with an exclamation icon.
-    let blockedBadge: IAutoView.IAutoViewBadgeProps | undefined = undefined;
-    if (webhookData.blocked) {
-      blockedBadge = {
-        type: "Badge",
-        // The childrenProps allows either an Avatar or an Icon. Use an Icon to represent a warning.
-        childrenProps: {
-          type: "Icon",
-          id: "exclamation-triangle", // using a typical warning icon name (in kebab-case, without prefix)
-          color: "red",
-          size: 12,
-        },
-        // Set color and dot flag to make it stand out.
-        color: "error",
-        dot: true,
-      };
-    }
-
-    // Create the card header.
-    const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-      type: "CardHeader",
-      title: webhookData.name,
-      description: webhookData.url,
-      startElement: headerIcon,
-      // If a blocked badge was created, attach it to the end element.
-      endElement: blockedBadge,
-    };
-
-    // Build markdown content summarizing additional webhook details.
-    // Use markdown formatting to enhance readability.
-    let markdownContent = `**Webhook Details**\n\n`;
-    markdownContent += `- **API Version:** ${webhookData.apiVersion}\n`;
-    markdownContent += `- **Scopes:** ${webhookData.scopes.join(", ")}\n`;
-
-    // Optionally output token if provided (even if read-only)
-    if (webhookData.token) {
-      markdownContent += `- **Token:** \`${webhookData.token}\`\n`;
-    }
-
-    // Include creation date if available.
-    if (webhookData.createdAt) {
-      // Convert timestamp to a human-readable string for display.
-      const createdDate = new Date(webhookData.createdAt).toLocaleString();
-      markdownContent += `- **Created At:** ${createdDate}\n`;
-    }
-
-    // Create the card content using a Markdown component.
-    const cardContent: IAutoView.IAutoViewCardContentProps = {
-      type: "CardContent",
-      childrenProps: {
-        // Use a Markdown component to render the content with rich text formatting.
-        type: "Markdown",
-        content: markdownContent,
-      },
-    };
-
-    // Compose the final vertical card component.
-    const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-      type: "VerticalCard",
-      childrenProps: [cardHeader, cardContent],
-    };
-
-    return verticalCard;
-  } else {
-    // If no webhook data is provided, return a Markdown component with a friendly message.
+function visualizeData(
+  input: IAutoViewTransformerInputType,
+): IAutoView.IAutoViewComponentProps {
+  // If there is no webhook data, show a simple markdown message
+  if (!input.webhook) {
     return {
       type: "Markdown",
-      content: "### No Webhook Data Available\n\nThe provided input does not include any webhook information.",
+      content: "## No webhook data available",
     };
   }
+
+  const w = input.webhook;
+
+  // Card header: show the webhook name and URL with a link icon
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: "CardHeader",
+    title: w.name,
+    description: w.url,
+    startElement: {
+      type: "Icon",
+      id: "link",      // FontAwesome "link" icon
+      size: 20,
+      color: "blue",
+    },
+  };
+
+  // Build a data list of key/value pairs for webhook properties
+  const dataItems: IAutoView.IAutoViewDataListItemProps[] = [];
+
+  // Helper to push a text-based list item if value is defined
+  const pushTextItem = (
+    label: string,
+    value: string | number,
+  ) => {
+    if (value !== undefined && value !== null) {
+      dataItems.push({
+        type: "DataListItem",
+        label: {
+          type: "Text",
+          content: label,
+          variant: "subtitle2",
+          color: "tertiary",
+        },
+        value: {
+          type: "Text",
+          content: String(value),
+          variant: "body2",
+        },
+      });
+    }
+  };
+
+  pushTextItem("ID", w.id!);
+  pushTextItem("Channel ID", w.channelId!);
+  pushTextItem("API Version", w.apiVersion);
+  // Timestamps: format to human‐readable
+  if (w.createdAt !== undefined) {
+    dataItems.push({
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Created At",
+        variant: "subtitle2",
+        color: "tertiary",
+      },
+      value: {
+        type: "Text",
+        content: new Date(w.createdAt).toLocaleString(),
+        variant: "body2",
+      },
+    });
+  }
+  if (w.lastBlockedAt !== undefined) {
+    dataItems.push({
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Last Blocked At",
+        variant: "subtitle2",
+        color: "tertiary",
+      },
+      value: {
+        type: "Text",
+        content: new Date(w.lastBlockedAt).toLocaleString(),
+        variant: "body2",
+      },
+    });
+  }
+  // Keywords: show as a group of chips
+  if (Array.isArray(w.keywords) && w.keywords.length > 0) {
+    dataItems.push({
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Keywords",
+        variant: "subtitle2",
+        color: "tertiary",
+      },
+      value: {
+        type: "ChipGroup",
+        childrenProps: w.keywords.map((kw) => ({
+          type: "Chip",
+          label: kw,
+          size: "small",
+          variant: "outlined",
+        })),
+      },
+    });
+  }
+
+  // Token: hide or mask if very long
+  if (w.token) {
+    const masked = w.token.length > 8
+      ? w.token.slice(0, 4) + "…" + w.token.slice(-4)
+      : w.token;
+    dataItems.push({
+      type: "DataListItem",
+      label: {
+        type: "Text",
+        content: "Token",
+        variant: "subtitle2",
+        color: "tertiary",
+      },
+      value: {
+        type: "Text",
+        content: masked,
+        variant: "body2",
+      },
+    });
+  }
+
+  // Assemble the data list component
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: dataItems,
+  };
+
+  // Footer: represent boolean flags as colored chips
+  const flagChips: IAutoView.IAutoViewChipProps[] = [];
+  if (w.watchUserChats !== undefined) {
+    flagChips.push({
+      type: "Chip",
+      label: "User Chats",
+      color: w.watchUserChats ? "success" : "gray",
+      size: "small",
+      variant: "filled",
+    });
+  }
+  if (w.watchGroups !== undefined) {
+    flagChips.push({
+      type: "Chip",
+      label: "Groups",
+      color: w.watchGroups ? "success" : "gray",
+      size: "small",
+      variant: "filled",
+    });
+  }
+  if (w.blocked !== undefined) {
+    flagChips.push({
+      type: "Chip",
+      label: w.blocked ? "Blocked" : "Active",
+      color: w.blocked ? "error" : "success",
+      size: "small",
+      variant: "filled",
+    });
+  }
+  const footer: IAutoView.IAutoViewCardFooterProps = {
+    type: "CardFooter",
+    childrenProps: {
+      type: "ChipGroup",
+      childrenProps: flagChips,
+    },
+  };
+
+  // Wrap everything in a responsive vertical card
+  const card: IAutoView.IAutoViewVerticalCardProps = {
+    type: "VerticalCard",
+    childrenProps: [
+      header,
+      {
+        type: "CardContent",
+        childrenProps: dataList,
+      },
+      footer,
+    ],
+  };
+
+  return card;
 }

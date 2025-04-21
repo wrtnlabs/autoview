@@ -1,36 +1,292 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4ChatTagView = {
-                chatTag?: legacy.v4.LegacyV4ChatTag;
-            };
-        }
+namespace Schema {
+    export namespace IPageIShoppingSaleSnapshot {
+        /**
+         * A page.
+         *
+         * Collection of records with pagination indformation.
+        */
+        export type ISummary = {
+            /**
+             * Page information.
+             *
+             * @title Page information
+            */
+            pagination: Schema.IPage.IPagination;
+            /**
+             * List of records.
+             *
+             * @title List of records
+            */
+            data: Schema.IShoppingSaleSnapshot.ISummary[];
+        };
     }
-    export namespace v4 {
-        export type LegacyV4ChatTag = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
+    export namespace IPage {
+        /**
+         * Page information.
+        */
+        export type IPagination = {
+            /**
+             * Current page number.
+             *
+             * @title Current page number
+            */
+            current: number & tags.Type<"int32">;
+            /**
+             * Limitation of records per a page.
+             *
+             * @title Limitation of records per a page
+            */
+            limit: number & tags.Type<"int32">;
+            /**
+             * Total records in the database.
+             *
+             * @title Total records in the database
+            */
+            records: number & tags.Type<"int32">;
+            /**
+             * Total pages.
+             *
+             * Equal to {@link records} / {@link limit} with ceiling.
+             *
+             * @title Total pages
+            */
+            pages: number & tags.Type<"int32">;
+        };
+    }
+    export namespace IShoppingSaleSnapshot {
+        /**
+         * Summarized information of the sale snapshot.
+        */
+        export type ISummary = {
+            /**
+             * Price range of the unit.
+             *
+             * @title Price range of the unit
+            */
+            price_range: Schema.IShoppingSalePriceRange;
+            /**
+             * Primary Key of Sale.
+             *
+             * @title Primary Key of Sale
+            */
+            id: string;
+            /**
+             * Primary Key of Snapshot.
+             *
+             * @title Primary Key of Snapshot
+            */
+            snapshot_id: string;
+            /**
+             * Whether the snapshot is the latest one or not.
+             *
+             * @title Whether the snapshot is the latest one or not
+            */
+            latest: boolean;
+            /**
+             * Description and image content describing the sale.
+             *
+             * @title Description and image content describing the sale
+            */
+            content: Schema.IShoppingSaleContent.IInvert;
+            /**
+             * List of categories.
+             *
+             * Which categories the sale is registered to.
+             *
+             * @title List of categories
+            */
+            categories: Schema.IShoppingChannelCategory.IInvert[];
+            /**
+             * List of search tags.
+             *
+             * @title List of search tags
+            */
+            tags: string[];
+            /**
+             * List of units.
+             *
+             * Records about individual product composition information that are sold
+             * in the sale. Each {@link IShoppingSaleUnit unit} record has configurable
+             * {@link IShoppingSaleUnitOption options},
+             * {@link IShoppingSaleUnitOptionCandidate candidate} values for each
+             * option, and {@link IShoppingSaleUnitStock final stocks} determined by
+             * selecting every candidate values of each option.
+             *
+             * @title List of units
+            */
+            units: Schema.IShoppingSaleUnit.ISummary[];
+        };
+    }
+    export type IShoppingSalePriceRange = {
+        lowest: Schema.IShoppingPrice;
+        highest: Schema.IShoppingPrice;
+    };
+    /**
+     * Shopping price interface.
+    */
+    export type IShoppingPrice = {
+        /**
+         * Nominal price.
+         *
+         * This is not {@link real real price} to pay, but just a nominal price to show.
+         * If this value is greater than the {@link real real price}, it would be shown
+         * like {@link IShoppingSeller seller} is giving a discount.
+         *
+         * @title Nominal price
+        */
+        nominal: number;
+        /**
+         * Real price to pay.
+         *
+         * @title Real price to pay
+        */
+        real: number;
+    };
+    export namespace IShoppingSaleContent {
+        export type IInvert = {
+            id: string & tags.Format<"uuid">;
+            title: string;
+            thumbnails: Schema.IAttachmentFile[];
+        };
+    }
+    /**
+     * Attachment File.
+     *
+     * Every attachment files that are managed in current system.
+     *
+     * For reference, it is possible to omit one of file {@link name}
+     * or {@link extension} like `.gitignore` or `README` case, but not
+     * possible to omit both of them.
+    */
+    export type IAttachmentFile = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of attachment file.
+         *
+         * @title Creation time of attachment file
+        */
+        created_at: string;
+        /**
+         * File name, except extension.
+         *
+         * If there's file `.gitignore`, then its name is an empty string.
+         *
+         * @title File name, except extension
+        */
+        name: string;
+        /**
+         * Extension.
+         *
+         * Possible to omit like `README` case.
+         *
+         * @title Extension
+        */
+        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+        /**
+         * URL path of the real file.
+         *
+         * @title URL path of the real file
+        */
+        url: string;
+    };
+    export namespace IShoppingChannelCategory {
+        /**
+         * Invert category information with parent category.
+        */
+        export type IInvert = {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | any;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
             name: string;
-            key: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            description?: string;
-            followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
+    export namespace IShoppingSaleUnit {
+        export type ISummary = {
+            price_range: Schema.IShoppingSalePriceRange;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Representative name of the unit.
+             *
+             * @title Representative name of the unit
+            */
+            name: string;
+            /**
+             * Whether the unit is primary or not.
+             *
+             * Just a labeling value.
+             *
+             * @title Whether the unit is primary or not
+            */
+            primary: boolean;
+            /**
+             * Whether the unit is required or not.
+             *
+             * When the unit is required, the customer must select the unit. If do not
+             * select, customer can't buy it.
+             *
+             * For example, if there's a sale "Macbook Set" and one of the unit is the
+             * "Main Body", is it possible to buy the "Macbook Set" without the
+             * "Main Body" unit? This property is for that case.
+             *
+             * @title Whether the unit is required or not
+            */
+            required: boolean;
         };
     }
 }
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4ChatTagView;
+type IAutoViewTransformerInputType = Schema.IPageIShoppingSaleSnapshot.ISummary;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -38,68 +294,89 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract the chatTag from the input.
-  const { chatTag } = input;
+    const { pagination, data } = input;
 
-  // If no chatTag is provided, return a simple markdown component to indicate missing data.
-  if (!chatTag) {
-    return {
-      type: "Markdown",
-      content: "### No Chat Tag Found\n\nPlease check your input data."
+    // Helper to format a number into a dollar price string with two decimals.
+    const formatPrice = (value: number): string => {
+        return `$${value.toFixed(2)}`;
     };
-  }
 
-  // Build a markdown string to display additional chat tag details.
-  // Using markdown formatting to make the content engaging.
-  const channelId = chatTag.channelId ?? "N/A";
-  const key = chatTag.key;
-  const followerCount = chatTag.followerIds ? chatTag.followerIds.length : 0;
-  const createdAt = chatTag.createdAt ? new Date(chatTag.createdAt).toLocaleString() : "N/A";
+    // Build the header subcomponent that shows current page info.
+    const header: IAutoView.IAutoViewListSubheaderProps = {
+        type: "ListSubheader",
+        stickToTop: true,
+        childrenProps: [
+            {
+                type: "Text",
+                // Using a concise page indicator for users.
+                content: `Page ${pagination.current} of ${pagination.pages}`,
+                variant: "subtitle1"
+            }
+        ]
+    };
 
-  const markdownContent = [
-    `- **Channel ID**: ${channelId}`,
-    `- **Key**: ${key}`,
-    `- **Follower Count**: ${followerCount}`,
-    `- **Created At**: ${createdAt}`
-  ].join("\n");
+    // Convert each sale snapshot into a ListItem for display.
+    const items: IAutoView.IAutoViewListItemProps[] = data.map((snapshot) => {
+        const { content, price_range, categories } = snapshot;
+        const lowest = price_range.lowest;
+        const highest = price_range.highest;
 
-  // Compose a CardHeader component for a visual presentation.
-  // We use an icon as the startElement to represent a chat tag visually.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: chatTag.name,           // Display the chat tag name as the title.
-    description: chatTag.description,  // Optionally display the description.
-    // The startElement expects types: Avatar, Icon, Chip, Badge, IconButton, or Text.
-    // Here, we use an Icon for a visually appealing header.
-    startElement: {
-      type: "Icon",
-      id: "tag",                   // Assuming "tag" is a valid icon id in kebab-case.
-      color: "blue",               // Choose a color that contrasts well on most backgrounds.
-      size: 32                     // A moderate size for visual emphasis.
-    }
-  };
+        // Prepare image thumbnail if available.
+        const firstThumb = Array.isArray(content.thumbnails) && content.thumbnails.length > 0
+            ? content.thumbnails[0]
+            : null;
 
-  // Compose a CardContent component that leverages a Markdown component
-  // to render the details in a formatted and responsive manner.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // The childrenProps here contains a Markdown component to display additional info.
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent
-    }
-  };
+        // Prepare up to three category chips, then a "+N" chip if more.
+        const maxChips = 3;
+        const chipProps: IAutoView.IAutoViewChipProps[] = [];
+        for (let i = 0; i < categories.length; i++) {
+            if (i < maxChips) {
+                chipProps.push({
+                    type: "Chip",
+                    label: categories[i].name,
+                    variant: "outlined",
+                    size: "small",
+                    color: "primary"
+                });
+            } else {
+                const remaining = categories.length - maxChips;
+                chipProps.push({
+                    type: "Chip",
+                    label: `+${remaining}`,
+                    variant: "outlined",
+                    size: "small",
+                    color: "gray"
+                });
+                break;
+            }
+        }
 
-  // Optionally, a CardFooter could be added to include actions (e.g., a button), but
-  // this example focuses on a header and content for visualization.
+        return {
+            type: "ListItem",
+            // Title is the main sale title.
+            title: content.title,
+            // Description shows the real price range and nominal in parentheses.
+            description: `${formatPrice(lowest.real)} - ${formatPrice(highest.real)} (nominal ${formatPrice(lowest.nominal)} - ${formatPrice(highest.nominal)})`,
+            // Display the first thumbnail image as a preview.
+            startElement: firstThumb
+                ? {
+                      type: "Image",
+                      src: firstThumb.url,
+                      alt: content.title
+                  }
+                : undefined,
+            // Render category chips on the right side.
+            endElement: chipProps.length > 0 ? chipProps : undefined,
+            // If the snapshot is the latest, show a badge on the left.
+            href: undefined
+        };
+    });
 
-  // Compose the main VerticalCard component, aggregating the header and content.
-  // VerticalCard.childrenProps accepts an array of card components.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent]
-  };
+    // Compose the final List component with header + items.
+    const listProps: IAutoView.IAutoViewListProps = {
+        type: "List",
+        childrenProps: [header, ...items]
+    };
 
-  // Return the composed component props that the UI renderer will use.
-  return verticalCard;
+    return listProps;
 }

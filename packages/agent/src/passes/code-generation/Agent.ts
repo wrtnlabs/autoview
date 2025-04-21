@@ -38,6 +38,7 @@ export class Agent implements AgentBase<Input, Output> {
     });
 
     const boilerplate = await service.generateBoilerplate(
+      "Schema",
       input.transformFunctionName,
     );
     const systemPrompt = prompt({
@@ -86,10 +87,11 @@ function handleText(
 ): (input: Input, text: string) => Promise<Output> {
   return async function (input: Input, text: string) {
     const output = parseOutput(text);
-    const rawTsCode = `${await service.generateBoilerplateForRawTsCode(input.transformFunctionName)}\n\n${output.typescript_function}`;
+    const rawTsCode = `${await service.generateBoilerplateForRawTsCode("Schema", input.transformFunctionName)}\n\n${output.typescript_function}`;
 
     const result = await service.compile(
       output.typescript_function,
+      "Schema",
       input.transformFunctionName,
     );
 
@@ -118,7 +120,7 @@ function handleText(
       );
     }
 
-    // const randomResult = await service.compileRandom();
+    // const randomResult = await service.compileRandom("Schema");
 
     // if (randomResult.type !== "success") {
     //   throw new Error(

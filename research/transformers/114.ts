@@ -1,223 +1,94 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace legacy {
-    export namespace open {
-        export namespace v4 {
-            export type LegacyV4GroupView = {
-                managers?: legacy.v4.LegacyV4Manager[];
-                onlines?: legacy.v4.LegacyV4Online[];
-                bookmark?: legacy.v4.LegacyV4ChatBookmark;
-                session?: legacy.v4.LegacyV4ChatSession;
-                group?: legacy.v4.LegacyV4Group;
-            };
-        }
+namespace Schema {
+    export namespace IShoppingChannel {
+        /**
+         * Hierarchical channel information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * Children categories with hierarchical structure.
+             *
+             * @title Children categories with hierarchical structure
+            */
+            categories: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+            /**
+             * Identifier code.
+             *
+             * @title Identifier code
+            */
+            code: string;
+            /**
+             * Name of the channel.
+             *
+             * @title Name of the channel
+            */
+            name: string;
+        };
     }
-    export namespace v4 {
-        export type LegacyV4Manager = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            accountId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            description?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            showDescriptionToFront?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            nameDescI18nMap?: {
-                [key: string]: NameDesc;
-            };
-            profile?: {
-                [key: string]: {};
-            };
-            email: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            showEmailToFront?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            mobileNumber?: string & tags.Default<"+18004424000"> & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            showMobileNumberToFront?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            role: "owner" | "member";
-            removed?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            displayAsChannel?: boolean;
-            defaultGroupWatch?: "all" | "info" | "none";
-            defaultDirectChatWatch?: "all" | "info" | "none";
-            defaultUserChatWatch?: "all" | "info" | "none";
-            operatorScore?: number & tags.JsonSchemaPlugin<{
-                format: "float",
-                readOnly: true
-            }>;
-            touchScore?: number & tags.JsonSchemaPlugin<{
-                format: "float",
-                readOnly: true
-            }>;
-            avatar?: TinyFile;
-            operatorEmailReminder?: boolean & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            operator?: boolean;
-            statusEmoji?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            statusText?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            statusClearAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            managerId?: string;
-            avatarUrl?: string;
-            emailForFront?: string;
-            mobileNumberForFront?: string & tags.Default<"+18004424000">;
-        };
-        export type LegacyV4Online = {
-            channelId?: string;
-            personType?: string;
-            personId?: string;
-            id?: string;
-        };
-        export type LegacyV4ChatBookmark = {
-            key?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            bookmarkKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            chatType?: string;
-            personType?: string;
-            personId?: string;
-        };
-        export type LegacyV4ChatSession = {
-            key?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            chatKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            updatedKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            unreadKey?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            alert?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            unread?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int32",
-                readOnly: true
-            }>;
-            watch?: "all" | "info" | "none";
-            readAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            receivedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            postedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            version?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            id?: string;
-            chatType?: string;
-            personType?: string;
-            personId?: string;
-        };
-        export type LegacyV4Group = {
-            id?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            channelId?: string & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            name: string & tags.Pattern<"[\\p{L}\\p{N}-_()]+">;
-            scope: "all" | "public" | "private";
-            managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems & tags.JsonSchemaPlugin<{
-                readOnly: true
-            }>;
-            icon?: string & tags.Pattern<"\\S+">;
-            description?: string;
-            createdAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            updatedAt?: number & tags.JsonSchemaPlugin<{
-                format: "int64",
-                readOnly: true
-            }>;
-            active?: boolean;
+    export namespace IShoppingChannelCategory {
+        /**
+         * Hierarchical category information with children categories.
+        */
+        export type IHierarchical = {
+            /**
+             * List of children categories with hierarchical structure.
+             *
+             * @title List of children categories with hierarchical structure
+            */
+            children: Schema.IShoppingChannelCategory.IHierarchical[];
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
         };
     }
 }
-type NameDesc = {
-    name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
-    description?: string;
-};
-type TinyFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-    height?: number & tags.Type<"int32"> & tags.JsonSchemaPlugin<{
-        format: "int32"
-    }>;
-};
-type IAutoViewTransformerInputType = legacy.open.v4.LegacyV4GroupView;
+type IAutoViewTransformerInputType = Schema.IShoppingChannel.IHierarchical;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -225,98 +96,87 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Extract group information from the input.
-  // If there is no group information provided, return a simple markdown component.
-  const group = input.group;
-  if (!group) {
-    // When group data is missing, we display a friendly markdown message.
-    return {
-      type: "Markdown",
-      content: "### No Group Data Available\nThe provided data does not contain any group information to display."
-    } as IAutoView.IAutoViewMarkdownProps;
-  }
-
-  // Compose the card header to display the group's primary details.
-  // If an icon exists in the group data, attach it as the start element.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: group.name,
-    description: group.description,
-    startElement: group.icon
-      ? {
-          type: "Icon",
-          id: group.icon, // using group.icon as icon identifier (must be in kebab-case)
-          size: 32,
-          // Optionally, the color could be set based on business rules.
-        }
-      : undefined
-  };
-
-  // Build a DataList to visually display the managers.
-  // For each manager, we create a list item that combines an avatar with markdown details.
-  let managerListItems: IAutoView.IAutoViewDataListItemProps[] = [];
-  if (input.managers && input.managers.length > 0) {
-    managerListItems = input.managers.map((manager) => {
-      // Create an avatar component for the manager.
-      // If avatarUrl is not provided, the avatar component will display initials (determined by the front-end).
-      const avatar: IAutoView.IAutoViewAvatarProps = {
-        type: "Avatar",
-        src: manager.avatarUrl,
-        name: manager.name,
-        size: 40, // size chosen for good visibility on mobile and desktop
-        variant: "primary"
+  /**
+   * Recursively build DataListItemProps for a list of categories.
+   * Each item shows the category name and, if present, its children in a nested list.
+   */
+  function buildCategoryItems(
+    categories: Schema.IShoppingChannelCategory.IHierarchical[],
+  ): IAutoView.IAutoViewDataListItemProps[] {
+    return categories.map((cat) => {
+      // Base component for the category name
+      const labelText: IAutoView.IAutoViewTextProps = {
+        type: "Text",
+        variant: "body1",
+        content: cat.name,
       };
 
-      // Create a markdown component to display additional manager details.
-      // Using markdown allows for enhanced formatting compared to plain text.
-      const detailsMarkdown: IAutoView.IAutoViewMarkdownProps = {
-        type: "Markdown",
-        content: `**Email:** ${manager.email}\n**Role:** ${manager.role}`
+      // If this category has children, render a nested DataList; otherwise show a folder icon
+      let valueComponent:
+        | IAutoView.IAutoViewDataListProps
+        | IAutoView.IAutoViewIconProps = {
+        type: "Icon",
+        id: "folder",
+        color: "gray",
+        size: 16,
       };
 
-      // Combine the avatar and details in a data list item.
-      // The avatar is used for the label and the markdown for the value.
-      const listItem: IAutoView.IAutoViewDataListItemProps = {
+      if (cat.children && cat.children.length > 0) {
+        valueComponent = {
+          type: "DataList",
+          childrenProps: buildCategoryItems(cat.children),
+        };
+      }
+
+      return {
         type: "DataListItem",
-        label: avatar,
-        value: detailsMarkdown
+        // The label can be an array of presentation components; here just one Text
+        label: [labelText],
+        // For leaf nodes, show an icon; for others, nested list
+        value: valueComponent,
       };
-
-      return listItem;
     });
-  } else {
-    // If there are no managers available, inform the user via a markdown component.
-    const emptyItem: IAutoView.IAutoViewDataListItemProps = {
-      type: "DataListItem",
-      label: {
-        type: "Markdown",
-        content: "**No managers available.**"
-      } as IAutoView.IAutoViewMarkdownProps
-    };
-    managerListItems.push(emptyItem);
   }
 
-  // Create a data list component to hold the list items representing the managers.
-  const managersDataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: managerListItems
+  // Build the channel header: avatar + title + code chip
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: "CardHeader",
+    title: input.name,
+    description: `Created at ${new Date(input.created_at).toLocaleDateString()}`,
+    startElement: {
+      type: "Avatar",
+      name: input.name[0].toUpperCase(),
+      variant: "cyan",
+      size: 32,
+    },
+    endElement: {
+      type: "Chip",
+      label: input.code,
+      size: "small",
+      variant: "outlined",
+    },
   };
 
-  // Build the card content component.
-  // Here we insert the managers data list. In a full production scenario,
-  // additional components (e.g., online status, session info, bookmarks) could be appended.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
+  // Build the content: either a DataList of categories or a markdown message
+  const contentChildren: IAutoView.IAutoViewComponentProps =
+    input.categories && input.categories.length > 0
+      ? {
+          type: "DataList",
+          childrenProps: buildCategoryItems(input.categories),
+        }
+      : {
+          type: "Markdown",
+          content: "_No categories available._",
+        };
+
+  const content: IAutoView.IAutoViewCardContentProps = {
     type: "CardContent",
-    childrenProps: managersDataList
+    childrenProps: contentChildren,
   };
 
-  // Assemble the final visual component.
-  // Using a vertical card component combines the header and the content for a cohesive display.
-  // This layout is designed to be responsive and works well on both desktop and mobile devices.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Compose a vertical card containing the header and the content
+  return {
     type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent]
+    childrenProps: [header, content],
   };
-
-  return verticalCard;
 }

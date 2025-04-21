@@ -21,34 +21,49 @@ export class AutoViewCompilerService implements IAutoViewCompilerService {
     return this.compiler_.generateComponentDto();
   }
 
-  public generateBoilerplate(transformFunctionName: string): string {
+  public generateBoilerplate(
+    inputSchemaPrefix: string,
+    transformFunctionName: string,
+  ): string {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.generateBoilerplate(transformFunctionName);
+    return this.compiler_.generateBoilerplate(
+      inputSchemaPrefix,
+      transformFunctionName,
+    );
   }
 
   public generateBoilerplateForRawTsCode(
+    inputSchemaPrefix: string,
     transformFunctionName: string,
   ): string {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
     return this.compiler_.generateBoilerplateForRawTsCode(
+      inputSchemaPrefix,
       transformFunctionName,
     );
   }
 
   public async compile(
     script: string,
+    inputSchemaPrefix: string,
     transformFunctionName: string,
   ): Promise<IAutoViewCompilerResult> {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.compile(script, transformFunctionName);
+    return this.compiler_.compile(
+      script,
+      inputSchemaPrefix,
+      transformFunctionName,
+    );
   }
 
-  public async compileRandom(): Promise<IAutoViewCompilerResult> {
+  public async compileRandom(
+    inputSchemaPrefix: string,
+  ): Promise<IAutoViewCompilerResult> {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.compileRandom();
+    return this.compiler_.compileRandom(inputSchemaPrefix);
   }
 }

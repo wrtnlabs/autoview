@@ -28,6 +28,7 @@ export const test_compiler_llm_parameters = async (): Promise<void> => {
         items: [],
       };
   `,
+    "Schema",
     "test_compiler_llm_parameters",
   );
   if (result.type === "success")

@@ -300,13 +300,3 @@ export class AutoViewAgent {
 function componentSchema(): IAutoViewCompilerMetadata {
   return typia.json.schema<IAutoViewComponentProps>();
 }
-
-// const PARAMETERS = typia.llm.parameters<
-//   {
-//     props: IAutoViewComponentProps;
-//   },
-//   "chatgpt",
-//   {
-//     reference: true;
-//   }
-// >();

@@ -1,191 +1,277 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A page.
- *
- * Collection of records with pagination indformation.
-*/
-type IPageIShoppingSaleInquiryComment = {
-    /**
-     * Page information.
-     *
-     * @title Page information
-    */
-    pagination: IPage.IPagination;
-    /**
-     * List of records.
-     *
-     * @title List of records
-    */
-    data: IShoppingSaleInquiryComment[];
-};
-namespace IPage {
-    /**
-     * Page information.
-    */
-    export type IPagination = {
+namespace Schema {
+    export namespace desk {
+        export type ChannelView = {
+            channel?: Schema.Channel;
+            manager?: Schema.Manager;
+            managerBadge?: Schema.ManagerBadge;
+        };
+    }
+    export type Channel = {
+        id?: string;
+        welcomeMessage: Schema.message.NestedMessage;
+        welcomeMessageI18nMap?: {
+            [key: string]: Schema.message.NestedMessage;
+        };
+        createdAt?: number;
+        updatedAt?: number;
+        userInfoUrl?: string;
+        trafficSource?: {
+            [key: string]: {};
+        };
+        billAccountId?: string;
+        name: string & tags.Pattern<"^[^@#$%:/\\x08\\\\]+$">;
+        nameDescI18nMap?: {
+            [key: string]: Schema.NameDesc;
+        };
+        coverImageColor?: string & tags.Default<"#123456">;
+        botName: string;
+        color: string & tags.Default<"#123456">;
+        description?: string;
+        country?: string;
+        domain?: string;
+        homepageUrl?: string;
+        phoneNumber?: string & tags.Default<"+18004424000">;
+        timeZone: string & tags.Default<"UTC">;
+        showOperatorProfile?: boolean;
+        disableNewChatButton?: boolean;
+        indebtedDueDate?: string & tags.Format<"date">;
+        followUpTexting: boolean;
+        followUpEmail: boolean;
+        followUpAskName?: boolean;
+        followUpMandatory?: boolean;
+        state?: "waiting" | "active" | "restricted" | "preIndebted" | "indebted" | "banned" | "removed";
+        entVerified?: boolean;
+        bizGrade: "AA" | "A" | "B" | "C" | "D" | "F" | "unknown";
+        defaultPluginId?: string;
+        workingType?: "always" | "never" | "custom";
+        sourceSurvey?: {
+            [key: string]: {};
+        };
+        bizCategory?: string;
+        staffs?: number & tags.Type<"int32">;
+        appCommerceId?: string;
+        appCommerceType?: string;
+        appCommerceDomain?: string;
+        enableMemberHash?: boolean;
+        defaultEmailDomainId?: string;
+        enableMfa?: boolean;
+        hideAppMessenger?: boolean;
+        baseTutorialCompleted: boolean;
+        bizCertificated?: boolean;
+        mktAlimtalkAllowed?: boolean;
+        bizCertificatedCountries?: string[];
+        managedUserChatRetentionDuration?: string;
+        blocked?: boolean;
+        working?: boolean;
+        avatarUrl?: string;
+        expectedResponseDelay?: "instant" | "normal" | "delayed";
+        inOperation?: boolean;
+        operationTimeScheduling?: boolean;
+        nextWorkingTime?: number;
+        nextAwayTime?: number;
+        operationTimeRanges?: Schema.TimeRange[];
+        awayOption?: "active" | "disabled" | "hidden";
+        blockReplyingAfterClosed?: boolean;
+        blockReplyingAfterClosedTime?: string;
         /**
-         * Current page number.
-         *
-         * @title Current page number
+         * @deprecated
         */
-        current: number & tags.Type<"int32">;
-        /**
-         * Limitation of records per a page.
-         *
-         * @title Limitation of records per a page
-        */
-        limit: number & tags.Type<"int32">;
-        /**
-         * Total records in the database.
-         *
-         * @title Total records in the database
-        */
-        records: number & tags.Type<"int32">;
-        /**
-         * Total pages.
-         *
-         * Equal to {@link records} / {@link limit} with ceiling.
-         *
-         * @title Total pages
-        */
-        pages: number & tags.Type<"int32">;
+        bright?: boolean;
+        borderColor?: string;
+        gradientColor?: string;
+        textColor?: string;
+        nextOperatingAt?: number;
+        usingFollowUp?: boolean;
+        initial?: string;
+        utcOffset?: string;
+        systemDomain?: string;
+        pluginIconColor?: string;
+        brightness?: number;
+        coverImageUrl?: string;
+        coverImageBright?: boolean;
+        dayUntilIndebted?: number & tags.Type<"int32">;
     };
-}
-/**
- * A comment written on an inquiry article.
- *
- * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
- * and is used when you want to communicate with multiple people about an
- * {@link IShoppingSaleInquiry inquiry} written by a
- * {@link IShoppingCustomer customer}.
- *
- * For reference, only related parties can write comments for
- * {@link IShoppingSeller sellers}, but there is no limit to
- * {@link IShoppingCustomer customers}. In other words, anyone customer can
- * freely write a comment, even if they are not the person who wrote the inquiry.
-*/
-type IShoppingSaleInquiryComment = {
-    /**
-     * Writer of the comment.
-     *
-     * Both customer and seller can write comment on the sale inquiry.
-     *
-     * By the way, no restriction on the customer, but seller must be the
-     * person who've registered the sale.
-     *
-     * @title Writer of the comment
-    */
-    writer: any | any | any;
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Parent comment's ID.
-     *
-     * @title Parent comment's ID
-    */
-    parent_id: null | (string & tags.Format<"uuid">);
-    /**
-     * List of snapshot contents.
-     *
-     * It is created for the first time when a comment being created, and is
-     * accumulated every time the comment is modified.
-     *
-     * @title List of snapshot contents
-    */
-    snapshots: IBbsArticleComment.ISnapshot[];
-    /**
-     * Creation time of comment.
-     *
-     * @title Creation time of comment
-    */
-    created_at: string;
-};
-namespace IShoppingAdministrator {
-    export type IInvert = any;
-}
-type IShoppingCustomer = any;
-namespace IShoppingSeller {
-    export type IInvert = any;
-}
-namespace IBbsArticleComment {
-    /**
-     * Snapshot of comment.
-     *
-     * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
-     * the contents of the comment.
-     *
-     * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
-     * and prevent fraud.
-    */
-    export type ISnapshot = {
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Creation time of snapshot record.
-         *
-         * In other words, creation time or update time or comment.
-         *
-         * @title Creation time of snapshot record
-        */
-        created_at: string;
-        /**
-         * Format of body.
-         *
-         * Same meaning with extension like `html`, `md`, `txt`.
-         *
-         * @title Format of body
-        */
-        format: "html" | "md" | "txt";
-        /**
-         * Content body of comment.
-         *
-         * @title Content body of comment
-        */
-        body: string;
-        /**
-         * List of attachment files.
-         *
-         * @title List of attachment files
-        */
-        files: IAttachmentFile.ICreate[];
+    export namespace message {
+        export type NestedMessage = {
+            blocks?: Schema.message.Block[];
+            buttons?: Schema.message.Button[] & tags.MinItems<1> & tags.MaxItems<2>;
+            files?: Schema.message.File[] & tags.MinItems<1> & tags.MaxItems<30>;
+            webPage?: Schema.message.WebPage;
+            form?: Schema.message.form.Form;
+        };
+        export type Block = {
+            type: "bullets" | "code" | "text";
+            language?: string;
+            value?: string;
+            blocks?: Schema.message.Block[];
+        };
+        export type Button = {
+            title: string;
+            colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
+            action: Schema.message.action.Action;
+            /**
+             * @deprecated
+            */
+            url?: string;
+        };
+        export namespace action {
+            export type Action = {
+                attributes?: Schema.message.action.Attributes;
+                type: string;
+            };
+            export type Attributes = {};
+        }
+        export type File = {
+            id: string;
+            type?: string;
+            name: string;
+            size: number & tags.Type<"int32">;
+            contentType?: string;
+            duration?: number;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            orientation?: number & tags.Type<"int32">;
+            animated?: boolean;
+            bucket: string;
+            key: string;
+            previewKey?: string;
+            channelId?: string;
+            chatType?: string;
+            chatId?: string;
+        };
+        export type WebPage = {
+            id: string;
+            url: string;
+            title?: string;
+            description?: string;
+            imageUrl?: string;
+            videoUrl?: string;
+            publisher?: string;
+            author?: string;
+            width?: number & tags.Type<"int32">;
+            height?: number & tags.Type<"int32">;
+            bucket?: string;
+            previewKey?: string;
+            logo?: string;
+            name?: string;
+        };
+        export namespace form {
+            export type Form = {
+                submittedAt?: number;
+                inputs?: Schema.message.form.FormInput[];
+                type: string;
+            };
+            export type FormInput = {
+                value?: {};
+                readOnly?: boolean;
+                type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
+                label?: string;
+                bindingKey?: string;
+                dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
+                userChatProfileBindingKey?: boolean;
+                userProfileBindingKey?: boolean;
+            };
+        }
+    }
+    export type NameDesc = {
+        name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
+        description?: string;
     };
-}
-namespace IAttachmentFile {
-    export type ICreate = {
-        /**
-         * File name, except extension.
-         *
-         * If there's file `.gitignore`, then its name is an empty string.
-         *
-         * @title File name, except extension
-        */
+    export type TimeRange = {
+        dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
+        from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+        to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+    };
+    export type Manager = {
+        id?: string;
+        channelId?: string;
+        accountId?: string;
         name: string;
+        description?: string;
+        showDescriptionToFront?: boolean;
+        nameDescI18nMap?: {
+            [key: string]: Schema.NameDesc;
+        };
+        profile?: {
+            [key: string]: {};
+        };
+        email?: string;
+        showEmailToFront?: boolean;
+        mobileNumber?: string & tags.Default<"+18004424000">;
+        showMobileNumberToFront?: boolean;
+        roleId?: string;
+        removed?: boolean;
+        createdAt?: number;
+        updatedAt?: number;
+        removedAt?: number;
+        displayAsChannel?: boolean;
+        defaultGroupWatch?: "all" | "info" | "none";
+        defaultDirectChatWatch?: "all" | "info" | "none";
+        defaultUserChatWatch?: "all" | "info" | "none";
+        chatAlertSound?: "none" | "drop" | "woody" | "bounce" | "crystal" | "xylo" | "quickKnock" | "candy" | "shine";
+        meetAlertSound?: "cute" | "basic" | "gentle" | "marimba";
+        showPrivateMessagePreview?: boolean;
+        operatorScore?: number;
+        touchScore?: number;
+        avatar?: Schema.TinyFile;
+        operatorEmailReminder?: boolean;
+        receiveUnassignedAlert?: boolean;
+        receiveUnassignedChatAlert?: boolean;
+        receiveUnassignedMeetAlert?: boolean;
+        operator?: boolean;
+        operatorStatusId?: string;
+        defaultAllMentionImportant?: boolean;
+        userMessageImportant?: boolean;
+        assignableUserChatTypes?: ("sync" | "async")[] & tags.UniqueItems;
+        autoAssignCapacity?: number & tags.Type<"uint32"> & tags.Maximum<100>;
+        enableAutoAssignOnSync?: boolean;
+        statusEmoji?: string;
+        statusText?: string;
+        statusClearAt?: number;
+        doNotDisturb?: boolean;
+        doNotDisturbClearAt?: number;
+        accountDoNotDisturb?: boolean;
+        accountDoNotDisturbClearAt?: number;
+        enableReactedMessageIndex?: boolean;
+        enableTeamMentionedMessageIndex?: boolean;
+        operatorUpdatedAt?: number;
+        pcInboxMeetAlert?: boolean;
+        mobileInboxMeetAlert?: boolean;
+        pcTeamChatMeetAlert?: boolean;
+        mobileTeamChatMeetAlert?: boolean;
+        managerId?: string;
+        avatarUrl?: string;
         /**
-         * Extension.
-         *
-         * Possible to omit like `README` case.
-         *
-         * @title Extension
+         * @deprecated
         */
-        extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
-        /**
-         * URL path of the real file.
-         *
-         * @title URL path of the real file
-        */
-        url: string;
+        meetOperator?: boolean;
+        emailForFront?: string;
+        mobileNumberForFront?: string & tags.Default<"+18004424000">;
+    };
+    export type TinyFile = {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+    };
+    export type ManagerBadge = {
+        id?: string;
+        teamChatAlert?: number & tags.Type<"int32">;
+        teamChatUnread?: number & tags.Type<"int32">;
+        userChatAlert?: number & tags.Type<"int32">;
+        userChatUnread?: number & tags.Type<"int32">;
+        teamChatThreadAlert?: number & tags.Type<"int32">;
+        teamChatThreadUnread?: number & tags.Type<"int32">;
+        updatedAt?: number;
+        version?: number & tags.Type<"int32">;
+        managerId?: string;
+        alert?: number & tags.Type<"int32">;
+        unread?: number & tags.Type<"int32">;
     };
 }
-type IAutoViewTransformerInputType = IPageIShoppingSaleInquiryComment;
+type IAutoViewTransformerInputType = Schema.desk.ChannelView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -193,89 +279,204 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Helper function to safely extract the latest snapshot from a comment.
-  const getLatestSnapshot = (snapshots: IBbsArticleComment.ISnapshot[]): IBbsArticleComment.ISnapshot | null => {
-    if (!snapshots || snapshots.length === 0) return null;
-    // Assume snapshots are ordered by creation time; if not, sort by created_at.
-    return snapshots[snapshots.length - 1];
-  };
-
-  // Create a DataListItem for each comment
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = input.data.map((comment) => {
-    // Extract relevant fields. The writer may not be a string, so convert it.
-    const writerText = comment.writer != null ? String(comment.writer) : "Unknown";
-    const createdAt = comment.created_at || "Unknown time";
-    // Get the latest snapshot (if any)
-    const latestSnapshot = getLatestSnapshot(comment.snapshots);
-    // Use Markdown to render the comment meta information in the label.
-    const labelMarkdown: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      // We use markdown formatting to emphasize important metadata.
-      content: `**Comment by:** ${writerText}\n**Created at:** ${createdAt}`,
-    };
-
-    // Use Markdown to render the comment body in the value section.
-    // If no snapshot is available, display a placeholder message.
-    const bodyContent = latestSnapshot
-      ? latestSnapshot.body
-      : "_No content available_";
-    const valueMarkdown: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: bodyContent,
-    };
-
+  const channel = input.channel;
+  // Fallback if no channel data is provided
+  if (!channel) {
     return {
-      type: "DataListItem",
-      // label accepts a presentation component.
-      label: labelMarkdown,
-      // value accepts a presentation component.
-      value: valueMarkdown,
+      type: "Text",
+      content: "No channel data available",
+      variant: "body1",
     };
-  });
+  }
 
-  // Create a DataList component that visualizes all comments
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems,
+  // Helper to convert message blocks to a markdown string
+  function blocksToMarkdown(blocks?: Schema.message.Block[]): string {
+    if (!blocks || blocks.length === 0) return "";
+    return blocks
+      .map((blk) => {
+        switch (blk.type) {
+          case "text":
+            return blk.value ?? "";
+          case "code":
+            // wrap code block with language if provided
+            return "" + (blk.language ?? "") + "\n" + (blk.value ?? "") + "\n```";
+          case "bullets":
+            // flatten nested bullets if any
+            if (blk.blocks && blk.blocks.length > 0) {
+              return blk.blocks.map((b) => "- " + (b.value ?? "")).join("\n");
+            }
+            return "- " + (blk.value ?? "");
+          default:
+            return blk.value ?? "";
+        }
+      })
+      .join("\n\n");
+  }
+
+  // Map channel.state to chip color
+  const stateColorMap: Record<string, IAutoView.IAutoViewChipProps["color"]> = {
+    waiting: "orange",
+    active: "green",
+    restricted: "red",
+    preIndebted: "warning",
+    indebted: "error",
+    banned: "darkGray",
+    removed: "gray",
   };
 
-  // Create a CardContent component that holds the DataList.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // CardContent can accept any presentation components including DataList.
-    childrenProps: dataList,
-  };
-
-  // Create a CardHeader that gives summary information about the page.
-  const pagination = input.pagination;
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
+  // Build CardHeader
+  const header: IAutoView.IAutoViewCardHeaderProps = {
     type: "CardHeader",
-    title: "Comments",
-    // Provide page information in the description.
-    description: `Page ${pagination.current} of ${pagination.pages} (Total records: ${pagination.records})`,
-    // Optionally, we set a startElement icon to visually indicate comments.
-    startElement: {
-      type: "Icon",
-      id: "comment",
-      // Use a moderate icon size for better mobile experience.
-      size: 20,
-      // Icon colors should be valid color names; "blue" is chosen for good contrast.
-      color: "blue"
-    }
+    title: channel.name,
+    description: channel.description,
+    startElement: channel.avatarUrl
+      ? {
+          type: "Avatar",
+          src: channel.avatarUrl,
+          name: channel.name,
+          size: 40,
+        }
+      : undefined,
   };
 
-  // Compose the final output using a Vertical Card.
-  // VerticalCard children accept card header and card content.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Prepare CardContent children
+  const contentChildren: IAutoView.IAutoViewPresentationComponentProps[] = [];
+
+  // Show cover image if available
+  if (channel.coverImageUrl) {
+    contentChildren.push({
+      type: "Image",
+      src: channel.coverImageUrl,
+      alt: channel.name,
+    });
+  }
+
+  // Show welcome message as markdown
+  const welcomeMd = blocksToMarkdown(channel.welcomeMessage?.blocks);
+  if (welcomeMd) {
+    contentChildren.push({
+      type: "Markdown",
+      content: welcomeMd,
+    });
+  }
+
+  // Build a list of key/value pairs for channel metadata
+  const dataItems: IAutoView.IAutoViewDataListItemProps[] = [];
+
+  // Utility to push a DataListItem
+  function pushItem(
+    labelText: string,
+    valueComp: IAutoView.IAutoViewPresentationComponentProps
+  ) {
+    dataItems.push({
+      type: "DataListItem",
+      label: [{ type: "Text", content: labelText, variant: "subtitle2" }],
+      value: valueComp,
+    });
+  }
+
+  if (channel.state) {
+    pushItem("State", {
+      type: "Chip",
+      label: channel.state,
+      color: stateColorMap[channel.state] || "gray",
+      variant: "outlined",
+    });
+  }
+  if (channel.bizGrade) {
+    pushItem("Business Grade", {
+      type: "Chip",
+      label: channel.bizGrade,
+      color: "primary",
+      variant: "filled",
+    });
+  }
+  if (channel.country) {
+    pushItem("Country", {
+      type: "Text",
+      content: channel.country,
+      variant: "body2",
+    });
+  }
+  if (channel.domain) {
+    pushItem("Domain", {
+      type: "Text",
+      content: channel.domain,
+      variant: "body2",
+    });
+  }
+  if (channel.phoneNumber) {
+    pushItem("Phone", {
+      type: "Text",
+      content: channel.phoneNumber,
+      variant: "body2",
+    });
+  }
+  if (channel.timeZone) {
+    pushItem("Time Zone", {
+      type: "Chip",
+      label: channel.timeZone,
+      color: "secondary",
+      variant: "outlined",
+    });
+  }
+
+  // Assemble DataList with the metadata
+  if (dataItems.length > 0) {
+    contentChildren.push({
+      type: "DataList",
+      childrenProps: dataItems,
+    });
+  }
+
+  const content: IAutoView.IAutoViewCardContentProps = {
+    type: "CardContent",
+    childrenProps: contentChildren,
+  };
+
+  // Build CardFooter with manager info if present
+  let footer: IAutoView.IAutoViewCardFooterProps | undefined;
+  if (input.manager) {
+    const mgr = input.manager;
+    const badgeCount = input.managerBadge?.unread ?? 0;
+
+    // Avatar wrapped in a badge showing unread count
+    const avatarWithBadge: IAutoView.IAutoViewBadgeProps = {
+      type: "Badge",
+      count: badgeCount,
+      showZero: false,
+      childrenProps: {
+        type: "Avatar",
+        src: mgr.avatarUrl,
+        name: mgr.name,
+        size: 40,
+      },
+    };
+
+    // Manager name
+    const nameText: IAutoView.IAutoViewTextProps = {
+      type: "Text",
+      content: mgr.name,
+      variant: "body1",
+    };
+
+    footer = {
+      type: "CardFooter",
+      childrenProps: [avatarWithBadge, nameText],
+    };
+  }
+
+  // Compose the vertical card
+  const childrenProps: IAutoView.IAutoViewVerticalCardProps["childrenProps"] = [
+    header,
+    content,
+  ];
+  if (footer) {
+    childrenProps.push(footer);
+  }
+
+  return {
     type: "VerticalCard",
-    childrenProps: [
-      // Card header displays summary meta / title.
-      cardHeader,
-      // Card content holds the DataList component.
-      cardContent
-    ]
+    childrenProps,
   };
-
-  // Return the transformed output data for visualization.
-  return verticalCard;
 }

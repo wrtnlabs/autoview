@@ -35,13 +35,14 @@ export const test_compiler_service = async (): Promise<void> => {
     });
     const result: IAutoViewCompilerResult = await service.compile(
       `
-function visualizeData(_: unknown): IAutoViewComponentProps {
+function visualizeData(_: unknown): IAutoView.IAutoViewComponentProps {
   return {
     type: "GridList",
     items: [],
   };
 }
   `,
+      "Schema",
       "test_compiler_service",
     );
     if (result.type !== "success")

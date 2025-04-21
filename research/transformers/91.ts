@@ -1,99 +1,141 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-/**
- * A page.
- *
- * Collection of records with pagination indformation.
-*/
-type IPageIShoppingSection = {
+namespace Schema {
     /**
-     * Page information.
+     * A comment written on an inquiry article.
      *
-     * @title Page information
-    */
-    pagination: IPage.IPagination;
-    /**
-     * List of records.
+     * `IShoppingSaleInquiryComment` is a subtype entity of {@link IBbsArticleComment},
+     * and is used when you want to communicate with multiple people about an
+     * {@link IShoppingSaleInquiry inquiry} written by a
+     * {@link IShoppingCustomer customer}.
      *
-     * @title List of records
+     * For reference, only related parties can write comments for
+     * {@link IShoppingSeller sellers}, but there is no limit to
+     * {@link IShoppingCustomer customers}. In other words, anyone customer can
+     * freely write a comment, even if they are not the person who wrote the inquiry.
     */
-    data: IShoppingSection[];
-};
-namespace IPage {
-    /**
-     * Page information.
-    */
-    export type IPagination = {
+    export type IShoppingSaleInquiryComment = {
         /**
-         * Current page number.
+         * Writer of the comment.
          *
-         * @title Current page number
+         * Both customer and seller can write comment on the sale inquiry.
+         *
+         * By the way, no restriction on the customer, but seller must be the
+         * person who've registered the sale.
+         *
+         * @title Writer of the comment
         */
-        current: number & tags.Type<"int32">;
+        writer: any | any | any;
         /**
-         * Limitation of records per a page.
+         * Primary Key.
          *
-         * @title Limitation of records per a page
+         * @title Primary Key
         */
-        limit: number & tags.Type<"int32">;
+        id: string;
         /**
-         * Total records in the database.
+         * Parent comment's ID.
          *
-         * @title Total records in the database
+         * @title Parent comment's ID
         */
-        records: number & tags.Type<"int32">;
+        parent_id: null | (string & tags.Format<"uuid">);
         /**
-         * Total pages.
+         * List of snapshot contents.
          *
-         * Equal to {@link records} / {@link limit} with ceiling.
+         * It is created for the first time when a comment being created, and is
+         * accumulated every time the comment is modified.
          *
-         * @title Total pages
+         * @title List of snapshot contents
         */
-        pages: number & tags.Type<"int32">;
+        snapshots: Schema.IBbsArticleComment.ISnapshot[];
+        /**
+         * Creation time of comment.
+         *
+         * @title Creation time of comment
+        */
+        created_at: string;
     };
+    export namespace IShoppingAdministrator {
+        export type IInvert = any;
+    }
+    export type IShoppingCustomer = any;
+    export namespace IShoppingSeller {
+        export type IInvert = any;
+    }
+    export namespace IBbsArticleComment {
+        /**
+         * Snapshot of comment.
+         *
+         * `IBbsArticleComment.ISnapshot` is a snapshot entity that contains
+         * the contents of the comment.
+         *
+         * As mentioned in {@link IBbsArticleComment}, designed to keep evidence
+         * and prevent fraud.
+        */
+        export type ISnapshot = {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Creation time of snapshot record.
+             *
+             * In other words, creation time or update time or comment.
+             *
+             * @title Creation time of snapshot record
+            */
+            created_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Content body of comment.
+             *
+             * @title Content body of comment
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: Schema.IAttachmentFile.ICreate[];
+        };
+    }
+    export namespace IAttachmentFile {
+        export type ICreate = {
+            /**
+             * File name, except extension.
+             *
+             * If there's file `.gitignore`, then its name is an empty string.
+             *
+             * @title File name, except extension
+            */
+            name: string;
+            /**
+             * Extension.
+             *
+             * Possible to omit like `README` case.
+             *
+             * @title Extension
+            */
+            extension: null | (string & tags.MinLength<1> & tags.MaxLength<8>);
+            /**
+             * URL path of the real file.
+             *
+             * @title URL path of the real file
+            */
+            url: string;
+        };
+    }
 }
-/**
- * Section information.
- *
- * `IShoppingSection` is a concept that refers to the spatial information of
- * the market.
- *
- * If we compare the section mentioned here to the offline market, it means a
- * spatially separated area within the store, such as the "fruit corner" or
- * "butcher corner". Therefore, in the {@link IShoppingSale sale} entity, it is
- * not possible to classify multiple sections simultaneously, but only one section
- * can be classified.
- *
- * By the way, if your shopping mall system requires only one section, then just
- * use only one. This concept is designed to be expandable in the future.
-*/
-type IShoppingSection = {
-    /**
-     * Primary Key.
-     *
-     * @title Primary Key
-    */
-    id: string;
-    /**
-     * Identifier code.
-     *
-     * @title Identifier code
-    */
-    code: string;
-    /**
-     * Representative name of the section.
-     *
-     * @title Representative name of the section
-    */
-    name: string;
-    /**
-     * Creation time of record.
-     *
-     * @title Creation time of record
-    */
-    created_at: string;
-};
-type IAutoViewTransformerInputType = IPageIShoppingSection;
+type IAutoViewTransformerInputType = Schema.IShoppingSaleInquiryComment;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -101,57 +143,108 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // In this function we transform the shopping section data into a visual list.
-  // We use a DataList component to aggregate individual section items.
-  // For each section, we create a DataListItem that includes a markdown label (to provide a rich text display)
-  // and an icon representing the section (to make the UI more engaging).
-
-  // Handle the edge case where input data is empty.
-  if (!input || !input.data || input.data.length === 0) {
-    // When no sections are provided, return a markdown component displaying an appropriate message.
-    return {
-      type: "Markdown",
-      content: "## No sections available\n\nCurrently, there are no shopping sections to display."
-    } as IAutoView.IAutoViewMarkdownProps;
+  // Safely extract a displayable writer name
+  let writerName = "User";
+  const w = input.writer as any;
+  if (typeof w === "string") {
+    writerName = w;
+  } else if (typeof w?.name === "string") {
+    writerName = w.name;
+  } else if (typeof w?.id === "string") {
+    writerName = w.id;
   }
 
-  // Transform each IShoppingSection record into a DataListItem component.
-  const dataListItems: IAutoView.IAutoViewDataListItemProps[] = input.data.map((section) => {
-    // Construct a markdown string that visually highlights the section's details.
-    // Markdown is used instead of plain text to enrich the UI.
-    const markdownContent = `### ${section.name}\n\n- **Code:** ${section.code}\n- **Created:** ${section.created_at}`;
-    
-    // Create a Markdown component for the label.
-    const labelComponent: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: markdownContent
-    };
+  // Choose the latest snapshot; fallback to a placeholder if none
+  const snapshots = Array.isArray(input.snapshots) ? input.snapshots : [];
+  const latestSnapshot = snapshots.length
+    ? snapshots.reduce((prev, cur) =>
+        prev.created_at > cur.created_at ? prev : cur
+      )
+    : null;
+  const bodyContent = latestSnapshot
+    ? latestSnapshot.body
+    : "_No content available._";
 
-    // Create an Icon component for the value.
-    // Using a shopping bag icon (represented as "shopping-bag") to visually indicate the section context.
-    // This enhances the recognition factor and engages users via visual cues.
-    const iconComponent: IAutoView.IAutoViewIconProps = {
+  // Build a list of attachment items if there are any files
+  let attachmentsList: IAutoView.IAutoViewDataListProps | undefined;
+  if (latestSnapshot && Array.isArray(latestSnapshot.files) && latestSnapshot.files.length > 0) {
+    const items: IAutoView.IAutoViewDataListItemProps[] = latestSnapshot.files.map(
+      (file) => {
+        // Compose a filename with extension
+        const ext = file.extension ? `.${file.extension}` : "";
+        const filename = `${file.name}${ext}`;
+
+        const labelText: IAutoView.IAutoViewTextProps = {
+          type: "Text",
+          content: filename,
+          variant: "body2",
+        };
+        const downloadButton: IAutoView.IAutoViewButtonProps = {
+          type: "Button",
+          label: "Download",
+          variant: "text",
+          size: "small",
+          href: file.url,
+        };
+        return {
+          type: "DataListItem",
+          label: labelText,
+          value: downloadButton,
+        };
+      }
+    );
+    attachmentsList = {
+      type: "DataList",
+      childrenProps: items,
+    };
+  }
+
+  // Optional chip to show parent comment linkage
+  let replyChip: IAutoView.IAutoViewChipProps | undefined;
+  if (typeof input.parent_id === "string" && input.parent_id.length > 0) {
+    replyChip = {
+      type: "Chip",
+      label: `Reply to ${input.parent_id}`,
+      variant: "outlined",
+      size: "small",
+      color: "secondary",
+    };
+  }
+
+  // Card header with an icon for the user
+  const header: IAutoView.IAutoViewCardHeaderProps = {
+    type: "CardHeader",
+    title: `Comment by ${writerName}`,
+    description: new Date(input.created_at).toLocaleString(),
+    startElement: {
       type: "Icon",
-      id: "shopping-bag",
-      color: "blue", // Chosen color; can be adapted based on theming or dynamic inputs.
-      size: 24
-    };
-
-    // Return a DataListItem that bundles the markdown label and the icon.
-    return {
-      type: "DataListItem",
-      label: labelComponent,
-      value: iconComponent
-    };
-  });
-
-  // Compose the final DataList component that holds all section items.
-  const dataList: IAutoView.IAutoViewDataListProps = {
-    type: "DataList",
-    childrenProps: dataListItems
+      id: "user",
+      size: 24,
+      color: "blue",
+    },
+    endElement: replyChip,
   };
 
-  // The resulting component is responsive and uses rich visual elements,
-  // making it suitable for both web and mobile devices.
-  return dataList;
+  // Card content: markdown of body + attachments list if any
+  const contentChildren: IAutoView.IAutoViewPresentationComponentProps[] = [
+    {
+      type: "Markdown",
+      content: bodyContent,
+    },
+  ];
+  if (attachmentsList) {
+    contentChildren.push(attachmentsList);
+  }
+  const content: IAutoView.IAutoViewCardContentProps = {
+    type: "CardContent",
+    childrenProps: contentChildren,
+  };
+
+  // Assemble into a vertical card for responsive display
+  const card: IAutoView.IAutoViewVerticalCardProps = {
+    type: "VerticalCard",
+    childrenProps: [header, content],
+  };
+
+  return card;
 }

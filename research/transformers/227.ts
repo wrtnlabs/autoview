@@ -1,74 +1,141 @@
+import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type CANNOT_FINDONE_ARTICLE = any;
-type ResponseForm_lt_boolean_gt_ = any;
-type IAutoViewTransformerInputType = any | any;
+namespace Schema {
+    export namespace open {
+        export namespace marketing {
+            export type CampaignUserView = {
+                campaignUser?: Schema.marketing.CampaignUser;
+            };
+        }
+    }
+    export namespace marketing {
+        export type CampaignUser = {
+            campaignId?: string;
+            userId?: string;
+            msgId?: string;
+            userChatId?: string;
+            sent?: number;
+            view?: number;
+            goal?: number;
+            click?: number;
+            version?: number & tags.Type<"int32">;
+            id?: string;
+            campaignMessageView?: boolean;
+        };
+    }
+}
+type IAutoViewTransformerInputType = Schema.open.marketing.CampaignUserView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
 
 
 
+// Transforms CampaignUserView data into a visual AutoView component tree.
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // ------------------------------------------------------------------------------
-  // Data Transformation Logic:
-  // We receive any input and we want to produce a visually engaging summary.
-  // In this implementation, we embed the input as a formatted JSON within a Markdown block.
-  // Additionally, we add a header with an icon to provide a visual cue for data visualization.
-  // If the input is not valid or is empty, we still produce an UI component that indicates so.
-  // ------------------------------------------------------------------------------
-
-  // Convert input to a pretty printed JSON string.
-  // In production use, you might want to perform further transformations.
-  let jsonString: string;
-  try {
-    // Try to stringify the data with indentation; this might throw on circular references.
-    jsonString = JSON.stringify(input, null, 2);
-  } catch {
-    jsonString = "Unable to display input data due to circular references or invalid structure.";
+  const cu = input.campaignUser;
+  // Handle edge case: no campaign data provided
+  if (!cu) {
+    return {
+      type: "Markdown",
+      content: "**No campaign data available**",
+    };
   }
 
-  // Prepare a markdown content using a code block to render the JSON
-  const markdownContent = `## Data Visualization\n\n` +
-    "Below is a formatted view of the input data:\n\n" +
-    "json\n" +
-    jsonString +
-    "\n```";
+  // Destructure metrics with sensible defaults
+  const {
+    campaignId,
+    userId,
+    sent = 0,
+    view = 0,
+    click = 0,
+    goal = 0,
+    version,
+    campaignMessageView,
+  } = cu;
 
-  // Create the card header component with an icon to engage users visually.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Data Visualization",
-    description: "An overview of your input data displayed with visual cues.",
-    // startElement accepts icon, avatar, chip, etc. Here, we use an icon component.
-    startElement: {
-      type: "Icon",
-      id: "chart-bar", // ensure the icon name exists in your icon library in kebab-case
-      color: "blue",   // using a primary color from the predefined list
-      size: 24         // a reasonable size to make the icon visible
-    }
-  };
+  // Helper: build a DataListItem for a given metric
+  const createMetricItem = (
+    label: string,
+    iconId: string,
+    value: number | undefined,
+  ): IAutoView.IAutoViewDataListItemProps => ({
+    type: "DataListItem",
+    // Label area: icon + text
+    label: [
+      {
+        type: "Icon",
+        id: iconId,
+        size: 16,
+        color: "gray",
+      },
+      {
+        type: "Text",
+        content: label,
+        variant: "body2",
+      },
+    ],
+    // Value area: just the number
+    value: {
+      type: "Text",
+      content: String(value ?? 0),
+      variant: "body2",
+    },
+  });
 
-  // Create the card content component that embeds the markdown.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // childrenProps can be a single component or an array; using a Markdown component for text.
-    childrenProps: {
-      type: "Markdown",
-      content: markdownContent
-    }
-  };
+  // Aggregate the core metrics
+  const metrics: IAutoView.IAutoViewDataListItemProps[] = [
+    createMetricItem("Sent", "paper-plane", sent),
+    createMetricItem("Views", "eye", view),
+    createMetricItem("Clicks", "mouse-pointer", click),
+    createMetricItem("Goal", "bullseye", goal),
+  ];
+  // Optionally include version if present
+  if (version !== undefined) {
+    metrics.push(createMetricItem("Version", "tag", version));
+  }
 
-  // Compose the final vertical card that aggregates the header and the content.
-  // VerticalCard.childrenProps accepts an array of card components.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
+  // Build the responsive card layout
+  return {
     type: "VerticalCard",
     childrenProps: [
-      cardHeader,
-      cardContent
-      // Optionally, you could add a CardFooter or other components here as needed.
-    ]
+      {
+        type: "CardHeader",
+        // Show the campaign and user identifiers
+        title: `Campaign ${campaignId}`,
+        description: `User ${userId}`,
+        // A prominent icon to identify the card
+        startElement: {
+          type: "Icon",
+          id: "bullhorn",
+          size: 24,
+          color: "blue",
+        },
+        // A badge indicating if the message was viewed
+        endElement: campaignMessageView
+          ? {
+              type: "Chip",
+              label: "Viewed",
+              color: "green",
+              size: "small",
+              variant: "filled",
+            }
+          : {
+              type: "Chip",
+              label: "Not Viewed",
+              color: "gray",
+              size: "small",
+              variant: "outlined",
+            },
+      },
+      {
+        type: "CardContent",
+        // Present the metric list
+        childrenProps: {
+          type: "DataList",
+          childrenProps: metrics,
+        },
+      },
+    ],
   };
-
-  // Return the composed component which implements IAutoView.IAutoViewComponentProps.
-  return verticalCard;
 }

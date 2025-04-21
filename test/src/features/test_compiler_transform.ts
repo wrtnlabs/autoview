@@ -41,6 +41,7 @@ export const test_compiler_transform = async (): Promise<void> => {
           items: [],
         };
     `,
+    "Schema",
     "test_compiler_transform",
   );
   if (result.type !== "success")

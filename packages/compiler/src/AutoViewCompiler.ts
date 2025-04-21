@@ -49,7 +49,10 @@ export class AutoViewCompiler {
     return source;
   }
 
-  public generateBoilerplate(transformFunctionName: string): string {
+  public generateBoilerplate(
+    inputSchemaPrefix: string,
+    transformFunctionName: string,
+  ): string {
     const ctx: IAutoViewProgrammerContext = {
       importer: new AutoViewImportProgrammer(),
     };
@@ -57,6 +60,7 @@ export class AutoViewCompiler {
       ctx,
       this.inputComponents,
       this.inputSchema,
+      inputSchemaPrefix,
       this.componentComponents,
       this.componentSchema,
       transformFunctionName,
@@ -67,6 +71,7 @@ export class AutoViewCompiler {
   }
 
   public generateBoilerplateForRawTsCode(
+    inputSchemaPrefix: string,
     transformFunctionName: string,
   ): string {
     const ctx: IAutoViewProgrammerContext = {
@@ -76,6 +81,7 @@ export class AutoViewCompiler {
       ctx,
       this.inputComponents,
       this.inputSchema,
+      inputSchemaPrefix,
       transformFunctionName,
     );
     const source: string = FilePrinter.write({ statements });
@@ -85,6 +91,7 @@ export class AutoViewCompiler {
 
   public async compile(
     script: string,
+    inputSchemaPrefix: string,
     transformFunctionName: string,
   ): Promise<IAutoViewCompilerResult> {
     const ctx: IAutoViewProgrammerContext = {
@@ -94,6 +101,7 @@ export class AutoViewCompiler {
       ctx,
       this.inputComponents,
       this.inputSchema,
+      inputSchemaPrefix,
       this.componentComponents,
       this.componentSchema,
       transformFunctionName,
@@ -110,7 +118,9 @@ export class AutoViewCompiler {
     }
   }
 
-  public async compileRandom(): Promise<IAutoViewCompilerResult> {
+  public async compileRandom(
+    inputSchemaPrefix: string,
+  ): Promise<IAutoViewCompilerResult> {
     const ctx: IAutoViewProgrammerContext = {
       importer: new AutoViewImportProgrammer(),
     };
@@ -118,6 +128,7 @@ export class AutoViewCompiler {
       ctx,
       this.inputComponents,
       this.inputSchema,
+      inputSchemaPrefix,
     );
     const source: string = FilePrinter.write({ statements });
 

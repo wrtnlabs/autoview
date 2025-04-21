@@ -1,34 +1,59 @@
 import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-namespace desk {
-    export type ChatTagsView = {
-        next?: string;
-        chatTags?: ChatTag[];
-    };
+namespace Schema {
+    export namespace IShoppingChannelCategory {
+        /**
+         * Invert category information with parent category.
+        */
+        export type IInvert = {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | any;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        };
+    }
 }
-type ChatTag = {
-    id?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    channelId?: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
-    name: string;
-    key: string & tags.JsonSchemaPlugin<{
-        readOnly: true
-    }>;
-    description?: string;
-    /**
-     * @deprecated
-    */
-    followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
-    createdAt?: number & tags.JsonSchemaPlugin<{
-        format: "int64",
-        readOnly: true
-    }>;
-};
-type IAutoViewTransformerInputType = desk.ChatTagsView;
+type IAutoViewTransformerInputType = Schema.IShoppingChannelCategory.IInvert;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -36,76 +61,62 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Helper function: map chat tag colorVariant to a valid AutoView color.
-  // Allowed colors for chip and avatar components are:
-  // "primary", "secondary", "success", "error", "warning", "info",
-  // "red", "orange", "yellow", "lime", "green", "teal", "cyan", "blue",
-  // "indigo", "violet", "pink", "gray", "darkGray"
-  // Since some chat tag colorVariant values (like "olive", "cobalt", "purple", "navy") are not allowed,
-  // we default these to "gray".
-  function normalizeColor(colorVariant?: string): "red" | "orange" | "yellow" | "lime" | "green" | "teal" | "cyan" | "blue" | "indigo" | "violet" | "pink" | "gray" | "darkGray" | "primary" {
-    const validColors = new Set([
-      "red", "orange", "yellow", "lime", "green", "teal", "cyan",
-      "blue", "indigo", "violet", "pink", "gray", "darkGray",
-      "primary", "secondary", "success", "error", "warning", "info"
-    ]);
-    if (colorVariant && validColors.has(colorVariant)) {
-      return colorVariant as any;
-    }
-    // For known alternatives we try a mapping (if desired you can expand this)
-    if (colorVariant === "olive" || colorVariant === "cobalt" || colorVariant === "purple" || colorVariant === "navy") {
-      return "gray";
-    }
-    // Fallback default
-    return "primary";
+  // Build the lineage (ancestor chain) from root to immediate parent
+  const lineage: Array<{ name: string; code: string }> = [];
+  let cursor = input.parent as Schema.IShoppingChannelCategory.IInvert | null;
+  while (cursor) {
+    lineage.push({ name: cursor.name, code: cursor.code });
+    // Traverse upward
+    cursor = cursor.parent as Schema.IShoppingChannelCategory.IInvert | null;
   }
+  // Reverse so that the top-most ancestor comes first
+  lineage.reverse();
 
-  // Check if the input has any chat tags to display.
-  if (input.chatTags && input.chatTags.length > 0) {
-    // For each chat tag, create a chip.
-    // We use chips for a more compact and visual representation, and we include an avatar element with the first letter.
-    const chipChildren: IAutoView.IAutoViewChipProps[] = input.chatTags.map((tag) => {
-      // Create an avatar to display as the chip start element.
-      // Extract the first character of the tag name (if available) to use as a visual cue.
-      const firstChar = tag.name.trim().charAt(0).toUpperCase();
-      // Determine the color for this tag using our helper.
-      const normalizedColor = normalizeColor(tag.colorVariant);
+  // Compose a markdown representation of the parent hierarchy
+  const parentSection =
+    lineage.length > 0
+      ? [
+          "### Parent Hierarchy",
+          ...lineage.map((item, idx) => `${"  ".repeat(idx)}- ${item.name} (${item.code})`),
+        ].join("\n")
+      : "### Parent Hierarchy\n- No parent category";
 
-      // Construct the avatar element. The 'src' property is not provided here because we are using a letter symbol.
-      const avatarElement: IAutoView.IAutoViewAvatarProps = {
-        type: "Avatar",
-        name: firstChar,
-        variant: normalizedColor,
-        size: 24 // A moderate size for an avatar inside a chip.
-      };
+  // Construct the VerticalCard to display the category info
+  const card: IAutoView.IAutoViewVerticalCardProps = {
+    type: "VerticalCard",
+    childrenProps: [
+      // Header with icon, title, and code
+      {
+        type: "CardHeader",
+        title: input.name,
+        description: `Code: ${input.code}`,
+        startElement: {
+          type: "Icon",
+          id: "tags",    // using a tag icon to represent category
+          size: 24,
+          color: "blue",
+        },
+      },
+      // Content: show parent hierarchy via markdown for better readability
+      {
+        type: "CardContent",
+        childrenProps: {
+          type: "Markdown",
+          content: parentSection,
+        },
+      },
+      // Footer: show creation timestamp in a subtle style
+      {
+        type: "CardFooter",
+        childrenProps: {
+          type: "Text",
+          content: `Created at: ${input.created_at}`,
+          variant: "caption",
+          color: "gray",
+        },
+      },
+    ],
+  };
 
-      // Construct the chip using the tag name and avatar.
-      return {
-        type: "Chip",
-        label: tag.name,
-        startElement: avatarElement,
-        color: normalizedColor,
-        size: "small",
-        variant: "filled"
-      };
-    });
-
-    // Wrap the chips in a ChipGroup for visual grouping.
-    const chipGroup: IAutoView.IAutoViewChipGroupProps = {
-      type: "ChipGroup",
-      childrenProps: chipChildren,
-      maxItems: chipChildren.length // Show all items; adjust as needed for UI constraints.
-    };
-
-    // Return the ChipGroup as the final component.
-    return chipGroup;
-  } else {
-    // If there are no chat tags, display a markdown message using a Markdown component.
-    // Using markdown helps in a more stylized and responsive presentation.
-    const markdownComponent: IAutoView.IAutoViewMarkdownProps = {
-      type: "Markdown",
-      content: "## No Chat Tags Available\n\nThere are currently no chat tags to display."
-    };
-    return markdownComponent;
-  }
+  return card;
 }

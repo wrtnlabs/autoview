@@ -1,7 +1,31 @@
+import { tags } from "typia";
 import type * as IAutoView from "@autoview/interface";
-type SELECT_MORE_THAN_ONE_IMAGE = any;
-type ResponseForm_lt_Array_lt_string_gt__gt_ = any;
-type IAutoViewTransformerInputType = any | any;
+namespace Schema {
+    export namespace desk {
+        export type GroupsInfiniteScrollingView = {
+            next?: string;
+            groups?: Schema.Group[];
+        };
+    }
+    export type Group = {
+        id?: string;
+        channelId?: string;
+        title: string & tags.Pattern<"[\\p{L}\\p{N}-_()]+">;
+        scope: "all" | "public" | "private";
+        managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+        icon?: string & tags.Pattern<"\\S+">;
+        liveMeetId?: string;
+        description?: string;
+        createdAt?: number;
+        updatedAt?: number;
+        /**
+         * @deprecated
+        */
+        name?: string;
+        active?: boolean;
+    };
+}
+type IAutoViewTransformerInputType = Schema.desk.GroupsInfiniteScrollingView;
 export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
     return visualizeData($input);
 }
@@ -9,57 +33,124 @@ export function transform($input: IAutoViewTransformerInputType): IAutoView.IAut
 
 
 function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
-  // Convert the input data to a pretty JSON string for visualization.
-  // If the input is null/undefined, we provide a fallback message.
-  let dataString: string;
-  if (input === null || input === undefined) {
-    dataString = "No data provided.";
-  } else {
-    try {
-      // Format input as a prettified JSON string.
-      dataString = JSON.stringify(input, null, 2);
-    } catch (error) {
-      // Fallback to a simple string conversion in case of exception.
-      dataString = String(input);
-    }
+  // Destructure input for ease of use
+  const { groups, next } = input;
+
+  // If no groups are present, show an informative markdown message
+  if (!groups || groups.length === 0) {
+    return {
+      type: "Markdown",
+      content: "## No groups available\nThere are no groups to display at this time.",
+    };
   }
 
-  // We use a markdown component to present the data in a visually appealing way.
-  // Here we wrap the JSON data within a markdown code block and add a header.
-  const markdownComponent: IAutoView.IAutoViewMarkdownProps = {
-    type: "Markdown",
-    content: "## Data Overview\n\njson\n" + dataString + "\n```"
-  };
+  // Transform each group into a DataListItemProps for a rich list view
+  const items: IAutoView.IAutoViewDataListItemProps[] = groups.map((group) => {
+    // Build the label: optional icon (if provided) followed by the title text
+    const labelComponents: IAutoView.IAutoViewPresentationComponentProps[] = [];
 
-  // Create a card header component which visualizes the title using an icon.
-  // The endElement is an icon component that uses a common “eye” icon as a metaphor for data inspection.
-  const cardHeader: IAutoView.IAutoViewCardHeaderProps = {
-    type: "CardHeader",
-    title: "Data Visualization",
-    description: "Interactive overview of the transformed input data.",
-    endElement: {
-      type: "Icon",
-      id: "eye",
-      // Optional visual styling: using a pleasant blue shade and moderate size.
-      color: "blue",
-      size: 16
+    if (group.icon) {
+      // Use FontAwesome icon if the group.icon matches a valid id
+      labelComponents.push({
+        type: "Icon",
+        id: group.icon,
+        size: 24,
+        color: "blue",
+      });
     }
+
+    // Title text component
+    labelComponents.push({
+      type: "Text",
+      content: group.title,
+      variant: "h5",
+      color: "primary",
+    });
+
+    // Build the value column: description (markdown), scope chip, manager badge
+    const valueComponents: IAutoView.IAutoViewPresentationComponentProps[] = [];
+
+    if (group.description) {
+      // Render description with markdown for richer formatting
+      valueComponents.push({
+        type: "Markdown",
+        content: group.description,
+      });
+    }
+
+    // Scope indicator as a chip; color-coded for quick visual distinction
+    const scopeColor =
+      group.scope === "private"
+        ? "error"
+        : group.scope === "public"
+        ? "success"
+        : "info";
+    valueComponents.push({
+      type: "Chip",
+      label: group.scope,
+      variant: "filled",
+      color: scopeColor,
+      size: "small",
+    });
+
+    // Badge showing number of managers (if any)
+    const managerCount = group.managerIds?.length ?? 0;
+    valueComponents.push({
+      type: "Badge",
+      count: managerCount,
+      maxCount: 99,
+      showZero: false,
+      childrenProps: {
+        type: "Icon",
+        id: "users",    // FontAwesome "users" icon for managers
+        color: "gray",
+        size: 16,
+      },
+    });
+
+    return {
+      type: "DataListItem",
+      label: labelComponents,
+      value: valueComponents,
+    };
+  });
+
+  // Assemble the data list
+  const dataList: IAutoView.IAutoViewDataListProps = {
+    type: "DataList",
+    childrenProps: items,
   };
 
-  // Encapsulate the markdown component within a card content component.
-  const cardContent: IAutoView.IAutoViewCardContentProps = {
-    type: "CardContent",
-    // childrenProps accepts a single component, here our markdown component.
-    childrenProps: markdownComponent
-  };
+  // If there's a `next` token/url, append a "Load more" button wrapped in a card
+  if (next) {
+    const loadMoreButton: IAutoView.IAutoViewButtonProps = {
+      type: "Button",
+      label: "Load more",
+      variant: "text",
+      color: "primary",
+      size: "medium",
+      href: next,
+    };
 
-  // Compose the final visual UI with a vertical card which aggregates the header and content.
-  // VerticalCard.childrenProps expects an array of components, hence we provide both header and content.
-  const verticalCard: IAutoView.IAutoViewVerticalCardProps = {
-    type: "VerticalCard",
-    childrenProps: [cardHeader, cardContent]
-  };
+    // CardContent to hold the list
+    const cardContent: IAutoView.IAutoViewCardContentProps = {
+      type: "CardContent",
+      childrenProps: [dataList],
+    };
 
-  // Return the fully composed component for rendering.
-  return verticalCard;
+    // CardFooter to hold the pagination control
+    const cardFooter: IAutoView.IAutoViewCardFooterProps = {
+      type: "CardFooter",
+      childrenProps: loadMoreButton,
+    };
+
+    // Wrap everything in a vertical card for a cohesive mobile-friendly layout
+    return {
+      type: "VerticalCard",
+      childrenProps: [cardContent, cardFooter],
+    };
+  }
+
+  // No pagination needed, return just the data list
+  return dataList;
 }
