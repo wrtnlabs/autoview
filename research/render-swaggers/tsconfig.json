@@ -19,16 +19,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@transformers/*": ["../transformers/*"]
-    }
+      "@/*": ["./src/*"]
+    },
+    "noImplicitAny": false,
+    "strictNullChecks": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "../transformers/**/*.ts"
+    "./src/transformers/**/*.ts",
+    "./src/transformer-randoms/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

@@ -1,3 +1,4 @@
+import unTypiaNext from "@ryoppippi/unplugin-typia/next";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -5,4 +6,4 @@ const nextConfig: NextConfig = {
   devIndicators: false,
 };
 
-export default nextConfig;
+export default unTypiaNext(nextConfig);

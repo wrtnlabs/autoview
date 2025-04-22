@@ -1,0 +1,629 @@
+import { tags } from "typia";
+import type * as IAutoView from "@autoview/interface";
+namespace Schema {
+    /**
+     * Price information of the order including discounts.
+    */
+    export type IShoppingOrderPrice = {
+        /**
+         * List of discount coupon ticket payments.
+         *
+         * @title List of discount coupon ticket payments
+        */
+        ticket_payments: Schema.IShoppingCouponTicketPayment[];
+        /**
+         * Amount of the cash payment.
+         *
+         * @title Amount of the cash payment
+        */
+        cash: number;
+        /**
+         * Amount of the deposit payment.
+         *
+         * @title Amount of the deposit payment
+        */
+        deposit: number;
+        /**
+         * Amount of the mileage payment.
+         *
+         * @title Amount of the mileage payment
+        */
+        mileage: number;
+        /**
+         * Amount of the discount coupon ticket payment.
+         *
+         * @title Amount of the discount coupon ticket payment
+        */
+        ticket: number;
+        /**
+         * Nominal price.
+         *
+         * This is not {@link real real price} to pay, but just a nominal price to show.
+         * If this value is greater than the {@link real real price}, it would be shown
+         * like {@link IShoppingSeller seller} is giving a discount.
+         *
+         * @title Nominal price
+        */
+        nominal: number;
+        /**
+         * Real price to pay.
+         *
+         * @title Real price to pay
+        */
+        real: number;
+    };
+    /**
+     * Discount coupon ticket payment details.
+     *
+     * `IShoppingCouponTicketPayment` is an entity that embodies the payment
+     * information for the {@link IShoppingOrder order} of
+     * {@link IShoppingCouponTicket}, and is used when a consumer uses the
+     * discount coupon ticket he or she was issued to order and has the payment
+     * amount deducted.
+     *
+     * And since {@link IShoppingOrder} itself is not an entity used in
+     * situations where an order is completed, but rather an entity designed to
+     * express an order request, the creation of this
+     * `IShoppingCouponTicketPayment` record does not actually mean that the
+     * attached ticket disappears. Until the {@link IShoppingCustomer customer}
+     * {@link IShoppingOrderPublish.paid_at completes the payment} and confirms
+     * the order, the ticket can be understood as a kind of deposit.
+     *
+     * Additionally, this record can be deleted by the customer reversing the
+     * payment of the ticket, but it can also be deleted when the attribution
+     * order itself is cancelled.
+    */
+    export type IShoppingCouponTicketPayment = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Target ticket.
+         *
+         * @title Target ticket
+        */
+        ticket: Schema.IShoppingCouponTicket;
+        /**
+         * Creation time of the record.
+         *
+         * @title Creation time of the record
+        */
+        created_at: string;
+    };
+    /**
+     * Discount coupon ticket issuance details.
+     *
+     * `IShoppingCouponTicket` is an entity that symbolizes
+     * {@link IShoppingCoupon discount coupon} tickets issued by
+     * {@link IShoppingCustomer customers}.
+     *
+     * And if the target discount coupon specification itself has an expiration
+     * date, the expiration date is recorded in expired_at and is automatically
+     * discarded after that expiration date. Of course, it doesn't matter if you
+     * use the discount coupon for your order within the deadline.
+    */
+    export type IShoppingCouponTicket = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Customer who've taken the coupon ticket.
+         *
+         * @title Customer who've taken the coupon ticket
+        */
+        customer: Schema.IShoppingCustomer;
+        /**
+         * Target coupon.
+         *
+         * @title Target coupon
+        */
+        coupon: Schema.IShoppingCoupon;
+        /**
+         * Creation time of the record.
+         *
+         * @title Creation time of the record
+        */
+        created_at: string;
+        /**
+         * Expiration time of the ticket.
+         *
+         * @title Expiration time of the ticket
+        */
+        expired_at: null | (string & tags.Format<"date-time">);
+    };
+    /**
+     * Customer information, but not a person but a connection basis.
+     *
+     * `IShoppingCustomer` is an entity that literally embodies the information of
+     * those who participated in the market as customers. By the way, the
+     * `IShoppingCustomer` does not mean a person, but a connection basis. Therefore,
+     * even if the same person connects to the shopping mall multiple, multiple
+     * records are created in `IShoppingCustomer`.
+     *
+     * The first purpose of this is to track the customer's inflow path in detail,
+     * and it is for cases where the same person enters as a non-member,
+     * {@link IShoppingCartCommodity puts items in the shopping cart} in advance,
+     * and only authenticates their {@link IShoppingCitizen real name} or
+     * registers/logs in at the moment of {@link IShoppingOrderPublish payment}.
+     * It is the second. Lastly, it is to accurately track the activities that
+     * a person performs at the shopping mall in various ways like below.
+     *
+     * - Same person comes from an {@link IShoppingExternalUser external service}
+     * - Same person creates multiple accounts
+     * - Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}
+     * - Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time
+     *
+     * Therefore, `IShoppingCustomer` can have multiple records with the same
+     * {@link IShoppingCitizen}, {@link IShoppingMember}, and
+     * {@link IShoppingExternalUser}. Additionally, if a customer signs up for
+     * membership after verifying their real name or signs up for our service after
+     * being a user of an external service, all related records are changed at once.
+     * Therefore, identification and tracking of customers can be done very
+     * systematically.
+    */
+    export type IShoppingCustomer = {
+        /**
+         * Discriminant for the type of customer.
+         *
+         * @title Discriminant for the type of customer
+        */
+        type: "customer";
+        /**
+         * Membership information.
+         *
+         * If the customer has joined as a member.
+         *
+         * @title Membership information
+        */
+        member: null | any;
+        /**
+         * Citizen information.
+         *
+         * If the customer has verified his real name and mobile number.
+         *
+         * @title Citizen information
+        */
+        citizen: null | any;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Belonged channel.
+         *
+         * @title Belonged channel
+        */
+        channel: Schema.IShoppingChannel;
+        /**
+         * External user information.
+         *
+         * When the customer has come from an external service.
+         *
+         * @title External user information
+        */
+        external_user: null | any;
+        /**
+         * Connection address.
+         *
+         * Same with {@link window.location.href} of client.
+         *
+         * @title Connection address
+        */
+        href: string;
+        /**
+         * Referrer address.
+         *
+         * Same with {@link window.document.referrer} of client.
+         *
+         * @title Referrer address
+        */
+        referrer: null | (string & tags.Format<"uri">) | (string & tags.MaxLength<0>);
+        /**
+         * Connection IP Address.
+         *
+         * @title Connection IP Address
+        */
+        ip: (string & tags.Format<"ipv4">) | (string & tags.Format<"ipv6">);
+        /**
+         * Creation time of the connection record.
+         *
+         * @title Creation time of the connection record
+        */
+        created_at: string;
+    };
+    export type IShoppingMember = any;
+    export type IShoppingCitizen = any;
+    /**
+     * Channel information.
+     *
+     * `IShoppingChannel` is a concept that shapes the distribution channel in the
+     * market. Therefore, the difference in the channel in this e-commerce system
+     * means that it is another site or application.
+     *
+     * By the way, if your shopping mall system requires only one channel, then
+     * just use only one. This concept is designed to be expandable in the future.
+    */
+    export type IShoppingChannel = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier code.
+         *
+         * @title Identifier code
+        */
+        code: string;
+        /**
+         * Name of the channel.
+         *
+         * @title Name of the channel
+        */
+        name: string;
+    };
+    export type IShoppingExternalUser = any;
+    /**
+     * Discount coupon.
+     *
+     * `IShoppingCoupon` is an entity that symbolizes discount coupons at
+     * a shopping mall.
+     *
+     * Note that, `IShoppingCoupon` only contains specification information
+     * about discount coupons. Please keep in mind that this is a different
+     * concept from {@link IShoppingCouponTicket}, which refers to the issuance
+     * of a discount coupon, or {@link IShoppingCouponTicketPayment}, which
+     * refers to its payment.
+     *
+     * Additionally, discount coupons are applied on an order-by-order basis,
+     * but each has its own unique restrictions. For example, a coupon with
+     * {@link IShoppingCouponSellerCriteria} may or may not be used only for
+     * {@link IShoppingSale} of listings registered by the {@link IShoppingSeller}.
+     * Also, there are restrictions such as
+     * {@link IShoppingCouponDiscount.threshold minimum amount restrictions} for
+     * using discount coupons and
+     * {@link IShoppingCouponDiscount.limit maximum discount amount limits}.
+     *
+     * In addition, you can set whether to issue discount coupons publicly or
+     * give them only to people who know the specific issuing code. In addition,
+     * there are restrictions such as issued discount coupons having an
+     * {@link IShoppingCouponRestriction.expired_at expiration date} or being
+     * issued only to customers who came in through a
+     * {@link IShoppingCouponFunnelCriteria specific funnel}.
+     *
+     * For more information, please refer to the properties below and the
+     * subsidiary entities described later.
+    */
+    export type IShoppingCoupon = {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Designer who've made the coupon.
+         *
+         * @title Designer who've made the coupon
+        */
+        designer: any | any;
+        /**
+         * Inventory information.
+         *
+         * @title Inventory information
+        */
+        inventory: Schema.IShoppingCouponInventory;
+        /**
+         * List of criteria information.
+         *
+         * @title List of criteria information
+        */
+        criterias: (any | any | any | any)[];
+        /**
+         * Discount information.
+         *
+         * @title Discount information
+        */
+        discount: any | any;
+        /**
+         * Restriction information.
+         *
+         * @title Restriction information
+        */
+        restriction: Schema.IShoppingCouponRestriction;
+        /**
+         * Representative name of the coupon.
+         *
+         * @title Representative name of the coupon
+        */
+        name: string;
+        /**
+         * Opening time of the coupon.
+         *
+         * @title Opening time of the coupon
+        */
+        opened_at: null | (string & tags.Format<"date-time">);
+        /**
+         * Closing time of the coupon.
+         *
+         * Tickets cannot be issued after this time.
+         *
+         * However, previously issued tickets can still be used until their
+         * expiration date.
+         *
+         * @title Closing time of the coupon
+        */
+        closed_at: null | (string & tags.Format<"date-time">);
+        /**
+         * Creation tie of the record.
+         *
+         * @title Creation tie of the record
+        */
+        created_at: string;
+    };
+    export type IShoppingAdministrator = any;
+    export type IShoppingSeller = any;
+    /**
+     * Inventory information of the coupon.
+     *
+     * If a {@link IShoppingCoupon coupon} has been designed with limited
+     * inventory, this `IShoppingCouponInventory` structure represents the
+     * remaining inventory information.
+    */
+    export type IShoppingCouponInventory = {
+        /**
+         * Remaining volume for everyone.
+         *
+         * If there is a limit to the quantity issued, it becomes impossible to
+         * issue tickets exceeding this value.
+         *
+         * In other words, the concept of N coupons being issued on a first-come,
+         * first-served basis is created.
+         *
+         * @title Remaining volume for everyone
+        */
+        volume: null | (number & tags.Type<"uint32">);
+        /**
+         * Remaining volume per citizen.
+         *
+         * As a limit to the total amount of issuance per person, it is common to
+         * assign 1 to limit duplicate issuance to the same citizen, or to use the
+         * `nul`` value to set no limit.
+         *
+         * Of course, by assigning a value of N, the total amount issued to the
+         * same citizen can be limited.
+         *
+         * @title Remaining volume per citizen
+        */
+        volume_per_citizen: null | (number & tags.Type<"uint32">);
+    };
+    export type IShoppingCouponSectionCriteria = any;
+    export type IShoppingCouponSellerCriteria = any;
+    export type IShoppingCouponSaleCriteria = any;
+    export type IShoppingCouponFunnelCriteria = any;
+    export namespace IShoppingCouponDiscount {
+        export type IAmount = any;
+        export type IPercent = any;
+    }
+    /**
+     * Restriction information of the coupon.
+    */
+    export type IShoppingCouponRestriction = {
+        /**
+         * Access level of coupon.
+         *
+         * - public: possible to find from public API
+         * - private: unable to find from public API
+         *   - arbitrarily assigned by the seller or administrator
+         *   - issued from one-time link
+         *
+         * @title Access level of coupon
+        */
+        access: "public" | "private";
+        /**
+         * Exclusivity or not.
+         *
+         * An exclusive discount coupon refers to a discount coupon that has an
+         * exclusive relationship with other discount coupons and can only be
+         * used alone. That is, when an exclusive discount coupon is used, no
+         * other discount coupon can be used for the same
+         * {@link IShoppingOrder order} or {@link IShoppingOrderGood good}.
+         *
+         * Please note that this exclusive attribute is a very different concept
+         * from multiplicative, which means whether the same coupon can be
+         * multiplied and applied to multiple coupons of the same order, so
+         * please do not confuse them.
+         *
+         * @title Exclusivity or not
+        */
+        exclusive: boolean;
+        /**
+         * Limited quantity issued.
+         *
+         * If there is a limit to the quantity issued, it becomes impossible
+         * to issue tickets exceeding this value.
+         *
+         * In other words, the concept of N coupons being issued on
+         * a first-come, first-served basis is created.
+         *
+         * @title Limited quantity issued
+        */
+        volume: null | (number & tags.Type<"uint32">);
+        /**
+         * Limited quantity issued per person.
+         *
+         * As a limit to the total amount of issuance per person, it is
+         * common to assign 1 to limit duplicate issuance to the same citizen,
+         * or to use the NULL value to set no limit.
+         *
+         * Of course, by assigning a value of N, the total amount issued
+         * to the same citizen can be limited.
+         *
+         * @title Limited quantity issued per person
+        */
+        volume_per_citizen: null | (number & tags.Type<"uint32">);
+        /**
+         * Expiration day(s) value.
+         *
+         * The concept of expiring N days after a discount coupon ticket is issued.
+         *
+         * Therefore, customers must use the ticket within N days, if possible,
+         * from the time it is issued.
+         *
+         * @title Expiration day(s) value
+        */
+        expired_in: null | (number & tags.Type<"uint32">);
+        /**
+         * Expiration date.
+         *
+         * A concept that expires after YYYY-MM-DD after a discount coupon ticket
+         * is issued.
+         *
+         * Double restrictions are possible with expired_in, of which the one
+         * with the shorter expiration date is used.
+         *
+         * @title Expiration date
+        */
+        expired_at: null | (string & tags.Format<"date-time">);
+    };
+}
+type IAutoViewTransformerInputType = Schema.IShoppingOrderPrice;
+export function transform($input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
+    return visualizeData($input);
+}
+
+
+
+function visualizeData(input: IAutoViewTransformerInputType): IAutoView.IAutoViewComponentProps {
+    // Helper to format numbers as currency (assuming USD; adjust as needed)
+    const formatCurrency = (value: number): string => `$${value.toLocaleString()}`;
+
+    // Destructure the price breakdown
+    const { cash, deposit, mileage, ticket: couponDiscount, nominal, real, ticket_payments } = input;
+
+    // Build a list of DataListItem components for each non-zero payment method
+    const items: IAutoView.IAutoViewDataListItemProps[] = [];
+
+    // Mapping of payment methods to icon metadata
+    const methods: Array<{
+        amount: number;
+        key: string;
+        label: string;
+        icon: IAutoView.IAutoViewIconProps;
+    }> = [
+        {
+            amount: cash,
+            key: 'cash',
+            label: 'Cash',
+            icon: { type: 'Icon', id: 'dollar-sign', color: 'green', size: 20 },
+        },
+        {
+            amount: deposit,
+            key: 'deposit',
+            label: 'Deposit',
+            icon: { type: 'Icon', id: 'credit-card', color: 'blue', size: 20 },
+        },
+        {
+            amount: mileage,
+            key: 'mileage',
+            label: 'Mileage',
+            icon: { type: 'Icon', id: 'road', color: 'orange', size: 20 },
+        },
+        {
+            amount: couponDiscount,
+            key: 'couponDiscount',
+            label: 'Coupon Discount',
+            icon: { type: 'Icon', id: 'ticket-alt', color: 'violet', size: 20 },
+        },
+    ];
+
+    for (const method of methods) {
+        if (method.amount != null && method.amount > 0) {
+            items.push({
+                type: 'DataListItem',
+                // combine icon + text into the label
+                label: [
+                    method.icon,
+                    { type: 'Text', content: method.label, variant: 'body2' },
+                ],
+                // show the formatted amount as the value
+                value: {
+                    type: 'Text',
+                    content: formatCurrency(method.amount),
+                    variant: 'body2',
+                },
+            });
+        }
+    }
+
+    // If any coupon tickets were applied, show the count
+    if (ticket_payments && ticket_payments.length > 0) {
+        items.push({
+            type: 'DataListItem',
+            label: [
+                { type: 'Icon', id: 'ticket-alt', color: 'pink', size: 20 },
+                { type: 'Text', content: 'Coupons Used', variant: 'body2' },
+            ],
+            value: {
+                type: 'Text',
+                content: `${ticket_payments.length}`,
+                variant: 'body2',
+            },
+        });
+    }
+
+    // Compose the main DataList component
+    const breakdownList: IAutoView.IAutoViewDataListProps = {
+        type: 'DataList',
+        childrenProps: items,
+    };
+
+    // Prepare markdown footer showing nominal vs real price
+    let footerMarkdown = `**Total Paid:** ${formatCurrency(real)}`;
+    if (nominal != null && nominal > real) {
+        footerMarkdown += `\n\n**Original Price:** ~~${formatCurrency(nominal)}~~`;
+    }
+
+    // Build the VerticalCard with header, content (breakdown), and footer
+    const card: IAutoView.IAutoViewVerticalCardProps = {
+        type: 'VerticalCard',
+        childrenProps: [
+            {
+                type: 'CardHeader',
+                title: 'Order Price Summary',
+                // Use an icon to visually represent the section
+                startElement: { type: 'Icon', id: 'receipt', color: 'blue', size: 24 },
+            },
+            {
+                type: 'CardContent',
+                childrenProps: breakdownList,
+            },
+            {
+                type: 'CardFooter',
+                childrenProps: [
+                    {
+                        type: 'Markdown',
+                        content: footerMarkdown,
+                    },
+                ],
+            },
+        ],
+    };
+
+    return card;
+}

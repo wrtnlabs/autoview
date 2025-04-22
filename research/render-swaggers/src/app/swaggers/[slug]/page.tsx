@@ -1,22 +1,49 @@
-export interface PageProps {
-  params: Promise<PageParams>;
+"use client";
+
+import type * as IAutoView from "@autoview/interface";
+import { renderComponent } from "@autoview/ui";
+import dynamic from "next/dynamic";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type Transform = (input: unknown) => IAutoView.IAutoViewComponentProps;
+type Random = () => unknown;
+
+function NoSsrImpl({ children }: { children: any }) {
+  return <>{children}</>;
 }
 
-export interface PageParams {
-  slug: string;
-}
+const NoSsr = dynamic(() => Promise.resolve(NoSsrImpl), {
+  ssr: false,
+});
 
-export default async function Page({ params }: PageProps) {
-  const { slug } = await params;
+export default function Page() {
+  const params = useParams();
+  const [transform, setTransform] = useState<Transform | null>(null);
+  const [random, setRandom] = useState<Random | null>(null);
 
-  const transformer = await import(`@transformers/${slug}.ts`);
-  const { transform } = transformer;
+  async function loadTransform(slug: string): Promise<void> {
+    const { transform } = await import(`../../../transformers/${slug}.js`);
+    setTransform(() => transform);
+  }
 
-  console.log(transformer);
+  async function loadRandom(slug: string): Promise<void> {
+    const { random } = await import(`../../../transformer-randoms/${slug}.js`);
+    setRandom(() => random);
+  }
 
-  return (
-    <div>
-      <h1>Hello, {slug}!</h1>
-    </div>
-  );
+  useEffect(() => {
+    if (!("slug" in params) || typeof params.slug !== "string") {
+      return;
+    }
+
+    void loadTransform(params.slug);
+    void loadRandom(params.slug);
+  }, [params]);
+
+  if (transform === null || random === null) {
+    return <div>Loading...</div>;
+  }
+
+  return renderComponent(transform(random()));
 }

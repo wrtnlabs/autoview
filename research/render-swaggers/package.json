@@ -3,25 +3,46 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
+    "build:transformers": "tsc --project tsconfig.transformers.json",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prepare": "ts-patch install"
   },
   "dependencies": {
+    "next": "15.3.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.3.0"
+    "@emotion/react": ">=11.14.0",
+    "@emotion/styled": ">=11.14.0",
+    "@fortawesome/fontawesome-svg-core": ">=6.7.2",
+    "@fortawesome/free-brands-svg-icons": ">=6.7.2",
+    "@fortawesome/free-solid-svg-icons": ">=6.7.2",
+    "@fortawesome/react-fontawesome": ">=0.2.2",
+    "@mui/material": ">=6.4.8",
+    "embla-carousel": ">=8.5.2",
+    "embla-carousel-autoplay": ">=8.5.2",
+    "embla-carousel-fade": ">=8.5.2",
+    "embla-carousel-react": ">=8.5.2",
+    "react-markdown": ">=9.0.0",
+    "react-syntax-highlighter": ">=15.6.1",
+    "remark-gfm": ">=4.0.1",
+    "typia": "^9.1.1"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@autoview/interface": "workspace:*",
+    "@autoview/ui": "workspace:*",
+    "@eslint/eslintrc": "^3",
+    "@ryoppippi/unplugin-typia": "^2.1.4",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "ts-patch": "^3.3.0",
+    "typescript": "^5.8.3"
   }
 }
