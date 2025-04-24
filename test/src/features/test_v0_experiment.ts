@@ -30,7 +30,7 @@ export const test_v0_experiment = async () => {
         });
         if (result === null) return;
 
-        await await mkdir.get();
+        await mkdir.get();
         await fs.promises.writeFile(
           `results/v0/${r.method}-${r.path.replace(/\//g, "-")}.md`,
           result,
