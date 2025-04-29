@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="./docs/logo.png" width="300" height="300" alt="Autoview Logo" />
-</p>
 <h1 align="center">Autoview</h1>
 <p align="center">
 <a href="https://www.npmjs.com/package/@autoview/agent">
@@ -36,7 +33,7 @@
 
 </h3>
 
---- 
+---
 
 _Autoview_ is a code generator that transforms your schema into fully functional TypeScript frontend components. Whether you define your schema as TypeScript types or provide a Swagger/OpenAPI document, _Autoview_ automatically generates the corresponding UI code with precision.
 
@@ -103,6 +100,7 @@ const agent = new AutoViewAgent({
 ```
 
 ### Step 4. Lights, camera, action! 🎥
+
 ```typescript
 const result = await agent.generate(); // generate the code
 
@@ -130,7 +128,6 @@ export default function MemberComponent(props: MemberComponentProps) {
 }
 ```
 
-
 ## 💬 Community & Support
 
 For support, questions, or to provide feedback, join our Discord community:
@@ -151,4 +148,3 @@ Autoview is open-source and available under the [MIT License](https://github.com
 <div align="center">
   Autoview is maintained by <a href="https://wrtnlabs.io">Wrtn Technologies</a> &mdash; Empowering developers to automate frontend viewer creation.
 </div>
-
