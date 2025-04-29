@@ -25,7 +25,7 @@
 
 ---
 
-[![AutoView Playground](https://wrtnlabs.io/autoview/images/docs/playground.png)](https://wrtnlabs.io/autoview)
+[![AutoView Playground](https://wrtnlabs.io/autoview/images/docs/playground.png?refresh)](https://wrtnlabs.io/autoview)
 
 <h3 align="center">
 
