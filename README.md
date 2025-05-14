@@ -1,4 +1,9 @@
-<h1 align="center">Autoview</h1>
+<h1>Autoview, Automated Frontend Viewer Development
+</h1>
+
+![autoview](https://github.com/user-attachments/assets/8dee7cb0-65a6-436a-89e5-b39893070c16)
+
+
 <p align="center">
 <a href="https://www.npmjs.com/package/@autoview/agent">
   <img src="https://img.shields.io/npm/v/@autoview/agent?style=for-the-badge" alt="npm version">
@@ -18,18 +23,38 @@
 </p>
 
 <p align="center">
-    <strong>Turn your blueprint into UI components</strong>
-  <br>
-    <span>Automated Frontend Viewer Development</span>
-</p>
-
----
-
-[![AutoView Playground](https://wrtnlabs.io/autoview/images/docs/playground.png?refresh)](https://wrtnlabs.io/autoview)
 
 <h3 align="center">
+<!-- === Quick links === -->
 
-[Homepage](https://wrtnlabs.io/autoview) // [Documentation](https://wrtnlabs.io/autoview/docs) // [Tutorials](https://youtube.com) // [Playground](https://wrtnlabs.io/autoview/images/docs/playground.png)
+<p align="center">
+  <a href="https://wrtnlabs.io/autoview/">
+    <img
+      src="https://img.shields.io/badge/Website-00393E?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTAiLz4KPHBhdGggZD0iTTIgMTJoMjAiLz4KPHBhdGggZD0iTTEyIDJhMTUuMyAxNS4zIDAgMCAxIDQgMTAgMTUuMyAxNS4zIDAgMCAxLTQgMTAgMTUuMyAxNS4zIDAgMCAxLTQtMTAgMTUuMyAxNS4zIDAgMCAxIDQtMTB6Ii8+Cjwvc3ZnPg==&logoColor=white"
+      alt="Website"
+    />
+  </a>&nbsp;&nbsp;
+  <a href="https://wrtnlabs.io/autoview/docs/">
+    <img
+      src="https://img.shields.io/badge/Docs-00393E?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KPHBhdGggZD0iTTIgM2g2YTQgNCAwIDAgMSA0IDR2MTRhNCA0IDAgMCAwLTQtNEgyWiIvPgo8cGF0aCBkPSJNMjIgM2gtNmE0IDQgMCAwIDAtNCA0djE0YTQgNCAwIDAgMSA0LTRoNnoiLz4KPC9zdmc+&logoColor=white"
+      alt="Docs"
+    />
+  </a>&nbsp;&nbsp;
+  <a href="https://www.youtube.com/@wrtnlabs">
+    <img
+      src="https://img.shields.io/badge/Tutorial-00393E?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KPHBvbHlnb24gcG9pbnRzPSI2IDMgMjAgMTIgNiAyMSA2IDMiLz4KPC9zdmc+&logoColor=white"
+      alt="Tutorial"
+    />
+  </a>&nbsp;&nbsp;
+  <a href="https://wrtnlabs.io/autoview/images/docs/playground.png" style="text-decoration:none">
+    <img
+    src="https://img.shields.io/badge/Playground-00393E?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmZmZmYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48bGluZSB4MT0iNiIgeDI9IjEwIiB5MT0iMTEiIHkyPSIxMSIvPjxsaW5lIHgxPSI4IiB4Mj0iOCIgeTE9IjkiIHkyPSIxMyIvPjxsaW5lIHgxPSIxNSIgeDI9IjE1LjAxIiB5MT0iMTIiIHkyPSIxMiIvPjxsaW5lIHgxPSIxOCIgeDI9IjE4LjAxIiB5MT0iMTAiIHkyPSIxMCIvPjxwYXRoIGQ9Ik0xNy4zMiA1SDYuNjhhNCA0IDAgMCAwLTMuOTc4IDMuNTljLS4wMDYuMDUyLS4wMS4xMDEtLjAxNy4xNTVDMi42MDQgOS40MTYgMiAxNC40NTYgMiAxNmEzIDMgMCAwIDAgMyAzYzEgMCAxLjUtLjUgMi0xbDEuNDE0LTEuNDE0QTIgMiAwIDAgMSA5LjgyOCAxNmg0LjM0NGEyIDIgMCAwIDEgMS40MTQuNTg2TDE3IDE4Yy41LjUgMSAxIDIgMWEzIDMgMCAwIDAgMy0zYzAtMS41NDUtLjYwNC02LjU4NC0uNjg1LTcuMjU4LS4wMDctLjA1LS4wMTEtLjEtLjAxNy0uMTUxQTQgNCAwIDAgMCAxNy4zMiA1eiIvPjwvc3ZnPg=="
+    alt="Playground"
+    style="margin:0 4px"
+   />
+  </a>
+</p>
+
 
 </h3>
 
@@ -143,7 +168,7 @@ Autoview is open-source and available under the [MIT License](https://github.com
 ---
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/2a143ef8-6a9d-4258-96ce-fb3a59137a5b" alt="Wrtn Technologies Logo" />
+  <img src="https://github.com/user-attachments/assets/e5e9e6e2-4295-45e7-8956-9f1d3aa757b4" alt="Wrtn Technologies Logo" />
 </p>
 <div align="center">
   Autoview is maintained by <a href="https://wrtnlabs.io">Wrtn Technologies</a> &mdash; Empowering developers to automate frontend viewer creation.
