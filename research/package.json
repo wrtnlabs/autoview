@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "crawl": "ts-node src/crawl-openapis.ts",
-    "clear": "ts-node src/clear-all-transformers.ts",
-    "generate": "ts-node src/generate-all-transformers.ts",
+    "clear": "ts-node src/clear-all-components.ts",
+    "generate": "ts-node src/generate-all-components.ts",
     "prepare": "ts-patch install"
   },
   "dependencies": {
