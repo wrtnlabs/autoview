@@ -17,36 +17,46 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingMileage;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { value: miles, direction, code, source, created_at } = value;
-  const displayPoints = miles ?? 0;
-  const sign = direction === 1 ? '+' : '-';
-  const formattedPoints = displayPoints.toLocaleString();
-  const formattedDate = new Date(created_at).toLocaleDateString(undefined, {
+  const points = value.value ?? 0;
+  const isPositive = value.direction === 1;
+  const sign = isPositive ? '+' : '-';
+  const displayPoints = `${sign}${Math.abs(points).toLocaleString()} points`;
+  const statusLabel = isPositive ? 'Earned' : 'Redeemed';
+  const dateObj = new Date(value.created_at);
+  const formattedDate = dateObj.toLocaleDateString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
   });
-  const valueClass = direction === 1 ? 'text-green-600' : 'text-red-600';
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-xs w-full bg-white shadow-md rounded-lg p-4 flex flex-col space-y-2">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-800 truncate">{code}</h3>
-        <span className="text-xs font-medium bg-gray-100 text-gray-600 px-2 py-1 rounded">
-          {source}
+    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-4">
+      <div className="flex items-center justify-between mb-3">
+        <time dateTime={value.created_at} className="text-sm text-gray-500">
+          {formattedDate}
+        </time>
+        <span
+          className={`text-sm font-bold ${
+            isPositive ? 'text-green-600' : 'text-red-600'
+          }`}
+        >
+          {displayPoints}
         </span>
       </div>
-      <div className="flex items-baseline space-x-1">
-        <span className={`${valueClass} text-2xl font-bold`}>
-          {sign}
-          {formattedPoints}
-        </span>
-        <span className="text-sm text-gray-500">pts</span>
+      <div className="space-y-2">
+        <div className="text-lg font-semibold text-gray-800">{statusLabel}</div>
+        <div className="flex flex-wrap text-sm text-gray-600 gap-x-4">
+          <div className="flex-shrink-0">
+            <span className="font-medium">Code:</span>{' '}
+            <span className="font-mono text-gray-700 truncate">{value.code}</span>
+          </div>
+          <div className="flex-shrink-0">
+            <span className="font-medium">Source:</span>{' '}
+            <span className="capitalize text-gray-700">{value.source}</span>
+          </div>
+        </div>
       </div>
-      <time dateTime={created_at} className="self-end text-xs text-gray-400">
-        {formattedDate}
-      </time>
     </div>
   );
 }

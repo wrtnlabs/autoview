@@ -68,55 +68,84 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingDeposit;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { current, pages, records } = value.pagination;
-  
+  const { pagination, data } = value;
+  const { current, limit, records, pages } = pagination;
+  const startRecord = (current - 1) * limit + 1;
+  const endRecord = Math.min(current * limit, records);
+
+  const formatDate = (iso: string): string => {
+    const date = new Date(iso);
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const directionLabel = (dir: number): string =>
+    dir === 1 ? 'Deposit' : 'Withdrawal';
+
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      {/* Pagination Summary */}
-      <div className="mb-4 text-sm text-gray-600">
-        Page {current}/{pages} · {records} records
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Shopping Deposits
+        </h2>
+        <p className="text-sm text-gray-500">
+          Page {current} of {pages} &middot; Showing {startRecord}–
+          {endRecord} of {records}
+        </p>
       </div>
-      {/* List of Deposits */}
-      <ul className="space-y-4">
-        {value.data.map((item) => {
-          // Format date-time
-          const dateStr = new Date(item.created_at).toLocaleString(undefined, {
-            dateStyle: 'medium',
-            timeStyle: 'short',
-          });
-          // Map direction to label and color
-          const isCredit = item.direction === 1;
-          const directionLabel = isCredit ? 'Credit' : 'Debit';
-          const directionColor = isCredit ? 'text-green-500' : 'text-red-500';
-
-          return (
-            <li key={item.id} className="p-4 bg-white rounded-lg shadow-sm">
-              <div className="flex justify-between items-center">
-                {/* Deposit Details */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-lg font-medium text-gray-800 truncate">
-                    {item.code}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {dateStr}
-                  </div>
-                </div>
-                {/* Source and Direction */}
-                <div className="ml-4 text-right">
-                  <div className={`text-sm font-semibold ${directionColor}`}>
-                    {directionLabel}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {item.source}
-                  </div>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Date
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Code
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Source
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                Type
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item, idx) => (
+              <tr
+                key={item.id}
+                className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
+              >
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                  {formatDate(item.created_at)}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 truncate max-w-xs">
+                  {item.code}
+                </td>
+                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 truncate max-w-xs">
+                  {item.source}
+                </td>
+                <td
+                  className={`px-4 py-2 whitespace-nowrap text-sm font-medium ${
+                    item.direction === 1
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}
+                >
+                  {directionLabel(item.direction)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-  // 3. Return the React element.
 }

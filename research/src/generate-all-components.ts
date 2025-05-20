@@ -121,7 +121,7 @@ async function generatecomponent(
         encoding: "utf-8",
       });
       await fs.writeFile(
-        `./component-randoms/${index}.ts`,
+        `./mock-data/${index}.ts`,
         generateRandomModuleSourceCode(index, result.mockData),
         {
           encoding: "utf-8",
