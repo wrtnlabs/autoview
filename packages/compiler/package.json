@@ -29,10 +29,10 @@
     "typescript": ">=5.0.0"
   },
   "scripts": {
-    "build": "rimraf lib && tsc",
+    "build": "rimraf lib && pnpm run build:external && tsc",
     "build:external": "node build/external.js",
-    "dev": "rimraf lib && tsc --watch",
-    "prepare": "ts-patch install"
+    "dev": "rimraf lib && pnpm run build:external && tsc --watch",
+    "prepare": "ts-patch install && pnpm run build:external"
   },
   "files": [
     "lib",
