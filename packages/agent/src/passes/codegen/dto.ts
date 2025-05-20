@@ -1,12 +1,21 @@
-import { IAutoViewCompilerMetadata } from "@autoview/interface";
+import {
+  IAutoViewCompilerMetadata,
+  IAutoViewCompilerResult,
+} from "@autoview/interface";
 
 import { IAutoViewVendor } from "../../structures";
 
 export interface Input {
   vendor: IAutoViewVendor;
   inputSchema: IAutoViewCompilerMetadata;
+  onCompilerError?: (
+    tsCode: string,
+    diagnostics: IAutoViewCompilerResult.IDiagnostic[],
+  ) => void | Promise<void>;
 }
 
 export interface Output {
-  tsCode: string;
+  generatedTsCode: string;
+  entireTsCode: string;
+  jsCode: string;
 }

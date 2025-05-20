@@ -1,14 +1,9 @@
 import { IAutoViewCompilerService } from "@autoview/interface";
+import { OpenApiValidator } from "@samchon/openapi/lib/utils/OpenApiValidator";
 import { WorkerConnector } from "tgrid";
 import { is_node } from "tstl";
-import { TypeGuardError, assertGuard } from "typia";
 
-import {
-  AgentBase,
-  LlmFailure,
-  LlmProxy,
-  parseLlmJsonOutput,
-} from "../../core";
+import { AgentBase, LlmFailure, LlmProxy } from "../../core";
 import { Input, Output } from "./dto";
 import { prompt } from "./prompt";
 
@@ -42,9 +37,9 @@ export class Agent implements AgentBase<Input, Output> {
       inputMetadata: input.inputSchema,
     });
 
-    const boilerplate = await service.generateBoilerplate(
-      "Schema",
-      input.inputSchema,
+    const boilerplate = await service.generateBoilerplateForReactComponent(
+      "AutoViewInput",
+      "AutoViewInputSubTypes",
     );
     const systemPrompt = prompt({
       boilerplate,
@@ -52,7 +47,6 @@ export class Agent implements AgentBase<Input, Output> {
 
     const results = await new LlmProxy<Input, Output>()
       .withTextHandler(handleText)
-      .withToolHandler("example", handleExampleTool)
       .call(
         input,
         input.vendor.api,
@@ -81,47 +75,55 @@ export class Agent implements AgentBase<Input, Output> {
   }
 }
 
-function handleText(_input: Input, text: string): Output {
+function handleText(input: Input, text: string): Output {
   const output = parseOutput(text);
 
-  return {
-    output: output.output,
-  };
-}
+  const result = OpenApiValidator.validate({
+    schema: input.inputSchema.schema,
+    components: input.inputSchema.components,
+    value: output.mock_data,
+    required: true,
+  });
 
-function handleExampleTool(
-  _input: Input,
-  toolCallId: string,
-  toolName: string,
-  toolInput: unknown,
-): Output {
-  console.log(toolCallId, toolName, toolInput);
+  if (!result.success) {
+    throw new LlmFailure(
+      `the mock data you've generated is not match with the type \`AutoViewType\`; analyze the type again with the errors and try again: \n\n<error>\n${JSON.stringify(
+        result.errors,
+        null,
+        2,
+      )}\n</error>`,
+    );
+  }
 
   return {
-    output: "example",
+    mockData: output.mock_data,
   };
 }
 
 interface TextOutput {
-  output: string;
+  mock_data: any;
 }
 
 function parseOutput(text: string): TextOutput {
-  const parsed = parseLlmJsonOutput(text);
-  let output: TextOutput;
+  const mockData = text.match(/<mock_data>([\s\S]*?)<\/mock_data>/);
 
-  try {
-    assertGuard<TextOutput>(parsed);
-    output = parsed;
-  } catch (error: unknown) {
-    if (error instanceof TypeGuardError) {
-      throw new LlmFailure(
-        `expected ${error.expected}, but got ${error.value}`,
-      );
-    }
-
-    throw error;
+  if (mockData?.[1] == null) {
+    throw new LlmFailure(
+      `failed to parse the output; your response should contain a mock data within <mock_data> tags`,
+    );
   }
 
-  return output;
+  try {
+    return {
+      mock_data: JSON.parse(mockData[1]),
+    };
+  } catch (error: unknown) {
+    throw new LlmFailure(
+      `failed to parse the output; the mock data string you've generated is not a valid JSON value: \n\n<error>\n${JSON.stringify(
+        error,
+        null,
+        2,
+      )}\n</error>`,
+    );
+  }
 }
