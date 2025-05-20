@@ -19,7 +19,8 @@ export namespace AutoViewBoilerplateProgrammer {
         ctx,
         schemaComponents,
         schema,
-        `${subTypePrefix}.`,
+        subTypePrefix,
+        shouldExport,
       ),
       ts.factory.createTypeAliasDeclaration(
         shouldExport

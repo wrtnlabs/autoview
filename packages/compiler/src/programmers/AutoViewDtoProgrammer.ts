@@ -14,6 +14,7 @@ export namespace AutoViewDtoProgrammer {
     components: OpenApi.IComponents,
     schema: OpenApi.IJsonSchema,
     dtoPrefix: string,
+    shouldExport: boolean,
   ): ts.ModuleDeclaration => {
     const references: Map<string, OpenApi.IJsonSchema> = new Map();
     OpenApiTypeChecker.visit({
@@ -45,7 +46,9 @@ export namespace AutoViewDtoProgrammer {
     const statements = writeModulo(ctx, components, schema, dict, dtoPrefix);
 
     return ts.factory.createModuleDeclaration(
-      undefined,
+      shouldExport
+        ? [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)]
+        : undefined,
       ts.factory.createIdentifier(dtoPrefix),
       ts.factory.createModuleBlock(statements),
       ts.NodeFlags.Namespace,

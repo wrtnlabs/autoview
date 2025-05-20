@@ -2,18 +2,17 @@ import {
   CodeGen,
   IAutoViewVendor,
   LlmUnrecoverableError,
-  RandomGen,
+  convertSchema,
 } from "@autoview/agent";
 import {
   IAutoViewCompilerMetadata,
   IAutoViewCompilerResult,
-  IAutoViewComponentProps,
 } from "@autoview/interface";
-import { ChatGptTypeChecker, ILlmSchemaV3_1 } from "@samchon/openapi";
+import { ILlmSchemaV3_1 } from "@samchon/openapi";
 import * as fs from "fs/promises";
 import OpenAI from "openai";
 import * as path from "path";
-import typia, { assertGuard } from "typia";
+import { assertGuard } from "typia";
 
 import { TestGlobal } from "../TestGlobal";
 import * as Report from "./collect_ts_errors_report_agent";
@@ -500,12 +499,11 @@ async function collectSchemaList(): Promise<ISchema[]> {
 
     assertGuard<RawSchema>(schema);
 
+    const converted = convertSchema("3.1", schema.schema, schema.$defs);
+
     schemaList.push({
       name: file,
-      schema: {
-        schema: schema.schema,
-        components: schema.$defs,
-      },
+      schema: converted,
     });
   }
 

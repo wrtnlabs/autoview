@@ -13,14 +13,16 @@ export async function test_boilerplates(): Promise<void> {
   const service = worker.getDriver();
   await service.initialize({
     inputMetadata: {
-      schema: inputSchema as any,
-      components: inputSchema.$defs as any,
+      schema: inputSchema.schema as any,
+      components: {
+        schemas: inputSchema.$defs as any,
+      },
     },
   });
 
   const boilerplate = await service.generateBoilerplateForReactComponent(
-    "Schema",
-    "test_components_as_ts_types",
+    "AutoViewInput",
+    "AutoViewInputSubTypes",
   );
   console.log(boilerplate);
   await fs.writeFile("test.tsx", boilerplate, "utf-8");
@@ -29,171 +31,224 @@ export async function test_boilerplates(): Promise<void> {
 }
 
 const inputSchema = {
-  type: "object",
-  properties: {
-    body: {
-      description:
-        'Creation information of a shopping cart commodity.\n\n------------------------------\n\nDescription of the current {@link IShoppingCartCommodity.ICreate} type:\n\n> Creation information of a shopping cart commodity.\n\n------------------------------\n\nDescription of the parent {@link IShoppingCartCommodity} type:\n\n> Item in a shopping cart.\n> \n> `IShoppingCartCommodity` is an entity that represents a\n> {@link IShoppingSaleSnapshot snapshot} of the items that\n> {@link IShoppingCustomer customer} has placed into his shopping cart with a\n> {@link IShoppingOrder purchase} in mind. And if the customer continues this\n> into an actual order in the future, `IShoppingCartCommodity` be changed to\n> {@link IShoppingOrderGood}.\n> \n> And while adding a sale snapshot to the shopping cart, the customer inevitably\n> selects specific {@link IShoppingSaleUnit units} and\n> {@link IShoppingSaleUnitStock final stocks} within the listing snapshot.\n> Information about these units and stocks is recorded in the subsidiary entity\n> {@link IShoppingCartCommodityStock}. Also, there is an attribute {@link volume}\n> that indicates how many sets of snapshots of the target commodity will be\n> purchased. This "volume" is a value that will be multiplied by\n> {@link IShoppingSaleUnitStock.IInvert.quantity}, the quantity for each\n> component.',
+  schema: {
+    $ref: "#/components/schemas/marketplace-purchase",
+  },
+  $defs: {
+    "marketplace-purchase": {
+      title: "Marketplace Purchase",
+      description: "Marketplace Purchase",
       type: "object",
       properties: {
-        sale_id: {
-          title: "Target sale's {@link IShoppingSale.id}",
-          description:
-            "Target sale's {@link IShoppingSale.id}.\n\n\n@format uuid",
+        url: {
           type: "string",
         },
-        stocks: {
-          title: "List of the stocks to be purchased",
-          description: "List of the stocks to be purchased.\n\n\n@minItems 1",
-          type: "array",
-          items: {
-            description:
-              "Creation information of the commodity stock of shopping cart.\n\nWhen record being created, its corresponding structure would be\n{@link IShoppingSaleSnapshotUnit.IInvert} and\n{@link IShoppingSaleSnapshotUnitStock.IInvert}.\n\n------------------------------\n\nDescription of the current {@link IShoppingCartCommodityStock.ICreate} type:\n\n> Creation information of the commodity stock of shopping cart.\n> \n> When record being created, its corresponding structure would be\n> {@link IShoppingSaleSnapshotUnit.IInvert} and\n> {@link IShoppingSaleSnapshotUnitStock.IInvert}.",
-            type: "object",
-            properties: {
-              unit_id: {
-                title: "Target unit's {@link IShoppingSaleUnit.id}",
-                description:
-                  "Target unit's {@link IShoppingSaleUnit.id}.\n\n\n@format uuid",
-                type: "string",
-              },
-              stock_id: {
-                title: "Target stock's {@link IShoppingSaleUnitStock.id}",
-                description:
-                  "Target stock's {@link IShoppingSaleUnitStock.id}.\n\nIt must be matched with the {@link choices} property.\n\n\n@format uuid",
-                type: "string",
-              },
-              choices: {
-                title:
-                  "Creation information of the choices for each descriptive option",
-                description:
-                  "Creation information of the choices for each descriptive option.\n\nIf target option is not of descriptive but of selective, then\nthis property must be an empty array.",
-                type: "array",
-                items: {
-                  description:
-                    "Creation information of the choice for each option (of descriptive).\n\nWhen target option is {@link IShoppingSaleUnitDescriptiveOption}\ntype, then you have to compose this choice structure with\n{@link value} specification.\n\nOtherwise when target option is {@link IShoppingSaleUnitSelectableOption}\ntype, you don't need to compose this choice structure. Just fill only\nthe {@link IShoppingCartCommodityStock.ICreate.stock_id} property.\n\n------------------------------\n\nDescription of the current {@link IShoppingCartCommodityStockChoice.ICreate} type:\n\n> Creation information of the choice for each option (of descriptive).\n> \n> When target option is {@link IShoppingSaleUnitDescriptiveOption}\n> type, then you have to compose this choice structure with\n> {@link value} specification.\n> \n> Otherwise when target option is {@link IShoppingSaleUnitSelectableOption}\n> type, you don't need to compose this choice structure. Just fill only\n> the {@link IShoppingCartCommodityStock.ICreate.stock_id} property.",
-                  type: "object",
-                  properties: {
-                    option_id: {
-                      title:
-                        "Target option's {@link IShoppingSaleUnitOption.id}",
-                      description:
-                        "Target option's {@link IShoppingSaleUnitOption.id}.\n\n\n@format uuid",
-                      type: "string",
-                    },
-                    value: {
-                      title: "Written value about the option",
-                      description:
-                        "Written value about the option.\n\nWhen target option's type is 'descriptive', then you have to\nfill this property with the written value by the customer.",
-                      anyOf: [
-                        {
-                          type: "null",
-                        },
-                        {
-                          type: "string",
-                        },
-                        {
-                          type: "number",
-                        },
-                        {
-                          type: "boolean",
-                        },
-                      ],
-                    },
-                  },
-                  required: ["option_id", "value"],
-                },
-              },
-              quantity: {
-                title: "Quantity of the stock to purchase",
-                description:
-                  "Quantity of the stock to purchase.\n\nThis value is multiplied by the {@link IShoppingCartCommodity.volume}.\n\n\n@minimum 1",
-                type: "integer",
-              },
-            },
-            required: ["unit_id", "stock_id", "choices", "quantity"],
-          },
-        },
-        volume: {
-          title: "Volume of the commodity to purchase",
-          description:
-            "Volume of the commodity to purchase.\n\nA value indicating how many sets would be multiplied to the children\n{@link IShoppingSaleUnitStock.IInvert.quantity} values.\n\n\n@minimum 1",
-          type: "integer",
-        },
-        accumulate: {
-          title: "Whether to accumulate the volume or not",
-          description:
-            "Whether to accumulate the volume or not.\n\nIf this attribute is not `false` and there's same commodity that\ncomposed with same stocks and options, then the volume will be\naccumulated to the existed one.\n\nOtherwise, duplicated commodity would be newly created.",
-          anyOf: [
-            {
-              type: "null",
-            },
-            {
-              type: "boolean",
-            },
-          ],
-        },
-      },
-      required: ["sale_id", "stocks", "volume"],
-    },
-  },
-  additionalProperties: false,
-  required: ["body"],
-  $defs: {
-    "IShoppingChannelCategory.IInvert": {
-      description: "Invert category information with parent category.",
-      type: "object",
-      properties: {
-        parent: {
-          title: "Parent category info with recursive structure",
-          description:
-            "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
-          anyOf: [
-            {
-              type: "null",
-            },
-            {
-              $ref: "#/$defs/IShoppingChannelCategory.IInvert",
-            },
-          ],
+        type: {
+          type: "string",
         },
         id: {
-          title: "Primary Key",
-          description: "Primary Key.\n\n\n@format uuid",
+          type: "integer",
+        },
+        login: {
           type: "string",
         },
-        code: {
-          title: "Identifier code of the category",
-          description:
-            "Identifier code of the category.\n\nThe code must be unique in the channel.",
+        organization_billing_email: {
           type: "string",
         },
-        parent_id: {
-          title: "Parent category's ID",
-          description: "Parent category's ID.",
-          anyOf: [
+        email: {
+          oneOf: [
+            {
+              type: "string",
+            },
             {
               type: "null",
             },
+          ],
+        },
+        marketplace_pending_change: {
+          oneOf: [
             {
-              type: "string",
-              description: "@format uuid",
+              type: "object",
+              properties: {
+                is_installed: {
+                  type: "boolean",
+                },
+                effective_date: {
+                  type: "string",
+                },
+                unit_count: {
+                  oneOf: [
+                    {
+                      type: "integer",
+                    },
+                    {
+                      type: "null",
+                    },
+                  ],
+                },
+                id: {
+                  type: "integer",
+                },
+                plan: {
+                  $ref: "#/components/schemas/marketplace-listing-plan",
+                },
+              },
+              required: [],
+            },
+            {
+              type: "null",
             },
           ],
         },
-        name: {
-          title: "Representative name of the category",
-          description:
-            "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
-          type: "string",
-        },
-        created_at: {
-          title: "Creation time of record",
-          description: "Creation time of record.\n\n\n@format date-time",
-          type: "string",
+        marketplace_purchase: {
+          type: "object",
+          properties: {
+            billing_cycle: {
+              type: "string",
+            },
+            next_billing_date: {
+              oneOf: [
+                {
+                  type: "string",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            is_installed: {
+              type: "boolean",
+            },
+            unit_count: {
+              oneOf: [
+                {
+                  type: "integer",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            on_free_trial: {
+              type: "boolean",
+            },
+            free_trial_ends_on: {
+              oneOf: [
+                {
+                  type: "string",
+                },
+                {
+                  type: "null",
+                },
+              ],
+            },
+            updated_at: {
+              type: "string",
+            },
+            plan: {
+              $ref: "#/components/schemas/marketplace-listing-plan",
+            },
+          },
+          required: [],
         },
       },
-      required: ["parent", "id", "code", "parent_id", "name", "created_at"],
+      required: ["url", "id", "type", "login", "marketplace_purchase"],
+    },
+    "marketplace-listing-plan": {
+      title: "Marketplace Listing Plan",
+      description: "Marketplace Listing Plan",
+      type: "object",
+      properties: {
+        url: {
+          example: "https://api.github.com/marketplace_listing/plans/1313",
+          type: "string",
+          format: "uri",
+        },
+        accounts_url: {
+          example:
+            "https://api.github.com/marketplace_listing/plans/1313/accounts",
+          type: "string",
+          format: "uri",
+        },
+        id: {
+          example: 1313,
+          type: "integer",
+        },
+        number: {
+          example: 3,
+          type: "integer",
+        },
+        name: {
+          example: "Pro",
+          type: "string",
+        },
+        description: {
+          example: "A professional-grade CI solution",
+          type: "string",
+        },
+        monthly_price_in_cents: {
+          example: 1099,
+          type: "integer",
+        },
+        yearly_price_in_cents: {
+          example: 11870,
+          type: "integer",
+        },
+        price_model: {
+          example: "FLAT_RATE",
+          oneOf: [
+            {
+              const: "FREE",
+            },
+            {
+              const: "FLAT_RATE",
+            },
+            {
+              const: "PER_UNIT",
+            },
+          ],
+        },
+        has_free_trial: {
+          example: true,
+          type: "boolean",
+        },
+        unit_name: {
+          oneOf: [
+            {
+              type: "string",
+            },
+            {
+              type: "null",
+            },
+          ],
+        },
+        state: {
+          example: "published",
+          type: "string",
+        },
+        bullets: {
+          example: ["Up to 25 private repositories", "11 concurrent builds"],
+          type: "array",
+          items: {
+            type: "string",
+          },
+        },
+      },
+      required: [
+        "url",
+        "accounts_url",
+        "id",
+        "number",
+        "name",
+        "description",
+        "has_free_trial",
+        "price_model",
+        "unit_name",
+        "monthly_price_in_cents",
+        "state",
+        "yearly_price_in_cents",
+        "bullets",
+      ],
     },
   },
 };
