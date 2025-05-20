@@ -44,7 +44,9 @@ export class AutoViewCompiler {
       name: "React",
     });
 
-    return FilePrinter.write({ statements });
+    return FilePrinter.write({
+      statements: [...ctx.importer.toStatements(() => ""), ...statements],
+    });
   }
 
   public async compileReactComponent(
