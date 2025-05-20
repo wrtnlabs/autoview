@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "@autoview/compiler-dependencies",
+  "version": "0.0.0",
+  "author": "Wrtn Technologies",
+  "license": "MIT",
+  "dependencies": {
+    "@types/react": ">=17",
+    "typia": "^9.3.1"
+  }
+}
