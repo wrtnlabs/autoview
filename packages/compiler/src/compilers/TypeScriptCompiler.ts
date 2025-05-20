@@ -29,7 +29,7 @@ export namespace TypeScriptCompiler {
               module: ts.ModuleKind.ESNext,
               moduleResolution: ts.ModuleResolutionKind.Bundler,
             }),
-        jsx: ts.JsxEmit.React,
+        jsx: ts.JsxEmit.ReactJSX,
         noImplicitAny: false,
       },
       transformers: (program, diagnostics) => ({
