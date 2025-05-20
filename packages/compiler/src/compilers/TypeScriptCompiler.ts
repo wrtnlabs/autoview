@@ -3,18 +3,14 @@ import { IPointer } from "tstl";
 import ts from "typescript";
 import transform from "typia/lib/transform";
 
-import { IAutoViewProgrammerContext } from "../programmers/IAutoViewProgrammerContext";
 import { RAW } from "../raw/RAW";
 
 export namespace TypeScriptCompiler {
   export const build = (
-    _ctx: IAutoViewProgrammerContext,
     typescript: string,
     target: "cjs" | "esm",
+    reactEnabled: boolean,
   ): IAutoViewCompilerResult => {
-    // LLM GENERATED CODE
-    // typescript = typescript.replace("placeholder();", ctx.body);
-
     // PREPARE RAW FILES
     const dict: Map<string, ts.SourceFile> = new Map();
     for (const [file, content] of RAW) {
@@ -40,9 +36,10 @@ export namespace TypeScriptCompiler {
     const output: IPointer<string> = { value: "" };
     const diagnostics: ts.Diagnostic[] = [];
     const program: ts.Program = ts.createProgram(
-      ["main.ts"],
+      [reactEnabled ? "main.tsx" : "main.ts"],
       {
         target: ts.ScriptTarget.ESNext,
+        jsx: ts.JsxEmit.ReactJSX,
         esModuleInterop: true,
         downlevelIteration: true,
         forceConsistentCasingInFileNames: true,

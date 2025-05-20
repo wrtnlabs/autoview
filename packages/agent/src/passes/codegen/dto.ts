@@ -5,14 +5,8 @@ import { IAutoViewVendor } from "../../structures";
 export interface Input {
   vendor: IAutoViewVendor;
   inputSchema: IAutoViewCompilerMetadata;
-  componentSchema: IAutoViewCompilerMetadata;
-  instruction?: string;
 }
 
 export interface Output {
-  initial_analysis: string;
-  data_exploration: string;
-  ideas: string;
-  reasoning: string;
-  planning: string;
+  tsCode: string;
 }
