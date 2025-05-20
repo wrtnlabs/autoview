@@ -18,6 +18,7 @@ export namespace AutoViewRandomProgrammer {
         inputComponents,
         inputSchema,
         inputSchemaPrefix,
+        false,
       ),
       ts.factory.createTypeAliasDeclaration(
         undefined,
