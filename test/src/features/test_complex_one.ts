@@ -35,9 +35,12 @@ export async function test_complex_one(): Promise<void> {
       schema: schema.schema,
       $defs: schema.$defs,
     },
-    experimentalAllInOne: true,
   });
   const result = await agent.generate();
 
-  console.log(result.transformTsCode);
+  console.log(result.status);
+
+  if (result.status === "success") {
+    console.log(result.tsxCode);
+  }
 }

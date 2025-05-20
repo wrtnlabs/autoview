@@ -1,7 +1,6 @@
 import {
   IAutoViewCompilerResult,
   IAutoViewCompilerService,
-  IAutoViewComponentProps,
 } from "@autoview/interface";
 import { useEffect, useState } from "react";
 import { Driver, WorkerConnector } from "tgrid";
@@ -21,29 +20,23 @@ function App() {
       await worker.connect("worker.js");
       const service: Driver<IAutoViewCompilerService> = worker.getDriver();
       await service.initialize({
-        inputMetadata: {
-          parameters: typia.llm.parameters<IBbsArticle, "chatgpt">(),
-        },
-        componentMetadata: {
-          parameters: typia.llm.parameters<
-            {
-              props: IAutoViewComponentProps;
-            },
-            "chatgpt",
-            {
-              reference: true;
-            }
-          >(),
-        },
+        inputMetadata: typia.json.schema<IBbsArticle>(),
       });
-      const result: IAutoViewCompilerResult = await service.compile(`
-function visualizeData(_: unknown): IAutoViewComponentProps {
+      const result: IAutoViewCompilerResult =
+        await service.compileReactComponent(
+          await service.generateBoilerplateForReactComponent(
+            "AutoViewInput",
+            "AutoViewInputSubTypes",
+          ),
+          `
+export default function Component(value: AutoViewInput): React.ReactNode {
   return {
     type: "GridList",
     items: [],
   };
 }
-      `);
+      `,
+        );
       console.log(result);
     };
     initialize().catch(console.error);

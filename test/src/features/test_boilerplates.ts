@@ -1,11 +1,6 @@
-import {
-  IAutoViewCompilerMetadata,
-  IAutoViewCompilerService,
-  IAutoViewComponentProps,
-} from "@autoview/interface";
+import { IAutoViewCompilerService } from "@autoview/interface";
 import * as fs from "fs/promises";
 import { WorkerConnector } from "tgrid";
-import typia from "typia";
 
 export async function test_boilerplates(): Promise<void> {
   const worker: WorkerConnector<null, null, IAutoViewCompilerService> =
@@ -18,18 +13,17 @@ export async function test_boilerplates(): Promise<void> {
   const service = worker.getDriver();
   await service.initialize({
     inputMetadata: {
-      $defs: (inputSchema as any)["$defs"],
       schema: inputSchema as any,
+      components: inputSchema.$defs as any,
     },
-    componentMetadata: componentSchema(),
   });
 
-  const boilerplate = await service.generateBoilerplate(
+  const boilerplate = await service.generateBoilerplateForReactComponent(
     "Schema",
     "test_components_as_ts_types",
   );
   console.log(boilerplate);
-  await fs.writeFile("test.ts", boilerplate, "utf-8");
+  await fs.writeFile("test.tsx", boilerplate, "utf-8");
 
   await worker.close();
 }
@@ -203,7 +197,3 @@ const inputSchema = {
     },
   },
 };
-
-function componentSchema(): IAutoViewCompilerMetadata {
-  return typia.json.schema<IAutoViewComponentProps>();
-}
