@@ -21,12 +21,14 @@ export namespace AutoViewProgrammer {
         componentComponents,
         componentSchema,
         "IAutoView",
+        false,
       ),
       AutoViewDtoProgrammer.write(
         ctx,
         inputComponents,
         inputSchema,
         inputSchemaPrefix,
+        false,
       ),
       ...AutoViewTransformerProgrammer.write(
         ctx,
@@ -49,6 +51,7 @@ export namespace AutoViewProgrammer {
         componentComponents,
         componentSchema,
         "IAutoView",
+        false,
       ),
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];
@@ -78,6 +81,7 @@ export namespace AutoViewProgrammer {
         inputComponents,
         inputSchema,
         inputSchemaPrefix,
+        false,
       ),
       ...AutoViewTransformerProgrammer.write(
         ctx,
