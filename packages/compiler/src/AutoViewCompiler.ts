@@ -59,10 +59,14 @@ export class AutoViewCompiler {
     const source = `${boilerplate}\n\n${componentTsCode}`;
 
     try {
-      return TypeScriptCompiler.build(source, this.compilerOptions.module);
+      return TypeScriptCompiler.build(
+        source,
+        this.compilerOptions.module,
+        true,
+      );
     } catch (error) {
       return {
-        type: "error",
+        type: "exception",
         error: ErrorUtil.toJSON(error),
       };
     }

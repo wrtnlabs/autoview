@@ -14,6 +14,7 @@
   "dependencies": {
     "@autoview/interface": "workspace:^",
     "@samchon/openapi": "^4.1.0",
+    "embed-typescript": "^1.0.1",
     "serialize-error": "4.1.0",
     "tgrid": "^1.1.0",
     "tstl": "^3.0.0",
@@ -28,9 +29,10 @@
     "typescript": ">=5.0.0"
   },
   "scripts": {
-    "build": "node build/raw && rimraf lib && tsc",
-    "dev": "node build/raw && rimraf lib && tsc --watch",
-    "prepare": "ts-patch install && node build/raw"
+    "build": "rimraf lib && pnpm run build:external && tsc",
+    "build:external": "node build/external.js",
+    "dev": "rimraf lib && pnpm run build:external && tsc --watch",
+    "prepare": "ts-patch install && pnpm run build:external"
   },
   "files": [
     "lib",
