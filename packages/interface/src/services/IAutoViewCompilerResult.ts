@@ -1,22 +1,22 @@
 export type IAutoViewCompilerResult =
   | IAutoViewCompilerResult.ISuccess
-  | IAutoViewCompilerResult.IError
-  | IAutoViewCompilerResult.IFailure;
+  | IAutoViewCompilerResult.IFailure
+  | IAutoViewCompilerResult.IException;
 export namespace IAutoViewCompilerResult {
   export interface ISuccess {
     type: "success";
-    typescript: string;
-    javascript: string;
-  }
-  export interface IError {
-    type: "error";
-    error: unknown;
+    javascript: Record<string, string>;
   }
   export interface IFailure {
     type: "failure";
     diagnostics: IDiagnostic[];
-    typescript: string;
+    javascript: Record<string, string>;
   }
+  export interface IException {
+    type: "exception";
+    error: unknown;
+  }
+
   export interface IDiagnostic {
     category: DiagnosticCategory;
     code: number | string;

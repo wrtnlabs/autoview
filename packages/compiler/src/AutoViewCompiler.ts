@@ -112,7 +112,7 @@ export class AutoViewCompiler {
       return TypeScriptCompiler.build(ctx, source, this.compilerOptions.module);
     } catch (error) {
       return {
-        type: "error",
+        type: "exception",
         error: ErrorUtil.toJSON(error),
       };
     }
@@ -136,7 +136,7 @@ export class AutoViewCompiler {
       return TypeScriptCompiler.build(ctx, source, this.compilerOptions.module);
     } catch (error) {
       return {
-        type: "error",
+        type: "exception",
         error: ErrorUtil.toJSON(error),
       };
     }
