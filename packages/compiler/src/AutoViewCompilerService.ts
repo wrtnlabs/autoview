@@ -1,5 +1,6 @@
 import type {
   IAutoViewCompilerProps,
+  IAutoViewCompilerResult,
   IAutoViewCompilerService,
 } from "@autoview/interface";
 
@@ -24,5 +25,14 @@ export class AutoViewCompilerService implements IAutoViewCompilerService {
       alias,
       subTypePrefix,
     );
+  }
+
+  public compileReactComponent(
+    boilerplate: string,
+    componentTsCode: string,
+  ): Promise<IAutoViewCompilerResult> {
+    if (this.compiler_ === null)
+      throw new Error("You have not initialized yet.");
+    return this.compiler_.compileReactComponent(boilerplate, componentTsCode);
   }
 }
