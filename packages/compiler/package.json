@@ -14,7 +14,7 @@
   "dependencies": {
     "@autoview/interface": "workspace:^",
     "@samchon/openapi": "^4.1.0",
-    "embed-typescript": "^1.0.0",
+    "embed-typescript": "^1.0.1",
     "serialize-error": "4.1.0",
     "tgrid": "^1.1.0",
     "tstl": "^3.0.0",
