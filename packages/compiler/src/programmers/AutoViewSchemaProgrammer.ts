@@ -170,8 +170,19 @@ export namespace AutoViewSchemaProgrammer {
       intersection.push(ctx.importer.tag("MinLength", schema.minLength));
     if (schema.maxLength !== undefined)
       intersection.push(ctx.importer.tag("MaxLength", schema.maxLength));
-    if (schema.pattern !== undefined)
-      intersection.push(ctx.importer.tag("Pattern", schema.pattern));
+    if (schema.pattern !== undefined) {
+      function isValidRegex(pattern: string): boolean {
+        try {
+          new RegExp(pattern);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      if (isValidRegex(schema.pattern))
+        intersection.push(ctx.importer.tag("Pattern", schema.pattern));
+    }
     if (
       schema.format !== undefined &&
       (FormatCheatSheet as Record<string, string>)[schema.format] !== undefined

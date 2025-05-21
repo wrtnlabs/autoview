@@ -1,7 +1,9 @@
 import { IAutoViewCompilerService } from "@autoview/interface";
+import { OpenApi, OpenApiTypeChecker } from "@samchon/openapi";
 import { OpenApiValidator } from "@samchon/openapi/lib/utils/OpenApiValidator";
 import { WorkerConnector } from "tgrid";
 import { is_node } from "tstl";
+import typia from "typia";
 
 import { AgentBase, LlmFailure, LlmProxy } from "../../core";
 import { Input, Output } from "./dto";
@@ -78,9 +80,13 @@ export class Agent implements AgentBase<Input, Output> {
 function handleText(input: Input, text: string): Output {
   const output = parseOutput(text);
 
+  const [sanitizedSchema, sanitizedComponents] = removeInvalidPattern(
+    input.inputSchema.schema,
+    input.inputSchema.components,
+  );
   const result = OpenApiValidator.validate({
-    schema: input.inputSchema.schema,
-    components: input.inputSchema.components,
+    schema: sanitizedSchema,
+    components: sanitizedComponents,
     value: output.mock_data,
     required: true,
   });
@@ -125,5 +131,82 @@ function parseOutput(text: string): TextOutput {
         2,
       )}\n</error>`,
     );
+  }
+}
+
+function removeInvalidPattern(
+  schema: OpenApi.IJsonSchema,
+  components: OpenApi.IComponents,
+): [OpenApi.IJsonSchema, OpenApi.IComponents] {
+  const clonedSchema = typia.misc.assertClone(schema);
+  const clonedComponents = typia.misc.assertClone(components);
+
+  removeInvalidPatternInline(clonedSchema);
+
+  if (clonedComponents.schemas) {
+    for (const value of Object.values(clonedComponents.schemas)) {
+      removeInvalidPatternInline(value);
+    }
+  }
+
+  return [clonedSchema, clonedComponents];
+}
+
+function removeInvalidPatternInline(schema: OpenApi.IJsonSchema): void {
+  if (OpenApiTypeChecker.isString(schema)) {
+    removeInvalidPatternString(schema);
+  } else if (OpenApiTypeChecker.isArray(schema)) {
+    removeInvalidPatternArray(schema);
+  } else if (OpenApiTypeChecker.isTuple(schema)) {
+    removeInvalidPatternTuple(schema);
+  } else if (OpenApiTypeChecker.isObject(schema)) {
+    removeInvalidPatternObject(schema);
+  } else if (OpenApiTypeChecker.isOneOf(schema)) {
+    removeInvalidPatternOneOf(schema);
+  }
+}
+
+function removeInvalidPatternString(string: OpenApi.IJsonSchema.IString): void {
+  if (string.pattern) {
+    try {
+      new RegExp(string.pattern);
+    } catch {
+      string.pattern = undefined;
+    }
+  }
+}
+
+function removeInvalidPatternArray(array: OpenApi.IJsonSchema.IArray): void {
+  removeInvalidPatternInline(array.items);
+}
+
+function removeInvalidPatternTuple(tuple: OpenApi.IJsonSchema.ITuple): void {
+  for (const prefixItem of tuple.prefixItems) {
+    removeInvalidPatternInline(prefixItem);
+  }
+
+  if (tuple.additionalItems && typeof tuple.additionalItems === "object") {
+    removeInvalidPatternInline(tuple.additionalItems);
+  }
+}
+
+function removeInvalidPatternObject(object: OpenApi.IJsonSchema.IObject): void {
+  if (object.properties) {
+    for (const value of Object.values(object.properties)) {
+      removeInvalidPatternInline(value);
+    }
+  }
+
+  if (
+    object.additionalProperties &&
+    typeof object.additionalProperties === "object"
+  ) {
+    removeInvalidPatternInline(object.additionalProperties);
+  }
+}
+
+function removeInvalidPatternOneOf(oneOf: OpenApi.IJsonSchema.IOneOf): void {
+  for (const value of oneOf.oneOf) {
+    removeInvalidPatternInline(value);
   }
 }
