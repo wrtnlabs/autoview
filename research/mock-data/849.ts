@@ -1,0 +1,8 @@
+
+import Component from "../components/849";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"url":"https://api.example.org/releases/assets/98765","browser_download_url":"https://downloads.example.org/test-project/v1.0.0/sample-asset.zip","id":98765,"node_id":"MDc6UmVsZWFzZUFzc2V0OTg3NjU=","name":"sample-asset-v1.0.0.zip","label":"Sample Asset (Demo)","state":"uploaded","content_type":"application/zip","size":1024000,"download_count":42,"created_at":"2025-05-19T14:30:00Z","updated_at":"2025-05-19T15:00:00Z","uploader":{"name":"Sample User (Test)","email":"sample.user@example.com","login":"sample-user-test","id":12345,"node_id":"MDQ6VXNlcjEyMzQ1","avatar_url":"https://avatars.example.org/u/12345?v=4","gravatar_id":null,"url":"https://api.example.org/users/sample-user-test","html_url":"https://example.org/sample-user-test","followers_url":"https://api.example.org/users/sample-user-test/followers","following_url":"https://api.example.org/users/sample-user-test/following{/other_user}","gists_url":"https://api.example.org/users/sample-user-test/gists{/gist_id}","starred_url":"https://api.example.org/users/sample-user-test/starred{/owner}{/repo}","subscriptions_url":"https://api.example.org/users/sample-user-test/subscriptions","organizations_url":"https://api.example.org/users/sample-user-test/orgs","repos_url":"https://api.example.org/users/sample-user-test/repos","events_url":"https://api.example.org/users/sample-user-test/events{/privacy}","received_events_url":"https://api.example.org/users/sample-user-test/received_events","type":"User","site_admin":false,"starred_at":"2025-05-18T12:00:00Z","user_view_type":"member"}};
+}

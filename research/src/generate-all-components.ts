@@ -38,7 +38,10 @@ async function main(): Promise<void> {
   const swaggersWithIndex: SwaggerWithIndex[] = [];
 
   for (let index = 0; index < swaggers.length; ++index) {
-    if (!(await fs.stat(`./components/${index}.ts`).catch(() => false))) {
+    if (
+      !(await fs.stat(`./components/${index}.tsx`).catch(() => false)) ||
+      !(await fs.stat(`./mock-data/${index}.ts`).catch(() => false))
+    ) {
       swaggersWithIndex.push({ index, swagger: swaggers[index] });
     }
   }
@@ -117,7 +120,7 @@ async function generatecomponent(
         continue;
       }
 
-      await fs.writeFile(`./components/${index}.ts`, result.tsxCode, {
+      await fs.writeFile(`./components/${index}.tsx`, result.tsxCode, {
         encoding: "utf-8",
       });
       await fs.writeFile(
@@ -152,7 +155,7 @@ import Component from "../components/${index}";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return JSON.parse(${JSON.stringify(value)});
+  return ${JSON.stringify(value)};
 }
 `;
 }

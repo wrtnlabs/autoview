@@ -1,0 +1,8 @@
+
+import Component from "../components/45";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"pagination":{"current":1,"limit":2,"records":2,"pages":1},"data":[{"categories":[{"children":[{"children":[],"id":"22222222-2222-2222-2222-222222222222","code":"MOBILE_PHONES","parent_id":"11111111-1111-1111-1111-111111111111","name":"Mobile Phones (Sample)","created_at":"2025-05-18T08:00:00Z"},{"children":[],"id":"33333333-3333-3333-3333-333333333333","code":"LAPTOPS","parent_id":"11111111-1111-1111-1111-111111111111","name":"Laptops (Test)","created_at":"2025-05-18T08:30:00Z"}],"id":"11111111-1111-1111-1111-111111111111","code":"ELECTRONICS","parent_id":null,"name":"Electronics (Test)","created_at":"2025-05-17T15:45:00Z"},{"children":[],"id":"44444444-4444-4444-4444-444444444444","code":"APPAREL","parent_id":null,"name":"Apparel (Sample)","created_at":"2025-05-16T11:20:00Z"}],"id":"channel-12345","created_at":"2025-05-19T12:00:00Z","code":"SAMPLE_STORE","name":"Sample Store Channel (Test)"},{"categories":[{"children":[{"children":[],"id":"77777777-7777-7777-7777-777777777777","code":"FURNITURE","parent_id":"66666666-6666-6666-6666-666666666666","name":"Furniture (Sample)","created_at":"2025-04-09T10:15:00Z"}],"id":"66666666-6666-6666-6666-666666666666","code":"HOME_KITCHEN","parent_id":null,"name":"Home & Kitchen (Test)","created_at":"2025-04-08T14:50:00Z"},{"children":[],"id":"88888888-8888-8888-8888-888888888888","code":"DECOR","parent_id":null,"name":"Décor (Sample)","created_at":"2025-04-07T09:25:00Z"}],"id":"channel-67890","created_at":"2025-04-10T09:30:00Z","code":"MARKET_BETA","name":"Market Beta Channel (Sample)"}]};
+}

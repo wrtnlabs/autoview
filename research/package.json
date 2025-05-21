@@ -11,8 +11,9 @@
   "dependencies": {
     "@autoview/agent": "workspace:^",
     "@autoview/interface": "^7.3.1",
-    "@samchon/openapi": "^4.0.0",
+    "@samchon/openapi": "^4.3.3",
     "openai": "^4.95.0",
+    "react": "^19.1.0",
     "typia": "^9.1.0"
   },
   "devDependencies": {

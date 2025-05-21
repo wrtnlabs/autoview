@@ -1,0 +1,8 @@
+
+import Component from "../components/150";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"pagination":{"current":1,"limit":10,"records":2,"pages":1},"data":[{"score":4.5,"customer":{"type":"customer","member":null,"citizen":null,"id":"cust-001-sample","channel":{"id":"channel-01-sample","created_at":"2024-01-10T08:00:00Z","code":"WEB_MOBILE_TEST","name":"Web & Mobile (Sample)"},"external_user":null,"href":"https://www.example.com/shop?session=test_session_001","referrer":"https://referrer.example.net/home","ip":"203.0.113.45","created_at":"2025-05-18T09:15:00Z"},"answer":{"message":"Thank you for your feedback (Sample)","answered_at":"2025-05-19T10:00:00Z"},"read_by_seller":true,"id":"rev-0001-sample","title":"Great product, but minor issue (Test)","created_at":"2025-05-18T09:20:00Z","updated_at":"2025-05-19T10:00:00Z"},{"score":2,"customer":{"type":"customer","member":{"member_id":"mem-1234-sample","joined_at":"2025-01-01T12:00:00Z"},"citizen":null,"id":"cust-002-sample","channel":{"id":"channel-02-sample","created_at":"2023-11-05T14:30:00Z","code":"MOBILE_APP_TEST","name":"Mobile App (Sample)"},"external_user":{"service":"TestOAuth","external_id":"oauth-5678-sample"},"href":"https://m.example.com/app/test?session=sample","referrer":null,"ip":"2001:0db8:85a3:0000:0000:8a2e:0370:7334","created_at":"2025-05-17T22:45:00Z"},"answer":"We are sorry to hear about the issue. Please contact support@example.com for assistance. (Test)","read_by_seller":false,"id":"rev-0002-sample","title":"Not satisfied with delivery time (Sample)","created_at":"2025-05-17T23:00:00Z","updated_at":"2025-05-18T08:30:00Z"}]};
+}

@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "build:transformers": "tsc --project tsconfig.transformers.json",
+    "build:components": "tsc --project tsconfig.components.json",
     "start": "next start",
     "lint": "next lint",
     "prepare": "ts-patch install"

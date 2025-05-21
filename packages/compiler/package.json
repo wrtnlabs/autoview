@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@autoview/interface": "workspace:^",
-    "@samchon/openapi": "^4.1.0",
+    "@samchon/openapi": "^4.3.3",
     "embed-typescript": "^1.0.1",
     "serialize-error": "4.1.0",
     "tgrid": "^1.1.0",

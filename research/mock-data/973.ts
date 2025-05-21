@@ -1,0 +1,8 @@
+
+import Component from "../components/973";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"owner_url":"https://api.example.com/orgs/sample-org/projects","url":"https://api.example.com/repos/sample-org/sample-repo/projects/3","html_url":"https://www.example.com/orgs/sample-org/projects/3","columns_url":"https://api.example.com/repos/sample-org/sample-repo/projects/3/columns","id":3,"node_id":"MDc6UHJvamVjdDM=","name":"Test Project Alpha","body":"This is a dummy body for UI testing purposes. All content is fictional.","number":3,"state":"open","creator":{"name":"Sample User (Test)","email":"test.user@example.com","login":"sampleuser","id":101,"node_id":"MDQ6VXNlcjEwMQ==","avatar_url":"https://avatars.example.com/u/101?v=4","gravatar_id":null,"url":"https://api.example.com/users/sampleuser","html_url":"https://www.example.com/sampleuser","followers_url":"https://api.example.com/users/sampleuser/followers","following_url":"https://api.example.com/users/sampleuser/following","gists_url":"https://api.example.com/users/sampleuser/gists","starred_url":"https://api.example.com/users/sampleuser/starred","subscriptions_url":"https://api.example.com/users/sampleuser/subscriptions","organizations_url":"https://api.example.com/users/sampleuser/orgs","repos_url":"https://api.example.com/users/sampleuser/repos","events_url":"https://api.example.com/users/sampleuser/events","received_events_url":"https://api.example.com/users/sampleuser/received_events","type":"User","site_admin":false,"starred_at":"2025-05-19T14:30:00Z","user_view_type":"rich"},"created_at":"2025-05-19T12:00:00Z","updated_at":"2025-05-19T12:30:00Z","organization_permission":"admin","private":true};
+}

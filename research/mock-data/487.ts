@@ -1,0 +1,8 @@
+
+import Component from "../components/487";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"id":101,"name":"Developer (Test Role)","description":"A sample role for UI testing. Grants basic write permissions in sample organization.","base_role":"write","source":"Organization","permissions":["issues:write","pull_requests:write","metadata:read"],"organization":{"name":"Sample Org (Test Account)","email":"org.team@example.org","login":"sample-org-test","id":202,"node_id":"ORGNODEID_Sample123==","avatar_url":"https://avatars.example.com/u/202?v=4","gravatar_id":null,"url":"https://api.example.com/users/sample-org-test","html_url":"https://github.com/sample-org-test","followers_url":"https://api.github.com/users/sample-org-test/followers","following_url":"https://api.github.com/users/sample-org-test/following{/other_user}","gists_url":"https://api.github.com/users/sample-org-test/gists{/gist_id}","starred_url":"https://api.github.com/users/sample-org-test/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/sample-org-test/subscriptions","organizations_url":"https://api.github.com/users/sample-org-test/orgs","repos_url":"https://api.github.com/users/sample-org-test/repos","events_url":"https://api.github.com/users/sample-org-test/events{/privacy}","received_events_url":"https://api.github.com/users/sample-org-test/received_events","type":"Organization","site_admin":false,"starred_at":"2025-05-10T08:30:00Z","user_view_type":"detailed"},"created_at":"2025-05-19T14:30:00Z","updated_at":"2025-05-20T09:15:00Z"};
+}

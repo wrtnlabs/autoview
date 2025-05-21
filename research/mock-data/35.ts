@@ -1,0 +1,8 @@
+
+import Component from "../components/35";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"pagination":{"current":1,"limit":10,"records":1,"pages":1},"data":[{"price_range":{"lowest":{"nominal":79.99,"real":69.99},"highest":{"nominal":199.99,"real":189.99}},"id":"sale-001-test","snapshot_id":"snapshot-2025-09-01-abc123","latest":true,"content":{"id":"d290f1ee-6c54-4b01-90e6-d701748f0851","title":"Summer Electronics Bonanza (Test)","thumbnails":[{"id":"img-001-test","created_at":"2025-05-19T14:30:00Z","name":"front_view","extension":"jpg","url":"https://cdn.example.com/images/sample-front.jpg"},{"id":"img-002-test","created_at":"2025-05-19T14:35:00Z","name":"side_view","extension":"png","url":"https://cdn.example.com/images/sample-side.png"}]},"categories":[{"parent":null,"id":"c1a8f7d0-1234-4bbf-8f6d-3c2e1b2a9f40","code":"ELEC","parent_id":null,"name":"Electronics (Test)","created_at":"2025-05-01T10:00:00Z"},{"parent":{"parent":null,"id":"c1a8f7d0-1234-4bbf-8f6d-3c2e1b2a9f40","code":"ELEC","parent_id":null,"name":"Electronics (Test)","created_at":"2025-05-01T10:00:00Z"},"id":"c2b9e8d1-2345-4ccf-9f7a-4d3f2c3b1a21","code":"ELEC-ACC","parent_id":"c1a8f7d0-1234-4bbf-8f6d-3c2e1b2a9f40","name":"Accessories (Test)","created_at":"2025-05-02T11:15:00Z"}],"tags":["electronics","summer-sale","test-data"],"units":[{"price_range":{"lowest":{"nominal":79.99,"real":69.99},"highest":{"nominal":99.99,"real":89.99}},"id":"unit-001-test","name":"Wireless Headphones (Test)","primary":true,"required":true},{"price_range":{"lowest":{"nominal":19.99,"real":14.99},"highest":{"nominal":29.99,"real":24.99}},"id":"unit-002-test","name":"Accessory Pack (Test)","primary":false,"required":false}]}]};
+}

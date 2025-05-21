@@ -1,0 +1,8 @@
+
+import Component from "../components/199";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"plugin":{"id":"plugin-123","key":"550e8400-e29b-41d4-a716-446655440000","channelId":"channel-xyz-123","state":"active","name":"Sample Plugin (Test)","createdAt":1627848267123,"color":"#123456","botName":"TestBot (Sample)","textI18n":{"text":"Hello from plugin text (Sample)","en":"Hello (Test)","ja":"サンプル挨拶","ko":"테스트 인사말"},"labelButton":true,"deskImage":{"bucket":"test-bucket-sample","key":"images/plugin_desk_img.png","width":800,"height":600},"deskMarginX":10,"deskMarginY":20,"deskPosition":"right","mobileImage":{"bucket":"test-bucket-sample","key":"images/plugin_mobile_img.png","width":400,"height":300},"mobileMarginX":5,"mobileMarginY":15,"mobilePosition":"left","mobileHideButton":false,"mobileBubblePosition":"bottom","accessSecret":"secret-token-sample","welcomeI18n":{"text":"Welcome to Plugin (Sample)","en":"Welcome!","ja":"ようこそ！","ko":"환영합니다!"},"profileBot":true,"profileBotMessageI18n":{"text":"Profile Bot says hi (Test)","en":"Hi there!","ja":"こんにちは！","ko":"안녕하세요!"},"profileBotSchemaIds":["schema-001","schema-002"],"urlWhitelist":["https://www.example.com","https://api.example.org/v1/test-data"],"runRate":0.75,"facebookPixelId":"FB-TEST-PIXEL-001","bright":true,"borderColor":"#999999","gradientColor":"linear-gradient(to right, #ff7e5f, #feb47b)","textColor":"#000000","deskImageUrl":"https://cdn.example.com/assets/sample-desk-image.png","mobileImageUrl":"https://cdn.example.com/assets/sample-mobile-image.png","showPoweredBy":false}};
+}

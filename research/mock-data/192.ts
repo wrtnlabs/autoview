@@ -1,0 +1,8 @@
+
+import Component from "../components/192";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"managers":[{"id":"mgr_001_test","channelId":"channel_42_test","accountId":"acct_1001_test","name":"Alice Example (Test)","description":"Lead Manager for sample users. For UI testing only.","showDescriptionToFront":true,"nameDescI18nMap":{"en-US":{"name":"Alice Example","description":"Sample description (Test)."}},"profile":{"customField":{}},"email":"alice.manager@example.com","showEmailToFront":true,"mobileNumber":"+15551234567","showMobileNumberToFront":false,"role":"owner","removed":false,"createdAt":1716105600000,"displayAsChannel":false,"defaultGroupWatch":"all","defaultDirectChatWatch":"info","defaultUserChatWatch":"none","operatorScore":88.5,"touchScore":42,"avatar":{"bucket":"sample-bucket","key":"avatars/alice_test.png","width":128,"height":128},"operatorEmailReminder":true,"operator":true,"statusEmoji":"🟢","statusText":"Available (Test)","statusClearAt":1716109200000,"managerId":"mgr_001","avatarUrl":"https://example.com/avatars/alice_test.png","emailForFront":"alice.manager+front@example.com","mobileNumberForFront":"+15551234567"},{"id":"mgr_002_test","name":"Bob Sample (Test)","email":"bob.sample@example.org","showEmailToFront":false,"role":"member","defaultGroupWatch":"none","operator":false}],"onlines":[{"channelId":"channel_42_test","personType":"manager","personId":"mgr_001_test","id":"online_001"},{"channelId":"channel_99_test","personType":"user","personId":"user_123_test","id":"online_002"}],"next":"cursor_abc123"};
+}

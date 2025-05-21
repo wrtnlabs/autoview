@@ -1,0 +1,8 @@
+
+import Component from "../components/253";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"next":2,"plugins":[{"id":"plugin-001","key":"550e8400-e29b-41d4-a716-446655440000","channelId":"channel-1234","state":"active","name":"Test Plugin (Sample)","createdAt":1684729200000,"appearance":"system","labelButton":true,"labelButtonText":"Click Me (Test)","labelButtonTextI18nMap":{"en":"Click Me (Test)","es":"Haga clic (Prueba)"},"buttonType":"iconButton","iconButton":"chat-bubble-alt-filled","customImage":{"bucket":"sample-bucket","key":"images/test-plugin.png","width":128,"height":128,"contentType":"image/png"},"deskImage":{"bucket":"sample-bucket","key":"images/test-plugin-desk.png","width":64,"height":64},"deskMarginX":10,"deskMarginY":20,"deskHideButton":false,"deskPosition":"right","mobileImage":{"bucket":"sample-bucket","key":"images/test-plugin-mobile.png","width":48,"height":48},"mobileMarginX":5,"mobileMarginY":10,"mobilePosition":"left","mobileHideButton":false,"mobileBubblePosition":"bottom","urlWhitelist":["https://www.example.com/help","https://api.example.org/v1/sample"],"runRate":0.75,"facebookPixelId":"123456789012345","customImageUrl":"https://cdn.example.net/test-plugin-image.png","deskImageUrl":"https://cdn.example.net/test-plugin-desk-image.png","mobileImageUrl":"https://cdn.example.net/test-plugin-mobile-image.png","validLabelButtonText":true,"validLabelButtonTextI18nMap":true},{"key":"123e4567-e89b-12d3-a456-426614174000","channelId":"channel-5678","state":"waiting","name":"Secondary Plugin (Sample)","appearance":"dark","buttonType":"legacy","iconButton":"send-forward"}]};
+}

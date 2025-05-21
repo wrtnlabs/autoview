@@ -93,7 +93,7 @@ function handleText(input: Input, text: string): Output {
 
   if (!result.success) {
     throw new LlmFailure(
-      `the mock data you've generated is not match with the type \`AutoViewType\`; analyze the type again with the errors and try again: \n\n<error>\n${JSON.stringify(
+      `the mock data you've generated is not match with the type \`AutoViewInput\`; analyze the type again with the errors and try again: \n\n<error>\n${JSON.stringify(
         result.errors,
         null,
         2,

@@ -1,4 +1,6 @@
+import { convertSchema } from "@autoview/agent";
 import { IAutoViewCompilerService } from "@autoview/interface";
+import { ILlmSchemaV3_1 } from "@samchon/openapi";
 import * as fs from "fs/promises";
 import { WorkerConnector } from "tgrid";
 
@@ -10,13 +12,14 @@ export async function test_boilerplates(): Promise<void> {
     `${__dirname}/../../../packages/compiler/lib/worker/index.js`,
   );
 
+  const converted = convertSchema("3.1", inputSchema.schema, inputSchema.$defs);
+  console.log(JSON.stringify(converted.components, null, 2));
+
   const service = worker.getDriver();
   await service.initialize({
     inputMetadata: {
-      schema: inputSchema.schema as any,
-      components: {
-        schemas: inputSchema.$defs as any,
-      },
+      schema: converted.schema,
+      components: converted.components,
     },
   });
 
@@ -24,7 +27,7 @@ export async function test_boilerplates(): Promise<void> {
     "AutoViewInput",
     "AutoViewInputSubTypes",
   );
-  console.log(boilerplate);
+  // console.log(boilerplate);
   await fs.writeFile("test.tsx", boilerplate, "utf-8");
 
   await worker.close();
@@ -32,9 +35,17 @@ export async function test_boilerplates(): Promise<void> {
 
 const inputSchema = {
   schema: {
-    $ref: "#/components/schemas/marketplace-purchase",
-  },
+    type: "array",
+    items: {
+      $ref: "#/$defs/marketplace-purchase",
+    },
+  } satisfies ILlmSchemaV3_1,
   $defs: {
+    "IApiMarketplaceListingPlansAccounts.GetQuery": {
+      type: "object",
+      properties: {},
+      required: [],
+    },
     "marketplace-purchase": {
       title: "Marketplace Purchase",
       description: "Marketplace Purchase",
@@ -90,7 +101,7 @@ const inputSchema = {
                   type: "integer",
                 },
                 plan: {
-                  $ref: "#/components/schemas/marketplace-listing-plan",
+                  $ref: "#/$defs/marketplace-listing-plan",
                 },
               },
               required: [],
@@ -146,7 +157,7 @@ const inputSchema = {
               type: "string",
             },
             plan: {
-              $ref: "#/components/schemas/marketplace-listing-plan",
+              $ref: "#/$defs/marketplace-listing-plan",
             },
           },
           required: [],
@@ -250,5 +261,5 @@ const inputSchema = {
         "bullets",
       ],
     },
-  },
+  } satisfies Record<string, ILlmSchemaV3_1>,
 };

@@ -1,4 +1,6 @@
-namespace AutoViewInputSubTypes {
+import { tags } from "typia";
+import React from "react";
+export namespace AutoViewInputSubTypes {
     /**
      * Marketplace Purchase
      *
@@ -50,4 +52,4 @@ namespace AutoViewInputSubTypes {
         bullets: string[];
     };
 }
-export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase;
+export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase[];

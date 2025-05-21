@@ -1,27 +1,31 @@
 "use client";
 
-import type * as IAutoView from "@autoview/interface";
-import { renderComponent } from "@autoview/ui";
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState } from "react";
 
 export interface AutoViewCompProps {
   index: number;
 }
 
-type Transform = (input: unknown) => IAutoView.IAutoViewComponentProps;
+interface ComponentProps {
+  value: unknown;
+}
 type Random = () => unknown;
 
 export default function AutoViewComp({ index }: AutoViewCompProps) {
-  const [transform, setTransform] = useState<Transform | null>(null);
+  const [component, setComponent] = useState<Component<ComponentProps> | null>(
+    null,
+  );
   const [random, setRandom] = useState<Random | null>(null);
 
   async function loadTransform(index: number): Promise<void> {
-    const { transform } = await import(`../../../transformers/${index}.js`);
-    setTransform(() => transform);
+    const { default: component } = await import(
+      `../../../../../components/${index}.jsx`
+    );
+    setComponent(() => component);
   }
 
   async function loadRandom(index: number): Promise<void> {
-    const { random } = await import(`../../../transformer-randoms/${index}.js`);
+    const { random } = await import(`../../../../../mock-data/${index}.js`);
     setRandom(() => random);
   }
 
@@ -33,9 +37,9 @@ export default function AutoViewComp({ index }: AutoViewCompProps) {
   useEffect(() => {
     const event = new Event("autoview-render-finished");
     document.dispatchEvent(event);
-  }, [transform, random]);
+  }, [component, random]);
 
-  if (transform === null || random === null) {
+  if (component === null || random === null) {
     return (
       <div className="py-16">
         <p className="text-center text-lg">Loading...</p>
@@ -43,5 +47,10 @@ export default function AutoViewComp({ index }: AutoViewCompProps) {
     );
   }
 
-  return <>{renderComponent(transform(random()))}</>;
+  const Comp = component;
+
+  console.log(Comp);
+
+  // @ts-ignore
+  return <Comp {...random()} />;
 }

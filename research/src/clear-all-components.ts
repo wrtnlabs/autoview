@@ -1,16 +1,28 @@
 import * as fs from "fs/promises";
 
 async function main(): Promise<void> {
-  const components = fs.glob("./components/*.ts");
+  const components = [
+    fs.glob("./components/*.tsx"),
+    fs.glob("./components/*.jsx"),
+    fs.glob("./components/*.jsx.map"),
+  ];
 
-  for await (const component of components) {
-    await fs.unlink(component);
+  for (const items of components) {
+    for await (const item of items) {
+      await fs.unlink(item);
+    }
   }
 
-  const randoms = fs.glob("./mock-data/*.ts");
+  const randoms = [
+    fs.glob("./mock-data/*.ts"),
+    fs.glob("./mock-data/*.js"),
+    fs.glob("./mock-data/*.js.map"),
+  ];
 
-  for await (const random of randoms) {
-    await fs.unlink(random);
+  for (const items of randoms) {
+    for await (const item of items) {
+      await fs.unlink(item);
+    }
   }
 }
 
