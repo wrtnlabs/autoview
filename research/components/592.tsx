@@ -1,125 +1,139 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * A self hosted runner
+   *
+   * @title Self hosted runners
+   */
+  export type runner = {
     /**
-     * A self hosted runner
-     *
-     * @title Self hosted runners
-    */
-    export type runner = {
-        /**
-         * The ID of the runner.
-        */
-        id: number & tags.Type<"int32">;
-        /**
-         * The ID of the runner group.
-        */
-        runner_group_id?: number & tags.Type<"int32">;
-        /**
-         * The name of the runner.
-        */
-        name: string;
-        /**
-         * The Operating System of the runner.
-        */
-        os: string;
-        /**
-         * The status of the runner.
-        */
-        status: string;
-        busy: boolean;
-        labels: AutoViewInputSubTypes.runner_label[];
-        ephemeral?: boolean;
-    };
+     * The ID of the runner.
+     */
+    id: number & tags.Type<"int32">;
     /**
-     * A label for a self hosted runner
-     *
-     * @title Self hosted runner label
-    */
-    export type runner_label = {
-        /**
-         * Unique identifier of the label.
-        */
-        id?: number & tags.Type<"int32">;
-        /**
-         * Name of the label.
-        */
-        name: string;
-        /**
-         * The type of label. Read-only labels are applied automatically when the runner is configured.
-        */
-        type?: "read-only" | "custom";
-    };
+     * The ID of the runner group.
+     */
+    runner_group_id?: number & tags.Type<"int32">;
+    /**
+     * The name of the runner.
+     */
+    name: string;
+    /**
+     * The Operating System of the runner.
+     */
+    os: string;
+    /**
+     * The status of the runner.
+     */
+    status: string;
+    busy: boolean;
+    labels: AutoViewInputSubTypes.runner_label[];
+    ephemeral?: boolean;
+  };
+  /**
+   * A label for a self hosted runner
+   *
+   * @title Self hosted runner label
+   */
+  export type runner_label = {
+    /**
+     * Unique identifier of the label.
+     */
+    id?: number & tags.Type<"int32">;
+    /**
+     * Name of the label.
+     */
+    name: string;
+    /**
+     * The type of label. Read-only labels are applied automatically when the runner is configured.
+     */
+    type?: "read-only" | "custom";
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const busyStatus = value.busy ? "Busy" : "Idle";
-  const busyBadgeClasses = value.busy
-    ? "bg-red-100 text-red-800"
-    : "bg-green-100 text-green-800";
-  const statusText = value.status.charAt(0).toUpperCase() + value.status.slice(1);
+  const runnerName = value.name;
+  const osLabel = value.os;
+
+  const statusKey = value.status.trim().toLowerCase();
+  const statusLabel = statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
+  const statusColorClass =
+    statusKey === "online"
+      ? "bg-green-500"
+      : statusKey === "offline"
+        ? "bg-red-500"
+        : "bg-amber-500";
+
+  const busyLabel = value.busy ? "Busy" : "Idle";
+  const busyIcon = value.busy ? (
+    <LucideReact.Loader
+      className="animate-spin text-blue-500"
+      size={16}
+      aria-label="Busy"
+    />
+  ) : (
+    <LucideReact.CheckCircle
+      className="text-green-500"
+      size={16}
+      aria-label="Idle"
+    />
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md flex flex-col space-y-3">
-      {/* Header: Name and Ephemeral Badge */}
-      <div className="flex items-center justify-between">
-        <h2
-          className="text-lg font-semibold text-gray-900 truncate"
-          title={value.name}
-        >
-          {value.name}
-        </h2>
-        {value.ephemeral && (
-          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">
-            Ephemeral
-          </span>
-        )}
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col gap-3">
+      {/* Header: Runner name */}
+      <div className="flex items-center text-lg font-semibold text-gray-800">
+        <LucideReact.Server size={20} className="text-gray-500 mr-2" />
+        {runnerName}
       </div>
 
-      {/* Runner Details */}
-      <div className="flex flex-wrap text-sm text-gray-700 gap-4">
+      {/* Meta info: OS, Status, Busy/Idle, Ephemeral */}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
         <div className="flex items-center">
-          <span className="font-medium">OS:</span>
-          <span className="ml-1">{value.os}</span>
+          <LucideReact.Computer size={16} className="text-gray-400" />
+          <span className="ml-1">{osLabel}</span>
         </div>
+
         <div className="flex items-center">
-          <span className="font-medium">Status:</span>
-          <span className="ml-1 capitalize">{statusText}</span>
+          <div className={`h-2 w-2 rounded-full ${statusColorClass}`} />
+          <span className="ml-1">{statusLabel}</span>
         </div>
+
         <div className="flex items-center">
-          <span className="font-medium">State:</span>
-          <span className={`ml-1 px-1 rounded text-xs font-medium ${busyBadgeClasses}`}>
-            {busyStatus}
-          </span>
+          {busyIcon}
+          <span className="ml-1">{busyLabel}</span>
         </div>
+
+        {value.ephemeral && (
+          <div className="flex items-center">
+            <LucideReact.Clock size={16} className="text-gray-400" />
+            <span className="ml-1">Ephemeral</span>
+          </div>
+        )}
       </div>
 
       {/* Labels */}
       {value.labels.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {value.labels.map((lbl, idx) => {
-            const type = lbl.type === "read-only" ? "read-only" : "custom";
-            const badgeColor =
-              type === "read-only"
-                ? "bg-blue-100 text-blue-800"
-                : "bg-yellow-100 text-yellow-800";
-            const key = lbl.id != null ? lbl.id : `${lbl.name}-${idx}`;
-            return (
-              <span
-                key={key}
-                className={`px-2 py-0.5 text-xs font-medium rounded ${badgeColor}`}
-                title={lbl.name}
-              >
-                {lbl.name}
-              </span>
-            );
-          })}
+        <div className="flex flex-wrap gap-2 mt-2">
+          {value.labels.map((label, idx) => (
+            <span
+              key={idx}
+              className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                label.type === "read-only"
+                  ? "bg-gray-100 text-gray-700"
+                  : "bg-blue-100 text-blue-800"
+              }`}
+            >
+              {label.name}
+            </span>
+          ))}
         </div>
       )}
     </div>

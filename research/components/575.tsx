@@ -1,33 +1,33 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Repository actions caches
+   *
+   * @title Repository actions caches
+   */
+  export type actions_cache_list = {
     /**
-     * Repository actions caches
-     *
-     * @title Repository actions caches
-    */
-    export type actions_cache_list = {
-        /**
-         * Total number of caches
-        */
-        total_count: number & tags.Type<"int32">;
-        /**
-         * Array of caches
-        */
-        actions_caches: {
-            id?: number & tags.Type<"int32">;
-            ref?: string;
-            key?: string;
-            version?: string;
-            last_accessed_at?: string & tags.Format<"date-time">;
-            created_at?: string & tags.Format<"date-time">;
-            size_in_bytes?: number & tags.Type<"int32">;
-        }[];
-    };
+     * Total number of caches
+     */
+    total_count: number & tags.Type<"int32">;
+    /**
+     * Array of caches
+     */
+    actions_caches: {
+      id?: number & tags.Type<"int32">;
+      ref?: string;
+      key?: string;
+      version?: string;
+      last_accessed_at?: string & tags.Format<"date-time">;
+      created_at?: string & tags.Format<"date-time">;
+      size_in_bytes?: number & tags.Type<"int32">;
+    }[];
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_cache_list;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
@@ -43,63 +43,90 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
         })
       : "-";
 
-  const formatBytes = (bytes?: number): string => {
-    if (bytes === undefined) return "-";
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  const formatSize = (bytes?: number): string => {
+    if (bytes == null) return "-";
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(1)} KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(1)} MB`;
+    const gb = mb / 1024;
+    return `${gb.toFixed(1)} GB`;
   };
-
-  const { total_count, actions_caches } = value;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        Repository Actions Caches ({total_count})
-      </h2>
-      {actions_caches.length === 0 ? (
-        <p className="text-sm text-gray-500">No caches available.</p>
+      <div className="flex items-center mb-4">
+        <LucideReact.Database
+          size={20}
+          className="text-gray-500 mr-2"
+          aria-hidden="true"
+        />
+        <h2 className="text-lg font-semibold text-gray-700">
+          Caches ({value.total_count})
+        </h2>
+      </div>
+      {value.total_count === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+          <LucideReact.AlertCircle
+            size={48}
+            className="mb-2"
+            aria-hidden="true"
+          />
+          <span>No caches available</span>
+        </div>
       ) : (
-        <ul className="space-y-4">
-          {actions_caches.map((cache, idx) => (
-            <li
-              key={cache.id ?? idx}
-              className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm"
-            >
-              <div className="flex justify-between items-start sm:items-center mb-2">
-                <p className="text-gray-900 font-medium truncate">
-                  {cache.key ?? `#${cache.id ?? idx}`}
-                </p>
-                {cache.version && (
-                  <span className="text-sm text-gray-500">v{cache.version}</span>
-                )}
-              </div>
-              <div className="text-sm text-gray-600 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {cache.ref && (
-                  <p className="truncate">
-                    <span className="font-semibold text-gray-700">Ref: </span>
-                    {cache.ref}
-                  </p>
-                )}
-                <p>
-                  <span className="font-semibold text-gray-700">Size: </span>
-                  {formatBytes(cache.size_in_bytes)}
-                </p>
-                <p>
-                  <span className="font-semibold text-gray-700">Created: </span>
-                  {formatDate(cache.created_at)}
-                </p>
-                <p>
-                  <span className="font-semibold text-gray-700">Last Accessed: </span>
-                  {formatDate(cache.last_accessed_at)}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div className="overflow-x-auto">
+          <table className="min-w-full table-auto divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Key
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Ref
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Version
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Created
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Last Accessed
+                </th>
+                <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Size
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-100">
+              {value.actions_caches.map((cache, index) => (
+                <tr key={cache.id ?? index}>
+                  <td className="px-4 py-2 text-sm text-gray-700 truncate max-w-xs">
+                    {cache.key ?? "-"}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 truncate max-w-xs">
+                    {cache.ref ?? "-"}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700">
+                    {cache.version ?? "-"}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+                    {formatDate(cache.created_at)}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 whitespace-nowrap">
+                    {formatDate(cache.last_accessed_at)}
+                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-700 text-right whitespace-nowrap">
+                    {formatSize(cache.size_in_bytes)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

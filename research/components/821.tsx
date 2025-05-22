@@ -1,188 +1,168 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Pages Health Check Status
-     *
-     * @title Pages Health Check Status
-    */
-    export type pages_health_check = {
-        domain?: {
-            host?: string;
-            uri?: string;
-            nameservers?: string;
-            dns_resolves?: boolean;
-            is_proxied?: boolean | null;
-            is_cloudflare_ip?: boolean | null;
-            is_fastly_ip?: boolean | null;
-            is_old_ip_address?: boolean | null;
-            is_a_record?: boolean | null;
-            has_cname_record?: boolean | null;
-            has_mx_records_present?: boolean | null;
-            is_valid_domain?: boolean;
-            is_apex_domain?: boolean;
-            should_be_a_record?: boolean | null;
-            is_cname_to_github_user_domain?: boolean | null;
-            is_cname_to_pages_dot_github_dot_com?: boolean | null;
-            is_cname_to_fastly?: boolean | null;
-            is_pointed_to_github_pages_ip?: boolean | null;
-            is_non_github_pages_ip_present?: boolean | null;
-            is_pages_domain?: boolean;
-            is_served_by_pages?: boolean | null;
-            is_valid?: boolean;
-            reason?: string | null;
-            responds_to_https?: boolean;
-            enforces_https?: boolean;
-            https_error?: string | null;
-            is_https_eligible?: boolean | null;
-            caa_error?: string | null;
-        };
-        alt_domain?: {
-            host?: string;
-            uri?: string;
-            nameservers?: string;
-            dns_resolves?: boolean;
-            is_proxied?: boolean | null;
-            is_cloudflare_ip?: boolean | null;
-            is_fastly_ip?: boolean | null;
-            is_old_ip_address?: boolean | null;
-            is_a_record?: boolean | null;
-            has_cname_record?: boolean | null;
-            has_mx_records_present?: boolean | null;
-            is_valid_domain?: boolean;
-            is_apex_domain?: boolean;
-            should_be_a_record?: boolean | null;
-            is_cname_to_github_user_domain?: boolean | null;
-            is_cname_to_pages_dot_github_dot_com?: boolean | null;
-            is_cname_to_fastly?: boolean | null;
-            is_pointed_to_github_pages_ip?: boolean | null;
-            is_non_github_pages_ip_present?: boolean | null;
-            is_pages_domain?: boolean;
-            is_served_by_pages?: boolean | null;
-            is_valid?: boolean;
-            reason?: string | null;
-            responds_to_https?: boolean;
-            enforces_https?: boolean;
-            https_error?: string | null;
-            is_https_eligible?: boolean | null;
-            caa_error?: string | null;
-        } | null;
+  /**
+   * Pages Health Check Status
+   *
+   * @title Pages Health Check Status
+   */
+  export type pages_health_check = {
+    domain?: {
+      host?: string;
+      uri?: string;
+      nameservers?: string;
+      dns_resolves?: boolean;
+      is_proxied?: boolean | null;
+      is_cloudflare_ip?: boolean | null;
+      is_fastly_ip?: boolean | null;
+      is_old_ip_address?: boolean | null;
+      is_a_record?: boolean | null;
+      has_cname_record?: boolean | null;
+      has_mx_records_present?: boolean | null;
+      is_valid_domain?: boolean;
+      is_apex_domain?: boolean;
+      should_be_a_record?: boolean | null;
+      is_cname_to_github_user_domain?: boolean | null;
+      is_cname_to_pages_dot_github_dot_com?: boolean | null;
+      is_cname_to_fastly?: boolean | null;
+      is_pointed_to_github_pages_ip?: boolean | null;
+      is_non_github_pages_ip_present?: boolean | null;
+      is_pages_domain?: boolean;
+      is_served_by_pages?: boolean | null;
+      is_valid?: boolean;
+      reason?: string | null;
+      responds_to_https?: boolean;
+      enforces_https?: boolean;
+      https_error?: string | null;
+      is_https_eligible?: boolean | null;
+      caa_error?: string | null;
     };
+    alt_domain?: {
+      host?: string;
+      uri?: string;
+      nameservers?: string;
+      dns_resolves?: boolean;
+      is_proxied?: boolean | null;
+      is_cloudflare_ip?: boolean | null;
+      is_fastly_ip?: boolean | null;
+      is_old_ip_address?: boolean | null;
+      is_a_record?: boolean | null;
+      has_cname_record?: boolean | null;
+      has_mx_records_present?: boolean | null;
+      is_valid_domain?: boolean;
+      is_apex_domain?: boolean;
+      should_be_a_record?: boolean | null;
+      is_cname_to_github_user_domain?: boolean | null;
+      is_cname_to_pages_dot_github_dot_com?: boolean | null;
+      is_cname_to_fastly?: boolean | null;
+      is_pointed_to_github_pages_ip?: boolean | null;
+      is_non_github_pages_ip_present?: boolean | null;
+      is_pages_domain?: boolean;
+      is_served_by_pages?: boolean | null;
+      is_valid?: boolean;
+      reason?: string | null;
+      responds_to_https?: boolean;
+      enforces_https?: boolean;
+      https_error?: string | null;
+      is_https_eligible?: boolean | null;
+      caa_error?: string | null;
+    } | null;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.pages_health_check;
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const domain = value.domain || {};
-  const alt = value.alt_domain;
+  type DomainData = NonNullable<AutoViewInput["domain"]>;
+  const domain = value.domain;
+  const altDomain = value.alt_domain;
 
-  // Utility to render a status badge for boolean|undefined|null values
-  function StatusBadge(status: boolean | null | undefined): React.ReactNode {
-    let text: string;
-    let bg: string;
-    let fg: string;
-    if (status === true) {
-      text = 'Yes';
-      bg = 'bg-green-100';
-      fg = 'text-green-800';
-    } else if (status === false) {
-      text = 'No';
-      bg = 'bg-red-100';
-      fg = 'text-red-800';
-    } else {
-      text = 'Unknown';
-      bg = 'bg-gray-100';
-      fg = 'text-gray-800';
+  // Render boolean/null status icons
+  const renderIcon = (flag: boolean | null | undefined) => {
+    if (flag === true) {
+      return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+    } else if (flag === false) {
+      return <LucideReact.XCircle className="text-red-500" size={16} />;
     }
-    return (
-      <span className={`${bg} ${fg} px-2 py-0.5 text-xs font-medium rounded-full`}>
-        {text}
-      </span>
-    );
-  }
+    return <LucideReact.AlertTriangle className="text-gray-400" size={16} />;
+  };
 
-  // Helper to render a domain block (primary or alternate)
-  function renderDomainBlock(title: string, data: typeof domain): React.ReactNode {
-    const items: { label: string; content: React.ReactNode }[] = [];
-
-    // Textual fields
-    if (data.host) items.push({ label: 'Host', content: data.host });
-    if (data.uri) items.push({ label: 'URI', content: data.uri });
-    if (data.nameservers) items.push({ label: 'Nameservers', content: data.nameservers });
-
-    // Boolean status fields
-    const boolFields: [keyof typeof domain, string][] = [
-      ['dns_resolves', 'DNS Resolves'],
-      ['is_valid_domain', 'Valid Domain'],
-      ['is_apex_domain', 'Apex Domain'],
-      ['is_a_record', 'Has A Record'],
-      ['has_cname_record', 'Has CNAME Record'],
-      ['is_proxied', 'Proxied'],
-      ['is_cloudflare_ip', 'Cloudflare IP'],
-      ['is_fastly_ip', 'Fastly IP'],
-      ['is_old_ip_address', 'Old IP Address'],
-      ['is_pointed_to_github_pages_ip', 'Pointed to GitHub Pages IP'],
-      ['is_non_github_pages_ip_present', 'Non-GitHub Pages IP Present'],
-      ['is_cname_to_github_user_domain', 'CNAME to GitHub User Domain'],
-      ['is_cname_to_pages_dot_github_dot_com', 'CNAME to pages.github.com'],
-      ['is_cname_to_fastly', 'CNAME to Fastly'],
-      ['is_pages_domain', 'Is Pages Domain'],
-      ['is_served_by_pages', 'Served by GitHub Pages'],
-      ['responds_to_https', 'HTTPS Response'],
-      ['enforces_https', 'Enforces HTTPS'],
-      ['is_https_eligible', 'HTTPS Eligible'],
+  // Render one domain health section
+  const renderSection = (title: string, d: DomainData) => {
+    const items: [string, boolean | null | undefined][] = [
+      ["Valid Format", d.is_valid_domain],
+      ["DNS Resolves", d.dns_resolves],
+      ["Proxied", d.is_proxied],
+      ["Cloudflare IP", d.is_cloudflare_ip],
+      ["Fastly IP", d.is_fastly_ip],
+      ["Pages Domain", d.is_pages_domain],
+      ["Served by Pages", d.is_served_by_pages],
+      ["Responds to HTTPS", d.responds_to_https],
+      ["Enforces HTTPS", d.enforces_https],
+      ["HTTPS Eligible", d.is_https_eligible],
     ];
-    for (const [key, label] of boolFields) {
-      if (key in data) {
-        items.push({ label, content: StatusBadge(data[key] as boolean | null | undefined) });
-      }
-    }
-
-    // Error or reason fields
-    if (data.reason) {
-      items.push({
-        label: 'Reason',
-        content: <span className="text-red-600 text-sm">{data.reason}</span>,
-      });
-    }
-    if (data.https_error) {
-      items.push({
-        label: 'HTTPS Error',
-        content: <span className="text-red-600 text-sm">{data.https_error}</span>,
-      });
-    }
-    if (data.caa_error) {
-      items.push({
-        label: 'CAA Error',
-        content: <span className="text-red-600 text-sm">{data.caa_error}</span>,
-      });
-    }
 
     return (
-      <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-800 mb-3">{title}</h4>
-        <dl className="space-y-2">
-          {items.map((item, idx) => (
-            <div key={idx} className="flex justify-between">
-              <dt className="text-gray-600">{item.label}</dt>
-              <dd className="ml-4">{item.content}</dd>
-            </div>
-          ))}
-        </dl>
+      <div className="border-t border-gray-200 pt-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-md font-semibold text-gray-800">{title}</h3>
+          {renderIcon(d.is_valid)}
+        </div>
+        <div className="flex items-center text-gray-700 mb-3">
+          <LucideReact.Globe size={18} />
+          <span className="ml-2 truncate">{d.host || "Unknown host"}</span>
+        </div>
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
+          {items
+            .filter(([, flag]) => flag !== undefined && flag !== null)
+            .map(([label, flag]) => (
+              <li key={label} className="flex items-center">
+                {renderIcon(flag)}
+                <span className="ml-2">{label}</span>
+              </li>
+            ))}
+        </ul>
+        {d.reason && (
+          <div className="mt-2 text-sm text-red-600 flex items-center">
+            <LucideReact.AlertTriangle size={16} />
+            <span className="ml-2 italic">{d.reason}</span>
+          </div>
+        )}
+        {(d.https_error || d.caa_error) && (
+          <div className="mt-2 space-y-1">
+            {d.https_error && (
+              <div className="text-sm text-red-600 flex items-center">
+                <LucideReact.AlertTriangle size={16} />
+                <span className="ml-2 italic">{d.https_error}</span>
+              </div>
+            )}
+            {d.caa_error && (
+              <div className="text-sm text-red-600 flex items-center">
+                <LucideReact.AlertTriangle size={16} />
+                <span className="ml-2 italic">{d.caa_error}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
-  }
+  };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-xl mx-auto p-4 bg-gray-50 rounded-lg">
-      <h3 className="text-2xl font-bold text-gray-900 mb-6">Pages Health Check</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {renderDomainBlock('Primary Domain', domain)}
-        {alt ? renderDomainBlock('Alternate Domain', alt) : null}
-      </div>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-6">
+      <h2 className="text-xl font-bold text-gray-900">Pages Health Check</h2>
+
+      {domain ? (
+        renderSection("Main Domain", domain)
+      ) : (
+        <div className="text-gray-500 flex items-center">
+          <LucideReact.AlertCircle className="text-gray-400" size={20} />
+          <span className="ml-2">No domain data available</span>
+        </div>
+      )}
+
+      {altDomain && renderSection("Alternative Domain", altDomain)}
     </div>
   );
 }

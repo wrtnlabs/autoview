@@ -1,158 +1,236 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * The Relationship a Team has with a role.
+   *
+   * @title A Role Assignment for a Team
+   */
+  export type team_role_assignment = {
     /**
-     * The Relationship a Team has with a role.
-     *
-     * @title A Role Assignment for a Team
-    */
-    export type team_role_assignment = {
-        /**
-         * Determines if the team has a direct, indirect, or mixed relationship to a role
-        */
-        assignment?: "direct" | "indirect" | "mixed";
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        name: string;
-        slug: string;
-        description: string | null;
-        privacy?: string;
-        notification_setting?: string;
-        permission: string;
-        permissions?: {
-            pull: boolean;
-            triage: boolean;
-            push: boolean;
-            maintain: boolean;
-            admin: boolean;
-        };
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        members_url: string;
-        repositories_url: string & tags.Format<"uri">;
-        parent: AutoViewInputSubTypes.nullable_team_simple;
+     * Determines if the team has a direct, indirect, or mixed relationship to a role
+     */
+    assignment?: "direct" | "indirect" | "mixed";
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    privacy?: string;
+    notification_setting?: string;
+    permission: string;
+    permissions?: {
+      pull: boolean;
+      triage: boolean;
+      push: boolean;
+      maintain: boolean;
+      admin: boolean;
     };
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    members_url: string;
+    repositories_url: string & tags.Format<"uri">;
+    parent: AutoViewInputSubTypes.nullable_team_simple;
+  };
+  /**
+   * Groups of organization members that gives permissions on specified repositories.
+   *
+   * @title Team Simple
+   */
+  export type nullable_team_simple = {
     /**
-     * Groups of organization members that gives permissions on specified repositories.
-     *
-     * @title Team Simple
-    */
-    export type nullable_team_simple = {
-        /**
-         * Unique identifier of the team
-        */
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        /**
-         * URL for the team
-        */
-        url: string & tags.Format<"uri">;
-        members_url: string;
-        /**
-         * Name of the team
-        */
-        name: string;
-        /**
-         * Description of the team
-        */
-        description: string | null;
-        /**
-         * Permission that the team will have for its repositories
-        */
-        permission: string;
-        /**
-         * The level of privacy this team should have
-        */
-        privacy?: string;
-        /**
-         * The notification setting the team has set
-        */
-        notification_setting?: string;
-        html_url: string & tags.Format<"uri">;
-        repositories_url: string & tags.Format<"uri">;
-        slug: string;
-        /**
-         * Distinguished Name (DN) that team maps to within LDAP environment
-        */
-        ldap_dn?: string;
-    } | null;
+     * Unique identifier of the team
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * URL for the team
+     */
+    url: string;
+    members_url: string;
+    /**
+     * Name of the team
+     */
+    name: string;
+    /**
+     * Description of the team
+     */
+    description: string | null;
+    /**
+     * Permission that the team will have for its repositories
+     */
+    permission: string;
+    /**
+     * The level of privacy this team should have
+     */
+    privacy?: string;
+    /**
+     * The notification setting the team has set
+     */
+    notification_setting?: string;
+    html_url: string & tags.Format<"uri">;
+    repositories_url: string & tags.Format<"uri">;
+    slug: string;
+    /**
+     * Distinguished Name (DN) that team maps to within LDAP environment
+     */
+    ldap_dn?: string;
+  } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_role_assignment[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Helper to capitalize strings
-  const capitalize = (s?: string): string =>
-    s ? s.charAt(0).toUpperCase() + s.slice(1) : 'N/A';
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const assignments = value ?? [];
+  const count = assignments.length;
 
-  if (!value || value.length === 0) {
+  // Utility to truncate or provide fallback
+  const truncate = (text: string, max = 100) =>
+    text.length > max ? text.slice(0, max) + "…" : text;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (count === 0) {
     return (
-      <div className="py-8 text-center text-gray-500">
-        No role assignments available.
+      <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mb-2" />
+        <span className="text-sm">No team role assignments available.</span>
       </div>
     );
   }
 
-  const assignmentColors: Record<string, string> = {
-    direct: 'bg-green-100 text-green-800',
-    indirect: 'bg-yellow-100 text-yellow-800',
-    mixed: 'bg-gray-100 text-gray-800',
-  };
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {value.map((item) => {
-        const assignmentType = item.assignment ?? 'N/A';
-        const assignmentClass =
-          assignmentColors[item.assignment ?? ''] ?? 'bg-gray-100 text-gray-800';
+    <div className="p-4 space-y-6">
+      <div className="flex items-center text-lg font-semibold text-gray-800">
+        <LucideReact.Users size={20} className="mr-2 text-gray-600" />
+        <span>Team Role Assignments ({count})</span>
+      </div>
+      <div className="space-y-4">
+        {assignments.map((item) => {
+          const {
+            id,
+            name,
+            assignment,
+            description,
+            parent,
+            permission,
+            permissions,
+          } = item;
 
-        const grantedPermissions = item.permissions
-          ? (Object.entries(item.permissions) as [keyof typeof item.permissions, boolean][])
-              .filter(([, allowed]) => allowed)
-              .map(([key]) => capitalize(key))
-          : [];
+          // Determine assignment icon and label
+          const getAssignment = () => {
+            switch (assignment) {
+              case "direct":
+                return (
+                  <div className="flex items-center text-sm text-green-600">
+                    <LucideReact.CheckCircle size={16} className="mr-1" />
+                    Direct
+                  </div>
+                );
+              case "indirect":
+                return (
+                  <div className="flex items-center text-blue-600">
+                    <LucideReact.ArrowDownRight size={16} className="mr-1" />
+                    Indirect
+                  </div>
+                );
+              case "mixed":
+                return (
+                  <div className="flex items-center text-purple-600">
+                    <LucideReact.Shuffle size={16} className="mr-1" />
+                    Mixed
+                  </div>
+                );
+              default:
+                return (
+                  <div className="flex items-center text-gray-400">
+                    <LucideReact.HelpCircle size={16} className="mr-1" />
+                    N/A
+                  </div>
+                );
+            }
+          };
 
-        return (
-          <div key={item.id} className="p-4 bg-white rounded-lg shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-medium text-gray-900 truncate">
-                {item.name}
-              </h3>
-              <span
-                className={`px-2 py-1 text-xs font-semibold rounded-full ${assignmentClass}`}
-              >
-                {capitalize(assignmentType)}
-              </span>
-            </div>
-            {item.description && (
-              <p className="text-gray-700 text-sm mb-2 line-clamp-2">
-                {item.description}
-              </p>
-            )}
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="px-2 py-1 text-xs font-semibold rounded bg-blue-100 text-blue-800">
-                {capitalize(item.permission)}
-              </span>
-              {grantedPermissions.map((perm) => (
-                <span
-                  key={perm}
-                  className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded"
-                >
-                  {perm}
-                </span>
-              ))}
-            </div>
-            {item.parent && (
-              <div className="text-gray-600 text-sm">
-                <span className="font-medium">Parent Team:</span>{' '}
-                <span className="truncate">{item.parent.name}</span>
+          // Map flag permissions to icons and labels
+          const flagMap: Record<
+            keyof typeof permissions,
+            { icon: React.ReactNode; label: string }
+          > = {
+            pull: {
+              icon: <LucideReact.Download size={14} />,
+              label: "Pull",
+            },
+            triage: {
+              icon: <LucideReact.Gavel size={14} />,
+              label: "Triage",
+            },
+            push: {
+              icon: <LucideReact.Upload size={14} />,
+              label: "Push",
+            },
+            maintain: {
+              icon: <LucideReact.Settings size={14} />,
+              label: "Maintain",
+            },
+            admin: {
+              icon: <LucideReact.Shield size={14} />,
+              label: "Admin",
+            },
+          };
+
+          return (
+            <div
+              key={id}
+              className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between">
+                <h3 className="text-md font-medium text-gray-900 truncate">
+                  {name}
+                </h3>
+                {getAssignment()}
               </div>
-            )}
-          </div>
-        );
-      })}
+              {description ? (
+                <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                  {truncate(description, 120)}
+                </p>
+              ) : null}
+              {parent && parent.name ? (
+                <div className="mt-2 flex items-center text-sm text-gray-500">
+                  <LucideReact.Folder
+                    size={16}
+                    className="mr-1 text-gray-400"
+                  />
+                  Parent: <span className="ml-1">{parent.name}</span>
+                </div>
+              ) : null}
+              <div className="mt-3 flex items-center text-sm text-gray-700">
+                <LucideReact.Tag size={16} className="mr-1 text-gray-500" />
+                Primary permission:
+                <span className="ml-1 font-medium capitalize">
+                  {permission}
+                </span>
+              </div>
+              {permissions ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {(Object.keys(permissions) as Array<keyof typeof permissions>)
+                    .filter((key) => permissions[key])
+                    .map((key) => (
+                      <span
+                        key={key}
+                        className="flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full text-xs"
+                      >
+                        {flagMap[key].icon}
+                        {flagMap[key].label}
+                      </span>
+                    ))}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

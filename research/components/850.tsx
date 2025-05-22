@@ -1,45 +1,51 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Generated name and body describing a release
+   *
+   * @title Generated Release Notes Content
+   */
+  export type release_notes_content = {
     /**
-     * Generated name and body describing a release
-     *
-     * @title Generated Release Notes Content
-    */
-    export type release_notes_content = {
-        /**
-         * The generated name of the release
-        */
-        name: string;
-        /**
-         * The generated body describing the contents of the release supporting markdown formatting
-        */
-        body: string;
-    };
+     * The generated name of the release
+     */
+    name: string;
+    /**
+     * The generated body describing the contents of the release supporting markdown formatting
+     */
+    body: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.release_notes_content;
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data extraction and presence check
   const { name, body } = value;
-  const maxPreviewLength = 200;
-  const previewBody =
-    body.length > maxPreviewLength
-      ? body.slice(0, maxPreviewLength).trimEnd() + '...'
-      : body;
+  const hasContent = Boolean(body && body.trim());
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 max-w-full">
-      <h2 className="text-xl font-semibold text-gray-900 mb-2 truncate">
-        {name}
-      </h2>
-      <p className="text-sm text-gray-700 whitespace-pre-wrap overflow-hidden max-h-32">
-        {previewBody}
-      </p>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Title Section */}
+      <div className="flex items-center gap-2 mb-3">
+        <LucideReact.FileText size={20} className="text-indigo-500" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+      </div>
+
+      {/* Body Section */}
+      {hasContent ? (
+        <div className="max-h-48 overflow-y-auto text-sm text-gray-700 whitespace-pre-line break-words px-1">
+          {body}
+        </div>
+      ) : (
+        <div className="flex items-center text-gray-400 text-sm">
+          <LucideReact.AlertCircle size={16} className="mr-1" />
+          <span>No release notes content available.</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,188 +1,265 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Commit
-     *
-     * @title Commit
-    */
-    export type commit = {
+  /**
+   * Commit
+   *
+   * @title Commit
+   */
+  export type commit = {
+    url: string & tags.Format<"uri">;
+    sha: string;
+    node_id: string;
+    html_url: string & tags.Format<"uri">;
+    comments_url: string & tags.Format<"uri">;
+    commit: {
+      url: string & tags.Format<"uri">;
+      author: AutoViewInputSubTypes.nullable_git_user;
+      committer: AutoViewInputSubTypes.nullable_git_user;
+      message: string;
+      comment_count: number & tags.Type<"int32">;
+      tree: {
+        sha: string;
         url: string & tags.Format<"uri">;
-        sha: string;
-        node_id: string;
-        html_url: string & tags.Format<"uri">;
-        comments_url: string & tags.Format<"uri">;
-        commit: {
-            url: string & tags.Format<"uri">;
-            author: AutoViewInputSubTypes.nullable_git_user;
-            committer: AutoViewInputSubTypes.nullable_git_user;
-            message: string;
-            comment_count: number & tags.Type<"int32">;
-            tree: {
-                sha: string;
-                url: string & tags.Format<"uri">;
-            };
-            verification?: AutoViewInputSubTypes.verification;
-        };
-        author: any | any | null;
-        committer: any | any | null;
-        parents: {
-            sha: string;
-            url: string & tags.Format<"uri">;
-            html_url?: string & tags.Format<"uri">;
-        }[];
-        stats?: {
-            additions?: number & tags.Type<"int32">;
-            deletions?: number & tags.Type<"int32">;
-            total?: number & tags.Type<"int32">;
-        };
-        files?: AutoViewInputSubTypes.diff_entry[];
+      };
+      verification?: AutoViewInputSubTypes.verification;
     };
-    /**
-     * Metaproperties for Git author/committer information.
-     *
-     * @title Git User
-    */
-    export type nullable_git_user = {
-        name?: string;
-        email?: string;
-        date?: string;
-    } | null;
-    /**
-     * @title Verification
-    */
-    export type verification = {
-        verified: boolean;
-        reason: string;
-        payload: string | null;
-        signature: string | null;
-        verified_at: string | null;
+    author:
+      | AutoViewInputSubTypes.simple_user
+      | AutoViewInputSubTypes.empty_object
+      | null;
+    committer:
+      | AutoViewInputSubTypes.simple_user
+      | AutoViewInputSubTypes.empty_object
+      | null;
+    parents: {
+      sha: string;
+      url: string & tags.Format<"uri">;
+      html_url?: string & tags.Format<"uri">;
+    }[];
+    stats?: {
+      additions?: number & tags.Type<"int32">;
+      deletions?: number & tags.Type<"int32">;
+      total?: number & tags.Type<"int32">;
     };
-    export type simple_user = any;
-    export type empty_object = any;
-    /**
-     * Diff Entry
-     *
-     * @title Diff Entry
-    */
-    export type diff_entry = {
-        sha: string;
-        filename: string;
-        status: "added" | "removed" | "modified" | "renamed" | "copied" | "changed" | "unchanged";
-        additions: number & tags.Type<"int32">;
-        deletions: number & tags.Type<"int32">;
-        changes: number & tags.Type<"int32">;
-        blob_url: string & tags.Format<"uri">;
-        raw_url: string & tags.Format<"uri">;
-        contents_url: string & tags.Format<"uri">;
-        patch?: string;
-        previous_filename?: string;
-    };
+    files?: AutoViewInputSubTypes.diff_entry[];
+  };
+  /**
+   * Metaproperties for Git author/committer information.
+   *
+   * @title Git User
+   */
+  export type nullable_git_user = {
+    name?: string;
+    email?: string;
+    date?: string;
+  } | null;
+  /**
+   * @title Verification
+   */
+  export type verification = {
+    verified: boolean;
+    reason: string;
+    payload: string | null;
+    signature: string | null;
+    verified_at: string | null;
+  };
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  };
+  /**
+   * An object without any properties.
+   *
+   * @title Empty Object
+   */
+  export type empty_object = {};
+  /**
+   * Diff Entry
+   *
+   * @title Diff Entry
+   */
+  export type diff_entry = {
+    sha: string;
+    filename: string;
+    status:
+      | "added"
+      | "removed"
+      | "modified"
+      | "renamed"
+      | "copied"
+      | "changed"
+      | "unchanged";
+    additions: number & tags.Type<"int32">;
+    deletions: number & tags.Type<"int32">;
+    changes: number & tags.Type<"int32">;
+    blob_url: string & tags.Format<"uri">;
+    raw_url: string & tags.Format<"uri">;
+    contents_url: string & tags.Format<"uri">;
+    patch?: string;
+    previous_filename?: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.commit[];
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const commits = Array.isArray(value) ? value : [];
+  if (commits.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span>No commits available.</span>
+      </div>
+    );
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {commits.length === 0 ? (
-        <p className="text-gray-500 text-center">No commits to display.</p>
-      ) : (
-        commits.map((commit) => {
-          // Derive author name
-          const authorName = commit.commit.author?.name ?? "Unknown Author";
+    <ul className="space-y-4">
+      {commits.map((item) => {
+        // Author display name and avatar logic
+        const authorLogin =
+          item.author && "login" in item.author && item.author.login
+            ? item.author.login
+            : undefined;
+        const commitMetaName = item.commit.author?.name;
+        const displayName = authorLogin || commitMetaName || "Unknown Author";
+        const hasAvatar =
+          item.author &&
+          "avatar_url" in item.author &&
+          typeof item.author.avatar_url === "string";
+        const avatarSrc = hasAvatar
+          ? (item.author as any).avatar_url
+          : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              displayName,
+            )}&background=0D8ABC&color=fff`;
 
-          // Derive commit date
-          const rawDate = commit.commit.author?.date ?? commit.commit.committer?.date ?? "";
-          const formattedDate = rawDate
-            ? new Date(rawDate).toLocaleString(undefined, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })
-            : "Unknown date";
+        // Commit message and SHA
+        const fullMessage = item.commit.message || "";
+        const messageTitle = fullMessage.split("\n")[0];
+        const shortSha = item.sha.slice(0, 7);
 
-          // Short SHA
-          const shortSha = commit.sha.slice(0, 7);
+        // Commit date formatting
+        const dateStr = item.commit.author?.date ?? item.commit.committer?.date;
+        const formattedDate = dateStr
+          ? new Date(dateStr).toLocaleDateString("default", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "Unknown date";
 
-          // Parents count
-          const parentsCount = Array.isArray(commit.parents) ? commit.parents.length : 0;
+        // Stats aggregation
+        const fileCount = item.files?.length ?? 0;
+        const additions =
+          item.stats?.additions ??
+          (item.files
+            ? item.files.reduce((sum, f) => sum + f.additions, 0)
+            : 0);
+        const deletions =
+          item.stats?.deletions ??
+          (item.files
+            ? item.files.reduce((sum, f) => sum + f.deletions, 0)
+            : 0);
 
-          // Files changed count
-          const filesCount = Array.isArray(commit.files) ? commit.files.length : 0;
-
-          // Stats
-          const additions = commit.stats?.additions ?? 0;
-          const deletions = commit.stats?.deletions ?? 0;
-          const totalChanges = commit.stats?.total ?? additions + deletions;
-
-          // Verification status
-          const isVerified = commit.commit.verification?.verified === true;
-
-          return (
-            <div
-              key={commit.sha}
-              className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              <h3 className="text-gray-900 font-semibold text-lg line-clamp-2">
-                {commit.commit.message}
-              </h3>
-
-              <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:space-x-2 text-sm text-gray-600">
-                <span className="truncate">{authorName}</span>
-                <span>·</span>
-                <span className="whitespace-nowrap">{formattedDate}</span>
+        return (
+          <li
+            key={item.sha}
+            className="flex flex-col sm:flex-row items-start sm:items-center bg-white p-4 rounded-lg shadow"
+          >
+            <img
+              src={avatarSrc}
+              alt={displayName}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  displayName,
+                )}&background=0D8ABC&color=fff`;
+              }}
+              className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+            />
+            <div className="mt-3 sm:mt-0 sm:ml-4 flex-1">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-gray-900 font-medium">{messageTitle}</h3>
+                <span className="mt-1 sm:mt-0 text-sm text-gray-500 flex items-center">
+                  <LucideReact.Calendar size={16} className="mr-1" />
+                  {formattedDate}
+                </span>
               </div>
-
-              <div className="flex flex-wrap gap-2 mt-3">
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+              <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 space-x-2">
+                <span className="font-mono bg-gray-100 px-1 rounded">
                   {shortSha}
                 </span>
-                {isVerified && (
-                  <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                    Verified
+                {fileCount > 0 && (
+                  <span className="flex items-center">
+                    <LucideReact.FileText
+                      size={16}
+                      className="text-gray-400 mr-1"
+                    />
+                    {fileCount} file{fileCount > 1 ? "s" : ""}
                   </span>
                 )}
-                {parentsCount > 0 && (
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                    {parentsCount} parent{parentsCount > 1 ? "s" : ""}
+                {additions > 0 && (
+                  <span className="flex items-center text-green-600">
+                    <LucideReact.Plus
+                      size={16}
+                      className="mr-1 text-green-500"
+                    />
+                    +{additions}
                   </span>
                 )}
-                {filesCount > 0 && (
-                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
-                    {filesCount} file{filesCount > 1 ? "s" : ""} changed
+                {deletions > 0 && (
+                  <span className="flex items-center text-red-600">
+                    <LucideReact.Minus
+                      size={16}
+                      className="mr-1 text-red-500"
+                    />
+                    -{deletions}
                   </span>
-                )}
-                {(additions > 0 || deletions > 0) && (
-                  <>
-                    {additions > 0 && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">
-                        +{additions}
-                      </span>
-                    )}
-                    {deletions > 0 && (
-                      <span className="text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded">
-                        -{deletions}
-                      </span>
-                    )}
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                      {totalChanges} change{totalChanges !== 1 ? "s" : ""}
-                    </span>
-                  </>
                 )}
               </div>
+              <a
+                href={item.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-flex items-center text-blue-500 hover:underline text-sm"
+              >
+                <LucideReact.Link size={16} />
+                <span className="ml-1">View on GitHub</span>
+              </a>
             </div>
-          );
-        })
-      )}
-    </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

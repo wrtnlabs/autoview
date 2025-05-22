@@ -1,114 +1,111 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace legacy {
-        export namespace open {
-            export namespace v4 {
-                export type LegacyV4ChatTagView = {
-                    chatTag?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatTag;
-                };
-            }
-        }
-        export namespace v4 {
-            export type LegacyV4ChatTag = {
-                id?: string;
-                channelId?: string;
-                colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
-                name: string;
-                key: string;
-                description?: string;
-                followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
-                createdAt?: number;
-            };
-        }
+  export namespace legacy {
+    export namespace open {
+      export namespace v4 {
+        export type LegacyV4ChatTagView = {
+          chatTag?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatTag;
+        };
+      }
     }
+    export namespace v4 {
+      export type LegacyV4ChatTag = {
+        id?: string;
+        channelId?: string;
+        colorVariant?:
+          | "red"
+          | "orange"
+          | "yellow"
+          | "olive"
+          | "green"
+          | "cobalt"
+          | "purple"
+          | "pink"
+          | "navy";
+        name: string;
+        key: string;
+        description?: string;
+        followerIds?: string[] &
+          tags.MinItems<1> &
+          tags.MaxItems<2147483647> &
+          tags.UniqueItems;
+        createdAt?: number;
+      };
+    }
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ChatTagView;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.legacy.open.v4.LegacyV4ChatTagView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Derived values and helpers
   const tag = value.chatTag;
+  const createdDate = tag?.createdAt
+    ? new Date(tag.createdAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+  const followerCount = tag?.followerIds?.length ?? 0;
+
+  // Map the colorVariant to a Tailwind CSS background class
+  const colorMap: Record<string, string> = {
+    red: "bg-red-500",
+    orange: "bg-orange-500",
+    yellow: "bg-yellow-400",
+    olive: "bg-lime-700",
+    green: "bg-green-500",
+    cobalt: "bg-blue-700",
+    purple: "bg-purple-500",
+    pink: "bg-pink-500",
+    navy: "bg-blue-900",
+  };
+  const colorClass = tag?.colorVariant
+    ? colorMap[tag.colorVariant] || "bg-gray-300"
+    : "bg-gray-300";
+
+  // 2. Compose the visual structure
   if (!tag) {
     return (
-      <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-500">
-        No chat tag available.
+      <div className="p-4 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="ml-2">No tag data available</span>
       </div>
     );
   }
 
-  // Derive follower count
-  const followerCount = tag.followerIds?.length ?? 0;
-
-  // Format creation date
-  const createdDate = tag.createdAt
-    ? new Date(tag.createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    : 'Unknown';
-
-  // Map colorVariant to Tailwind-safe color or fallback
-  const colorMap: Record<string, string> = {
-    red: 'red',
-    orange: 'orange',
-    yellow: 'yellow',
-    olive: 'gray',   // olive not default: fallback to gray
-    green: 'green',
-    cobalt: 'blue',  // cobalt mapped to blue
-    purple: 'purple',
-    pink: 'pink',
-    navy: 'blue',    // navy mapped to blue
-  };
-  const variant = tag.colorVariant ?? 'default';
-  const tailwindColor = colorMap[variant] || 'gray';
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
+    <div className="max-w-sm w-full bg-white p-4 rounded-lg shadow-md">
+      <div className="flex items-center">
+        <span className={`h-3 w-3 rounded-full ${colorClass}`} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-900 truncate">
           {tag.name}
         </h2>
-        <span
-          className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-${tailwindColor}-100 text-${tailwindColor}-800`}
-        >
-          {variant}
-        </span>
       </div>
-      <p className="text-xs text-gray-500 mb-3 truncate">Key: {tag.key}</p>
-      <p className="text-gray-600 text-sm mb-4 overflow-hidden line-clamp-3">
-        {tag.description ?? 'No description provided.'}
-      </p>
-      <div className="flex flex-wrap gap-4 text-sm text-gray-700">
+      <p className="mt-1 text-xs text-gray-500 truncate">Key: {tag.key}</p>
+      {tag.description && (
+        <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+          {tag.description}
+        </p>
+      )}
+      <div className="flex items-center mt-4 text-gray-500 text-sm">
         <div className="flex items-center">
-          <svg
-            className="w-4 h-4 mr-1 text-gray-400"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M10 2a6 6 0 00-6 6v3H3a1 1 0 000 2h14a1 1 0 000-2h-1V8a6 6 0 00-6-6zm-4 9V8a4 4 0 118 0v3H6zm4 5a2.5 2.5 0 01-2.45-2h4.9A2.5 2.5 0 0110 16z" />
-          </svg>
-          {followerCount} follower{followerCount === 1 ? '' : 's'}
+          <LucideReact.Users size={16} />
+          <span className="ml-1">
+            {followerCount} follower{followerCount !== 1 ? "s" : ""}
+          </span>
         </div>
-        <div className="flex items-center">
-          <svg
-            className="w-4 h-4 mr-1 text-gray-400"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M6 2a1 1 0 00-1 1v2a1 1 0 102 0V4h6v1a1 1 0 102 0V3a1 1 0 00-1-1H6z" />
-            <path
-              fillRule="evenodd"
-              d="M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm2 0v8h10V8H5z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Created: {createdDate}
-        </div>
+        {createdDate && (
+          <div className="flex items-center ml-4">
+            <LucideReact.Calendar size={16} />
+            <span className="ml-1">{createdDate}</span>
+          </div>
+        )}
       </div>
     </div>
   );

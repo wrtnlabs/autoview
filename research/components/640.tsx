@@ -1,41 +1,55 @@
-import React from "react";
-export namespace AutoViewInputSubTypes { }
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
+export namespace AutoViewInputSubTypes {}
 export type AutoViewInput = string[];
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const items: string[] = Array.isArray(value) ? value : [];
-  const totalCount: number = items.length;
-  const MAX_DISPLAY = 10;
-  const hasOverflow: boolean = totalCount > MAX_DISPLAY;
-  const visibleItems: string[] = hasOverflow ? items.slice(0, MAX_DISPLAY) : items;
+  //    Here, treat the array of strings as tags or items, deduplicate and sort them.
+  const uniqueTags = Array.from(
+    new Set(value.filter((v) => typeof v === "string" && v.trim() !== "")),
+  );
+  const sortedTags = uniqueTags.sort((a, b) =>
+    a.localeCompare(b, undefined, { sensitivity: "base" }),
+  );
+  const tagCount = sortedTags.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Display a header with an icon and count, then show tags or an empty state.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm">
-      <div className="text-gray-700 font-medium text-sm mb-2">
-        Items ({totalCount})
+    <div className="p-4 bg-white rounded-lg shadow-sm w-full max-w-md mx-auto">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center text-gray-800">
+          <LucideReact.Tag
+            size={20}
+            className="text-blue-500 mr-2"
+            aria-hidden="true"
+          />
+          <h2 className="text-lg font-medium">Items</h2>
+        </div>
+        <span className="text-sm text-gray-500">
+          {tagCount} {tagCount === 1 ? "item" : "items"}
+        </span>
       </div>
-      {totalCount === 0 ? (
-        <div className="text-gray-500 text-sm">No items to display.</div>
-      ) : (
+
+      {tagCount > 0 ? (
         <div className="flex flex-wrap gap-2">
-          {visibleItems.map((item, index) => (
+          {sortedTags.map((tag) => (
             <span
-              key={index}
-              className="inline-block max-w-[150px] overflow-hidden whitespace-nowrap truncate px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full"
+              key={tag}
+              className="bg-gray-100 text-gray-700 text-sm px-2 py-1 rounded-full truncate max-w-xs"
+              title={tag}
             >
-              {item}
+              {tag}
             </span>
           ))}
-          {hasOverflow && (
-            <span className="inline-block px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
-              +{totalCount - MAX_DISPLAY} more
-            </span>
-          )}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-6 text-gray-400">
+          <LucideReact.AlertCircle size={24} aria-hidden="true" />
+          <span className="mt-2 text-sm">No items to display</span>
         </div>
       )}
     </div>

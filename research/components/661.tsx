@@ -1,142 +1,134 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Check Annotation
-     *
-     * @title Check Annotation
-    */
-    export type check_annotation = {
-        path: string;
-        start_line: number & tags.Type<"int32">;
-        end_line: number & tags.Type<"int32">;
-        start_column: (number & tags.Type<"int32">) | null;
-        end_column: (number & tags.Type<"int32">) | null;
-        annotation_level: string | null;
-        title: string | null;
-        message: string | null;
-        raw_details: string | null;
-        blob_href: string;
-    };
+  /**
+   * Check Annotation
+   *
+   * @title Check Annotation
+   */
+  export type check_annotation = {
+    path: string;
+    start_line: number & tags.Type<"int32">;
+    end_line: number & tags.Type<"int32">;
+    start_column: (number & tags.Type<"int32">) | null;
+    end_column: (number & tags.Type<"int32">) | null;
+    annotation_level: string | null;
+    title: string | null;
+    message: string | null;
+    raw_details: string | null;
+    blob_href: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.check_annotation[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const annotations = value;
-  const total = annotations.length;
+  // 1. Data transformation helpers
 
-  // Count annotations by level
-  const counts = annotations.reduce((acc, ann) => {
-    const lvl = (ann.annotation_level ?? "note").toLowerCase();
-    acc[lvl] = (acc[lvl] ?? 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Mapping of levels to badge colors
-  const levelClasses: Record<string, string> = {
-    error: "bg-red-100 text-red-800",
-    warning: "bg-yellow-100 text-yellow-800",
-    note: "bg-blue-100 text-blue-800",
-    notice: "bg-blue-100 text-blue-800",
-    info: "bg-blue-100 text-blue-800",
+  // Map annotation levels to icons and labels
+  const getLevelMeta = (level: string | null) => {
+    const lvl = level?.toLowerCase();
+    switch (lvl) {
+      case "failure":
+      case "error":
+        return {
+          icon: <LucideReact.XCircle size={16} className="text-red-500" />,
+          label: "Error",
+        };
+      case "warning":
+        return {
+          icon: (
+            <LucideReact.AlertTriangle size={16} className="text-amber-500" />
+          ),
+          label: "Warning",
+        };
+      case "notice":
+      case "info":
+        return {
+          icon: <LucideReact.Info size={16} className="text-blue-500" />,
+          label: "Notice",
+        };
+      default:
+        return {
+          icon: <LucideReact.Bell size={16} className="text-gray-500" />,
+          label: "Annotation",
+        };
+    }
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Format line and column information
+  const formatRange = (ann: AutoViewInputSubTypes.check_annotation) => {
+    const { start_line, end_line, start_column, end_column } = ann;
+    const linePart =
+      start_line === end_line
+        ? `Line ${start_line}`
+        : `Lines ${start_line}-${end_line}`;
+    if (start_column != null && end_column != null && start_line === end_line) {
+      return `${linePart} (Cols ${start_column}-${end_column})`;
+    }
+    return linePart;
+  };
+
+  // 2. Render when no annotations
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center py-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-2 text-sm">No annotations available</p>
+      </div>
+    );
+  }
+
+  // 3. Compose the visual structure
   return (
-    <div className="w-full max-w-md mx-auto space-y-4">
-      {total === 0 ? (
-        <div className="py-6 text-center text-gray-500 italic">
-          No annotations to display.
-        </div>
-      ) : (
-        <>
-          {/* Summary */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-gray-600">
-              Total: {total} annotation{total > 1 ? "s" : ""}
-            </span>
-            {Object.entries(counts).map(([level, count]) => {
-              const cls = levelClasses[level] || "bg-gray-100 text-gray-800";
-              const label = level.charAt(0).toUpperCase() + level.slice(1);
-              return (
-                <span
-                  key={level}
-                  className={`px-2 py-1 text-xs font-semibold rounded ${cls}`}
-                >
-                  {count} {label}
-                  {count > 1 ? "s" : ""}
+    <div className="space-y-4">
+      {value.map((ann, idx) => {
+        const { icon, label } = getLevelMeta(ann.annotation_level);
+        const rangeText = formatRange(ann);
+
+        return (
+          <div
+            key={`${ann.path}-${ann.start_line}-${idx}`}
+            className="p-4 bg-white rounded-lg shadow-sm"
+          >
+            {/* Header: file path and level */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <LucideReact.FileText size={16} className="text-gray-500" />
+                <span className="font-medium text-gray-800 truncate">
+                  {ann.path}
                 </span>
-              );
-            })}
+              </div>
+              <div className="flex items-center gap-1">
+                {icon}
+                <span className="text-sm font-medium text-gray-600">
+                  {label}
+                </span>
+              </div>
+            </div>
+
+            {/* Range information */}
+            <div className="mt-2 flex items-center text-sm text-gray-500">
+              <LucideReact.Hash size={16} className="mr-1 text-gray-500" />
+              <span>{rangeText}</span>
+            </div>
+
+            {/* Title and message */}
+            {ann.title && (
+              <p className="mt-2 font-semibold text-gray-800 truncate">
+                {ann.title}
+              </p>
+            )}
+            {ann.message && (
+              <p className="mt-1 text-gray-700 text-sm line-clamp-2">
+                {ann.message}
+              </p>
+            )}
           </div>
-
-          {/* Annotation List */}
-          <div className="space-y-4">
-            {annotations.map((ann, idx) => {
-              const lvl = (ann.annotation_level ?? "note").toLowerCase();
-              const badgeCls = levelClasses[lvl] || "bg-gray-100 text-gray-800";
-              const label = lvl.charAt(0).toUpperCase() + lvl.slice(1);
-
-              // Derive location string
-              let location =
-                ann.start_line === ann.end_line
-                  ? `Line ${ann.start_line}`
-                  : `Lines ${ann.start_line}–${ann.end_line}`;
-              if (
-                ann.start_column != null &&
-                ann.end_column != null
-              ) {
-                location += `, cols ${ann.start_column}–${ann.end_column}`;
-              }
-
-              return (
-                <div
-                  key={idx}
-                  className="p-4 bg-white rounded-lg shadow"
-                >
-                  <div className="flex items-center">
-                    <span
-                      className={`px-2 py-1 text-xs font-semibold rounded ${badgeCls}`}
-                    >
-                      {label}
-                    </span>
-                    <span className="ml-2 text-sm font-medium text-gray-800 truncate">
-                      {ann.path}
-                    </span>
-                    <span className="ml-auto text-xs text-gray-500 whitespace-nowrap">
-                      {location}
-                    </span>
-                  </div>
-
-                  {ann.title && (
-                    <div className="mt-2 text-sm font-medium text-gray-900 truncate">
-                      {ann.title}
-                    </div>
-                  )}
-                  {ann.message && (
-                    <div className="mt-1 text-sm text-gray-700 line-clamp-2">
-                      {ann.message}
-                    </div>
-                  )}
-                  {ann.raw_details && (
-                    <div className="mt-1 text-xs text-gray-500 line-clamp-3">
-                      {ann.raw_details}
-                    </div>
-                  )}
-
-                  <div className="mt-2 text-xs font-mono text-blue-600 truncate">
-                    {ann.blob_href}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </>
-      )}
+        );
+      })}
     </div>
   );
 }

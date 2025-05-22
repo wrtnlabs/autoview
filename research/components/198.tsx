@@ -1,173 +1,186 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace legacy {
-        export namespace open {
-            export namespace v4 {
-                export type LegacyV4PluginView = {
-                    plugin?: AutoViewInputSubTypes.legacy.v4.LegacyV4Plugin;
-                };
-            }
-        }
-        export namespace v4 {
-            export type LegacyV4Plugin = {
-                id?: string;
-                key?: string & tags.Format<"uuid">;
-                channelId?: string;
-                state?: "waiting" | "active";
-                name: string;
-                createdAt?: number;
-                color: string & tags.Default<"#123456">;
-                botName: string;
-                textI18n?: AutoViewInputSubTypes.I18nText;
-                labelButton?: boolean;
-                deskImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
-                deskMarginX?: number & tags.Type<"int32">;
-                deskMarginY?: number & tags.Type<"int32">;
-                deskPosition?: "left" | "right";
-                mobileImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
-                mobileMarginX?: number & tags.Type<"int32">;
-                mobileMarginY?: number & tags.Type<"int32">;
-                mobilePosition?: "left" | "right";
-                mobileHideButton?: boolean;
-                mobileBubblePosition?: "top" | "bottom";
-                accessSecret?: string;
-                welcomeI18n: AutoViewInputSubTypes.I18nText;
-                profileBot?: boolean;
-                profileBotMessageI18n: AutoViewInputSubTypes.I18nText;
-                profileBotSchemaIds?: string[];
-                urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
-                runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
-                facebookPixelId?: string;
-                bright?: boolean;
-                borderColor?: string;
-                gradientColor?: string;
-                textColor?: string;
-                deskImageUrl?: string;
-                mobileImageUrl?: string;
-                /**
-                 * @deprecated
-                */
-                showPoweredBy?: boolean;
-            };
-            export type LegacyV4TinyFile = {
-                bucket: string;
-                key: string;
-                width?: number & tags.Type<"int32">;
-                height?: number & tags.Type<"int32">;
-            };
-        }
+  export namespace legacy {
+    export namespace open {
+      export namespace v4 {
+        export type LegacyV4PluginView = {
+          plugin?: AutoViewInputSubTypes.legacy.v4.LegacyV4Plugin;
+        };
+      }
     }
-    export type I18nText = {
-        text?: string;
-        en?: string;
-        ja?: string;
-        ko?: string;
-    };
+    export namespace v4 {
+      export type LegacyV4Plugin = {
+        id?: string;
+        key?: string & tags.Format<"uuid">;
+        channelId?: string;
+        state?: "waiting" | "active";
+        name: string;
+        createdAt?: number;
+        color: string & tags.Default<"#123456">;
+        botName: string;
+        textI18n?: AutoViewInputSubTypes.I18nText;
+        labelButton?: boolean;
+        deskImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
+        deskMarginX?: number & tags.Type<"int32">;
+        deskMarginY?: number & tags.Type<"int32">;
+        deskPosition?: "left" | "right";
+        mobileImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
+        mobileMarginX?: number & tags.Type<"int32">;
+        mobileMarginY?: number & tags.Type<"int32">;
+        mobilePosition?: "left" | "right";
+        mobileHideButton?: boolean;
+        mobileBubblePosition?: "top" | "bottom";
+        accessSecret?: string;
+        welcomeI18n: AutoViewInputSubTypes.I18nText;
+        profileBot?: boolean;
+        profileBotMessageI18n: AutoViewInputSubTypes.I18nText;
+        profileBotSchemaIds?: string[];
+        urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
+        runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
+        facebookPixelId?: string;
+        bright?: boolean;
+        borderColor?: string;
+        gradientColor?: string;
+        textColor?: string;
+        deskImageUrl?: string;
+        mobileImageUrl?: string;
+        /**
+         * @deprecated
+         */
+        showPoweredBy?: boolean;
+      };
+      export type LegacyV4TinyFile = {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+      };
+    }
+  }
+  export type I18nText = {
+    text?: string;
+    en?: string;
+    ja?: string;
+    ko?: string;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4PluginView;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.legacy.open.v4.LegacyV4PluginView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const plugin = value.plugin;
+  const plugin: AutoViewInputSubTypes.legacy.v4.LegacyV4Plugin | undefined =
+    value.plugin;
+
+  // Fallback UI when there's no plugin data
   if (!plugin) {
     return (
-      <div className="p-4 text-gray-500 italic">
-        No Plugin Data Available
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-4" />
+        <span className="text-lg">No plugin data available</span>
       </div>
     );
   }
 
-  const {
-    name,
-    state,
-    createdAt,
-    color,
-    botName,
-    welcomeI18n,
-    deskImageUrl,
-    mobileImageUrl,
-    runRate,
-  } = plugin;
-
-  const formattedDate = createdAt
-    ? new Date(createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
+  // Format creation date
+  const createdDate = plugin.createdAt
+    ? new Date(plugin.createdAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       })
-    : 'N/A';
+    : "Unknown";
 
-  const statusDisplay =
-    state === 'active' ? 'Active' :
-    state === 'waiting' ? 'Waiting' :
-    'Unknown';
+  // Determine status icon and color
+  let statusIcon: JSX.Element;
+  switch (plugin.state) {
+    case "active":
+      statusIcon = (
+        <LucideReact.CheckCircle className="text-green-500" size={16} />
+      );
+      break;
+    default:
+      statusIcon = <LucideReact.Clock className="text-amber-500" size={16} />;
+      break;
+  }
+  const statusText = plugin.state ?? "waiting";
 
-  const statusColorClass =
-    state === 'active'
-      ? 'bg-green-100 text-green-800'
-      : state === 'waiting'
-      ? 'bg-yellow-100 text-yellow-800'
-      : 'bg-gray-100 text-gray-800';
-
+  // Prepare welcome message (I18nText)
   const welcomeText =
-    welcomeI18n?.text ||
-    welcomeI18n?.en ||
-    welcomeI18n?.ja ||
-    welcomeI18n?.ko ||
-    '';
+    plugin.welcomeI18n?.text ??
+    plugin.welcomeI18n?.en ??
+    plugin.welcomeI18n?.ja ??
+    plugin.welcomeI18n?.ko ??
+    "—";
 
-  const runRateDisplay =
-    runRate !== undefined ? `${(runRate * 100).toFixed(0)}%` : undefined;
+  // Image URL with placeholder fallback
+  const placeholderImage = `https://placehold.co/400x300/f1f5f9/64748b?text=${encodeURIComponent(
+    plugin.name || "Plugin",
+  )}`;
+  const initialImage = plugin.deskImageUrl || placeholderImage;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div
-      className="border-l-4 p-4 bg-white rounded-lg shadow-md"
-      style={{ borderLeftColor: color }}
-    >
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          {name}
-        </h2>
-        <span
-          className={`px-2 py-0.5 text-xs font-semibold rounded-full ${statusColorClass}`}
-        >
-          {statusDisplay}
-        </span>
-      </div>
-
-      <div className="mt-1 text-sm text-gray-600">
-        <span>Bot: {botName}</span>
-        <span className="mx-2">|</span>
-        <span>Created: {formattedDate}</span>
-      </div>
-
-      {(deskImageUrl || mobileImageUrl) && (
-        <img
-          src={deskImageUrl || mobileImageUrl}
-          alt={name}
-          className="w-full h-32 object-cover rounded mt-4"
-        />
-      )}
-
-      {welcomeText && (
-        <p className="mt-3 text-gray-700 text-sm line-clamp-2">
-          {welcomeText}
-        </p>
-      )}
-
-      {runRateDisplay && (
-        <div className="mt-3 text-sm text-gray-600">
-          Run Rate:{' '}
-          <span className="font-medium text-gray-800">
-            {runRateDisplay}
-          </span>
+    <div className="p-5 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <div className="md:flex">
+        {/* Image Section */}
+        <div className="flex-shrink-0">
+          <div className="w-32 h-32 bg-gray-100 rounded-lg overflow-hidden">
+            <img
+              src={initialImage}
+              alt={`${plugin.name} image`}
+              className="object-cover w-full h-full"
+              onError={(e) => {
+                e.currentTarget.src = placeholderImage;
+              }}
+            />
+          </div>
         </div>
-      )}
+
+        {/* Details Section */}
+        <div className="mt-4 md:mt-0 md:ml-6 flex-1">
+          {/* Title & Color */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900 truncate">
+              {plugin.name}
+            </h2>
+            <div className="flex items-center gap-1">
+              <span
+                className="w-3 h-3 rounded-full border"
+                style={{ backgroundColor: plugin.color }}
+              />
+            </div>
+          </div>
+
+          {/* Welcome Message */}
+          <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+            {welcomeText}
+          </p>
+
+          {/* Meta Info */}
+          <div className="mt-4 flex flex-wrap items-center text-sm text-gray-600 gap-4">
+            <div className="flex items-center">
+              {statusIcon}
+              <span className="ml-1 capitalize">{statusText}</span>
+            </div>
+            <div className="flex items-center">
+              <LucideReact.Calendar className="text-gray-400" size={16} />
+              <span className="ml-1">{createdDate}</span>
+            </div>
+            <div className="flex items-center">
+              <LucideReact.User className="text-gray-400" size={16} />
+              <span className="ml-1 truncate">{plugin.botName}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

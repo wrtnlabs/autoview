@@ -1,187 +1,161 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Groups of organization members that gives permissions on specified repositories.
-     *
-     * @title Team
-    */
-    export type team = {
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        name: string;
-        slug: string;
-        description: string | null;
-        privacy?: string;
-        notification_setting?: string;
-        permission: string;
-        permissions?: {
-            pull: boolean;
-            triage: boolean;
-            push: boolean;
-            maintain: boolean;
-            admin: boolean;
-        };
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        members_url: string;
-        repositories_url: string & tags.Format<"uri">;
-        parent: AutoViewInputSubTypes.nullable_team_simple;
+  /**
+   * Groups of organization members that gives permissions on specified repositories.
+   *
+   * @title Team
+   */
+  export type team = {
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    privacy?: string;
+    notification_setting?: string;
+    permission: string;
+    permissions?: {
+      pull: boolean;
+      triage: boolean;
+      push: boolean;
+      maintain: boolean;
+      admin: boolean;
     };
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    members_url: string;
+    repositories_url: string & tags.Format<"uri">;
+    parent: AutoViewInputSubTypes.nullable_team_simple;
+  };
+  /**
+   * Groups of organization members that gives permissions on specified repositories.
+   *
+   * @title Team Simple
+   */
+  export type nullable_team_simple = {
     /**
-     * Groups of organization members that gives permissions on specified repositories.
-     *
-     * @title Team Simple
-    */
-    export type nullable_team_simple = {
-        /**
-         * Unique identifier of the team
-        */
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        /**
-         * URL for the team
-        */
-        url: string & tags.Format<"uri">;
-        members_url: string;
-        /**
-         * Name of the team
-        */
-        name: string;
-        /**
-         * Description of the team
-        */
-        description: string | null;
-        /**
-         * Permission that the team will have for its repositories
-        */
-        permission: string;
-        /**
-         * The level of privacy this team should have
-        */
-        privacy?: string;
-        /**
-         * The notification setting the team has set
-        */
-        notification_setting?: string;
-        html_url: string & tags.Format<"uri">;
-        repositories_url: string & tags.Format<"uri">;
-        slug: string;
-        /**
-         * Distinguished Name (DN) that team maps to within LDAP environment
-        */
-        ldap_dn?: string;
-    } | null;
+     * Unique identifier of the team
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * URL for the team
+     */
+    url: string;
+    members_url: string;
+    /**
+     * Name of the team
+     */
+    name: string;
+    /**
+     * Description of the team
+     */
+    description: string | null;
+    /**
+     * Permission that the team will have for its repositories
+     */
+    permission: string;
+    /**
+     * The level of privacy this team should have
+     */
+    privacy?: string;
+    /**
+     * The notification setting the team has set
+     */
+    notification_setting?: string;
+    html_url: string & tags.Format<"uri">;
+    repositories_url: string & tags.Format<"uri">;
+    slug: string;
+    /**
+     * Distinguished Name (DN) that team maps to within LDAP environment
+     */
+    ldap_dn?: string;
+  } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes.team[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  if (!Array.isArray(value) || value.length === 0) {
+  const teams = value;
+  // Show placeholder when no data is available
+  if (!teams || teams.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No teams available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2 text-sm">No teams available</span>
       </div>
     );
   }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {value.map((team) => {
-        const {
-          id,
-          name,
-          slug,
-          description,
-          privacy,
-          permission,
-          permissions,
-          parent,
-        } = team;
+    <div className="flex flex-col gap-4">
+      {teams.map((team) => (
+        <div
+          key={team.id}
+          className="p-4 bg-white rounded-lg shadow-sm border border-gray-100"
+        >
+          {/* Header: Team name and slug */}
+          <div className="flex items-center gap-2">
+            <LucideReact.Users size={20} className="text-indigo-500" />
+            <h2 className="text-lg font-semibold text-gray-900 truncate">
+              {team.name}
+            </h2>
+            <span className="ml-auto text-sm text-gray-500">{team.slug}</span>
+          </div>
 
-        // Prepare description text
-        const descText = description && description.trim() !== ""
-          ? description
-          : "No description provided.";
-
-        // Derive granted permissions list if available
-        const grantedPermissions = permissions
-          ? (
-              (Object.entries(permissions) as [keyof typeof permissions, boolean][])
-                .filter(([, allowed]) => allowed)
-                .map(([perm]) => perm.charAt(0).toUpperCase() + perm.slice(1))
-            )
-          : [];
-
-        // Parent team name, if exists
-        const parentName = parent && parent.name
-          ? parent.name
-          : null;
-
-        return (
-          <article
-            key={id}
-            className="bg-white rounded-lg shadow p-5 flex flex-col space-y-3"
-          >
-            <header className="flex flex-col">
-              <h2
-                className="text-lg font-semibold text-gray-800 truncate"
-                title={name}
-              >
-                {name}
-              </h2>
-              <span className="text-sm text-gray-500 truncate" title={slug}>
-                @{slug}
-              </span>
-            </header>
-
-            <p className="text-gray-600 text-sm line-clamp-2">
-              {descText}
+          {/* Description (truncated) */}
+          {team.description !== null && (
+            <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+              {team.description}
             </p>
+          )}
 
-            <div className="flex flex-wrap gap-2">
-              {privacy && (
-                <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full">
-                  {privacy.charAt(0).toUpperCase() + privacy.slice(1)}
-                </span>
-              )}
-              {permission && (
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                  {permission.charAt(0).toUpperCase() + permission.slice(1)}
-                </span>
-              )}
+          {/* Core details: permission, privacy, notification, parent */}
+          <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-700">
+            <div className="flex items-center gap-1">
+              <LucideReact.Shield size={16} className="text-gray-500" />
+              <span className="capitalize">{team.permission}</span>
             </div>
+            {team.privacy && (
+              <div className="flex items-center gap-1">
+                <LucideReact.Lock size={16} className="text-gray-500" />
+                <span className="capitalize">{team.privacy}</span>
+              </div>
+            )}
+            {team.notification_setting && (
+              <div className="flex items-center gap-1">
+                <LucideReact.Bell size={16} className="text-gray-500" />
+                <span className="capitalize">{team.notification_setting}</span>
+              </div>
+            )}
+            {team.parent && (
+              <div className="flex items-center gap-1">
+                <LucideReact.Folder size={16} className="text-gray-500" />
+                <span className="truncate">{team.parent.name}</span>
+              </div>
+            )}
+          </div>
 
-            {grantedPermissions.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {grantedPermissions.map((perm) => (
+          {/* Detailed permission flags */}
+          {team.permissions && (
+            <div className="flex flex-wrap gap-1 mt-3">
+              {Object.entries(team.permissions)
+                .filter(([, enabled]) => enabled)
+                .map(([perm]) => (
                   <span
                     key={perm}
-                    className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full"
+                    className="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs capitalize"
                   >
                     {perm}
                   </span>
                 ))}
-              </div>
-            )}
-
-            {parentName && (
-              <div className="mt-auto pt-3 border-t border-gray-200">
-                <span className="text-xs font-medium text-gray-500">
-                  Parent Team:&nbsp;
-                </span>
-                <span className="text-xs text-gray-700 truncate" title={parentName}>
-                  {parentName}
-                </span>
-              </div>
-            )}
-          </article>
-        );
-      })}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

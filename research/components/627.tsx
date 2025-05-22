@@ -1,65 +1,69 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Check Dependabot security updates
+   *
+   * @title Check Dependabot security updates
+   */
+  export type check_automated_security_fixes = {
     /**
-     * Check Dependabot security updates
-     *
-     * @title Check Dependabot security updates
-    */
-    export type check_automated_security_fixes = {
-        /**
-         * Whether Dependabot security updates are enabled for the repository.
-        */
-        enabled: boolean;
-        /**
-         * Whether Dependabot security updates are paused for the repository.
-        */
-        paused: boolean;
-    };
+     * Whether Dependabot security updates are enabled for the repository.
+     */
+    enabled: boolean;
+    /**
+     * Whether Dependabot security updates are paused for the repository.
+     */
+    paused: boolean;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.check_automated_security_fixes;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.check_automated_security_fixes;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isEnabled = value.enabled;
-  const isPaused = value.paused;
+  const statusLabel = value.paused
+    ? "Paused"
+    : value.enabled
+      ? "Enabled"
+      : "Disabled";
 
-  const enabledBadge = (
-    <span
-      className={`px-2 py-1 text-xs font-semibold rounded ${
-        isEnabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-      }`}
-    >
-      {isEnabled ? 'Enabled' : 'Disabled'}
-    </span>
-  );
-
-  const pausedBadge = (
-    <span
-      className={`px-2 py-1 text-xs font-semibold rounded ${
-        isPaused ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
-      }`}
-    >
-      {isPaused ? 'Paused' : 'Running'}
-    </span>
+  const statusIcon = value.paused ? (
+    <LucideReact.Clock
+      size={20}
+      className="text-amber-500"
+      aria-label="Paused"
+    />
+  ) : value.enabled ? (
+    <LucideReact.CheckCircle
+      size={20}
+      className="text-green-500"
+      aria-label="Enabled"
+    />
+  ) : (
+    <LucideReact.XCircle
+      size={20}
+      className="text-red-500"
+      aria-label="Disabled"
+    />
   );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
-  const content = (
-    <div className="max-w-xs mx-auto p-4 bg-white rounded-lg shadow">
-      <h2 className="text-lg font-medium text-gray-900 mb-2 truncate">
+  // 3. Return the React element.
+  return (
+    <div className="max-w-xs p-4 bg-white rounded-lg shadow-md">
+      <h3 className="text-lg font-semibold text-gray-900">
         Dependabot Security Updates
-      </h2>
-      <div className="flex flex-wrap items-center space-x-2">
-        {enabledBadge}
-        {pausedBadge}
+      </h3>
+      <p className="mt-1 text-sm text-gray-500">
+        Automated security updates for this repository.
+      </p>
+      <div className="mt-4 flex items-center gap-2">
+        {statusIcon}
+        <span className="text-sm font-medium text-gray-900">{statusLabel}</span>
       </div>
     </div>
   );
-
-  // 3. Return the React element.
-  return content;
 }

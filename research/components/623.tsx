@@ -1,99 +1,127 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiReposAttestations {
-        export type GetResponse = {
-            attestations?: {
-                /**
-                 * The attestation's Sigstore Bundle.
-                 * Refer to the [Sigstore Bundle Specification](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto) for more information.
-                */
-                bundle?: {
-                    mediaType?: string;
-                    verificationMaterial?: {};
-                    dsseEnvelope?: {};
-                };
-                repository_id?: number & tags.Type<"int32">;
-                bundle_url?: string;
-            }[];
+  export namespace IApiReposAttestations {
+    export type GetResponse = {
+      attestations?: {
+        /**
+         * The attestation's Sigstore Bundle.
+         * Refer to the [Sigstore Bundle Specification](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto) for more information.
+         */
+        bundle?: {
+          mediaType?: string;
+          verificationMaterial?: {};
+          dsseEnvelope?: {};
         };
-    }
+        repository_id?: number & tags.Type<"int32">;
+        bundle_url?: string;
+      }[];
+    };
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiReposAttestations.GetResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiReposAttestations.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const attestations = value.attestations ?? [];
-  const totalAttestations = attestations.length;
+  const total = attestations.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <section className="p-4 bg-white rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold mb-3">
-        Attestations ({totalAttestations})
-      </h2>
-      {totalAttestations === 0 ? (
-        <p className="text-gray-500">No attestations available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {attestations.map((att, idx) => {
-            const mediaType = att.bundle?.mediaType ?? "Unknown";
-            const url = att.bundle_url ?? "N/A";
-            const hasVm = att.bundle?.verificationMaterial != null;
-            const hasDsse = att.bundle?.dsseEnvelope != null;
-            const bundleStatus =
-              hasVm && hasDsse ? "Complete Bundle" : "Partial Bundle";
+  //    Utilize semantic HTML elements where appropriate.
+  if (total === 0) {
+    return (
+      <div className="flex flex-col items-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No attestations available.</span>
+      </div>
+    );
+  }
 
-            return (
-              <li
-                key={idx}
-                className="p-3 bg-gray-50 border border-gray-200 rounded-lg"
-              >
-                <div className="flex justify-between items-start">
-                  <span className="text-sm font-medium text-gray-800">
-                    {mediaType}
-                  </span>
-                  <span
-                    className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                      hasVm && hasDsse
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {bundleStatus}
-                  </span>
-                </div>
-                <div className="mt-2">
-                  <p className="text-xs text-gray-600 font-mono truncate">
-                    URL: {url}
-                  </p>
-                </div>
-                <div className="mt-2 flex space-x-2">
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      hasVm ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    VM: {hasVm ? "Yes" : "No"}
-                  </span>
-                  <span
-                    className={`px-2 py-1 text-xs rounded-full ${
-                      hasDsse
-                        ? "bg-indigo-100 text-indigo-800"
-                        : "bg-gray-100 text-gray-500"
-                    }`}
-                  >
-                    DSSE: {hasDsse ? "Yes" : "No"}
+  return (
+    <div className="space-y-6">
+      {/* Summary Header */}
+      <div className="flex items-center text-gray-700">
+        <LucideReact.List className="text-gray-500" size={20} />
+        <span className="ml-2 font-semibold">
+          {total} Attestation{total > 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* Attestation Cards */}
+      {attestations.map((att, idx) => {
+        const bundle = att.bundle;
+        const hasVerification = !!bundle?.verificationMaterial;
+        const hasDsse = !!bundle?.dsseEnvelope;
+        return (
+          <div
+            key={idx}
+            className="p-4 bg-white rounded-lg shadow border border-gray-200"
+          >
+            <div className="flex items-center mb-2">
+              <LucideReact.FileText className="text-indigo-500" size={20} />
+              <span className="ml-2 font-medium text-gray-800">
+                Attestation {idx + 1}
+              </span>
+            </div>
+            <div className="space-y-1 text-sm text-gray-600">
+              {att.repository_id !== undefined && (
+                <div className="flex items-center">
+                  <LucideReact.Hash className="text-gray-400" size={16} />
+                  <span className="ml-1">
+                    Repository ID: {att.repository_id}
                   </span>
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </section>
+              )}
+              {bundle?.mediaType && (
+                <div className="flex items-center">
+                  <LucideReact.Tag className="text-gray-400" size={16} />
+                  <span className="ml-1">Media Type: {bundle.mediaType}</span>
+                </div>
+              )}
+              {att.bundle_url && (
+                <div className="flex items-center">
+                  <LucideReact.Link className="text-gray-400" size={16} />
+                  <span className="ml-1 break-all">{att.bundle_url}</span>
+                </div>
+              )}
+              {/* Verification Material Indicator */}
+              <div className="flex items-center">
+                {hasVerification ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={16}
+                  />
+                ) : (
+                  <LucideReact.XCircle className="text-red-500" size={16} />
+                )}
+                <span className="ml-1">
+                  {hasVerification
+                    ? "Verification Material Present"
+                    : "No Verification Material"}
+                </span>
+              </div>
+              {/* DSSE Envelope Indicator */}
+              <div className="flex items-center">
+                {hasDsse ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={16}
+                  />
+                ) : (
+                  <LucideReact.XCircle className="text-red-500" size={16} />
+                )}
+                <span className="ml-1">
+                  {hasDsse ? "DSSE Envelope Present" : "No DSSE Envelope"}
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 }

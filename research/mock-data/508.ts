@@ -4,5 +4,5 @@ import Component from "../components/508";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"property_name":"Environment Type (Sample)","url":"https://api.example.com/orgs/sample-org/properties/environment-type","source_type":"organization","value_type":"multi_select","required":true,"default_value":["Development","Staging"],"description":"Select the environment(s) associated with this project. This is for testing UI components only.","allowed_values":["Development","Staging","Production (Test)","QA Environment Sample"],"values_editable_by":"org_and_repo_actors"};
+  return {"property_name":"Sample Property (Test)","url":"https://api.example.com/v1/organizations/123456/custom-properties/sample-property","source_type":"organization","value_type":"multi_select","required":false,"default_value":["Option A Sample","Option B Sample"],"description":"A sample multi-select custom property for UI testing purposes. All listed values are fictional and for demonstration only.","allowed_values":["Option A Sample","Option B Sample","Option C Sample","Option D Sample"],"values_editable_by":"org_and_repo_actors"};
 }

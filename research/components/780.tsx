@@ -1,379 +1,833 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Issue Event
+   *
+   * @title Issue Event
+   */
+  export type issue_event = {
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    url: string & tags.Format<"uri">;
+    actor: AutoViewInputSubTypes.nullable_simple_user;
+    event: string;
+    commit_id: string | null;
+    commit_url: string | null;
+    created_at: string & tags.Format<"date-time">;
+    issue?: AutoViewInputSubTypes.nullable_issue;
+    label?: AutoViewInputSubTypes.issue_event_label;
+    assignee?: AutoViewInputSubTypes.nullable_simple_user;
+    assigner?: AutoViewInputSubTypes.nullable_simple_user;
+    review_requester?: AutoViewInputSubTypes.nullable_simple_user;
+    requested_reviewer?: AutoViewInputSubTypes.nullable_simple_user;
+    requested_team?: AutoViewInputSubTypes.team;
+    dismissed_review?: AutoViewInputSubTypes.issue_event_dismissed_review;
+    milestone?: AutoViewInputSubTypes.issue_event_milestone;
+    project_card?: AutoViewInputSubTypes.issue_event_project_card;
+    rename?: AutoViewInputSubTypes.issue_event_rename;
+    author_association?: AutoViewInputSubTypes.author_association;
+    lock_reason?: string | null;
+    performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
+  };
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type nullable_simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  } | null;
+  /**
+   * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
+   *
+   * @title Issue
+   */
+  export type nullable_issue = {
+    id: number & tags.Type<"int32">;
+    node_id: string;
     /**
-     * Issue Event
+     * URL for the issue
+     */
+    url: string;
+    repository_url: string & tags.Format<"uri">;
+    labels_url: string;
+    comments_url: string & tags.Format<"uri">;
+    events_url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    /**
+     * Number uniquely identifying the issue within its repository
+     */
+    number: number & tags.Type<"int32">;
+    /**
+     * State of the issue; either 'open' or 'closed'
+     */
+    state: string;
+    /**
+     * The reason for the current state
+     */
+    state_reason?: "completed" | "reopened" | "not_planned" | null;
+    /**
+     * Title of the issue
+     */
+    title: string;
+    /**
+     * Contents of the issue
+     */
+    body?: string | null;
+    user: AutoViewInputSubTypes.nullable_simple_user;
+    /**
+     * Labels to associate with this issue; pass one or more label names to replace the set of labels on this issue; send an empty array to clear all labels from the issue; note that the labels are silently dropped for users without push access to the repository
+     */
+    labels: (
+      | string
+      | {
+          id?: number & tags.Type<"int32">;
+          node_id?: string;
+          url?: string & tags.Format<"uri">;
+          name?: string;
+          description?: string | null;
+          color?: string | null;
+          default?: boolean;
+        }
+    )[];
+    assignee: AutoViewInputSubTypes.nullable_simple_user;
+    assignees?: AutoViewInputSubTypes.simple_user[] | null;
+    milestone: AutoViewInputSubTypes.nullable_milestone;
+    locked: boolean;
+    active_lock_reason?: string | null;
+    comments: number & tags.Type<"int32">;
+    pull_request?: {
+      merged_at?: (string & tags.Format<"date-time">) | null;
+      diff_url: (string & tags.Format<"uri">) | null;
+      html_url: (string & tags.Format<"uri">) | null;
+      patch_url: (string & tags.Format<"uri">) | null;
+      url: (string & tags.Format<"uri">) | null;
+    };
+    closed_at: (string & tags.Format<"date-time">) | null;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    draft?: boolean;
+    closed_by?: AutoViewInputSubTypes.nullable_simple_user;
+    body_html?: string;
+    body_text?: string;
+    timeline_url?: string & tags.Format<"uri">;
+    type?: AutoViewInputSubTypes.issue_type;
+    repository?: AutoViewInputSubTypes.repository;
+    performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
+    author_association: AutoViewInputSubTypes.author_association;
+    reactions?: AutoViewInputSubTypes.reaction_rollup;
+    sub_issues_summary?: AutoViewInputSubTypes.sub_issues_summary;
+  } | null;
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  };
+  /**
+   * A collection of related issues and pull requests.
+   *
+   * @title Milestone
+   */
+  export type nullable_milestone = {
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    labels_url: string & tags.Format<"uri">;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * The number of the milestone.
+     */
+    number: number & tags.Type<"int32">;
+    /**
+     * The state of the milestone.
+     */
+    state: "open" | "closed";
+    /**
+     * The title of the milestone.
+     */
+    title: string;
+    description: string | null;
+    creator: AutoViewInputSubTypes.nullable_simple_user;
+    open_issues: number & tags.Type<"int32">;
+    closed_issues: number & tags.Type<"int32">;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    closed_at: (string & tags.Format<"date-time">) | null;
+    due_on: (string & tags.Format<"date-time">) | null;
+  } | null;
+  /**
+   * The type of issue.
+   *
+   * @title Issue Type
+   */
+  export type issue_type = {
+    /**
+     * The unique identifier of the issue type.
+     */
+    id: number & tags.Type<"int32">;
+    /**
+     * The node identifier of the issue type.
+     */
+    node_id: string;
+    /**
+     * The name of the issue type.
+     */
+    name: string;
+    /**
+     * The description of the issue type.
+     */
+    description: string | null;
+    /**
+     * The color of the issue type.
+     */
+    color?:
+      | "gray"
+      | "blue"
+      | "green"
+      | "yellow"
+      | "orange"
+      | "red"
+      | "pink"
+      | "purple"
+      | null;
+    /**
+     * The time the issue type created.
+     */
+    created_at?: string;
+    /**
+     * The time the issue type last updated.
+     */
+    updated_at?: string;
+    /**
+     * The enabled state of the issue type.
+     */
+    is_enabled?: boolean;
+  } | null;
+  /**
+   * A repository on GitHub.
+   *
+   * @title Repository
+   */
+  export type repository = {
+    /**
+     * Unique identifier of the repository
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * The name of the repository.
+     */
+    name: string;
+    full_name: string;
+    license: AutoViewInputSubTypes.nullable_license_simple;
+    forks: number & tags.Type<"int32">;
+    permissions?: {
+      admin: boolean;
+      pull: boolean;
+      triage?: boolean;
+      push: boolean;
+      maintain?: boolean;
+    };
+    owner: AutoViewInputSubTypes.simple_user;
+    /**
+     * Whether the repository is private or public.
+     */
+    private: boolean;
+    html_url: string & tags.Format<"uri">;
+    description: string | null;
+    fork: boolean;
+    url: string & tags.Format<"uri">;
+    archive_url: string;
+    assignees_url: string;
+    blobs_url: string;
+    branches_url: string;
+    collaborators_url: string;
+    comments_url: string;
+    commits_url: string;
+    compare_url: string;
+    contents_url: string;
+    contributors_url: string & tags.Format<"uri">;
+    deployments_url: string & tags.Format<"uri">;
+    downloads_url: string & tags.Format<"uri">;
+    events_url: string & tags.Format<"uri">;
+    forks_url: string & tags.Format<"uri">;
+    git_commits_url: string;
+    git_refs_url: string;
+    git_tags_url: string;
+    git_url: string;
+    issue_comment_url: string;
+    issue_events_url: string;
+    issues_url: string;
+    keys_url: string;
+    labels_url: string;
+    languages_url: string & tags.Format<"uri">;
+    merges_url: string & tags.Format<"uri">;
+    milestones_url: string;
+    notifications_url: string;
+    pulls_url: string;
+    releases_url: string;
+    ssh_url: string;
+    stargazers_url: string & tags.Format<"uri">;
+    statuses_url: string;
+    subscribers_url: string & tags.Format<"uri">;
+    subscription_url: string & tags.Format<"uri">;
+    tags_url: string & tags.Format<"uri">;
+    teams_url: string & tags.Format<"uri">;
+    trees_url: string;
+    clone_url: string;
+    mirror_url: (string & tags.Format<"uri">) | null;
+    hooks_url: string & tags.Format<"uri">;
+    svn_url: string & tags.Format<"uri">;
+    homepage: (string & tags.Format<"uri">) | null;
+    language: string | null;
+    forks_count: number & tags.Type<"int32">;
+    stargazers_count: number & tags.Type<"int32">;
+    watchers_count: number & tags.Type<"int32">;
+    /**
+     * The size of the repository, in kilobytes. Size is calculated hourly. When a repository is initially created, the size is 0.
+     */
+    size: number & tags.Type<"int32">;
+    /**
+     * The default branch of the repository.
+     */
+    default_branch: string;
+    open_issues_count: number & tags.Type<"int32">;
+    /**
+     * Whether this repository acts as a template that can be used to generate new repositories.
+     */
+    is_template?: boolean;
+    topics?: string[];
+    /**
+     * Whether issues are enabled.
+     */
+    has_issues: boolean;
+    /**
+     * Whether projects are enabled.
+     */
+    has_projects: boolean;
+    /**
+     * Whether the wiki is enabled.
+     */
+    has_wiki: boolean;
+    has_pages: boolean;
+    /**
+     * Whether downloads are enabled.
      *
-     * @title Issue Event
-    */
-    export type issue_event = {
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        url: string & tags.Format<"uri">;
-        actor: AutoViewInputSubTypes.nullable_simple_user;
-        event: string;
-        commit_id: string | null;
-        commit_url: string | null;
-        created_at: string & tags.Format<"date-time">;
-        issue?: AutoViewInputSubTypes.nullable_issue;
-        label?: AutoViewInputSubTypes.issue_event_label;
-        assignee?: AutoViewInputSubTypes.nullable_simple_user;
-        assigner?: AutoViewInputSubTypes.nullable_simple_user;
-        review_requester?: AutoViewInputSubTypes.nullable_simple_user;
-        requested_reviewer?: AutoViewInputSubTypes.nullable_simple_user;
-        requested_team?: AutoViewInputSubTypes.team;
-        dismissed_review?: AutoViewInputSubTypes.issue_event_dismissed_review;
-        milestone?: AutoViewInputSubTypes.issue_event_milestone;
-        project_card?: AutoViewInputSubTypes.issue_event_project_card;
-        rename?: AutoViewInputSubTypes.issue_event_rename;
-        author_association?: AutoViewInputSubTypes.author_association;
-        lock_reason?: string | null;
-        performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
+     * @deprecated
+     */
+    has_downloads: boolean;
+    /**
+     * Whether discussions are enabled.
+     */
+    has_discussions?: boolean;
+    /**
+     * Whether the repository is archived.
+     */
+    archived: boolean;
+    /**
+     * Returns whether or not this repository disabled.
+     */
+    disabled: boolean;
+    /**
+     * The repository visibility: public, private, or internal.
+     */
+    visibility?: string & tags.Default<"public">;
+    pushed_at: (string & tags.Format<"date-time">) | null;
+    created_at: (string & tags.Format<"date-time">) | null;
+    updated_at: (string & tags.Format<"date-time">) | null;
+    /**
+     * Whether to allow rebase merges for pull requests.
+     */
+    allow_rebase_merge?: boolean;
+    temp_clone_token?: string;
+    /**
+     * Whether to allow squash merges for pull requests.
+     */
+    allow_squash_merge?: boolean;
+    /**
+     * Whether to allow Auto-merge to be used on pull requests.
+     */
+    allow_auto_merge?: boolean;
+    /**
+     * Whether to delete head branches when pull requests are merged
+     */
+    delete_branch_on_merge?: boolean;
+    /**
+     * Whether or not a pull request head branch that is behind its base branch can always be updated even if it is not required to be up to date before merging.
+     */
+    allow_update_branch?: boolean;
+    /**
+     * Whether a squash merge commit can use the pull request title as default. **This property is closing down. Please use `squash_merge_commit_title` instead.
+     *
+     * @deprecated
+     */
+    use_squash_pr_title_as_default?: boolean;
+    /**
+     * The default value for a squash merge commit title:
+     *
+     * - `PR_TITLE` - default to the pull request's title.
+     * - `COMMIT_OR_PR_TITLE` - default to the commit's title (if only one commit) or the pull request's title (when more than one commit).
+     */
+    squash_merge_commit_title?: "PR_TITLE" | "COMMIT_OR_PR_TITLE";
+    /**
+     * The default value for a squash merge commit message:
+     *
+     * - `PR_BODY` - default to the pull request's body.
+     * - `COMMIT_MESSAGES` - default to the branch's commit messages.
+     * - `BLANK` - default to a blank commit message.
+     */
+    squash_merge_commit_message?: "PR_BODY" | "COMMIT_MESSAGES" | "BLANK";
+    /**
+     * The default value for a merge commit title.
+     *
+     * - `PR_TITLE` - default to the pull request's title.
+     * - `MERGE_MESSAGE` - default to the classic title for a merge message (e.g., Merge pull request #123 from branch-name).
+     */
+    merge_commit_title?: "PR_TITLE" | "MERGE_MESSAGE";
+    /**
+     * The default value for a merge commit message.
+     *
+     * - `PR_TITLE` - default to the pull request's title.
+     * - `PR_BODY` - default to the pull request's body.
+     * - `BLANK` - default to a blank commit message.
+     */
+    merge_commit_message?: "PR_BODY" | "PR_TITLE" | "BLANK";
+    /**
+     * Whether to allow merge commits for pull requests.
+     */
+    allow_merge_commit?: boolean;
+    /**
+     * Whether to allow forking this repo
+     */
+    allow_forking?: boolean;
+    /**
+     * Whether to require contributors to sign off on web-based commits
+     */
+    web_commit_signoff_required?: boolean;
+    open_issues: number & tags.Type<"int32">;
+    watchers: number & tags.Type<"int32">;
+    master_branch?: string;
+    starred_at?: string;
+    /**
+     * Whether anonymous git access is enabled for this repository
+     */
+    anonymous_access_enabled?: boolean;
+  };
+  /**
+   * License Simple
+   *
+   * @title License Simple
+   */
+  export type nullable_license_simple = {
+    key: string;
+    name: string;
+    url: (string & tags.Format<"uri">) | null;
+    spdx_id: string | null;
+    node_id: string;
+    html_url?: string & tags.Format<"uri">;
+  } | null;
+  /**
+   * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
+   *
+   * @title GitHub app
+   */
+  export type nullable_integration = {
+    /**
+     * Unique identifier of the GitHub app
+     */
+    id: number & tags.Type<"int32">;
+    /**
+     * The slug name of the GitHub app
+     */
+    slug?: string;
+    node_id: string;
+    client_id?: string;
+    owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
+    /**
+     * The name of the GitHub app
+     */
+    name: string;
+    description: string | null;
+    external_url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    /**
+     * The set of permissions for the GitHub app
+     */
+    permissions: {
+      [key: string]: string;
     };
     /**
-     * A GitHub user.
-     *
-     * @title Simple User
-    */
-    export type nullable_simple_user = {
-        name?: string | null;
-        email?: string | null;
-        login: string;
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        avatar_url: string & tags.Format<"uri">;
-        gravatar_id: string | null;
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        followers_url: string & tags.Format<"uri">;
-        following_url: string;
-        gists_url: string;
-        starred_url: string;
-        subscriptions_url: string & tags.Format<"uri">;
-        organizations_url: string & tags.Format<"uri">;
-        repos_url: string & tags.Format<"uri">;
-        events_url: string;
-        received_events_url: string & tags.Format<"uri">;
-        type: string;
-        site_admin: boolean;
-        starred_at?: string;
-        user_view_type?: string;
-    } | null;
+     * The list of events for the GitHub app
+     */
+    events: string[];
     /**
-     * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
-     *
-     * @title Issue
-    */
-    export type nullable_issue = {
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        /**
-         * URL for the issue
-        */
-        url: string & tags.Format<"uri">;
-        repository_url: string & tags.Format<"uri">;
-        labels_url: string;
-        comments_url: string & tags.Format<"uri">;
-        events_url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        /**
-         * Number uniquely identifying the issue within its repository
-        */
-        number: number & tags.Type<"int32">;
-        /**
-         * State of the issue; either 'open' or 'closed'
-        */
-        state: string;
-        /**
-         * The reason for the current state
-        */
-        state_reason?: "completed" | "reopened" | "not_planned" | null;
-        /**
-         * Title of the issue
-        */
-        title: string;
-        /**
-         * Contents of the issue
-        */
-        body?: string | null;
-        user: any;
-        /**
-         * Labels to associate with this issue; pass one or more label names to replace the set of labels on this issue; send an empty array to clear all labels from the issue; note that the labels are silently dropped for users without push access to the repository
-        */
-        labels: (string | {
-            id?: number & tags.Type<"int32">;
-            node_id?: string;
-            url?: string & tags.Format<"uri">;
-            name?: string;
-            description?: string | null;
-            color?: string | null;
-            "default"?: boolean;
-        })[];
-        assignee: any;
-        assignees?: any[] | null;
-        milestone: any;
-        locked: boolean;
-        active_lock_reason?: string | null;
-        comments: number & tags.Type<"int32">;
-        pull_request?: {
-            merged_at?: (string & tags.Format<"date-time">) | null;
-            diff_url: (string & tags.Format<"uri">) | null;
-            html_url: (string & tags.Format<"uri">) | null;
-            patch_url: (string & tags.Format<"uri">) | null;
-            url: (string & tags.Format<"uri">) | null;
-        };
-        closed_at: (string & tags.Format<"date-time">) | null;
-        created_at: string & tags.Format<"date-time">;
-        updated_at: string & tags.Format<"date-time">;
-        draft?: boolean;
-        closed_by?: any;
-        body_html?: string;
-        body_text?: string;
-        timeline_url?: string & tags.Format<"uri">;
-        type?: any;
-        repository?: any;
-        performed_via_github_app?: any;
-        author_association: any;
-        reactions?: any;
-        sub_issues_summary?: any;
-    } | null;
-    export type simple_user = any;
-    export type nullable_milestone = any;
-    export type issue_type = any;
-    export type repository = any;
+     * The number of installations associated with the GitHub app
+     */
+    installations_count?: number & tags.Type<"int32">;
+    client_secret?: string;
+    webhook_secret?: string | null;
+    pem?: string;
+  } | null;
+  /**
+   * An enterprise on GitHub.
+   *
+   * @title Enterprise
+   */
+  export type enterprise = {
     /**
-     * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
-     *
-     * @title GitHub app
-    */
-    export type nullable_integration = {
-        /**
-         * Unique identifier of the GitHub app
-        */
-        id: number & tags.Type<"int32">;
-        /**
-         * The slug name of the GitHub app
-        */
-        slug?: string;
-        node_id: string;
-        client_id?: string;
-        owner: any | any;
-        /**
-         * The name of the GitHub app
-        */
-        name: string;
-        description: string | null;
-        external_url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        created_at: string & tags.Format<"date-time">;
-        updated_at: string & tags.Format<"date-time">;
-        /**
-         * The set of permissions for the GitHub app
-        */
-        permissions: {
-            [key: string]: string;
-        };
-        /**
-         * The list of events for the GitHub app
-        */
-        events: string[];
-        /**
-         * The number of installations associated with the GitHub app
-        */
-        installations_count?: number & tags.Type<"int32">;
-        client_secret?: string;
-        webhook_secret?: string | null;
-        pem?: string;
-    } | null;
+     * A short description of the enterprise.
+     */
+    description?: string | null;
+    html_url: string & tags.Format<"uri">;
     /**
-     * How the author is associated with the repository.
-     *
-     * @title author_association
-    */
-    export type author_association = "COLLABORATOR" | "CONTRIBUTOR" | "FIRST_TIMER" | "FIRST_TIME_CONTRIBUTOR" | "MANNEQUIN" | "MEMBER" | "NONE" | "OWNER";
-    export type reaction_rollup = any;
-    export type sub_issues_summary = any;
+     * The enterprise's website URL.
+     */
+    website_url?: (string & tags.Format<"uri">) | null;
     /**
-     * Issue Event Label
-     *
-     * @title Issue Event Label
-    */
-    export type issue_event_label = {
-        name: string | null;
-        color: string | null;
+     * Unique identifier of the enterprise
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * The name of the enterprise.
+     */
+    name: string;
+    /**
+     * The slug url identifier for the enterprise.
+     */
+    slug: string;
+    created_at: (string & tags.Format<"date-time">) | null;
+    updated_at: (string & tags.Format<"date-time">) | null;
+    avatar_url: string & tags.Format<"uri">;
+  };
+  /**
+   * How the author is associated with the repository.
+   *
+   * @title author_association
+   */
+  export type author_association =
+    | "COLLABORATOR"
+    | "CONTRIBUTOR"
+    | "FIRST_TIMER"
+    | "FIRST_TIME_CONTRIBUTOR"
+    | "MANNEQUIN"
+    | "MEMBER"
+    | "NONE"
+    | "OWNER";
+  /**
+   * @title Reaction Rollup
+   */
+  export type reaction_rollup = {
+    url: string & tags.Format<"uri">;
+    total_count: number & tags.Type<"int32">;
+    "+1": number & tags.Type<"int32">;
+    "-1": number & tags.Type<"int32">;
+    laugh: number & tags.Type<"int32">;
+    confused: number & tags.Type<"int32">;
+    heart: number & tags.Type<"int32">;
+    hooray: number & tags.Type<"int32">;
+    eyes: number & tags.Type<"int32">;
+    rocket: number & tags.Type<"int32">;
+  };
+  /**
+   * @title Sub-issues Summary
+   */
+  export type sub_issues_summary = {
+    total: number & tags.Type<"int32">;
+    completed: number & tags.Type<"int32">;
+    percent_completed: number & tags.Type<"int32">;
+  };
+  /**
+   * Issue Event Label
+   *
+   * @title Issue Event Label
+   */
+  export type issue_event_label = {
+    name: string | null;
+    color: string | null;
+  };
+  /**
+   * Groups of organization members that gives permissions on specified repositories.
+   *
+   * @title Team
+   */
+  export type team = {
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    privacy?: string;
+    notification_setting?: string;
+    permission: string;
+    permissions?: {
+      pull: boolean;
+      triage: boolean;
+      push: boolean;
+      maintain: boolean;
+      admin: boolean;
     };
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    members_url: string;
+    repositories_url: string & tags.Format<"uri">;
+    parent: AutoViewInputSubTypes.nullable_team_simple;
+  };
+  /**
+   * Groups of organization members that gives permissions on specified repositories.
+   *
+   * @title Team Simple
+   */
+  export type nullable_team_simple = {
     /**
-     * Groups of organization members that gives permissions on specified repositories.
-     *
-     * @title Team
-    */
-    export type team = {
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        name: string;
-        slug: string;
-        description: string | null;
-        privacy?: string;
-        notification_setting?: string;
-        permission: string;
-        permissions?: {
-            pull: boolean;
-            triage: boolean;
-            push: boolean;
-            maintain: boolean;
-            admin: boolean;
-        };
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        members_url: string;
-        repositories_url: string & tags.Format<"uri">;
-        parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+     * Unique identifier of the team
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
     /**
-     * Groups of organization members that gives permissions on specified repositories.
-     *
-     * @title Team Simple
-    */
-    export type nullable_team_simple = {
-        /**
-         * Unique identifier of the team
-        */
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        /**
-         * URL for the team
-        */
-        url: string & tags.Format<"uri">;
-        members_url: string;
-        /**
-         * Name of the team
-        */
-        name: string;
-        /**
-         * Description of the team
-        */
-        description: string | null;
-        /**
-         * Permission that the team will have for its repositories
-        */
-        permission: string;
-        /**
-         * The level of privacy this team should have
-        */
-        privacy?: string;
-        /**
-         * The notification setting the team has set
-        */
-        notification_setting?: string;
-        html_url: string & tags.Format<"uri">;
-        repositories_url: string & tags.Format<"uri">;
-        slug: string;
-        /**
-         * Distinguished Name (DN) that team maps to within LDAP environment
-        */
-        ldap_dn?: string;
-    } | null;
+     * URL for the team
+     */
+    url: string;
+    members_url: string;
     /**
-     * @title Issue Event Dismissed Review
-    */
-    export type issue_event_dismissed_review = {
-        state: string;
-        review_id: number & tags.Type<"int32">;
-        dismissal_message: string | null;
-        dismissal_commit_id?: string | null;
-    };
+     * Name of the team
+     */
+    name: string;
     /**
-     * Issue Event Milestone
-     *
-     * @title Issue Event Milestone
-    */
-    export type issue_event_milestone = {
-        title: string;
-    };
+     * Description of the team
+     */
+    description: string | null;
     /**
-     * Issue Event Project Card
-     *
-     * @title Issue Event Project Card
-    */
-    export type issue_event_project_card = {
-        url: string & tags.Format<"uri">;
-        id: number & tags.Type<"int32">;
-        project_url: string & tags.Format<"uri">;
-        project_id: number & tags.Type<"int32">;
-        column_name: string;
-        previous_column_name?: string;
-    };
+     * Permission that the team will have for its repositories
+     */
+    permission: string;
     /**
-     * Issue Event Rename
-     *
-     * @title Issue Event Rename
-    */
-    export type issue_event_rename = {
-        from: string;
-        to: string;
-    };
-    export type enterprise = any;
+     * The level of privacy this team should have
+     */
+    privacy?: string;
+    /**
+     * The notification setting the team has set
+     */
+    notification_setting?: string;
+    html_url: string & tags.Format<"uri">;
+    repositories_url: string & tags.Format<"uri">;
+    slug: string;
+    /**
+     * Distinguished Name (DN) that team maps to within LDAP environment
+     */
+    ldap_dn?: string;
+  } | null;
+  /**
+   * @title Issue Event Dismissed Review
+   */
+  export type issue_event_dismissed_review = {
+    state: string;
+    review_id: number & tags.Type<"int32">;
+    dismissal_message: string | null;
+    dismissal_commit_id?: string | null;
+  };
+  /**
+   * Issue Event Milestone
+   *
+   * @title Issue Event Milestone
+   */
+  export type issue_event_milestone = {
+    title: string;
+  };
+  /**
+   * Issue Event Project Card
+   *
+   * @title Issue Event Project Card
+   */
+  export type issue_event_project_card = {
+    url: string & tags.Format<"uri">;
+    id: number & tags.Type<"int32">;
+    project_url: string & tags.Format<"uri">;
+    project_id: number & tags.Type<"int32">;
+    column_name: string;
+    previous_column_name?: string;
+  };
+  /**
+   * Issue Event Rename
+   *
+   * @title Issue Event Rename
+   */
+  export type issue_event_rename = {
+    from: string;
+    to: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue_event[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Helper to capitalize event names
-  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: true,
+    });
 
+  const getEventIcon = (eventType: string): JSX.Element => {
+    switch (eventType.toLowerCase()) {
+      case "closed":
+        return <LucideReact.CheckCircle className="text-red-500" size={16} />;
+      case "reopened":
+        return <LucideReact.RotateCw className="text-green-500" size={16} />;
+      case "assigned":
+        return <LucideReact.UserPlus className="text-blue-500" size={16} />;
+      case "unassigned":
+        return <LucideReact.UserMinus className="text-gray-500" size={16} />;
+      case "labeled":
+      case "unlabeled":
+        return <LucideReact.Tag className="text-yellow-500" size={16} />;
+      case "review_requested":
+      case "review_request_removed":
+        return <LucideReact.Eye className="text-indigo-500" size={16} />;
+      case "commented":
+        return (
+          <LucideReact.MessageSquare className="text-gray-500" size={16} />
+        );
+      default:
+        return <LucideReact.Circle className="text-gray-400" size={16} />;
+    }
+  };
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="divide-y divide-gray-200">
-      {value.map((e, idx) => {
-        // Derived display values
-        const actorName = e.actor?.login || "Someone";
-        const eventName = capitalize(e.event.replace(/_/g, " "));
-        const issuePart = e.issue ? ` on issue #${e.issue.number}` : "";
-        const commitPart = e.commit_id ? ` commit ${e.commit_id.slice(0, 7)}` : "";
-        const assigneePart = e.assignee?.login ? ` assigned to ${e.assignee.login}` : "";
-        const milestonePart = e.milestone?.title ? ` milestone "${e.milestone.title}"` : "";
-        const projectPart = e.project_card
-          ? ` moved card to "${e.project_card.column_name}"`
-          : "";
-        const renamePart = e.rename
-          ? ` renamed from "${e.rename.from}" to "${e.rename.to}"`
-          : "";
-        const labelName = e.label?.name || "";
-        const formattedDate = new Date(e.created_at).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+    <div className="space-y-4">
+      {value.map((eventItem) => {
+        const actorLogin = eventItem.actor?.login ?? "Unknown";
+        const actorAvatar = eventItem.actor?.avatar_url || "";
+        const eventLabel = eventItem.event.replace(/_/g, " ");
+        const when = formatDate(eventItem.created_at);
 
         return (
-          <div key={e.id ?? idx} className="flex items-start py-4 px-2">
-            {e.actor?.avatar_url && (
+          <div
+            key={eventItem.id}
+            className="p-4 bg-white rounded-lg shadow flex flex-col md:flex-row md:items-start"
+          >
+            <div className="flex items-center md:items-start space-x-3">
               <img
-                src={e.actor.avatar_url}
-                alt={actorName}
-                className="w-8 h-8 rounded-full flex-shrink-0"
+                src={actorAvatar}
+                alt={actorLogin}
+                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    actorLogin,
+                  )}&background=0D8ABC&color=fff`;
+                }}
               />
-            )}
-            <div className="ml-4 flex-1">
-              <p className="text-sm text-gray-700">
-                <span className="font-medium text-gray-900">{actorName}</span>{" "}
-                {eventName}
-                {issuePart}
-                {commitPart}
-                {assigneePart}
-                {milestonePart}
-                {projectPart}
-                {renamePart}.
-                {labelName && (
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded ml-1">
-                    {labelName}
+              <div className="flex flex-col">
+                <div className="flex items-center space-x-2">
+                  <span className="font-semibold text-gray-800">
+                    {actorLogin}
                   </span>
-                )}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">{formattedDate}</p>
+                  <span className="text-gray-600">{eventLabel}</span>
+                  <span className="ml-1">{getEventIcon(eventItem.event)}</span>
+                  <time className="ml-auto text-sm text-gray-400">{when}</time>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                  {eventItem.issue && eventItem.issue.html_url && (
+                    <a
+                      href={eventItem.issue.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-1 hover:text-blue-500"
+                    >
+                      <LucideReact.Link size={16} />
+                      <span className="truncate max-w-xs">
+                        {eventItem.issue.title}
+                      </span>
+                    </a>
+                  )}
+                  {eventItem.commit_id && eventItem.commit_url && (
+                    <a
+                      href={eventItem.commit_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-1 hover:text-blue-500"
+                    >
+                      <LucideReact.Code size={16} />
+                      <span>{eventItem.commit_id.substring(0, 7)}</span>
+                    </a>
+                  )}
+                  {eventItem.label && eventItem.label.name && (
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Tag
+                        size={16}
+                        color={
+                          eventItem.label.color
+                            ? `#${eventItem.label.color}`
+                            : undefined
+                        }
+                      />
+                      <span>{eventItem.label.name}</span>
+                    </div>
+                  )}
+                  {eventItem.assignee && (
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.User size={16} />
+                      <span>{eventItem.assignee.login}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         );

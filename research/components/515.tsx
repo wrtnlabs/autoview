@@ -1,153 +1,198 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Response
+   *
+   * @title Rule Suites
+   */
+  export type rule_suites = {
     /**
-     * Response
-     *
-     * @title Rule Suites
-    */
-    export type rule_suites = {
-        /**
-         * The unique identifier of the rule insight.
-        */
-        id?: number & tags.Type<"int32">;
-        /**
-         * The number that identifies the user.
-        */
-        actor_id?: number & tags.Type<"int32">;
-        /**
-         * The handle for the GitHub user account.
-        */
-        actor_name?: string;
-        /**
-         * The first commit sha before the push evaluation.
-        */
-        before_sha?: string;
-        /**
-         * The last commit sha in the push evaluation.
-        */
-        after_sha?: string;
-        /**
-         * The ref name that the evaluation ran on.
-        */
-        ref?: string;
-        /**
-         * The ID of the repository associated with the rule evaluation.
-        */
-        repository_id?: number & tags.Type<"int32">;
-        /**
-         * The name of the repository without the `.git` extension.
-        */
-        repository_name?: string;
-        pushed_at?: string & tags.Format<"date-time">;
-        /**
-         * The result of the rule evaluations for rules with the `active` enforcement status.
-        */
-        result?: "pass" | "fail" | "bypass";
-        /**
-         * The result of the rule evaluations for rules with the `active` and `evaluate` enforcement statuses, demonstrating whether rules would pass or fail if all rules in the rule suite were `active`.
-        */
-        evaluation_result?: "pass" | "fail" | "bypass";
-    }[];
+     * The unique identifier of the rule insight.
+     */
+    id?: number & tags.Type<"int32">;
+    /**
+     * The number that identifies the user.
+     */
+    actor_id?: number & tags.Type<"int32">;
+    /**
+     * The handle for the GitHub user account.
+     */
+    actor_name?: string;
+    /**
+     * The first commit sha before the push evaluation.
+     */
+    before_sha?: string;
+    /**
+     * The last commit sha in the push evaluation.
+     */
+    after_sha?: string;
+    /**
+     * The ref name that the evaluation ran on.
+     */
+    ref?: string;
+    /**
+     * The ID of the repository associated with the rule evaluation.
+     */
+    repository_id?: number & tags.Type<"int32">;
+    /**
+     * The name of the repository without the `.git` extension.
+     */
+    repository_name?: string;
+    pushed_at?: string & tags.Format<"date-time">;
+    /**
+     * The result of the rule evaluations for rules with the `active` enforcement status.
+     */
+    result?: "pass" | "fail" | "bypass";
+    /**
+     * The result of the rule evaluations for rules with the `active` and `evaluate` enforcement statuses, demonstrating whether rules would pass or fail if all rules in the rule suite were `active`.
+     */
+    evaluation_result?: "pass" | "fail" | "bypass";
+  }[];
 }
 export type AutoViewInput = AutoViewInputSubTypes.rule_suites;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const badgeStyles: Record<"pass" | "fail" | "bypass", string> = {
-    pass: "bg-green-100 text-green-800",
-    fail: "bg-red-100 text-red-800",
-    bypass: "bg-yellow-100 text-yellow-800",
-  };
+  const totalSuites = value.length;
 
-  const formatDate = (iso?: string): string => {
-    if (!iso) return "—";
-    const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const resultCounts = { pass: 0, fail: 0, bypass: 0 } as Record<
+    "pass" | "fail" | "bypass",
+    number
+  >;
+  const evalCounts = { pass: 0, fail: 0, bypass: 0 } as Record<
+    "pass" | "fail" | "bypass",
+    number
+  >;
+
+  value.forEach((suite) => {
+    if (suite.result) resultCounts[suite.result]++;
+    if (suite.evaluation_result) evalCounts[suite.evaluation_result]++;
+  });
+
+  const formatDate = (iso?: string) =>
+    iso
+      ? new Date(iso).toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "";
+
+  const renderStatus = (
+    status?: "pass" | "fail" | "bypass",
+    prefix: string = "",
+  ) => {
+    if (!status) return null;
+    let Icon: JSX.Element;
+    let label: string;
+    switch (status) {
+      case "pass":
+        Icon = <LucideReact.CheckCircle size={16} className="text-green-500" />;
+        label = "Pass";
+        break;
+      case "fail":
+        Icon = <LucideReact.XCircle size={16} className="text-red-500" />;
+        label = "Fail";
+        break;
+      case "bypass":
+        Icon = (
+          <LucideReact.AlertTriangle size={16} className="text-amber-500" />
+        );
+        label = "Bypass";
+        break;
+    }
+    return (
+      <div className="flex items-center gap-1 text-sm">
+        {prefix && <span className="text-gray-600">{prefix}:</span>}
+        {Icon}
+        <span className="font-medium">{label}</span>
+      </div>
+    );
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {Array.isArray(value) && value.length > 0 ? (
-        value.map((suite, index) => {
-          const {
-            id,
-            actor_name,
-            repository_name,
-            ref,
-            pushed_at,
-            result,
-            evaluation_result,
-            before_sha,
-            after_sha,
-          } = suite;
-          const actor = actor_name ?? "Unknown";
-          const repo = repository_name ?? "Unknown repository";
-          const date = formatDate(pushed_at);
-          const status = result ?? "bypass";
-          const evalStatus = evaluation_result ?? "bypass";
-          const shortBefore = before_sha ? before_sha.slice(0, 7) : "";
-          const shortAfter = after_sha ? after_sha.slice(0, 7) : "";
+    <div className="space-y-6">
+      {/* Summary */}
+      <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-lg font-semibold text-gray-800">
+          Rule Suites ({totalSuites})
+        </div>
+        <div className="flex flex-wrap gap-4 mt-2 sm:mt-0 text-sm text-gray-700">
+          <div className="flex items-center gap-1">
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+            <span>Pass {resultCounts.pass}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.XCircle size={16} className="text-red-500" />
+            <span>Fail {resultCounts.fail}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.AlertTriangle size={16} className="text-amber-500" />
+            <span>Bypass {resultCounts.bypass}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Detail List */}
+      <ul className="space-y-4">
+        {value.map((suite, idx) => {
+          const actor = suite.actor_name || "Unknown";
+          const repo = suite.repository_name || "Repository";
+          const branch = suite.ref || "";
+          const beforeShort = suite.before_sha?.slice(0, 7) || "--";
+          const afterShort = suite.after_sha?.slice(0, 7) || "--";
+          const dateDisplay = formatDate(suite.pushed_at);
 
           return (
-            <div
-              key={id ?? index}
-              className="p-4 bg-white rounded-lg shadow-sm border border-gray-200"
+            <li
+              key={idx}
+              className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
             >
-              <header className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
+              <div className="flex flex-col sm:flex-row sm:justify-between">
+                <div className="flex items-center gap-2 truncate">
+                  <LucideReact.GitBranch size={20} className="text-gray-600" />
+                  <span className="font-semibold text-gray-800 truncate">
                     {repo}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-600 truncate">
-                    {actor}
-                  </p>
+                  </span>
+                  {branch && (
+                    <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded truncate">
+                      {branch}
+                    </span>
+                  )}
                 </div>
-                <time
-                  className="mt-2 sm:mt-0 text-sm text-gray-500 whitespace-nowrap"
-                  dateTime={pushed_at ?? undefined}
-                >
-                  {date}
-                </time>
-              </header>
-              <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                <span
-                  className={`px-2 py-1 rounded-full font-medium ${badgeStyles[status]}`}
-                >
-                  {status.toUpperCase()}
-                </span>
-                <span
-                  className={`px-2 py-1 rounded-full font-medium ${badgeStyles[evalStatus]}`}
-                >
-                  EVAL: {evalStatus.toUpperCase()}
-                </span>
-                {ref && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded">
-                    {ref}
-                  </span>
-                )}
-                {shortBefore && shortAfter && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded">
-                    {shortBefore}…{shortAfter}
-                  </span>
+                {dateDisplay && (
+                  <div className="flex items-center gap-1 text-sm text-gray-500 mt-2 sm:mt-0">
+                    <LucideReact.Calendar size={16} />
+                    <span>{dateDisplay}</span>
+                  </div>
                 )}
               </div>
-            </div>
+
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-gray-700">
+                <div className="flex items-center gap-1 text-sm">
+                  <LucideReact.User size={16} className="text-gray-600" />
+                  <span>{actor}</span>
+                </div>
+                <div className="flex items-center gap-1 text-sm">
+                  <LucideReact.GitCommit size={16} className="text-gray-600" />
+                  <span>
+                    {beforeShort} → {afterShort}
+                  </span>
+                </div>
+                <div>{renderStatus(suite.result, "Result")}</div>
+                <div>{renderStatus(suite.evaluation_result, "Eval")}</div>
+              </div>
+            </li>
           );
-        })
-      ) : (
-        <p className="text-center text-gray-500">No rule suite data available.</p>
-      )}
+        })}
+      </ul>
     </div>
   );
 }

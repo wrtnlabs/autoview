@@ -1,147 +1,181 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * A collection of related issues and pull requests.
+   *
+   * @title Milestone
+   */
+  export type milestone = {
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    labels_url: string & tags.Format<"uri">;
+    id: number & tags.Type<"int32">;
+    node_id: string;
     /**
-     * A collection of related issues and pull requests.
-     *
-     * @title Milestone
-    */
-    export type milestone = {
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        labels_url: string & tags.Format<"uri">;
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        /**
-         * The number of the milestone.
-        */
-        number: number & tags.Type<"int32">;
-        /**
-         * The state of the milestone.
-        */
-        state: "open" | "closed";
-        /**
-         * The title of the milestone.
-        */
-        title: string;
-        description: string | null;
-        creator: AutoViewInputSubTypes.nullable_simple_user;
-        open_issues: number & tags.Type<"int32">;
-        closed_issues: number & tags.Type<"int32">;
-        created_at: string & tags.Format<"date-time">;
-        updated_at: string & tags.Format<"date-time">;
-        closed_at: (string & tags.Format<"date-time">) | null;
-        due_on: (string & tags.Format<"date-time">) | null;
-    };
+     * The number of the milestone.
+     */
+    number: number & tags.Type<"int32">;
     /**
-     * A GitHub user.
-     *
-     * @title Simple User
-    */
-    export type nullable_simple_user = {
-        name?: string | null;
-        email?: string | null;
-        login: string;
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        avatar_url: string & tags.Format<"uri">;
-        gravatar_id: string | null;
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        followers_url: string & tags.Format<"uri">;
-        following_url: string;
-        gists_url: string;
-        starred_url: string;
-        subscriptions_url: string & tags.Format<"uri">;
-        organizations_url: string & tags.Format<"uri">;
-        repos_url: string & tags.Format<"uri">;
-        events_url: string;
-        received_events_url: string & tags.Format<"uri">;
-        type: string;
-        site_admin: boolean;
-        starred_at?: string;
-        user_view_type?: string;
-    } | null;
+     * The state of the milestone.
+     */
+    state: "open" | "closed";
+    /**
+     * The title of the milestone.
+     */
+    title: string;
+    description: string | null;
+    creator: AutoViewInputSubTypes.nullable_simple_user;
+    open_issues: number & tags.Type<"int32">;
+    closed_issues: number & tags.Type<"int32">;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    closed_at: (string & tags.Format<"date-time">) | null;
+    due_on: (string & tags.Format<"date-time">) | null;
+  };
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type nullable_simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes.milestone[];
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const milestones = React.useMemo(
-    () => [...value].sort((a, b) => a.number - b.number),
-    [value],
-  );
-
-  const formatDate = (dateString: string | null | undefined): string => {
-    if (!dateString) return "—";
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const milestones = value;
+  const formatDate = (dateString?: string | null): string =>
+    dateString
+      ? new Date(dateString).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "--";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!milestones || milestones.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-2 text-lg">No milestones available</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      {milestones.map((ms) => (
-        <div
-          key={ms.id}
-          className="p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row sm:items-center"
-        >
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {ms.title}
-              </h3>
-              <span className="text-sm text-gray-500 truncate">
-                #{ms.number}
-              </span>
-              <span
-                className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                  ms.state === "open"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {capitalize(ms.state)}
-              </span>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {milestones.map((ms) => {
+        const totalIssues = ms.open_issues + ms.closed_issues;
+        const progress =
+          totalIssues > 0 ? (ms.closed_issues / totalIssues) * 100 : 0;
+        const stateIcon =
+          ms.state === "closed" ? (
+            <LucideReact.CheckCircle className="text-green-500" size={16} />
+          ) : (
+            <LucideReact.Clock className="text-amber-500" size={16} />
+          );
+        const creatorLogin = ms.creator?.login;
+        const avatarUrl =
+          ms.creator?.avatar_url ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            creatorLogin || "User",
+          )}&background=random`;
+
+        return (
+          <div
+            key={ms.id}
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-2">
+                {stateIcon}
+                <h3 className="text-lg font-semibold text-gray-800 truncate">
+                  #{ms.number} {ms.title}
+                </h3>
+              </div>
+              {ms.due_on && (
+                <div className="flex items-center space-x-1 text-gray-500">
+                  <LucideReact.Calendar size={16} />
+                  <span className="text-sm">Due {formatDate(ms.due_on)}</span>
+                </div>
+              )}
             </div>
-            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
-              {ms.description ?? "No description provided."}
+
+            <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+              {ms.description || "No description provided."}
             </p>
-            <div className="mt-3 flex flex-wrap text-sm text-gray-500 space-x-4">
-              <span>
-                Open Issues: <span className="font-medium">{ms.open_issues}</span>
-              </span>
-              <span>
-                Closed Issues: <span className="font-medium">{ms.closed_issues}</span>
-              </span>
-              <span>
-                Due: <span className="font-medium">{formatDate(ms.due_on)}</span>
-              </span>
+
+            <div className="mt-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
+                  <img
+                    src={avatarUrl}
+                    alt={creatorLogin || "Creator"}
+                    className="w-full h-full object-cover"
+                    onError={(
+                      e: React.SyntheticEvent<HTMLImageElement, Event>,
+                    ) => {
+                      e.currentTarget.src =
+                        "https://ui-avatars.com/api/?name=User&background=random";
+                    }}
+                  />
+                </div>
+                <span className="text-sm text-gray-700">
+                  {creatorLogin || "Unknown"}
+                </span>
+              </div>
+              <div className="text-sm text-gray-500">
+                Created {formatDate(ms.created_at)}
+              </div>
             </div>
+
+            {totalIssues > 0 && (
+              <div className="mt-4">
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                  <span>
+                    Issues: {ms.closed_issues}/{totalIssues}
+                  </span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-blue-500"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
-          {ms.creator && (
-            <div className="mt-4 sm:mt-0 sm:ml-6 flex items-center">
-              <img
-                src={ms.creator.avatar_url}
-                alt={ms.creator.login}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <span className="ml-3 text-gray-700 text-sm font-medium truncate">
-                {ms.creator.login}
-              </span>
-            </div>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

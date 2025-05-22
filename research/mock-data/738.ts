@@ -4,5 +4,5 @@ import Component from "../components/738";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"total_count":2,"available_custom_deployment_protection_rule_integrations":[{"id":101,"slug":"custom-deployment-rule-app-alpha","integration_url":"https://api.example.org/v1/apps/custom-deployment-rule-app-alpha","node_id":"NODEID_CustomDeploymentRuleApp_alpha_101"},{"id":102,"slug":"custom-deployment-rule-app-beta","integration_url":"https://api.example.org/v1/apps/custom-deployment-rule-app-beta","node_id":"NODEID_CustomDeploymentRuleApp_beta_102"}]};
+  return {"total_count":2,"available_custom_deployment_protection_rule_integrations":[{"id":101,"slug":"sample-deployment-protection-app","integration_url":"https://api.example.com/v1/apps/sample-deployment-protection-app","node_id":"NODEID_CustomDeploymentRuleApp_abc123="},{"id":102,"slug":"test-protection-rule-bot","integration_url":"https://api.example.com/v1/apps/test-protection-rule-bot","node_id":"NODEID_TestProtectionRuleBot_def456="}]};
 }

@@ -1,103 +1,126 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiOrgsActionsHostedRunnersImagesPartner {
-        export type GetResponse = {
-            total_count: number & tags.Type<"int32">;
-            images: AutoViewInputSubTypes.actions_hosted_runner_image[];
-        };
-    }
-    /**
-     * Provides details of a hosted runner image
-     *
-     * @title GitHub-hosted runner image details.
-    */
-    export type actions_hosted_runner_image = {
-        /**
-         * The ID of the image. Use this ID for the `image` parameter when creating a new larger runner.
-        */
-        id: string;
-        /**
-         * The operating system of the image.
-        */
-        platform: string;
-        /**
-         * Image size in GB.
-        */
-        size_gb: number & tags.Type<"int32">;
-        /**
-         * Display name for this image.
-        */
-        display_name: string;
-        /**
-         * The image provider.
-        */
-        source: "github" | "partner" | "custom";
+  export namespace IApiOrgsActionsHostedRunnersImagesPartner {
+    export type GetResponse = {
+      total_count: number & tags.Type<"int32">;
+      images: AutoViewInputSubTypes.actions_hosted_runner_image[];
     };
+  }
+  /**
+   * Provides details of a hosted runner image
+   *
+   * @title GitHub-hosted runner image details.
+   */
+  export type actions_hosted_runner_image = {
+    /**
+     * The ID of the image. Use this ID for the `image` parameter when creating a new larger runner.
+     */
+    id: string;
+    /**
+     * The operating system of the image.
+     */
+    platform: string;
+    /**
+     * Image size in GB.
+     */
+    size_gb: number & tags.Type<"int32">;
+    /**
+     * Display name for this image.
+     */
+    display_name: string;
+    /**
+     * The image provider.
+     */
+    source: "github" | "partner" | "custom";
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsHostedRunnersImagesPartner.GetResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiOrgsActionsHostedRunnersImagesPartner.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation & transformation
-  const { total_count, images } = value;
-  const averageSize =
-    images.length > 0
-      ? images.reduce((sum, img) => sum + img.size_gb, 0) / images.length
-      : 0;
-  const formattedAvgSize = averageSize.toFixed(1);
-  const sourceCounts = images.reduce((acc, img) => {
-    acc[img.source] = (acc[img.source] || 0) + 1;
-    return acc;
-  }, {} as Record<"github" | "partner" | "custom", number>);
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const totalImages = value.total_count;
+  const totalSize = value.images.reduce((sum, img) => sum + img.size_gb, 0);
+  const avgSize = value.images.length
+    ? (totalSize / value.images.length).toFixed(1)
+    : "0";
+  const sourceStyles: Record<"github" | "partner" | "custom", string> = {
+    github: "bg-gray-100 text-gray-800",
+    partner: "bg-green-100 text-green-800",
+    custom: "bg-blue-100 text-blue-800",
+  };
 
-  // 2. Compose visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (value.images.length === 0) {
+    return (
+      <div className="p-6 bg-white rounded-lg shadow text-center">
+        <LucideReact.AlertCircle
+          aria-hidden="true"
+          size={48}
+          className="mx-auto text-gray-400"
+        />
+        <p className="mt-4 text-gray-500">No runner images available.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Hosted Runner Images</h2>
-        <div className="mt-2 flex flex-wrap space-x-4 text-sm text-gray-600">
-          <span>
-            Total: <span className="font-medium text-gray-800">{total_count}</span>
-          </span>
-          <span>
-            Avg Size: <span className="font-medium text-gray-800">{formattedAvgSize} GB</span>
-          </span>
-          {(["github", "partner", "custom"] as const).map((source) => (
-            <span key={source}>
-              {source.charAt(0).toUpperCase() + source.slice(1)}:{" "}
-              <span className="font-medium text-gray-800">{sourceCounts[source] || 0}</span>
-            </span>
-          ))}
+    <div className="p-4 bg-white rounded-lg shadow overflow-hidden">
+      <div className="flex items-center text-gray-700 text-sm mb-4 space-x-6">
+        <div className="flex items-center">
+          <LucideReact.Image
+            aria-hidden="true"
+            size={16}
+            className="mr-1 text-gray-500"
+          />
+          <span>Total Images: {totalImages}</span>
         </div>
-      </header>
+        <div className="flex items-center">
+          <LucideReact.BarChart2
+            aria-hidden="true"
+            size={16}
+            className="mr-1 text-gray-500"
+          />
+          <span>Avg Size: {avgSize} GB</span>
+        </div>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {images.map((img) => (
+        {value.images.map((img) => (
           <div
             key={img.id}
-            className="p-4 bg-gray-50 border border-gray-200 rounded-lg hover:shadow transition-shadow"
+            className="flex flex-col p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
-            <h3 className="text-lg font-medium text-gray-800 truncate">{img.display_name}</h3>
-            <dl className="mt-2 text-sm text-gray-600 space-y-1">
-              <div>
-                <dt className="inline font-semibold">Platform:</dt>{" "}
-                <dd className="inline">{img.platform}</dd>
-              </div>
-              <div>
-                <dt className="inline font-semibold">Size:</dt>{" "}
-                <dd className="inline">{img.size_gb} GB</dd>
-              </div>
-              <div>
-                <dt className="inline font-semibold">Source:</dt>{" "}
-                <dd className="inline capitalize">{img.source}</dd>
-              </div>
-            </dl>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+              {img.display_name}
+            </h3>
+            <div className="flex items-center text-gray-600 text-sm mb-1">
+              <LucideReact.Computer
+                aria-hidden="true"
+                size={16}
+                className="mr-1"
+              />
+              <span className="capitalize">{img.platform}</span>
+            </div>
+            <div className="flex items-center text-gray-600 text-sm mb-2">
+              <LucideReact.HardDrive
+                aria-hidden="true"
+                size={16}
+                className="mr-1"
+              />
+              <span>{img.size_gb} GB</span>
+            </div>
+            <span
+              className={`inline-block px-2 py-1 text-xs font-semibold uppercase tracking-wide rounded-full ${sourceStyles[img.source]}`}
+            >
+              {img.source}
+            </span>
           </div>
         ))}
       </div>
     </div>
   );
-  // 3. Return the React element.
 }

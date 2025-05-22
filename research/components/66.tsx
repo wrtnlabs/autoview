@@ -1,83 +1,90 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type IShoppingDepositChargePublish = {
-        id: string & tags.Format<"uuid">;
-        created_at: string & tags.Format<"date-time">;
-        paid_at: null | (string & tags.Format<"date-time">);
-        cancelled_at: null | (string & tags.Format<"date-time">);
-    };
+  export type IShoppingDepositChargePublish = {
+    id: string & tags.Format<"uuid">;
+    created_at: string & tags.Format<"date-time">;
+    paid_at: null | (string & tags.Format<"date-time">);
+    cancelled_at: null | (string & tags.Format<"date-time">);
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDepositChargePublish;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Determine current status based on paid_at and cancelled_at fields.
-  const status = value.paid_at
-    ? "Paid"
-    : value.cancelled_at
-    ? "Cancelled"
-    : "Pending";
-
-  // Map status to Tailwind CSS badge styles
-  const statusStyles: Record<string, string> = {
-    Paid: "bg-green-100 text-green-800",
-    Cancelled: "bg-red-100 text-red-800",
-    Pending: "bg-yellow-100 text-yellow-800",
-  };
-
-  // Format dates into a readable form
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString("default", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-
-  const formattedCreatedAt = formatDate(value.created_at);
-  const formattedPaidAt = value.paid_at ? formatDate(value.paid_at) : null;
-  const formattedCancelledAt = value.cancelled_at
-    ? formatDate(value.cancelled_at)
+  const createdDate = new Date(value.created_at).toLocaleString();
+  const paidDate = value.paid_at
+    ? new Date(value.paid_at).toLocaleString()
     : null;
+  const cancelledDate = value.cancelled_at
+    ? new Date(value.cancelled_at).toLocaleString()
+    : null;
+
+  type StatusType = "Pending" | "Paid" | "Cancelled";
+  let status: StatusType = "Pending";
+  if (paidDate) status = "Paid";
+  else if (cancelledDate) status = "Cancelled";
+
+  let StatusIcon: JSX.Element;
+  let statusColorClass: string;
+  switch (status) {
+    case "Paid":
+      StatusIcon = (
+        <LucideReact.CheckCircle className="text-green-500 ml-1" size={16} />
+      );
+      statusColorClass = "text-green-600";
+      break;
+    case "Cancelled":
+      StatusIcon = (
+        <LucideReact.AlertTriangle className="text-red-500 ml-1" size={16} />
+      );
+      statusColorClass = "text-red-600";
+      break;
+    default:
+      StatusIcon = (
+        <LucideReact.Clock className="text-amber-500 ml-1" size={16} />
+      );
+      statusColorClass = "text-amber-600";
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-      {/* Header with title and status badge */}
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Deposit Charge
-        </h2>
-        <span
-          className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${statusStyles[status]}`}
-        >
-          {status}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full text-gray-800">
+      <div className="flex items-center mb-3">
+        <LucideReact.Calendar className="text-gray-400 mr-2" size={16} />
+        <span className="text-sm">
+          Created: <span className="font-medium">{createdDate}</span>
         </span>
       </div>
-
-      {/* Details section */}
-      <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-        <div>
-          <span className="font-medium">Created:</span>{" "}
-          <span>{formattedCreatedAt}</span>
-        </div>
-        {formattedPaidAt && (
-          <div>
-            <span className="font-medium">Paid at:</span>{" "}
-            <span>{formattedPaidAt}</span>
-          </div>
+      <div className="flex items-center mb-3">
+        {status === "Paid" ? (
+          <LucideReact.CheckCircle className="text-green-500 mr-2" size={16} />
+        ) : (
+          <LucideReact.CheckCircle className="text-gray-300 mr-2" size={16} />
         )}
-        {formattedCancelledAt && (
-          <div>
-            <span className="font-medium">Cancelled at:</span>{" "}
-            <span>{formattedCancelledAt}</span>
-          </div>
+        <span className="text-sm">
+          Paid: <span className="font-medium">{paidDate ?? "—"}</span>
+        </span>
+      </div>
+      <div className="flex items-center mb-3">
+        {status === "Cancelled" ? (
+          <LucideReact.XCircle className="text-red-500 mr-2" size={16} />
+        ) : (
+          <LucideReact.XCircle className="text-gray-300 mr-2" size={16} />
         )}
+        <span className="text-sm">
+          Cancelled: <span className="font-medium">{cancelledDate ?? "—"}</span>
+        </span>
+      </div>
+      <div className="mt-4 flex items-center">
+        <span className="text-sm font-medium">Status:</span>
+        <span className={`ml-2 text-sm font-semibold ${statusColorClass}`}>
+          {status}
+        </span>
+        {StatusIcon}
       </div>
     </div>
   );

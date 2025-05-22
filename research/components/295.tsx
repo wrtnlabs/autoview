@@ -1,98 +1,89 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type SELECT_MORE_THAN_ONE_IMAGE = any;
-    export type ResponseForm_lt_Array_lt_string_gt__gt_ = any;
+  export type SELECT_MORE_THAN_ONE_IMAGE = {
+    type: "business";
+    result: false;
+    code: 4005;
+    data: "\uC801\uC5B4\uB3C4 1\uC7A5 \uC774\uC0C1\uC758 \uC774\uBBF8\uC9C0\uB97C \uACE8\uB77C\uC57C \uD569\uB2C8\uB2E4.";
+  };
+  export type ResponseForm_lt_Array_lt_string_gt__gt_ = {
+    result: true;
+    code: 1000;
+    requestToResponse?: string;
+    data: string[];
+  };
 }
-export type AutoViewInput = any | any;
-
-
+export type AutoViewInput =
+  | AutoViewInputSubTypes.SELECT_MORE_THAN_ONE_IMAGE
+  | AutoViewInputSubTypes.ResponseForm_lt_Array_lt_string_gt__gt_;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Filter out internal or non-primitive properties for display.
-  const entries = React.useMemo(() => {
-    if (typeof value !== 'object' || value === null) return [];
-    return Object.entries(value as Record<string, any>).filter(([key, val]) => {
-      // Exclude internal keys and empty/null values
-      if (
-        key.startsWith('_') ||
-        key.startsWith('internal') ||
-        key.endsWith('Id') ||
-        val == null
-      ) {
-        return false;
-      }
-      // Only show primitives or arrays
-      if (typeof val === 'object' && !Array.isArray(val)) {
-        return false;
-      }
-      return true;
-    });
-  }, [value]);
+  // 1. Determine if the payload represents an error or a successful response
+  const isError = value.result === false;
 
-  // Format a camelCase or PascalCase key into a human-readable label
-  const formatKey = (key: string) =>
-    key
-      .replace(/([A-Z])/g, ' $1')      // insert space before capitals
-      .replace(/^./, str => str.toUpperCase()); // capitalize first letter
+  if (isError) {
+    // Error case: SELECT_MORE_THAN_ONE_IMAGE
+    const { code, data: message } =
+      value as AutoViewInputSubTypes.SELECT_MORE_THAN_ONE_IMAGE;
 
-  // Format values based on type: dates, booleans, numbers, strings, arrays
-  const formatValue = (val: any): React.ReactNode => {
-    if (typeof val === 'boolean') {
-      return (
-        <span
-          className={
-            'px-2 py-0.5 rounded-full text-xs font-semibold ' +
-            (val ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')
-          }
-        >
-          {val ? 'Yes' : 'No'}
-        </span>
-      );
-    }
-    if (typeof val === 'number') {
-      return val.toLocaleString();
-    }
-    if (typeof val === 'string') {
-      // Detect ISO date strings
-      const date = new Date(val);
-      if (!isNaN(date.getTime()) && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(val)) {
-        return date.toLocaleString();
-      }
-      return <span className="truncate">{val}</span>;
-    }
-    if (Array.isArray(val)) {
-      return (
-        <div className="flex flex-wrap">
-          {val.map((item, idx) => (
-            <span
-              key={idx}
-              className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mr-1 mb-1"
-            >
-              {String(item)}
-            </span>
-          ))}
+    return (
+      <div className="flex items-start p-4 bg-red-50 border border-red-200 rounded-lg">
+        <LucideReact.AlertTriangle
+          className="text-red-500 flex-shrink-0"
+          size={20}
+          aria-label="Error"
+        />
+        <div className="ml-3">
+          <p className="text-sm font-semibold text-red-800">Error {code}</p>
+          <p className="mt-1 text-sm text-red-700">{message}</p>
         </div>
-      );
-    }
-    return null;
-  };
+      </div>
+    );
+  }
 
-  // 3. Return the React element.
+  // Success case: ResponseForm<string[]>
+  const {
+    code,
+    requestToResponse,
+    data: items,
+  } = value as AutoViewInputSubTypes.ResponseForm_lt_Array_lt_string_gt__gt_;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md max-w-full overflow-hidden">
-      {entries.length === 0 ? (
-        <div className="text-gray-500 text-sm">No data available</div>
-      ) : (
-        <dl className="space-y-2">
-          {entries.map(([key, val]) => (
-            <div key={key} className="flex justify-between items-start">
-              <dt className="text-gray-500 text-xs font-medium">{formatKey(key)}</dt>
-              <dd className="ml-2 text-gray-900 text-sm">{formatValue(val)}</dd>
-            </div>
+    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex items-center text-sm text-gray-500">
+        <LucideReact.MessageSquare className="mr-2" size={16} />
+        <span>Response Code: {code}</span>
+      </div>
+
+      {requestToResponse && (
+        <div className="mt-2 text-sm text-gray-700">
+          <span className="font-medium">Request → Response:</span>{" "}
+          <span className="italic">{requestToResponse}</span>
+        </div>
+      )}
+
+      {items.length > 0 ? (
+        <ul className="mt-3 space-y-2">
+          {items.map((item, idx) => (
+            <li key={idx} className="flex items-start">
+              <LucideReact.CheckCircle
+                className="text-green-500 flex-shrink-0 mt-1"
+                size={16}
+                aria-hidden="true"
+              />
+              <span className="ml-2 text-gray-800 break-words">{item}</span>
+            </li>
           ))}
-        </dl>
+        </ul>
+      ) : (
+        <div className="mt-3 flex items-center text-gray-500">
+          <LucideReact.AlertCircle size={20} className="mr-2" />
+          <span className="text-sm">No items available.</span>
+        </div>
       )}
     </div>
   );

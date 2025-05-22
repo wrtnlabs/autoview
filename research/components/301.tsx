@@ -1,116 +1,135 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace TryPagination_lt_UserType {
-        export type ProfileList_gt_ = {
-            result: true;
-            code: 1000;
-            requestToResponse?: string;
-            data: AutoViewInputSubTypes.PaginationResponseType_lt_UserType.ProfileList_gt_;
-        };
-    }
-    export namespace PaginationResponseType_lt_UserType {
-        export type ProfileList_gt_ = {
-            list: AutoViewInputSubTypes.UserType.Acquaintance[];
-            count: number;
-            totalResult: number;
-            totalPage: number;
-            search?: string;
-            page: number;
-        };
-    }
-    export namespace UserType {
-        export type Acquaintance = {
-            /**
-             * 사용자의 별칭, 설정하지 않는 경우도 있다.
-            */
-            nickname: string;
-            id: number;
-            /**
-             * 사용자의 프로필 이미지
-            */
-            profileImage?: string | null;
-            reason: "\uB098\uB97C \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C" | "\uB0B4\uAC00 \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C";
-        };
-    }
+  export namespace TryPagination_lt_UserType {
+    export type ProfileList_gt_ = {
+      result: true;
+      code: 1000;
+      requestToResponse?: string;
+      data: AutoViewInputSubTypes.PaginationResponseType_lt_UserType.ProfileList_gt_;
+    };
+  }
+  export namespace PaginationResponseType_lt_UserType {
+    export type ProfileList_gt_ = {
+      list: AutoViewInputSubTypes.UserType.Acquaintance[];
+      count: number;
+      totalResult: number;
+      totalPage: number;
+      search?: string;
+      page: number;
+    };
+  }
+  export namespace UserType {
+    export type Acquaintance = {
+      /**
+       * 사용자의 별칭, 설정하지 않는 경우도 있다.
+       */
+      nickname: string;
+      id: number;
+      /**
+       * 사용자의 프로필 이미지
+       */
+      profileImage?: string | null;
+      reason:
+        | "\uB098\uB97C \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C"
+        | "\uB0B4\uAC00 \uD314\uB85C\uC6B0\uD55C \uC0AC\uB78C";
+    };
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.TryPagination_lt_UserType.ProfileList_gt_;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.TryPagination_lt_UserType.ProfileList_gt_;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    data: { list, totalResult, totalPage, page, search },
-  } = value;
-  const displayCount = list.length;
+  const { data } = value;
+  const { list, page, totalPage, totalResult, search } = data;
 
-  // Helper to render avatar or initials
-  const renderAvatar = (user: AutoViewInputSubTypes.UserType.Acquaintance) => {
-    if (user.profileImage) {
-      return (
-        <img
-          src={user.profileImage}
-          alt={user.nickname || `User ${user.id}`}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-      );
-    }
-    const initial = user.nickname
-      ? user.nickname.charAt(0).toUpperCase()
-      : user.id.toString().charAt(0);
-    return (
-      <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center font-medium">
-        {initial}
-      </div>
-    );
+  // Map reason codes to human‐readable labels and icons
+  const reasonMap: Record<string, { label: string; icon: JSX.Element }> = {
+    "나를 팔로우한 사람": {
+      label: "Follows you",
+      icon: <LucideReact.UserCheck className="text-green-500" size={16} />,
+    },
+    "내가 팔로우한 사람": {
+      label: "You follow",
+      icon: <LucideReact.UserPlus className="text-gray-400" size={16} />,
+    },
   };
+
+  // Generate a placeholder avatar URL based on nickname
+  const makeAvatarUrl = (name: string) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Summary */}
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Acquaintance List
-        </h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Showing {displayCount} of {totalResult} users
-          {search ? (
-            <>
-              {' '}
-              for "<span className="italic">{search}</span>"
-            </>
-          ) : null}
-          , page {page} of {totalPage}.
-        </p>
-      </div>
-      {/* List */}
-      <ul className="divide-y divide-gray-200">
-        {list.map((user) => (
-          <li
-            key={user.id}
-            className="flex items-center space-x-4 py-3 hover:bg-gray-50"
-          >
-            {renderAvatar(user)}
-            <div className="flex-1 min-w-0">
-              <p className="text-gray-900 font-medium truncate">
-                {user.nickname || `User ${user.id}`}
-              </p>
-              <p className="text-gray-500 text-sm truncate">{user.reason}</p>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header with summary info */}
+      <header className="mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <LucideReact.Users className="text-gray-700" size={20} />
+          <h2 className="text-lg font-semibold text-gray-800">Acquaintances</h2>
+        </div>
+        <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4">
+          <span>
+            Page {page} of {totalPage}
+          </span>
+          <span>
+            Showing {list.length} of {totalResult}
+          </span>
+          {search && (
+            <div className="flex items-center gap-1 text-gray-500">
+              <LucideReact.Search size={16} />
+              <span className="truncate max-w-xs">"{search}"</span>
             </div>
-          </li>
-        ))}
-        {displayCount === 0 && (
-          <li className="py-4 text-center text-gray-500 text-sm">
-            No users to display.
-          </li>
-        )}
-      </ul>
-      {/* Footer */}
-      <div className="mt-4 text-center text-xs text-gray-400">
-        Data Code: {value.code}
-      </div>
+          )}
+        </div>
+      </header>
+
+      {/* Empty state */}
+      {list.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <p className="mt-2">No acquaintances found.</p>
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {list.map((item) => {
+            const avatarSrc = item.profileImage || makeAvatarUrl(item.nickname);
+            const reasonInfo = reasonMap[item.reason] || {
+              label: item.reason,
+              icon: <LucideReact.User className="text-gray-400" size={16} />,
+            };
+
+            return (
+              <li
+                key={item.id}
+                className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded"
+              >
+                <img
+                  src={avatarSrc}
+                  alt={item.nickname}
+                  className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = makeAvatarUrl(item.nickname);
+                  }}
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 truncate">
+                    {item.nickname}
+                  </p>
+                  <div className="flex items-center gap-1 text-sm text-gray-500 truncate">
+                    {reasonInfo.icon}
+                    <span>{reasonInfo.label}</span>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

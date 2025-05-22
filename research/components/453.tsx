@@ -1,146 +1,187 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Org Hook
-     *
-     * @title Org Hook
-    */
-    export type org_hook = {
-        id: number & tags.Type<"int32">;
-        url: string & tags.Format<"uri">;
-        ping_url: string & tags.Format<"uri">;
-        deliveries_url?: string & tags.Format<"uri">;
-        name: string;
-        events: string[];
-        active: boolean;
-        config: {
-            url?: string;
-            insecure_ssl?: string;
-            content_type?: string;
-            secret?: string;
-        };
-        updated_at: string & tags.Format<"date-time">;
-        created_at: string & tags.Format<"date-time">;
-        type: string;
+  /**
+   * Org Hook
+   *
+   * @title Org Hook
+   */
+  export type org_hook = {
+    id: number & tags.Type<"int32">;
+    url: string & tags.Format<"uri">;
+    ping_url: string & tags.Format<"uri">;
+    deliveries_url?: string & tags.Format<"uri">;
+    name: string;
+    events: string[];
+    active: boolean;
+    config: {
+      url?: string;
+      insecure_ssl?: string;
+      content_type?: string;
+      secret?: string;
     };
+    updated_at: string & tags.Format<"date-time">;
+    created_at: string & tags.Format<"date-time">;
+    type: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.org_hook;
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusText = value.active ? 'Active' : 'Inactive';
-  const statusColor = value.active ? 'green-500' : 'red-500';
-  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  });
-  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  });
-  const sslDisabled = value.config.insecure_ssl === '1';
+  // 1. Define data aggregation/transformation functions or derived constants
+  const formattedCreated = new Date(value.created_at).toLocaleString(
+    undefined,
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
+  const formattedUpdated = new Date(value.updated_at).toLocaleString(
+    undefined,
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
+  const sslEnabled = value.config.insecure_ssl !== "1";
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+    <div className="max-w-full p-6 bg-white rounded-lg shadow-md border border-gray-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800 truncate">
-          {value.name || 'Unnamed Hook'}
-        </h2>
-        <span
-          className={`px-2 py-1 text-sm font-medium text-white bg-${statusColor} rounded-full`}
-        >
-          {statusText}
-        </span>
-      </div>
-
-      {/* Core Info */}
-      <div className="space-y-2 text-gray-700 text-sm">
-        <div>
-          <span className="font-medium">Type:</span>{' '}
-          <span className="italic">{value.type}</span>
+        <div className="flex items-center">
+          <LucideReact.Rss className="text-gray-600 mr-2" size={20} />
+          <h2 className="text-lg font-semibold text-gray-800">{value.name}</h2>
         </div>
-        <div>
-          <span className="font-medium">Endpoint URL:</span>
-          <div className="mt-1 text-blue-600 truncate font-mono">
-            {value.url}
+        {value.active ? (
+          <div className="flex items-center text-green-600 text-sm">
+            <LucideReact.CheckCircle className="mr-1" size={16} />
+            Active
           </div>
-        </div>
-        {value.deliveries_url && (
-          <div>
-            <span className="font-medium">Deliveries URL:</span>
-            <div className="mt-1 text-blue-600 truncate font-mono">
-              {value.deliveries_url}
-            </div>
+        ) : (
+          <div className="flex items-center text-red-600 text-sm">
+            <LucideReact.XCircle className="mr-1" size={16} />
+            Inactive
           </div>
         )}
-        <div>
-          <span className="font-medium">Ping URL:</span>
-          <div className="mt-1 text-blue-600 truncate font-mono">
-            {value.ping_url}
-          </div>
-        </div>
       </div>
+
+      {/* Hook Type */}
+      <div className="text-sm text-gray-500 mb-4">{value.type}</div>
 
       {/* Events */}
-      {value.events.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-800 mb-1">Subscribed Events:</h3>
-          <div className="flex flex-wrap gap-2">
-            {value.events.map((evt, idx) => (
-              <span
-                key={idx}
-                className="px-2 py-1 text-xs text-gray-700 bg-gray-200 rounded-full"
-              >
-                {evt}
-              </span>
-            ))}
-          </div>
+      <div className="mb-4">
+        <span className="text-sm font-medium text-gray-700">
+          Subscribed Events:
+        </span>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {value.events.map((evt) => (
+            <span
+              key={evt}
+              className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full"
+            >
+              {evt}
+            </span>
+          ))}
         </div>
-      )}
-
-      {/* Config Summary */}
-      <div className="mt-4 border-t pt-4 text-gray-700 text-sm space-y-2">
-        <h3 className="text-sm font-medium text-gray-800">Configuration:</h3>
-        {value.config.content_type && (
-          <div>
-            <span className="font-medium">Content Type:</span> {value.config.content_type}
-          </div>
-        )}
-        {typeof value.config.insecure_ssl !== 'undefined' && (
-          <div>
-            <span className="font-medium">SSL Verification:</span>{' '}
-            {sslDisabled ? 'Disabled' : 'Enabled'}
-          </div>
-        )}
-        {value.config.url && (
-          <div>
-            <span className="font-medium">Config URL:</span>
-            <div className="mt-1 text-blue-600 truncate font-mono">
-              {value.config.url}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Timestamps */}
-      <div className="mt-4 border-t pt-4 text-gray-500 text-xs flex justify-between">
-        <div>
-          <span className="font-medium">Created:</span> {createdAt}
+      {/* Configuration Section */}
+      <div className="border-t border-gray-200 pt-4">
+        <h3 className="text-sm font-medium text-gray-800 mb-2">
+          Configuration
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+          {/* Callback URL */}
+          <div className="flex items-start">
+            <LucideReact.Link className="text-gray-500 mr-2 mt-1" size={16} />
+            <div>
+              <div className="font-medium">Callback URL</div>
+              <div className="font-mono break-all">
+                {value.config.url ?? "—"}
+              </div>
+            </div>
+          </div>
+
+          {/* Content Type */}
+          <div className="flex items-center">
+            <LucideReact.FileText className="text-gray-500 mr-2" size={16} />
+            <div>
+              <div className="font-medium">Content Type</div>
+              <div>{value.config.content_type ?? "—"}</div>
+            </div>
+          </div>
+
+          {/* SSL Verification */}
+          <div className="flex items-center">
+            {sslEnabled ? (
+              <LucideReact.CheckCircle
+                className="text-green-500 mr-2"
+                size={16}
+              />
+            ) : (
+              <LucideReact.AlertTriangle
+                className="text-amber-500 mr-2"
+                size={16}
+              />
+            )}
+            <div>
+              <div className="font-medium">SSL Verification</div>
+              <div>{sslEnabled ? "Enabled" : "Disabled"}</div>
+            </div>
+          </div>
         </div>
-        <div>
-          <span className="font-medium">Updated:</span> {updatedAt}
+      </div>
+
+      {/* URLs & Timestamps */}
+      <div className="border-t border-gray-200 pt-4 mt-4 text-sm text-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Ping URL */}
+          <div className="flex items-start">
+            <LucideReact.Link className="text-gray-500 mr-2 mt-1" size={16} />
+            <div>
+              <div className="font-medium">Ping URL</div>
+              <div className="font-mono break-all">{value.ping_url}</div>
+            </div>
+          </div>
+
+          {/* Deliveries URL (optional) */}
+          {value.deliveries_url && (
+            <div className="flex items-start">
+              <LucideReact.Package
+                className="text-gray-500 mr-2 mt-1"
+                size={16}
+              />
+              <div>
+                <div className="font-medium">Deliveries URL</div>
+                <div className="font-mono break-all">
+                  {value.deliveries_url}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Created At */}
+          <div className="flex items-center">
+            <LucideReact.Calendar className="text-gray-500 mr-2" size={16} />
+            <div>
+              <div className="font-medium">Created</div>
+              <div>{formattedCreated}</div>
+            </div>
+          </div>
+
+          {/* Updated At */}
+          <div className="flex items-center">
+            <LucideReact.Calendar className="text-gray-500 mr-2" size={16} />
+            <div>
+              <div className="font-medium">Updated</div>
+              <div>{formattedUpdated}</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -1,225 +1,302 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Comments provide a way for people to collaborate on an issue.
+   *
+   * @title Issue Comment
+   */
+  export type issue_comment = {
     /**
-     * Comments provide a way for people to collaborate on an issue.
-     *
-     * @title Issue Comment
-    */
-    export type issue_comment = {
-        /**
-         * Unique identifier of the issue comment
-        */
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        /**
-         * URL for the issue comment
-        */
-        url: string;
-        /**
-         * Contents of the issue comment
-        */
-        body?: string;
-        body_text?: string;
-        body_html?: string;
-        html_url: string & tags.Format<"uri">;
-        user: AutoViewInputSubTypes.nullable_simple_user;
-        created_at: string & tags.Format<"date-time">;
-        updated_at: string & tags.Format<"date-time">;
-        issue_url: string & tags.Format<"uri">;
-        author_association: AutoViewInputSubTypes.author_association;
-        performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
-        reactions?: AutoViewInputSubTypes.reaction_rollup;
+     * Unique identifier of the issue comment
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * URL for the issue comment
+     */
+    url: string;
+    /**
+     * Contents of the issue comment
+     */
+    body?: string;
+    body_text?: string;
+    body_html?: string;
+    html_url: string & tags.Format<"uri">;
+    user: AutoViewInputSubTypes.nullable_simple_user;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    issue_url: string & tags.Format<"uri">;
+    author_association: AutoViewInputSubTypes.author_association;
+    performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
+    reactions?: AutoViewInputSubTypes.reaction_rollup;
+  };
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type nullable_simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  } | null;
+  /**
+   * How the author is associated with the repository.
+   *
+   * @title author_association
+   */
+  export type author_association =
+    | "COLLABORATOR"
+    | "CONTRIBUTOR"
+    | "FIRST_TIMER"
+    | "FIRST_TIME_CONTRIBUTOR"
+    | "MANNEQUIN"
+    | "MEMBER"
+    | "NONE"
+    | "OWNER";
+  /**
+   * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
+   *
+   * @title GitHub app
+   */
+  export type nullable_integration = {
+    /**
+     * Unique identifier of the GitHub app
+     */
+    id: number & tags.Type<"int32">;
+    /**
+     * The slug name of the GitHub app
+     */
+    slug?: string;
+    node_id: string;
+    client_id?: string;
+    owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
+    /**
+     * The name of the GitHub app
+     */
+    name: string;
+    description: string | null;
+    external_url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    /**
+     * The set of permissions for the GitHub app
+     */
+    permissions: {
+      [key: string]: string;
     };
     /**
-     * A GitHub user.
-     *
-     * @title Simple User
-    */
-    export type nullable_simple_user = {
-        name?: string | null;
-        email?: string | null;
-        login: string;
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        avatar_url: string & tags.Format<"uri">;
-        gravatar_id: string | null;
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        followers_url: string & tags.Format<"uri">;
-        following_url: string;
-        gists_url: string;
-        starred_url: string;
-        subscriptions_url: string & tags.Format<"uri">;
-        organizations_url: string & tags.Format<"uri">;
-        repos_url: string & tags.Format<"uri">;
-        events_url: string;
-        received_events_url: string & tags.Format<"uri">;
-        type: string;
-        site_admin: boolean;
-        starred_at?: string;
-        user_view_type?: string;
-    } | null;
+     * The list of events for the GitHub app
+     */
+    events: string[];
     /**
-     * How the author is associated with the repository.
-     *
-     * @title author_association
-    */
-    export type author_association = "COLLABORATOR" | "CONTRIBUTOR" | "FIRST_TIMER" | "FIRST_TIME_CONTRIBUTOR" | "MANNEQUIN" | "MEMBER" | "NONE" | "OWNER";
+     * The number of installations associated with the GitHub app
+     */
+    installations_count?: number & tags.Type<"int32">;
+    client_secret?: string;
+    webhook_secret?: string | null;
+    pem?: string;
+  } | null;
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  };
+  /**
+   * An enterprise on GitHub.
+   *
+   * @title Enterprise
+   */
+  export type enterprise = {
     /**
-     * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
-     *
-     * @title GitHub app
-    */
-    export type nullable_integration = {
-        /**
-         * Unique identifier of the GitHub app
-        */
-        id: number & tags.Type<"int32">;
-        /**
-         * The slug name of the GitHub app
-        */
-        slug?: string;
-        node_id: string;
-        client_id?: string;
-        owner: any | any;
-        /**
-         * The name of the GitHub app
-        */
-        name: string;
-        description: string | null;
-        external_url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        created_at: string & tags.Format<"date-time">;
-        updated_at: string & tags.Format<"date-time">;
-        /**
-         * The set of permissions for the GitHub app
-        */
-        permissions: {
-            [key: string]: string;
-        };
-        /**
-         * The list of events for the GitHub app
-        */
-        events: string[];
-        /**
-         * The number of installations associated with the GitHub app
-        */
-        installations_count?: number & tags.Type<"int32">;
-        client_secret?: string;
-        webhook_secret?: string | null;
-        pem?: string;
-    } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+     * A short description of the enterprise.
+     */
+    description?: string | null;
+    html_url: string & tags.Format<"uri">;
     /**
-     * @title Reaction Rollup
-    */
-    export type reaction_rollup = {
-        url: string & tags.Format<"uri">;
-        total_count: number & tags.Type<"int32">;
-        "+1": number & tags.Type<"int32">;
-        "-1": number & tags.Type<"int32">;
-        laugh: number & tags.Type<"int32">;
-        confused: number & tags.Type<"int32">;
-        heart: number & tags.Type<"int32">;
-        hooray: number & tags.Type<"int32">;
-        eyes: number & tags.Type<"int32">;
-        rocket: number & tags.Type<"int32">;
-    };
+     * The enterprise's website URL.
+     */
+    website_url?: (string & tags.Format<"uri">) | null;
+    /**
+     * Unique identifier of the enterprise
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * The name of the enterprise.
+     */
+    name: string;
+    /**
+     * The slug url identifier for the enterprise.
+     */
+    slug: string;
+    created_at: (string & tags.Format<"date-time">) | null;
+    updated_at: (string & tags.Format<"date-time">) | null;
+    avatar_url: string & tags.Format<"uri">;
+  };
+  /**
+   * @title Reaction Rollup
+   */
+  export type reaction_rollup = {
+    url: string & tags.Format<"uri">;
+    total_count: number & tags.Type<"int32">;
+    "+1": number & tags.Type<"int32">;
+    "-1": number & tags.Type<"int32">;
+    laugh: number & tags.Type<"int32">;
+    confused: number & tags.Type<"int32">;
+    heart: number & tags.Type<"int32">;
+    hooray: number & tags.Type<"int32">;
+    eyes: number & tags.Type<"int32">;
+    rocket: number & tags.Type<"int32">;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue_comment;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const user = value.user;
-  const displayName = user
-    ? user.name
-      ? user.name
-      : user.login
+  const displayName = value.user
+    ? value.user.name?.trim() || value.user.login
     : "Unknown User";
-  const avatarUrl = user?.avatar_url;
-  const createdDate = new Date(value.created_at);
-  const createdAtStr = createdDate.toLocaleString("default", {
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName,
+  )}&background=0D8ABC&color=fff`;
+  const avatarUrl = value.user?.avatar_url || avatarPlaceholder;
+  const createdDate = new Date(value.created_at).toLocaleString("default", {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "numeric",
   });
-  const updatedDate = new Date(value.updated_at);
-  const isEdited = updatedDate.getTime() > createdDate.getTime();
-  // Derive plain text from body, fallback in order
-  let commentText = value.body_text ?? value.body;
-  if (!commentText && value.body_html) {
-    commentText = value.body_html.replace(/<[^>]+>/g, "");
-  }
-  const emojiMap: { [key: string]: string } = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    eyes: "👀",
-    rocket: "🚀",
-  };
+  const bodyText =
+    value.body_text?.trim() || value.body?.trim() || "[No content available]";
   const reactions = value.reactions;
+  const viaApp = value.performed_via_github_app?.name;
+
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <header className="flex items-center mb-3">
-        {avatarUrl && (
-          <img
-            src={avatarUrl}
-            alt={displayName + " avatar"}
-            className="w-10 h-10 rounded-full mr-3"
-          />
-        )}
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">{displayName}</span>
-          <span className="text-xs text-gray-500">
-            {createdAtStr}
-            {isEdited ? " • edited" : ""}
-          </span>
-        </div>
-        <span className="ml-auto px-2 py-0.5 text-xs font-medium text-gray-600 bg-gray-100 rounded">
-          {value.author_association.toLowerCase().replace(/_/g, " ")}
-        </span>
-      </header>
-      {commentText && (
-        <p
-          className="text-gray-700 text-sm mb-3 overflow-hidden"
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
+      {/* Header: Avatar, Name, Date */}
+      <div className="flex items-center mb-3">
+        <img
+          src={avatarUrl}
+          alt={displayName}
+          className="w-8 h-8 rounded-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = avatarPlaceholder;
           }}
-        >
-          {commentText}
-        </p>
-      )}
-      {reactions && (
-        <div className="flex flex-wrap items-center">
-          {Object.entries(reactions).map(([key, count]) => {
-            if (key === "url" || key === "total_count" || (count as number) === 0) {
-              return null;
-            }
-            const emoji = emojiMap[key] || "";
-            return (
-              <span
-                key={key}
-                className="inline-flex items-center px-2 py-0.5 mr-2 mb-1 text-xs font-medium text-gray-800 bg-gray-100 rounded"
-              >
-                {emoji} {count}
-              </span>
-            );
-          })}
+        />
+        <div className="ml-3">
+          <div className="text-gray-900 font-medium leading-tight">
+            {displayName}
+          </div>
+          <div className="flex items-center text-gray-500 text-xs">
+            <LucideReact.Calendar size={14} />
+            <span className="ml-1">{createdDate}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="text-gray-800 text-sm mb-3">
+        <p className="line-clamp-4 whitespace-pre-wrap">{bodyText}</p>
+      </div>
+
+      {/* Reactions */}
+      {reactions && reactions.total_count > 0 && (
+        <div className="flex items-center space-x-4 text-gray-500 text-sm mb-3">
+          {reactions["+1"] > 0 && (
+            <div className="flex items-center">
+              <LucideReact.ThumbsUp size={16} />
+              <span className="ml-1">{reactions["+1"]}</span>
+            </div>
+          )}
+          {reactions["-1"] > 0 && (
+            <div className="flex items-center">
+              <LucideReact.ThumbsDown size={16} />
+              <span className="ml-1">{reactions["-1"]}</span>
+            </div>
+          )}
+          {reactions.laugh > 0 && (
+            <div className="flex items-center">
+              <LucideReact.Laugh size={16} />
+              <span className="ml-1">{reactions.laugh}</span>
+            </div>
+          )}
+          {reactions.heart > 0 && (
+            <div className="flex items-center">
+              <LucideReact.Heart size={16} />
+              <span className="ml-1">{reactions.heart}</span>
+            </div>
+          )}
+          {/* Total summary */}
+          <div className="flex items-center">
+            <LucideReact.Smile size={16} className="text-gray-400" />
+            <span className="ml-1"> {reactions.total_count} total</span>
+          </div>
         </div>
       )}
+
+      {/* Footer: Author association and GitHub App */}
+      <div className="flex items-center space-x-3 text-gray-500 text-xs">
+        <span className="uppercase bg-gray-100 px-2 py-0.5 rounded">
+          {value.author_association}
+        </span>
+        {viaApp && (
+          <div className="flex items-center">
+            <LucideReact.Package size={14} />
+            <span className="ml-1">via {viaApp}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

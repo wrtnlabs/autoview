@@ -1,80 +1,81 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Key
-     *
-     * @title Key
-    */
-    export type key = {
-        key: string;
-        id: number & tags.Type<"int32">;
-        url: string;
-        title: string;
-        created_at: string & tags.Format<"date-time">;
-        verified: boolean;
-        read_only: boolean;
-    };
+  /**
+   * Key
+   *
+   * @title Key
+   */
+  export type key = {
+    key: string;
+    id: number & tags.Type<"int32">;
+    url: string;
+    title: string;
+    created_at: string & tags.Format<"date-time">;
+    verified: boolean;
+    read_only: boolean;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.key;
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data aggregation/transformation
   const maskedKey =
-    typeof value.key === "string" && value.key.length > 8
-      ? `${value.key.slice(0, 4)}…${value.key.slice(-4)}`
+    value.key.length > 8
+      ? `${value.key.slice(0, 4)}...${value.key.slice(-4)}`
       : value.key;
-
-  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
+  const createdDate = new Date(value.created_at);
+  const formattedDate = createdDate.toLocaleString(undefined, {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
   });
+  const urlDisplay = value.url.replace(/^https?:\/\//, "");
+  const truncatedUrl =
+    urlDisplay.length > 30 ? `${urlDisplay.slice(0, 30)}...` : urlDisplay;
 
-  const verifiedBadge = value.verified ? "Verified" : "Unverified";
-  const verifiedClasses = value.verified
-    ? "bg-green-100 text-green-800"
-    : "bg-red-100 text-red-800";
-
-  const accessBadge = value.read_only ? "Read-Only" : "Read-Write";
-  const accessClasses = value.read_only
-    ? "bg-gray-100 text-gray-800"
-    : "bg-blue-100 text-blue-800";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md space-y-3">
-      {/* Title */}
-      <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="w-full max-w-xs p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <h2 className="text-lg font-semibold text-gray-800 truncate">
         {value.title}
       </h2>
-
-      {/* URL */}
-      <p className="text-sm text-gray-500 break-all">{value.url}</p>
-
-      {/* Masked Key */}
-      <div className="flex items-center space-x-2">
-        <span className="text-sm font-mono text-gray-700">{maskedKey}</span>
-      </div>
-
-      {/* Created Date */}
-      <p className="text-sm text-gray-500">Created: {createdDate}</p>
-
-      {/* Badges */}
-      <div className="flex flex-wrap gap-2">
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${verifiedClasses}`}
-        >
-          {verifiedBadge}
-        </span>
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${accessClasses}`}
-        >
-          {accessBadge}
-        </span>
+      <div className="mt-3 space-y-2 text-sm text-gray-700">
+        <div className="flex items-center gap-2">
+          <LucideReact.Key size={16} className="text-gray-500" />
+          <span className="font-mono">{maskedKey}</span>
+        </div>
+        <div className="flex items-center gap-2 overflow-hidden">
+          <LucideReact.Link size={16} className="text-gray-500" />
+          <span className="truncate">{truncatedUrl}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <LucideReact.Calendar size={16} className="text-gray-500" />
+          <time dateTime={value.created_at}>{formattedDate}</time>
+        </div>
+        <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-1">
+            {value.verified ? (
+              <LucideReact.CheckCircle size={16} className="text-green-500" />
+            ) : (
+              <LucideReact.XCircle size={16} className="text-red-500" />
+            )}
+            <span>{value.verified ? "Verified" : "Unverified"}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {value.read_only ? (
+              <LucideReact.Lock size={16} className="text-gray-500" />
+            ) : (
+              <LucideReact.Unlock size={16} className="text-gray-500" />
+            )}
+            <span>{value.read_only ? "Read-only" : "Writable"}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

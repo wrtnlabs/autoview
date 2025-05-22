@@ -1,164 +1,142 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiOrgsActionsRunnerGroups {
-        export type GetResponse = {
-            total_count: number;
-            runner_groups: AutoViewInputSubTypes.runner_groups_org[];
-        };
-    }
-    export type runner_groups_org = {
-        id: number;
-        name: string;
-        visibility: string;
-        "default": boolean;
-        /**
-         * Link to the selected repositories resource for this runner group. Not present unless visibility was set to `selected`
-        */
-        selected_repositories_url?: string;
-        runners_url: string;
-        hosted_runners_url?: string;
-        /**
-         * The identifier of a hosted compute network configuration.
-        */
-        network_configuration_id?: string;
-        inherited: boolean;
-        inherited_allows_public_repositories?: boolean;
-        allows_public_repositories: boolean;
-        /**
-         * If `true`, the `restricted_to_workflows` and `selected_workflows` fields cannot be modified.
-        */
-        workflow_restrictions_read_only?: boolean;
-        /**
-         * If `true`, the runner group will be restricted to running only the workflows specified in the `selected_workflows` array.
-        */
-        restricted_to_workflows?: boolean;
-        /**
-         * List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.
-        */
-        selected_workflows?: string[];
+  export namespace IApiOrgsActionsRunnerGroups {
+    export type GetResponse = {
+      total_count: number;
+      runner_groups: AutoViewInputSubTypes.runner_groups_org[];
     };
+  }
+  export type runner_groups_org = {
+    id: number;
+    name: string;
+    visibility: string;
+    default: boolean;
+    /**
+     * Link to the selected repositories resource for this runner group. Not present unless visibility was set to `selected`
+     */
+    selected_repositories_url?: string;
+    runners_url: string;
+    hosted_runners_url?: string;
+    /**
+     * The identifier of a hosted compute network configuration.
+     */
+    network_configuration_id?: string;
+    inherited: boolean;
+    inherited_allows_public_repositories?: boolean;
+    allows_public_repositories: boolean;
+    /**
+     * If `true`, the `restricted_to_workflows` and `selected_workflows` fields cannot be modified.
+     */
+    workflow_restrictions_read_only?: boolean;
+    /**
+     * If `true`, the runner group will be restricted to running only the workflows specified in the `selected_workflows` array.
+     */
+    restricted_to_workflows?: boolean;
+    /**
+     * List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.
+     */
+    selected_workflows?: string[];
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnerGroups.GetResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiOrgsActionsRunnerGroups.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalGroups = value.total_count.toLocaleString();
-  const groups = value.runner_groups;
+  const { total_count, runner_groups } = value;
 
-  const capitalize = (s: string) =>
-    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-
-  // Badge generator for consistent styling
-  const Badge = ({
-    text,
-    colorClass,
-  }: {
-    text: string;
-    colorClass: string;
-  }): React.ReactNode => (
-    <span
-      className={`inline-block px-2 py-0.5 mr-2 mb-2 text-xs font-semibold uppercase rounded-full ${colorClass}`}
-    >
-      {text}
-    </span>
-  );
+  const getVisibilityLabel = (vis: string): string => {
+    if (vis === "all") return "All repos";
+    if (vis === "selected") return "Selected repos";
+    return vis.charAt(0).toUpperCase() + vis.slice(1);
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full mx-auto p-4">
-      <header className="mb-4">
-        <h2 className="text-lg font-bold text-gray-800">
-          Runner Groups ({totalGroups})
-        </h2>
-      </header>
+    <div className="p-4 bg-gray-50 rounded-lg">
+      {/* Header */}
+      <div className="flex items-center text-gray-700 mb-4">
+        <LucideReact.Layers className="text-gray-500 mr-2" size={20} />
+        <h2 className="text-lg font-medium">Runner Groups ({total_count})</h2>
+      </div>
 
-      {groups.length === 0 ? (
-        <p className="text-gray-600">No runner groups available.</p>
+      {/* Empty State */}
+      {runner_groups.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+          <LucideReact.AlertCircle
+            size={32}
+            className="mb-2"
+            aria-label="No runner groups"
+          />
+          <span>No runner groups available.</span>
+        </div>
       ) : (
-        <div className="space-y-4">
-          {groups.map((group) => (
-            <div
-              key={group.id}
-              className="bg-white rounded-lg shadow p-4 space-y-2"
-            >
-              <h3 className="text-md font-semibold text-gray-900 truncate">
-                {group.name}
-              </h3>
-              <div className="flex flex-wrap items-center">
-                {/* Visibility */}
-                <Badge
-                  text={group.visibility === "selected" ? "Selected" : capitalize(group.visibility)}
-                  colorClass={
-                    group.visibility === "selected"
-                      ? "bg-indigo-100 text-indigo-800"
-                      : "bg-gray-100 text-gray-800"
-                  }
-                />
+        // Grid of runner group cards
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {runner_groups.map((group) => {
+            const workflowCount = group.selected_workflows?.length ?? 0;
+            return (
+              <div
+                key={group.id}
+                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+              >
+                {/* Name */}
+                <h3 className="text-md font-semibold text-gray-800 truncate">
+                  {group.name}
+                </h3>
 
-                {/* Default */}
-                {group.default && (
-                  <Badge text="Default" colorClass="bg-blue-100 text-blue-800" />
-                )}
+                {/* Badges */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {/* Default */}
+                  {group.default && (
+                    <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+                      Default
+                    </span>
+                  )}
 
-                {/* Inherited */}
-                {group.inherited && (
-                  <Badge
-                    text="Inherited"
-                    colorClass="bg-purple-100 text-purple-800"
-                  />
-                )}
+                  {/* Visibility */}
+                  <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded capitalize">
+                    {getVisibilityLabel(group.visibility)}
+                  </span>
 
-                {/* Public repos */}
-                <Badge
-                  text={
-                    group.allows_public_repositories
-                      ? "Public Repos"
-                      : "Private Only"
-                  }
-                  colorClass={
-                    group.allows_public_repositories
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }
-                />
+                  {/* Public repositories */}
+                  {group.allows_public_repositories ? (
+                    <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">
+                      Public repos
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded">
+                      No public
+                    </span>
+                  )}
 
-                {/* Restricted to workflows */}
-                {group.restricted_to_workflows && (
-                  <Badge
-                    text="Restricted Workflows"
-                    colorClass="bg-yellow-100 text-yellow-800"
-                  />
-                )}
+                  {/* Inherited */}
+                  {group.inherited && (
+                    <span className="inline-flex items-center px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded">
+                      Inherited
+                    </span>
+                  )}
 
-                {/* Read-only workflow restrictions */}
-                {group.workflow_restrictions_read_only && (
-                  <Badge
-                    text="Workflows Locked"
-                    colorClass="bg-red-100 text-red-800"
-                  />
-                )}
+                  {/* Workflow restrictions */}
+                  {group.restricted_to_workflows && (
+                    <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded">
+                      Workflows ({workflowCount})
+                    </span>
+                  )}
+                </div>
 
-                {/* Network configuration */}
+                {/* Optional network configuration info */}
                 {group.network_configuration_id && (
-                  <Badge
-                    text={`Network: ${group.network_configuration_id}`}
-                    colorClass="bg-teal-100 text-teal-800"
-                  />
-                )}
-
-                {/* Selected workflows count */}
-                {group.selected_workflows && group.selected_workflows.length > 0 && (
-                  <Badge
-                    text={`Workflows: ${group.selected_workflows.length}`}
-                    colorClass="bg-indigo-50 text-indigo-700"
-                  />
+                  <div className="mt-2 text-xs text-gray-500">
+                    Network Config ID: {group.network_configuration_id}
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

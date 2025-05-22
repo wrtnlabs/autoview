@@ -1,85 +1,79 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type MeetWrapUpTimeView = {
-        channel?: number & tags.Type<"int32">;
-        managers?: {
-            [key: string]: number & tags.Type<"int32">;
-        };
+  export type MeetWrapUpTimeView = {
+    channel?: number & tags.Type<"int32">;
+    managers?: {
+      [key: string]: number & tags.Type<"int32">;
     };
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.MeetWrapUpTimeView;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { channel, managers } = value;
-  const managerEntries: [string, number][] = managers
-    ? Object.entries(managers)
-    : [];
+  //    Format seconds (int32) into mm:ss
+  const formatTime = (seconds: number): string => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
-  const totalTime = managerEntries.reduce((sum, [, t]) => sum + t, 0);
-  const averageTime =
-    managerEntries.length > 0 ? totalTime / managerEntries.length : 0;
+  const hasChannel = typeof value.channel === "number";
+  const managersMap = value.managers ?? {};
+  const managerEntries = Object.entries(managersMap);
+  const hasManagers = managerEntries.length > 0;
 
-  // Formats a duration (assumed in seconds) into "Xm Ys" or "Ys"
-  function formatDuration(secondsInput: number): string {
-    const totalSeconds = Math.round(secondsInput);
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    if (mins > 0) {
-      return `${mins}m ${secs}s`;
-    }
-    return `${secs}s`;
+  // 3. Return early if no data
+  if (!hasChannel && !hasManagers) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No wrap-up time data available.</span>
+      </div>
+    );
   }
+
+  // Sort managers by descending wrap-up time
+  const sortedManagers = managerEntries.sort((a, b) => b[1] - a[1]);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        Wrap-Up Time Summary
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-sm">
+      <h2 className="flex items-center text-lg font-semibold text-gray-900 mb-4">
+        <LucideReact.Clock size={20} className="mr-2 text-gray-500" />
+        Wrap-up Times
       </h2>
 
-      {channel !== undefined && (
-        <p className="text-sm text-gray-600 mb-4">
-          Channel:{" "}
-          <span className="font-medium text-gray-800">{channel}</span>
-        </p>
+      {hasChannel && (
+        <div className="flex items-center text-gray-700 mb-4">
+          <LucideReact.Layers size={16} className="mr-2 text-gray-500" />
+          <span className="font-medium">Channel:</span>
+          <span className="ml-1">{formatTime(value.channel!)}</span>
+        </div>
       )}
 
-      {managerEntries.length > 0 ? (
-        <>
-          <div className="mb-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">
-              Managers ({managerEntries.length})
-            </h3>
-            <ol className="list-decimal list-inside space-y-1">
-              {managerEntries.map(([name, time]) => (
-                <li
-                  key={name}
-                  className="flex justify-between text-gray-800"
-                >
-                  <span className="truncate">{name}</span>
-                  <span className="text-gray-600">
-                    {formatDuration(time)}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </div>
-          <p className="text-sm text-gray-700">
-            Average Time:{" "}
-            <span className="font-medium">
-              {formatDuration(averageTime)}
-            </span>
-          </p>
-        </>
-      ) : (
-        <p className="text-sm text-gray-600">
-          No manager wrap-up data available.
-        </p>
+      {hasManagers && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-800 mb-2">By Manager</h3>
+          <ul className="border border-gray-100 divide-y divide-gray-100 rounded-md overflow-hidden">
+            {sortedManagers.map(([name, time]) => (
+              <li
+                key={name}
+                className="flex justify-between items-center px-3 py-2 bg-white hover:bg-gray-50"
+              >
+                <span className="text-gray-800 truncate">{name}</span>
+                <div className="flex items-center text-gray-700">
+                  <LucideReact.User size={16} className="mr-1 text-gray-500" />
+                  <span>{formatTime(time)}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

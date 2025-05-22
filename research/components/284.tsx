@@ -1,135 +1,65 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type CANNOT_FIND_ONE_COMMENT = any;
-    export type ResponseForm_lt_boolean_gt_ = any;
+  export type CANNOT_FIND_ONE_COMMENT = {
+    type: "business";
+    result: false;
+    code: 4016;
+    data: "\uD574\uB2F9 \uB313\uAE00\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
+  };
+  export type ResponseForm_lt_boolean_gt_ = {
+    result: true;
+    code: 1000;
+    requestToResponse?: string;
+    data: boolean;
+  };
 }
-export type AutoViewInput = any | any;
-
-
+export type AutoViewInput =
+  | AutoViewInputSubTypes.CANNOT_FIND_ONE_COMMENT
+  | AutoViewInputSubTypes.ResponseForm_lt_boolean_gt_;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Utility to detect ISO date strings
-  const isIsoDate = (str: string): boolean => {
-    const d = Date.parse(str);
-    return !isNaN(d) && /^\d{4}-\d{2}-\d{2}T/.test(str);
-  };
+  // 1. Determine if the payload is an error or a normal boolean response
+  const isError = "type" in value && value.type === "business";
 
-  // Format functions
-  const formatDate = (str: string): string =>
-    new Date(str).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  // 2. Choose icon and label based on the payload
+  const statusIcon = isError ? (
+    <LucideReact.AlertTriangle
+      size={20}
+      className="text-red-500 flex-shrink-0"
+      aria-label="Error"
+    />
+  ) : value.data ? (
+    <LucideReact.CheckCircle
+      size={20}
+      className="text-green-500 flex-shrink-0"
+      aria-label="True"
+    />
+  ) : (
+    <LucideReact.XCircle
+      size={20}
+      className="text-red-500 flex-shrink-0"
+      aria-label="False"
+    />
+  );
 
-  const formatNumber = (num: number): string =>
-    new Intl.NumberFormat(undefined).format(num);
+  const statusLabel = isError ? "Error" : "Result";
 
-  // Render any value according to its type
-  const renderValue = (val: any): React.ReactNode => {
-    if (val == null) {
-      return <span className="text-gray-500">N/A</span>;
-    }
-    if (typeof val === "boolean") {
-      return (
-        <span
-          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-            val ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-          }`}
-        >
-          {val ? "Yes" : "No"}
-        </span>
-      );
-    }
-    if (typeof val === "number") {
-      return <span>{formatNumber(val)}</span>;
-    }
-    if (typeof val === "string") {
-      if (isIsoDate(val)) {
-        return (
-          <time dateTime={val} className="text-gray-700">
-            {formatDate(val)}
-          </time>
-        );
-      }
-      if (val.length > 120) {
-        return <p className="line-clamp-3 text-gray-800">{val}</p>;
-      }
-      return <span className="text-gray-800">{val}</span>;
-    }
-    if (Array.isArray(val)) {
-      // Array of strings as badges
-      if (val.every((v) => typeof v === "string")) {
-        return (
-          <div className="flex flex-wrap gap-1">
-            {(val as string[]).map((item, idx) => (
-              <span
-                key={idx}
-                className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        );
-      }
-      // Fallback: JSON-pretty
-      return (
-        <pre className="whitespace-pre-wrap text-sm text-gray-800 max-h-40 overflow-auto">
-          {JSON.stringify(val, null, 2)}
-        </pre>
-      );
-    }
-    if (typeof val === "object") {
-      // Nested object: render recursively
-      return <div className="pl-4 border-l border-gray-200">{renderFields(val)}</div>;
-    }
-    // Fallback for other types
-    return <span className="text-gray-800">{String(val)}</span>;
-  };
-
-  // Render object fields as key/value list
-  const renderFields = (obj: Record<string, any>): React.ReactNode[] => {
-    return Object.entries(obj)
-      .filter(([key]) => {
-        // Filter out common internal or non-informative keys
-        const lower = key.toLowerCase();
-        return (
-          !key.startsWith("_") &&
-          !lower.endsWith("id") &&
-          !["internaladminnotes", "rawtext", "processedhtml", "fulldetails"].includes(
-            lower
-          )
-        );
-      })
-      .map(([key, val]) => {
-        // Humanize the key: camelCase to Title Case
-        const label = key
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase());
-        return (
-          <div
-            key={key}
-            className="flex justify-between items-start py-2 border-b last:border-b-0"
-          >
-            <span className="font-medium text-gray-700">{label}</span>
-            <div className="text-right">{renderValue(val)}</div>
-          </div>
-        );
-      });
-  };
-
-  // Main wrapper
+  // 3. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-full">
-      {value && typeof value === "object" ? (
-        renderFields(value as Record<string, any>)
-      ) : (
-        <div className="text-gray-800">{String(value)}</div>
-      )}
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center space-x-2">
+        {statusIcon}
+        <span className="text-lg font-medium text-gray-900">{statusLabel}</span>
+      </div>
+      <div className="mt-2 text-sm text-gray-600">
+        {isError
+          ? (value as AutoViewInputSubTypes.CANNOT_FIND_ONE_COMMENT).data
+          : `Data: ${String(value.data)}`}
+      </div>
+      <div className="mt-2 text-xs text-gray-400">Code: {value.code}</div>
     </div>
   );
 }

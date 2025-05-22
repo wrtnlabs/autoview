@@ -4,5 +4,5 @@ import Component from "../components/850";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"name":"SuperApp v1.2.3 (Sample Release)","body":"# SuperApp v1.2.3 (Sample Release)\n\n## New Features\n- Introduced a dummy authentication flow (for UI testing).\n- Added sample interactive dashboard component.\n\n## Improvements\n- Refactored mock data service module for better readability.\n\n## Bug Fixes\n- Fixed a fictional issue with button alignment in test mode.\n\n> **Reminder:** This release note is for demonstration purposes only and contains no real production code or sensitive information."};
+  return {"name":"Sample Release 0.1.0 (Test)","body":"# Sample Release 0.1.0 (Test)\n\n## Features\n- Introduced **Demo Mode** for component preview.\n- Added sample endpoint `GET /api/demo` returning mock data.\n\n## Bug Fixes\n- Fixed alignment issue in mock table layout.\n- Resolved styling conflict in sample toolbar.\n\n## Documentation\n- Updated user guide with mock data usage examples.\n\n---\n\n> *Note: All content is fictional and for UI testing purposes.*"};
 }

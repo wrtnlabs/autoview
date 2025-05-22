@@ -1,78 +1,73 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Social media account
-     *
-     * @title Social account
-    */
-    export type social_account = {
-        provider: string;
-        url: string;
-    };
+  /**
+   * Social media account
+   *
+   * @title Social account
+   */
+  export type social_account = {
+    provider: string;
+    url: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.social_account[];
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const accounts = Array.isArray(value) ? value : [];
-
-  // Mapping common providers to icons/emojis
-  const providerIcons: Record<string, string> = {
-    twitter: "🐦",
-    facebook: "📘",
-    instagram: "📸",
-    linkedin: "🔗",
-    github: "🐙",
-  };
-
-  // Helper to extract hostname safely
-  function extractDomain(url: string): string {
+  //    - Capitalize provider names
+  //    - Extract a short domain for URL display
+  const formattedAccounts = value.map((account) => {
+    const providerName =
+      account.provider.charAt(0).toUpperCase() +
+      account.provider.slice(1).toLowerCase();
+    let domain = account.url;
     try {
-      return new URL(url).hostname;
+      domain = new URL(account.url).hostname;
     } catch {
-      return url;
+      // fallback to full URL if parsing fails
     }
-  }
+    return { ...account, providerName, domain };
+  });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (accounts.length === 0) {
+  //    - Handle empty state
+  if (formattedAccounts.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500 italic">
-        No social accounts available.
+      <div className="p-4 bg-white rounded-lg shadow flex flex-col items-center text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2 text-sm">No social accounts available</span>
       </div>
     );
   }
 
+  // 3. Render the list of social accounts
   return (
-    <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-      {accounts.map((acct, idx) => {
-        const providerKey = acct.provider.toLowerCase();
-        const icon = providerIcons[providerKey] || "🔗";
-        const displayName =
-          acct.provider.charAt(0).toUpperCase() + acct.provider.slice(1);
-        const domain = extractDomain(acct.url);
-
-        return (
-          <div
-            key={idx}
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white rounded-lg shadow"
-          >
-            <div className="flex items-center mb-2 sm:mb-0">
-              <span className="text-2xl mr-3">{icon}</span>
-              <span className="font-semibold text-gray-900 capitalize">
-                {displayName}
+    <div className="p-4 bg-white rounded-lg shadow">
+      <h2 className="flex items-center text-lg font-semibold text-gray-800 mb-4">
+        <LucideReact.Users size={20} className="mr-2 text-gray-600" />
+        Social Accounts
+      </h2>
+      <ul className="space-y-3">
+        {formattedAccounts.map((acc, idx) => (
+          <li key={idx} className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <LucideReact.Link size={16} className="text-gray-400" />
+              <span className="font-medium text-gray-700">
+                {acc.providerName}
               </span>
             </div>
-            <div className="flex flex-col text-right">
-              <span className="font-mono text-gray-700 truncate">{domain}</span>
-              <span className="text-gray-500 text-sm truncate">{acct.url}</span>
-            </div>
-          </div>
-        );
-      })}
+            <span
+              className="text-sm text-gray-600 truncate max-w-xs"
+              title={acc.url}
+            >
+              {acc.domain}
+            </span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

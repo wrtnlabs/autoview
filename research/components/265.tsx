@@ -1,35 +1,38 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type RecordingResponse = {
-        signedUrl?: string;
-    };
+  export type RecordingResponse = {
+    signedUrl?: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.RecordingResponse;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { signedUrl } = value;
-  const hasRecording = Boolean(signedUrl);
+  const recordingUrl = value.signedUrl;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!recordingUrl) {
+    return (
+      <div className="w-full bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center">
+        <LucideReact.AlertCircle size={48} className="text-gray-400 mb-2" />
+        <span className="text-gray-500 text-sm">Recording unavailable</span>
+      </div>
+    );
+  }
+
+  // 3. Return the React element.
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {hasRecording ? (
+    <div className="w-full bg-white rounded-lg shadow-md p-4">
+      <div className="w-full aspect-video bg-black rounded-md overflow-hidden">
         <video
-          src={signedUrl}
+          src={recordingUrl}
           controls
-          className="w-full rounded-md bg-black aspect-video"
-        >
-          Your browser does not support the video tag.
-        </video>
-      ) : (
-        <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-md">
-          <span className="text-gray-500">No recording available</span>
-        </div>
-      )}
+          className="w-full h-full object-cover"
+        />
+      </div>
     </div>
   );
 }

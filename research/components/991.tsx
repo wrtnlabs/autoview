@@ -1,111 +1,118 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * A GitHub user.
-     *
-     * @title Simple User
-    */
-    export type simple_user = {
-        name?: string | null;
-        email?: string | null;
-        login: string;
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        avatar_url: string & tags.Format<"uri">;
-        gravatar_id: string | null;
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        followers_url: string & tags.Format<"uri">;
-        following_url: string;
-        gists_url: string;
-        starred_url: string;
-        subscriptions_url: string & tags.Format<"uri">;
-        organizations_url: string & tags.Format<"uri">;
-        repos_url: string & tags.Format<"uri">;
-        events_url: string;
-        received_events_url: string & tags.Format<"uri">;
-        type: string;
-        site_admin: boolean;
-        starred_at?: string;
-        user_view_type?: string;
-    };
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Here we sort users alphabetically by login for consistent display.
-  const users = React.useMemo(
-    () => [...value].sort((a, b) => a.login.localeCompare(b.login)),
-    [value]
-  );
+  // Helper to format ISO dates to a human-readable form
+  const formatDate = (iso?: string): string =>
+    iso
+      ? new Date(iso).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "";
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Ensure we always have an array to map over
+  const users = Array.isArray(value) ? value : [];
+
+  // Render a responsive grid of user cards
   return (
-    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {users.map((user) => {
-        const displayName = user.name?.trim() ? user.name! : user.login;
-        const userType =
-          user.type?.charAt(0).toUpperCase() + user.type.slice(1);
-        const starredDate = user.starred_at
-          ? new Date(user.starred_at).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : null;
+        // Determine display name fallback
+        const displayName = user.name?.trim() || user.login;
+        // Fallback avatar using initials
+        const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          displayName,
+        )}&background=ccc&color=fff`;
+
+        // Image onError handler to swap to placeholder
+        const handleImgError = (
+          e: React.SyntheticEvent<HTMLImageElement, Event>,
+        ) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.src = placeholderAvatar;
+        };
 
         return (
           <div
             key={user.id}
-            className="bg-white p-4 rounded-lg shadow transition-shadow hover:shadow-md"
+            className="flex flex-col items-center p-4 bg-white rounded-lg shadow-sm"
           >
-            <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 mb-3">
               <img
                 src={user.avatar_url}
                 alt={`${displayName} avatar`}
-                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                onError={handleImgError}
+                className="w-full h-full object-cover rounded-full"
               />
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-gray-900 truncate">
-                  {displayName}
-                </h2>
-                <p className="text-sm text-gray-600 truncate">{user.login}</p>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 text-center">
+              {displayName}
+            </h3>
+            <p className="text-sm text-gray-500">@{user.login}</p>
+
+            {user.email && (
+              <div className="flex items-center mt-2 text-sm text-gray-600 truncate">
+                <LucideReact.Mail size={16} className="mr-1" />
+                <span>{user.email}</span>
               </div>
+            )}
+
+            <div className="flex items-center mt-2 text-sm text-gray-600 truncate">
+              <LucideReact.Link size={16} className="mr-1" />
+              <span>{user.html_url}</span>
             </div>
 
-            <div className="mt-3 space-y-1">
-              {user.email && (
-                <p className="text-sm text-gray-700 truncate">
-                  <span className="font-medium">Email:</span> {user.email}
-                </p>
+            <div className="flex flex-wrap justify-center gap-2 mt-3">
+              {user.site_admin && (
+                <span className="flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+                  <LucideReact.CheckCircle size={14} className="mr-1" />
+                  Admin
+                </span>
               )}
-              <div className="flex flex-wrap gap-2">
-                {userType && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-800 rounded">
-                    {userType}
-                  </span>
-                )}
-                {user.site_admin && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-                    Admin
-                  </span>
-                )}
-                {starredDate && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
-                    Starred: {starredDate}
-                  </span>
-                )}
-              </div>
+              {user.starred_at && (
+                <span className="flex items-center px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
+                  <LucideReact.Star size={14} className="mr-1" />
+                  Starred {formatDate(user.starred_at)}
+                </span>
+              )}
             </div>
-
-            <p className="mt-2 text-xs text-gray-500 truncate">
-              <span className="font-medium">Profile URL:</span> {user.html_url}
-            </p>
           </div>
         );
       })}

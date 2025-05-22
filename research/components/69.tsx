@@ -1,27 +1,26 @@
-import React from "react";
-export namespace AutoViewInputSubTypes { }
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
+export namespace AutoViewInputSubTypes {}
 export type AutoViewInput = number;
 
-
-
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Here we format the raw number with locale-aware compact notation (e.g., 1.5K, 2M).
+  // 1. Derived constants: format the number with locale-aware thousands separators and up to 2 decimal places.
   const formattedValue = new Intl.NumberFormat(undefined, {
-    notation: 'compact',
-    maximumFractionDigits: 1,
+    maximumFractionDigits: 2,
   }).format(value);
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    We present the number in a centered card with responsive typography.
-  const containerClasses = 'p-4 bg-white rounded-lg shadow-md flex items-center justify-center';
-  const numberClasses = 'text-4xl md:text-5xl font-bold text-gray-800';
-
-  // 3. Return the React element.
+  // 2. Visual structure: a clean card with a subtle icon and the formatted number, centered and responsive.
   return (
-    <div className={containerClasses}>
-      <span className={numberClasses}>{formattedValue}</span>
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center justify-center w-full max-w-xs mx-auto">
+      <LucideReact.Hash
+        size={32}
+        className="text-gray-400 mb-2"
+        aria-hidden="true"
+      />
+      <span className="text-2xl font-semibold text-gray-900">
+        {formattedValue}
+      </span>
     </div>
   );
 }

@@ -1,38 +1,39 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Org Hook
-     *
-     * @title Org Hook
-    */
-    export type org_hook = {
-        id: number & tags.Type<"int32">;
-        url: string & tags.Format<"uri">;
-        ping_url: string & tags.Format<"uri">;
-        deliveries_url?: string & tags.Format<"uri">;
-        name: string;
-        events: string[];
-        active: boolean;
-        config: {
-            url?: string;
-            insecure_ssl?: string;
-            content_type?: string;
-            secret?: string;
-        };
-        updated_at: string & tags.Format<"date-time">;
-        created_at: string & tags.Format<"date-time">;
-        type: string;
+  /**
+   * Org Hook
+   *
+   * @title Org Hook
+   */
+  export type org_hook = {
+    id: number & tags.Type<"int32">;
+    url: string & tags.Format<"uri">;
+    ping_url: string & tags.Format<"uri">;
+    deliveries_url?: string & tags.Format<"uri">;
+    name: string;
+    events: string[];
+    active: boolean;
+    config: {
+      url?: string;
+      insecure_ssl?: string;
+      content_type?: string;
+      secret?: string;
     };
+    updated_at: string & tags.Format<"date-time">;
+    created_at: string & tags.Format<"date-time">;
+    type: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.org_hook[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Helper: format ISO date-time string into "Jan 1, 2023, 03:45 PM"
-  const formatDate = (dateStr: string): string =>
+  // 1. Data aggregation / transformation
+  const hooks = value;
+  const formatDate = (dateStr: string) =>
     new Date(dateStr).toLocaleString(undefined, {
       year: "numeric",
       month: "short",
@@ -41,62 +42,111 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
       minute: "2-digit",
     });
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Handle empty state
+  if (!hooks || hooks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center text-gray-500 py-8">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2 text-sm">No webhooks configured.</span>
+      </div>
+    );
+  }
+
+  // 3. Compose visual structure
   return (
-    <div className="space-y-6">
-      {value.length === 0 ? (
-        <p className="text-center text-gray-500">No webhooks configured.</p>
-      ) : (
-        value.map((hook) => (
-          <div
-            key={hook.id}
-            className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between"
-          >
-            {/* Left section: hook details */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {hook.name || "(Unnamed Hook)"}
-              </h3>
-              <p className="mt-1 text-sm text-gray-500 truncate">{hook.type}</p>
+    <div className="space-y-4">
+      {hooks.map((hook) => (
+        <article
+          key={hook.id}
+          className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm"
+        >
+          <header className="flex justify-between items-center mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 truncate">
+              {hook.name}
+            </h3>
+            {hook.active ? (
+              <LucideReact.CheckCircle
+                size={20}
+                className="text-green-500"
+                aria-label="Active"
+              />
+            ) : (
+              <LucideReact.XCircle
+                size={20}
+                className="text-red-500"
+                aria-label="Inactive"
+              />
+            )}
+          </header>
 
-              <div className="mt-3 flex flex-wrap gap-2">
-                {hook.events.map((evt, idx) => (
-                  <span
-                    key={idx}
-                    className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded"
-                  >
-                    {evt}
-                  </span>
-                ))}
-              </div>
-
-              <p className="mt-3 text-sm text-gray-700">
-                <span className="font-medium">Endpoint:</span>{" "}
-                <span className="font-mono truncate block">{hook.url}</span>
-              </p>
+          <div className="space-y-2">
+            <div className="flex items-center text-sm text-gray-700 gap-1">
+              <LucideReact.Link size={16} />
+              <a
+                href={hook.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="truncate text-blue-600 hover:underline"
+              >
+                {hook.url}
+              </a>
             </div>
 
-            {/* Right section: status and timestamps */}
-            <div className="mt-4 sm:mt-0 flex flex-col sm:items-end sm:space-y-1">
-              <span
-                className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                  hook.active
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
+            <div className="flex items-center text-sm text-gray-700 gap-1">
+              <LucideReact.Link size={16} />
+              <a
+                href={hook.ping_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="truncate text-blue-600 hover:underline"
               >
-                {hook.active ? "Active" : "Inactive"}
-              </span>
-              <p className="text-xs text-gray-500">
-                Created: {formatDate(hook.created_at)}
-              </p>
-              <p className="text-xs text-gray-500">
-                Updated: {formatDate(hook.updated_at)}
-              </p>
+                Ping URL
+              </a>
+            </div>
+
+            {hook.deliveries_url && (
+              <div className="flex items-center text-sm text-gray-700 gap-1">
+                <LucideReact.Link size={16} />
+                <a
+                  href={hook.deliveries_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="truncate text-blue-600 hover:underline"
+                >
+                  Deliveries
+                </a>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-2 mt-2">
+              {hook.events.map((evt) => (
+                <span
+                  key={evt}
+                  className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full"
+                >
+                  {evt}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex items-center text-sm text-gray-600 gap-1 mt-2">
+              <LucideReact.Tag size={16} className="text-gray-500" />
+              <span className="capitalize">{hook.type}</span>
+            </div>
+
+            <div className="flex flex-wrap items-center text-xs text-gray-500 gap-4 mt-3">
+              <div className="flex items-center gap-1">
+                <LucideReact.Calendar size={14} />
+                <span>Created: {formatDate(hook.created_at)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <LucideReact.Calendar size={14} />
+                <span>Updated: {formatDate(hook.updated_at)}</span>
+              </div>
             </div>
           </div>
-        ))
-      )}
+        </article>
+      ))}
     </div>
   );
 }

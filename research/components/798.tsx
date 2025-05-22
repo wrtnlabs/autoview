@@ -1,116 +1,122 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * An SSH key granting access to a single repository.
-     *
-     * @title Deploy Key
-    */
-    export type deploy_key = {
-        id: number & tags.Type<"int32">;
-        key: string;
-        url: string;
-        title: string;
-        verified: boolean;
-        created_at: string;
-        read_only: boolean;
-        added_by?: string | null;
-        last_used?: string | null;
-        enabled?: boolean;
-    };
+  /**
+   * An SSH key granting access to a single repository.
+   *
+   * @title Deploy Key
+   */
+  export type deploy_key = {
+    id: number & tags.Type<"int32">;
+    key: string;
+    url: string;
+    title: string;
+    verified: boolean;
+    created_at: string;
+    read_only: boolean;
+    added_by?: string | null;
+    last_used?: string | null;
+    enabled?: boolean;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.deploy_key;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const formattedCreated = createdDate.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-  const lastUsedDate = value.last_used ? new Date(value.last_used) : null;
-  const formattedLastUsed = lastUsedDate
-    ? lastUsedDate.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "Never used";
-
-  // Truncate the SSH key for display (show first/last 4 characters)
-  const keyDisplay =
-    value.key.length > 12
-      ? `${value.key.slice(0, 4)}…${value.key.slice(-4)}`
+  const maskedKey =
+    value.key.length > 40
+      ? `${value.key.slice(0, 20)}…${value.key.slice(-15)}`
       : value.key;
-
-  const accessType = value.read_only ? "Read-Only" : "Read/Write";
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const lastUsed = value.last_used
+    ? new Date(value.last_used).toLocaleString()
+    : "Never";
+  const urlHost = (() => {
+    try {
+      return new URL(value.url).host;
+    } catch {
+      return value.url;
+    }
+  })();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="flex justify-between items-start">
+    <div className="w-full max-w-md bg-white rounded-lg shadow-md p-4">
+      {/* Title */}
+      <div className="flex items-center gap-2">
+        <LucideReact.Key size={20} className="text-gray-600" />
         <h2 className="text-lg font-semibold text-gray-900 truncate">
           {value.title}
         </h2>
-        <div className="flex space-x-2">
-          <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-              value.verified
-                ? "bg-green-100 text-green-800"
-                : "bg-yellow-100 text-yellow-800"
-            }`}
-          >
-            {value.verified ? "Verified" : "Unverified"}
-          </span>
-          <span
-            className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-              value.enabled
-                ? "bg-blue-100 text-blue-800"
-                : "bg-gray-100 text-gray-500"
-            }`}
-          >
-            {value.enabled ? "Enabled" : "Disabled"}
-          </span>
-        </div>
       </div>
 
-      <div className="mt-4 space-y-3 text-sm text-gray-700">
-        <div className="flex flex-col sm:flex-row sm:items-center">
-          <span className="font-medium text-gray-900">Key:</span>
-          <code className="mt-1 sm:mt-0 sm:ml-2 font-mono text-sm text-gray-800 break-all">
-            {keyDisplay}
-          </code>
-        </div>
+      {/* Masked Key */}
+      <div className="mt-3 flex items-start gap-2 text-sm text-gray-700">
+        <LucideReact.Code size={16} className="text-gray-500 mt-[2px]" />
+        <pre className="m-0 font-mono break-all">{maskedKey}</pre>
+      </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center">
-          <span className="font-medium text-gray-900">Access:</span>
-          <span className="mt-1 sm:mt-0 sm:ml-2">{accessType}</span>
+      {/* Metadata & Status */}
+      <div className="mt-4 flex flex-wrap gap-3 text-sm">
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Calendar size={16} className="text-gray-500" />
+          <span className="ml-1">Created: {createdAt}</span>
         </div>
-
-        {value.added_by != null && (
-          <div className="flex flex-col sm:flex-row sm:items-center">
-            <span className="font-medium text-gray-900">Added by:</span>
-            <span className="mt-1 sm:mt-0 sm:ml-2">{value.added_by}</span>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Clock size={16} className="text-gray-500" />
+          <span className="ml-1">Last used: {lastUsed}</span>
+        </div>
+        {value.added_by && (
+          <div className="flex items-center text-gray-600">
+            <LucideReact.User size={16} className="text-gray-500" />
+            <span className="ml-1">Added by: {value.added_by}</span>
           </div>
         )}
-
-        <div className="flex flex-col sm:flex-row sm:items-center">
-          <span className="font-medium text-gray-900">Created:</span>
-          <time className="mt-1 sm:mt-0 sm:ml-2">{formattedCreated}</time>
+        <div className="flex items-center">
+          {value.verified ? (
+            <>
+              <LucideReact.CheckCircle size={16} className="text-green-500" />
+              <span className="ml-1 text-green-600">Verified</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.AlertTriangle size={16} className="text-amber-500" />
+              <span className="ml-1 text-amber-600">Unverified</span>
+            </>
+          )}
         </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center">
-          <span className="font-medium text-gray-900">Last used:</span>
-          <time className="mt-1 sm:mt-0 sm:ml-2">{formattedLastUsed}</time>
+        <div className="flex items-center">
+          {value.enabled !== false ? (
+            <>
+              <LucideReact.CheckCircle size={16} className="text-green-500" />
+              <span className="ml-1 text-green-600">Enabled</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.XCircle size={16} className="text-red-500" />
+              <span className="ml-1 text-red-600">Disabled</span>
+            </>
+          )}
+        </div>
+        <div className="flex items-center">
+          {value.read_only ? (
+            <>
+              <LucideReact.Lock size={16} className="text-gray-500" />
+              <span className="ml-1 text-gray-600">Read-only</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.Unlock size={16} className="text-green-500" />
+              <span className="ml-1 text-green-600">Read/Write</span>
+            </>
+          )}
+        </div>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Link size={16} className="text-gray-500" />
+          <span className="ml-1 break-all">{urlHost}</span>
         </div>
       </div>
     </div>

@@ -1,109 +1,156 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * A GitHub Actions workflow
-     *
-     * @title Workflow
-    */
-    export type workflow = {
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        name: string;
-        path: string;
-        state: "active" | "deleted" | "disabled_fork" | "disabled_inactivity" | "disabled_manually";
-        created_at: string & tags.Format<"date-time">;
-        updated_at: string & tags.Format<"date-time">;
-        url: string;
-        html_url: string;
-        badge_url: string;
-        deleted_at?: string & tags.Format<"date-time">;
-    };
+  /**
+   * A GitHub Actions workflow
+   *
+   * @title Workflow
+   */
+  export type workflow = {
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    name: string;
+    path: string;
+    state:
+      | "active"
+      | "deleted"
+      | "disabled_fork"
+      | "disabled_inactivity"
+      | "disabled_manually";
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    url: string;
+    html_url: string;
+    badge_url: string;
+    deleted_at?: string & tags.Format<"date-time">;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.workflow;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const stateStyles: Record<
+  const formattedCreatedAt = new Date(value.created_at).toLocaleString(
+    undefined,
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+  );
+  const formattedUpdatedAt = new Date(value.updated_at).toLocaleString(
+    undefined,
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    },
+  );
+
+  const stateConfig: Record<
     AutoViewInput["state"],
-    { label: string; bg: string; text: string }
+    {
+      icon: typeof LucideReact.CheckCircle;
+      color: string;
+      label: string;
+    }
   > = {
-    active: { label: "Active", bg: "bg-green-100", text: "text-green-800" },
-    deleted: { label: "Deleted", bg: "bg-red-100", text: "text-red-800" },
+    active: {
+      icon: LucideReact.CheckCircle,
+      color: "text-green-500",
+      label: "Active",
+    },
+    deleted: {
+      icon: LucideReact.XCircle,
+      color: "text-red-500",
+      label: "Deleted",
+    },
     disabled_fork: {
+      icon: LucideReact.AlertTriangle,
+      color: "text-amber-500",
       label: "Disabled (Fork)",
-      bg: "bg-yellow-100",
-      text: "text-yellow-800",
     },
     disabled_inactivity: {
+      icon: LucideReact.AlertTriangle,
+      color: "text-amber-500",
       label: "Disabled (Inactivity)",
-      bg: "bg-yellow-100",
-      text: "text-yellow-800",
     },
     disabled_manually: {
-      label: "Disabled (Manually)",
-      bg: "bg-yellow-100",
-      text: "text-yellow-800",
+      icon: LucideReact.AlertTriangle,
+      color: "text-amber-500",
+      label: "Disabled (Manual)",
     },
   };
 
-  const { label, bg, text } = stateStyles[value.state];
-  const dateOpts: Intl.DateTimeFormatOptions = {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  };
-
-  const formattedCreated = new Date(value.created_at).toLocaleDateString(
-    undefined,
-    dateOpts,
-  );
-  const formattedUpdated = new Date(value.updated_at).toLocaleDateString(
-    undefined,
-    dateOpts,
-  );
-  const formattedDeleted = value.deleted_at
-    ? new Date(value.deleted_at).toLocaleDateString(undefined, dateOpts)
-    : null;
+  const {
+    icon: StateIcon,
+    color: stateColor,
+    label: stateLabel,
+  } = stateConfig[value.state];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md flex flex-col md:flex-row items-start">
-      <img
-        src={value.badge_url}
-        alt={`${value.name} badge`}
-        className="w-16 h-16 object-contain mb-4 md:mb-0 md:mr-4 flex-shrink-0"
-      />
-      <div className="flex-1 w-full">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header: badge, name, path, state */}
+      <div className="flex items-center space-x-3">
+        <img
+          src={value.badge_url}
+          alt={`${value.name} badge`}
+          className="w-20 h-auto object-contain"
+          onError={({ currentTarget }) => {
+            currentTarget.onerror = null;
+            currentTarget.src =
+              "https://placehold.co/80x20/e2e8f0/1e293b?text=Badge";
+          }}
+        />
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
             {value.name}
           </h2>
-          <span
-            className={`inline-block px-2 py-1 text-xs font-medium ${bg} ${text} rounded-full whitespace-nowrap`}
-          >
-            {label}
+          <p className="text-sm text-gray-500 truncate">{value.path}</p>
+        </div>
+        <div className="flex items-center space-x-1">
+          <StateIcon
+            size={16}
+            className={stateColor}
+            strokeWidth={2}
+            aria-label={stateLabel}
+          />
+          <span className={`text-sm font-medium ${stateColor}`}>
+            {stateLabel}
           </span>
         </div>
-        <p className="mt-1 text-sm text-gray-500 truncate">{value.path}</p>
-        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-400">
-          <div>
-            <span className="font-medium text-gray-600">Created:</span>{" "}
-            <time dateTime={value.created_at}>{formattedCreated}</time>
-          </div>
-          <div>
-            <span className="font-medium text-gray-600">Updated:</span>{" "}
-            <time dateTime={value.updated_at}>{formattedUpdated}</time>
-          </div>
-          {formattedDeleted && (
-            <div className="col-span-2 text-red-500">
-              <span className="font-medium">Deleted:</span>{" "}
-              <time dateTime={value.deleted_at!}>{formattedDeleted}</time>
-            </div>
-          )}
+      </div>
+
+      {/* Timestamps */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created:</span>
+          <span className="ml-1 font-medium text-gray-700">
+            {formattedCreatedAt}
+          </span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Updated:</span>
+          <span className="ml-1 font-medium text-gray-700">
+            {formattedUpdatedAt}
+          </span>
+        </div>
+      </div>
+
+      {/* Link display */}
+      <div className="mt-4 text-sm text-gray-500">
+        <div className="flex items-center space-x-1 overflow-hidden">
+          <LucideReact.Link size={16} className="text-gray-400 flex-shrink-0" />
+          <span className="truncate">{value.html_url}</span>
         </div>
       </div>
     </div>

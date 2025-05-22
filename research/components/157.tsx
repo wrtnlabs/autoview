@@ -1,84 +1,93 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Supplementation of inventory quantity of stock.
+   *
+   * You know what? If a {@link IShoppingSaleUnitStock stock} has been sold over
+   * its {@link IShoppingSaleUnitStock.ICreate.quantity initial inventory quantity},
+   * the stock can't be sold anymore, because of out of stock. In that case, how the
+   * {@link IShoppingSeller} should do?
+   *
+   * When the sotck is sold out, seller can supplement the inventory record by
+   * registering this `IShoppingSaleUnitStockSupplement` record. Right, this
+   * `IShoppingSaleUnitStockSupplement` is an entity that embodies the
+   * supplementation of the inventory quantity of the belonged stock.
+   */
+  export type IShoppingSaleUnitStockSupplement = {
     /**
-     * Supplementation of inventory quantity of stock.
+     * Primary Key.
      *
-     * You know what? If a {@link IShoppingSaleUnitStock stock} has been sold over
-     * its {@link IShoppingSaleUnitStock.ICreate.quantity initial inventory quantity},
-     * the stock can't be sold anymore, because of out of stock. In that case, how the
-     * {@link IShoppingSeller} should do?
+     * @title Primary Key
+     */
+    id: string;
+    /**
+     * Supplemented quantity.
      *
-     * When the sotck is sold out, seller can supplement the inventory record by
-     * registering this `IShoppingSaleUnitStockSupplement` record. Right, this
-     * `IShoppingSaleUnitStockSupplement` is an entity that embodies the
-     * supplementation of the inventory quantity of the belonged stock.
-    */
-    export type IShoppingSaleUnitStockSupplement = {
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Supplemented quantity.
-         *
-         * @title Supplemented quantity
-        */
-        value: number & tags.Type<"int32">;
-        /**
-         * Creation time of the record.
-         *
-         * Another words, the time when inventory of the stock being supplemented.
-         *
-         * @title Creation time of the record
-        */
-        created_at: string;
-    };
+     * @title Supplemented quantity
+     */
+    value: number & tags.Type<"int32">;
+    /**
+     * Creation time of the record.
+     *
+     * Another words, the time when inventory of the stock being supplemented.
+     *
+     * @title Creation time of the record
+     */
+    created_at: string;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleUnitStockSupplement;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IShoppingSaleUnitStockSupplement;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { value: supplementedQty, created_at } = value;
-  const dateObj = new Date(created_at);
-  const formattedDate = dateObj.toLocaleString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const { value: quantity, created_at } = value;
+  const formattedDate = React.useMemo(() => {
+    const date = new Date(created_at);
+    return isNaN(date.getTime())
+      ? created_at
+      : date.toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+  }, [created_at]);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div
-      role="region"
-      aria-label="Stock Supplement Record"
-      className="w-full max-w-md mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
-    >
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <div className="mb-4 sm:mb-0">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Supplemented Quantity
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900">
-            {supplementedQty}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Recorded At
-          </p>
-          <p className="mt-1 text-sm text-gray-700 truncate">
-            {formattedDate}
-          </p>
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-xs w-full">
+      <div className="flex items-center mb-3">
+        <LucideReact.PlusCircle
+          className="text-green-500"
+          size={20}
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          Stock Supplement
+        </h2>
+      </div>
+      <div className="flex items-center justify-between py-1">
+        <span className="flex items-center text-gray-600">
+          <LucideReact.Package className="text-gray-400 mr-1" size={16} />
+          Quantity
+        </span>
+        <span className="font-medium text-gray-900">{quantity}</span>
+      </div>
+      <div className="flex items-center justify-between py-1">
+        <span className="flex items-center text-gray-600">
+          <LucideReact.Calendar className="text-gray-400 mr-1" size={16} />
+          Date
+        </span>
+        <time dateTime={created_at} className="font-medium text-gray-900">
+          {formattedDate}
+        </time>
       </div>
     </div>
   );

@@ -1,95 +1,110 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Configuration object of the webhook
-     *
-     * @title Webhook Configuration
-    */
-    export type webhook_config = {
-        url?: AutoViewInputSubTypes.webhook_config_url;
-        content_type?: AutoViewInputSubTypes.webhook_config_content_type;
-        secret?: AutoViewInputSubTypes.webhook_config_secret;
-        insecure_ssl?: AutoViewInputSubTypes.webhook_config_insecure_ssl;
-    };
-    /**
-     * The URL to which the payloads will be delivered.
-    */
-    export type webhook_config_url = string;
-    /**
-     * The media type used to serialize the payloads. Supported values include `json` and `form`. The default is `form`.
-    */
-    export type webhook_config_content_type = string;
-    /**
-     * If provided, the `secret` will be used as the `key` to generate the HMAC hex digest value for [delivery signature headers](https://docs.github.com/webhooks/event-payloads/#delivery-headers).
-    */
-    export type webhook_config_secret = string;
-    export type webhook_config_insecure_ssl = string | number;
+  /**
+   * Configuration object of the webhook
+   *
+   * @title Webhook Configuration
+   */
+  export type webhook_config = {
+    url?: AutoViewInputSubTypes.webhook_config_url;
+    content_type?: AutoViewInputSubTypes.webhook_config_content_type;
+    secret?: AutoViewInputSubTypes.webhook_config_secret;
+    insecure_ssl?: AutoViewInputSubTypes.webhook_config_insecure_ssl;
+  };
+  /**
+   * The URL to which the payloads will be delivered.
+   */
+  export type webhook_config_url = string;
+  /**
+   * The media type used to serialize the payloads. Supported values include `json` and `form`. The default is `form`.
+   */
+  export type webhook_config_content_type = string;
+  /**
+   * If provided, the `secret` will be used as the `key` to generate the HMAC hex digest value for [delivery signature headers](https://docs.github.com/webhooks/event-payloads/#delivery-headers).
+   */
+  export type webhook_config_secret = string;
+  export type webhook_config_insecure_ssl = string | number;
 }
 export type AutoViewInput = AutoViewInputSubTypes.webhook_config;
 
-
-
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { url, content_type, secret, insecure_ssl } = value;
+  // Derived values
+  const insecureSSL = value.insecure_ssl === "1" || value.insecure_ssl === 1;
+  const contentType = value.content_type ?? "form";
+  const hasSecret = Boolean(value.secret);
+  let maskedSecret = "";
+  if (hasSecret && value.secret) {
+    const len = value.secret.length;
+    maskedSecret =
+      len > 6
+        ? `${value.secret.slice(0, 3)}…${value.secret.slice(-3)}`
+        : "••••••";
+  }
 
-  // Mask all but the last 4 characters of the secret
-  const maskedSecret =
-    secret?.replace(/.(?=.{4})/g, "•") ?? "";
-
-  // Interpret insecure_ssl: '0' or 0 means verification enabled; '1' or 1 means disabled
-  const sslEnabled = insecure_ssl === "0" || insecure_ssl === 0;
-  const sslLabel = sslEnabled
-    ? "SSL Verification Enabled"
-    : "SSL Verification Disabled";
-  const sslColor = sslEnabled
-    ? "text-green-600 bg-green-100"
-    : "text-red-600 bg-red-100";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Render structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow">
+      <h3 className="text-lg font-semibold text-gray-800">
         Webhook Configuration
-      </h2>
-      <dl className="space-y-4">
-        {url && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Delivery URL</dt>
-            <dd className="mt-1 text-base text-blue-600 break-all">
-              {url}
-            </dd>
+      </h3>
+      <dl className="mt-4 space-y-4">
+        {/* URL */}
+        {value.url && (
+          <div className="flex items-start">
+            <LucideReact.Link className="text-gray-400 mt-1" size={16} />
+            <div className="ml-3">
+              <dt className="text-sm font-medium text-gray-700">URL</dt>
+              <dd className="text-sm text-blue-600 break-all">{value.url}</dd>
+            </div>
           </div>
         )}
-        {content_type && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">
-              Content Type
-            </dt>
-            <dd className="mt-1 text-base text-gray-900">
-              {content_type}
+
+        {/* Content Type */}
+        <div className="flex items-center">
+          <LucideReact.Code className="text-gray-400" size={16} />
+          <div className="ml-3">
+            <dt className="text-sm font-medium text-gray-700">Content Type</dt>
+            <dd className="text-sm text-gray-900">{contentType}</dd>
+          </div>
+        </div>
+
+        {/* Secret */}
+        <div className="flex items-center">
+          {hasSecret ? (
+            <LucideReact.Lock className="text-gray-500" size={16} />
+          ) : (
+            <LucideReact.Unlock className="text-gray-400" size={16} />
+          )}
+          <div className="ml-3">
+            <dt className="text-sm font-medium text-gray-700">Secret</dt>
+            <dd className="text-sm text-gray-900">
+              {hasSecret ? (
+                maskedSecret
+              ) : (
+                <span className="text-gray-500">Not Configured</span>
+              )}
             </dd>
           </div>
-        )}
-        {typeof insecure_ssl !== "undefined" && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">
-              SSL Verification
-            </dt>
-            <dd
-              className={`mt-1 inline-block px-2 py-0.5 text-sm font-medium rounded ${sslColor}`}
-            >
-              {sslLabel}
-            </dd>
-          </div>
-        )}
-        {secret && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Secret</dt>
-            <dd className="mt-1 text-base font-mono text-gray-900">
-              {maskedSecret}
-            </dd>
+        </div>
+
+        {/* SSL Verification */}
+        {value.insecure_ssl != null && (
+          <div className="flex items-center">
+            {insecureSSL ? (
+              <LucideReact.ShieldOff className="text-amber-500" size={16} />
+            ) : (
+              <LucideReact.ShieldCheck className="text-green-500" size={16} />
+            )}
+            <div className="ml-3">
+              <dt className="text-sm font-medium text-gray-700">
+                SSL Verification
+              </dt>
+              <dd className="text-sm text-gray-900">
+                {insecureSSL ? "Disabled" : "Enabled"}
+              </dd>
+            </div>
           </div>
         )}
       </dl>

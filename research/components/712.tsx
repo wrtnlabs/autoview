@@ -1,150 +1,165 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * File Commit
-     *
-     * @title File Commit
-    */
-    export type file_commit = {
-        content: {
-            name?: string;
-            path?: string;
-            sha?: string;
-            size?: number & tags.Type<"int32">;
-            url?: string;
-            html_url?: string;
-            git_url?: string;
-            download_url?: string;
-            type?: string;
-            _links?: {
-                self?: string;
-                git?: string;
-                html?: string;
-            };
-        } | null;
-        commit: {
-            sha?: string;
-            node_id?: string;
-            url?: string;
-            html_url?: string;
-            author?: {
-                date?: string;
-                name?: string;
-                email?: string;
-            };
-            committer?: {
-                date?: string;
-                name?: string;
-                email?: string;
-            };
-            message?: string;
-            tree?: {
-                url?: string;
-                sha?: string;
-            };
-            parents?: {
-                url?: string;
-                html_url?: string;
-                sha?: string;
-            }[];
-            verification?: {
-                verified?: boolean;
-                reason?: string;
-                signature?: string | null;
-                payload?: string | null;
-                verified_at?: string | null;
-            };
-        };
+  /**
+   * File Commit
+   *
+   * @title File Commit
+   */
+  export type file_commit = {
+    content: {
+      name?: string;
+      path?: string;
+      sha?: string;
+      size?: number & tags.Type<"int32">;
+      url?: string;
+      html_url?: string;
+      git_url?: string;
+      download_url?: string;
+      type?: string;
+      _links?: {
+        self?: string;
+        git?: string;
+        html?: string;
+      };
+    } | null;
+    commit: {
+      sha?: string;
+      node_id?: string;
+      url?: string;
+      html_url?: string;
+      author?: {
+        date?: string;
+        name?: string;
+        email?: string;
+      };
+      committer?: {
+        date?: string;
+        name?: string;
+        email?: string;
+      };
+      message?: string;
+      tree?: {
+        url?: string;
+        sha?: string;
+      };
+      parents?: {
+        url?: string;
+        html_url?: string;
+        sha?: string;
+      }[];
+      verification?: {
+        verified?: boolean;
+        reason?: string;
+        signature?: string | null;
+        payload?: string | null;
+        verified_at?: string | null;
+      };
     };
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.file_commit;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { commit, content } = value;
-  const message = commit.message ?? 'No commit message';
-  const shaFull = commit.sha ?? '';
-  const shaShort = shaFull.slice(0, 7) || '—';
-  const authorInfo = commit.author ?? commit.committer;
-  const authorName = authorInfo?.name ?? 'Unknown Author';
-  const dateRaw = authorInfo?.date;
-  const formattedDate = dateRaw
-    ? new Date(dateRaw).toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-      })
-    : 'Date Unknown';
-  const isVerified = commit.verification?.verified === true;
+  const file = value.content;
+  const fileName = file?.name || "Unknown file";
+  const filePath = file?.path;
+  const fileSize = file?.size != null ? formatBytes(file.size) : null;
+
+  const commit = value.commit;
+  const fullSha = commit.sha || "";
+  const shortSha = fullSha ? fullSha.slice(0, 7) : "Unknown";
+  const commitMessage = commit.message || "No commit message";
+
+  // Prefer author info; fall back to committer
+  const actor = commit.author || commit.committer;
+  const actorName = actor?.name || "Unknown author";
+  const actorDateRaw = actor?.date;
+  const actorDate = actorDateRaw
+    ? new Date(actorDateRaw).toLocaleString()
+    : null;
+
+  const isVerified = commit.verification?.verified;
 
   function formatBytes(bytes: number): string {
-    if (bytes < 1024) return bytes + ' B';
-    const kb = bytes / 1024;
-    if (kb < 1024) return kb.toFixed(1) + ' KB';
-    const mb = kb / 1024;
-    return mb.toFixed(1) + ' MB';
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      {/* Commit Message */}
-      <h2 className="text-lg font-semibold text-gray-800 line-clamp-2">
-        {message}
-      </h2>
-
-      {/* Author & Date */}
-      <div className="mt-2 flex flex-wrap items-center text-sm text-gray-500 space-x-2">
-        <span>{authorName}</span>
-        <span>·</span>
-        <span>{formattedDate}</span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* File Header */}
+      <div className="flex items-center mb-2">
+        <LucideReact.FileText size={20} className="text-gray-500 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {fileName}
+        </h2>
       </div>
 
-      {/* SHA & Verification Badge */}
-      <div className="mt-3 flex items-center space-x-2">
-        <span className="text-sm text-gray-600">SHA: {shaShort}</span>
-        <span
-          className={`px-2 py-0.5 text-xs font-semibold rounded-full ${
-            isVerified
-              ? 'bg-green-100 text-green-800'
-              : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {isVerified ? 'Verified' : 'Unverified'}
-        </span>
-      </div>
+      {/* Optional Path and Size */}
+      {filePath && (
+        <p className="text-sm text-gray-500 truncate" title={filePath}>
+          Path: {filePath}
+        </p>
+      )}
+      {fileSize && (
+        <p className="text-sm text-gray-500 mt-1">Size: {fileSize}</p>
+      )}
 
-      {/* File Details */}
-      {content && (
-        <div className="mt-4 border-t border-gray-100 pt-4 text-sm text-gray-700 space-y-2">
-          <div className="flex justify-between">
-            <span className="font-medium text-gray-800">File:</span>
-            <span className="truncate">{content.name ?? '—'}</span>
+      {/* Commit Details */}
+      <div className="mt-4 border-t pt-4">
+        <p className="text-base font-medium text-gray-800 line-clamp-2">
+          {commitMessage}
+        </p>
+        <div className="flex flex-wrap items-center text-sm text-gray-600 mt-2 gap-4">
+          {/* SHA */}
+          <div className="flex items-center">
+            <LucideReact.GitCommit size={16} className="text-gray-400 mr-1" />
+            <span className="font-mono">{shortSha}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="font-medium text-gray-800">Path:</span>
-            <span className="truncate">{content.path ?? '—'}</span>
+
+          {/* Author */}
+          <div className="flex items-center">
+            <LucideReact.User size={16} className="text-gray-400 mr-1" />
+            <span>{actorName}</span>
           </div>
-          {typeof content.size === 'number' && (
-            <div className="flex justify-between">
-              <span className="font-medium text-gray-800">Size:</span>
-              <span>{formatBytes(content.size)}</span>
+
+          {/* Date */}
+          {actorDate && (
+            <div className="flex items-center">
+              <LucideReact.Calendar size={16} className="text-gray-400 mr-1" />
+              <time dateTime={actorDateRaw!}>{actorDate}</time>
             </div>
           )}
-          {content.type && (
-            <div className="flex justify-between">
-              <span className="font-medium text-gray-800">Type:</span>
-              <span className="capitalize">{content.type}</span>
+
+          {/* Verification */}
+          {isVerified != null && (
+            <div className="flex items-center">
+              {isVerified ? (
+                <LucideReact.CheckCircle
+                  size={16}
+                  className="text-green-500"
+                  aria-label="Verified"
+                />
+              ) : (
+                <LucideReact.AlertTriangle
+                  size={16}
+                  className="text-red-500"
+                  aria-label="Unverified"
+                />
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

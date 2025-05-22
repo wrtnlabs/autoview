@@ -1,76 +1,105 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type selected_actions = {
-        /**
-         * Whether GitHub-owned actions are allowed. For example, this includes the actions in the `actions` organization.
-        */
-        github_owned_allowed?: boolean;
-        /**
-         * Whether actions from GitHub Marketplace verified creators are allowed. Set to `true` to allow all actions by GitHub Marketplace verified creators.
-        */
-        verified_allowed?: boolean;
-        /**
-         * Specifies a list of string-matching patterns to allow specific action(s) and reusable workflow(s). Wildcards, tags, and SHAs are allowed. For example, `monalisa/octocat@*`, `monalisa/octocat@v2`, `monalisa/*`.
-         *
-         * > [!NOTE]
-         * > The `patterns_allowed` setting only applies to public repositories.
-        */
-        patterns_allowed?: string[];
-    };
+  export type selected_actions = {
+    /**
+     * Whether GitHub-owned actions are allowed. For example, this includes the actions in the `actions` organization.
+     */
+    github_owned_allowed?: boolean;
+    /**
+     * Whether actions from GitHub Marketplace verified creators are allowed. Set to `true` to allow all actions by GitHub Marketplace verified creators.
+     */
+    verified_allowed?: boolean;
+    /**
+     * Specifies a list of string-matching patterns to allow specific action(s) and reusable workflow(s). Wildcards, tags, and SHAs are allowed. For example, `monalisa/octocat@*`, `monalisa/octocat@v2`, `monalisa/*`.
+     *
+     * > [!NOTE]
+     * > The `patterns_allowed` setting only applies to public repositories.
+     */
+    patterns_allowed?: string[];
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.selected_actions;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const githubAllowed = value.github_owned_allowed === true;
-  const verifiedAllowed = value.verified_allowed === true;
+  const githubAllowed = value.github_owned_allowed ?? false;
+  const verifiedAllowed = value.verified_allowed ?? false;
   const patterns = value.patterns_allowed ?? [];
-
-  const renderBadge = (allowed: boolean) => (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium ${
-        allowed ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'
-      }`}
-    >
-      {allowed ? 'Allowed' : 'Disabled'}
-    </span>
-  );
+  const maxPatternsToShow = 5;
+  const displayedPatterns = patterns.slice(0, maxPatternsToShow);
+  const remainingCount = patterns.length - displayedPatterns.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Selected Actions Policy</h3>
+    <div className="p-4 bg-white rounded-lg shadow-md text-gray-800 max-w-md mx-auto">
+      <header className="flex items-center mb-4">
+        <LucideReact.GitBranch className="text-blue-500" size={20} />
+        <h2 className="ml-2 text-lg font-semibold">
+          Selected Actions Settings
+        </h2>
+      </header>
       <dl className="space-y-4">
-        <div>
-          <dt className="font-medium text-gray-700">GitHub-owned Actions</dt>
-          <dd className="mt-1">{renderBadge(githubAllowed)}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-700">Marketplace Verified Actions</dt>
-          <dd className="mt-1">{renderBadge(verifiedAllowed)}</dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-700">Specific Patterns Allowed</dt>
-          <dd className="mt-2">
-            {patterns.length > 0 ? (
-              <ul className="flex flex-wrap gap-2">
-                {patterns.map((pattern) => (
-                  <li
-                    key={pattern}
-                    className="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded truncate max-w-xs"
-                  >
-                    {pattern}
-                  </li>
-                ))}
-              </ul>
+        <div className="flex items-center justify-between">
+          <dt className="font-medium">GitHub-owned Actions</dt>
+          <dd className="flex items-center">
+            {githubAllowed ? (
+              <>
+                <LucideReact.CheckCircle className="text-green-600" size={18} />
+                <span className="ml-1 text-green-700">Allowed</span>
+              </>
             ) : (
-              <span className="text-gray-500 italic">None</span>
+              <>
+                <LucideReact.XCircle className="text-red-600" size={18} />
+                <span className="ml-1 text-red-700">Not allowed</span>
+              </>
             )}
           </dd>
+        </div>
+        <div className="flex items-center justify-between">
+          <dt className="font-medium">Verified Marketplace Actions</dt>
+          <dd className="flex items-center">
+            {verifiedAllowed ? (
+              <>
+                <LucideReact.CheckCircle className="text-green-600" size={18} />
+                <span className="ml-1 text-green-700">Allowed</span>
+              </>
+            ) : (
+              <>
+                <LucideReact.XCircle className="text-red-600" size={18} />
+                <span className="ml-1 text-red-700">Not allowed</span>
+              </>
+            )}
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium">Allowed Patterns</dt>
+          {patterns.length === 0 ? (
+            <div className="mt-1 flex items-center text-gray-500">
+              <LucideReact.AlertCircle size={18} />
+              <span className="ml-1">No patterns specified</span>
+            </div>
+          ) : (
+            <ul className="mt-2 flex flex-wrap gap-2">
+              {displayedPatterns.map((pattern, idx) => (
+                <li
+                  key={idx}
+                  className="px-2 py-1 bg-gray-100 text-sm rounded-lg truncate"
+                  title={pattern}
+                >
+                  {pattern}
+                </li>
+              ))}
+              {remainingCount > 0 && (
+                <li className="px-2 py-1 bg-gray-100 text-sm rounded-lg">
+                  +{remainingCount} more
+                </li>
+              )}
+            </ul>
+          )}
         </div>
       </dl>
     </div>

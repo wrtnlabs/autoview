@@ -1,85 +1,110 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * A GitHub user.
-     *
-     * @title Simple User
-    */
-    export type simple_user = {
-        name?: string | null;
-        email?: string | null;
-        login: string;
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        avatar_url: string & tags.Format<"uri">;
-        gravatar_id: string | null;
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        followers_url: string & tags.Format<"uri">;
-        following_url: string;
-        gists_url: string;
-        starred_url: string;
-        subscriptions_url: string & tags.Format<"uri">;
-        organizations_url: string & tags.Format<"uri">;
-        repos_url: string & tags.Format<"uri">;
-        events_url: string;
-        received_events_url: string & tags.Format<"uri">;
-        type: string;
-        site_admin: boolean;
-        starred_at?: string;
-        user_view_type?: string;
-    };
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and derived constants
-  const users = Array.isArray(value) ? value : [];
-
-  // 2. Handle empty state
-  if (users.length === 0) {
+  // 1. Handle empty or missing data
+  if (!value || value.length === 0) {
     return (
-      <p className="p-4 text-center text-gray-500">
-        No users to display.
-      </p>
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="text-gray-300" />
+        <span className="mt-3 text-sm">No users available.</span>
+      </div>
     );
   }
 
-  // 3. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Render user cards in a responsive grid
   return (
-    <div className="space-y-4">
-      {users.map((user) => {
-        const displayName = user.name?.trim() || user.login;
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {value.map((user) => {
+        // Derived display values
+        const displayName = user.name?.trim();
+        const displayEmail = user.email?.trim();
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          user.login,
+        )}&background=0D8ABC&color=fff`;
+
         return (
           <div
             key={user.id}
-            className="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            className="flex bg-white rounded-lg shadow-sm hover:shadow-md transition p-4"
           >
+            {/* Avatar */}
             <img
               src={user.avatar_url}
-              alt={`${displayName} avatar`}
-              className="w-12 h-12 rounded-full mr-4 flex-shrink-0"
+              alt={displayName || user.login}
+              className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = fallbackAvatar;
+              }}
             />
-            <div className="flex flex-col flex-grow min-w-0">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 truncate">
+
+            {/* User Info */}
+            <div className="ml-4 flex-1 flex flex-col truncate">
+              {/* Login */}
+              <span className="flex items-center text-gray-900 font-medium truncate">
+                <LucideReact.User size={16} className="text-gray-500 mr-1" />
+                {user.login}
+              </span>
+
+              {/* Optional full name */}
+              {displayName && (
+                <span className="mt-1 text-sm text-gray-600 truncate">
                   {displayName}
-                </h2>
-                {user.site_admin && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded">
-                    Admin
-                  </span>
-                )}
-              </div>
-              <p className="text-sm text-gray-600 truncate">{user.login}</p>
-              {user.email && (
-                <p className="text-sm text-blue-600 truncate">
-                  {user.email}
-                </p>
+                </span>
+              )}
+
+              {/* Optional email */}
+              {displayEmail && (
+                <span className="mt-1 flex items-center text-sm text-gray-600 truncate">
+                  <LucideReact.Mail size={14} className="text-gray-400 mr-1" />
+                  {displayEmail}
+                </span>
+              )}
+
+              {/* Site admin badge */}
+              {user.site_admin && (
+                <span className="mt-2 inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded">
+                  <LucideReact.CheckCircle
+                    size={12}
+                    className="text-green-600 mr-1"
+                  />
+                  Admin
+                </span>
               )}
             </div>
           </div>

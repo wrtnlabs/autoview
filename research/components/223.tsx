@@ -1,102 +1,137 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type BotsView = {
-        next?: number;
-        bots?: AutoViewInputSubTypes.bot.CustomBot[];
+  export type BotsView = {
+    next?: number;
+    bots?: AutoViewInputSubTypes.bot.CustomBot[];
+  };
+  export namespace bot {
+    export type CustomBot = {
+      id?: string;
+      channelId?: string;
+      name: string;
+      description?: string;
+      nameDescI18nMap?: {
+        [key: string]: AutoViewInputSubTypes.NameDesc;
+      };
+      createdAt?: number;
+      avatar?: AutoViewInputSubTypes.TinyFile;
+      color: string & tags.Default<"#123456">;
+      avatarUrl?: string;
+      ai?: boolean;
     };
-    export namespace bot {
-        export type CustomBot = {
-            id?: string;
-            channelId?: string;
-            name: string;
-            description?: string;
-            nameDescI18nMap?: {
-                [key: string]: AutoViewInputSubTypes.NameDesc;
-            };
-            createdAt?: number;
-            avatar?: AutoViewInputSubTypes.TinyFile;
-            color: string & tags.Default<"#123456">;
-            avatarUrl?: string;
-            ai?: boolean;
-        };
-    }
-    export type NameDesc = {
-        name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
-        description?: string;
-    };
-    export type TinyFile = {
-        bucket: string;
-        key: string;
-        width?: number & tags.Type<"int32">;
-        height?: number & tags.Type<"int32">;
-    };
+  }
+  export type NameDesc = {
+    name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
+    description?: string;
+  };
+  export type TinyFile = {
+    bucket: string;
+    key: string;
+    width?: number & tags.Type<"int32">;
+    height?: number & tags.Type<"int32">;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.BotsView;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const bots = value.bots ?? [];
-  const formatDate = (ts?: number) =>
-    ts
-      ? new Date(ts).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
-      : "";
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase();
+
+  function formatDate(timestamp?: number) {
+    if (!timestamp) return null;
+    return new Date(timestamp).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }
+
+  // Generate a placeholder avatar URL when none is provided
+  function getAvatarUrl(bot: AutoViewInputSubTypes.bot.CustomBot) {
+    if (bot.avatarUrl) return bot.avatarUrl;
+    // Fallback to initials-based avatar with bot.color as background
+    const bg = encodeURIComponent(bot.color.replace("#", ""));
+    const name = encodeURIComponent(bot.name);
+    return `https://ui-avatars.com/api/?name=${name}&background=${bg}&color=fff`;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (bots.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-4" />
+        <p className="text-lg">No bots available</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      {bots.length === 0 ? (
-        <p className="text-gray-500 text-center">No bots available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {bots.map((bot, idx) => (
-            <li key={idx} className="flex items-start space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center text-gray-500 text-lg font-semibold">
-                {bot.avatarUrl ? (
-                  <img src={bot.avatarUrl} alt={bot.name} className="w-full h-full object-cover" />
-                ) : (
-                  getInitials(bot.name)
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {bots.map((bot, idx) => {
+        const created = formatDate(bot.createdAt);
+        return (
+          <div
+            key={idx}
+            className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden"
+          >
+            <div className="flex items-center p-4">
+              <div
+                className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+                style={{ border: `2px solid ${bot.color}` }}
+              >
+                <img
+                  src={getAvatarUrl(bot)}
+                  alt={`${bot.name} avatar`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      "https://placehold.co/80x80/e2e8f0/1e293b?text=Bot";
+                  }}
+                />
+              </div>
+              <div className="ml-4 flex-1">
+                <h3 className="text-lg font-medium text-gray-900 truncate">
+                  {bot.name}
+                </h3>
+                {bot.ai && (
+                  <div className="flex items-center text-gray-500 text-sm mt-1">
+                    <LucideReact.Cpu size={16} className="mr-1" />
+                    <span>AI</span>
+                  </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
+            </div>
+            {bot.description && (
+              <p className="px-4 text-gray-600 text-sm line-clamp-2">
+                {bot.description}
+              </p>
+            )}
+            <div className="mt-auto px-4 py-3 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
+              {created ? (
                 <div className="flex items-center">
-                  <h3 className="text-gray-900 font-medium truncate">{bot.name}</h3>
-                  {bot.ai && (
-                    <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                      AI
-                    </span>
-                  )}
+                  <LucideReact.Calendar size={16} className="mr-1" />
+                  <span>{created}</span>
                 </div>
-                {bot.description && (
-                  <p className="text-gray-700 text-sm mt-1 line-clamp-2">{bot.description}</p>
-                )}
-                <div className="flex items-center space-x-2 mt-1 text-gray-500 text-xs">
-                  {bot.createdAt && <span>Created: {formatDate(bot.createdAt)}</span>}
-                  <span className="inline-flex items-center">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: bot.color }}></span>
-                    <span className="ml-1">Color</span>
-                  </span>
-                  {bot.nameDescI18nMap && Object.keys(bot.nameDescI18nMap).length > 0 && (
-                    <span>{Object.keys(bot.nameDescI18nMap).length} locales</span>
-                  )}
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {/* Next page indicator */}
-      {value.next !== undefined && (
-        <p className="mt-4 text-gray-600 text-sm">Next Page: {value.next}</p>
+              ) : (
+                <span>&nbsp;</span>
+              )}
+              <span
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: bot.color }}
+                title={`Color: ${bot.color}`}
+              />
+            </div>
+          </div>
+        );
+      })}
+      {typeof value.next === "number" && (
+        <div className="col-span-full text-center text-gray-500 mt-4">
+          More bots available...
+        </div>
       )}
     </div>
   );

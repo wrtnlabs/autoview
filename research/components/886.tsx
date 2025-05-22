@@ -1,76 +1,77 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Repository invitations let you manage who you collaborate with.
+   *
+   * @title Repository Invitation
+   */
+  export type repository_subscription = {
     /**
-     * Repository invitations let you manage who you collaborate with.
-     *
-     * @title Repository Invitation
-    */
-    export type repository_subscription = {
-        /**
-         * Determines if notifications should be received from this repository.
-        */
-        subscribed: boolean;
-        /**
-         * Determines if all notifications should be blocked from this repository.
-        */
-        ignored: boolean;
-        reason: string | null;
-        created_at: string & tags.Format<"date-time">;
-        url: string & tags.Format<"uri">;
-        repository_url: string & tags.Format<"uri">;
-    };
+     * Determines if notifications should be received from this repository.
+     */
+    subscribed: boolean;
+    /**
+     * Determines if all notifications should be blocked from this repository.
+     */
+    ignored: boolean;
+    reason: string | null;
+    created_at: string & tags.Format<"date-time">;
+    url: string & tags.Format<"uri">;
+    repository_url: string & tags.Format<"uri">;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.repository_subscription;
 
-
-
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const subscriptionStatus = value.ignored
-    ? "Notifications Blocked"
+  // 1. Define derived constants for status and formatted date.
+  const status = value.ignored
+    ? "Ignored"
     : value.subscribed
-    ? "Subscribed"
-    : "Not Subscribed";
-
-  const statusColor = value.ignored
-    ? "bg-red-100 text-red-800"
-    : value.subscribed
-    ? "bg-green-100 text-green-800"
-    : "bg-gray-100 text-gray-800";
-
+      ? "Subscribed"
+      : "Not Subscribed";
+  const statusIcon = value.ignored ? (
+    <LucideReact.XCircle className="text-red-500" size={16} />
+  ) : value.subscribed ? (
+    <LucideReact.CheckCircle className="text-green-500" size={16} />
+  ) : (
+    <LucideReact.XCircle className="text-gray-500" size={16} />
+  );
   const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-gray-900">Subscription</h2>
-        <span
-          className={`px-2 py-1 text-sm font-medium rounded ${statusColor}`}
-        >
-          {subscriptionStatus}
-        </span>
-      </div>
-      <div className="space-y-2 text-sm text-gray-700">
-        <div>
-          <span className="font-medium text-gray-900">Subscribed On:</span>{" "}
-          {formattedDate}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full">
+      <h2 className="flex items-center text-lg font-semibold text-gray-800 mb-4">
+        <LucideReact.GitBranch className="text-gray-600 mr-2" size={20} />
+        Repository Subscription
+      </h2>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          {statusIcon}
+          <span className="font-medium text-gray-700">{status}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <LucideReact.Calendar size={16} />
+          <span>Created: {formattedDate}</span>
         </div>
         {value.reason && (
-          <div>
-            <span className="font-medium text-gray-900">Reason:</span>{" "}
-            <span className="italic">{value.reason}</span>
+          <div className="flex items-start gap-2 text-sm text-gray-700">
+            <LucideReact.Info size={16} className="mt-0.5" />
+            <span className="truncate" title={value.reason}>
+              {value.reason}
+            </span>
           </div>
         )}
+        <div className="flex items-center gap-2 text-sm text-blue-600 break-all">
+          <LucideReact.Link size={16} />
+          <span>{value.repository_url}</span>
+        </div>
       </div>
     </div>
   );

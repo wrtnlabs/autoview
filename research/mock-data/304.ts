@@ -4,5 +4,5 @@ import Component from "../components/304";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"responseType":"DetailProfileWithRelation","payload":{"userId":2002,"displayName":"Sample Designer (Test)","profileUrl":"https://www.example.com/designers/sample-designer-2002","relations":{"projects":[{"projectId":3003,"projectName":"Test Project Alpha","role":"Lead Designer (Test)"}],"followersCount":17},"lastActiveAt":"2025-05-19T14:30:00Z"}};
+  return {"result":true,"code":1000,"requestToResponse":"resp-xyz-001-test","data":{"followStatus":"followUp","myself":false,"name":"Sample User (Test)","nickname":"sample_user","email":"sample.user@example.com","birth":"1992-07-15","id":101,"profileImage":"https://www.example.com/images/sample-user.png","coverImage":"https://www.example.com/images/sample-user-cover.png","introduce":"Hello! I'm a sample user used for UI testing. This introduction is purely fictional and meant to demonstrate text rendering."}};
 }

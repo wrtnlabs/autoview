@@ -1,52 +1,50 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiOrgsPrivateRegistriesPublicKey {
-        export type GetResponse = {
-            /**
-             * The identifier for the key.
-            */
-            key_id: string;
-            /**
-             * The Base64 encoded public key.
-            */
-            key: string;
-        };
-    }
+  export namespace IApiOrgsPrivateRegistriesPublicKey {
+    export type GetResponse = {
+      /**
+       * The identifier for the key.
+       */
+      key_id: string;
+      /**
+       * The Base64 encoded public key.
+       */
+      key: string;
+    };
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsPrivateRegistriesPublicKey.GetResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiOrgsPrivateRegistriesPublicKey.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { key_id, key } = value;
+  //    Split the Base64 key into 64-character lines for readability.
+  const formattedKey = value.key.match(/.{1,64}/g)?.join("\n") ?? value.key;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  //    Display the key ID and the public key in a styled, read-only block.
   return (
-    <section className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <header className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Public Key Details</h2>
-      </header>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Key ID */}
+      <div className="flex items-center text-gray-700 text-sm">
+        <LucideReact.Key size={16} className="text-gray-500 mr-2" />
+        <span className="font-medium">Key ID:</span>
+        <span className="ml-1 font-mono break-all">{value.key_id}</span>
+      </div>
 
-      <dl className="space-y-4">
-        <div>
-          <dt className="text-sm font-medium text-gray-600">Key ID</dt>
-          <dd className="mt-1 text-sm text-gray-800 break-all">{key_id}</dd>
+      {/* Public Key */}
+      <div className="mt-4">
+        <div className="flex items-center text-gray-700 text-sm mb-1">
+          <LucideReact.Code size={16} className="text-gray-500 mr-2" />
+          <span className="font-medium">Public Key:</span>
         </div>
-
-        <div>
-          <dt className="text-sm font-medium text-gray-600">Key</dt>
-          <dd className="mt-1">
-            <div className="overflow-x-auto bg-gray-50 rounded-md p-3">
-              <pre className="font-mono text-xs text-gray-800 whitespace-pre-wrap break-all">
-                {key}
-              </pre>
-            </div>
-          </dd>
-        </div>
-      </dl>
-    </section>
+        <pre className="bg-gray-100 text-gray-800 text-xs font-mono p-3 rounded overflow-auto max-h-48 whitespace-pre-wrap">
+          {formattedKey}
+        </pre>
+      </div>
+    </div>
   );
 }

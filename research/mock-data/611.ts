@@ -4,5 +4,5 @@ import Component from "../components/611";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"key_id":"test-key-id-001","key":"MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEY1qELm+89Ffk+abc123TESTKEYxyz==","id":101,"url":"https://api.example.com/repos/sample-org/sample-repo/actions/secrets/public-key","title":"Sample Actions Public Key (Test)","created_at":"2025-05-19T12:00:00Z"};
+  return {"key_id":"0123456789ABCDEF","key":"MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC3sampleBase64Key==","id":42,"url":"https://api.example.com/v1/actions/secrets/public-key/0123456789ABCDEF","title":"Sample Actions Public Key (Test)","created_at":"2025-05-19T14:30:00Z"};
 }

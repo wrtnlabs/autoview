@@ -1,115 +1,121 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace open {
-        export namespace marketing {
-            export type CampaignUserView = {
-                campaignUser?: AutoViewInputSubTypes.marketing.CampaignUser;
-            };
-        }
-    }
+  export namespace open {
     export namespace marketing {
-        export type CampaignUser = {
-            campaignId?: string;
-            userId?: string;
-            msgId?: string;
-            userChatId?: string;
-            sent?: number;
-            view?: number;
-            goal?: number;
-            click?: number;
-            version?: number & tags.Type<"int32">;
-            id?: string;
-            campaignMessageView?: boolean;
-        };
+      export type CampaignUserView = {
+        campaignUser?: AutoViewInputSubTypes.marketing.CampaignUser;
+      };
     }
+  }
+  export namespace marketing {
+    export type CampaignUser = {
+      campaignId?: string;
+      userId?: string;
+      msgId?: string;
+      userChatId?: string;
+      sent?: number;
+      view?: number;
+      goal?: number;
+      click?: number;
+      version?: number & tags.Type<"int32">;
+      id?: string;
+      campaignMessageView?: boolean;
+    };
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.open.marketing.CampaignUserView;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.open.marketing.CampaignUserView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const campaignUser = value.campaignUser;
-  if (!campaignUser) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No campaign data available.
-      </div>
-    );
-  }
+  // 1. Derive metrics with safe defaults
+  const user = value.campaignUser;
+  const sent = user?.sent ?? 0;
+  const views = user?.view ?? 0;
+  const clicks = user?.click ?? 0;
+  const goal = user?.goal ?? 0;
+  const viewedStatus = user?.campaignMessageView ?? false;
 
-  const {
-    sent = 0,
-    view = 0,
-    click = 0,
-    goal = 0,
-    campaignMessageView,
-  } = campaignUser;
-
-  const openRate = sent > 0 ? (view / sent) * 100 : 0;
-  const clickThroughRate = view > 0 ? (click / view) * 100 : 0;
-
-  const formatNumber = (n: number) => n.toLocaleString();
-  const formatPercent = (n: number) => `${n.toFixed(1)}%`;
+  const viewRate = sent > 0 ? (views / sent) * 100 : 0;
+  const clickRate = views > 0 ? (clicks / views) * 100 : 0;
+  const goalProgress = goal > 0 ? (views / goal) * 100 : 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Campaign Metrics</h2>
-        {campaignMessageView != null && (
-          <span
-            className={
-              "px-2 py-1 text-xs font-medium rounded " +
-              (campaignMessageView
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800")
-            }
-          >
-            {campaignMessageView ? "Message Viewed" : "Not Viewed"}
-          </span>
-        )}
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <p className="text-sm font-medium text-gray-500">Sent</p>
-          <p className="text-xl font-semibold text-gray-900">
-            {formatNumber(sent)}
-          </p>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {!user ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+          <LucideReact.AlertCircle size={32} className="mb-2" />
+          <span>No campaign data available</span>
         </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Views</p>
-          <p className="text-xl font-semibold text-gray-900">
-            {formatNumber(view)}
-          </p>
+      ) : (
+        <div className="space-y-4">
+          {/* Sent & Views */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <div className="flex items-center gap-1">
+              <LucideReact.Send size={16} className="text-blue-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Sent: {sent}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Eye size={16} className="text-green-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Views: {views} ({viewRate.toFixed(1)}%)
+              </span>
+            </div>
+          </div>
+
+          {/* Clicks & Goal */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <div className="flex items-center gap-1">
+              <LucideReact.MousePointer size={16} className="text-purple-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Clicks: {clicks} ({clickRate.toFixed(1)}%)
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Target size={16} className="text-orange-500" />
+              <span className="text-sm font-medium text-gray-700">
+                Goal: {goal}
+              </span>
+            </div>
+          </div>
+
+          {/* Goal Progress Bar */}
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">
+                Goal Progress
+              </span>
+              <span className="text-xs text-gray-500">
+                {goalProgress.toFixed(1)}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+              <div
+                className="bg-blue-500 h-2"
+                style={{ width: `${Math.min(goalProgress, 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Message Viewed Status */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">
+              Message Viewed:
+            </span>
+            {viewedStatus ? (
+              <LucideReact.CheckCircle size={16} className="text-green-500" />
+            ) : (
+              <LucideReact.XCircle size={16} className="text-red-500" />
+            )}
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Clicks</p>
-          <p className="text-xl font-semibold text-gray-900">
-            {formatNumber(click)}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Goal</p>
-          <p className="text-xl font-semibold text-gray-900">
-            {formatNumber(goal)}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Open Rate</p>
-          <p className="text-xl font-semibold text-gray-900">
-            {formatPercent(openRate)}
-          </p>
-        </div>
-        <div>
-          <p className="text-sm font-medium text-gray-500">Click-Through Rate</p>
-          <p className="text-xl font-semibold text-gray-900">
-            {formatPercent(clickThroughRate)}
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

@@ -1,67 +1,68 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Page Build Status
-     *
-     * @title Page Build Status
-    */
-    export type page_build_status = {
-        url: string & tags.Format<"uri">;
-        status: string;
-    };
+  /**
+   * Page Build Status
+   *
+   * @title Page Build Status
+   */
+  export type page_build_status = {
+    url: string & tags.Format<"uri">;
+    status: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.page_build_status;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { url, status } = value;
-  // Strip protocol for a cleaner display
-  const displayUrl = url.replace(/^https?:\/\//, '');
-  // Normalize status for mapping
-  const key = status.trim().toLowerCase();
-  const statusMap: Record<string, { label: string; color: string }> = {
-    success:    { label: 'Success',     color: 'green'  },
-    passed:     { label: 'Success',     color: 'green'  },
-    failed:     { label: 'Failed',      color: 'red'    },
-    error:      { label: 'Failed',      color: 'red'    },
-    building:   { label: 'Building',    color: 'yellow' },
-    'in_progress': { label: 'In Progress', color: 'yellow' },
-    queued:     { label: 'Queued',      color: 'blue'   },
-    canceled:   { label: 'Canceled',    color: 'gray'   },
-  };
-  const { label: statusLabel, color: statusColor } = statusMap[key] 
-    ?? { label: status[0].toUpperCase() + status.slice(1), color: 'gray' };
+  // Derive the host/domain from the URL for concise display
+  const host = (() => {
+    try {
+      return new URL(value.url).host;
+    } catch {
+      return value.url;
+    }
+  })();
 
-  // Tailwind classes for status badges
-  const badgeClasses: Record<string, string> = {
-    green:  'bg-green-100 text-green-800',
-    red:    'bg-red-100 text-red-800',
-    yellow: 'bg-yellow-100 text-yellow-800',
-    blue:   'bg-blue-100 text-blue-800',
-    gray:   'bg-gray-100 text-gray-800',
-  };
+  // Normalize and format the status string
+  const rawStatus = value.status ?? "";
+  const statusKey = rawStatus.trim().toLowerCase();
+  const statusText = rawStatus
+    .split(/[\s_-]+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+
+  // Choose an icon and color based on status semantics
+  let StatusIcon = LucideReact.Clock;
+  let statusColorClass = "text-amber-500";
+  if (statusKey.includes("success")) {
+    StatusIcon = LucideReact.CheckCircle;
+    statusColorClass = "text-green-500";
+  } else if (statusKey.includes("error") || statusKey.includes("fail")) {
+    StatusIcon = LucideReact.AlertTriangle;
+    statusColorClass = "text-red-500";
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between">
-        <h3
-          className="text-sm font-medium text-gray-700 truncate"
-          title={displayUrl}
-        >
-          {displayUrl}
-        </h3>
-        <span
-          className={
-            `px-2 py-1 text-xs font-semibold rounded-full ` +
-            badgeClasses[statusColor]
-          }
-        >
-          {statusLabel}
+    <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200 flex flex-col space-y-3">
+      {/* URL Display */}
+      <div className="flex flex-col">
+        <div className="flex items-center text-sm text-gray-700 truncate">
+          <LucideReact.Link size={16} className="text-gray-400 flex-shrink-0" />
+          <span className="ml-2 font-medium truncate">{host}</span>
+        </div>
+        <p className="mt-0.5 text-xs text-gray-500 truncate">{value.url}</p>
+      </div>
+
+      {/* Status Display */}
+      <div className="flex items-center">
+        <StatusIcon size={16} className={`${statusColorClass} flex-shrink-0`} />
+        <span className="ml-2 text-sm font-medium text-gray-800">
+          {statusText}
         </span>
       </div>
     </div>

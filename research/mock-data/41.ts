@@ -4,5 +4,5 @@ import Component from "../components/41";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"parent":{"parent":null,"id":"cat-001","code":"ELEC_TEST","parent_id":null,"name":"Electronics (Sample)","created_at":"2025-05-18T10:00:00Z"},"id":"cat-002","code":"HOME_APPLIANCE_TEST","parent_id":"550e8400-e29b-41d4-a716-446655440000","name":"Home Appliances (Sample)","created_at":"2025-05-19T14:30:00Z"};
+  return {"parent":{"parent":null,"id":"e4a1f2d3-5678-90ab-cdef-1234567890ab","code":"CAT_PARENT_TEST","parent_id":null,"name":"Parent Category (Test)","created_at":"2025-05-18T09:15:00Z"},"id":"f1d2e3c4-6789-01ab-cdef-0987654321ab","code":"CAT_CHILD_TEST","parent_id":"e4a1f2d3-5678-90ab-cdef-1234567890ab","name":"Child Category (Test)","created_at":"2025-05-19T12:00:00Z"};
 }

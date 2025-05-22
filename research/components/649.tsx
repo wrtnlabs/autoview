@@ -1,148 +1,177 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Groups of organization members that gives permissions on specified repositories.
-     *
-     * @title Team
-    */
-    export type team = {
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        name: string;
-        slug: string;
-        description: string | null;
-        privacy?: string;
-        notification_setting?: string;
-        permission: string;
-        permissions?: {
-            pull: boolean;
-            triage: boolean;
-            push: boolean;
-            maintain: boolean;
-            admin: boolean;
-        };
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        members_url: string;
-        repositories_url: string & tags.Format<"uri">;
-        parent: AutoViewInputSubTypes.nullable_team_simple;
+  /**
+   * Groups of organization members that gives permissions on specified repositories.
+   *
+   * @title Team
+   */
+  export type team = {
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    privacy?: string;
+    notification_setting?: string;
+    permission: string;
+    permissions?: {
+      pull: boolean;
+      triage: boolean;
+      push: boolean;
+      maintain: boolean;
+      admin: boolean;
     };
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    members_url: string;
+    repositories_url: string & tags.Format<"uri">;
+    parent: AutoViewInputSubTypes.nullable_team_simple;
+  };
+  /**
+   * Groups of organization members that gives permissions on specified repositories.
+   *
+   * @title Team Simple
+   */
+  export type nullable_team_simple = {
     /**
-     * Groups of organization members that gives permissions on specified repositories.
-     *
-     * @title Team Simple
-    */
-    export type nullable_team_simple = {
-        /**
-         * Unique identifier of the team
-        */
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        /**
-         * URL for the team
-        */
-        url: string & tags.Format<"uri">;
-        members_url: string;
-        /**
-         * Name of the team
-        */
-        name: string;
-        /**
-         * Description of the team
-        */
-        description: string | null;
-        /**
-         * Permission that the team will have for its repositories
-        */
-        permission: string;
-        /**
-         * The level of privacy this team should have
-        */
-        privacy?: string;
-        /**
-         * The notification setting the team has set
-        */
-        notification_setting?: string;
-        html_url: string & tags.Format<"uri">;
-        repositories_url: string & tags.Format<"uri">;
-        slug: string;
-        /**
-         * Distinguished Name (DN) that team maps to within LDAP environment
-        */
-        ldap_dn?: string;
-    } | null;
+     * Unique identifier of the team
+     */
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    /**
+     * URL for the team
+     */
+    url: string;
+    members_url: string;
+    /**
+     * Name of the team
+     */
+    name: string;
+    /**
+     * Description of the team
+     */
+    description: string | null;
+    /**
+     * Permission that the team will have for its repositories
+     */
+    permission: string;
+    /**
+     * The level of privacy this team should have
+     */
+    privacy?: string;
+    /**
+     * The notification setting the team has set
+     */
+    notification_setting?: string;
+    html_url: string & tags.Format<"uri">;
+    repositories_url: string & tags.Format<"uri">;
+    slug: string;
+    /**
+     * Distinguished Name (DN) that team maps to within LDAP environment
+     */
+    ldap_dn?: string;
+  } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes.team[];
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const teams = value;
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-  const formatActivePermissions = (perms?: AutoViewInputSubTypes.team["permissions"]) => {
-    if (!perms) return [];
-    return (Object.entries(perms) as [keyof typeof perms, boolean][])
-      .filter(([, enabled]) => enabled)
-      .map(([key]) => capitalize(key));
-  };
+  const teams = value ?? [];
+  const teamCount = teams.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (teamCount === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={32} className="mb-2" />
+        <span className="text-sm">No teams available</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4">
-      {teams.map((team) => {
-        const description = team.description ?? "No description provided.";
-        const badges = [
-          { label: team.permission, bg: "bg-green-100", text: "text-green-800" },
-          team.privacy && { label: capitalize(team.privacy), bg: "bg-blue-100", text: "text-blue-800" },
-          team.notification_setting && { label: capitalize(team.notification_setting), bg: "bg-indigo-100", text: "text-indigo-800" },
-        ].filter(Boolean) as { label: string; bg: string; text: string }[];
+    <div className="p-4">
+      {/* Header */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Users size={20} className="text-gray-800 mr-2" />
+        <h2 className="text-xl font-semibold text-gray-900">
+          Teams ({teamCount})
+        </h2>
+      </div>
 
-        const activePerms = formatActivePermissions(team.permissions);
+      {/* Team Grid */}
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {teams.map((team) => {
+          // Prepare permission badges
+          const permKeys = team.permissions
+            ? (
+                Object.entries(team.permissions) as [
+                  keyof typeof team.permissions,
+                  boolean,
+                ][]
+              )
+                .filter(([, allowed]) => allowed)
+                .map(([key]) => key)
+            : [];
+          const badgeList =
+            permKeys.length > 0 ? permKeys : [team.permission as string];
 
-        return (
-          <div
-            key={team.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
-          >
-            <div className="p-4 flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {team.name}
+          return (
+            <li
+              key={team.id}
+              className="bg-white rounded-lg shadow p-4 flex flex-col"
+            >
+              {/* Team Name */}
+              <h3 className="flex items-center text-lg font-semibold text-gray-900 mb-1">
+                <LucideReact.Users size={18} className="text-blue-500 mr-1" />
+                <span className="truncate">{team.name}</span>
               </h3>
-              <p className="text-sm text-gray-500 mb-2 truncate">
-                @{team.slug}
-              </p>
-              <p className="text-gray-700 text-sm mb-3 line-clamp-2">
-                {description}
-              </p>
+
+              {/* Slug */}
+              <div className="flex items-center text-sm text-gray-500 mb-2 truncate">
+                <LucideReact.Tag size={16} className="mr-1" />
+                <span>{team.slug}</span>
+              </div>
+
+              {/* Description */}
+              {team.description && (
+                <p className="text-gray-700 text-sm line-clamp-2 mb-3">
+                  {team.description}
+                </p>
+              )}
+
+              {/* Privacy & Permissions */}
               <div className="flex flex-wrap gap-2 mb-3">
-                {badges.map((b, i) => (
+                {team.privacy && (
+                  <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full">
+                    {team.privacy}
+                  </span>
+                )}
+                {badgeList.map((perm) => (
                   <span
-                    key={i}
-                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${b.bg} ${b.text}`}
+                    key={perm}
+                    className="px-2 py-0.5 bg-indigo-50 text-indigo-700 text-xs rounded-full"
                   >
-                    {b.label}
+                    {perm}
                   </span>
                 ))}
               </div>
-              {activePerms.length > 0 && (
-                <div className="text-sm text-gray-700">
-                  <span className="font-medium">Permissions:</span>{" "}
-                  {activePerms.join(", ")}
-                </div>
-              )}
+
+              {/* Parent Team */}
               {team.parent && (
-                <div className="mt-3 text-sm text-gray-600">
-                  <span className="font-medium">Parent Team:</span>{" "}
-                  {team.parent.name}
+                <div className="mt-auto text-sm text-gray-500">
+                  <span className="font-medium">Parent:</span>{" "}
+                  <span>{team.parent.name}</span>
                 </div>
               )}
-            </div>
-          </div>
-        );
-      })}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

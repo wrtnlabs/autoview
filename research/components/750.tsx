@@ -1,73 +1,91 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Blob
-     *
-     * @title Blob
-    */
-    export type blob = {
-        content: string;
-        encoding: string;
-        url: string & tags.Format<"uri">;
-        sha: string;
-        size: (number & tags.Type<"int32">) | null;
-        node_id: string;
-        highlighted_content?: string;
-    };
+  /**
+   * Blob
+   *
+   * @title Blob
+   */
+  export type blob = {
+    content: string;
+    encoding: string;
+    url: string & tags.Format<"uri">;
+    sha: string;
+    size: (number & tags.Type<"int32">) | null;
+    node_id: string;
+    highlighted_content?: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.blob;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const sizeFormatted =
-    value.size !== null
+  const formattedSize =
+    value.size != null
       ? value.size < 1024
-        ? `${value.size} bytes`
-        : `${(value.size / 1024).toFixed(2)} KB`
+        ? `${value.size} B`
+        : value.size < 1024 * 1024
+          ? `${(value.size / 1024).toFixed(1)} KB`
+          : `${(value.size / (1024 * 1024)).toFixed(1)} MB`
       : "Unknown size";
 
-  const shaShort = value.sha.slice(0, 7);
-  const previewContent = value.highlighted_content ?? value.content;
+  const truncatedSha = value.sha.slice(0, 7);
+
+  const renderContent = () => {
+    if (value.highlighted_content) {
+      return (
+        <div
+          className="prose max-w-full overflow-auto text-sm font-mono"
+          dangerouslySetInnerHTML={{ __html: value.highlighted_content }}
+        />
+      );
+    }
+
+    let decoded = value.content;
+    if (value.encoding === "base64") {
+      try {
+        decoded = atob(value.content);
+      } catch {
+        // leave content as-is if decoding fails
+      }
+    }
+
+    return (
+      <pre className="whitespace-pre-wrap break-all text-sm font-mono bg-gray-50 p-2 rounded">
+        {decoded}
+      </pre>
+    );
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Blob Details</h2>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* File metadata */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-gray-600 text-sm">
+        <div className="flex items-center space-x-2">
+          <LucideReact.FileText size={16} className="text-gray-500" />
+          <span>{formattedSize}</span>
+          <span className="hidden sm:inline">&bull;</span>
+          <span>{value.encoding.toUpperCase()}</span>
+        </div>
+        <div className="flex items-center space-x-1 mt-2 sm:mt-0">
+          <LucideReact.Activity size={16} className="text-gray-500" />
+          <span className="font-mono">{truncatedSha}</span>
+        </div>
+      </div>
 
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600 mb-4">
-        <div className="flex">
-          <dt className="font-medium w-24">URL:</dt>
-          <dd className="truncate">{value.url}</dd>
-        </div>
-        <div className="flex">
-          <dt className="font-medium w-24">Encoding:</dt>
-          <dd>{value.encoding}</dd>
-        </div>
-        <div className="flex">
-          <dt className="font-medium w-24">Size:</dt>
-          <dd>{sizeFormatted}</dd>
-        </div>
-        <div className="flex">
-          <dt className="font-medium w-24">SHA:</dt>
-          <dd className="font-mono">{shaShort}</dd>
-        </div>
-      </dl>
+      {/* Content preview */}
+      <div className="w-full max-h-64 overflow-auto border border-gray-200 rounded">
+        {renderContent()}
+      </div>
 
-      <div className="bg-gray-100 rounded-md overflow-hidden">
-        {value.highlighted_content ? (
-          <div
-            className="prose prose-sm max-h-60 overflow-auto p-2"
-            dangerouslySetInnerHTML={{ __html: previewContent }}
-          />
-        ) : (
-          <pre className="p-2 font-mono text-sm text-gray-800 whitespace-pre-wrap line-clamp-6">
-            {previewContent}
-          </pre>
-        )}
+      {/* URL display */}
+      <div className="flex items-center text-gray-500 text-sm space-x-1">
+        <LucideReact.Link size={16} />
+        <span className="truncate">{value.url}</span>
       </div>
     </div>
   );

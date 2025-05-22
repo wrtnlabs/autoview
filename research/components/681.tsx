@@ -1,120 +1,157 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Configuration for code scanning default setup.
+   */
+  export type code_scanning_default_setup = {
     /**
-     * Configuration for code scanning default setup.
-    */
-    export type code_scanning_default_setup = {
-        /**
-         * Code scanning default setup has been configured or not.
-        */
-        state?: "configured" | "not-configured";
-        /**
-         * Languages to be analyzed.
-        */
-        languages?: ("actions" | "c-cpp" | "csharp" | "go" | "java-kotlin" | "javascript-typescript" | "javascript" | "python" | "ruby" | "typescript" | "swift")[];
-        /**
-         * Runner type to be used.
-        */
-        runner_type?: "standard" | "labeled" | null;
-        /**
-         * Runner label to be used if the runner type is labeled.
-        */
-        runner_label?: string | null;
-        /**
-         * CodeQL query suite to be used.
-        */
-        query_suite?: "default" | "extended";
-        /**
-         * Timestamp of latest configuration update.
-        */
-        updated_at?: (string & tags.Format<"date-time">) | null;
-        /**
-         * The frequency of the periodic analysis.
-        */
-        schedule?: "weekly" | null;
-    };
+     * Code scanning default setup has been configured or not.
+     */
+    state?: "configured" | "not-configured";
+    /**
+     * Languages to be analyzed.
+     */
+    languages?: (
+      | "actions"
+      | "c-cpp"
+      | "csharp"
+      | "go"
+      | "java-kotlin"
+      | "javascript-typescript"
+      | "javascript"
+      | "python"
+      | "ruby"
+      | "typescript"
+      | "swift"
+    )[];
+    /**
+     * Runner type to be used.
+     */
+    runner_type?: "standard" | "labeled" | null;
+    /**
+     * Runner label to be used if the runner type is labeled.
+     */
+    runner_label?: string | null;
+    /**
+     * CodeQL query suite to be used.
+     */
+    query_suite?: "default" | "extended";
+    /**
+     * Timestamp of latest configuration update.
+     */
+    updated_at?: (string & tags.Format<"date-time">) | null;
+    /**
+     * The frequency of the periodic analysis.
+     */
+    schedule?: "weekly" | null;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_scanning_default_setup;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  const isConfigured = value.state === "configured";
+  const stateIcon = isConfigured ? (
+    <LucideReact.CheckCircle
+      className="text-green-500"
+      size={20}
+      strokeWidth={2}
+    />
+  ) : (
+    <LucideReact.AlertTriangle
+      className="text-red-500"
+      size={20}
+      strokeWidth={2}
+    />
+  );
 
-  const configurationState = value.state === "configured" ? "Configured" : "Not configured";
+  const languagesList = Array.isArray(value.languages) ? value.languages : [];
 
-  const languages = Array.isArray(value.languages) && value.languages.length > 0
-    ? value.languages
-    : [];
+  const runnerInfo =
+    value.runner_type != null
+      ? value.runner_type === "labeled"
+        ? `Runner: Labeled${value.runner_label ? ` (${value.runner_label})` : ""}`
+        : "Runner: Standard"
+      : null;
 
-  let runnerDisplay: string;
-  if (value.runner_type === "standard") {
-    runnerDisplay = "Standard runner";
-  } else if (value.runner_type === "labeled") {
-    runnerDisplay = value.runner_label ? `Runner: ${value.runner_label}` : "Labeled runner";
-  } else {
-    runnerDisplay = "Runner not specified";
-  }
+  const querySuiteLabel = value.query_suite
+    ? `${value.query_suite.charAt(0).toUpperCase() + value.query_suite.slice(1)}`
+    : null;
 
-  const querySuite = value.query_suite
-    ? `${capitalize(value.query_suite)} suite`
-    : "Default suite";
+  const formattedUpdatedAt = value.updated_at
+    ? new Date(value.updated_at).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : "Not available";
 
-  const scheduleDisplay = value.schedule
-    ? capitalize(value.schedule)
-    : "Not scheduled";
-
-  const updatedAtDisplay = value.updated_at
-    ? new Date(value.updated_at).toLocaleString()
-    : "Unknown";
+  const scheduleLabel = value.schedule === "weekly" ? "Weekly" : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
-        Code Scanning Configuration
-      </h2>
-      <div className="space-y-3">
-        <div className="flex justify-between">
-          <span className="text-gray-600">State:</span>
-          <span className="font-medium text-gray-800">{configurationState}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-gray-600 mb-1">Languages:</span>
-          {languages.length > 0 ? (
-            <div className="flex flex-wrap">
-              {languages.map((lang, idx) => (
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
+      {/* State */}
+      <div className="flex items-center mb-4">
+        {stateIcon}
+        <span className="ml-2 text-lg font-semibold text-gray-900">
+          {isConfigured ? "Configured" : "Not Configured"}
+        </span>
+      </div>
+
+      <div className="space-y-3 text-sm text-gray-700">
+        {/* Languages */}
+        {languagesList.length > 0 && (
+          <div>
+            <div className="flex items-center mb-1">
+              <LucideReact.Tag size={16} className="text-gray-500" />
+              <span className="ml-1 font-medium">Languages:</span>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {languagesList.map((lang) => (
                 <span
-                  key={idx}
-                  className="text-xs bg-gray-100 text-gray-800 rounded-full px-2 py-1 mr-2 mb-2"
+                  key={lang}
+                  className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded"
                 >
                   {lang}
                 </span>
               ))}
             </div>
-          ) : (
-            <span className="font-medium text-gray-800">None specified</span>
-          )}
+          </div>
+        )}
+
+        {/* Runner Type */}
+        {runnerInfo && (
+          <div className="flex items-center">
+            <LucideReact.Server size={16} className="text-gray-500" />
+            <span className="ml-1">{runnerInfo}</span>
+          </div>
+        )}
+
+        {/* Query Suite */}
+        {querySuiteLabel && (
+          <div className="flex items-center">
+            <LucideReact.List size={16} className="text-gray-500" />
+            <span className="ml-1">Query Suite: {querySuiteLabel}</span>
+          </div>
+        )}
+
+        {/* Last Updated */}
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-500" />
+          <span className="ml-1">Last Updated: {formattedUpdatedAt}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Runner:</span>
-          <span className="font-medium text-gray-800">{runnerDisplay}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Query Suite:</span>
-          <span className="font-medium text-gray-800">{querySuite}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Schedule:</span>
-          <span className="font-medium text-gray-800">{scheduleDisplay}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-600">Last Updated:</span>
-          <span className="font-medium text-gray-800">{updatedAtDisplay}</span>
-        </div>
+
+        {/* Schedule */}
+        {scheduleLabel && (
+          <div className="flex items-center">
+            <LucideReact.Clock size={16} className="text-gray-500" />
+            <span className="ml-1">Schedule: {scheduleLabel}</span>
+          </div>
+        )}
       </div>
     </div>
   );

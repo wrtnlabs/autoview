@@ -1,44 +1,45 @@
-import React from "react";
-export namespace AutoViewInputSubTypes { }
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
+export namespace AutoViewInputSubTypes {}
 export type AutoViewInput = string[];
 
-
-
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalItems = value.length;
-  const maxDisplay = 10;
-  const displayItems = totalItems > maxDisplay ? value.slice(0, maxDisplay) : value;
-  const remainingCount = totalItems - displayItems.length;
+  // Prepare the list of items and limit how many we display
+  const items = value ?? [];
+  const MAX_DISPLAY = 10;
+  const displayItems = items.slice(0, MAX_DISPLAY);
+  const remainingCount = items.length - displayItems.length;
 
-  // Utility to truncate long strings with an ellipsis
-  const truncate = (text: string, limit: number = 20): string =>
-    text.length > limit ? `${text.slice(0, limit)}…` : text;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Render a badge-like list for string arrays, with a placeholder for empty state
   return (
-    <section aria-label="String List" className="p-4 bg-white rounded-lg shadow-md">
-      <header className="flex items-center mb-3">
-        <h2 className="text-base font-semibold text-gray-900">Items</h2>
-        <span className="ml-2 text-sm text-gray-500">({totalItems})</span>
-      </header>
-      <ul role="list" className="flex flex-wrap">
-        {displayItems.map((item, idx) => (
-          <li key={idx} className="mr-2 mb-2">
-            <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded truncate max-w-[120px]">
-              {truncate(item)}
-            </span>
-          </li>
-        ))}
-        {remainingCount > 0 && (
-          <li>
-            <span className="inline-block bg-gray-100 text-gray-500 text-sm font-medium px-2.5 py-0.5 rounded">
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      {items.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={24} />
+          <span className="mt-2 text-sm">No items available</span>
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {displayItems.map((item, idx) => (
+            <div
+              key={`item-${idx}`}
+              className="flex items-center bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded max-w-xs"
+            >
+              <LucideReact.Tag
+                size={16}
+                className="mr-1 text-gray-500 flex-shrink-0"
+              />
+              <span className="truncate">{item}</span>
+            </div>
+          ))}
+          {remainingCount > 0 && (
+            <div className="flex items-center text-gray-500 text-sm px-2 py-1">
               +{remainingCount} more
-            </span>
-          </li>
-        )}
-      </ul>
-    </section>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

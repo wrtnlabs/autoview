@@ -1,36 +1,34 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * An object without any properties.
-     *
-     * @title Empty Object
-    */
-    export type empty_object = {};
+  /**
+   * An object without any properties.
+   *
+   * @title Empty Object
+   */
+  export type empty_object = {};
 }
 export type AutoViewInput = AutoViewInputSubTypes.empty_object;
 
-
-
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Since AutoViewInput is an empty object, there's no data to transform or display.
-  // We provide a user-friendly empty state indicator.
+  // 1. Determine whether there is any data to display
+  const hasData = value && Object.keys(value).length > 0;
 
+  // 2. If no properties exist, render a placeholder for empty state
+  if (!hasData) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6">
+        <LucideReact.AlertCircle size={48} className="text-gray-400 mb-2" />
+        <span className="text-gray-500 text-base">No data available</span>
+      </div>
+    );
+  }
+
+  // 3. Fallback rendering: pretty-print any unexpected data
   return (
-    <div className="w-full max-w-sm mx-auto p-6 bg-white rounded-lg shadow-md flex flex-col items-center justify-center">
-      <svg
-        className="w-12 h-12 mb-3 text-gray-300"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 48 48"
-        aria-hidden="true"
-      >
-        <circle cx="24" cy="24" r="20" strokeWidth="4" />
-        <path d="M16 24h16M24 16v16" strokeWidth="4" strokeLinecap="round"/>
-      </svg>
-      <p className="text-gray-500 text-center text-sm">
-        No data available
-      </p>
-    </div>
+    <pre className="p-4 overflow-auto text-sm text-gray-700 bg-gray-50 rounded-lg">
+      {JSON.stringify(value, null, 2)}
+    </pre>
   );
 }

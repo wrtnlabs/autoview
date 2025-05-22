@@ -1,144 +1,133 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * API Insights usage route stats for an actor
+   *
+   * @title Route Stats
+   */
+  export type api_insights_route_stats = {
     /**
-     * API Insights usage route stats for an actor
-     *
-     * @title Route Stats
-    */
-    export type api_insights_route_stats = {
-        /**
-         * The HTTP method
-        */
-        http_method?: string;
-        /**
-         * The API path's route template
-        */
-        api_route?: string;
-        /**
-         * The total number of requests within the queried time period
-        */
-        total_request_count?: number & tags.Type<"int32">;
-        /**
-         * The total number of requests that were rate limited within the queried time period
-        */
-        rate_limited_request_count?: number & tags.Type<"int32">;
-        last_rate_limited_timestamp?: string | null;
-        last_request_timestamp?: string;
-    }[];
+     * The HTTP method
+     */
+    http_method?: string;
+    /**
+     * The API path's route template
+     */
+    api_route?: string;
+    /**
+     * The total number of requests within the queried time period
+     */
+    total_request_count?: number & tags.Type<"int32">;
+    /**
+     * The total number of requests that were rate limited within the queried time period
+     */
+    rate_limited_request_count?: number & tags.Type<"int32">;
+    last_rate_limited_timestamp?: string | null;
+    last_request_timestamp?: string;
+  }[];
 }
 export type AutoViewInput = AutoViewInputSubTypes.api_insights_route_stats;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalRequests = value.reduce(
-    (sum, item) => sum + (item.total_request_count ?? 0),
-    0,
-  );
-  const totalRateLimited = value.reduce(
-    (sum, item) => sum + (item.rate_limited_request_count ?? 0),
-    0,
-  );
-  const overallRateLimitedPct =
-    totalRequests > 0 ? (totalRateLimited / totalRequests) * 100 : 0;
-
-  const formatNumber = (num: number) =>
-    new Intl.NumberFormat(undefined, {
-      notation: "compact",
-      compactDisplay: "short",
-    }).format(num);
-
-  const formatDateTime = (iso?: string | null) =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A";
+  const stats = Array.isArray(value) ? value : [];
+  const formatNumber = (num?: number): string =>
+    num != null ? num.toLocaleString() : "-";
+  const formatDate = (iso?: string | null): string => {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "-";
+    return d.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    });
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full p-4 bg-gray-50 rounded-lg">
-      {/* Summary */}
-      <div className="mb-6 p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row sm:justify-between">
-        <div className="text-center sm:text-left">
-          <div className="text-gray-500 text-sm">Total Requests</div>
-          <div className="text-xl font-semibold text-gray-800">
-            {formatNumber(totalRequests)}
-          </div>
-        </div>
-        <div className="mt-4 sm:mt-0 text-center sm:text-left">
-          <div className="text-gray-500 text-sm">Rate Limited</div>
-          <div className="text-xl font-semibold text-gray-800">
-            {formatNumber(totalRateLimited)}{" "}
-            <span className="text-sm text-gray-500">
-              ({overallRateLimitedPct.toFixed(1)}%)
-            </span>
-          </div>
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-md overflow-x-auto">
+      <div className="flex items-center mb-4">
+        <LucideReact.List size={20} className="text-gray-600 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800">API Route Stats</h2>
       </div>
-
-      {/* Detailed Route Cards */}
-      <div className="space-y-4">
-        {value.map((item, idx) => {
-          const method = item.http_method?.toUpperCase() ?? "–";
-          const route = item.api_route ?? "Unknown Route";
-          const total = item.total_request_count ?? 0;
-          const limited = item.rate_limited_request_count ?? 0;
-          const pct = total > 0 ? (limited / total) * 100 : 0;
-
-          return (
-            <div
-              key={`${method}-${route}-${idx}`}
-              className="bg-white rounded-lg shadow-sm p-4 flex flex-col sm:flex-row sm:justify-between"
-            >
-              <div className="flex items-center space-x-2 truncate">
-                <span className="px-2 py-0.5 text-xs font-semibold uppercase text-blue-800 bg-blue-100 rounded">
-                  {method}
-                </span>
-                <span className="text-gray-800 font-medium truncate">
-                  {route}
-                </span>
-              </div>
-              <div className="mt-4 sm:mt-0 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                <div>
-                  <div className="text-gray-500">Requests</div>
-                  <div className="text-gray-800 font-semibold">
-                    {formatNumber(total)}
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr className="bg-gray-50">
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Method
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Route
+            </th>
+            <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Total
+            </th>
+            <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Rate Limited
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Last Request
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Last Limited
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          {stats.map((stat, idx) => {
+            const total = stat.total_request_count ?? 0;
+            const limited = stat.rate_limited_request_count ?? 0;
+            const percent =
+              total > 0 ? ((limited / total) * 100).toFixed(1) + "%" : "0%";
+            return (
+              <tr key={idx} className="hover:bg-gray-50">
+                <td className="px-3 py-2 text-sm font-medium text-gray-700">
+                  {(stat.http_method ?? "-").toUpperCase()}
+                </td>
+                <td className="px-3 py-2 text-sm text-blue-600 truncate max-w-xs">
+                  {stat.api_route ?? "-"}
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-700 text-right">
+                  {formatNumber(stat.total_request_count)}
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-700 text-right">
+                  <div className="flex items-center justify-end space-x-1">
+                    <span>{formatNumber(stat.rate_limited_request_count)}</span>
+                    <span className="text-xs text-gray-500">({percent})</span>
                   </div>
-                </div>
-                <div>
-                  <div className="text-gray-500">Rate Limited</div>
-                  <div className="text-gray-800 font-semibold">
-                    {formatNumber(limited)}{" "}
-                    <span className="text-xs text-gray-500">
-                      ({pct.toFixed(1)}%)
-                    </span>
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-700">
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Calendar size={14} className="text-gray-400" />
+                    <span>{formatDate(stat.last_request_timestamp)}</span>
                   </div>
-                </div>
-                <div>
-                  <div className="text-gray-500">Last Request</div>
-                  <div className="text-gray-800">
-                    {formatDateTime(item.last_request_timestamp)}
+                </td>
+                <td className="px-3 py-2 text-sm text-gray-700">
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Calendar size={14} className="text-gray-400" />
+                    <span>{formatDate(stat.last_rate_limited_timestamp)}</span>
                   </div>
-                </div>
-                <div>
-                  <div className="text-gray-500">Last Rate Limit</div>
-                  <div className="text-gray-800">
-                    {formatDateTime(item.last_rate_limited_timestamp)}
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                </td>
+              </tr>
+            );
+          })}
+          {stats.length === 0 && (
+            <tr>
+              <td colSpan={6} className="px-3 py-6 text-center text-gray-500">
+                <LucideReact.AlertCircle size={24} className="mx-auto mb-2" />
+                <span>No data available</span>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }

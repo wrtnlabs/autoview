@@ -1,89 +1,80 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiOrgsActionsRunnersLabels {
-        export type GetResponse = {
-            total_count: number & tags.Type<"int32">;
-            labels: AutoViewInputSubTypes.runner_label[];
-        };
-    }
-    /**
-     * A label for a self hosted runner
-     *
-     * @title Self hosted runner label
-    */
-    export type runner_label = {
-        /**
-         * Unique identifier of the label.
-        */
-        id?: number & tags.Type<"int32">;
-        /**
-         * Name of the label.
-        */
-        name: string;
-        /**
-         * The type of label. Read-only labels are applied automatically when the runner is configured.
-        */
-        type?: "read-only" | "custom";
+  export namespace IApiOrgsActionsRunnersLabels {
+    export type GetResponse = {
+      total_count: number & tags.Type<"int32">;
+      labels: AutoViewInputSubTypes.runner_label[];
     };
+  }
+  /**
+   * A label for a self hosted runner
+   *
+   * @title Self hosted runner label
+   */
+  export type runner_label = {
+    /**
+     * Unique identifier of the label.
+     */
+    id?: number & tags.Type<"int32">;
+    /**
+     * Name of the label.
+     */
+    name: string;
+    /**
+     * The type of label. Read-only labels are applied automatically when the runner is configured.
+     */
+    type?: "read-only" | "custom";
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnersLabels.GetResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiOrgsActionsRunnersLabels.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalCount = value.total_count;
-  const labels = value.labels;
-  const shownCount = labels.length;
-  const countText =
-    totalCount !== shownCount
-      ? `Showing ${shownCount} of ${totalCount} labels`
-      : `${totalCount} label${totalCount !== 1 ? "s" : ""}`;
+  const sortedLabels = React.useMemo(
+    () => [...value.labels].sort((a, b) => a.name.localeCompare(b.name)),
+    [value.labels],
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Runner Labels</h2>
-        <span className="text-sm text-gray-600">{countText}</span>
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex items-center mb-3 text-gray-700">
+        <LucideReact.Tag size={20} className="mr-2 text-gray-600" />
+        <h2 className="text-lg font-semibold">
+          Runner Labels ({value.total_count})
+        </h2>
       </div>
-      {labels.length > 0 ? (
-        <ul className="space-y-2">
-          {labels.map((label, index) => {
-            const badgeText =
-              label.type === "read-only"
-                ? "Read-only"
-                : label.type === "custom"
-                ? "Custom"
-                : "";
-            const badgeClasses =
-              label.type === "read-only"
-                ? "bg-indigo-100 text-indigo-800"
-                : "bg-green-100 text-green-800";
+
+      {sortedLabels.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {sortedLabels.map((label, index) => {
+            const isReadOnly = label.type === "read-only";
+            const bgColor = isReadOnly ? "bg-gray-100" : "bg-blue-100";
+            const textColor = isReadOnly ? "text-gray-800" : "text-blue-800";
+            const Icon = isReadOnly ? LucideReact.Lock : LucideReact.Tag;
 
             return (
-              <li
-                key={label.id ?? index}
-                className="flex items-center justify-between p-3 border border-gray-200 rounded"
+              <div
+                key={index}
+                className={`${bgColor} ${textColor} inline-flex items-center px-3 py-1 rounded-full text-sm max-w-xs`}
               >
-                <span className="text-gray-700 truncate">{label.name}</span>
-                {badgeText && (
-                  <span
-                    className={`ml-2 px-2 py-0.5 text-xs font-medium rounded ${badgeClasses}`}
-                  >
-                    {badgeText}
-                  </span>
-                )}
-              </li>
+                <Icon size={14} className="mr-1" />
+                <span className="truncate">{label.name}</span>
+              </div>
             );
           })}
-        </ul>
+        </div>
       ) : (
-        <p className="text-center text-gray-500">No labels available.</p>
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <p className="mt-2">No labels available</p>
+        </div>
       )}
     </div>
   );
-  // 3. Return the React element.
 }

@@ -4,5 +4,5 @@ import Component from "../components/233";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"event":{"userId":"test_user_12345","id":"evt_sample_001","channelId":"channel_dummy_01","name":"Sample Event for UI Testing","property":{"featureToggle":{},"metadata":{}},"createdAt":1737167400000,"expireAt":1739769400000,"managed":true,"version":1,"nameI18nMap":{"en":"Sample Event","es":"Evento de Muestra"}}};
+  return {"event":{"userId":"user_12345_test","id":"evt_0001_test","channelId":"channel_alpha_test","name":"Sample Event (Test)","property":{"sampleProperty":{"key1":"value1"},"nestedProperty":{}},"createdAt":1620000000000,"expireAt":1622592000000,"managed":false,"version":1,"nameI18nMap":{"en":"Sample Event (Test)","es":"Evento de Prueba (Muestra)"}}};
 }

@@ -1,89 +1,109 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * A GitHub user.
-     *
-     * @title Simple User
-    */
-    export type simple_user = {
-        name?: string | null;
-        email?: string | null;
-        login: string;
-        id: number & tags.Type<"int32">;
-        node_id: string;
-        avatar_url: string & tags.Format<"uri">;
-        gravatar_id: string | null;
-        url: string & tags.Format<"uri">;
-        html_url: string & tags.Format<"uri">;
-        followers_url: string & tags.Format<"uri">;
-        following_url: string;
-        gists_url: string;
-        starred_url: string;
-        subscriptions_url: string & tags.Format<"uri">;
-        organizations_url: string & tags.Format<"uri">;
-        repos_url: string & tags.Format<"uri">;
-        events_url: string;
-        received_events_url: string & tags.Format<"uri">;
-        type: string;
-        site_admin: boolean;
-        starred_at?: string;
-        user_view_type?: string;
-    };
+  /**
+   * A GitHub user.
+   *
+   * @title Simple User
+   */
+  export type simple_user = {
+    name?: string | null;
+    email?: string | null;
+    login: string;
+    id: number & tags.Type<"int32">;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    starred_at?: string;
+    user_view_type?: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Function to format ISO date into a readable string.
-  const formatDate = (iso?: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "";
+  // Derived: Check for empty list
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span className="text-lg">No users available</span>
+      </div>
+    );
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Return a responsive grid of user cards
   return (
-    <div className="space-y-4">
-      {value.map((user, idx) => {
-        const displayName = user.name?.trim() || user.login;
-        const email = user.email?.trim();
-        const starredAt = formatDate(user.starred_at);
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      {value.map((user) => {
+        // Fallback avatar URL
+        const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          user.name ?? user.login,
+        )}&background=0D8ABC&color=fff&size=128`;
+
         return (
           <div
-            key={user.id ?? idx}
-            className="flex items-center p-4 bg-white rounded-lg shadow-sm"
+            key={user.id}
+            className="flex flex-col items-center bg-white rounded-lg shadow-md p-5"
           >
-            <img
-              src={user.avatar_url}
-              alt={displayName + " avatar"}
-              className="w-12 h-12 rounded-full flex-shrink-0"
-            />
-            <div className="ml-4 flex-1 min-w-0">
-              <div className="flex items-center space-x-2">
-                <h2 className="text-gray-900 font-medium truncate">
-                  {displayName}
-                </h2>
-                {user.site_admin && (
-                  <span className="text-xs font-semibold text-white bg-red-500 rounded-full px-2 py-0.5">
-                    Admin
-                  </span>
-                )}
-              </div>
-              <p className="text-gray-500 text-sm truncate">@{user.login}</p>
-              {email && (
-                <p className="text-gray-500 text-sm truncate">{email}</p>
+            <div className="w-24 h-24 mb-4">
+              <img
+                src={user.avatar_url}
+                alt={user.login}
+                className="w-full h-full rounded-full object-cover"
+                onError={(e) => {
+                  const target = e.currentTarget as HTMLImageElement;
+                  target.onerror = null;
+                  target.src = avatarFallback;
+                }}
+              />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-gray-800 truncate">
+                {user.name ?? user.login}
+              </h3>
+              {user.name && (
+                <p className="text-sm text-gray-500 truncate">@{user.login}</p>
               )}
-              <div className="mt-1 flex space-x-2 text-xs text-gray-400">
-                <span>{user.type}</span>
-                {starredAt && <span>★ Starred: {starredAt}</span>}
+            </div>
+            <div className="mt-3 w-full space-y-2 text-sm text-gray-600">
+              {user.email && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Mail size={16} className="text-gray-400" />
+                  <span className="truncate">{user.email}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-1">
+                <LucideReact.Link size={16} className="text-gray-400" />
+                <span className="truncate">{user.html_url}</span>
               </div>
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex items-center gap-1 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs">
+                <LucideReact.User size={14} />
+                <span>{user.type}</span>
+              </div>
+              {user.site_admin && (
+                <div className="flex items-center gap-1 bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+                  <LucideReact.CheckCircle size={14} />
+                  <span>Admin</span>
+                </div>
+              )}
             </div>
           </div>
         );

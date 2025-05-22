@@ -4,5 +4,5 @@ import Component from "../components/623";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"attestations":[{"bundle":{"mediaType":"application/vnd.dev.cosign.simplesigning.v1+json","verificationMaterial":{"format":"x509","certificate":"SampleCertificateDataBase64=="},"dsseEnvelope":{"payloadType":"application/vnd.dev.cosign.simplesigning.v1+json","payload":"c2FtcGxlLWRhdGE=","signatures":[{"sig":"fake-signature-value","keyid":"test-key-id-001"}]}},"repository_id":1024,"bundle_url":"https://api.example.com/sigstore/bundles/sample-bundle-1024.json"},{"bundle":{"mediaType":"application/sample+json"},"repository_id":2048},{"repository_id":4096,"bundle_url":"https://example.org/sigstore/bundles/test-bundle-4096.json"}]};
+  return {"attestations":[{"bundle":{"mediaType":"application/vnd.test.sigstore.bundle+json;version=0.1","verificationMaterial":{"cert":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtestCertDataSample","format":"X.509 (Test)"},"dsseEnvelope":{"payload":"ZGF0YV9zYW1wbGVfcGF5bG9hZA==","payloadType":"application/vnd.test.dsse.samples+json"}},"repository_id":1001,"bundle_url":"https://api.example.org/repos/example-org/sample-repo/attestations/attestation-1001.bundle"},{"repository_id":1002}]};
 }

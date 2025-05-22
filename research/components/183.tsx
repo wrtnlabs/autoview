@@ -1,142 +1,143 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace legacy {
-        export namespace open {
-            export namespace v4 {
-                export type LegacyV4SessionsView = {
-                    sessions?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession[];
-                };
-            }
-        }
-        export namespace v4 {
-            export type LegacyV4ChatSession = {
-                key?: string;
-                chatId?: string;
-                chatKey?: string;
-                updatedKey?: string;
-                unreadKey?: string;
-                channelId?: string;
-                alert?: number & tags.Type<"int32">;
-                unread?: number & tags.Type<"int32">;
-                watch?: "all" | "info" | "none";
-                readAt?: number;
-                receivedAt?: number;
-                postedAt?: number;
-                updatedAt?: number;
-                createdAt?: number;
-                version?: number & tags.Type<"int32">;
-                id?: string;
-                chatType?: string;
-                personType?: string;
-                personId?: string;
-            };
-        }
+  export namespace legacy {
+    export namespace open {
+      export namespace v4 {
+        export type LegacyV4SessionsView = {
+          sessions?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession[];
+        };
+      }
     }
+    export namespace v4 {
+      export type LegacyV4ChatSession = {
+        key?: string;
+        chatId?: string;
+        chatKey?: string;
+        updatedKey?: string;
+        unreadKey?: string;
+        channelId?: string;
+        alert?: number & tags.Type<"int32">;
+        unread?: number & tags.Type<"int32">;
+        watch?: "all" | "info" | "none";
+        readAt?: number;
+        receivedAt?: number;
+        postedAt?: number;
+        updatedAt?: number;
+        createdAt?: number;
+        version?: number & tags.Type<"int32">;
+        id?: string;
+        chatType?: string;
+        personType?: string;
+        personId?: string;
+      };
+    }
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4SessionsView;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.legacy.open.v4.LegacyV4SessionsView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation and transformation
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const sessions = value.sessions ?? [];
-  const totalUnread = sessions.reduce((sum, s) => sum + (s.unread ?? 0), 0);
-  const totalAlerts = sessions.reduce((sum, s) => sum + (s.alert ?? 0), 0);
+  const sessionCount = sessions.length;
 
-  const formatDate = (ms?: number) => {
-    if (typeof ms !== 'number') return '—';
-    const d = new Date(ms);
-    return d.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getLastActivity = (s: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession) => {
-    const times = [
-      s.updatedAt,
-      s.receivedAt,
-      s.postedAt,
-      s.readAt,
-      s.createdAt
-    ].filter((t): t is number => typeof t === 'number');
-    return times.length ? Math.max(...times) : undefined;
-  };
-
-  const mapWatchLabel = (w?: 'all' | 'info' | 'none') => {
-    switch (w) {
-      case 'all':
-        return 'All';
-      case 'info':
-        return 'Info';
-      default:
-        return 'None';
+  // Helper to format timestamps
+  const formatTimestamp = (ts?: number): string => {
+    if (!ts) return "—";
+    try {
+      return new Date(ts).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "—";
     }
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">
-        Chat Sessions ({sessions.length})
-      </h2>
-      <p className="text-sm text-gray-600 mb-4">
-        Total Unread: {totalUnread}
-        {totalAlerts > 0 && (
-          <span className="ml-4">Alerts: {totalAlerts}</span>
-        )}
-      </p>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Chat Sessions ({sessionCount})
+        </h2>
+      </div>
 
-      {sessions.length === 0 ? (
-        <p className="text-sm text-gray-500">No sessions available.</p>
-      ) : (
-        <ul className="divide-y divide-gray-200">
-          {sessions.map((s, idx) => {
-            const lastActivity = getLastActivity(s);
-            const watchLabel = mapWatchLabel(s.watch);
-            const title =
-              s.chatId ?? s.channelId ?? s.id ?? 'Unknown Session';
+      {/* Body */}
+      {sessionCount > 0 ? (
+        <ul className="space-y-2">
+          {sessions.map((session, idx) => {
+            const name =
+              session.chatId ?? session.id ?? session.key ?? "Unknown Session";
+            const updated = formatTimestamp(
+              session.updatedAt ?? session.createdAt,
+            );
+            const unreadCount = session.unread ?? 0;
+            const alertCount = session.alert ?? 0;
+            const watchMode = session.watch ?? "none";
 
             return (
               <li
                 key={idx}
-                className="flex flex-col sm:flex-row sm:justify-between py-3"
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
               >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 truncate">
-                    {title}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {s.chatType ?? s.personType ?? ''}
+                {/* Session Info */}
+                <div className="flex items-center space-x-3">
+                  <LucideReact.MessageSquare
+                    className="text-gray-500"
+                    size={20}
+                  />
+                  <div className="flex flex-col">
+                    <span
+                      className="font-medium text-gray-800 truncate w-48"
+                      title={name}
+                    >
+                      {name}
+                    </span>
+                    <div className="flex items-center space-x-1 text-sm text-gray-500">
+                      <LucideReact.Calendar size={14} />
+                      <span>{updated}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap items-center mt-2 sm:mt-0 space-x-2">
-                  {s.unread ? (
-                    <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                      {s.unread} Unread
-                    </span>
-                  ) : null}
-                  {s.alert ? (
-                    <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-                      {s.alert} Alerts
-                    </span>
-                  ) : null}
-                  <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded">
-                    {watchLabel}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatDate(lastActivity)}
-                  </span>
+
+                {/* Session Stats */}
+                <div className="flex items-center space-x-4">
+                  {unreadCount > 0 && (
+                    <div className="flex items-center text-red-500 text-sm">
+                      <LucideReact.Mail size={16} />
+                      <span className="ml-1">{unreadCount}</span>
+                    </div>
+                  )}
+                  {alertCount > 0 && (
+                    <div className="flex items-center text-yellow-500 text-sm">
+                      <LucideReact.AlertTriangle size={16} />
+                      <span className="ml-1">{alertCount}</span>
+                    </div>
+                  )}
+                  <div className="text-gray-500" title={`Watch: ${watchMode}`}>
+                    {watchMode === "all" && <LucideReact.Eye size={16} />}
+                    {watchMode === "info" && <LucideReact.Info size={16} />}
+                    {watchMode === "none" && <LucideReact.EyeOff size={16} />}
+                  </div>
                 </div>
               </li>
             );
           })}
         </ul>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+          <LucideReact.AlertCircle size={36} />
+          <span className="mt-2">No sessions available</span>
+        </div>
       )}
     </div>
   );

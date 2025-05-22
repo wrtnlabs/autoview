@@ -1,76 +1,78 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type secret_scanning_scan_history = {
-        incremental_scans?: AutoViewInputSubTypes.secret_scanning_scan[];
-        pattern_update_scans?: AutoViewInputSubTypes.secret_scanning_scan[];
-        backfill_scans?: AutoViewInputSubTypes.secret_scanning_scan[];
-        custom_pattern_backfill_scans?: {
-            /**
-             * The type of scan
-            */
-            type?: string;
-            /**
-             * The state of the scan. Either "completed", "running", or "pending"
-            */
-            status?: string;
-            /**
-             * The time that the scan was completed. Empty if the scan is running
-            */
-            completed_at?: (string & tags.Format<"date-time">) | null;
-            /**
-             * The time that the scan was started. Empty if the scan is pending
-            */
-            started_at?: (string & tags.Format<"date-time">) | null;
-            /**
-             * Name of the custom pattern for custom pattern scans
-            */
-            pattern_name?: string;
-            /**
-             * Level at which the custom pattern is defined, one of "repository", "organization", or "enterprise"
-            */
-            pattern_scope?: string;
-        }[];
-    };
+  export type secret_scanning_scan_history = {
+    incremental_scans?: AutoViewInputSubTypes.secret_scanning_scan[];
+    pattern_update_scans?: AutoViewInputSubTypes.secret_scanning_scan[];
+    backfill_scans?: AutoViewInputSubTypes.secret_scanning_scan[];
+    custom_pattern_backfill_scans?: {
+      /**
+       * The type of scan
+       */
+      type?: string;
+      /**
+       * The state of the scan. Either "completed", "running", or "pending"
+       */
+      status?: string;
+      /**
+       * The time that the scan was completed. Empty if the scan is running
+       */
+      completed_at?: (string & tags.Format<"date-time">) | null;
+      /**
+       * The time that the scan was started. Empty if the scan is pending
+       */
+      started_at?: (string & tags.Format<"date-time">) | null;
+      /**
+       * Name of the custom pattern for custom pattern scans
+       */
+      pattern_name?: string;
+      /**
+       * Level at which the custom pattern is defined, one of "repository", "organization", or "enterprise"
+       */
+      pattern_scope?: string;
+    }[];
+  };
+  /**
+   * Information on a single scan performed by secret scanning on the repository
+   */
+  export type secret_scanning_scan = {
     /**
-     * Information on a single scan performed by secret scanning on the repository
-    */
-    export type secret_scanning_scan = {
-        /**
-         * The type of scan
-        */
-        type?: string;
-        /**
-         * The state of the scan. Either "completed", "running", or "pending"
-        */
-        status?: string;
-        /**
-         * The time that the scan was completed. Empty if the scan is running
-        */
-        completed_at?: (string & tags.Format<"date-time">) | null;
-        /**
-         * The time that the scan was started. Empty if the scan is pending
-        */
-        started_at?: (string & tags.Format<"date-time">) | null;
-    };
+     * The type of scan
+     */
+    type?: string;
+    /**
+     * The state of the scan. Either "completed", "running", or "pending"
+     */
+    status?: string;
+    /**
+     * The time that the scan was completed. Empty if the scan is running
+     */
+    completed_at?: (string & tags.Format<"date-time">) | null;
+    /**
+     * The time that the scan was started. Empty if the scan is pending
+     */
+    started_at?: (string & tags.Format<"date-time">) | null;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.secret_scanning_scan_history;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const incremental = value.incremental_scans ?? [];
-  const patternUpdates = value.pattern_update_scans ?? [];
-  const backfills = value.backfill_scans ?? [];
-  const custom = value.custom_pattern_backfill_scans ?? [];
+  const sections = [
+    { label: "Incremental Scans", scans: value.incremental_scans ?? [] },
+    { label: "Pattern Update Scans", scans: value.pattern_update_scans ?? [] },
+    { label: "Backfill Scans", scans: value.backfill_scans ?? [] },
+  ];
 
-  const formatDateTime = (dateStr?: string | null): string => {
-    if (!dateStr) return "N/A";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "Invalid date";
-    return d.toLocaleString(undefined, {
+  const customScans = value.custom_pattern_backfill_scans ?? [];
+
+  const formatDate = (iso: string | null | undefined): string => {
+    if (!iso) return "—";
+    const date = new Date(iso);
+    return date.toLocaleString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -79,110 +81,143 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
     });
   };
 
-  const summarize = (
-    scans: Array<{ started_at?: string | null; completed_at?: string | null }>
-  ) => {
-    let lastStarted: string | null = null;
-    let lastCompleted: string | null = null;
-    scans.forEach((s) => {
-      if (s.started_at) {
-        if (!lastStarted || new Date(s.started_at) > new Date(lastStarted)) {
-          lastStarted = s.started_at;
-        }
-      }
-      if (s.completed_at) {
-        if (!lastCompleted || new Date(s.completed_at) > new Date(lastCompleted)) {
-          lastCompleted = s.completed_at;
-        }
-      }
-    });
-    return { count: scans.length, lastStarted, lastCompleted };
+  const renderStatusIcon = (status?: string) => {
+    switch (status) {
+      case "completed":
+        return (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={16}
+            aria-label="Completed"
+          />
+        );
+      case "running":
+        return (
+          <LucideReact.Loader
+            className="animate-spin text-blue-500"
+            size={16}
+            aria-label="Running"
+          />
+        );
+      case "pending":
+        return (
+          <LucideReact.Clock
+            className="text-amber-500"
+            size={16}
+            aria-label="Pending"
+          />
+        );
+      default:
+        return (
+          <LucideReact.HelpCircle
+            className="text-gray-400"
+            size={16}
+            aria-label="Unknown status"
+          />
+        );
+    }
   };
-
-  const incSummary = summarize(incremental);
-  const updSummary = summarize(patternUpdates);
-  const backSummary = summarize(backfills);
-
-  const statusCounts: Record<string, number> = { completed: 0, running: 0, pending: 0 };
-  let customLastStarted: string | null = null;
-  let customLastCompleted: string | null = null;
-  custom.forEach((s) => {
-    const st = s.status ?? "pending";
-    if (statusCounts[st] !== undefined) statusCounts[st]++;
-    if (s.started_at && (!customLastStarted || new Date(s.started_at) > new Date(customLastStarted))) {
-      customLastStarted = s.started_at;
-    }
-    if (
-      s.completed_at &&
-      (!customLastCompleted || new Date(s.completed_at) > new Date(customLastCompleted))
-    ) {
-      customLastCompleted = s.completed_at;
-    }
-  });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Secret Scanning History</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Incremental Scans */}
-        <div className="p-4 bg-white rounded-lg shadow flex flex-col space-y-2">
-          <h3 className="text-lg font-medium text-gray-700">Incremental Scans</h3>
-          <p className="text-sm text-gray-600">Total: {incSummary.count}</p>
-          <p className="text-sm text-gray-600">
-            Last Started: {formatDateTime(incSummary.lastStarted)}
-          </p>
-          <p className="text-sm text-gray-600">
-            Last Completed: {formatDateTime(incSummary.lastCompleted)}
-          </p>
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      <h2 className="text-xl font-semibold mb-4 text-gray-800">
+        Secret Scanning History
+      </h2>
+      <div className="space-y-6">
+        {sections.map(({ label, scans }) => {
+          const total = scans.length;
+          const completed = scans.filter(
+            (s) => s.status === "completed",
+          ).length;
+          const running = scans.filter((s) => s.status === "running").length;
+          const pending = scans.filter((s) => s.status === "pending").length;
+          // find most recent completed_at
+          const lastCompletedDates = scans
+            .map((s) => s.completed_at)
+            .filter((d): d is string => typeof d === "string")
+            .map((d) => new Date(d))
+            .sort((a, b) => b.getTime() - a.getTime());
+          const lastCompleted = lastCompletedDates[0]
+            ? new Date(lastCompletedDates[0]).toISOString()
+            : null;
 
-        {/* Pattern Update Scans */}
-        <div className="p-4 bg-white rounded-lg shadow flex flex-col space-y-2">
-          <h3 className="text-lg font-medium text-gray-700">Pattern Update Scans</h3>
-          <p className="text-sm text-gray-600">Total: {updSummary.count}</p>
-          <p className="text-sm text-gray-600">
-            Last Started: {formatDateTime(updSummary.lastStarted)}
-          </p>
-          <p className="text-sm text-gray-600">
-            Last Completed: {formatDateTime(updSummary.lastCompleted)}
-          </p>
-        </div>
+          return (
+            <div
+              key={label}
+              className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 bg-gray-50 rounded-md"
+            >
+              <div className="text-gray-700 font-medium mb-2 sm:mb-0">
+                {label}
+              </div>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+                <div className="flex items-center space-x-1">
+                  {renderStatusIcon("completed")}
+                  <span>{completed}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {renderStatusIcon("running")}
+                  <span>{running}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {renderStatusIcon("pending")}
+                  <span>{pending}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Calendar className="text-gray-400" size={16} />
+                  <span className="whitespace-nowrap">
+                    Last: {formatDate(lastCompleted)}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Users className="text-gray-400" size={16} />
+                  <span>{total} total</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
 
-        {/* Backfill Scans */}
-        <div className="p-4 bg-white rounded-lg shadow flex flex-col space-y-2">
-          <h3 className="text-lg font-medium text-gray-700">Backfill Scans</h3>
-          <p className="text-sm text-gray-600">Total: {backSummary.count}</p>
-          <p className="text-sm text-gray-600">
-            Last Started: {formatDateTime(backSummary.lastStarted)}
-          </p>
-          <p className="text-sm text-gray-600">
-            Last Completed: {formatDateTime(backSummary.lastCompleted)}
-          </p>
-        </div>
-
-        {/* Custom Pattern Backfill */}
-        <div className="p-4 bg-white rounded-lg shadow flex flex-col space-y-3">
-          <h3 className="text-lg font-medium text-gray-700">Custom Pattern Backfill</h3>
-          <p className="text-sm text-gray-600">Total: {custom.length}</p>
-          <div className="flex flex-wrap gap-2">
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-              {statusCounts.completed} Completed
-            </span>
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-              {statusCounts.running} Running
-            </span>
-            <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-              {statusCounts.pending} Pending
-            </span>
+        {customScans.length > 0 && (
+          <div>
+            <div className="text-gray-700 font-medium mb-2">
+              Custom Pattern Backfill Scans
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 text-sm text-gray-700">
+              <div className="font-semibold">Pattern</div>
+              <div className="font-semibold">Scope</div>
+              <div className="font-semibold">Status</div>
+              <div className="font-semibold">Timestamp</div>
+            </div>
+            <div className="divide-y divide-gray-200">
+              {customScans.slice(0, 3).map((scan, idx) => (
+                <div
+                  key={idx}
+                  className="grid grid-cols-1 sm:grid-cols-4 gap-2 py-2 items-center text-sm"
+                >
+                  <span className="truncate">{scan.pattern_name || "—"}</span>
+                  <span className="truncate">{scan.pattern_scope || "—"}</span>
+                  <div className="flex items-center">
+                    {renderStatusIcon(scan.status)}
+                    <span className="ml-1 capitalize">
+                      {scan.status || "unknown"}
+                    </span>
+                  </div>
+                  <span>
+                    {scan.completed_at || scan.started_at
+                      ? formatDate(scan.completed_at || scan.started_at)
+                      : "—"}
+                  </span>
+                </div>
+              ))}
+              {customScans.length > 3 && (
+                <div className="p-2 text-center text-sm text-gray-500">
+                  +{customScans.length - 3} more...
+                </div>
+              )}
+            </div>
           </div>
-          <p className="text-sm text-gray-600">
-            Last Started: {formatDateTime(customLastStarted)}
-          </p>
-          <p className="text-sm text-gray-600">
-            Last Completed: {formatDateTime(customLastCompleted)}
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -1,183 +1,194 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace legacy {
-        export namespace open {
-            export namespace v4 {
-                export type LegacyV4PluginView = {
-                    plugin?: AutoViewInputSubTypes.legacy.v4.LegacyV4Plugin;
-                };
-            }
-        }
-        export namespace v4 {
-            export type LegacyV4Plugin = {
-                id?: string;
-                key?: string & tags.Format<"uuid">;
-                channelId?: string;
-                state?: "waiting" | "active";
-                name: string;
-                createdAt?: number;
-                color: string & tags.Default<"#123456">;
-                botName: string;
-                textI18n?: AutoViewInputSubTypes.I18nText;
-                labelButton?: boolean;
-                deskImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
-                deskMarginX?: number & tags.Type<"int32">;
-                deskMarginY?: number & tags.Type<"int32">;
-                deskPosition?: "left" | "right";
-                mobileImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
-                mobileMarginX?: number & tags.Type<"int32">;
-                mobileMarginY?: number & tags.Type<"int32">;
-                mobilePosition?: "left" | "right";
-                mobileHideButton?: boolean;
-                mobileBubblePosition?: "top" | "bottom";
-                accessSecret?: string;
-                welcomeI18n: AutoViewInputSubTypes.I18nText;
-                profileBot?: boolean;
-                profileBotMessageI18n: AutoViewInputSubTypes.I18nText;
-                profileBotSchemaIds?: string[];
-                urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
-                runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
-                facebookPixelId?: string;
-                bright?: boolean;
-                borderColor?: string;
-                gradientColor?: string;
-                textColor?: string;
-                deskImageUrl?: string;
-                mobileImageUrl?: string;
-                /**
-                 * @deprecated
-                */
-                showPoweredBy?: boolean;
-            };
-            export type LegacyV4TinyFile = {
-                bucket: string;
-                key: string;
-                width?: number & tags.Type<"int32">;
-                height?: number & tags.Type<"int32">;
-            };
-        }
+  export namespace legacy {
+    export namespace open {
+      export namespace v4 {
+        export type LegacyV4PluginView = {
+          plugin?: AutoViewInputSubTypes.legacy.v4.LegacyV4Plugin;
+        };
+      }
     }
-    export type I18nText = {
-        text?: string;
-        en?: string;
-        ja?: string;
-        ko?: string;
-    };
+    export namespace v4 {
+      export type LegacyV4Plugin = {
+        id?: string;
+        key?: string & tags.Format<"uuid">;
+        channelId?: string;
+        state?: "waiting" | "active";
+        name: string;
+        createdAt?: number;
+        color: string & tags.Default<"#123456">;
+        botName: string;
+        textI18n?: AutoViewInputSubTypes.I18nText;
+        labelButton?: boolean;
+        deskImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
+        deskMarginX?: number & tags.Type<"int32">;
+        deskMarginY?: number & tags.Type<"int32">;
+        deskPosition?: "left" | "right";
+        mobileImage?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
+        mobileMarginX?: number & tags.Type<"int32">;
+        mobileMarginY?: number & tags.Type<"int32">;
+        mobilePosition?: "left" | "right";
+        mobileHideButton?: boolean;
+        mobileBubblePosition?: "top" | "bottom";
+        accessSecret?: string;
+        welcomeI18n: AutoViewInputSubTypes.I18nText;
+        profileBot?: boolean;
+        profileBotMessageI18n: AutoViewInputSubTypes.I18nText;
+        profileBotSchemaIds?: string[];
+        urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
+        runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
+        facebookPixelId?: string;
+        bright?: boolean;
+        borderColor?: string;
+        gradientColor?: string;
+        textColor?: string;
+        deskImageUrl?: string;
+        mobileImageUrl?: string;
+        /**
+         * @deprecated
+         */
+        showPoweredBy?: boolean;
+      };
+      export type LegacyV4TinyFile = {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+      };
+    }
+  }
+  export type I18nText = {
+    text?: string;
+    en?: string;
+    ja?: string;
+    ko?: string;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4PluginView;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.legacy.open.v4.LegacyV4PluginView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const plugin = value.plugin;
+  const imagePlaceholder =
+    "https://placehold.co/300x200/e2e8f0/1e293b?text=Image";
+
   if (!plugin) {
     return (
-      <div className="p-4 bg-gray-50 text-gray-500 text-center rounded-lg">
-        No plugin data available
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No plugin data available</span>
       </div>
     );
   }
 
-  const statusLabel =
-    plugin.state === "active"
-      ? "Active"
-      : plugin.state === "waiting"
-      ? "Waiting"
-      : "Unknown";
-  const statusClasses =
-    plugin.state === "active"
-      ? "bg-green-100 text-green-800"
-      : plugin.state === "waiting"
-      ? "bg-yellow-100 text-yellow-800"
-      : "bg-gray-100 text-gray-800";
-
-  const createdDate = plugin.createdAt
+  const dateCreated = plugin.createdAt
     ? new Date(plugin.createdAt).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       })
-    : "—";
+    : "N/A";
 
-  const runRateLabel =
+  const state = plugin.state ?? "waiting";
+  const isActive = state === "active";
+  const StateIcon = isActive ? LucideReact.CheckCircle : LucideReact.Clock;
+  const stateColorClass = isActive ? "text-green-500" : "text-amber-500";
+
+  const runRateDisplay =
     typeof plugin.runRate === "number"
       ? `${Math.round(plugin.runRate * 100)}%`
-      : null;
+      : "N/A";
 
-  const imageUrl = plugin.deskImageUrl || plugin.mobileImageUrl || "";
-  const description =
-    plugin.textI18n?.en ||
-    plugin.textI18n?.text ||
-    plugin.welcomeI18n?.en ||
+  const whitelistCount = Array.isArray(plugin.urlWhitelist)
+    ? plugin.urlWhitelist.length
+    : 0;
+
+  const deskSrc = plugin.deskImageUrl || imagePlaceholder;
+  const mobileSrc = plugin.mobileImageUrl || imagePlaceholder;
+
+  const welcomeText =
     plugin.welcomeI18n?.text ||
-    "";
+    plugin.welcomeI18n?.en ||
+    "No welcome message set";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div
-      className={`max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md border`}
-      style={plugin.borderColor ? { borderColor: plugin.borderColor } : undefined}
-    >
-      {imageUrl && (
-        <div className="w-full h-40 bg-gray-100 rounded overflow-hidden">
-          <img
-            src={imageUrl}
-            alt={plugin.name}
-            className="object-cover w-full h-full"
-          />
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">{plugin.name}</h2>
+        <div
+          className={`flex items-center text-sm font-medium ${stateColorClass}`}
+        >
+          <StateIcon size={16} className={`mr-1 ${stateColorClass}`} />
+          <span>{state.charAt(0).toUpperCase() + state.slice(1)}</span>
         </div>
-      )}
+      </div>
 
-      <div className="mt-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {plugin.name}
-        </h2>
-        <p className="text-sm text-gray-600 truncate">{plugin.botName}</p>
-
-        <div className="flex flex-wrap items-center gap-2 mt-3">
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded ${statusClasses}`}
-          >
-            {statusLabel}
-          </span>
-          {plugin.bright && (
-            <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800">
-              Bright
-            </span>
-          )}
-        </div>
-
-        {(description.length > 0) && (
-          <p className="mt-3 text-sm text-gray-700 line-clamp-2">
-            {description}
-          </p>
-        )}
-
-        <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-gray-600">
-          <div>
-            <span className="font-medium">Created:</span> {createdDate}
+      {/* Key Details */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <div className="flex items-center text-gray-600 text-sm">
+            <LucideReact.User size={16} className="mr-1" />
+            <span>{plugin.botName}</span>
           </div>
-          {runRateLabel && (
-            <div>
-              <span className="font-medium">Run Rate:</span> {runRateLabel}
-            </div>
-          )}
-          {plugin.urlWhitelist && plugin.urlWhitelist.length > 0 && (
-            <div>
-              <span className="font-medium">Whitelist:</span>{" "}
-              {plugin.urlWhitelist.length} domains
-            </div>
-          )}
-          {plugin.facebookPixelId && (
-            <div>
-              <span className="font-medium">Pixel ID:</span>{" "}
-              {plugin.facebookPixelId}
+          <div className="flex items-center text-gray-600 text-sm">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <span>Created: {dateCreated}</span>
+          </div>
+          <div className="flex items-center text-gray-600 text-sm">
+            <span className="mr-1">Color:</span>
+            <span
+              className="w-4 h-4 border rounded"
+              style={{ backgroundColor: plugin.color }}
+            />
+          </div>
+          <div className="flex items-center text-gray-600 text-sm">
+            <span className="mr-1">Run Rate:</span>
+            <span>{runRateDisplay}</span>
+          </div>
+          <div className="flex items-center text-gray-600 text-sm">
+            <LucideReact.Link size={16} className="mr-1" />
+            <span>{whitelistCount} URLs</span>
+          </div>
+        </div>
+        <div className="space-y-2 text-gray-700 text-sm">
+          <div>
+            <span className="font-medium">Welcome Message:</span>{" "}
+            <span>{welcomeText}</span>
+          </div>
+          {plugin.profileBot && (
+            <div className="flex items-center text-green-600 text-sm">
+              <LucideReact.CheckCircle size={16} className="mr-1" />
+              <span>Profile Bot Enabled</span>
             </div>
           )}
         </div>
+      </div>
+
+      {/* Images */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <img
+          src={deskSrc}
+          alt="Desktop Preview"
+          className="w-full h-32 object-cover rounded"
+          onError={(e) => {
+            e.currentTarget.src = imagePlaceholder;
+          }}
+        />
+        <img
+          src={mobileSrc}
+          alt="Mobile Preview"
+          className="w-full h-32 object-cover rounded"
+          onError={(e) => {
+            e.currentTarget.src = imagePlaceholder;
+          }}
+        />
       </div>
     </div>
   );

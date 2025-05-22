@@ -1,105 +1,124 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * List of custom property values for a repository
+   *
+   * @title Organization Repository Custom Property Values
+   */
+  export type org_repo_custom_property_values = {
+    repository_id: number & tags.Type<"int32">;
+    repository_name: string;
+    repository_full_name: string;
     /**
-     * List of custom property values for a repository
-     *
-     * @title Organization Repository Custom Property Values
-    */
-    export type org_repo_custom_property_values = {
-        repository_id: number & tags.Type<"int32">;
-        repository_name: string;
-        repository_full_name: string;
-        /**
-         * List of custom property names and associated values
-        */
-        properties: AutoViewInputSubTypes.custom_property_value[];
-    };
+     * List of custom property names and associated values
+     */
+    properties: AutoViewInputSubTypes.custom_property_value[];
+  };
+  /**
+   * Custom property name and associated value
+   *
+   * @title Custom Property Value
+   */
+  export type custom_property_value = {
     /**
-     * Custom property name and associated value
-     *
-     * @title Custom Property Value
-    */
-    export type custom_property_value = {
-        /**
-         * The name of the property
-        */
-        property_name: string;
-        /**
-         * The value assigned to the property
-        */
-        value: string | string[] | null;
-    };
+     * The name of the property
+     */
+    property_name: string;
+    /**
+     * The value assigned to the property
+     */
+    value: string | string[] | null;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.org_repo_custom_property_values[];
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.org_repo_custom_property_values[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const repos = Array.isArray(value) ? value : [];
+  //    Format custom property values into badges, text, or placeholder.
+  const formatValue = (val: string | string[] | null): React.ReactNode => {
+    if (val === null) {
+      return <span className="italic text-gray-400">N/A</span>;
+    }
+    if (Array.isArray(val)) {
+      if (val.length === 0) {
+        return <span className="italic text-gray-400">None</span>;
+      }
+      return (
+        <div className="flex flex-wrap gap-1">
+          {val.map((item, idx) => (
+            <span
+              key={idx}
+              className="inline-block bg-gray-100 text-gray-700 text-xs font-medium px-2 py-1 rounded"
+            >
+              {item}
+            </span>
+          ))}
+        </div>
+      );
+    }
+    return <span className="text-gray-700">{val}</span>;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (repos.length === 0) {
+  //    Handle empty list state.
+  if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No repositories found.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-2 text-lg">No repositories available</p>
       </div>
     );
   }
 
+  // 3. Return the React element.
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {repos.map((repo) => {
-        const { repository_id, repository_full_name, properties } = repo;
-
-        // Filter out properties without meaningful values
-        const displayedProperties = properties.filter(
-          (p) =>
-            p.value != null &&
-            (!(Array.isArray(p.value)) || (Array.isArray(p.value) && p.value.length > 0)) &&
-            !(typeof p.value === "string" && p.value.trim() === "")
-        );
-
-        return (
-          <div
-            key={repository_id}
-            className="p-4 bg-white rounded-lg shadow border border-gray-200 flex flex-col"
-          >
-            <h3 className="text-lg font-semibold text-gray-800 truncate">
-              {repository_full_name}
-            </h3>
-
-            {displayedProperties.length > 0 ? (
-              <ul className="mt-3 space-y-2 flex-1">
-                {displayedProperties.map((p) => {
-                  const raw = p.value!;
-                  const displayValue = Array.isArray(raw)
-                    ? raw.join(", ")
-                    : String(raw);
-
-                  return (
-                    <li
-                      key={p.property_name}
-                      className="flex justify-between items-start"
-                    >
-                      <span className="text-gray-600">{p.property_name}</span>
-                      <span className="text-gray-900 font-medium truncate ml-2">
-                        {displayValue}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <p className="mt-3 text-gray-500 text-sm">
-                No custom properties.
-              </p>
-            )}
+    <div className="space-y-4">
+      {value.map((repo) => (
+        <div
+          key={repo.repository_id}
+          className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+        >
+          <div className="flex items-center mb-2">
+            <LucideReact.GitBranch className="text-gray-500" size={20} />
+            <h2 className="ml-2 text-lg font-semibold text-gray-800 truncate">
+              {repo.repository_name}
+            </h2>
           </div>
-        );
-      })}
+          <p className="text-sm text-gray-500 mb-3 truncate">
+            {repo.repository_full_name}
+          </p>
+          {repo.properties && repo.properties.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {repo.properties.map((prop) => (
+                <div
+                  key={prop.property_name}
+                  className="flex items-start space-x-2"
+                >
+                  <LucideReact.Tag
+                    className="text-blue-500 flex-shrink-0"
+                    size={16}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-700 truncate">
+                      {prop.property_name}
+                    </p>
+                    <div className="mt-1 text-sm">
+                      {formatValue(prop.value)}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">No custom properties</p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

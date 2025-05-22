@@ -1,41 +1,62 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type Try_lt_string_gt_ = {
-        result: true;
-        code: 1000;
-        requestToResponse?: string;
-        data: string;
-    };
+  export type Try_lt_string_gt_ = {
+    result: true;
+    code: 1000;
+    requestToResponse?: string;
+    data: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.Try_lt_string_gt_;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isSuccess = value.result === true;
-  const statusLabel = isSuccess ? "Success" : "Error";
-  const statusClasses = isSuccess
-    ? "bg-green-100 text-green-800"
-    : "bg-red-100 text-red-800";
+  const statusLabel = value.result ? "Success" : "Error";
+  const StatusIcon = value.result
+    ? LucideReact.CheckCircle
+    : LucideReact.AlertTriangle;
+  const statusColorClass = value.result ? "text-green-500" : "text-red-500";
+  const hasAdditional = Boolean(value.requestToResponse);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between mb-4">
-        <span className={`px-2 py-1 text-sm font-medium rounded ${statusClasses}`}>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Status Header */}
+      <div className="flex items-center mb-3">
+        <StatusIcon className={`mr-2 ${statusColorClass}`} size={20} />
+        <h2 className={`text-lg font-semibold ${statusColorClass}`}>
           {statusLabel}
-        </span>
-        <span className="text-sm text-gray-500">Code: {value.code}</span>
+        </h2>
       </div>
-      {value.requestToResponse && (
-        <div className="mb-4 text-sm italic text-gray-600">
-          {value.requestToResponse}
+
+      {/* Code Display */}
+      <div className="flex items-center text-gray-600 mb-4 text-sm">
+        <LucideReact.Code size={16} className="mr-1" />
+        <span className="font-medium">Code:</span>
+        <span className="ml-1">{value.code}</span>
+      </div>
+
+      {/* Optional Request/Response */}
+      {hasAdditional && (
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-800 mb-1">
+            Request / Response
+          </h3>
+          <pre className="max-h-40 overflow-auto bg-gray-100 p-2 rounded text-xs whitespace-pre-wrap">
+            {value.requestToResponse}
+          </pre>
         </div>
       )}
-      <div className="overflow-auto max-h-40 p-2 bg-gray-50 text-sm text-gray-800 rounded whitespace-pre-wrap break-words">
-        {value.data}
+
+      {/* Primary Data */}
+      <div>
+        <h3 className="text-sm font-medium text-gray-800 mb-1">Data</h3>
+        <p className="text-gray-900 text-sm line-clamp-4 whitespace-pre-wrap">
+          {value.data}
+        </p>
       </div>
     </div>
   );

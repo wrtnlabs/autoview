@@ -1,186 +1,214 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace legacy {
-        export namespace open {
-            export namespace v4 {
-                export type LegacyV4CampaignsView = {
-                    campaigns?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign[];
-                    msgs?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4CampaignMsg[];
-                    next?: number;
-                };
-            }
-        }
-        export namespace v4 {
-            export namespace marketing {
-                /**
-                 * ### 이벤트 기록
-                 *
-                 * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
-                */
-                export type LegacyV4Campaign = {
-                    id?: string;
-                    channelId?: string;
-                    name: string;
-                    state?: "draft" | "active" | "stopped" | "removed";
-                    sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
-                    userQuery?: AutoViewInputSubTypes.Expression;
-                    triggerEventName: string;
-                    triggerEventQuery?: AutoViewInputSubTypes.Expression;
-                    waitingTime: string;
-                    filterEventName?: string;
-                    filterEventQuery?: AutoViewInputSubTypes.Expression;
-                    filterMatch?: "positive" | "negative";
-                    goalEventName?: string;
-                    goalEventQuery?: AutoViewInputSubTypes.Expression;
-                    advertising: boolean;
-                    enableSupportBot: boolean;
-                    followingSupportBotId?: string;
-                    sendToOfflineXms?: boolean;
-                    sendToOfflineEmail?: boolean;
-                    cooldown?: string;
-                    sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
-                    sendTimeRanges?: AutoViewInputSubTypes.TimeRange[];
-                    startAt?: number;
-                    endAt?: number;
-                    draft?: AutoViewInputSubTypes.marketing.CampaignDraft;
-                    createdAt?: number;
-                    updatedAt?: number;
-                    sent?: number & tags.Type<"int32">;
-                    view?: number & tags.Type<"int32">;
-                    goal?: number & tags.Type<"int32">;
-                    click?: number & tags.Type<"int32">;
-                    userChatExpireDuration?: string;
-                    managerId?: string;
-                };
-                export type LegacyV4CampaignMsg = {
-                    id: string;
-                    campaignId?: string;
-                    name: string;
-                    sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
-                    settings?: AutoViewInputSubTypes.marketing.SendMediumSettings;
-                    createdAt?: number;
-                    updatedAt?: number;
-                    sent?: number & tags.Type<"int32">;
-                    view?: number & tags.Type<"int32">;
-                    goal?: number & tags.Type<"int32">;
-                    click?: number & tags.Type<"int32">;
-                };
-            }
-        }
-    }
-    export type Expression = {
-        key?: string;
-        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
-        operator?: AutoViewInputSubTypes.Operator;
-        values?: {}[];
-        and?: AutoViewInputSubTypes.Expression[];
-        or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
-    export type TimeRange = {
-        dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
-        from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-        to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-    };
-    export namespace marketing {
-        export type CampaignDraft = {
-            campaign: AutoViewInputSubTypes.marketing.Campaign;
-            msgs: AutoViewInputSubTypes.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
+  export namespace legacy {
+    export namespace open {
+      export namespace v4 {
+        export type LegacyV4CampaignsView = {
+          campaigns?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign[];
+          msgs?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4CampaignMsg[];
+          next?: number;
         };
+      }
+    }
+    export namespace v4 {
+      export namespace marketing {
         /**
          * ### 이벤트 기록
          *
          * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
-        */
-        export type Campaign = {
-            id?: string;
-            channelId?: string;
-            name: string;
-            state?: "draft" | "active" | "stopped" | "removed";
-            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
-            userQuery?: AutoViewInputSubTypes.Expression;
-            triggerEventName: string;
-            triggerEventQuery?: AutoViewInputSubTypes.Expression;
-            waitingTime: string;
-            filterEventName?: string;
-            filterEventQuery?: AutoViewInputSubTypes.Expression;
-            filterMatch?: "positive" | "negative";
-            filterHpc?: AutoViewInputSubTypes.marketing.HoldingPropertyConstant;
-            goalEventName?: string;
-            goalEventQuery?: AutoViewInputSubTypes.Expression;
-            goalEventDuration?: string;
-            goalHpc?: AutoViewInputSubTypes.marketing.HoldingPropertyConstant;
-            advertising: boolean;
-            sendToOfflineXms?: boolean;
-            sendToOfflineEmail?: boolean;
-            cooldown?: string;
-            sendMode: "always" | "away" | "inOperation" | "customUsingSenderTime" | "customUsingReceiverTime" | "custom";
-            channelOperationId?: string;
-            sendTimeRanges?: AutoViewInputSubTypes.TimeRange[];
-            startAt?: number;
-            endAt?: number;
-            deleteMessageAfterStop?: boolean;
-            draft?: AutoViewInputSubTypes.marketing.CampaignDraft;
-            createdAt?: number;
-            updatedAt?: number;
-            sent?: number & tags.Type<"int32">;
-            view?: number & tags.Type<"int32">;
-            goal?: number & tags.Type<"int32">;
-            click?: number & tags.Type<"int32">;
-            userChatExpireDuration?: string;
-            managerId?: string;
-            recipeCaseId?: string;
+         */
+        export type LegacyV4Campaign = {
+          id?: string;
+          channelId?: string;
+          name: string;
+          state?: "draft" | "active" | "stopped" | "removed";
+          sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+          userQuery?: AutoViewInputSubTypes.Expression;
+          triggerEventName: string;
+          triggerEventQuery?: AutoViewInputSubTypes.Expression;
+          waitingTime: string;
+          filterEventName?: string;
+          filterEventQuery?: AutoViewInputSubTypes.Expression;
+          filterMatch?: "positive" | "negative";
+          goalEventName?: string;
+          goalEventQuery?: AutoViewInputSubTypes.Expression;
+          advertising: boolean;
+          enableSupportBot: boolean;
+          followingSupportBotId?: string;
+          sendToOfflineXms?: boolean;
+          sendToOfflineEmail?: boolean;
+          cooldown?: string;
+          sendMode:
+            | "always"
+            | "away"
+            | "inOperation"
+            | "customUsingSenderTime"
+            | "customUsingReceiverTime"
+            | "custom";
+          sendTimeRanges?: AutoViewInputSubTypes.TimeRange[];
+          startAt?: number;
+          endAt?: number;
+          draft?: AutoViewInputSubTypes.marketing.CampaignDraft;
+          createdAt?: number;
+          updatedAt?: number;
+          sent?: number & tags.Type<"int32">;
+          view?: number & tags.Type<"int32">;
+          goal?: number & tags.Type<"int32">;
+          click?: number & tags.Type<"int32">;
+          userChatExpireDuration?: string;
+          managerId?: string;
         };
-        export type HoldingPropertyConstant = {
-            baseEventName: string;
-            baseEventKey: string;
-            eventQuery?: AutoViewInputSubTypes.Expression;
-            baseEventType: "triggerEvent" | "additionalFilter";
-            operator?: AutoViewInputSubTypes.EventSchema;
-            values?: {};
+        export type LegacyV4CampaignMsg = {
+          id: string;
+          campaignId?: string;
+          name: string;
+          sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+          settings?: AutoViewInputSubTypes.marketing.SendMediumSettings;
+          createdAt?: number;
+          updatedAt?: number;
+          sent?: number & tags.Type<"int32">;
+          view?: number & tags.Type<"int32">;
+          goal?: number & tags.Type<"int32">;
+          click?: number & tags.Type<"int32">;
         };
-        export type CampaignMsg = {
-            id: string;
-            campaignId?: string;
-            channelId?: string;
-            name: string;
-            sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
-            settings: AutoViewInputSubTypes.marketing.SendMediumSettings;
-            createdAt?: number;
-            updatedAt?: number;
-            sent?: number & tags.Type<"int32">;
-            view?: number & tags.Type<"int32">;
-            goal?: number & tags.Type<"int32">;
-            click?: number & tags.Type<"int32">;
-        };
-        export type SendMediumSettings = {
-            type: string;
-        };
+      }
     }
-    export type EventSchema = {
-        id?: string;
-        channelId?: string;
-        eventName?: string;
-        key?: string;
-        parentKey?: string;
-        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
-        createdAt?: number;
-        updatedAt?: number;
-        icon?: string;
+  }
+  export type Expression = {
+    key?: string;
+    type?:
+      | "boolean"
+      | "date"
+      | "datetime"
+      | "list"
+      | "listOfNumber"
+      | "number"
+      | "string"
+      | "listOfObject";
+    operator?: AutoViewInputSubTypes.Operator;
+    values?: {}[];
+    and?: AutoViewInputSubTypes.Expression[];
+    or?: AutoViewInputSubTypes.Expression[];
+  };
+  export type Operator = {};
+  export type TimeRange = {
+    dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] &
+      tags.UniqueItems;
+    from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+    to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
+  };
+  export namespace marketing {
+    export type CampaignDraft = {
+      campaign: AutoViewInputSubTypes.marketing.Campaign;
+      msgs: AutoViewInputSubTypes.marketing.CampaignMsg[] &
+        tags.MinItems<1> &
+        tags.MaxItems<4>;
     };
+    /**
+     * ### 이벤트 기록
+     *
+     * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
+     */
+    export type Campaign = {
+      id?: string;
+      channelId?: string;
+      name: string;
+      state?: "draft" | "active" | "stopped" | "removed";
+      sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+      userQuery?: AutoViewInputSubTypes.Expression;
+      triggerEventName: string;
+      triggerEventQuery?: AutoViewInputSubTypes.Expression;
+      waitingTime: string;
+      filterEventName?: string;
+      filterEventQuery?: AutoViewInputSubTypes.Expression;
+      filterMatch?: "positive" | "negative";
+      filterHpc?: AutoViewInputSubTypes.marketing.HoldingPropertyConstant;
+      goalEventName?: string;
+      goalEventQuery?: AutoViewInputSubTypes.Expression;
+      goalEventDuration?: string;
+      goalHpc?: AutoViewInputSubTypes.marketing.HoldingPropertyConstant;
+      advertising: boolean;
+      sendToOfflineXms?: boolean;
+      sendToOfflineEmail?: boolean;
+      cooldown?: string;
+      sendMode:
+        | "always"
+        | "away"
+        | "inOperation"
+        | "customUsingSenderTime"
+        | "customUsingReceiverTime"
+        | "custom";
+      channelOperationId?: string;
+      sendTimeRanges?: AutoViewInputSubTypes.TimeRange[];
+      startAt?: number;
+      endAt?: number;
+      deleteMessageAfterStop?: boolean;
+      draft?: AutoViewInputSubTypes.marketing.CampaignDraft;
+      createdAt?: number;
+      updatedAt?: number;
+      sent?: number & tags.Type<"int32">;
+      view?: number & tags.Type<"int32">;
+      goal?: number & tags.Type<"int32">;
+      click?: number & tags.Type<"int32">;
+      userChatExpireDuration?: string;
+      managerId?: string;
+      recipeCaseId?: string;
+    };
+    export type HoldingPropertyConstant = {
+      baseEventName: string;
+      baseEventKey: string;
+      eventQuery?: AutoViewInputSubTypes.Expression;
+      baseEventType: "triggerEvent" | "additionalFilter";
+      operator?: AutoViewInputSubTypes.EventSchema;
+      values?: {};
+    };
+    export type CampaignMsg = {
+      id: string;
+      campaignId?: string;
+      channelId?: string;
+      name: string;
+      sendMedium: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+      settings: AutoViewInputSubTypes.marketing.SendMediumSettings;
+      createdAt?: number;
+      updatedAt?: number;
+      sent?: number & tags.Type<"int32">;
+      view?: number & tags.Type<"int32">;
+      goal?: number & tags.Type<"int32">;
+      click?: number & tags.Type<"int32">;
+    };
+    export type SendMediumSettings = {
+      type: string;
+    };
+  }
+  export type EventSchema = {
+    id?: string;
+    channelId?: string;
+    eventName?: string;
+    key?: string;
+    parentKey?: string;
+    type?:
+      | "boolean"
+      | "date"
+      | "datetime"
+      | "list"
+      | "listOfNumber"
+      | "number"
+      | "string"
+      | "listOfObject";
+    createdAt?: number;
+    updatedAt?: number;
+    icon?: string;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4CampaignsView;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.legacy.open.v4.LegacyV4CampaignsView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data extraction and derived functions
-  const campaigns = value.campaigns ?? [];
-  const msgs = value.msgs ?? [];
-  const nextToken = value.next;
-
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formatDate = (ts?: number) =>
     ts
       ? new Date(ts).toLocaleDateString(undefined, {
@@ -188,120 +216,194 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
           month: "short",
           day: "numeric",
         })
-      : "-";
+      : "—";
 
-  const formatNumber = (num?: number) =>
-    num != null ? num.toLocaleString() : "0";
-
-  const stateColor: Record<string, string> = {
-    draft: "bg-gray-200 text-gray-800",
-    active: "bg-green-100 text-green-800",
-    stopped: "bg-yellow-100 text-yellow-800",
-    removed: "bg-red-100 text-red-800",
+  const getStateInfo = (state?: string) => {
+    switch (state) {
+      case "draft":
+        return {
+          label: "Draft",
+          icon: <LucideReact.Edit2 size={16} className="text-gray-500" />,
+        };
+      case "active":
+        return {
+          label: "Active",
+          icon: (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          ),
+        };
+      case "stopped":
+        return {
+          label: "Stopped",
+          icon: (
+            <LucideReact.PauseCircle size={16} className="text-yellow-500" />
+          ),
+        };
+      case "removed":
+        return {
+          label: "Removed",
+          icon: <LucideReact.XCircle size={16} className="text-red-500" />,
+        };
+      default:
+        return {
+          label: "Unknown",
+          icon: <LucideReact.HelpCircle size={16} className="text-gray-400" />,
+        };
+    }
   };
 
-  const mediumLabel: Record<string, string> = {
-    appAlimtalk: "App Alimtalk",
-    appLine: "App Line",
-    email: "Email",
-    inAppChat: "In-App Chat",
-    xms: "XMS",
+  const getMediumIcon = (m?: string) => {
+    switch (m) {
+      case "email":
+        return <LucideReact.Mail size={16} className="text-blue-500" />;
+      case "inAppChat":
+        return (
+          <LucideReact.MessageSquare size={16} className="text-indigo-500" />
+        );
+      case "appAlimtalk":
+        return (
+          <LucideReact.MessageSquare size={16} className="text-green-500" />
+        );
+      case "appLine":
+        return (
+          <LucideReact.MessageSquare size={16} className="text-green-400" />
+        );
+      case "xms":
+        return (
+          <LucideReact.MessageSquare size={16} className="text-purple-500" />
+        );
+      default:
+        return (
+          <LucideReact.MessageSquare size={16} className="text-gray-400" />
+        );
+    }
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  const hasCampaigns =
+    Array.isArray(value.campaigns) && value.campaigns.length > 0;
+  const hasMsgs = Array.isArray(value.msgs) && value.msgs.length > 0;
+  if (!hasCampaigns && !hasMsgs) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2">No data available.</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 space-y-8">
-      {/* Summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Campaigns ({campaigns.length})
-        </h2>
-        <h2 className="mt-2 sm:mt-0 text-xl font-semibold text-gray-900">
-          Messages ({msgs.length})
-        </h2>
-      </div>
-
-      {/* Campaigns List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {campaigns.map((camp) => (
-          <div
-            key={camp.id ?? Math.random()}
-            className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-800 truncate">
-                {camp.name}
-              </h3>
-              {camp.state && (
-                <span
-                  className={`px-2 py-0.5 text-xs font-semibold uppercase rounded ${stateColor[camp.state] ||
-                    "bg-gray-100 text-gray-800"}`}
+    <div className="space-y-8 p-4">
+      {hasCampaigns && (
+        <section>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+            Campaigns
+          </h2>
+          <div className="space-y-4">
+            {value.campaigns!.map((c) => {
+              const state = getStateInfo(c.state);
+              return (
+                <div
+                  key={c.id ?? c.name}
+                  className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0"
                 >
-                  {camp.state}
-                </span>
-              )}
-            </div>
-            <p className="mt-2 text-sm text-gray-600">
-              {mediumLabel[camp.sendMedium] || camp.sendMedium}
-            </p>
-            <p className="mt-1 text-sm text-gray-600">
-              {formatDate(camp.startAt)} – {formatDate(camp.endAt)}
-            </p>
-            <div className="mt-4 flex space-x-4 text-sm text-gray-700">
-              <div>
-                <span className="font-semibold">{formatNumber(camp.sent)}</span>{" "}
-                Sent
-              </div>
-              <div>
-                <span className="font-semibold">{formatNumber(camp.view)}</span>{" "}
-                Viewed
-              </div>
-              <div>
-                <span className="font-semibold">{formatNumber(camp.click)}</span>{" "}
-                Clicked
-              </div>
-            </div>
+                  <div className="flex items-center space-x-2 truncate">
+                    {getMediumIcon(c.sendMedium)}
+                    <span className="font-medium text-gray-900 truncate">
+                      {c.name}
+                    </span>
+                    <span className="ml-2 flex items-center space-x-1 text-sm">
+                      {state.icon}
+                      <span>{state.label}</span>
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-600">
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Send size={16} className="text-gray-500" />
+                      <span>{c.sent ?? 0}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Eye size={16} className="text-gray-500" />
+                      <span>{c.view ?? 0}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Target size={16} className="text-gray-500" />
+                      <span>{c.goal ?? 0}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.MousePointer
+                        size={16}
+                        className="text-gray-500"
+                      />
+                      <span>{c.click ?? 0}</span>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-500 flex flex-wrap space-x-4">
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Calendar size={14} />
+                      <span>Created: {formatDate(c.createdAt)}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Clock size={14} />
+                      <span>Updated: {formatDate(c.updatedAt)}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
-      </div>
+        </section>
+      )}
 
-      {/* Messages List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {msgs.map((msg) => (
-          <div
-            key={msg.id}
-            className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-800 truncate">
-                {msg.name}
-              </h3>
-              <span className="text-xs text-gray-500">
-                {mediumLabel[msg.sendMedium] || msg.sendMedium}
-              </span>
-            </div>
-            <div className="mt-4 flex space-x-4 text-sm text-gray-700">
-              <div>
-                <span className="font-semibold">{formatNumber(msg.sent)}</span>{" "}
-                Sent
+      {hasMsgs && (
+        <section>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Messages</h2>
+          <div className="space-y-4">
+            {value.msgs!.map((m) => (
+              <div
+                key={m.id}
+                className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0"
+              >
+                <div className="flex items-center space-x-2 truncate">
+                  {getMediumIcon(m.sendMedium)}
+                  <span className="font-medium text-gray-900 truncate">
+                    {m.name}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-600">
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Send size={16} className="text-gray-500" />
+                    <span>{m.sent ?? 0}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Eye size={16} className="text-gray-500" />
+                    <span>{m.view ?? 0}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Target size={16} className="text-gray-500" />
+                    <span>{m.goal ?? 0}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.MousePointer
+                      size={16}
+                      className="text-gray-500"
+                    />
+                    <span>{m.click ?? 0}</span>
+                  </div>
+                </div>
+                <div className="text-xs text-gray-500 flex items-center space-x-2">
+                  <LucideReact.Calendar size={14} />
+                  <span>{formatDate(m.createdAt)}</span>
+                </div>
               </div>
-              <div>
-                <span className="font-semibold">{formatNumber(msg.view)}</span>{" "}
-                Viewed
-              </div>
-              <div>
-                <span className="font-semibold">{formatNumber(msg.click)}</span>{" "}
-                Clicked
-              </div>
-            </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </section>
+      )}
 
-      {/* 3. Return the React element. */}
-      {nextToken != null && (
-        <div className="text-right text-sm text-gray-500">
-          Next Token: <span className="font-medium">{nextToken}</span>
+      {typeof value.next === "number" && (
+        <div className="text-sm text-gray-500">
+          Next offset: <span className="font-medium">{value.next}</span>
         </div>
       )}
     </div>

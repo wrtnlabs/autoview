@@ -1,103 +1,214 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+import { tags } from "typia";
+
 export namespace AutoViewInputSubTypes {
-    export type private_user = any;
-    export type public_user = any;
+  /**
+   * Private User
+   *
+   * @title Private User
+   */
+  export type private_user = {
+    login: string;
+    id: number & tags.Type<"int32">;
+    user_view_type?: string;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    name: string | null;
+    company: string | null;
+    blog: string | null;
+    location: string | null;
+    email: (string & tags.Format<"email">) | null;
+    notification_email?: (string & tags.Format<"email">) | null;
+    hireable: boolean | null;
+    bio: string | null;
+    twitter_username?: string | null;
+    public_repos: number & tags.Type<"int32">;
+    public_gists: number & tags.Type<"int32">;
+    followers: number & tags.Type<"int32">;
+    following: number & tags.Type<"int32">;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    private_gists: number & tags.Type<"int32">;
+    total_private_repos: number & tags.Type<"int32">;
+    owned_private_repos: number & tags.Type<"int32">;
+    disk_usage: number & tags.Type<"int32">;
+    collaborators: number & tags.Type<"int32">;
+    two_factor_authentication: boolean;
+    plan?: {
+      collaborators: number & tags.Type<"int32">;
+      name: string;
+      space: number & tags.Type<"int32">;
+      private_repos: number & tags.Type<"int32">;
+    };
+    business_plus?: boolean;
+    ldap_dn?: string;
+  };
+  /**
+   * Public User
+   *
+   * @title Public User
+   */
+  export type public_user = {
+    login: string;
+    id: number & tags.Type<"int32">;
+    user_view_type?: string;
+    node_id: string;
+    avatar_url: string & tags.Format<"uri">;
+    gravatar_id: string | null;
+    url: string & tags.Format<"uri">;
+    html_url: string & tags.Format<"uri">;
+    followers_url: string & tags.Format<"uri">;
+    following_url: string;
+    gists_url: string;
+    starred_url: string;
+    subscriptions_url: string & tags.Format<"uri">;
+    organizations_url: string & tags.Format<"uri">;
+    repos_url: string & tags.Format<"uri">;
+    events_url: string;
+    received_events_url: string & tags.Format<"uri">;
+    type: string;
+    site_admin: boolean;
+    name: string | null;
+    company: string | null;
+    blog: string | null;
+    location: string | null;
+    email: (string & tags.Format<"email">) | null;
+    notification_email?: (string & tags.Format<"email">) | null;
+    hireable: boolean | null;
+    bio: string | null;
+    twitter_username?: string | null;
+    public_repos: number & tags.Type<"int32">;
+    public_gists: number & tags.Type<"int32">;
+    followers: number & tags.Type<"int32">;
+    following: number & tags.Type<"int32">;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+    plan?: {
+      collaborators: number & tags.Type<"int32">;
+      name: string;
+      space: number & tags.Type<"int32">;
+      private_repos: number & tags.Type<"int32">;
+    };
+    private_gists?: number & tags.Type<"int32">;
+    total_private_repos?: number & tags.Type<"int32">;
+    owned_private_repos?: number & tags.Type<"int32">;
+    disk_usage?: number & tags.Type<"int32">;
+    collaborators?: number & tags.Type<"int32">;
+  };
 }
-export type AutoViewInput = any | any;
-
-
+export type AutoViewInput =
+  | AutoViewInputSubTypes.private_user
+  | AutoViewInputSubTypes.public_user;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const obj = (value || {}) as Record<string, any>;
-  const omitKeys = ['id', 'userId', 'authorId', 'contentId', 'internalId', 'metadata', 'internalAdminNotes'];
-  const entries: { key: string; label: string; value: React.ReactNode }[] = [];
-
-  // Derived fullName if firstName & lastName are present
-  if (typeof obj.firstName === 'string' && typeof obj.lastName === 'string') {
-    entries.push({
-      key: 'fullName',
-      label: 'Name',
-      value: `${obj.firstName} ${obj.lastName}`,
-    });
-  }
-
-  // Process other displayable properties
-  for (const [rawKey, rawVal] of Object.entries(obj)) {
-    if (omitKeys.includes(rawKey)) continue;
-    if ((rawKey === 'firstName' || rawKey === 'lastName') && entries.some(e => e.key === 'fullName')) continue;
-    if (rawVal == null) continue;
-
-    let displayVal: React.ReactNode = null;
-
-    // Dates (ISO strings)
-    if (typeof rawVal === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(rawVal)) {
-      displayVal = new Date(rawVal).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
-    }
-    // Booleans
-    else if (typeof rawVal === 'boolean') {
-      displayVal = (
-        <span
-          className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${
-            rawVal ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {rawVal ? 'Yes' : 'No'}
-        </span>
-      );
-    }
-    // Numbers
-    else if (typeof rawVal === 'number') {
-      displayVal = rawVal.toLocaleString();
-    }
-    // Arrays of primitives
-    else if (Array.isArray(rawVal) && rawVal.every(item => ['string', 'number'].includes(typeof item))) {
-      const arr = rawVal as (string | number)[];
-      displayVal = arr.length > 5 ? `${arr.slice(0, 5).join(', ')}...` : arr.join(', ');
-    }
-    // Strings
-    else if (typeof rawVal === 'string') {
-      displayVal = rawVal.length > 100 ? `${rawVal.slice(0, 100)}...` : rawVal;
-    } else {
-      // Skip nested objects or unsupported types
-      continue;
-    }
-
-    // Humanize key as label
-    const label = rawKey
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/[_-]/g, ' ')
-      .replace(/^./, str => str.toUpperCase());
-
-    entries.push({ key: rawKey, label, value: displayVal });
-  }
+  const displayName = value.name?.trim() || value.login;
+  const formattedJoined = React.useMemo(
+    () =>
+      new Date(value.created_at).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
+    [value.created_at],
+  );
+  const [avatarSrc, setAvatarSrc] = React.useState<string>(value.avatar_url);
+  const handleImageError = () =>
+    setAvatarSrc(
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        displayName,
+      )}&background=0D8ABC&color=fff`,
+    );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (entries.length === 0) {
-    // Fallback for totally unknown shapes
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md">
-        <pre className="text-sm text-gray-500 truncate">{JSON.stringify(obj)}</pre>
-      </div>
-    );
-  }
-
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-        {entries.map(({ key, label, value: val }) => (
-          <div key={key} className="flex flex-col">
-            <dt className="text-sm font-medium text-gray-500">{label}</dt>
-            <dd className="mt-1 text-sm text-gray-900">{val}</dd>
+    <div className="max-w-sm mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+      <div className="flex flex-col items-center p-6">
+        <img
+          src={avatarSrc}
+          onError={handleImageError}
+          alt={`${displayName}'s avatar`}
+          className="w-24 h-24 rounded-full object-cover"
+        />
+        <h2 className="mt-4 text-lg font-semibold text-gray-900">
+          {displayName}
+        </h2>
+        {displayName !== value.login && (
+          <span className="text-sm text-gray-500">@{value.login}</span>
+        )}
+        <p className="mt-3 text-sm text-gray-600 line-clamp-2">
+          {value.bio ?? "No bio available"}
+        </p>
+
+        <div className="mt-4 space-y-2 w-full">
+          {value.company && (
+            <div className="flex items-center text-gray-500 text-sm">
+              <LucideReact.Building size={16} />
+              <span className="ml-1 truncate">{value.company}</span>
+            </div>
+          )}
+          {value.location && (
+            <div className="flex items-center text-gray-500 text-sm">
+              <LucideReact.MapPin size={16} />
+              <span className="ml-1 truncate">{value.location}</span>
+            </div>
+          )}
+          {value.email && (
+            <div className="flex items-center text-gray-500 text-sm">
+              <LucideReact.Mail size={16} />
+              <span className="ml-1 truncate">{value.email}</span>
+            </div>
+          )}
+          {value.blog && (
+            <div className="flex items-center text-gray-500 text-sm">
+              <LucideReact.Link size={16} />
+              <span className="ml-1 truncate">{value.blog}</span>
+            </div>
+          )}
+          {value.twitter_username && (
+            <div className="flex items-center text-gray-500 text-sm">
+              <LucideReact.Twitter size={16} />
+              <span className="ml-1 truncate">@{value.twitter_username}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-5 w-full border-t border-gray-200 pt-4 flex justify-between text-gray-600 text-sm">
+          <div className="flex items-center gap-1">
+            <LucideReact.BookOpen size={16} />
+            <span>{value.public_repos} Repos</span>
           </div>
-        ))}
-      </dl>
+          <div className="flex items-center gap-1">
+            <LucideReact.Users size={16} />
+            <span>{value.followers} Followers</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.UserCheck size={16} />
+            <span>{value.following} Following</span>
+          </div>
+        </div>
+
+        <div className="mt-3 text-xs text-gray-400 flex items-center gap-1">
+          <LucideReact.Calendar size={14} />
+          <span>Joined {formattedJoined}</span>
+        </div>
+      </div>
     </div>
   );
 }

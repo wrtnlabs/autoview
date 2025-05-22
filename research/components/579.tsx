@@ -1,54 +1,65 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Actions OIDC subject customization for a repository
+   *
+   * @title Actions OIDC subject customization for a repository
+   */
+  export type oidc_custom_sub_repo = {
     /**
-     * Actions OIDC subject customization for a repository
-     *
-     * @title Actions OIDC subject customization for a repository
-    */
-    export type oidc_custom_sub_repo = {
-        /**
-         * Whether to use the default template or not. If `true`, the `include_claim_keys` field is ignored.
-        */
-        use_default: boolean;
-        /**
-         * Array of unique strings. Each claim key can only contain alphanumeric characters and underscores.
-        */
-        include_claim_keys?: string[];
-    };
+     * Whether to use the default template or not. If `true`, the `include_claim_keys` field is ignored.
+     */
+    use_default: boolean;
+    /**
+     * Array of unique strings. Each claim key can only contain alphanumeric characters and underscores.
+     */
+    include_claim_keys?: string[];
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.oidc_custom_sub_repo;
 
-
-
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { use_default, include_claim_keys } = value;
-  const templateType = use_default ? "Default OIDC Subject Template" : "Custom OIDC Subject Template";
-  const badgeStyles = use_default
-    ? "bg-green-100 text-green-800"
-    : "bg-blue-100 text-blue-800";
+  // 1. Define derived constants for clarity
+  const useDefault = value.use_default;
+  const claimKeys = value.include_claim_keys ?? [];
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Render the visual structure
   return (
-    <div className="max-w-sm w-full mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">OIDC Subject Configuration</h3>
-      <span
-        className={`inline-block px-2 py-1 text-xs font-medium rounded ${badgeStyles}`}
-      >
-        {templateType}
-      </span>
+    <div className="bg-white rounded-lg shadow p-4 sm:p-6 max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Settings className="text-gray-600 mr-2" size={20} />
+        <h2 className="text-lg font-semibold text-gray-800">
+          OIDC Subject Customization
+        </h2>
+      </div>
 
-      {!use_default && (
-        <div className="mt-4">
-          <h4 className="text-sm font-medium text-gray-700 mb-1">Included Claim Keys</h4>
-          {include_claim_keys && include_claim_keys.length > 0 ? (
+      {/* Status */}
+      <div className="flex items-center mb-4">
+        {useDefault ? (
+          <LucideReact.CheckCircle className="text-green-500 mr-2" size={16} />
+        ) : (
+          <LucideReact.Code className="text-blue-500 mr-2" size={16} />
+        )}
+        <span className="text-sm text-gray-700">
+          {useDefault ? "Default template enabled" : "Custom template enabled"}
+        </span>
+      </div>
+
+      {/* Included Claim Keys */}
+      {!useDefault && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
+            Included Claim Keys
+          </h3>
+          {claimKeys.length > 0 ? (
             <ul className="flex flex-wrap gap-2">
-              {include_claim_keys.map((key) => (
+              {claimKeys.map((key) => (
                 <li
                   key={key}
-                  className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded truncate"
-                  title={key}
+                  className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
                 >
                   {key}
                 </li>

@@ -1,93 +1,88 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiOrgsActionsRunnersLabels {
-        export type PutResponse = {
-            total_count: number & tags.Type<"int32">;
-            labels: AutoViewInputSubTypes.runner_label[];
-        };
-    }
-    /**
-     * A label for a self hosted runner
-     *
-     * @title Self hosted runner label
-    */
-    export type runner_label = {
-        /**
-         * Unique identifier of the label.
-        */
-        id?: number & tags.Type<"int32">;
-        /**
-         * Name of the label.
-        */
-        name: string;
-        /**
-         * The type of label. Read-only labels are applied automatically when the runner is configured.
-        */
-        type?: "read-only" | "custom";
+  export namespace IApiOrgsActionsRunnersLabels {
+    export type PutResponse = {
+      total_count: number & tags.Type<"int32">;
+      labels: AutoViewInputSubTypes.runner_label[];
     };
+  }
+  /**
+   * A label for a self hosted runner
+   *
+   * @title Self hosted runner label
+   */
+  export type runner_label = {
+    /**
+     * Unique identifier of the label.
+     */
+    id?: number & tags.Type<"int32">;
+    /**
+     * Name of the label.
+     */
+    name: string;
+    /**
+     * The type of label. Read-only labels are applied automatically when the runner is configured.
+     */
+    type?: "read-only" | "custom";
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnersLabels.PutResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiOrgsActionsRunnersLabels.PutResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { total_count, labels } = value;
-  const customCount = labels.filter(label => label.type === "custom").length;
-  const readOnlyCount = labels.filter(label => label.type === "read-only").length;
+  // Sort labels alphabetically for consistent display
+  const sortedLabels = [...labels].sort((a, b) => a.name.localeCompare(b.name));
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
+  const hasLabels = sortedLabels.length > 0;
+
+  // 3. Return the React element.
+  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header with title and total count */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Runner Labels</h2>
-        <span className="text-sm text-gray-600">{total_count} Total</span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      <div className="flex items-center mb-3">
+        <LucideReact.Tag className="text-gray-600" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          Labels ({total_count})
+        </h2>
       </div>
+      {hasLabels ? (
+        <div className="flex flex-wrap gap-2">
+          {sortedLabels.map((label, idx) => {
+            const isReadOnly = label.type === "read-only";
+            const Icon = isReadOnly ? LucideReact.Lock : LucideReact.Tag;
+            const iconColor = isReadOnly ? "text-blue-500" : "text-green-500";
 
-      {/* Summary badges for custom and read-only */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded">
-          {customCount} Custom
-        </span>
-        <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-          {readOnlyCount} Read-only
-        </span>
-      </div>
-
-      {/* List of individual labels */}
-      <ul className="space-y-2">
-        {labels.map(label => {
-          const type = label.type ?? "custom";
-          const isReadOnly = type === "read-only";
-          const badgeStyles = isReadOnly
-            ? "bg-blue-50 text-blue-700"
-            : "bg-green-50 text-green-700";
-          const badgeText = isReadOnly ? "Read-only" : "Custom";
-          const key = `${label.id ?? label.name}`;
-
-          return (
-            <li
-              key={key}
-              className="flex justify-between items-center px-3 py-2 bg-gray-50 rounded"
-            >
+            return (
               <span
-                className="text-gray-800 truncate"
-                title={label.name}
+                key={idx}
+                className="flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full"
               >
-                {label.name}
+                <Icon
+                  className={iconColor}
+                  size={14}
+                  aria-label={isReadOnly ? "Read-only label" : "Custom label"}
+                />
+                <span className="text-sm text-gray-800 truncate">
+                  {label.name}
+                </span>
               </span>
-              <span
-                className={`px-2 py-0.5 text-xs font-medium rounded ${badgeStyles}`}
-              >
-                {badgeText}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="flex items-center text-gray-500">
+          <LucideReact.AlertCircle className="mr-2" size={24} />
+          <span className="text-sm">No labels available.</span>
+        </div>
+      )}
     </div>
   );
 }

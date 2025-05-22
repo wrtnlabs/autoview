@@ -1,59 +1,75 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Protected Branch Admin Enforced
-     *
-     * @title Protected Branch Admin Enforced
-    */
-    export type protected_branch_admin_enforced = {
-        url: string & tags.Format<"uri">;
-        enabled: boolean;
-    };
+  /**
+   * Protected Branch Admin Enforced
+   *
+   * @title Protected Branch Admin Enforced
+   */
+  export type protected_branch_admin_enforced = {
+    url: string & tags.Format<"uri">;
+    enabled: boolean;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.protected_branch_admin_enforced;
+export type AutoViewInput =
+  AutoViewInputSubTypes.protected_branch_admin_enforced;
 
-
-
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants.
-  const hostname = (() => {
+  // 1. Derive the displayable hostname from the URL, falling back to full URL if parsing fails.
+  const displayHost: string = (() => {
     try {
       return new URL(value.url).hostname;
     } catch {
       return value.url;
     }
   })();
-  const statusText = value.enabled ? 'Enabled' : 'Disabled';
-  const statusClasses = value.enabled
-    ? 'bg-green-100 text-green-800'
-    : 'bg-red-100 text-red-800';
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="max-w-md mx-auto bg-white shadow rounded-lg p-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Protected Branch Enforcement
-        </h2>
-        <span className={`px-2 py-1 text-sm font-medium rounded ${statusClasses}`}>
-          {statusText}
-        </span>
-      </div>
-      <div className="mt-4">
-        <div className="text-xs font-medium text-gray-500 uppercase">
-          Branch URL
-        </div>
-        <div
-          className="mt-1 text-sm text-gray-700 truncate"
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+      {/* URL Display */}
+      <div className="flex items-center space-x-2 truncate">
+        <LucideReact.Link
+          size={20}
+          className="text-gray-500 flex-shrink-0"
+          aria-label="Repository URL"
+        />
+        <a
+          href={value.url}
           title={value.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline truncate"
         >
-          {value.url}
-        </div>
-        <div className="mt-1 text-xs text-gray-400">
-          Host: {hostname}
-        </div>
+          {displayHost}
+        </a>
+      </div>
+
+      {/* Enabled Status */}
+      <div className="flex items-center space-x-1">
+        {value.enabled ? (
+          <LucideReact.CheckCircle
+            size={20}
+            className="text-green-500 flex-shrink-0"
+            aria-label="Enabled"
+          />
+        ) : (
+          <LucideReact.XCircle
+            size={20}
+            className="text-red-500 flex-shrink-0"
+            aria-label="Disabled"
+          />
+        )}
+        <span
+          className={`text-sm font-medium ${
+            value.enabled ? "text-green-700" : "text-red-700"
+          }`}
+        >
+          {value.enabled ? "Enabled" : "Disabled"}
+        </span>
       </div>
     </div>
   );

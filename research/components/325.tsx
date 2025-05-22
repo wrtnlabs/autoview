@@ -1,91 +1,97 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * A GitHub Classroom classroom
+   *
+   * @title Simple Classroom
+   */
+  export type simple_classroom = {
     /**
-     * A GitHub Classroom classroom
-     *
-     * @title Simple Classroom
-    */
-    export type simple_classroom = {
-        /**
-         * Unique identifier of the classroom.
-        */
-        id: number & tags.Type<"int32">;
-        /**
-         * The name of the classroom.
-        */
-        name: string;
-        /**
-         * Returns whether classroom is archived or not.
-        */
-        archived: boolean;
-        /**
-         * The url of the classroom on GitHub Classroom.
-        */
-        url: string;
-    };
+     * Unique identifier of the classroom.
+     */
+    id: number & tags.Type<"int32">;
+    /**
+     * The name of the classroom.
+     */
+    name: string;
+    /**
+     * Returns whether classroom is archived or not.
+     */
+    archived: boolean;
+    /**
+     * The url of the classroom on GitHub Classroom.
+     */
+    url: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_classroom[];
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const total = value.length;
-  const archivedCount = value.filter((c) => c.archived).length;
-  const activeCount = total - archivedCount;
+  const activeCount = value.filter((c) => !c.archived).length;
+  const archivedCount = total - activeCount;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Classrooms ({total})
-        </h2>
-        <p className="text-sm text-gray-600">
-          <span className="font-medium text-green-600">{activeCount} Active</span>
-          {", "}
-          <span className="font-medium text-gray-500">{archivedCount} Archived</span>
-        </p>
+      {/* Summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Users size={16} className="mr-1" />
+          <span>Total: {total}</span>
+        </div>
+        <div className="flex items-center text-green-600">
+          <LucideReact.CheckCircle size={16} className="mr-1" />
+          <span>Active: {activeCount}</span>
+        </div>
+        <div className="flex items-center text-red-600">
+          <LucideReact.XCircle size={16} className="mr-1" />
+          <span>Archived: {archivedCount}</span>
+        </div>
       </div>
 
-      {total === 0 ? (
-        <p className="text-center text-gray-500">No classrooms available.</p>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {value.map((classroom) => {
-            const statusLabel = classroom.archived ? "Archived" : "Active";
-            const statusClasses = classroom.archived
-              ? "text-gray-600 bg-gray-100"
-              : "text-green-700 bg-green-100";
-
-            return (
+      {/* Classroom List or Empty State */}
+      <div className="mt-4">
+        {total > 0 ? (
+          <div className="space-y-3">
+            {value.map((classroom) => (
               <div
                 key={classroom.id}
-                className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+                className="p-3 bg-gray-50 rounded-md flex flex-col sm:flex-row sm:items-center sm:justify-between"
               >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-md font-semibold text-gray-800 truncate">
-                    {classroom.name}
-                  </h3>
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded ${statusClasses}`}
-                  >
-                    {statusLabel}
-                  </span>
+                <div className="flex items-center text-gray-800">
+                  <span className="font-medium truncate">{classroom.name}</span>
+                  {classroom.archived ? (
+                    <LucideReact.XCircle
+                      className="ml-2 text-red-500"
+                      size={16}
+                    />
+                  ) : (
+                    <LucideReact.CheckCircle
+                      className="ml-2 text-green-500"
+                      size={16}
+                    />
+                  )}
                 </div>
-                <p
-                  className="text-sm text-blue-600 truncate break-all"
-                  title={classroom.url}
-                >
-                  {classroom.url}
-                </p>
+                <div className="flex items-center text-gray-500 mt-2 sm:mt-0">
+                  <LucideReact.Link size={16} className="mr-1" />
+                  <span className="truncate">{classroom.url}</span>
+                </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center text-gray-400">
+            <LucideReact.AlertCircle size={24} className="mr-2" />
+            <span>No classrooms available</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

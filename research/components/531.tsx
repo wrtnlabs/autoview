@@ -1,78 +1,88 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * A hosted compute network settings resource.
+   *
+   * @title Hosted compute network settings resource
+   */
+  export type network_settings = {
     /**
-     * A hosted compute network settings resource.
-     *
-     * @title Hosted compute network settings resource
-    */
-    export type network_settings = {
-        /**
-         * The unique identifier of the network settings resource.
-        */
-        id: string;
-        /**
-         * The identifier of the network configuration that is using this settings resource.
-        */
-        network_configuration_id?: string;
-        /**
-         * The name of the network settings resource.
-        */
-        name: string;
-        /**
-         * The subnet this network settings resource is configured for.
-        */
-        subnet_id: string;
-        /**
-         * The location of the subnet this network settings resource is configured for.
-        */
-        region: string;
-    };
+     * The unique identifier of the network settings resource.
+     */
+    id: string;
+    /**
+     * The identifier of the network configuration that is using this settings resource.
+     */
+    network_configuration_id?: string;
+    /**
+     * The name of the network settings resource.
+     */
+    name: string;
+    /**
+     * The subnet this network settings resource is configured for.
+     */
+    subnet_id: string;
+    /**
+     * The location of the subnet this network settings resource is configured for.
+     */
+    region: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.network_settings;
 
-
-
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Determine assignment status based on presence of network_configuration_id
-  const isAssigned = Boolean(value.network_configuration_id);
-  const statusText = isAssigned ? 'Assigned' : 'Unassigned';
-  const statusClasses = isAssigned
-    ? 'bg-green-100 text-green-800'
-    : 'bg-gray-100 text-gray-800';
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // Determine if a network configuration ID is provided.
+  const hasConfig = Boolean(value.network_configuration_id);
 
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
+  //    Display only the relevant fields: name, region, subnet, and optional network configuration ID.
   return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md">
-      {/* Header: Name and Status */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="w-full max-w-md bg-white rounded-lg shadow-md p-4 flex flex-col">
+      {/* Resource title */}
+      <div className="flex items-center mb-3">
+        <LucideReact.Server
+          size={20}
+          className="text-blue-500 mr-2"
+          aria-hidden="true"
+        />
+        <h2 className="text-xl font-semibold text-gray-900 truncate">
           {value.name}
         </h2>
-        <span className={`px-2 py-1 text-sm font-medium rounded ${statusClasses}`}>
-          {statusText}
-        </span>
       </div>
-
-      {/* Details */}
-      <dl className="space-y-2">
-        <div className="flex">
-          <dt className="w-28 font-medium text-gray-500">Region:</dt>
-          <dd className="text-gray-900">{value.region}</dd>
+      {/* Key properties */}
+      <div className="flex flex-col space-y-2 text-gray-700">
+        <div className="flex items-center">
+          <LucideReact.Globe
+            size={16}
+            className="text-gray-500 mr-2"
+            aria-hidden="true"
+          />
+          <span className="truncate">{value.region}</span>
         </div>
-
-        <div className="flex">
-          <dt className="w-28 font-medium text-gray-500">Subnet ID:</dt>
-          <dd className="text-gray-900 truncate">{value.subnet_id}</dd>
+        <div className="flex items-center">
+          <LucideReact.Link
+            size={16}
+            className="text-gray-500 mr-2"
+            aria-hidden="true"
+          />
+          <span className="truncate">{value.subnet_id}</span>
         </div>
-
-        {value.network_configuration_id && (
-          <div className="flex">
-            <dt className="w-28 font-medium text-gray-500">Config ID:</dt>
-            <dd className="text-gray-900 truncate">
-              {value.network_configuration_id}
-            </dd>
+        {hasConfig && (
+          <div className="flex items-center">
+            <LucideReact.GitBranch
+              size={16}
+              className="text-gray-500 mr-2"
+              aria-hidden="true"
+            />
+            <span className="truncate">{value.network_configuration_id}</span>
           </div>
         )}
-      </dl>
+      </div>
     </div>
   );
 }

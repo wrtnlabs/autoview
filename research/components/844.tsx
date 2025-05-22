@@ -1,125 +1,94 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    /**
-     * Content File
-     *
-     * @title Content File
-    */
-    export type content_file = {
-        type: "file";
-        encoding: string;
-        size: number & tags.Type<"int32">;
-        name: string;
-        path: string;
-        content: string;
-        sha: string;
-        url: string & tags.Format<"uri">;
-        git_url: (string & tags.Format<"uri">) | null;
-        html_url: (string & tags.Format<"uri">) | null;
-        download_url: (string & tags.Format<"uri">) | null;
-        _links: {
-            git: (string & tags.Format<"uri">) | null;
-            html: (string & tags.Format<"uri">) | null;
-            self: string & tags.Format<"uri">;
-        };
-        target?: string;
-        submodule_git_url?: string;
+  /**
+   * Content File
+   *
+   * @title Content File
+   */
+  export type content_file = {
+    type: "file";
+    encoding: string;
+    size: number & tags.Type<"int32">;
+    name: string;
+    path: string;
+    content: string;
+    sha: string;
+    url: string & tags.Format<"uri">;
+    git_url: (string & tags.Format<"uri">) | null;
+    html_url: (string & tags.Format<"uri">) | null;
+    download_url: (string & tags.Format<"uri">) | null;
+    _links: {
+      git: (string & tags.Format<"uri">) | null;
+      html: (string & tags.Format<"uri">) | null;
+      self: string & tags.Format<"uri">;
     };
+    target?: string;
+    submodule_git_url?: string;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.content_file;
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derived utilities and constants
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  //    Formatting file size into human-readable units.
   const formatBytes = (bytes: number): string => {
-    const thresh = 1024;
-    if (Math.abs(bytes) < thresh) {
-      return bytes + " B";
-    }
-    const units = ["KB", "MB", "GB", "TB"];
-    let u = -1;
-    let b = bytes;
-    do {
-      b /= thresh;
-      u++;
-    } while (Math.abs(b) >= thresh && u < units.length - 1);
-    return b.toFixed(1) + " " + units[u];
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(2)} KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(2)} MB`;
+    return `${(mb / 1024).toFixed(2)} GB`;
   };
+  const formattedSize = formatBytes(value.size);
+  const shortSha = value.sha.slice(0, 7);
 
-  const decodedContent = (() => {
-    try {
-      if (value.encoding === "base64") {
-        return typeof atob === "function" ? atob(value.content) : value.content;
-      }
-      return value.content;
-    } catch {
-      return value.content;
-    }
-  })();
-
-  const previewText =
-    decodedContent.length > 500
-      ? decodedContent.slice(0, 500) + "..."
-      : decodedContent;
-
-  const links: { label: string; url: string }[] = [
-    { label: "HTML URL", url: value.html_url || "" },
-    { label: "Download URL", url: value.download_url || "" },
-    { label: "Git URL", url: value.git_url || "" },
-  ].filter((link) => link.url);
-
-  // 2. Visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-md space-y-4">
-      {/* File Name & Path */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
+    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow ring-1 ring-gray-200">
+      {/* File header */}
+      <div className="flex items-center mb-2">
+        <LucideReact.FileText className="text-indigo-500" size={20} />
+        <h2 className="ml-2 text-lg font-medium text-gray-800 truncate">
           {value.name}
         </h2>
-        {value.path && value.path !== value.name && (
-          <p className="text-sm text-gray-500 truncate">{value.path}</p>
-        )}
+      </div>
+      <p className="text-sm text-gray-500 mb-4 truncate">{value.path}</p>
+
+      {/* File details grid */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 mb-4">
+        <div className="flex items-center">
+          <span className="font-medium">Size:</span>
+          <span className="ml-1">{formattedSize}</span>
+        </div>
+        <div className="flex items-center">
+          <span className="font-medium">Encoding:</span>
+          <span className="ml-1 capitalize">{value.encoding}</span>
+        </div>
+        <div className="flex items-center col-span-2">
+          <span className="font-medium">SHA:</span>
+          <span className="ml-1 font-mono break-all">{shortSha}</span>
+        </div>
       </div>
 
-      {/* Metadata Row */}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-        <span>Size: {formatBytes(value.size)}</span>
-        <span>Encoding: {value.encoding}</span>
-        <span>SHA: {value.sha.slice(0, 7)}</span>
-        {value.target && <span>Target: {value.target}</span>}
-        {value.submodule_git_url && (
-          <span className="truncate">
-            Submodule: {value.submodule_git_url}
-          </span>
-        )}
-      </div>
-
-      {/* Links Section */}
-      {links.length > 0 && (
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium text-gray-700">Links</h3>
-          <div className="space-y-1">
-            {links.map((link) => (
-              <p key={link.label} className="text-xs text-blue-600 break-all">
-                <span className="font-medium">{link.label}:</span> {link.url}
-              </p>
-            ))}
+      {/* Links */}
+      <div className="flex flex-col space-y-2 text-sm text-blue-600 overflow-x-auto">
+        {value.html_url && (
+          <div className="flex items-center">
+            <LucideReact.Link size={16} className="text-gray-400" />
+            <span className="ml-1 truncate">{value.html_url}</span>
           </div>
-        </div>
-      )}
-
-      {/* Content Preview */}
-      {previewText && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Preview</h3>
-          <pre className="mt-1 p-2 bg-gray-100 rounded text-xs font-mono overflow-auto max-h-40">
-            {previewText}
-          </pre>
-        </div>
-      )}
+        )}
+        {value.download_url && (
+          <div className="flex items-center">
+            <LucideReact.Download size={16} className="text-gray-400" />
+            <span className="ml-1 truncate">{value.download_url}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

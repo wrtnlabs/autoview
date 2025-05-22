@@ -1,163 +1,142 @@
-import React from "react";
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type CallLog = {
-        channelId?: string;
-        missedReason?: string;
-        direction?: string;
-        state?: string;
-        from?: string;
-        to?: string;
-        createdAt?: number;
-        updatedAt?: number;
-        engagedAt?: number;
-        closedAt?: number;
-        userChatId?: string;
-        managerIds?: string[];
-    };
+  export type CallLog = {
+    channelId?: string;
+    missedReason?: string;
+    direction?: string;
+    state?: string;
+    from?: string;
+    to?: string;
+    createdAt?: number;
+    updatedAt?: number;
+    engagedAt?: number;
+    closedAt?: number;
+    userChatId?: string;
+    managerIds?: string[];
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.CallLog[];
 
-
-
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Helper to capitalize strings
-  const capitalize = (s: string = ''): string =>
-    s.charAt(0).toUpperCase() + s.slice(1);
-
-  // Format timestamp to "Mon DD, YYYY HH:MM AM/PM"
-  const formatDateTime = (timestamp?: number): string => {
-    if (!timestamp) return 'Unknown';
-    const d = new Date(timestamp);
-    const date = d.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    const time = d.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-    return `${date} ${time}`;
-  };
-
-  // Convert total seconds into "Hh Mm Ss"
-  const formatDuration = (totalSeconds: number): string => {
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    const segments: string[] = [];
-    if (hours) segments.push(`${hours}h`);
-    if (minutes) segments.push(`${minutes}m`);
-    segments.push(`${seconds}s`);
-    return segments.join(' ');
-  };
-
-  // Aggregate summary statistics
-  const totalCalls = value.length;
-  const missedCalls = value.filter(
-    (c) => c.state?.toLowerCase() === 'missed' || !!c.missedReason
-  ).length;
+  // Data aggregation and formatting helpers
+  const logs: AutoViewInputSubTypes.CallLog[] = value;
+  const totalCalls = logs.length;
+  const missedCalls = logs.filter((log) => log.missedReason != null).length;
   const answeredCalls = totalCalls - missedCalls;
-  const callDurations = value
-    .map((c) =>
-      c.engagedAt && c.closedAt
-        ? Math.floor((c.closedAt - c.engagedAt) / 1000)
-        : 0
-    )
-    .filter((sec) => sec > 0);
-  const averageDurationSec = callDurations.length
-    ? Math.floor(
-        callDurations.reduce((sum, s) => sum + s, 0) / callDurations.length
-      )
-    : 0;
-  const averageDurationLabel = averageDurationSec
-    ? formatDuration(averageDurationSec)
-    : 'N/A';
 
-  // Render
+  const formatDate = (ts?: number) =>
+    ts ? new Date(ts).toLocaleString() : "—";
+
+  const formatDuration = (start?: number, end?: number) => {
+    if (start && end && end > start) {
+      const totalSec = Math.floor((end - start) / 1000);
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      return `${mins}m ${secs}s`;
+    }
+    return "—";
+  };
+
+  // Empty state
+  if (totalCalls === 0) {
+    return (
+      <div className="flex flex-col items-center py-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No call logs available</span>
+      </div>
+    );
+  }
+
+  // Main render
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Summary Section */}
-      <h2 className="text-xl font-semibold mb-4">Call Logs Summary</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gray-100 p-3 rounded flex flex-col items-center">
-          <span className="text-2xl font-bold">{totalCalls}</span>
-          <span className="text-gray-600 text-sm">Total Calls</span>
-        </div>
-        <div className="bg-gray-100 p-3 rounded flex flex-col items-center">
-          <span className="text-2xl font-bold">{answeredCalls}</span>
-          <span className="text-gray-600 text-sm">Answered</span>
-        </div>
-        <div className="bg-gray-100 p-3 rounded flex flex-col items-center">
-          <span className="text-2xl font-bold">{missedCalls}</span>
-          <span className="text-gray-600 text-sm">Missed</span>
-        </div>
-        <div className="bg-gray-100 p-3 rounded flex flex-col items-center">
-          <span className="text-2xl font-bold">{averageDurationLabel}</span>
-          <span className="text-gray-600 text-sm">Avg Duration</span>
+      {/* Summary */}
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">Call Summary</h2>
+        <div className="mt-2 flex space-x-6 text-sm text-gray-600">
+          <div className="flex items-center">
+            <LucideReact.Phone size={16} className="text-gray-500 mr-1" />
+            Total: {totalCalls}
+          </div>
+          <div className="flex items-center">
+            <LucideReact.AlertTriangle
+              size={16}
+              className="text-red-500 mr-1"
+            />
+            Missed: {missedCalls}
+          </div>
+          <div className="flex items-center">
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500 mr-1"
+            />
+            Answered: {answeredCalls}
+          </div>
         </div>
       </div>
 
-      {/* Detailed Call List */}
-      <div className="space-y-4">
-        {value.map((call, idx) => {
-          const dateLabel = formatDateTime(call.createdAt);
-          const dirLabel = capitalize(call.direction || 'Unknown');
-          const stateKey = call.state?.toLowerCase() || 'unknown';
-          const stateLabel = capitalize(stateKey);
-          const badgeStyle =
-            stateKey === 'missed'
-              ? 'bg-red-100 text-red-800'
-              : stateKey === 'closed'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-blue-100 text-blue-800';
-          const durSec =
-            call.engagedAt && call.closedAt
-              ? Math.floor((call.closedAt - call.engagedAt) / 1000)
-              : 0;
-          const durLabel = durSec > 0 ? formatDuration(durSec) : null;
+      {/* Call list */}
+      <div className="space-y-2">
+        {logs.map((log, idx) => {
+          const isMissed = Boolean(log.missedReason);
+          const dir = log.direction?.toLowerCase();
+          const DirectionIcon =
+            dir === "outgoing" || dir === "dial"
+              ? LucideReact.PhoneOutgoing
+              : LucideReact.PhoneIncoming;
+          const iconColor = dir === "outgoing" ? "#7C3AED" : "#10B981";
 
           return (
             <div
               key={idx}
-              className="p-4 bg-gray-50 rounded-lg shadow-sm"
+              className="flex items-center p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition"
             >
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-gray-500">{dateLabel}</span>
-                <span
-                  className={`px-2 py-1 text-xs font-medium rounded ${badgeStyle}`}
-                >
-                  {stateLabel}
-                </span>
+              {/* Direction icon */}
+              <div className="mr-3">
+                <DirectionIcon
+                  size={20}
+                  color={iconColor}
+                  aria-label={dir ?? "call"}
+                />
               </div>
-              <div className="text-lg font-medium mb-1">
-                {dirLabel} Call
-              </div>
-              <div className="text-sm text-gray-700">
-                From:{' '}
-                <span className="font-medium">
-                  {call.from || 'Unknown'}
-                </span>{' '}
-                To:{' '}
-                <span className="font-medium">
-                  {call.to || 'Unknown'}
-                </span>
-              </div>
-              {durLabel && (
-                <div className="text-sm text-gray-700 mt-1">
-                  Duration:{' '}
-                  <span className="font-medium">{durLabel}</span>
-                </div>
-              )}
-              {stateKey === 'missed' && call.missedReason && (
-                <div className="text-sm text-red-600 mt-1">
-                  Reason:{' '}
-                  <span className="font-medium">
-                    {call.missedReason}
+
+              {/* Call details */}
+              <div className="flex-1 min-w-0">
+                <div className="flex flex-wrap items-center text-gray-800 truncate">
+                  <span className="font-medium truncate">
+                    {log.from ?? "Unknown"}
+                  </span>
+                  <span className="mx-1">→</span>
+                  <span className="font-medium truncate">
+                    {log.to ?? "Unknown"}
                   </span>
                 </div>
-              )}
+                <div className="mt-1 flex items-center text-xs text-gray-500">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  <span className="truncate">{formatDate(log.createdAt)}</span>
+                </div>
+                {isMissed && (
+                  <div className="mt-1 flex items-center text-xs text-red-500">
+                    <LucideReact.XCircle size={14} className="mr-1" />
+                    <span className="truncate">{log.missedReason}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Duration & state */}
+              <div className="ml-4 flex flex-col items-end text-xs text-gray-600">
+                <div className="flex items-center">
+                  <LucideReact.Clock size={14} className="mr-1" />
+                  {formatDuration(log.engagedAt, log.closedAt)}
+                </div>
+                {log.state && (
+                  <span className="mt-1 px-2 py-0.5 bg-gray-200 rounded-full capitalize text-[10px]">
+                    {log.state}
+                  </span>
+                )}
+              </div>
             </div>
           );
         })}

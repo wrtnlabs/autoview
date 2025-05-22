@@ -1,161 +1,163 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Journey of delivery.
+   *
+   * `IShoppingDeliveryJourney` is a subsidiary entity of {@link IShoppingDelivery},
+   * describing each journey of the delivery. For reference, the word journey
+   * means each step of the delivery process, such as preparing, shipping, and
+   * delivering {@link IShoppingOrderGood goods} to the
+   * {@link IShoppingCustomer customer}.
+   */
+  export type IShoppingDeliveryJourney = {
     /**
-     * Journey of delivery.
+     * Primary Key.
      *
-     * `IShoppingDeliveryJourney` is a subsidiary entity of {@link IShoppingDelivery},
-     * describing each journey of the delivery. For reference, the word journey
-     * means each step of the delivery process, such as preparing, shipping, and
-     * delivering {@link IShoppingOrderGood goods} to the
-     * {@link IShoppingCustomer customer}.
-    */
-    export type IShoppingDeliveryJourney = {
-        /**
-         * Primary Key.
-         *
-         * @title Primary Key
-        */
-        id: string;
-        /**
-         * Creation time of the record.
-         *
-         * @title Creation time of the record
-        */
-        created_at: string;
-        /**
-         * Deletion time of the record.
-         *
-         * @title Deletion time of the record
-        */
-        deleted_at: null | (string & tags.Format<"date-time">);
-        /**
-         * Type of journey.
-         *
-         * - preparing
-         * - manufacturing
-         * - shipping
-         * - delivering
-         *
-         * @title Type of journey
-        */
-        type: "preparing" | "manufacturing" | "shipping" | "delivering";
-        /**
-         * Title of journey.
-         *
-         * @title Title of journey
-        */
-        title: null | string;
-        /**
-         * Description of journey.
-         *
-         * @title Description of journey
-        */
-        description: null | string;
-        /**
-         * Start time of the journey.
-         *
-         * @title Start time of the journey
-        */
-        started_at: null | (string & tags.Format<"date-time">);
-        /**
-         * Completion time of the journey.
-         *
-         * @title Completion time of the journey
-        */
-        completed_at: null | (string & tags.Format<"date-time">);
-    };
+     * @title Primary Key
+     */
+    id: string;
+    /**
+     * Creation time of the record.
+     *
+     * @title Creation time of the record
+     */
+    created_at: string;
+    /**
+     * Deletion time of the record.
+     *
+     * @title Deletion time of the record
+     */
+    deleted_at: null | (string & tags.Format<"date-time">);
+    /**
+     * Type of journey.
+     *
+     * - preparing
+     * - manufacturing
+     * - shipping
+     * - delivering
+     *
+     * @title Type of journey
+     */
+    type: "preparing" | "manufacturing" | "shipping" | "delivering";
+    /**
+     * Title of journey.
+     *
+     * @title Title of journey
+     */
+    title: null | string;
+    /**
+     * Description of journey.
+     *
+     * @title Description of journey
+     */
+    description: null | string;
+    /**
+     * Start time of the journey.
+     *
+     * @title Start time of the journey
+     */
+    started_at: null | (string & tags.Format<"date-time">);
+    /**
+     * Completion time of the journey.
+     *
+     * @title Completion time of the journey
+     */
+    completed_at: null | (string & tags.Format<"date-time">);
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeliveryJourney;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const typeMap: Record<AutoViewInput["type"], { label: string; color: string }> = {
-    preparing:       { label: "Preparing",    color: "bg-gray-200 text-gray-800" },
-    manufacturing:   { label: "Manufacturing", color: "bg-blue-200 text-blue-800" },
-    shipping:        { label: "Shipping",      color: "bg-yellow-200 text-yellow-800" },
-    delivering:      { label: "Delivering",    color: "bg-green-200 text-green-800" },
+  const typeLabels: Record<AutoViewInput["type"], string> = {
+    preparing: "Preparing",
+    manufacturing: "Manufacturing",
+    shipping: "Shipping",
+    delivering: "Delivering",
   };
-  const { label: typeLabel, color: typeColor } =
-    typeMap[value.type] || { label: value.type, color: "bg-gray-200 text-gray-800" };
-  const title = value.title ?? typeLabel;
-  const description = value.description ?? "No description available";
 
-  const formatDate = (dateStr: string | null) =>
-    dateStr
-      ? new Date(dateStr).toLocaleString(undefined, {
+  const typeIcons: Record<AutoViewInput["type"], JSX.Element> = {
+    preparing: <LucideReact.Box color="#2563EB" size={24} />,
+    manufacturing: <LucideReact.Package color="#9333EA" size={24} />,
+    shipping: <LucideReact.Truck color="#F59E0B" size={24} />,
+    delivering: <LucideReact.CheckCircle color="#10B981" size={24} />,
+  };
+
+  const isCompleted = Boolean(value.completed_at);
+  const isStarted = Boolean(value.started_at);
+  const statusLabel = isCompleted
+    ? "Completed"
+    : isStarted
+      ? "In Progress"
+      : "Upcoming";
+  const statusIcon = isCompleted ? (
+    <LucideReact.CheckCircle className="text-green-500" size={16} />
+  ) : isStarted ? (
+    <LucideReact.Loader className="animate-spin text-amber-500" size={16} />
+  ) : (
+    <LucideReact.Clock className="text-gray-400" size={16} />
+  );
+
+  const formatDate = (d: string | null): string =>
+    d
+      ? new Date(d).toLocaleString(undefined, {
           year: "numeric",
           month: "short",
           day: "numeric",
-          hour: "numeric",
+          hour: "2-digit",
           minute: "2-digit",
         })
-      : null;
-
-  const startedAt   = formatDate(value.started_at);
-  const completedAt = formatDate(value.completed_at);
-
-  let duration: string | null = null;
-  if (value.started_at && value.completed_at) {
-    const diffMs = new Date(value.completed_at).getTime() - new Date(value.started_at).getTime();
-    const totalMinutes = Math.floor(diffMs / 60000);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    duration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  }
-
-  let status = "Pending";
-  if (value.completed_at) status = "Completed";
-  else if (value.started_at) status = "In Progress";
+      : "—";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="p-4 bg-white rounded-lg shadow flex flex-col space-y-3">
-      <div className="flex items-center justify-between">
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${typeColor}`}
-        >
-          {typeLabel}
-        </span>
-        <span className="text-xs text-gray-500">{status}</span>
-      </div>
-
-      <h3 className="text-lg font-semibold text-gray-900 truncate">{title}</h3>
-
-      {description && (
-        <p className="text-gray-700 text-sm line-clamp-2">{description}</p>
-      )}
-
-      <div className="text-sm text-gray-600 space-y-1">
-        {startedAt && (
-          <div>
-            Start: <time dateTime={value.started_at!}>{startedAt}</time>
+    <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row sm:items-start gap-4">
+      <div className="flex-shrink-0">{typeIcons[value.type]}</div>
+      <div className="flex-1">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold text-gray-700">
+            {typeLabels[value.type]}
+          </span>
+          <div className="flex items-center text-sm">
+            {statusIcon}
+            <span
+              className={`ml-1 ${
+                isCompleted
+                  ? "text-green-600"
+                  : isStarted
+                    ? "text-amber-500"
+                    : "text-gray-500"
+              }`}
+            >
+              {statusLabel}
+            </span>
           </div>
+        </div>
+        {value.title && (
+          <h3 className="mt-1 text-lg font-medium text-gray-800 truncate">
+            {value.title}
+          </h3>
         )}
-        {completedAt && (
-          <div>
-            End: <time dateTime={value.completed_at!}>{completedAt}</time>
+        {value.description && (
+          <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+            {value.description}
+          </p>
+        )}
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-600 text-sm">
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} />
+            <span className="ml-1">Start: {formatDate(value.started_at)}</span>
           </div>
-        )}
-        {duration && (
-          <div>
-            Duration: <span>{duration}</span>
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} />
+            <span className="ml-1">End: {formatDate(value.completed_at)}</span>
           </div>
-        )}
-        <div>
-          Logged:{" "}
-          <time dateTime={value.created_at}>
-            {new Date(value.created_at).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </time>
         </div>
       </div>
-    </article>
+    </div>
   );
 }

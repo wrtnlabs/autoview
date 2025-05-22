@@ -1,48 +1,61 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export type IShoppingDeposit = {
-        id: string & tags.Format<"uuid">;
-        created_at: string & tags.Format<"date-time">;
-        code: string;
-        source: string;
-        direction: -1 | 1;
-    };
+  export type IShoppingDeposit = {
+    id: string & tags.Format<"uuid">;
+    created_at: string & tags.Format<"date-time">;
+    code: string;
+    source: string;
+    direction: -1 | 1;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeposit;
 
-
-
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants
+  // 1. Data transformation
   const date = new Date(value.created_at);
   const formattedDate = date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
   });
-  const type = value.direction === 1 ? 'Credit' : 'Debit';
-  const typeClass =
-    value.direction === 1
-      ? 'text-green-700 bg-green-100'
-      : 'text-red-700 bg-red-100';
+  const isCredit = value.direction === 1;
+  const directionLabel = isCredit ? "Credit" : "Debit";
+  const DirectionIcon = isCredit
+    ? LucideReact.ArrowUpRight
+    : LucideReact.ArrowDownLeft;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-gray-900 break-words">
-            {value.code}
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">Source: {value.source}</p>
-          <p className="mt-1 text-sm text-gray-500">Date: {formattedDate}</p>
+    <div className="w-full max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>{formattedDate}</span>
         </div>
-        <span
-          className={`mt-2 sm:mt-0 sm:ml-4 inline-block px-2 py-1 text-xs font-semibold rounded ${typeClass}`}
+        <div
+          className={`flex items-center text-sm font-medium ${
+            isCredit ? "text-green-600" : "text-red-600"
+          }`}
         >
-          {type}
-        </span>
+          <DirectionIcon size={16} className="mr-1" />
+          <span>{directionLabel}</span>
+        </div>
+      </div>
+      <div className="text-gray-800 space-y-2">
+        <div className="flex items-center">
+          <span className="font-semibold w-16">Code:</span>
+          <span className="truncate">{value.code}</span>
+        </div>
+        <div className="flex items-center">
+          <span className="font-semibold w-16">Source:</span>
+          <span className="truncate">{value.source}</span>
+        </div>
       </div>
     </div>
   );

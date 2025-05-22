@@ -1,136 +1,174 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiReposActionsRunners {
-        export type GetResponse = {
-            total_count: number & tags.Type<"int32">;
-            runners: AutoViewInputSubTypes.runner[];
-        };
-    }
-    /**
-     * A self hosted runner
-     *
-     * @title Self hosted runners
-    */
-    export type runner = {
-        /**
-         * The ID of the runner.
-        */
-        id: number & tags.Type<"int32">;
-        /**
-         * The ID of the runner group.
-        */
-        runner_group_id?: number & tags.Type<"int32">;
-        /**
-         * The name of the runner.
-        */
-        name: string;
-        /**
-         * The Operating System of the runner.
-        */
-        os: string;
-        /**
-         * The status of the runner.
-        */
-        status: string;
-        busy: boolean;
-        labels: AutoViewInputSubTypes.runner_label[];
-        ephemeral?: boolean;
+  export namespace IApiReposActionsRunners {
+    export type GetResponse = {
+      total_count: number & tags.Type<"int32">;
+      runners: AutoViewInputSubTypes.runner[];
     };
+  }
+  /**
+   * A self hosted runner
+   *
+   * @title Self hosted runners
+   */
+  export type runner = {
     /**
-     * A label for a self hosted runner
-     *
-     * @title Self hosted runner label
-    */
-    export type runner_label = {
-        /**
-         * Unique identifier of the label.
-        */
-        id?: number & tags.Type<"int32">;
-        /**
-         * Name of the label.
-        */
-        name: string;
-        /**
-         * The type of label. Read-only labels are applied automatically when the runner is configured.
-        */
-        type?: "read-only" | "custom";
-    };
+     * The ID of the runner.
+     */
+    id: number & tags.Type<"int32">;
+    /**
+     * The ID of the runner group.
+     */
+    runner_group_id?: number & tags.Type<"int32">;
+    /**
+     * The name of the runner.
+     */
+    name: string;
+    /**
+     * The Operating System of the runner.
+     */
+    os: string;
+    /**
+     * The status of the runner.
+     */
+    status: string;
+    busy: boolean;
+    labels: AutoViewInputSubTypes.runner_label[];
+    ephemeral?: boolean;
+  };
+  /**
+   * A label for a self hosted runner
+   *
+   * @title Self hosted runner label
+   */
+  export type runner_label = {
+    /**
+     * Unique identifier of the label.
+     */
+    id?: number & tags.Type<"int32">;
+    /**
+     * Name of the label.
+     */
+    name: string;
+    /**
+     * The type of label. Read-only labels are applied automatically when the runner is configured.
+     */
+    type?: "read-only" | "custom";
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunners.GetResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiReposActionsRunners.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const busyCount = value.runners.filter(r => r.busy).length;
-  const idleCount = value.runners.length - busyCount;
-  const ephemeralCount = value.runners.filter(r => r.ephemeral).length;
-  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  const totalRunners = value.total_count;
+  const runners = value.runners;
+  const onlineCount = runners.filter(
+    (r) => r.status.toLowerCase() === "online",
+  ).length;
+  const offlineCount = runners.filter(
+    (r) => r.status.toLowerCase() === "offline",
+  ).length;
+  const busyCount = runners.filter((r) => r.busy).length;
+  const capitalize = (s: string) =>
+    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
       {/* Summary Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Self-Hosted Runners ({value.total_count})
-        </h2>
-        <div className="mt-2 sm:mt-0 flex flex-wrap gap-2">
-          <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">
-            Busy: {busyCount}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-2 text-gray-700">
+          <LucideReact.Users size={20} className="text-gray-500" />
+          <span className="text-lg font-semibold">
+            {totalRunners} Runner{totalRunners !== 1 ? "s" : ""}
           </span>
-          <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-            Idle: {idleCount}
-          </span>
-          {ephemeralCount > 0 && (
-            <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              Ephemeral: {ephemeralCount}
-            </span>
+        </div>
+        <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-600">
+          <div className="flex items-center space-x-1">
+            <LucideReact.Circle size={16} className="text-green-500" />
+            <span>{onlineCount} Online</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <LucideReact.Circle size={16} className="text-red-500" />
+            <span>{offlineCount} Offline</span>
+          </div>
+          {busyCount > 0 && (
+            <div className="flex items-center space-x-1">
+              <LucideReact.Loader
+                size={16}
+                className="animate-spin text-yellow-500"
+              />
+              <span>{busyCount} Busy</span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Runners List */}
-      <ul className="mt-4 space-y-4">
-        {value.runners.map(runner => (
-          <li
+      {/* Runner List */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {runners.map((runner) => (
+          <div
             key={runner.id}
-            className="p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
+            className="p-4 border border-gray-200 rounded-lg hover:shadow transition-shadow flex flex-col"
           >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
+            <div className="flex items-center justify-between">
+              <h3 className="text-md font-medium text-gray-800 truncate">
                 {runner.name}
               </h3>
-              <div className="mt-2 sm:mt-0 flex flex-wrap gap-2 text-sm text-gray-600">
-                <span>OS: {capitalize(runner.os)}</span>
-                <span>Status: {capitalize(runner.status)}</span>
-                {runner.busy ? (
-                  <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded-full">
-                    Busy
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded-full">
-                    Idle
-                  </span>
-                )}
-                {runner.ephemeral && (
-                  <span className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
-                    Ephemeral
-                  </span>
-                )}
-              </div>
+              {runner.ephemeral && (
+                <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
+                  Ephemeral
+                </span>
+              )}
             </div>
+
+            <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
+              <LucideReact.Monitor size={16} className="text-gray-400" />
+              <span className="truncate">{runner.os}</span>
+            </div>
+
+            <div className="mt-2 flex items-center space-x-2 text-sm">
+              {runner.busy ? (
+                <LucideReact.Loader
+                  size={16}
+                  className="animate-spin text-yellow-500"
+                />
+              ) : runner.status.toLowerCase() === "online" ? (
+                <LucideReact.CheckCircle size={16} className="text-green-500" />
+              ) : runner.status.toLowerCase() === "offline" ? (
+                <LucideReact.XCircle size={16} className="text-red-500" />
+              ) : (
+                <LucideReact.Circle size={16} className="text-gray-500" />
+              )}
+              <span
+                className={
+                  runner.busy
+                    ? "text-yellow-600"
+                    : runner.status.toLowerCase() === "online"
+                      ? "text-green-600"
+                      : runner.status.toLowerCase() === "offline"
+                        ? "text-red-600"
+                        : "text-gray-600"
+                }
+              >
+                {runner.busy ? "Busy" : capitalize(runner.status)}
+              </span>
+            </div>
+
             {runner.labels.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {runner.labels.map(label => (
+              <div className="mt-3 flex flex-wrap gap-1">
+                {runner.labels.map((label) => (
                   <span
-                    key={label.id ?? label.name}
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                    key={label.name}
+                    className={`text-xs px-2 py-0.5 rounded ${
                       label.type === "read-only"
-                        ? "bg-blue-50 text-blue-700"
-                        : "bg-green-50 text-green-700"
+                        ? "bg-gray-100 text-gray-800"
+                        : "bg-blue-100 text-blue-800"
                     }`}
                   >
                     {label.name}
@@ -138,9 +176,9 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
                 ))}
               </div>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

@@ -4,5 +4,5 @@ import Component from "../components/171";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"bots":[{"id":"bot_001_test","channelId":"channel_test_123","name":"Sample Bot Alpha (Test)","createdAt":1687184729000,"avatar":{"bucket":"sample-bucket-test","key":"avatars/bot_001.png","width":128,"height":128},"avatarUrl":"https://cdn.example.com/avatars/bot_001.png","color":"#a1b2c3"},{"name":"Minimal Bot Beta (Sample)","color":"#d4e5f6"}],"next":2};
+  return {"bots":[{"id":"bot_001","channelId":"channel-group-sample-01","name":"Sample Bot Alpha","createdAt":1716086400000,"avatar":{"bucket":"sample-bucket-test","key":"avatars/sample-bot-alpha.png","width":64,"height":64},"avatarUrl":"https://example.com/avatars/sample-bot-alpha.png","color":"#abcdef"},{"id":"bot_002","name":"Test Bot Beta","avatar":{"bucket":"test-bucket-sample","key":"avatars/test-bot-beta.jpg","width":256},"color":"#123456"}],"next":2};
 }

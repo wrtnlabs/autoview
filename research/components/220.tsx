@@ -1,135 +1,176 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace legacy {
-        export namespace open {
-            export namespace v4 {
-                export type LegacyV4WebhookView = {
-                    webhook?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook;
-                };
-            }
-        }
-        export namespace v4 {
-            export type LegacyV4Webhook = {
-                id?: string;
-                channelId?: string;
-                name: string;
-                url: string;
-                token?: string;
-                keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
-                createdAt?: number;
-                watchUserChats?: boolean;
-                watchGroups?: boolean;
-                apiVersion: string;
-                lastBlockedAt?: number;
-                blocked?: boolean;
-            };
-        }
+  export namespace legacy {
+    export namespace open {
+      export namespace v4 {
+        export type LegacyV4WebhookView = {
+          webhook?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook;
+        };
+      }
     }
+    export namespace v4 {
+      export type LegacyV4Webhook = {
+        id?: string;
+        channelId?: string;
+        name: string;
+        url: string;
+        token?: string;
+        keywords?: string[] &
+          tags.MinItems<1> &
+          tags.MaxItems<20> &
+          tags.UniqueItems;
+        createdAt?: number;
+        watchUserChats?: boolean;
+        watchGroups?: boolean;
+        apiVersion: string;
+        lastBlockedAt?: number;
+        blocked?: boolean;
+      };
+    }
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4WebhookView;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.legacy.open.v4.LegacyV4WebhookView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const webhook = value.webhook;
-  if (!webhook) {
+  const wk = value.webhook;
+  const hasWebhook = Boolean(wk);
+  const name = wk?.name ?? "";
+  const url = wk?.url ?? "";
+  const apiVersion = wk?.apiVersion ?? "";
+  const keywords = wk?.keywords ?? [];
+  const createdAt = wk?.createdAt;
+  const lastBlockedAt = wk?.lastBlockedAt;
+  const watchUserChats = wk?.watchUserChats ?? false;
+  const watchGroups = wk?.watchGroups ?? false;
+  const blocked = wk?.blocked ?? false;
+
+  const formattedCreatedAt = createdAt
+    ? new Date(createdAt).toLocaleString()
+    : undefined;
+  const formattedLastBlockedAt = lastBlockedAt
+    ? new Date(lastBlockedAt).toLocaleString()
+    : undefined;
+
+  // Icons and status
+  const statusIcon = blocked ? (
+    <LucideReact.AlertTriangle
+      size={16}
+      className="text-red-500"
+      aria-label="Blocked"
+    />
+  ) : (
+    <LucideReact.CheckCircle
+      size={16}
+      className="text-green-500"
+      aria-label="Active"
+    />
+  );
+  const statusText = blocked ? "Blocked" : "Active";
+
+  const chatIcon = (
+    <LucideReact.MessageSquare
+      size={16}
+      className={watchUserChats ? "text-green-500" : "text-gray-400"}
+      aria-label={
+        watchUserChats ? "Watching user chats" : "Not watching user chats"
+      }
+    />
+  );
+  const groupIcon = (
+    <LucideReact.Users
+      size={16}
+      className={watchGroups ? "text-green-500" : "text-gray-400"}
+      aria-label={watchGroups ? "Watching groups" : "Not watching groups"}
+    />
+  );
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!hasWebhook) {
     return (
-      <div className="p-4 bg-gray-100 text-gray-600 rounded-lg text-center">
-        No webhook information available
+      <div className="p-4 bg-white rounded-lg shadow text-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mx-auto mb-2" />
+        <p>No webhook configured.</p>
       </div>
     );
   }
 
-  const {
-    name,
-    url,
-    apiVersion,
-    createdAt,
-    lastBlockedAt,
-    blocked,
-    keywords,
-    watchUserChats,
-    watchGroups,
-  } = webhook;
-
-  const formattedCreatedAt = createdAt
-    ? new Date(createdAt).toLocaleString()
-    : '—';
-  const formattedLastBlockedAt = lastBlockedAt
-    ? new Date(lastBlockedAt).toLocaleString()
-    : '—';
-
-  const statusText = blocked ? 'Blocked' : 'Active';
-  const statusClasses = blocked
-    ? 'bg-red-100 text-red-800'
-    : 'bg-green-100 text-green-800';
-
-  const watchFeatures: string[] = [];
-  if (watchUserChats) watchFeatures.push('User Chats');
-  if (watchGroups) watchFeatures.push('Groups');
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-medium text-gray-900 truncate">{name}</h2>
-        <span className={`px-2 py-1 text-xs font-semibold rounded ${statusClasses}`}>
-          {statusText}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto space-y-4">
+      {/* Header: Name */}
+      <div className="flex items-center space-x-2">
+        <LucideReact.Rss size={20} className="text-indigo-500" />
+        <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
+      </div>
+
+      {/* URL & API Version */}
+      <div className="space-y-1">
+        <div className="flex items-center text-blue-600 overflow-hidden">
+          <LucideReact.Link size={16} className="mr-1 flex-shrink-0" />
+          <span className="text-sm truncate">{url}</span>
+        </div>
+        <div className="text-sm text-gray-500">API Version: {apiVersion}</div>
+      </div>
+
+      {/* Status */}
+      <div className="flex items-center space-x-1 text-sm">
+        <span>Status:</span>
+        <span className="flex items-center space-x-1">
+          {statusIcon}
+          <span className={blocked ? "text-red-600" : "text-green-600"}>
+            {statusText}
+          </span>
         </span>
       </div>
-
-      <div className="mb-2">
-        <p className="text-sm text-gray-700">
-          <span className="font-semibold">URL:</span>
-        </p>
-        <p className="mt-1 text-xs font-mono text-blue-600 break-all">
-          {url}
-        </p>
-      </div>
-
-      <div className="flex flex-wrap gap-4 mb-3 text-sm text-gray-700">
-        <div>
-          <span className="font-semibold">API Version:</span>
-          <span className="ml-1">{apiVersion}</span>
-        </div>
-        <div>
-          <span className="font-semibold">Created:</span>
-          <span className="ml-1 text-gray-500">{formattedCreatedAt}</span>
-        </div>
-        {blocked && lastBlockedAt && (
-          <div>
-            <span className="font-semibold">Blocked At:</span>
-            <span className="ml-1 text-gray-500">{formattedLastBlockedAt}</span>
-          </div>
-        )}
-      </div>
-
-      {watchFeatures.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {watchFeatures.map((feat) => (
-            <span
-              key={feat}
-              className="px-2 py-1 bg-blue-50 text-blue-800 text-xs rounded"
-            >
-              {feat}
-            </span>
-          ))}
+      {blocked && formattedLastBlockedAt && (
+        <div className="text-xs text-red-500">
+          Last blocked: {formattedLastBlockedAt}
         </div>
       )}
 
-      {keywords && keywords.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {keywords.map((kw) => (
-            <span
-              key={kw}
-              className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded"
-            >
-              {kw}
-            </span>
-          ))}
+      {/* Creation Date */}
+      {formattedCreatedAt && (
+        <div className="flex items-center text-sm text-gray-500">
+          <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+          <span>Created: {formattedCreatedAt}</span>
+        </div>
+      )}
+
+      {/* Watch Settings */}
+      <div className="flex items-center space-x-6 text-sm">
+        <div className="flex items-center space-x-1">
+          {chatIcon}
+          <span className={watchUserChats ? "text-gray-800" : "text-gray-400"}>
+            User Chats
+          </span>
+        </div>
+        <div className="flex items-center space-x-1">
+          {groupIcon}
+          <span className={watchGroups ? "text-gray-800" : "text-gray-400"}>
+            Groups
+          </span>
+        </div>
+      </div>
+
+      {/* Keywords */}
+      {keywords.length > 0 && (
+        <div className="mt-2">
+          <span className="text-sm font-medium text-gray-700">Keywords:</span>
+          <div className="mt-1 flex flex-wrap">
+            {keywords.map((kw, idx) => (
+              <span
+                key={idx}
+                className="inline-block bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-1"
+              >
+                {kw}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

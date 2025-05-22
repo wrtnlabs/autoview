@@ -1,63 +1,86 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * GitHub Actions Cache Usage by repository.
+   *
+   * @title Actions Cache Usage by repository
+   */
+  export type actions_cache_usage_by_repository = {
     /**
-     * GitHub Actions Cache Usage by repository.
-     *
-     * @title Actions Cache Usage by repository
-    */
-    export type actions_cache_usage_by_repository = {
-        /**
-         * The repository owner and name for the cache usage being shown.
-        */
-        full_name: string;
-        /**
-         * The sum of the size in bytes of all the active cache items in the repository.
-        */
-        active_caches_size_in_bytes: number & tags.Type<"int32">;
-        /**
-         * The number of active caches in the repository.
-        */
-        active_caches_count: number & tags.Type<"int32">;
-    };
+     * The repository owner and name for the cache usage being shown.
+     */
+    full_name: string;
+    /**
+     * The sum of the size in bytes of all the active cache items in the repository.
+     */
+    active_caches_size_in_bytes: number & tags.Type<"int32">;
+    /**
+     * The number of active caches in the repository.
+     */
+    active_caches_count: number & tags.Type<"int32">;
+  };
 }
-export type AutoViewInput = AutoViewInputSubTypes.actions_cache_usage_by_repository;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.actions_cache_usage_by_repository;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { full_name, active_caches_count, active_caches_size_in_bytes } = value;
+  const repositoryName = value.full_name;
+  const cachesCount = value.active_caches_count;
+  const cachesSizeBytes = value.active_caches_size_in_bytes;
 
-  // Convert bytes to a human-readable string (e.g., "1.23 MB")
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const units = ["B", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const size = bytes / Math.pow(k, i);
-    return `${size.toFixed(2)} ${units[i]}`;
-  };
-
-  const readableSize = formatBytes(active_caches_size_in_bytes);
-  const countDisplay = active_caches_count.toLocaleString();
+  // Format bytes into human-readable string.
+  function formatBytes(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(2)} KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(2)} MB`;
+    const gb = mb / 1024;
+    return `${gb.toFixed(2)} GB`;
+  }
+  const formattedSize = formatBytes(cachesSizeBytes);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex flex-col space-y-3 md:flex-row md:space-y-0 md:space-x-6">
-      <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-semibold text-gray-900 truncate">
-          {full_name}
-        </h3>
-        <div className="mt-2 flex flex-wrap text-sm text-gray-600 space-x-4">
-          <div className="flex items-center space-x-1">
-            <span className="font-medium text-gray-700">Caches:</span>
-            <span>{countDisplay}</span>
+    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
+      {/* Repository Name */}
+      <div className="flex items-center gap-2 mb-4">
+        <LucideReact.GitBranch
+          size={20}
+          className="text-gray-500"
+          aria-hidden="true"
+        />
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
+          {repositoryName}
+        </h2>
+      </div>
+      {/* Statistics */}
+      <div className="flex items-center justify-between text-gray-700">
+        <div className="flex items-center gap-1">
+          <LucideReact.Database
+            size={18}
+            className="text-gray-500"
+            aria-hidden="true"
+          />
+          <div className="flex flex-col">
+            <span className="font-medium">{formattedSize}</span>
+            <span className="text-sm text-gray-500">Cache Size</span>
           </div>
-          <div className="flex items-center space-x-1">
-            <span className="font-medium text-gray-700">Total Size:</span>
-            <span>{readableSize}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.List
+            size={18}
+            className="text-gray-500"
+            aria-hidden="true"
+          />
+          <div className="flex flex-col">
+            <span className="font-medium">{cachesCount}</span>
+            <span className="text-sm text-gray-500">Cache Count</span>
           </div>
         </div>
       </div>

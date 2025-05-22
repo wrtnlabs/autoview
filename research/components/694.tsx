@@ -1,56 +1,57 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
+  /**
+   * Set repository secrets for GitHub Codespaces.
+   *
+   * @title Codespaces Secret
+   */
+  export type repo_codespaces_secret = {
     /**
-     * Set repository secrets for GitHub Codespaces.
-     *
-     * @title Codespaces Secret
-    */
-    export type repo_codespaces_secret = {
-        /**
-         * The name of the secret.
-        */
-        name: string;
-        created_at: string & tags.Format<"date-time">;
-        updated_at: string & tags.Format<"date-time">;
-    };
+     * The name of the secret.
+     */
+    name: string;
+    created_at: string & tags.Format<"date-time">;
+    updated_at: string & tags.Format<"date-time">;
+  };
 }
 export type AutoViewInput = AutoViewInputSubTypes.repo_codespaces_secret;
-
-
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const createdDate = new Date(value.created_at);
   const updatedDate = new Date(value.updated_at);
-
-  const formatOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  };
-
-  const formattedCreatedAt = createdDate.toLocaleString(undefined, formatOptions);
-  const formattedUpdatedAt = updatedDate.toLocaleString(undefined, formatOptions);
+  const formattedCreatedAt = createdDate.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const formattedUpdatedAt = updatedDate.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-4">
-      <h3 className="text-gray-900 text-lg font-semibold truncate">{value.name}</h3>
-      <dl className="mt-3 space-y-2 text-gray-700 text-sm">
-        <div className="flex justify-between">
-          <dt className="font-medium">Created</dt>
-          <dd className="text-right">{formattedCreatedAt}</dd>
+    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-3">
+        <LucideReact.Key size={20} className="text-gray-500" />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800 truncate">
+          {value.name}
+        </h2>
+      </div>
+      <div className="space-y-2 text-sm text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span className="ml-1">Created on {formattedCreatedAt}</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="font-medium">Updated</dt>
-          <dd className="text-right">{formattedUpdatedAt}</dd>
+        <div className="flex items-center">
+          <LucideReact.RefreshCw size={16} className="text-gray-400" />
+          <span className="ml-1">Last updated {formattedUpdatedAt}</span>
         </div>
-      </dl>
+      </div>
     </div>
   );
 }

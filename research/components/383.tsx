@@ -1,50 +1,57 @@
+import LucideReact from "lucide-react";
+import React, { JSX } from "react";
 import { tags } from "typia";
-import React from "react";
+
 export namespace AutoViewInputSubTypes {
-    export namespace IApiOrgsActionsHostedRunnersPlatforms {
-        export type GetResponse = {
-            total_count: number & tags.Type<"int32">;
-            platforms: string[];
-        };
-    }
+  export namespace IApiOrgsActionsHostedRunnersPlatforms {
+    export type GetResponse = {
+      total_count: number & tags.Type<"int32">;
+      platforms: string[];
+    };
+  }
 }
-export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsHostedRunnersPlatforms.GetResponse;
-
-
+export type AutoViewInput =
+  AutoViewInputSubTypes.IApiOrgsActionsHostedRunnersPlatforms.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedCount = new Intl.NumberFormat().format(value.total_count);
-  const formatPlatformName = (platform: string): string =>
-    platform
-      .split(/[-_]/)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  const formattedPlatforms = value.platforms.map(formatPlatformName);
+  const totalCount = value.total_count.toLocaleString();
+  const hasPlatforms =
+    Array.isArray(value.platforms) && value.platforms.length > 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">
-        Hosted Runners Platforms
-      </h2>
-      <p className="text-sm text-gray-600 mb-4">
-        Total Platforms: <span className="font-medium text-gray-800">{formattedCount}</span>
-      </p>
-      {formattedPlatforms.length > 0 ? (
-        <ul className="flex flex-wrap gap-2">
-          {formattedPlatforms.map((name, idx) => (
-            <li
-              key={idx}
-              className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm truncate"
+    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md">
+      {/* Header */}
+      <div className="flex items-center text-gray-700 mb-3">
+        <LucideReact.Server size={20} className="text-indigo-500" />
+        <h3 className="ml-2 text-lg font-semibold">
+          Supported Platforms ({totalCount})
+        </h3>
+      </div>
+
+      {/* Platform List or Empty State */}
+      {hasPlatforms ? (
+        <div className="flex flex-wrap gap-2">
+          {value.platforms.map((platform) => (
+            <span
+              key={platform}
+              className="inline-flex items-center bg-gray-100 text-gray-800 text-sm font-medium px-2 py-0.5 rounded"
             >
-              {name}
-            </li>
+              <LucideReact.CheckCircle
+                size={14}
+                className="text-green-500 mr-1"
+              />
+              {platform}
+            </span>
           ))}
-        </ul>
+        </div>
       ) : (
-        <p className="text-sm text-gray-500 italic">No available platforms.</p>
+        <div className="flex items-center text-gray-500">
+          <LucideReact.AlertCircle size={18} className="mr-2" />
+          <span>No supported platforms</span>
+        </div>
       )}
     </div>
   );
