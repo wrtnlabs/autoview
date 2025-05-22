@@ -8,5 +8,5 @@ export interface Input {
 }
 
 export interface Output {
-  mockData: any;
+  mockData: unknown;
 }
