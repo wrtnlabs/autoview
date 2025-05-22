@@ -47,6 +47,32 @@ export class Agent implements AgentBase<Input, Output> {
       BOILERPLATE_ALIAS,
       BOILERPLATE_SUBTYPE_PREFIX,
     );
+
+    // compile the boilerplate first to detect if the schema is valid
+    const preCompileResult = await service.compileReactComponent(
+      boilerplate,
+      "",
+    );
+
+    if (preCompileResult.type === "failure") {
+      if (
+        preCompileResult.diagnostics.some((item) =>
+          item.messageText.includes("circularly references itself"),
+        )
+      ) {
+        // if the schema is circularly references itself,
+        // it means that the schema is invalid.
+        throw new Error(
+          "[INVALID SCHEMA] the schema is circularly references itself; unable to generate the code",
+        );
+      }
+
+      // otherwise, this is an internal issue.
+      throw new Error(
+        `[INTERNAL BUG] failed to compile the boilerplate!\n\nBoilerplate:\n${boilerplate}\n\nDiagnostics:\n${JSON.stringify(preCompileResult.diagnostics, null, 2)}`,
+      );
+    }
+
     const systemPrompt = prompt({
       boilerplate,
       pre_defined_components_info: "NO-COMPONENTS-SUPPORTED-YET",

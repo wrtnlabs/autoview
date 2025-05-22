@@ -148,7 +148,7 @@ export class AutoViewAgent {
           .catch((error) =>
             error instanceof LlmUnrecoverableError
               ? `the LLM failed to generate a compilable React component despite of multiple tries with error feedback:\n\n<error>\n${error.getMessage()}\n</error>`
-              : `[INTERNAL ISSUE] failed to execute code generation agent:\n\n<error>\n${error}\n</error>`,
+              : `failed to execute code generation agent:\n\n<error>\n${error}\n</error>`,
           ),
         randomgenAgent
           .execute({
