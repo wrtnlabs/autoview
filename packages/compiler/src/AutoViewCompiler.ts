@@ -49,7 +49,7 @@ export class AutoViewCompiler {
       name: "React",
     });
     ctx.importer.external({
-      type: "default",
+      type: "star-import",
       library: "lucide-react",
       name: "LucideReact",
     });
