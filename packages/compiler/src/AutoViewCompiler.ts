@@ -43,6 +43,11 @@ export class AutoViewCompiler {
       library: "react",
       name: "React",
     });
+    ctx.importer.external({
+      type: "default",
+      library: "lucide-react",
+      name: "LucideReact",
+    });
 
     return FilePrinter.write({
       statements: [...ctx.importer.toStatements(() => ""), ...statements],
