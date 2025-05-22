@@ -1,0 +1,69 @@
+{
+  "schema": {
+    "$ref": "#/$defs/api-insights-user-stats"
+  },
+  "$defs": {
+    "api-insights-user-stats": {
+      "title": "User Stats",
+      "description": "API Insights usage stats for a user",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "actor_type": {
+            "type": "string"
+          },
+          "actor_name": {
+            "type": "string"
+          },
+          "actor_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "integration_id": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "oauth_application_id": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "format": "int64"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "total_request_count": {
+            "type": "integer"
+          },
+          "rate_limited_request_count": {
+            "type": "integer"
+          },
+          "last_rate_limited_timestamp": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_request_timestamp": {
+            "type": "string"
+          }
+        },
+        "required": []
+      }
+    }
+  }
+}

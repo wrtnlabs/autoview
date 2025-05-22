@@ -1,0 +1,8 @@
+
+import Component from "../components/555";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"id":101,"node_id":"NODEID_team_101_abc123=","name":"Sample Team Alpha (Test)","slug":"sample-team-alpha","description":"This is a sample team used for UI testing purposes.","privacy":"closed","notification_setting":"daily","permission":"admin","permissions":{"pull":true,"triage":false,"push":true,"maintain":false,"admin":true},"url":"https://api.example.com/teams/101","html_url":"https://www.example.com/teams/sample-team-alpha","members_url":"https://api.example.com/teams/101/members","repositories_url":"https://api.example.com/teams/101/repos","parent":{"id":100,"node_id":"NODEID_simple_100_xyz789=","url":"https://api.example.com/teams/100","members_url":"https://api.example.com/teams/100/members","name":"Parent Sample Team (Test)","description":"Parent team for testing nested UI rendering.","permission":"read","privacy":"closed","notification_setting":"weekly","html_url":"https://example.com/teams/parent-sample","repositories_url":"https://api.example.com/teams/100/repos","slug":"parent-sample-team","ldap_dn":"CN=Parent Sample Team,OU=Groups,DC=example,DC=com"}},{"id":102,"node_id":"NODEID_team_102_def456=","name":"Sample Team Beta (Test)","slug":"sample-team-beta","description":null,"permission":"triage","url":"https://api.example.com/teams/102","html_url":"https://www.example.com/teams/sample-team-beta","members_url":"https://api.example.com/teams/102/members","repositories_url":"https://api.example.com/teams/102/repos","parent":null}];
+}

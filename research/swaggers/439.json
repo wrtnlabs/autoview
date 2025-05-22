@@ -1,0 +1,620 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsCopilotBillingSeats.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsCopilotBillingSeats.GetQuery": {
+      "type": "object",
+      "properties": {
+        "per_page": {
+          "description": "The number of results per page (max 100). For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "type": "integer",
+          "default": 50
+        }
+      },
+      "required": []
+    },
+    "IApiOrgsCopilotBillingSeats.GetResponse": {
+      "type": "object",
+      "properties": {
+        "total_seats": {
+          "description": "Total number of Copilot seats for the organization currently being billed.",
+          "type": "integer"
+        },
+        "seats": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/copilot-seat-details"
+          }
+        }
+      },
+      "required": []
+    },
+    "copilot-seat-details": {
+      "title": "Copilot Business Seat Detail",
+      "description": "Information about a Copilot Business seat assignment for a user, team, or organization.",
+      "type": "object",
+      "properties": {
+        "assignee": {
+          "$ref": "#/$defs/simple-user"
+        },
+        "organization": {
+          "$ref": "#/$defs/nullable-organization-simple"
+        },
+        "assigning_team": {
+          "description": "The team through which the assignee is granted access to GitHub Copilot, if applicable.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/team"
+            },
+            {
+              "$ref": "#/$defs/enterprise-team"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_cancellation_date": {
+          "description": "The pending cancellation date for the seat, in `YYYY-MM-DD` format. This will be null unless the assignee's Copilot access has been canceled during the current billing cycle. If the seat has been cancelled, this corresponds to the start of the organization's next billing cycle.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_activity_at": {
+          "description": "Timestamp of user's last GitHub Copilot activity, in ISO 8601 format.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_activity_editor": {
+          "description": "Last editor that was used by the user for a GitHub Copilot completion.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "description": "Timestamp of when the assignee was last granted access to GitHub Copilot, in ISO 8601 format.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "description": "**Closing down notice:** This field is no longer relevant and is closing down. Use the `created_at` field to determine when the assignee was last granted access to GitHub Copilot. Timestamp of when the assignee's GitHub Copilot access was last updated, in ISO 8601 format.",
+          "type": "string",
+          "format": "date-time",
+          "deprecated": true
+        },
+        "plan_type": {
+          "description": "The Copilot plan of the organization, or the parent enterprise, when applicable.",
+          "oneOf": [
+            {
+              "const": "business"
+            },
+            {
+              "const": "enterprise"
+            },
+            {
+              "const": "unknown"
+            }
+          ]
+        }
+      },
+      "required": [
+        "assignee",
+        "created_at"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "nullable-organization-simple": {
+      "title": "Organization Simple",
+      "description": "A GitHub organization.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "login": {
+              "example": "github",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer"
+            },
+            "node_id": {
+              "example": "MDEyOk9yZ2FuaXphdGlvbjE=",
+              "type": "string"
+            },
+            "url": {
+              "example": "https://api.github.com/orgs/github",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/orgs/github/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/orgs/github/events",
+              "type": "string",
+              "format": "uri"
+            },
+            "hooks_url": {
+              "example": "https://api.github.com/orgs/github/hooks",
+              "type": "string"
+            },
+            "issues_url": {
+              "example": "https://api.github.com/orgs/github/issues",
+              "type": "string"
+            },
+            "members_url": {
+              "example": "https://api.github.com/orgs/github/members{/member}",
+              "type": "string"
+            },
+            "public_members_url": {
+              "example": "https://api.github.com/orgs/github/public_members{/member}",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string"
+            },
+            "description": {
+              "example": "A great organization",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "login",
+            "url",
+            "id",
+            "node_id",
+            "repos_url",
+            "events_url",
+            "hooks_url",
+            "issues_url",
+            "members_url",
+            "public_members_url",
+            "avatar_url",
+            "description"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "team": {
+      "title": "Team",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "description": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "privacy": {
+          "type": "string"
+        },
+        "notification_setting": {
+          "type": "string"
+        },
+        "permission": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "pull": {
+              "type": "boolean"
+            },
+            "triage": {
+              "type": "boolean"
+            },
+            "push": {
+              "type": "boolean"
+            },
+            "maintain": {
+              "type": "boolean"
+            },
+            "admin": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pull",
+            "triage",
+            "push",
+            "maintain",
+            "admin"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/rails/teams/core",
+          "type": "string",
+          "format": "uri"
+        },
+        "members_url": {
+          "type": "string"
+        },
+        "repositories_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent": {
+          "$ref": "#/$defs/nullable-team-simple"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "members_url",
+        "name",
+        "description",
+        "permission",
+        "html_url",
+        "repositories_url",
+        "slug",
+        "parent"
+      ]
+    },
+    "nullable-team-simple": {
+      "title": "Team Simple",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the team",
+              "example": 1,
+              "type": "integer"
+            },
+            "node_id": {
+              "example": "MDQ6VGVhbTE=",
+              "type": "string"
+            },
+            "url": {
+              "description": "URL for the team",
+              "example": "https://api.github.com/organizations/1/team/1",
+              "type": "string",
+              "format": "uri"
+            },
+            "members_url": {
+              "example": "https://api.github.com/organizations/1/team/1/members{/member}",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name of the team",
+              "example": "Justice League",
+              "type": "string"
+            },
+            "description": {
+              "description": "Description of the team",
+              "example": "A great team.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "permission": {
+              "description": "Permission that the team will have for its repositories",
+              "example": "admin",
+              "type": "string"
+            },
+            "privacy": {
+              "description": "The level of privacy this team should have",
+              "example": "closed",
+              "type": "string"
+            },
+            "notification_setting": {
+              "description": "The notification setting the team has set",
+              "example": "notifications_enabled",
+              "type": "string"
+            },
+            "html_url": {
+              "example": "https://github.com/orgs/rails/teams/core",
+              "type": "string",
+              "format": "uri"
+            },
+            "repositories_url": {
+              "example": "https://api.github.com/organizations/1/team/1/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "slug": {
+              "example": "justice-league",
+              "type": "string"
+            },
+            "ldap_dn": {
+              "description": "Distinguished Name (DN) that team maps to within LDAP environment",
+              "example": "uid=example,ou=users,dc=github,dc=com",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "url",
+            "members_url",
+            "name",
+            "description",
+            "permission",
+            "html_url",
+            "repositories_url",
+            "slug"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "enterprise-team": {
+      "title": "Enterprise Team",
+      "description": "Group of enterprise owners and/or members",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "sync_to_organizations": {
+          "example": "disabled | all",
+          "type": "string"
+        },
+        "group_id": {
+          "example": "62ab9291-fae2-468e-974b-7e45096d5021",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "group_name": {
+          "example": "Justice League",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "html_url": {
+          "example": "https://github.com/enterprises/dc/teams/justice-league",
+          "type": "string",
+          "format": "uri"
+        },
+        "members_url": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "members_url",
+        "sync_to_organizations",
+        "name",
+        "html_url",
+        "slug",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

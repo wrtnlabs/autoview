@@ -1,0 +1,223 @@
+{
+  "schema": {
+    "$ref": "#/$defs/ISystem"
+  },
+  "$defs": {
+    "ISystem": {
+      "description": "System Information.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "title": "Random Unique ID",
+          "description": "Random Unique ID.",
+          "type": "number"
+        },
+        "arguments": {
+          "description": "`process.argv`",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "commit": {
+          "title": "Git commit info",
+          "description": "Git commit info.",
+          "$ref": "#/$defs/ISystem.ICommit"
+        },
+        "package": {
+          "description": "`package.json`",
+          "$ref": "#/$defs/ISystem.IPackage"
+        },
+        "created_at": {
+          "title": "Creation time of this server",
+          "description": "Creation time of this server.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "uid",
+        "arguments",
+        "commit",
+        "package",
+        "created_at"
+      ]
+    },
+    "ISystem.ICommit": {
+      "description": "Git commit info.",
+      "type": "object",
+      "properties": {
+        "shortHash": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "sanitizedSubject": {
+          "type": "string"
+        },
+        "body": {
+          "type": "string"
+        },
+        "author": {
+          "$ref": "#/$defs/ISystem.ICommit.IUser"
+        },
+        "committer": {
+          "$ref": "#/$defs/ISystem.ICommit.IUser"
+        },
+        "authored_at": {
+          "type": "string"
+        },
+        "committed_at": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "shortHash",
+        "branch",
+        "hash",
+        "subject",
+        "sanitizedSubject",
+        "body",
+        "author",
+        "committer",
+        "authored_at",
+        "committed_at",
+        "tags"
+      ]
+    },
+    "ISystem.ICommit.IUser": {
+      "description": "Git user account info.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "email"
+      ]
+    },
+    "ISystem.IPackage": {
+      "description": "NPM package info.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "main": {
+          "type": "string"
+        },
+        "typings": {
+          "type": "string"
+        },
+        "scripts": {
+          "$ref": "#/$defs/Recordstringstring"
+        },
+        "repository": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "git"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "url"
+          ]
+        },
+        "author": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        },
+        "bugs": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        },
+        "homepage": {
+          "type": "string"
+        },
+        "devDependencies": {
+          "$ref": "#/$defs/Recordstringstring"
+        },
+        "dependencies": {
+          "$ref": "#/$defs/Recordstringstring"
+        },
+        "publishConfig": {
+          "type": "object",
+          "properties": {
+            "registry": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "registry"
+          ]
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "description",
+        "scripts",
+        "repository",
+        "author",
+        "license",
+        "bugs",
+        "homepage",
+        "dependencies"
+      ]
+    },
+    "Recordstringstring": {
+      "description": "Construct a type with a set of properties K of type T",
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  }
+}

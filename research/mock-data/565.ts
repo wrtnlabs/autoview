@@ -1,0 +1,8 @@
+
+import Component from "../components/565";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"owner_url":"https://api.example.org/orgs/sample-org/projects","url":"https://api.example.org/projects/1001","html_url":"https://www.example.org/orgs/sample-org/projects/1","columns_url":"https://api.example.org/projects/1001/columns","id":1001,"node_id":"NODEID_Project_1001","name":"Sample Project Alpha (Test)","body":"This is a sample project body for UI testing. All content is fictional and non-sensitive.","number":42,"state":"open","creator":{"name":"Test User (Dev)","email":"test.dev.user@example.com","login":"testuser","id":1234,"node_id":"NODEID_User_1234","avatar_url":"https://avatars.example.com/u/1234?v=4","gravatar_id":null,"url":"https://api.example.org/users/testuser","html_url":"https://www.example.org/testuser","followers_url":"https://api.example.org/users/testuser/followers","following_url":"https://api.example.org/users/testuser/following{/other_user}","gists_url":"https://api.example.org/users/testuser/gists{/gist_id}","starred_url":"https://api.example.org/users/testuser/starred{/owner}{/repo}","subscriptions_url":"https://api.example.org/users/testuser/subscriptions","organizations_url":"https://api.example.org/users/testuser/orgs","repos_url":"https://api.example.org/users/testuser/repos","events_url":"https://api.example.org/users/testuser/events{/privacy}","received_events_url":"https://api.example.org/users/testuser/received_events","type":"User","site_admin":false,"starred_at":"2025-05-19T15:00:00Z","user_view_type":"rich"},"created_at":"2025-05-18T12:00:00Z","updated_at":"2025-05-19T09:30:00Z","organization_permission":"write","private":true};
+}

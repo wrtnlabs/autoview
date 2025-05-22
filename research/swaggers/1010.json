@@ -1,0 +1,29 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/social-account"
+    }
+  },
+  "$defs": {
+    "social-account": {
+      "title": "Social account",
+      "description": "Social media account",
+      "type": "object",
+      "properties": {
+        "provider": {
+          "example": "linkedin",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://www.linkedin.com/company/github/",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "url"
+      ]
+    }
+  }
+}

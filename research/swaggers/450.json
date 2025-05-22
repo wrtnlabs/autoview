@@ -1,0 +1,101 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/org-hook"
+    }
+  },
+  "$defs": {
+    "org-hook": {
+      "title": "Org Hook",
+      "description": "Org Hook",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 1,
+          "type": "integer"
+        },
+        "url": {
+          "example": "https://api.github.com/orgs/octocat/hooks/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "ping_url": {
+          "example": "https://api.github.com/orgs/octocat/hooks/1/pings",
+          "type": "string",
+          "format": "uri"
+        },
+        "deliveries_url": {
+          "example": "https://api.github.com/orgs/octocat/hooks/1/deliveries",
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "example": "web",
+          "type": "string"
+        },
+        "events": {
+          "example": [
+            "push",
+            "pull_request"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "active": {
+          "example": true,
+          "type": "boolean"
+        },
+        "config": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "example": "\"http://example.com/2\"",
+              "type": "string"
+            },
+            "insecure_ssl": {
+              "example": "\"0\"",
+              "type": "string"
+            },
+            "content_type": {
+              "example": "\"form\"",
+              "type": "string"
+            },
+            "secret": {
+              "example": "\"********\"",
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "updated_at": {
+          "example": "2011-09-06T20:39:23Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "example": "2011-09-06T17:26:27Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "type",
+        "name",
+        "active",
+        "events",
+        "config",
+        "ping_url",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

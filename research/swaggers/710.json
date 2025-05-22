@@ -1,0 +1,228 @@
+{
+  "schema": {
+    "$ref": "#/$defs/community-profile"
+  },
+  "$defs": {
+    "community-profile": {
+      "title": "Community Profile",
+      "description": "Community Profile",
+      "type": "object",
+      "properties": {
+        "health_percentage": {
+          "example": 100,
+          "type": "integer"
+        },
+        "description": {
+          "example": "My first repository on GitHub!",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "documentation": {
+          "example": "example.com",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "files": {
+          "type": "object",
+          "properties": {
+            "code_of_conduct": {
+              "$ref": "#/$defs/nullable-code-of-conduct-simple"
+            },
+            "code_of_conduct_file": {
+              "$ref": "#/$defs/nullable-community-health-file"
+            },
+            "license": {
+              "$ref": "#/$defs/nullable-license-simple"
+            },
+            "contributing": {
+              "$ref": "#/$defs/nullable-community-health-file"
+            },
+            "readme": {
+              "$ref": "#/$defs/nullable-community-health-file"
+            },
+            "issue_template": {
+              "$ref": "#/$defs/nullable-community-health-file"
+            },
+            "pull_request_template": {
+              "$ref": "#/$defs/nullable-community-health-file"
+            }
+          },
+          "required": [
+            "code_of_conduct",
+            "code_of_conduct_file",
+            "license",
+            "contributing",
+            "readme",
+            "issue_template",
+            "pull_request_template"
+          ]
+        },
+        "updated_at": {
+          "example": "2017-02-28T19:09:29Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_reports_enabled": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "health_percentage",
+        "description",
+        "documentation",
+        "files",
+        "updated_at"
+      ]
+    },
+    "nullable-code-of-conduct-simple": {
+      "title": "Code Of Conduct Simple",
+      "description": "Code of Conduct Simple",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "url": {
+              "example": "https://api.github.com/repos/github/docs/community/code_of_conduct",
+              "type": "string",
+              "format": "uri"
+            },
+            "key": {
+              "example": "citizen_code_of_conduct",
+              "type": "string"
+            },
+            "name": {
+              "example": "Citizen Code of Conduct",
+              "type": "string"
+            },
+            "html_url": {
+              "example": "https://github.com/github/docs/blob/main/CODE_OF_CONDUCT.md",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "url",
+            "key",
+            "name",
+            "html_url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-community-health-file": {
+      "title": "Community Health File",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "url",
+            "html_url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-license-simple": {
+      "title": "License Simple",
+      "description": "License Simple",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "key": {
+              "example": "mit",
+              "type": "string"
+            },
+            "name": {
+              "example": "MIT License",
+              "type": "string"
+            },
+            "url": {
+              "example": "https://api.github.com/licenses/mit",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "spdx_id": {
+              "example": "MIT",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "node_id": {
+              "example": "MDc6TGljZW5zZW1pdA==",
+              "type": "string"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "key",
+            "name",
+            "url",
+            "spdx_id",
+            "node_id"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

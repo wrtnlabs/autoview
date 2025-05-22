@@ -1,0 +1,1519 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IPageIShoppingCartCommodity"
+  },
+  "$defs": {
+    "IShoppingCartCommodity.IRequest": {
+      "type": "object",
+      "properties": {
+        "search": {
+          "$ref": "#/$defs/IShoppingCartCommodity.IRequest.ISearch"
+        },
+        "sort": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "-seller.created_at"
+              },
+              {
+                "const": "-seller.goods.payments.real"
+              },
+              {
+                "const": "-seller.goods.publish_count"
+              },
+              {
+                "const": "-seller.reviews.average"
+              },
+              {
+                "const": "-seller.reviews.count"
+              },
+              {
+                "const": "-goods.publish_count"
+              },
+              {
+                "const": "-goods.payments.real"
+              },
+              {
+                "const": "-reviews.average"
+              },
+              {
+                "const": "-reviews.count"
+              },
+              {
+                "const": "-sale.created_at"
+              },
+              {
+                "const": "-sale.updated_at"
+              },
+              {
+                "const": "-sale.opened_at"
+              },
+              {
+                "const": "-sale.closed_at"
+              },
+              {
+                "const": "-sale.content.title"
+              },
+              {
+                "const": "-sale.price_range.lowest.real"
+              },
+              {
+                "const": "-sale.price_range.highest.real"
+              },
+              {
+                "const": "+seller.created_at"
+              },
+              {
+                "const": "+seller.goods.payments.real"
+              },
+              {
+                "const": "+seller.goods.publish_count"
+              },
+              {
+                "const": "+seller.reviews.average"
+              },
+              {
+                "const": "+seller.reviews.count"
+              },
+              {
+                "const": "+goods.publish_count"
+              },
+              {
+                "const": "+goods.payments.real"
+              },
+              {
+                "const": "+reviews.average"
+              },
+              {
+                "const": "+reviews.count"
+              },
+              {
+                "const": "+sale.created_at"
+              },
+              {
+                "const": "+sale.updated_at"
+              },
+              {
+                "const": "+sale.opened_at"
+              },
+              {
+                "const": "+sale.closed_at"
+              },
+              {
+                "const": "+sale.content.title"
+              },
+              {
+                "const": "+sale.price_range.lowest.real"
+              },
+              {
+                "const": "+sale.price_range.highest.real"
+              },
+              {
+                "const": "-commodity.price"
+              },
+              {
+                "const": "-commodity.volume"
+              },
+              {
+                "const": "-commodity.volumed_price"
+              },
+              {
+                "const": "-commodity.created_at"
+              },
+              {
+                "const": "+commodity.price"
+              },
+              {
+                "const": "+commodity.volume"
+              },
+              {
+                "const": "+commodity.volumed_price"
+              },
+              {
+                "const": "+commodity.created_at"
+              }
+            ]
+          }
+        },
+        "page": {
+          "title": "Page number",
+          "description": "Page number.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingCartCommodity.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "min_price": {
+          "type": "number"
+        },
+        "max_price": {
+          "type": "number"
+        },
+        "min_volumed_price": {
+          "type": "number"
+        },
+        "max_volumed_price": {
+          "type": "number"
+        },
+        "sale": {
+          "$ref": "#/$defs/IShoppingSale.IRequest.ISearch"
+        }
+      },
+      "required": []
+    },
+    "IShoppingSale.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "show_paused": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "show_suspended": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "const": "only"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        },
+        "title": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "content": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "title_or_content": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "price": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingPrice.ISearch"
+            }
+          ]
+        },
+        "review": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSaleReview.IInvertSearch"
+            }
+          ]
+        },
+        "section_codes": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "channel_category_ids": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "tags": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        },
+        "seller": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSeller.IRequest.ISearch"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingPrice.ISearch": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "maximum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingSaleReview.IInvertSearch": {
+      "type": "object",
+      "properties": {
+        "score": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSaleReview.IInvertSearch.IScoreRange"
+            }
+          ]
+        },
+        "count": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSaleReview.IInvertSearch.ICountRange"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingSaleReview.IInvertSearch.IScoreRange": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          ]
+        },
+        "maximum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingSaleReview.IInvertSearch.ICountRange": {
+      "type": "object",
+      "properties": {
+        "minimum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "maximum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingSeller.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uuid"
+            }
+          ]
+        },
+        "mobile": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "pattern": "^[0-9]*$"
+            }
+          ]
+        },
+        "name": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "email"
+            }
+          ]
+        },
+        "nickname": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IPageIShoppingCartCommodity": {
+      "description": "A page.\n\nCollection of records with pagination indformation.",
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "title": "Page information",
+          "description": "Page information.",
+          "$ref": "#/$defs/IPage.IPagination"
+        },
+        "data": {
+          "title": "List of records",
+          "description": "List of records.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingCartCommodity"
+          }
+        }
+      },
+      "required": [
+        "pagination",
+        "data"
+      ]
+    },
+    "IPage.IPagination": {
+      "description": "Page information.",
+      "type": "object",
+      "properties": {
+        "current": {
+          "title": "Current page number",
+          "description": "Current page number.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "records": {
+          "title": "Total records in the database",
+          "description": "Total records in the database.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "title": "Total pages",
+          "description": "Total pages.\n\nEqual to {@link records} / {@link limit} with ceiling.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "current",
+        "limit",
+        "records",
+        "pages"
+      ]
+    },
+    "IShoppingCartCommodity": {
+      "description": "Item in a shopping cart.\n\n`IShoppingCartCommodity` is an entity that represents a\n{@link IShoppingSaleSnapshot snapshot} of the items that\n{@link IShoppingCustomer customer} has placed into his shopping cart with a\n{@link IShoppingOrder purchase} in mind. And if the customer continues this\ninto an actual order in the future, `IShoppingCartCommodity` be changed to\n{@link IShoppingOrderGood}.\n\nAnd while adding a sale snapshot to the shopping cart, the customer inevitably\nselects specific {@link IShoppingSaleUnit units} and\n{@link IShoppingSaleUnitStock final stocks} within the listing snapshot.\nInformation about these units and stocks is recorded in the subsidiary entity\n{@link IShoppingCartCommodityStock}. Also, there is an attribute {@link volume}\nthat indicates how many sets of snapshots of the target commodity will be\npurchased. This \"volume\" is a value that will be multiplied by\n{@link IShoppingSaleUnitStock.IInvert.quantity}, the quantity for each\ncomponent.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.\n\nIf you want to continue to the order the commodity, then use this ID to order.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "sale": {
+          "title": "Invert information of the sale (snapshot), in the perspective of commodity",
+          "description": "Invert information of the sale (snapshot), in the perspective of commodity.",
+          "$ref": "#/$defs/IShoppingSaleSnapshot.IInvert"
+        },
+        "orderable": {
+          "title": "Whether current commodity is orderable or not",
+          "description": "Whether current commodity is orderable or not.\n\nIf this attribute is `false`, then the commodity is not orderable, because\nit has already been ordered.",
+          "type": "boolean"
+        },
+        "pseudo": {
+          "title": "Whether current commodity is pseudo or not",
+          "description": "Whether current commodity is pseudo or not.\n\nWhen this attribute is `true`, then the commodity is not the real one,\nbut just fake information only for calculating the discount effect by\n{@link IShoppingCoupon coupons}.",
+          "type": "boolean"
+        },
+        "volume": {
+          "title": "Volume of the commodity to purchase",
+          "description": "Volume of the commodity to purchase.\n\nA value indicating how many sets would be multiplied to the children\n{@link IShoppingSaleUnitStock.IInvert.quantity} values.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "price": {
+          "title": "Price of the commodity",
+          "description": "Price of the commodity.\n\nFor reference, this price value has not been multiplied by the\n{@link volume} value. It just sumed up the prices of the children\n{@link IShoppingSaleUnitStock.IInvert.price} values.",
+          "$ref": "#/$defs/IShoppingPrice"
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "sale",
+        "orderable",
+        "pseudo",
+        "volume",
+        "price",
+        "created_at"
+      ]
+    },
+    "IShoppingSaleSnapshot.IInvert": {
+      "description": "Invert information of the sale snapshot, in the perspective of commodity.\n\n`IShoppingSaleSnapshot.IInvert` is a structure used to represent a\nsnapshot in the perspective of a {@link IShoppingCommodity}, corresponding\nto an {@link IShoppingCartCommodityStock} entity.\n\nTherefore, `IShoppingSaleSnapshot.IInvert` does not contain every\n{@link IShoppingSaleUnit units} and {@link IShoppingSaleUnitStock stocks}\nof the snapshot records, but only some of the records which are put\ninto the {@link IShoppingCartCommodity shopping cart}.",
+      "type": "object",
+      "properties": {
+        "section": {
+          "title": "Belonged section's information",
+          "description": "Belonged section's information.",
+          "$ref": "#/$defs/IShoppingSection"
+        },
+        "seller": {
+          "title": "Seller who've registered the sale",
+          "description": "Seller who've registered the sale.",
+          "$ref": "#/$defs/IShoppingSeller.IInvert"
+        },
+        "id": {
+          "title": "Primary Key of Sale",
+          "description": "Primary Key of Sale.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "snapshot_id": {
+          "title": "Primary Key of Snapshot",
+          "description": "Primary Key of Snapshot.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "latest": {
+          "title": "Whether the snapshot is the latest one or not",
+          "description": "Whether the snapshot is the latest one or not.",
+          "type": "boolean"
+        },
+        "content": {
+          "title": "Description and image content describing the sale",
+          "description": "Description and image content describing the sale.",
+          "$ref": "#/$defs/IShoppingSaleContent.IInvert"
+        },
+        "categories": {
+          "title": "List of categories",
+          "description": "List of categories.\n\nWhich categories the sale is registered to.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+          }
+        },
+        "tags": {
+          "title": "List of search tags",
+          "description": "List of search tags.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "units": {
+          "title": "List of units",
+          "description": "List of units.\n\nRecords about individual product composition information that are sold\nin the sale. Each {@link IShoppingSaleUnit unit} record has configurable\n{@link IShoppingSaleUnitOption options},\n{@link IShoppingSaleUnitOptionCandidate candidate} values for each\noption, and {@link IShoppingSaleUnitStock final stocks} determined by\nselecting every candidate values of each option.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnit.IInvert"
+          },
+          "minItems": 1
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.\n\nNote that, this property is different with {@link opened_at},\nwhich means the timepoint of the sale is opened.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "title": "Last updated time of the record",
+          "description": "Last updated time of the record.\n\nIn another words, creation time of the last snapshot.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "paused_at": {
+          "title": "Paused time of the sale",
+          "description": "Paused time of the sale.\n\nThe sale is paused by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} can still see the sale on the\nboth list and detail pages, but the sale has a warning label\n\"The sale is paused by the seller\".",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "suspended_at": {
+          "title": "Suspended time of the sale",
+          "description": "Suspended time of the sale.\n\nThe sale is suspended by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} cannot see the sale on the\nboth list and detail pages. It is almost same with soft delettion,\nbut there's a little bit difference that the owner\n{@link IShoppingSeller seller} can still see the sale and resume it.\n\nOf course, the {@link IShoppingCustomer customers} who have\nalready purchased the sale can still see the sale on the\n{@link IShoppingOrder order} page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "opened_at": {
+          "title": "Opening time of the sale",
+          "description": "Opening time of the sale.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "closed_at": {
+          "title": "Closing time of the sale",
+          "description": "Closing time of the sale.\n\nIf this value is `null`, the sale be continued forever.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "section",
+        "seller",
+        "id",
+        "snapshot_id",
+        "latest",
+        "content",
+        "categories",
+        "tags",
+        "units",
+        "created_at",
+        "updated_at",
+        "paused_at",
+        "suspended_at",
+        "opened_at",
+        "closed_at"
+      ]
+    },
+    "IShoppingSection": {
+      "description": "Section information.\n\n`IShoppingSection` is a concept that refers to the spatial information of\nthe market.\n\nIf we compare the section mentioned here to the offline market, it means a\nspatially separated area within the store, such as the \"fruit corner\" or\n\"butcher corner\". Therefore, in the {@link IShoppingSale sale} entity, it is\nnot possible to classify multiple sections simultaneously, but only one section\ncan be classified.\n\nBy the way, if your shopping mall system requires only one section, then just\nuse only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Representative name of the section",
+          "description": "Representative name of the section.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "created_at"
+      ]
+    },
+    "IShoppingSeller.IInvert": {
+      "description": "Invert information starting from seller info.\n\nInstead of accessing to the seller information from the\n{@link IShoppingCustomer.member} -> {@link IShoppingMember.seller},\n`IShoppingSeller.IInvert` starts from the seller information\nand access to the customer, member and {@link IShoppingCitizen citizen}\ninformation inversely.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Discriminant for the type of seller",
+          "description": "Discriminant for the type of seller.",
+          "const": "seller"
+        },
+        "member": {
+          "title": "Membership joining information",
+          "description": "Membership joining information.",
+          "$ref": "#/$defs/IShoppingMember.IInvert"
+        },
+        "customer": {
+          "title": "Customer, the connection information",
+          "description": "Customer, the connection information.",
+          "$ref": "#/$defs/IShoppingCustomer.IInvert"
+        },
+        "citizen": {
+          "title": "Real-name and mobile number authentication information",
+          "description": "Real-name and mobile number authentication information.",
+          "$ref": "#/$defs/IShoppingCitizen"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation tmie of record",
+          "description": "Creation tmie of record.\n\nAnother words, the time when the seller has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "member",
+        "customer",
+        "citizen",
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingMember.IInvert": {
+      "description": "Invert information of member.\n\nThis invert member information has been designed to be used for another\ninvert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "nickname": {
+          "title": "Nickname that uniquely identifies the member",
+          "description": "Nickname that uniquely identifies the member.",
+          "type": "string"
+        },
+        "emails": {
+          "title": "List of emails",
+          "description": "List of emails.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingMemberEmail"
+          }
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the member has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "nickname",
+        "emails",
+        "created_at"
+      ]
+    },
+    "IShoppingMemberEmail": {
+      "description": "Email address of member.\n\nThis shopping mall system allows multiple email addresses to be\nregistered for one {@link IShoppingMember member}. If you don't have to\nplan such multiple email addresses, just use only one.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Email address value",
+          "description": "Email address value.",
+          "type": "string",
+          "format": "email"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at"
+      ]
+    },
+    "IShoppingCustomer.IInvert": {
+      "description": "Inverted customer information.\n\nThis inverted customer information has been designed to be used for\nanother invert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "channel": {
+          "title": "Belonged channel",
+          "description": "Belonged channel.",
+          "$ref": "#/$defs/IShoppingChannel"
+        },
+        "external_user": {
+          "title": "External user information",
+          "description": "External user information.\n\nWhen the customer has come from an external service.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingExternalUser"
+            }
+          ]
+        },
+        "href": {
+          "title": "Connection address",
+          "description": "Connection address.\n\nSame with {@link window.location.href} of client.",
+          "type": "string",
+          "format": "uri"
+        },
+        "referrer": {
+          "title": "Referrer address",
+          "description": "Referrer address.\n\nSame with {@link window.document.referrer} of client.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "string",
+              "maxLength": 0
+            }
+          ]
+        },
+        "ip": {
+          "title": "Connection IP Address",
+          "description": "Connection IP Address.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "ipv4"
+            },
+            {
+              "type": "string",
+              "format": "ipv6"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of the connection record",
+          "description": "Creation time of the connection record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "channel",
+        "external_user",
+        "href",
+        "referrer",
+        "ip",
+        "created_at"
+      ]
+    },
+    "IShoppingChannel": {
+      "description": "Channel information.\n\n`IShoppingChannel` is a concept that shapes the distribution channel in the\nmarket. Therefore, the difference in the channel in this e-commerce system\nmeans that it is another site or application.\n\nBy the way, if your shopping mall system requires only one channel, then\njust use only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name of the channel",
+          "description": "Name of the channel.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "code",
+        "name"
+      ]
+    },
+    "IShoppingExternalUser": {
+      "description": "External user information.\n\n`IShoppingExternalUser` is an entity dsigned for when this system needs\nto connect with external services and welcome their users as\n{@link IShoppingCustomer customers} of this service.\n\nFor reference, customers who connect from an external service must have\nthis record, and the external service user is identified through the two\nattributes {@link application} and {@link uid}. If a customer connected\nfrom an external service completes\n{@link IShoppingCitizen real-name authentication} from this service, each\ntime the external service user reconnects to this service and issues a\nnew customer authentication token, real-name authentication begins with\ncompleted.\n\nAnd {@link password} is the password issued to the user by the external\nservice system (the so-called permanent user authentication token), and\nis never the actual user password. However, for customers who entered the\nsame application and uid as the current external system user, this is to\ndetermine whether to view this as a correct external system user or a\nviolation.\n\nIn addition, additional information received from external services can\nbe recorded in the data field in JSON format.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "citizen": {
+          "title": "Citizen activation info",
+          "description": "Citizen activation info.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCitizen"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother word, first time when the external user connected.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "uid": {
+          "title": "Identifier key of external user from the external system",
+          "description": "Identifier key of external user from the external system.",
+          "type": "string"
+        },
+        "application": {
+          "title": "Identifier code of the external service",
+          "description": "Identifier code of the external service.\n\nIt can be same with {@link IShoppingChannel.code} in common.",
+          "type": "string"
+        },
+        "nickname": {
+          "title": "Nickname of external user in the external system",
+          "description": "Nickname of external user in the external system.",
+          "type": "string"
+        },
+        "data": {
+          "description": "Additional information about external user from the external\nsystem."
+        }
+      },
+      "required": [
+        "id",
+        "citizen",
+        "created_at",
+        "uid",
+        "application",
+        "nickname",
+        "data"
+      ]
+    },
+    "IShoppingCitizen": {
+      "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "mobile": {
+          "title": "Mobile number",
+          "description": "Mobile number.",
+          "x-wrtn-payment-order-mobile": true,
+          "type": "string",
+          "pattern": "^[0-9]*$"
+        },
+        "name": {
+          "title": "Real name, or equivalent nickname",
+          "description": "Real name, or equivalent nickname.",
+          "x-wrtn-payment-order-citizen": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "mobile",
+        "name"
+      ]
+    },
+    "IShoppingSaleContent.IInvert": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "thumbnails"
+      ]
+    },
+    "IAttachmentFile": {
+      "description": "Attachment File.\n\nEvery attachment files that are managed in current system.\n\nFor reference, it is possible to omit one of file {@link name}\nor {@link extension} like `.gitignore` or `README` case, but not\npossible to omit both of them.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of attachment file",
+          "description": "Creation time of attachment file.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IShoppingChannelCategory.IInvert": {
+      "description": "Invert category information with parent category.",
+      "type": "object",
+      "properties": {
+        "parent": {
+          "title": "Parent category info with recursive structure",
+          "description": "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+            }
+          ]
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code of the category",
+          "description": "Identifier code of the category.\n\nThe code must be unique in the channel.",
+          "type": "string"
+        },
+        "parent_id": {
+          "title": "Parent category's ID",
+          "description": "Parent category's ID.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uuid"
+            }
+          ]
+        },
+        "name": {
+          "title": "Representative name of the category",
+          "description": "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "parent",
+        "id",
+        "code",
+        "parent_id",
+        "name",
+        "created_at"
+      ]
+    },
+    "IShoppingSaleUnit.IInvert": {
+      "type": "object",
+      "properties": {
+        "stocks": {
+          "title": "List of final stocks",
+          "description": "List of final stocks.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitStock.IInvert"
+          },
+          "minItems": 1
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Representative name of the unit",
+          "description": "Representative name of the unit.",
+          "type": "string"
+        },
+        "primary": {
+          "title": "Whether the unit is primary or not",
+          "description": "Whether the unit is primary or not.\n\nJust a labeling value.",
+          "type": "boolean"
+        },
+        "required": {
+          "title": "Whether the unit is required or not",
+          "description": "Whether the unit is required or not.\n\nWhen the unit is required, the customer must select the unit. If do not\nselect, customer can't buy it.\n\nFor example, if there's a sale \"Macbook Set\" and one of the unit is the\n\"Main Body\", is it possible to buy the \"Macbook Set\" without the\n\"Main Body\" unit? This property is for that case.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "stocks",
+        "id",
+        "name",
+        "primary",
+        "required"
+      ]
+    },
+    "IShoppingSaleUnitStock.IInvert": {
+      "description": "Invert information from the cart.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Representative name of the stock",
+          "description": "Representative name of the stock.",
+          "type": "string"
+        },
+        "price": {
+          "title": "Price of the stock",
+          "description": "Price of the stock.",
+          "$ref": "#/$defs/IShoppingPrice"
+        },
+        "quantity": {
+          "title": "Quantity of the stock in the cart",
+          "description": "Quantity of the stock in the cart.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "inventory": {
+          "title": "Current inventory status of the stock",
+          "description": "Current inventory status of the stock.",
+          "$ref": "#/$defs/IShoppingSaleUnitStockInventory"
+        },
+        "choices": {
+          "title": "List of choices",
+          "description": "List of choices.\n\nWhich values being written for each option.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitStockChoice.IInvert"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "price",
+        "quantity",
+        "inventory",
+        "choices"
+      ]
+    },
+    "IShoppingPrice": {
+      "description": "Shopping price interface.",
+      "type": "object",
+      "properties": {
+        "nominal": {
+          "title": "Nominal price",
+          "description": "Nominal price.\n\nThis is not {@link real real price} to pay, but just a nominal price to show.\nIf this value is greater than the {@link real real price}, it would be shown\nlike {@link IShoppingSeller seller} is giving a discount.",
+          "type": "number",
+          "minimum": 0
+        },
+        "real": {
+          "title": "Real price to pay",
+          "description": "Real price to pay.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "nominal",
+        "real"
+      ]
+    },
+    "IShoppingSaleUnitStockInventory": {
+      "description": "Inventory information of a final stock.",
+      "type": "object",
+      "properties": {
+        "income": {
+          "title": "Total income quantity",
+          "description": "Total income quantity.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "outcome": {
+          "title": "Total outcome quantity",
+          "description": "Total outcome quantity.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "income",
+        "outcome"
+      ]
+    },
+    "IShoppingSaleUnitStockChoice.IInvert": {
+      "description": "Invert information from the cart.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "option": {
+          "title": "Target option",
+          "description": "Target option.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/IShoppingSaleUnitSelectableOption.IInvert"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSaleUnitDescriptiveOption"
+            }
+          ]
+        },
+        "candidate": {
+          "title": "Selected candidate value",
+          "description": "Selected candidate value.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSaleUnitOptionCandidate"
+            }
+          ]
+        },
+        "value": {
+          "title": "Written value",
+          "description": "Written value.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "option",
+        "candidate",
+        "value"
+      ]
+    },
+    "IShoppingSaleUnitSelectableOption.IInvert": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "title": "Discriminant for the type of selectable option",
+          "description": "Discriminant for the type of selectable option.",
+          "const": "select"
+        },
+        "name": {
+          "title": "Represents the name of the option",
+          "description": "Represents the name of the option.",
+          "type": "string"
+        },
+        "variable": {
+          "title": "Whether the option is variable or not",
+          "description": "Whether the option is variable or not.\n\nWhen type of current option is \"select\", this attribute means whether\nselecting different candidate value affects the final stock or not.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "name",
+        "variable"
+      ]
+    },
+    "IShoppingSaleUnitDescriptiveOption": {
+      "description": "Descriptive option.\n\nWhen type of the option not `\"select\"`, it means the option is descriptive\nthat requiring {@link IShoppingCustomer customers} to write some value to\n{@link IShoppingOrder purchase}. Also, whatever customer writes about the\noption, it does not affect the {@link IShoppingSaleUnitStock final stock}.\n\nAnother words, the descriptive option is just for information transfer.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "title": "Type of descriptive option",
+          "description": "Type of descriptive option.\n\nWhich typed value should be written when purchasing.",
+          "oneOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "name": {
+          "title": "Readable name of the option",
+          "description": "Readable name of the option.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "name"
+      ]
+    },
+    "IShoppingSaleUnitOptionCandidate": {
+      "description": "Selectable candidate values within an option.\n\n`IShoppingSaleUnitOptionCandidate` is an entity that represents individual\ncandidate values that can be selected from\n{@link IShoppingSaleUnitSelectableOption options of the \"select\" type}.\n\n- Example\n  - RAM: 8GB, 16GB, 32GB\n  - GPU: RTX 3060, RTX 4080, TESLA\n  - License: Private, Commercial, Educatiion\n\nBy the way, if belonged option is not \"select\" type, this entity never\nbeing used.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Represents the name of the candidate value",
+          "description": "Represents the name of the candidate value.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    }
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "schema": {
+    "$ref": "#/$defs/page"
+  },
+  "$defs": {
+    "IApiReposPages.PostBody": {
+      "description": "The source branch and directory used to publish your Pages site.",
+      "oneOf": [
+        {
+          "required": [
+            "source"
+          ]
+        },
+        {
+          "required": [
+            "build_type"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "page": {
+      "title": "GitHub Pages",
+      "description": "The configuration for GitHub Pages for a repository.",
+      "type": "object",
+      "properties": {
+        "url": {
+          "description": "The API address for accessing this Page resource.",
+          "example": "https://api.github.com/repos/github/hello-world/pages",
+          "type": "string",
+          "format": "uri"
+        },
+        "status": {
+          "description": "The status of the most recent build of the Page.",
+          "example": "built",
+          "oneOf": [
+            {
+              "const": "built"
+            },
+            {
+              "const": "building"
+            },
+            {
+              "const": "errored"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cname": {
+          "description": "The Pages site's custom domain",
+          "example": "example.com",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "protected_domain_state": {
+          "description": "The state if the domain is verified",
+          "example": "pending",
+          "oneOf": [
+            {
+              "const": "pending"
+            },
+            {
+              "const": "verified"
+            },
+            {
+              "const": "unverified"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "pending_domain_unverified_at": {
+          "description": "The timestamp when a pending domain becomes unverified.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "custom_404": {
+          "description": "Whether the Page has a custom 404 page.",
+          "example": false,
+          "type": "boolean",
+          "default": false
+        },
+        "html_url": {
+          "description": "The web address the Page can be accessed from.",
+          "example": "https://example.com",
+          "type": "string",
+          "format": "uri"
+        },
+        "build_type": {
+          "description": "The process in which the Page will be built.",
+          "example": "legacy",
+          "oneOf": [
+            {
+              "const": "legacy"
+            },
+            {
+              "const": "workflow"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "source": {
+          "$ref": "#/$defs/pages-source-hash"
+        },
+        "public": {
+          "description": "Whether the GitHub Pages site is publicly visible. If set to `true`, the site is accessible to anyone on the internet. If set to `false`, the site will only be accessible to users who have at least `read` access to the repository that published the site.",
+          "example": true,
+          "type": "boolean"
+        },
+        "https_certificate": {
+          "$ref": "#/$defs/pages-https-certificate"
+        },
+        "https_enforced": {
+          "description": "Whether https is enabled on the domain",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "url",
+        "status",
+        "cname",
+        "custom_404",
+        "public"
+      ]
+    },
+    "pages-source-hash": {
+      "title": "Pages Source Hash",
+      "type": "object",
+      "properties": {
+        "branch": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "branch",
+        "path"
+      ]
+    },
+    "pages-https-certificate": {
+      "title": "Pages Https Certificate",
+      "type": "object",
+      "properties": {
+        "state": {
+          "example": "approved",
+          "oneOf": [
+            {
+              "const": "new"
+            },
+            {
+              "const": "authorization_created"
+            },
+            {
+              "const": "authorization_pending"
+            },
+            {
+              "const": "authorized"
+            },
+            {
+              "const": "authorization_revoked"
+            },
+            {
+              "const": "issued"
+            },
+            {
+              "const": "uploaded"
+            },
+            {
+              "const": "approved"
+            },
+            {
+              "const": "errored"
+            },
+            {
+              "const": "bad_authz"
+            },
+            {
+              "const": "destroy_pending"
+            },
+            {
+              "const": "dns_changed"
+            }
+          ]
+        },
+        "description": {
+          "example": "Certificate is approved",
+          "type": "string"
+        },
+        "domains": {
+          "description": "Array of the domain set and its alternate name (if it is configured)",
+          "example": [
+            "example.com",
+            "www.example.com"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "required": [
+        "state",
+        "description",
+        "domains"
+      ]
+    }
+  }
+}

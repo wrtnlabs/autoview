@@ -1,0 +1,43 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/branch-short"
+    }
+  },
+  "$defs": {
+    "branch-short": {
+      "title": "Branch Short",
+      "description": "Branch Short",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "sha": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "sha",
+            "url"
+          ]
+        },
+        "protected": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "commit",
+        "protected"
+      ]
+    }
+  }
+}

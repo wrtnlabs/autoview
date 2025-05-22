@@ -1,0 +1,27 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/key-simple"
+    }
+  },
+  "$defs": {
+    "key-simple": {
+      "title": "Key Simple",
+      "description": "Key Simple",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "id"
+      ]
+    }
+  }
+}

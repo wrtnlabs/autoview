@@ -1,0 +1,201 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IPageIShoppingChannel"
+  },
+  "$defs": {
+    "IShoppingChannel.IRequest": {
+      "description": "Request of the channels with pagination and searching/sorting options.",
+      "type": "object",
+      "properties": {
+        "search": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingChannel.IRequest.ISearch"
+            }
+          ]
+        },
+        "sort": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "const": "-channel.code"
+                  },
+                  {
+                    "const": "-channel.name"
+                  },
+                  {
+                    "const": "-channel.created_at"
+                  },
+                  {
+                    "const": "+channel.code"
+                  },
+                  {
+                    "const": "+channel.name"
+                  },
+                  {
+                    "const": "+channel.created_at"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "page": {
+          "title": "Page number",
+          "description": "Page number.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingChannel.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "name": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IPageIShoppingChannel": {
+      "description": "A page.\n\nCollection of records with pagination indformation.",
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "title": "Page information",
+          "description": "Page information.",
+          "$ref": "#/$defs/IPage.IPagination"
+        },
+        "data": {
+          "title": "List of records",
+          "description": "List of records.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannel"
+          }
+        }
+      },
+      "required": [
+        "pagination",
+        "data"
+      ]
+    },
+    "IPage.IPagination": {
+      "description": "Page information.",
+      "type": "object",
+      "properties": {
+        "current": {
+          "title": "Current page number",
+          "description": "Current page number.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "records": {
+          "title": "Total records in the database",
+          "description": "Total records in the database.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "title": "Total pages",
+          "description": "Total pages.\n\nEqual to {@link records} / {@link limit} with ceiling.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "current",
+        "limit",
+        "records",
+        "pages"
+      ]
+    },
+    "IShoppingChannel": {
+      "description": "Channel information.\n\n`IShoppingChannel` is a concept that shapes the distribution channel in the\nmarket. Therefore, the difference in the channel in this e-commerce system\nmeans that it is another site or application.\n\nBy the way, if your shopping mall system requires only one channel, then\njust use only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name of the channel",
+          "description": "Name of the channel.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "code",
+        "name"
+      ]
+    }
+  }
+}

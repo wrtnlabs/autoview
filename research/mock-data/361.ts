@@ -1,0 +1,8 @@
+
+import Component from "../components/361";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"url":"https://api.example.com/marketplace/plans/free-tier-test","accounts_url":"https://api.example.com/marketplace/plans/free-tier-test/accounts","id":10,"number":1,"name":"Free Tier (Test)","description":"A sample free plan for testing UI components. Includes basic features only.","monthly_price_in_cents":0,"yearly_price_in_cents":0,"price_model":"FREE","has_free_trial":false,"unit_name":null,"state":"active","bullets":["Community support","Limited access to sample features"]},{"url":"https://api.example.com/marketplace/plans/flat-rate-basic-sample","accounts_url":"https://api.example.com/marketplace/plans/flat-rate-basic-sample/accounts","id":20,"number":2,"name":"Basic Flat Rate Plan (Sample)","description":"This flat-rate plan offers standard features. Ideal for small teams.","monthly_price_in_cents":499,"yearly_price_in_cents":4999,"price_model":"FLAT_RATE","has_free_trial":true,"unit_name":null,"state":"trialing","bullets":["Email support","Up to 5 sample accounts","Access to standard sample features"]},{"url":"https://api.example.com/marketplace/plans/per-unit-enterprise-test","accounts_url":"https://api.example.com/marketplace/plans/per-unit-enterprise-test/accounts","id":30,"number":3,"name":"Enterprise Per Unit Plan (Test)","description":"A per-unit pricing model for enterprise testing with customizable unit usage.","monthly_price_in_cents":150,"yearly_price_in_cents":1500,"price_model":"PER_UNIT","has_free_trial":false,"unit_name":"unit","state":"active","bullets":["Priority email support","Custom unit allocation","Dedicated sample account manager"]}];
+}

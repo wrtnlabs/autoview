@@ -1,0 +1,47 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposAttestations.PostResponse"
+  },
+  "$defs": {
+    "IApiReposAttestations.PostBody": {
+      "type": "object",
+      "properties": {
+        "bundle": {
+          "description": "The attestation's Sigstore Bundle.\nRefer to the [Sigstore Bundle Specification](https://github.com/sigstore/protobuf-specs/blob/main/protos/sigstore_bundle.proto) for more information.",
+          "type": "object",
+          "properties": {
+            "mediaType": {
+              "type": "string"
+            },
+            "verificationMaterial": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true,
+              "required": []
+            },
+            "dsseEnvelope": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": true,
+              "required": []
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "bundle"
+      ]
+    },
+    "IApiReposAttestations.PostResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID of the attestation.",
+          "type": "integer"
+        }
+      },
+      "required": []
+    }
+  }
+}

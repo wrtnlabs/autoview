@@ -1,0 +1,1301 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IPageIShoppingCoupon"
+  },
+  "$defs": {
+    "IShoppingCoupon.IRequest": {
+      "type": "object",
+      "properties": {
+        "search": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCoupon.IRequest.ISearch"
+            }
+          ]
+        },
+        "sort": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "const": "-coupon.name"
+                  },
+                  {
+                    "const": "-coupon.unit"
+                  },
+                  {
+                    "const": "-coupon.value"
+                  },
+                  {
+                    "const": "-coupon.created_at"
+                  },
+                  {
+                    "const": "-coupon.opened_at"
+                  },
+                  {
+                    "const": "-coupon.closed_at"
+                  },
+                  {
+                    "const": "+coupon.name"
+                  },
+                  {
+                    "const": "+coupon.unit"
+                  },
+                  {
+                    "const": "+coupon.value"
+                  },
+                  {
+                    "const": "+coupon.created_at"
+                  },
+                  {
+                    "const": "+coupon.opened_at"
+                  },
+                  {
+                    "const": "+coupon.closed_at"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "page": {
+          "title": "Page number",
+          "description": "Page number.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingCoupon.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IPageIShoppingCoupon": {
+      "description": "A page.\n\nCollection of records with pagination indformation.",
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "title": "Page information",
+          "description": "Page information.",
+          "$ref": "#/$defs/IPage.IPagination"
+        },
+        "data": {
+          "title": "List of records",
+          "description": "List of records.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingCoupon"
+          }
+        }
+      },
+      "required": [
+        "pagination",
+        "data"
+      ]
+    },
+    "IPage.IPagination": {
+      "description": "Page information.",
+      "type": "object",
+      "properties": {
+        "current": {
+          "title": "Current page number",
+          "description": "Current page number.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "records": {
+          "title": "Total records in the database",
+          "description": "Total records in the database.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "title": "Total pages",
+          "description": "Total pages.\n\nEqual to {@link records} / {@link limit} with ceiling.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "current",
+        "limit",
+        "records",
+        "pages"
+      ]
+    },
+    "IShoppingCoupon": {
+      "description": "Discount coupon.\n\n`IShoppingCoupon` is an entity that symbolizes discount coupons at\na shopping mall.\n\nNote that, `IShoppingCoupon` only contains specification information\nabout discount coupons. Please keep in mind that this is a different\nconcept from {@link IShoppingCouponTicket}, which refers to the issuance\nof a discount coupon, or {@link IShoppingCouponTicketPayment}, which\nrefers to its payment.\n\nAdditionally, discount coupons are applied on an order-by-order basis,\nbut each has its own unique restrictions. For example, a coupon with\n{@link IShoppingCouponSellerCriteria} may or may not be used only for\n{@link IShoppingSale} of listings registered by the {@link IShoppingSeller}.\nAlso, there are restrictions such as\n{@link IShoppingCouponDiscount.threshold minimum amount restrictions} for\nusing discount coupons and\n{@link IShoppingCouponDiscount.limit maximum discount amount limits}.\n\nIn addition, you can set whether to issue discount coupons publicly or\ngive them only to people who know the specific issuing code. In addition,\nthere are restrictions such as issued discount coupons having an\n{@link IShoppingCouponRestriction.expired_at expiration date} or being\nissued only to customers who came in through a\n{@link IShoppingCouponFunnelCriteria specific funnel}.\n\nFor more information, please refer to the properties below and the\nsubsidiary entities described later.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "designer": {
+          "title": "Designer who've made the coupon",
+          "description": "Designer who've made the coupon.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/IShoppingAdministrator"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSeller"
+            }
+          ]
+        },
+        "inventory": {
+          "title": "Inventory information",
+          "description": "Inventory information.",
+          "$ref": "#/$defs/IShoppingCouponInventory"
+        },
+        "criterias": {
+          "title": "List of criteria information",
+          "description": "List of criteria information.",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/IShoppingCouponSectionCriteria"
+              },
+              {
+                "$ref": "#/$defs/IShoppingCouponSellerCriteria"
+              },
+              {
+                "$ref": "#/$defs/IShoppingCouponSaleCriteria"
+              },
+              {
+                "$ref": "#/$defs/IShoppingCouponFunnelCriteria"
+              }
+            ]
+          }
+        },
+        "discount": {
+          "title": "Discount information",
+          "description": "Discount information.",
+          "oneOf": [
+            {
+              "$ref": "#/$defs/IShoppingCouponDiscount.IAmount"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCouponDiscount.IPercent"
+            }
+          ]
+        },
+        "restriction": {
+          "title": "Restriction information",
+          "description": "Restriction information.",
+          "$ref": "#/$defs/IShoppingCouponRestriction"
+        },
+        "name": {
+          "title": "Representative name of the coupon",
+          "description": "Representative name of the coupon.",
+          "type": "string"
+        },
+        "opened_at": {
+          "title": "Opening time of the coupon",
+          "description": "Opening time of the coupon.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "closed_at": {
+          "title": "Closing time of the coupon",
+          "description": "Closing time of the coupon.\n\nTickets cannot be issued after this time.\n\nHowever, previously issued tickets can still be used until their\nexpiration date.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation tie of the record",
+          "description": "Creation tie of the record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "designer",
+        "inventory",
+        "criterias",
+        "discount",
+        "restriction",
+        "name",
+        "opened_at",
+        "closed_at",
+        "created_at"
+      ]
+    },
+    "IShoppingAdministrator": {
+      "description": "Administrator account.\n\n`IShoppingAdministrator` is an entity that embodies a person who manages\nthe shopping mall system, with {@link IShoppingMember membership} joining.\n\nFor reference, unlike {@link IShoppingCustomer customers} which can participate\neven without membership joining, administrator must join membership to operate\nmanagements. Also, administrator must perform the\n{@link IShoppingCitizen real-name and mobile authentication}, too.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the administrator has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingSeller": {
+      "description": "Seller information.\n\n`IShoppingSeller` is an entity that embodies a person who registers\n{@link IShoppingSale sales} to operate selling activities, with\n{@link IShoppingMember membership} joining.\n\nFor reference, unlike {@link IShoppingCustomer customers} which can\nparticipate even without membership joining, seller must join membership\nto operate sales. Also, seller must do the\n{@link IShoppingCitizen real-name and mobile authentication}, too.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation tmie of record",
+          "description": "Creation tmie of record.\n\nAnother words, the time when the seller has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingCouponInventory": {
+      "description": "Inventory information of the coupon.\n\nIf a {@link IShoppingCoupon coupon} has been designed with limited\ninventory, this `IShoppingCouponInventory` structure represents the\nremaining inventory information.",
+      "type": "object",
+      "properties": {
+        "volume": {
+          "title": "Remaining volume for everyone",
+          "description": "Remaining volume for everyone.\n\nIf there is a limit to the quantity issued, it becomes impossible to\nissue tickets exceeding this value.\n\nIn other words, the concept of N coupons being issued on a first-come,\nfirst-served basis is created.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "volume_per_citizen": {
+          "title": "Remaining volume per citizen",
+          "description": "Remaining volume per citizen.\n\nAs a limit to the total amount of issuance per person, it is common to\nassign 1 to limit duplicate issuance to the same citizen, or to use the\n`nul`` value to set no limit.\n\nOf course, by assigning a value of N, the total amount issued to the\nsame citizen can be limited.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": [
+        "volume",
+        "volume_per_citizen"
+      ]
+    },
+    "IShoppingCouponSectionCriteria": {
+      "description": "Conditions for sections of discount coupons.\n\n`IShoppingCouponSectionCriteria` is a subtype entity of\n{@link IShoppingCouponCriteriaBase} and is used when setting conditions\nfor a specific {@link IShoppingSection section}.\n\nIf the {@link direction} value is \"include\", the coupon can only be used\nfor the target {@link sections}. Conversely, if it is \"exclude\", the\ncoupon cannot be used.",
+      "type": "object",
+      "properties": {
+        "sections": {
+          "title": "Target sections to include or exclude",
+          "description": "Target sections to include or exclude.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSection"
+          },
+          "minItems": 1
+        },
+        "type": {
+          "title": "Descrimanator type",
+          "description": "Descrimanator type.",
+          "const": "section"
+        },
+        "direction": {
+          "title": "Direction of the criteria",
+          "description": "Direction of the criteria.",
+          "oneOf": [
+            {
+              "const": "include"
+            },
+            {
+              "const": "exclude"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sections",
+        "type",
+        "direction"
+      ]
+    },
+    "IShoppingSection": {
+      "description": "Section information.\n\n`IShoppingSection` is a concept that refers to the spatial information of\nthe market.\n\nIf we compare the section mentioned here to the offline market, it means a\nspatially separated area within the store, such as the \"fruit corner\" or\n\"butcher corner\". Therefore, in the {@link IShoppingSale sale} entity, it is\nnot possible to classify multiple sections simultaneously, but only one section\ncan be classified.\n\nBy the way, if your shopping mall system requires only one section, then just\nuse only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Representative name of the section",
+          "description": "Representative name of the section.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "name",
+        "created_at"
+      ]
+    },
+    "IShoppingCouponSellerCriteria": {
+      "description": "Conditions for sellers of discount coupons.\n\n`IShoppingCouponSellerCriteria` is a subtype entity of\n{@link IShoppingCouponCriteriaBase} and is used when setting conditions\nfor a specific {@link IShoppingSeller seller}.\n\nIf the {@link direction} value is \"include\", the coupon can only be used\nfor the target {@link sellers}. Conversely, if it is \"exclude\", the\ncoupon cannot be used.",
+      "type": "object",
+      "properties": {
+        "sellers": {
+          "title": "Target sellers to include or exclude",
+          "description": "Target sellers to include or exclude.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSeller"
+          },
+          "minItems": 1
+        },
+        "type": {
+          "title": "Descrimanator type",
+          "description": "Descrimanator type.",
+          "const": "seller"
+        },
+        "direction": {
+          "title": "Direction of the criteria",
+          "description": "Direction of the criteria.",
+          "oneOf": [
+            {
+              "const": "include"
+            },
+            {
+              "const": "exclude"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sellers",
+        "type",
+        "direction"
+      ]
+    },
+    "IShoppingCouponSaleCriteria": {
+      "description": "Conditions for sales of discount coupons.\n\n`IShoppingCouponSaleCriteria` is a subtype entity of\n{@link IShoppingCouponCriteriaBase} and is used when setting conditions\nfor a specific {@link IShoppingSale sale}.\n\nIf the {@link direction} value is \"include\", the coupon can only be used\nfor the target {@link sales}. Conversely, if it is \"exclude\", the\ncoupon cannot be used.",
+      "type": "object",
+      "properties": {
+        "sales": {
+          "title": "Target sales to include or exclude",
+          "description": "Target sales to include or exclude.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSale.ISummary"
+          },
+          "minItems": 1
+        },
+        "type": {
+          "title": "Descrimanator type",
+          "description": "Descrimanator type.",
+          "const": "sale"
+        },
+        "direction": {
+          "title": "Direction of the criteria",
+          "description": "Direction of the criteria.",
+          "oneOf": [
+            {
+              "const": "include"
+            },
+            {
+              "const": "exclude"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sales",
+        "type",
+        "direction"
+      ]
+    },
+    "IShoppingSale.ISummary": {
+      "description": "Summarized information of sale.\n\nThis summarized information being used for pagination.",
+      "type": "object",
+      "properties": {
+        "section": {
+          "title": "Belonged section",
+          "description": "Belonged section.",
+          "$ref": "#/$defs/IShoppingSection"
+        },
+        "seller": {
+          "title": "Seller who has registered the sale",
+          "description": "Seller who has registered the sale.",
+          "$ref": "#/$defs/IShoppingSeller.ISummary"
+        },
+        "price_range": {
+          "title": "Price range of the unit",
+          "description": "Price range of the unit.",
+          "$ref": "#/$defs/IShoppingSalePriceRange"
+        },
+        "id": {
+          "title": "Primary Key of Sale",
+          "description": "Primary Key of Sale.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "snapshot_id": {
+          "title": "Primary Key of Snapshot",
+          "description": "Primary Key of Snapshot.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "latest": {
+          "title": "Whether the snapshot is the latest one or not",
+          "description": "Whether the snapshot is the latest one or not.",
+          "type": "boolean"
+        },
+        "content": {
+          "title": "Description and image content describing the sale",
+          "description": "Description and image content describing the sale.",
+          "$ref": "#/$defs/IShoppingSaleContent.IInvert"
+        },
+        "categories": {
+          "title": "List of categories",
+          "description": "List of categories.\n\nWhich categories the sale is registered to.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+          }
+        },
+        "tags": {
+          "title": "List of search tags",
+          "description": "List of search tags.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "units": {
+          "title": "List of units",
+          "description": "List of units.\n\nRecords about individual product composition information that are sold\nin the sale. Each {@link IShoppingSaleUnit unit} record has configurable\n{@link IShoppingSaleUnitOption options},\n{@link IShoppingSaleUnitOptionCandidate candidate} values for each\noption, and {@link IShoppingSaleUnitStock final stocks} determined by\nselecting every candidate values of each option.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnit.ISummary"
+          },
+          "minItems": 1
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.\n\nNote that, this property is different with {@link opened_at},\nwhich means the timepoint of the sale is opened.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "title": "Last updated time of the record",
+          "description": "Last updated time of the record.\n\nIn another words, creation time of the last snapshot.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "paused_at": {
+          "title": "Paused time of the sale",
+          "description": "Paused time of the sale.\n\nThe sale is paused by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} can still see the sale on the\nboth list and detail pages, but the sale has a warning label\n\"The sale is paused by the seller\".",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "suspended_at": {
+          "title": "Suspended time of the sale",
+          "description": "Suspended time of the sale.\n\nThe sale is suspended by the seller, for some reason.\n\n{@link IShoppingCustomer Customers} cannot see the sale on the\nboth list and detail pages. It is almost same with soft delettion,\nbut there's a little bit difference that the owner\n{@link IShoppingSeller seller} can still see the sale and resume it.\n\nOf course, the {@link IShoppingCustomer customers} who have\nalready purchased the sale can still see the sale on the\n{@link IShoppingOrder order} page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "opened_at": {
+          "title": "Opening time of the sale",
+          "description": "Opening time of the sale.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "closed_at": {
+          "title": "Closing time of the sale",
+          "description": "Closing time of the sale.\n\nIf this value is `null`, the sale be continued forever.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "section",
+        "seller",
+        "price_range",
+        "id",
+        "snapshot_id",
+        "latest",
+        "content",
+        "categories",
+        "tags",
+        "units",
+        "created_at",
+        "updated_at",
+        "paused_at",
+        "suspended_at",
+        "opened_at",
+        "closed_at"
+      ]
+    },
+    "IShoppingSeller.ISummary": {
+      "description": "Summary of seller information.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Discriminant for the type of seller",
+          "description": "Discriminant for the type of seller.",
+          "const": "seller"
+        },
+        "member": {
+          "title": "Membership joining information",
+          "description": "Membership joining information.",
+          "$ref": "#/$defs/IShoppingMember.IInvert"
+        },
+        "citizen": {
+          "title": "Real-name and mobile number authentication information",
+          "description": "Real-name and mobile number authentication information.",
+          "$ref": "#/$defs/IShoppingCitizen"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation tmie of record",
+          "description": "Creation tmie of record.\n\nAnother words, the time when the seller has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "member",
+        "citizen",
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingMember.IInvert": {
+      "description": "Invert information of member.\n\nThis invert member information has been designed to be used for another\ninvert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "nickname": {
+          "title": "Nickname that uniquely identifies the member",
+          "description": "Nickname that uniquely identifies the member.",
+          "type": "string"
+        },
+        "emails": {
+          "title": "List of emails",
+          "description": "List of emails.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingMemberEmail"
+          }
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the member has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "nickname",
+        "emails",
+        "created_at"
+      ]
+    },
+    "IShoppingMemberEmail": {
+      "description": "Email address of member.\n\nThis shopping mall system allows multiple email addresses to be\nregistered for one {@link IShoppingMember member}. If you don't have to\nplan such multiple email addresses, just use only one.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Email address value",
+          "description": "Email address value.",
+          "type": "string",
+          "format": "email"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at"
+      ]
+    },
+    "IShoppingCitizen": {
+      "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "mobile": {
+          "title": "Mobile number",
+          "description": "Mobile number.",
+          "x-wrtn-payment-order-mobile": true,
+          "type": "string",
+          "pattern": "^[0-9]*$"
+        },
+        "name": {
+          "title": "Real name, or equivalent nickname",
+          "description": "Real name, or equivalent nickname.",
+          "x-wrtn-payment-order-citizen": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "mobile",
+        "name"
+      ]
+    },
+    "IShoppingSalePriceRange": {
+      "type": "object",
+      "properties": {
+        "lowest": {
+          "$ref": "#/$defs/IShoppingPrice"
+        },
+        "highest": {
+          "$ref": "#/$defs/IShoppingPrice"
+        }
+      },
+      "required": [
+        "lowest",
+        "highest"
+      ]
+    },
+    "IShoppingPrice": {
+      "description": "Shopping price interface.",
+      "type": "object",
+      "properties": {
+        "nominal": {
+          "title": "Nominal price",
+          "description": "Nominal price.\n\nThis is not {@link real real price} to pay, but just a nominal price to show.\nIf this value is greater than the {@link real real price}, it would be shown\nlike {@link IShoppingSeller seller} is giving a discount.",
+          "type": "number",
+          "minimum": 0
+        },
+        "real": {
+          "title": "Real price to pay",
+          "description": "Real price to pay.",
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "nominal",
+        "real"
+      ]
+    },
+    "IShoppingSaleContent.IInvert": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "title": {
+          "type": "string"
+        },
+        "thumbnails": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "thumbnails"
+      ]
+    },
+    "IAttachmentFile": {
+      "description": "Attachment File.\n\nEvery attachment files that are managed in current system.\n\nFor reference, it is possible to omit one of file {@link name}\nor {@link extension} like `.gitignore` or `README` case, but not\npossible to omit both of them.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of attachment file",
+          "description": "Creation time of attachment file.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IShoppingChannelCategory.IInvert": {
+      "description": "Invert category information with parent category.",
+      "type": "object",
+      "properties": {
+        "parent": {
+          "title": "Parent category info with recursive structure",
+          "description": "Parent category info with recursive structure.\n\nIf no parent exists, then be `null`.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingChannelCategory.IInvert"
+            }
+          ]
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code of the category",
+          "description": "Identifier code of the category.\n\nThe code must be unique in the channel.",
+          "type": "string"
+        },
+        "parent_id": {
+          "title": "Parent category's ID",
+          "description": "Parent category's ID.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uuid"
+            }
+          ]
+        },
+        "name": {
+          "title": "Representative name of the category",
+          "description": "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "parent",
+        "id",
+        "code",
+        "parent_id",
+        "name",
+        "created_at"
+      ]
+    },
+    "IShoppingSaleUnit.ISummary": {
+      "type": "object",
+      "properties": {
+        "price_range": {
+          "$ref": "#/$defs/IShoppingSalePriceRange"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "title": "Representative name of the unit",
+          "description": "Representative name of the unit.",
+          "type": "string"
+        },
+        "primary": {
+          "title": "Whether the unit is primary or not",
+          "description": "Whether the unit is primary or not.\n\nJust a labeling value.",
+          "type": "boolean"
+        },
+        "required": {
+          "title": "Whether the unit is required or not",
+          "description": "Whether the unit is required or not.\n\nWhen the unit is required, the customer must select the unit. If do not\nselect, customer can't buy it.\n\nFor example, if there's a sale \"Macbook Set\" and one of the unit is the\n\"Main Body\", is it possible to buy the \"Macbook Set\" without the\n\"Main Body\" unit? This property is for that case.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "price_range",
+        "id",
+        "name",
+        "primary",
+        "required"
+      ]
+    },
+    "IShoppingCouponFunnelCriteria": {
+      "description": "Limit the funnel of discount coupons.\n\n`ishoppingcouponfunnelcriteria` is a subtype entity of\n{@link IShoppingCouponCriteria}, and is used when you want to issue or\nexclude discount coupons only to {@link IShoppingCustomer customers} who\ncame from a specific path.\n\nAnd funnel restrictions are possible in 3 ways: The first is\n{@link IShoppingCustomer.referrer}, and by parsing\n{@link IShoppingCustomer.href}, which records the customer's access\naddress, restrictions can be made in units of specific URLs or variables.",
+      "type": "object",
+      "properties": {
+        "funnels": {
+          "title": "List of target funnels",
+          "description": "List of target funnels.",
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/IShoppingCouponFunnelCriteria.IValueFunnel"
+              },
+              {
+                "$ref": "#/$defs/IShoppingCouponFunnelCriteria.IVariableFunnel"
+              }
+            ]
+          },
+          "minItems": 1
+        },
+        "type": {
+          "title": "Descrimanator type",
+          "description": "Descrimanator type.",
+          "const": "funnel"
+        },
+        "direction": {
+          "title": "Direction of the criteria",
+          "description": "Direction of the criteria.",
+          "oneOf": [
+            {
+              "const": "include"
+            },
+            {
+              "const": "exclude"
+            }
+          ]
+        }
+      },
+      "required": [
+        "funnels",
+        "type",
+        "direction"
+      ]
+    },
+    "IShoppingCouponFunnelCriteria.IValueFunnel": {
+      "description": "Kind of funnel restriction by a value.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind of funnel restriction",
+          "description": "Kind of funnel restriction.",
+          "oneOf": [
+            {
+              "const": "url"
+            },
+            {
+              "const": "referrer"
+            }
+          ]
+        },
+        "value": {
+          "title": "Target value",
+          "description": "Target value.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ]
+    },
+    "IShoppingCouponFunnelCriteria.IVariableFunnel": {
+      "description": "Kind of funnel restriction by a variable.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "title": "Kind of funnel restriction",
+          "description": "Kind of funnel restriction.",
+          "const": "variable"
+        },
+        "key": {
+          "title": "Target variable's key",
+          "description": "Target variable's key.",
+          "type": "string"
+        },
+        "value": {
+          "title": "Target variable's value",
+          "description": "Target variable's value.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "key",
+        "value"
+      ]
+    },
+    "IShoppingCouponDiscount.IAmount": {
+      "description": "Discount information with amount unit.",
+      "type": "object",
+      "properties": {
+        "unit": {
+          "title": "Discount unit as amount",
+          "description": "Discount unit as amount.\n\nIt means the order price would be discounted by the amount value.",
+          "const": "amount"
+        },
+        "value": {
+          "title": "Discount value as amount",
+          "description": "Discount value as amount.",
+          "type": "number"
+        },
+        "threshold": {
+          "title": "Minimum purchase amount for discount",
+          "description": "Minimum purchase amount for discount.\n\nWhen setting this value, discount coupons cannot be applied to\norder totals that are less than this value.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Maximum amount available for discount",
+          "description": "Maximum amount available for discount.\n\nWhen this value is set, no further discount will be given no\nmatter how much you order. This property would be meaningful\nonly when the {@link multiplicative} is `true`.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          ]
+        },
+        "multiplicative": {
+          "title": "Multiplicative or not",
+          "description": "Multiplicative or not.\n\nIf this property is `true`, the discount value would be multiplied\nto the {@link IShoppingCartCommodity.volume} or\n{@link IShoppingOrderGood.volume} value. Also, in that case,\nthe {@link limit} property would be meaningful.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "unit",
+        "value",
+        "threshold",
+        "limit",
+        "multiplicative"
+      ]
+    },
+    "IShoppingCouponDiscount.IPercent": {
+      "description": "Discount information with percent unit.",
+      "type": "object",
+      "properties": {
+        "unit": {
+          "title": "Discount unit as percent",
+          "description": "Discount unit as percent.\n\nIt means the order price would be discounted by the percent value.",
+          "const": "percent"
+        },
+        "value": {
+          "title": "Discount value as percent",
+          "description": "Discount value as percent.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "threshold": {
+          "title": "Minimum purchase amount for discount",
+          "description": "Minimum purchase amount for discount.\n\nWhen setting this value, discount coupons cannot be applied to\norder totals that are less than this value.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Maximum amount available for discount",
+          "description": "Maximum amount available for discount.\n\nWhen this value is set, no further discount will be given no\nmatter how much you order.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          ]
+        }
+      },
+      "required": [
+        "unit",
+        "value",
+        "threshold",
+        "limit"
+      ]
+    },
+    "IShoppingCouponRestriction": {
+      "description": "Restriction information of the coupon.",
+      "type": "object",
+      "properties": {
+        "access": {
+          "title": "Access level of coupon",
+          "description": "Access level of coupon.\n\n- public: possible to find from public API\n- private: unable to find from public API\n  - arbitrarily assigned by the seller or administrator\n  - issued from one-time link",
+          "oneOf": [
+            {
+              "const": "public"
+            },
+            {
+              "const": "private"
+            }
+          ]
+        },
+        "exclusive": {
+          "title": "Exclusivity or not",
+          "description": "Exclusivity or not.\n\nAn exclusive discount coupon refers to a discount coupon that has an\nexclusive relationship with other discount coupons and can only be\nused alone. That is, when an exclusive discount coupon is used, no\nother discount coupon can be used for the same\n{@link IShoppingOrder order} or {@link IShoppingOrderGood good}.\n\nPlease note that this exclusive attribute is a very different concept\nfrom multiplicative, which means whether the same coupon can be\nmultiplied and applied to multiple coupons of the same order, so\nplease do not confuse them.",
+          "type": "boolean"
+        },
+        "volume": {
+          "title": "Limited quantity issued",
+          "description": "Limited quantity issued.\n\nIf there is a limit to the quantity issued, it becomes impossible\nto issue tickets exceeding this value.\n\nIn other words, the concept of N coupons being issued on\na first-come, first-served basis is created.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "volume_per_citizen": {
+          "title": "Limited quantity issued per person",
+          "description": "Limited quantity issued per person.\n\nAs a limit to the total amount of issuance per person, it is\ncommon to assign 1 to limit duplicate issuance to the same citizen,\nor to use the NULL value to set no limit.\n\nOf course, by assigning a value of N, the total amount issued\nto the same citizen can be limited.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "expired_in": {
+          "title": "Expiration day(s) value",
+          "description": "Expiration day(s) value.\n\nThe concept of expiring N days after a discount coupon ticket is issued.\n\nTherefore, customers must use the ticket within N days, if possible,\nfrom the time it is issued.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "expired_at": {
+          "title": "Expiration date",
+          "description": "Expiration date.\n\nA concept that expires after YYYY-MM-DD after a discount coupon ticket\nis issued.\n\nDouble restrictions are possible with expired_in, of which the one\nwith the shorter expiration date is used.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "access",
+        "exclusive",
+        "volume",
+        "volume_per_citizen",
+        "expired_in",
+        "expired_at"
+      ]
+    }
+  }
+}

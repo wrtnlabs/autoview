@@ -1,0 +1,57 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposEnvironmentsDeploymentProtectionRulesApps.GetResponse"
+  },
+  "$defs": {
+    "IApiReposEnvironmentsDeploymentProtectionRulesApps.GetResponse": {
+      "type": "object",
+      "properties": {
+        "total_count": {
+          "description": "The total number of custom deployment protection rule integrations available for this environment.",
+          "example": 35,
+          "type": "integer"
+        },
+        "available_custom_deployment_protection_rule_integrations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/custom-deployment-rule-app"
+          }
+        }
+      },
+      "required": []
+    },
+    "custom-deployment-rule-app": {
+      "title": "Custom deployment protection rule app",
+      "description": "A GitHub App that is providing a custom deployment protection rule.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the deployment protection rule integration.",
+          "example": 3515,
+          "type": "integer"
+        },
+        "slug": {
+          "description": "The slugified name of the deployment protection rule integration.",
+          "example": "my-custom-app",
+          "type": "string"
+        },
+        "integration_url": {
+          "description": "The URL for the endpoint to get details about the app.",
+          "example": "https://api.github.com/apps/custom-app-slug",
+          "type": "string"
+        },
+        "node_id": {
+          "description": "The node ID for the deployment protection rule integration.",
+          "example": "MDQ6R2F0ZTM1MTU=",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "integration_url",
+        "node_id"
+      ]
+    }
+  }
+}

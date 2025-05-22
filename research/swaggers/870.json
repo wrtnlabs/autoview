@@ -1,0 +1,384 @@
+{
+  "schema": {
+    "description": "List of locations where the secret was detected",
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/secret-scanning-location"
+    }
+  },
+  "$defs": {
+    "secret-scanning-location": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "The location type. Because secrets may be found in different types of resources (ie. code, comments, issues, pull requests, discussions), this field identifies the type of resource where the secret was found.",
+          "example": "commit",
+          "oneOf": [
+            {
+              "const": "commit"
+            },
+            {
+              "const": "wiki_commit"
+            },
+            {
+              "const": "issue_title"
+            },
+            {
+              "const": "issue_body"
+            },
+            {
+              "const": "issue_comment"
+            },
+            {
+              "const": "discussion_title"
+            },
+            {
+              "const": "discussion_body"
+            },
+            {
+              "const": "discussion_comment"
+            },
+            {
+              "const": "pull_request_title"
+            },
+            {
+              "const": "pull_request_body"
+            },
+            {
+              "const": "pull_request_comment"
+            },
+            {
+              "const": "pull_request_review"
+            },
+            {
+              "const": "pull_request_review_comment"
+            }
+          ]
+        },
+        "details": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/secret-scanning-location-commit"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-wiki-commit"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-issue-title"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-issue-body"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-issue-comment"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-discussion-title"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-discussion-body"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-discussion-comment"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-pull-request-title"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-pull-request-body"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-pull-request-comment"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-pull-request-review"
+            },
+            {
+              "$ref": "#/$defs/secret-scanning-location-pull-request-review-comment"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "secret-scanning-location-commit": {
+      "description": "Represents a 'commit' secret scanning location type. This location type shows that a secret was detected inside a commit to a repository.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "The file path in the repository",
+          "example": "/example/secrets.txt",
+          "type": "string"
+        },
+        "start_line": {
+          "description": "Line number at which the secret starts in the file",
+          "type": "number"
+        },
+        "end_line": {
+          "description": "Line number at which the secret ends in the file",
+          "type": "number"
+        },
+        "start_column": {
+          "description": "The column at which the secret starts within the start line when the file is interpreted as 8BIT ASCII",
+          "type": "number"
+        },
+        "end_column": {
+          "description": "The column at which the secret ends within the end line when the file is interpreted as 8BIT ASCII",
+          "type": "number"
+        },
+        "blob_sha": {
+          "description": "SHA-1 hash ID of the associated blob",
+          "example": "af5626b4a114abcb82d63db7c8082c3c4756e51b",
+          "type": "string"
+        },
+        "blob_url": {
+          "description": "The API URL to get the associated blob resource",
+          "type": "string"
+        },
+        "commit_sha": {
+          "description": "SHA-1 hash ID of the associated commit",
+          "example": "af5626b4a114abcb82d63db7c8082c3c4756e51b",
+          "type": "string"
+        },
+        "commit_url": {
+          "description": "The API URL to get the associated commit resource",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "start_line",
+        "end_line",
+        "start_column",
+        "end_column",
+        "blob_sha",
+        "blob_url",
+        "commit_sha",
+        "commit_url"
+      ]
+    },
+    "secret-scanning-location-wiki-commit": {
+      "description": "Represents a 'wiki_commit' secret scanning location type. This location type shows that a secret was detected inside a commit to a repository wiki.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "description": "The file path of the wiki page",
+          "example": "/example/Home.md",
+          "type": "string"
+        },
+        "start_line": {
+          "description": "Line number at which the secret starts in the file",
+          "type": "number"
+        },
+        "end_line": {
+          "description": "Line number at which the secret ends in the file",
+          "type": "number"
+        },
+        "start_column": {
+          "description": "The column at which the secret starts within the start line when the file is interpreted as 8-bit ASCII.",
+          "type": "number"
+        },
+        "end_column": {
+          "description": "The column at which the secret ends within the end line when the file is interpreted as 8-bit ASCII.",
+          "type": "number"
+        },
+        "blob_sha": {
+          "description": "SHA-1 hash ID of the associated blob",
+          "example": "af5626b4a114abcb82d63db7c8082c3c4756e51b",
+          "type": "string"
+        },
+        "page_url": {
+          "description": "The GitHub URL to get the associated wiki page",
+          "example": "https://github.com/octocat/Hello-World/wiki/Home/302c0b7e200761c9dd9b57e57db540ee0b4293a5",
+          "type": "string"
+        },
+        "commit_sha": {
+          "description": "SHA-1 hash ID of the associated commit",
+          "example": "302c0b7e200761c9dd9b57e57db540ee0b4293a5",
+          "type": "string"
+        },
+        "commit_url": {
+          "description": "The GitHub URL to get the associated wiki commit",
+          "example": "https://github.com/octocat/Hello-World/wiki/_compare/302c0b7e200761c9dd9b57e57db540ee0b4293a5",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "start_line",
+        "end_line",
+        "start_column",
+        "end_column",
+        "blob_sha",
+        "page_url",
+        "commit_sha",
+        "commit_url"
+      ]
+    },
+    "secret-scanning-location-issue-title": {
+      "description": "Represents an 'issue_title' secret scanning location type. This location type shows that a secret was detected in the title of an issue.",
+      "type": "object",
+      "properties": {
+        "issue_title_url": {
+          "description": "The API URL to get the issue where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/issues/1347",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "issue_title_url"
+      ]
+    },
+    "secret-scanning-location-issue-body": {
+      "description": "Represents an 'issue_body' secret scanning location type. This location type shows that a secret was detected in the body of an issue.",
+      "type": "object",
+      "properties": {
+        "issue_body_url": {
+          "description": "The API URL to get the issue where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/issues/1347",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "issue_body_url"
+      ]
+    },
+    "secret-scanning-location-issue-comment": {
+      "description": "Represents an 'issue_comment' secret scanning location type. This location type shows that a secret was detected in a comment on an issue.",
+      "type": "object",
+      "properties": {
+        "issue_comment_url": {
+          "description": "The API URL to get the issue comment where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/issues/comments/1081119451",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "issue_comment_url"
+      ]
+    },
+    "secret-scanning-location-discussion-title": {
+      "description": "Represents a 'discussion_title' secret scanning location type. This location type shows that a secret was detected in the title of a discussion.",
+      "type": "object",
+      "properties": {
+        "discussion_title_url": {
+          "description": "The URL to the discussion where the secret was detected.",
+          "example": "https://github.com/community/community/discussions/39082",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "discussion_title_url"
+      ]
+    },
+    "secret-scanning-location-discussion-body": {
+      "description": "Represents a 'discussion_body' secret scanning location type. This location type shows that a secret was detected in the body of a discussion.",
+      "type": "object",
+      "properties": {
+        "discussion_body_url": {
+          "description": "The URL to the discussion where the secret was detected.",
+          "example": "https://github.com/community/community/discussions/39082#discussion-4566270",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "discussion_body_url"
+      ]
+    },
+    "secret-scanning-location-discussion-comment": {
+      "description": "Represents a 'discussion_comment' secret scanning location type. This location type shows that a secret was detected in a comment on a discussion.",
+      "type": "object",
+      "properties": {
+        "discussion_comment_url": {
+          "description": "The API URL to get the discussion comment where the secret was detected.",
+          "example": "https://github.com/community/community/discussions/39082#discussioncomment-4158232",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "discussion_comment_url"
+      ]
+    },
+    "secret-scanning-location-pull-request-title": {
+      "description": "Represents a 'pull_request_title' secret scanning location type. This location type shows that a secret was detected in the title of a pull request.",
+      "type": "object",
+      "properties": {
+        "pull_request_title_url": {
+          "description": "The API URL to get the pull request where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls/2846",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "pull_request_title_url"
+      ]
+    },
+    "secret-scanning-location-pull-request-body": {
+      "description": "Represents a 'pull_request_body' secret scanning location type. This location type shows that a secret was detected in the body of a pull request.",
+      "type": "object",
+      "properties": {
+        "pull_request_body_url": {
+          "description": "The API URL to get the pull request where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls/2846",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "pull_request_body_url"
+      ]
+    },
+    "secret-scanning-location-pull-request-comment": {
+      "description": "Represents a 'pull_request_comment' secret scanning location type. This location type shows that a secret was detected in a comment on a pull request.",
+      "type": "object",
+      "properties": {
+        "pull_request_comment_url": {
+          "description": "The API URL to get the pull request comment where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/issues/comments/1081119451",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "pull_request_comment_url"
+      ]
+    },
+    "secret-scanning-location-pull-request-review": {
+      "description": "Represents a 'pull_request_review' secret scanning location type. This location type shows that a secret was detected in a review on a pull request.",
+      "type": "object",
+      "properties": {
+        "pull_request_review_url": {
+          "description": "The API URL to get the pull request review where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls/2846/reviews/80",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "pull_request_review_url"
+      ]
+    },
+    "secret-scanning-location-pull-request-review-comment": {
+      "description": "Represents a 'pull_request_review_comment' secret scanning location type. This location type shows that a secret was detected in a review comment on a pull request.",
+      "type": "object",
+      "properties": {
+        "pull_request_review_comment_url": {
+          "description": "The API URL to get the pull request review comment where the secret was detected.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls/comments/12",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "pull_request_review_comment_url"
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+
+import Component from "../components/195";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"oneTimeMsg":{"id":"msg_001_test","channelId":"channel_123_dummy","name":"Welcome Message (Test)","state":"draft","sendMode":"immediately","sendMedium":"email","settings":{"type":"html_email_settings_dummy"},"userQuery":{"key":"segment","type":"list","operator":{},"values":[{"segment":"beta_testers"},{"segment":"internal_team"}]},"goalEventName":"opened_email_test","goalEventQuery":{"key":"action","type":"string","operator":{},"values":[{"action":"click"}]},"enableSupportBot":false,"followingSupportBotId":"support_bot_01_dummy","advertising":false,"sendToOfflineXms":true,"sendToOfflineEmail":false,"startAt":1747600800000,"draft":{"oneTimeMsg":{"id":"draft_msg_001_test","channelId":"channel_123_dummy","name":"Draft: Follow-up Message (Test)","state":"waiting","sendMode":"reservedWithReceiverTime","channelOperationId":"op_1234_dummy","sendMedium":"inAppChat","settings":{"type":"messaging_settings_dummy"},"userQuery":{"key":"user_activity","type":"datetime","operator":{},"values":[{"date":"2025-05-15T09:00:00Z"}]},"goalEventName":"message_opened_test","goalEventQuery":{"key":"opened","type":"boolean","operator":{},"values":[{"opened":true}]},"goalEventDuration":"3h","advertising":true,"sendToOfflineXms":false,"sendToOfflineEmail":false,"startAt":1747689600000,"localStartAt":"2025-05-20T10:00:00Z","createdAt":1747593600000,"updatedAt":1747597200000,"sent":5,"view":10,"goal":2,"click":3,"userChatExpireDuration":"24h"}},"createdAt":1747593600000,"updatedAt":1747597200000,"sent":0,"view":0,"goal":0,"click":0,"userChatExpireDuration":"48h"}};
+}

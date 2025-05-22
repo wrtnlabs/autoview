@@ -1,0 +1,133 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/label"
+    }
+  },
+  "$defs": {
+    "IApiReposIssuesLabels.PostBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "labels": {
+              "description": "The names of the labels to add to the issue's existing labels. You can pass an empty array to remove all labels. Alternatively, you can pass a single label as a `string` or an `array` of labels directly, but GitHub recommends passing an object with the `labels` key. You can also replace all of the labels for an issue. For more information, see \"[Set labels for an issue](https://docs.github.com/rest/issues/labels#set-labels-for-an-issue).\"",
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          }
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "label": {
+      "title": "Label",
+      "description": "Color-coded labels help you categorize and filter your issues (just like labels in Gmail).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the label.",
+          "example": 208045946,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDU6TGFiZWwyMDgwNDU5NDY=",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL for the label",
+          "example": "https://api.github.com/repositories/42/labels/bug",
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "description": "The name of the label.",
+          "example": "bug",
+          "type": "string"
+        },
+        "description": {
+          "description": "Optional description of the label, such as its purpose.",
+          "example": "Something isn't working",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "color": {
+          "description": "6-character hex code, without the leading #, identifying the color",
+          "example": "FFFFFF",
+          "type": "string"
+        },
+        "default": {
+          "description": "Whether this label comes by default in a new repository.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "name",
+        "description",
+        "color",
+        "default"
+      ]
+    }
+  }
+}

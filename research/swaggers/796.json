@@ -1,0 +1,70 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/deploy-key"
+    }
+  },
+  "$defs": {
+    "deploy-key": {
+      "title": "Deploy Key",
+      "description": "An SSH key granting access to a single repository.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "key": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "read_only": {
+          "type": "boolean"
+        },
+        "added_by": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last_used": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "key",
+        "url",
+        "title",
+        "verified",
+        "created_at",
+        "read_only"
+      ]
+    }
+  }
+}

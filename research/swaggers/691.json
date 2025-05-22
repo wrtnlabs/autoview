@@ -1,0 +1,41 @@
+{
+  "schema": {
+    "$ref": "#/$defs/codespaces-permissions-check-for-devcontainer"
+  },
+  "$defs": {
+    "IApiReposCodespacesPermissionsCheck.GetQuery": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "description": "The git reference that points to the location of the devcontainer configuration to use for the permission check. The value of `ref` will typically be a branch name (`heads/BRANCH_NAME`). For more information, see \"[Git References](https://git-scm.com/book/en/v2/Git-Internals-Git-References)\" in the Git documentation.",
+          "example": "master",
+          "type": "string"
+        },
+        "devcontainer_path": {
+          "description": "Path to the devcontainer.json configuration to use for the permission check.",
+          "example": ".devcontainer/example/devcontainer.json",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "devcontainer_path"
+      ]
+    },
+    "codespaces-permissions-check-for-devcontainer": {
+      "title": "Codespaces Permissions Check",
+      "description": "Permission check result for a given devcontainer config.",
+      "type": "object",
+      "properties": {
+        "accepted": {
+          "description": "Whether the user has accepted the permissions defined by the devcontainer config",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "accepted"
+      ]
+    }
+  }
+}

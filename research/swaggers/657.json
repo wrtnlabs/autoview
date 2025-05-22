@@ -1,0 +1,1603 @@
+{
+  "schema": {
+    "$ref": "#/$defs/branch-with-protection"
+  },
+  "$defs": {
+    "IApiReposBranchesRename.PostBody": {
+      "type": "object",
+      "properties": {
+        "new_name": {
+          "description": "The new name of the branch.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "new_name"
+      ]
+    },
+    "branch-with-protection": {
+      "title": "Branch With Protection",
+      "description": "Branch With Protection",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "commit": {
+          "$ref": "#/$defs/commit"
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "html": {
+              "type": "string"
+            },
+            "self": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "html",
+            "self"
+          ]
+        },
+        "protected": {
+          "type": "boolean"
+        },
+        "protection": {
+          "$ref": "#/$defs/branch-protection"
+        },
+        "protection_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "pattern": {
+          "example": "\"mas*\"",
+          "type": "string"
+        },
+        "required_approving_review_count": {
+          "example": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "commit",
+        "_links",
+        "protection",
+        "protected",
+        "protection_url"
+      ]
+    },
+    "commit": {
+      "title": "Commit",
+      "description": "Commit",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/commits/6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string",
+          "format": "uri"
+        },
+        "sha": {
+          "example": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string"
+        },
+        "node_id": {
+          "example": "MDY6Q29tbWl0NmRjYjA5YjViNTc4NzVmMzM0ZjYxYWViZWQ2OTVlMmU0MTkzZGI1ZQ==",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat/Hello-World/commit/6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string",
+          "format": "uri"
+        },
+        "comments_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/commits/6dcb09b5b57875f334f61aebed695e2e4193db5e/comments",
+          "type": "string",
+          "format": "uri"
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "example": "https://api.github.com/repos/octocat/Hello-World/commits/6dcb09b5b57875f334f61aebed695e2e4193db5e",
+              "type": "string",
+              "format": "uri"
+            },
+            "author": {
+              "$ref": "#/$defs/nullable-git-user"
+            },
+            "committer": {
+              "$ref": "#/$defs/nullable-git-user"
+            },
+            "message": {
+              "example": "Fix all the bugs",
+              "type": "string"
+            },
+            "comment_count": {
+              "example": 0,
+              "type": "integer"
+            },
+            "tree": {
+              "type": "object",
+              "properties": {
+                "sha": {
+                  "example": "827efc6d56897b048c772eb4087f854f46256132",
+                  "type": "string"
+                },
+                "url": {
+                  "example": "https://api.github.com/repos/octocat/Hello-World/tree/827efc6d56897b048c772eb4087f854f46256132",
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "sha",
+                "url"
+              ]
+            },
+            "verification": {
+              "$ref": "#/$defs/verification"
+            }
+          },
+          "required": [
+            "author",
+            "committer",
+            "comment_count",
+            "message",
+            "tree",
+            "url"
+          ]
+        },
+        "author": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/simple-user"
+            },
+            {
+              "$ref": "#/$defs/empty-object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "committer": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/simple-user"
+            },
+            {
+              "$ref": "#/$defs/empty-object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sha": {
+                "example": "7638417db6d59f3c431d3e1f261cc637155684cd",
+                "type": "string"
+              },
+              "url": {
+                "example": "https://api.github.com/repos/octocat/Hello-World/commits/7638417db6d59f3c431d3e1f261cc637155684cd",
+                "type": "string",
+                "format": "uri"
+              },
+              "html_url": {
+                "example": "https://github.com/octocat/Hello-World/commit/7638417db6d59f3c431d3e1f261cc637155684cd",
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": [
+              "sha",
+              "url"
+            ]
+          }
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "additions": {
+              "type": "integer"
+            },
+            "deletions": {
+              "type": "integer"
+            },
+            "total": {
+              "type": "integer"
+            }
+          },
+          "required": []
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/diff-entry"
+          }
+        }
+      },
+      "required": [
+        "url",
+        "sha",
+        "node_id",
+        "html_url",
+        "comments_url",
+        "commit",
+        "author",
+        "committer",
+        "parents"
+      ]
+    },
+    "nullable-git-user": {
+      "title": "Git User",
+      "description": "Metaproperties for Git author/committer information.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "example": "\"Chris Wanstrath\"",
+              "type": "string"
+            },
+            "email": {
+              "example": "\"chris@ozmm.org\"",
+              "type": "string"
+            },
+            "date": {
+              "example": "\"2007-10-29T02:42:39.000-07:00\"",
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verification": {
+      "title": "Verification",
+      "type": "object",
+      "properties": {
+        "verified": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "signature": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verified_at": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "verified",
+        "reason",
+        "payload",
+        "signature",
+        "verified_at"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "empty-object": {
+      "title": "Empty Object",
+      "description": "An object without any properties.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "diff-entry": {
+      "title": "Diff Entry",
+      "description": "Diff Entry",
+      "type": "object",
+      "properties": {
+        "sha": {
+          "example": "bbcd538c8e72b8c175046e27cc8f907076331401",
+          "type": "string"
+        },
+        "filename": {
+          "example": "file1.txt",
+          "type": "string"
+        },
+        "status": {
+          "example": "added",
+          "oneOf": [
+            {
+              "const": "added"
+            },
+            {
+              "const": "removed"
+            },
+            {
+              "const": "modified"
+            },
+            {
+              "const": "renamed"
+            },
+            {
+              "const": "copied"
+            },
+            {
+              "const": "changed"
+            },
+            {
+              "const": "unchanged"
+            }
+          ]
+        },
+        "additions": {
+          "example": 103,
+          "type": "integer"
+        },
+        "deletions": {
+          "example": 21,
+          "type": "integer"
+        },
+        "changes": {
+          "example": 124,
+          "type": "integer"
+        },
+        "blob_url": {
+          "example": "https://github.com/octocat/Hello-World/blob/6dcb09b5b57875f334f61aebed695e2e4193db5e/file1.txt",
+          "type": "string",
+          "format": "uri"
+        },
+        "raw_url": {
+          "example": "https://github.com/octocat/Hello-World/raw/6dcb09b5b57875f334f61aebed695e2e4193db5e/file1.txt",
+          "type": "string",
+          "format": "uri"
+        },
+        "contents_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/contents/file1.txt?ref=6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string",
+          "format": "uri"
+        },
+        "patch": {
+          "example": "@@ -132,7 +132,7 @@ module Test @@ -1000,7 +1000,7 @@ module Test",
+          "type": "string"
+        },
+        "previous_filename": {
+          "example": "file.txt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "additions",
+        "blob_url",
+        "changes",
+        "contents_url",
+        "deletions",
+        "filename",
+        "raw_url",
+        "sha",
+        "status"
+      ]
+    },
+    "branch-protection": {
+      "title": "Branch Protection",
+      "description": "Branch Protection",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "required_status_checks": {
+          "$ref": "#/$defs/protected-branch-required-status-check"
+        },
+        "enforce_admins": {
+          "$ref": "#/$defs/protected-branch-admin-enforced"
+        },
+        "required_pull_request_reviews": {
+          "$ref": "#/$defs/protected-branch-pull-request-review"
+        },
+        "restrictions": {
+          "$ref": "#/$defs/branch-restriction-policy"
+        },
+        "required_linear_history": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "allow_force_pushes": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "allow_deletions": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "block_creations": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "required_conversation_resolution": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "name": {
+          "example": "\"branch/with/protection\"",
+          "type": "string"
+        },
+        "protection_url": {
+          "example": "\"https://api.github.com/repos/owner-79e94e2d36b3fd06a32bb213/AAA_Public_Repo/branches/branch/with/protection/protection\"",
+          "type": "string"
+        },
+        "required_signatures": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_signatures",
+              "type": "string",
+              "format": "uri"
+            },
+            "enabled": {
+              "example": true,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "url",
+            "enabled"
+          ]
+        },
+        "lock_branch": {
+          "description": "Whether to set the branch as read-only. If this is true, users will not be able to push to the branch.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": []
+        },
+        "allow_fork_syncing": {
+          "description": "Whether users can pull changes from upstream when the branch is locked. Set to `true` to allow fork syncing. Set to `false` to prevent fork syncing.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          "required": []
+        }
+      },
+      "required": []
+    },
+    "protected-branch-required-status-check": {
+      "title": "Protected Branch Required Status Check",
+      "description": "Protected Branch Required Status Check",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "enforcement_level": {
+          "type": "string"
+        },
+        "contexts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "context": {
+                "type": "string"
+              },
+              "app_id": {
+                "oneOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "context",
+              "app_id"
+            ]
+          }
+        },
+        "contexts_url": {
+          "type": "string"
+        },
+        "strict": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "contexts",
+        "checks"
+      ]
+    },
+    "protected-branch-admin-enforced": {
+      "title": "Protected Branch Admin Enforced",
+      "description": "Protected Branch Admin Enforced",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/enforce_admins",
+          "type": "string",
+          "format": "uri"
+        },
+        "enabled": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "url",
+        "enabled"
+      ]
+    },
+    "protected-branch-pull-request-review": {
+      "title": "Protected Branch Pull Request Review",
+      "description": "Protected Branch Pull Request Review",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/dismissal_restrictions",
+          "type": "string",
+          "format": "uri"
+        },
+        "dismissal_restrictions": {
+          "type": "object",
+          "properties": {
+            "users": {
+              "description": "The list of users with review dismissal access.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/simple-user"
+              }
+            },
+            "teams": {
+              "description": "The list of teams with review dismissal access.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/team"
+              }
+            },
+            "apps": {
+              "description": "The list of apps with review dismissal access.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/integration"
+              }
+            },
+            "url": {
+              "example": "\"https://api.github.com/repos/the-org/an-org-repo/branches/master/protection/dismissal_restrictions\"",
+              "type": "string"
+            },
+            "users_url": {
+              "example": "\"https://api.github.com/repos/the-org/an-org-repo/branches/master/protection/dismissal_restrictions/users\"",
+              "type": "string"
+            },
+            "teams_url": {
+              "example": "\"https://api.github.com/repos/the-org/an-org-repo/branches/master/protection/dismissal_restrictions/teams\"",
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "bypass_pull_request_allowances": {
+          "description": "Allow specific users, teams, or apps to bypass pull request requirements.",
+          "type": "object",
+          "properties": {
+            "users": {
+              "description": "The list of users allowed to bypass pull request requirements.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/simple-user"
+              }
+            },
+            "teams": {
+              "description": "The list of teams allowed to bypass pull request requirements.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/team"
+              }
+            },
+            "apps": {
+              "description": "The list of apps allowed to bypass pull request requirements.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/integration"
+              }
+            }
+          },
+          "required": []
+        },
+        "dismiss_stale_reviews": {
+          "example": true,
+          "type": "boolean"
+        },
+        "require_code_owner_reviews": {
+          "example": true,
+          "type": "boolean"
+        },
+        "required_approving_review_count": {
+          "example": 2,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 6
+        },
+        "require_last_push_approval": {
+          "description": "Whether the most recent push must be approved by someone other than the person who pushed it.",
+          "example": true,
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "dismiss_stale_reviews",
+        "require_code_owner_reviews"
+      ]
+    },
+    "team": {
+      "title": "Team",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "description": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "privacy": {
+          "type": "string"
+        },
+        "notification_setting": {
+          "type": "string"
+        },
+        "permission": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "pull": {
+              "type": "boolean"
+            },
+            "triage": {
+              "type": "boolean"
+            },
+            "push": {
+              "type": "boolean"
+            },
+            "maintain": {
+              "type": "boolean"
+            },
+            "admin": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pull",
+            "triage",
+            "push",
+            "maintain",
+            "admin"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/rails/teams/core",
+          "type": "string",
+          "format": "uri"
+        },
+        "members_url": {
+          "type": "string"
+        },
+        "repositories_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent": {
+          "$ref": "#/$defs/nullable-team-simple"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "members_url",
+        "name",
+        "description",
+        "permission",
+        "html_url",
+        "repositories_url",
+        "slug",
+        "parent"
+      ]
+    },
+    "nullable-team-simple": {
+      "title": "Team Simple",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the team",
+              "example": 1,
+              "type": "integer"
+            },
+            "node_id": {
+              "example": "MDQ6VGVhbTE=",
+              "type": "string"
+            },
+            "url": {
+              "description": "URL for the team",
+              "example": "https://api.github.com/organizations/1/team/1",
+              "type": "string",
+              "format": "uri"
+            },
+            "members_url": {
+              "example": "https://api.github.com/organizations/1/team/1/members{/member}",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name of the team",
+              "example": "Justice League",
+              "type": "string"
+            },
+            "description": {
+              "description": "Description of the team",
+              "example": "A great team.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "permission": {
+              "description": "Permission that the team will have for its repositories",
+              "example": "admin",
+              "type": "string"
+            },
+            "privacy": {
+              "description": "The level of privacy this team should have",
+              "example": "closed",
+              "type": "string"
+            },
+            "notification_setting": {
+              "description": "The notification setting the team has set",
+              "example": "notifications_enabled",
+              "type": "string"
+            },
+            "html_url": {
+              "example": "https://github.com/orgs/rails/teams/core",
+              "type": "string",
+              "format": "uri"
+            },
+            "repositories_url": {
+              "example": "https://api.github.com/organizations/1/team/1/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "slug": {
+              "example": "justice-league",
+              "type": "string"
+            },
+            "ldap_dn": {
+              "description": "Distinguished Name (DN) that team maps to within LDAP environment",
+              "example": "uid=example,ou=users,dc=github,dc=com",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "url",
+            "members_url",
+            "name",
+            "description",
+            "permission",
+            "html_url",
+            "repositories_url",
+            "slug"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "integration": {
+      "title": "GitHub app",
+      "description": "GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the GitHub app",
+              "example": 37,
+              "type": "integer"
+            },
+            "slug": {
+              "description": "The slug name of the GitHub app",
+              "example": "probot-owners",
+              "type": "string"
+            },
+            "node_id": {
+              "example": "MDExOkludGVncmF0aW9uMQ==",
+              "type": "string"
+            },
+            "client_id": {
+              "example": "\"Iv1.25b5d1e65ffc4022\"",
+              "type": "string"
+            },
+            "owner": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/simple-user"
+                },
+                {
+                  "$ref": "#/$defs/enterprise"
+                }
+              ]
+            },
+            "name": {
+              "description": "The name of the GitHub app",
+              "example": "Probot Owners",
+              "type": "string"
+            },
+            "description": {
+              "example": "The description of the app.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "external_url": {
+              "example": "https://example.com",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/apps/super-ci",
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "example": "2017-07-08T16:18:44-04:00",
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "example": "2017-07-08T16:18:44-04:00",
+              "type": "string",
+              "format": "date-time"
+            },
+            "permissions": {
+              "description": "The set of permissions for the GitHub app",
+              "example": {
+                "issues": "read",
+                "deployments": "write"
+              },
+              "type": "object",
+              "properties": {
+                "issues": {
+                  "type": "string"
+                },
+                "checks": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "string"
+                },
+                "contents": {
+                  "type": "string"
+                },
+                "deployments": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": []
+            },
+            "events": {
+              "description": "The list of events for the GitHub app",
+              "example": [
+                "label",
+                "deployment"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "installations_count": {
+              "description": "The number of installations associated with the GitHub app",
+              "example": 5,
+              "type": "integer"
+            },
+            "client_secret": {
+              "example": "\"1d4b2097ac622ba702d19de498f005747a8b21d3\"",
+              "type": "string"
+            },
+            "webhook_secret": {
+              "example": "\"6fba8f2fc8a7e8f2cca5577eddd82ca7586b3b6b\"",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pem": {
+              "example": "\"-----BEGIN RSA PRIVATE KEY-----\\nMIIEogIBAAKCAQEArYxrNYD/iT5CZVpRJu4rBKmmze3PVmT/gCo2ATUvDvZTPTey\\nxcGJ3vvrJXazKk06pN05TN29o98jrYz4cengG3YGsXPNEpKsIrEl8NhbnxapEnM9\\nJCMRe0P5JcPsfZlX6hmiT7136GRWiGOUba2X9+HKh8QJVLG5rM007TBER9/z9mWm\\nrJuNh+m5l320oBQY/Qq3A7wzdEfZw8qm/mIN0FCeoXH1L6B8xXWaAYBwhTEh6SSn\\nZHlO1Xu1JWDmAvBCi0RO5aRSKM8q9QEkvvHP4yweAtK3N8+aAbZ7ovaDhyGz8r6r\\nzhU1b8Uo0Z2ysf503WqzQgIajr7Fry7/kUwpgQIDAQABAoIBADwJp80Ko1xHPZDy\\nfcCKBDfIuPvkmSW6KumbsLMaQv1aGdHDwwTGv3t0ixSay8CGlxMRtRDyZPib6SvQ\\n6OH/lpfpbMdW2ErkksgtoIKBVrDilfrcAvrNZu7NxRNbhCSvN8q0s4ICecjbbVQh\\nnueSdlA6vGXbW58BHMq68uRbHkP+k+mM9U0mDJ1HMch67wlg5GbayVRt63H7R2+r\\nVxcna7B80J/lCEjIYZznawgiTvp3MSanTglqAYi+m1EcSsP14bJIB9vgaxS79kTu\\noiSo93leJbBvuGo8QEiUqTwMw4tDksmkLsoqNKQ1q9P7LZ9DGcujtPy4EZsamSJT\\ny8OJt0ECgYEA2lxOxJsQk2kI325JgKFjo92mQeUObIvPfSNWUIZQDTjniOI6Gv63\\nGLWVFrZcvQBWjMEQraJA9xjPbblV8PtfO87MiJGLWCHFxmPz2dzoedN+2Coxom8m\\nV95CLz8QUShuao6u/RYcvUaZEoYs5bHcTmy5sBK80JyEmafJPtCQVxMCgYEAy3ar\\nZr3yv4xRPEPMat4rseswmuMooSaK3SKub19WFI5IAtB/e7qR1Rj9JhOGcZz+OQrl\\nT78O2OFYlgOIkJPvRMrPpK5V9lslc7tz1FSh3BZMRGq5jSyD7ETSOQ0c8T2O/s7v\\nbeEPbVbDe4mwvM24XByH0GnWveVxaDl51ABD65sCgYB3ZAspUkOA5egVCh8kNpnd\\nSd6SnuQBE3ySRlT2WEnCwP9Ph6oPgn+oAfiPX4xbRqkL8q/k0BdHQ4h+zNwhk7+h\\nWtPYRAP1Xxnc/F+jGjb+DVaIaKGU18MWPg7f+FI6nampl3Q0KvfxwX0GdNhtio8T\\nTj1E+SnFwh56SRQuxSh2gwKBgHKjlIO5NtNSflsUYFM+hyQiPiqnHzddfhSG+/3o\\nm5nNaSmczJesUYreH5San7/YEy2UxAugvP7aSY2MxB+iGsiJ9WD2kZzTUlDZJ7RV\\nUzWsoqBR+eZfVJ2FUWWvy8TpSG6trh4dFxImNtKejCR1TREpSiTV3Zb1dmahK9GV\\nrK9NAoGAbBxRLoC01xfxCTgt5BDiBcFVh4fp5yYKwavJPLzHSpuDOrrI9jDn1oKN\\nonq5sDU1i391zfQvdrbX4Ova48BN+B7p63FocP/MK5tyyBoT8zQEk2+vWDOw7H/Z\\nu5dTCPxTIsoIwUw1I+7yIxqJzLPFgR2gVBwY1ra/8iAqCj+zeBw=\\n-----END RSA PRIVATE KEY-----\\n\"",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "owner",
+            "name",
+            "description",
+            "external_url",
+            "html_url",
+            "created_at",
+            "updated_at",
+            "permissions",
+            "events"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "enterprise": {
+      "title": "Enterprise",
+      "description": "An enterprise on GitHub.",
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "A short description of the enterprise.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "html_url": {
+          "example": "https://github.com/enterprises/octo-business",
+          "type": "string",
+          "format": "uri"
+        },
+        "website_url": {
+          "description": "The enterprise's website URL.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "Unique identifier of the enterprise",
+          "example": 42,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the enterprise.",
+          "example": "Octo Business",
+          "type": "string"
+        },
+        "slug": {
+          "description": "The slug url identifier for the enterprise.",
+          "example": "octo-business",
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2019-01-26T19:01:12Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "example": "2019-01-26T19:14:43Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "avatar_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "name",
+        "slug",
+        "html_url",
+        "created_at",
+        "updated_at",
+        "avatar_url"
+      ]
+    },
+    "branch-restriction-policy": {
+      "title": "Branch Restriction Policy",
+      "description": "Branch Restriction Policy",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "users_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "teams_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "apps_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "users": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "login": {
+                "type": "string"
+              },
+              "id": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "avatar_url": {
+                "type": "string"
+              },
+              "gravatar_id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "followers_url": {
+                "type": "string"
+              },
+              "following_url": {
+                "type": "string"
+              },
+              "gists_url": {
+                "type": "string"
+              },
+              "starred_url": {
+                "type": "string"
+              },
+              "subscriptions_url": {
+                "type": "string"
+              },
+              "organizations_url": {
+                "type": "string"
+              },
+              "repos_url": {
+                "type": "string"
+              },
+              "events_url": {
+                "type": "string"
+              },
+              "received_events_url": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "site_admin": {
+                "type": "boolean"
+              },
+              "user_view_type": {
+                "type": "string"
+              }
+            },
+            "required": []
+          }
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "description": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "privacy": {
+                "type": "string"
+              },
+              "notification_setting": {
+                "type": "string"
+              },
+              "permission": {
+                "type": "string"
+              },
+              "members_url": {
+                "type": "string"
+              },
+              "repositories_url": {
+                "type": "string"
+              },
+              "parent": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": []
+          }
+        },
+        "apps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "node_id": {
+                "type": "string"
+              },
+              "owner": {
+                "type": "object",
+                "properties": {
+                  "login": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "integer"
+                  },
+                  "node_id": {
+                    "type": "string"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "repos_url": {
+                    "type": "string"
+                  },
+                  "events_url": {
+                    "type": "string"
+                  },
+                  "hooks_url": {
+                    "type": "string"
+                  },
+                  "issues_url": {
+                    "type": "string"
+                  },
+                  "members_url": {
+                    "type": "string"
+                  },
+                  "public_members_url": {
+                    "type": "string"
+                  },
+                  "avatar_url": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "gravatar_id": {
+                    "example": "\"\"",
+                    "type": "string"
+                  },
+                  "html_url": {
+                    "example": "\"https://github.com/testorg-ea8ec76d71c3af4b\"",
+                    "type": "string"
+                  },
+                  "followers_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/followers\"",
+                    "type": "string"
+                  },
+                  "following_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/following{/other_user}\"",
+                    "type": "string"
+                  },
+                  "gists_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/gists{/gist_id}\"",
+                    "type": "string"
+                  },
+                  "starred_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/starred{/owner}{/repo}\"",
+                    "type": "string"
+                  },
+                  "subscriptions_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/subscriptions\"",
+                    "type": "string"
+                  },
+                  "organizations_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/orgs\"",
+                    "type": "string"
+                  },
+                  "received_events_url": {
+                    "example": "\"https://api.github.com/users/testorg-ea8ec76d71c3af4b/received_events\"",
+                    "type": "string"
+                  },
+                  "type": {
+                    "example": "\"Organization\"",
+                    "type": "string"
+                  },
+                  "site_admin": {
+                    "example": false,
+                    "type": "boolean"
+                  },
+                  "user_view_type": {
+                    "example": "public",
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "name": {
+                "type": "string"
+              },
+              "client_id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "external_url": {
+                "type": "string"
+              },
+              "html_url": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              },
+              "permissions": {
+                "type": "object",
+                "properties": {
+                  "metadata": {
+                    "type": "string"
+                  },
+                  "contents": {
+                    "type": "string"
+                  },
+                  "issues": {
+                    "type": "string"
+                  },
+                  "single_file": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              },
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": []
+          }
+        }
+      },
+      "required": [
+        "url",
+        "users_url",
+        "teams_url",
+        "apps_url",
+        "users",
+        "teams",
+        "apps"
+      ]
+    }
+  }
+}

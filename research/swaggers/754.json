@@ -1,0 +1,153 @@
+{
+  "schema": {
+    "$ref": "#/$defs/git-tree"
+  },
+  "$defs": {
+    "IApiReposGitTrees.PostBody": {
+      "type": "object",
+      "properties": {
+        "tree": {
+          "description": "Objects (of `path`, `mode`, `type`, and `sha`) specifying a tree structure.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "description": "The file referenced in the tree.",
+                "type": "string"
+              },
+              "mode": {
+                "description": "The file mode; one of `100644` for file (blob), `100755` for executable (blob), `040000` for subdirectory (tree), `160000` for submodule (commit), or `120000` for a blob that specifies the path of a symlink.",
+                "oneOf": [
+                  {
+                    "const": "100644"
+                  },
+                  {
+                    "const": "100755"
+                  },
+                  {
+                    "const": "040000"
+                  },
+                  {
+                    "const": "160000"
+                  },
+                  {
+                    "const": "120000"
+                  }
+                ]
+              },
+              "type": {
+                "description": "Either `blob`, `tree`, or `commit`.",
+                "oneOf": [
+                  {
+                    "const": "blob"
+                  },
+                  {
+                    "const": "tree"
+                  },
+                  {
+                    "const": "commit"
+                  }
+                ]
+              },
+              "sha": {
+                "description": "The SHA1 checksum ID of the object in the tree. Also called `tree.sha`. If the value is `null` then the file will be deleted.  \n  \n**Note:** Use either `tree.sha` or `content` to specify the contents of the entry. Using both `tree.sha` and `content` will return an error.",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "content": {
+                "description": "The content you want this file to have. GitHub will write this blob out and use that SHA for this entry. Use either this, or `tree.sha`.  \n  \n**Note:** Use either `tree.sha` or `content` to specify the contents of the entry. Using both `tree.sha` and `content` will return an error.",
+                "type": "string"
+              }
+            },
+            "required": []
+          }
+        },
+        "base_tree": {
+          "description": "The SHA1 of an existing Git tree object which will be used as the base for the new tree. If provided, a new Git tree object will be created from entries in the Git tree object pointed to by `base_tree` and entries defined in the `tree` parameter. Entries defined in the `tree` parameter will overwrite items from `base_tree` with the same `path`. If you're creating new changes on a branch, then normally you'd set `base_tree` to the SHA1 of the Git tree object of the current latest commit on the branch you're working on.\nIf not provided, GitHub will create a new Git tree object from only the entries defined in the `tree` parameter. If you create a new commit pointing to such a tree, then all files which were a part of the parent commit's tree and were not defined in the `tree` parameter will be listed as deleted by the new commit.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tree"
+      ]
+    },
+    "git-tree": {
+      "title": "Git Tree",
+      "description": "The hierarchy between files in a Git repository.",
+      "type": "object",
+      "properties": {
+        "sha": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "truncated": {
+          "type": "boolean"
+        },
+        "tree": {
+          "description": "Objects specifying a tree structure",
+          "example": [
+            {
+              "path": "file.rb",
+              "mode": "100644",
+              "type": "blob",
+              "size": 30,
+              "sha": "44b4fc6d56897b048c772eb4087f854f46256132",
+              "url": "https://api.github.com/repos/octocat/Hello-World/git/blobs/44b4fc6d56897b048c772eb4087f854f46256132"
+            }
+          ],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "mode",
+              "type",
+              "sha"
+            ],
+            "properties": {
+              "path": {
+                "example": "test/file.rb",
+                "type": "string"
+              },
+              "mode": {
+                "example": "040000",
+                "type": "string"
+              },
+              "type": {
+                "example": "tree",
+                "type": "string"
+              },
+              "sha": {
+                "example": "23f6827669e43831def8a7ad935069c8bd418261",
+                "type": "string"
+              },
+              "size": {
+                "example": 12,
+                "type": "integer"
+              },
+              "url": {
+                "example": "https://api.github.com/repos/owner-482f3203ecf01f67e9deb18e/BBB_Private_Repo/git/blobs/23f6827669e43831def8a7ad935069c8bd418261",
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "sha",
+        "tree",
+        "truncated"
+      ]
+    }
+  }
+}

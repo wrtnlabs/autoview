@@ -1,0 +1,24 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-cache-usage-org-enterprise"
+  },
+  "$defs": {
+    "actions-cache-usage-org-enterprise": {
+      "type": "object",
+      "properties": {
+        "total_active_caches_count": {
+          "description": "The count of active caches across all repositories of an enterprise or an organization.",
+          "type": "integer"
+        },
+        "total_active_caches_size_in_bytes": {
+          "description": "The total size in bytes of all active cache items across all repositories of an enterprise or an organization.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_active_caches_count",
+        "total_active_caches_size_in_bytes"
+      ]
+    }
+  }
+}

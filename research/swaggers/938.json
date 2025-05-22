@@ -1,0 +1,86 @@
+{
+  "schema": {
+    "$ref": "#/$defs/codespace-export-details"
+  },
+  "$defs": {
+    "codespace-export-details": {
+      "title": "Fetches information about an export of a codespace.",
+      "description": "An export of a codespace. Also, latest export details for a codespace can be fetched with id = latest",
+      "type": "object",
+      "properties": {
+        "state": {
+          "description": "State of the latest export",
+          "example": "succeeded | failed | in_progress",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "completed_at": {
+          "description": "Completion time of the last export operation",
+          "example": "2021-01-01T19:01:12Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "branch": {
+          "description": "Name of the exported branch",
+          "example": "codespace-monalisa-octocat-hello-world-g4wpq6h95q",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sha": {
+          "description": "Git commit SHA of the exported branch",
+          "example": "fd95a81ca01e48ede9f39c799ecbcef817b8a3b2",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "Id for the export details",
+          "example": "latest",
+          "type": "string"
+        },
+        "export_url": {
+          "description": "Url for fetching export details",
+          "example": "https://api.github.com/user/codespaces/:name/exports/latest",
+          "type": "string"
+        },
+        "html_url": {
+          "description": "Web url for the exported branch",
+          "example": "https://github.com/octocat/hello-world/tree/:branch",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}

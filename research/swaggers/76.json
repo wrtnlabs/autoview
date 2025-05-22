@@ -1,0 +1,123 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingCartCommodity.ICreate"
+  },
+  "$defs": {
+    "IShoppingCartCommodity.ICreate": {
+      "description": "Creation information of a shopping cart commodity.",
+      "type": "object",
+      "properties": {
+        "sale_id": {
+          "title": "Target sale's {@link IShoppingSale.id}",
+          "description": "Target sale's {@link IShoppingSale.id}.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "stocks": {
+          "title": "List of the stocks to be purchased",
+          "description": "List of the stocks to be purchased.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingCartCommodityStock.ICreate"
+          },
+          "minItems": 1
+        },
+        "volume": {
+          "title": "Volume of the commodity to purchase",
+          "description": "Volume of the commodity to purchase.\n\nA value indicating how many sets would be multiplied to the children\n{@link IShoppingSaleUnitStock.IInvert.quantity} values.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "accumulate": {
+          "title": "Whether to accumulate the volume or not",
+          "description": "Whether to accumulate the volume or not.\n\nIf this attribute is not `false` and there's same commodity that\ncomposed with same stocks and options, then the volume will be\naccumulated to the existed one.\n\nOtherwise, duplicated commodity would be newly created.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "required": [
+        "sale_id",
+        "stocks",
+        "volume"
+      ]
+    },
+    "IShoppingCartCommodityStock.ICreate": {
+      "description": "Creation information of the commodity stock of shopping cart.\n\nWhen record being created, its corresponding structure would be\n{@link IShoppingSaleSnapshotUnit.IInvert} and\n{@link IShoppingSaleSnapshotUnitStock.IInvert}.",
+      "type": "object",
+      "properties": {
+        "unit_id": {
+          "title": "Target unit's {@link IShoppingSaleUnit.id}",
+          "description": "Target unit's {@link IShoppingSaleUnit.id}.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "stock_id": {
+          "title": "Target stock's {@link IShoppingSaleUnitStock.id}",
+          "description": "Target stock's {@link IShoppingSaleUnitStock.id}.\n\nIt must be matched with the {@link choices} property.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "choices": {
+          "title": "Creation information of the choices for each descriptive option",
+          "description": "Creation information of the choices for each descriptive option.\n\nIf target option is not of descriptive but of selective, then\nthis property must be an empty array.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingCartCommodityStockChoice.ICreate"
+          }
+        },
+        "quantity": {
+          "title": "Quantity of the stock to purchase",
+          "description": "Quantity of the stock to purchase.\n\nThis value is multiplied by the {@link IShoppingCartCommodity.volume}.",
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "unit_id",
+        "stock_id",
+        "choices",
+        "quantity"
+      ]
+    },
+    "IShoppingCartCommodityStockChoice.ICreate": {
+      "description": "Creation information of the choice for each option (of descriptive).\n\nWhen target option is {@link IShoppingSaleUnitDescriptiveOption}\ntype, then you have to compose this choice structure with\n{@link value} specification.\n\nOtherwise when target option is {@link IShoppingSaleUnitSelectableOption}\ntype, you don't need to compose this choice structure. Just fill only\nthe {@link IShoppingCartCommodityStock.ICreate.stock_id} property.",
+      "type": "object",
+      "properties": {
+        "option_id": {
+          "title": "Target option's {@link IShoppingSaleUnitOption.id}",
+          "description": "Target option's {@link IShoppingSaleUnitOption.id}.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Written value about the option",
+          "description": "Written value about the option.\n\nWhen target option's type is 'descriptive', then you have to\nfill this property with the written value by the customer.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            }
+          ]
+        }
+      },
+      "required": [
+        "option_id",
+        "value"
+      ]
+    }
+  }
+}

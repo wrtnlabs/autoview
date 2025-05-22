@@ -1,0 +1,26 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiProjectsColumnsMoves.PostResponse"
+  },
+  "$defs": {
+    "IApiProjectsColumnsMoves.PostBody": {
+      "properties": {
+        "position": {
+          "description": "The position of the column in a project. Can be one of: `first`, `last`, or `after:<column_id>` to place after the specified column.",
+          "example": "last",
+          "type": "string",
+          "pattern": "^(?:first|last|after:\\d+)$"
+        }
+      },
+      "required": [
+        "position"
+      ],
+      "type": "object"
+    },
+    "IApiProjectsColumnsMoves.PostResponse": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+}

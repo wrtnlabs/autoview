@@ -1,0 +1,1036 @@
+{
+  "schema": {
+    "$ref": "#/$defs/authorization"
+  },
+  "$defs": {
+    "IApiApplicationsToken.PostBody": {
+      "properties": {
+        "access_token": {
+          "description": "The access_token of the OAuth or GitHub application.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "access_token"
+      ],
+      "type": "object"
+    },
+    "authorization": {
+      "title": "Authorization",
+      "description": "The authorization for an OAuth app, GitHub App, or a Personal Access Token.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "scopes": {
+          "description": "A list of scopes that this authorization is in.",
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "token": {
+          "type": "string"
+        },
+        "token_last_eight": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "hashed_token": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "app": {
+          "type": "object",
+          "properties": {
+            "client_id": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "client_id",
+            "name",
+            "url"
+          ]
+        },
+        "note": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "note_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "fingerprint": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "user": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "installation": {
+          "$ref": "#/$defs/nullable-scoped-installation"
+        },
+        "expires_at": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "app",
+        "id",
+        "note",
+        "note_url",
+        "scopes",
+        "token",
+        "hashed_token",
+        "token_last_eight",
+        "fingerprint",
+        "url",
+        "created_at",
+        "updated_at",
+        "expires_at"
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-scoped-installation": {
+      "title": "Scoped Installation",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "permissions": {
+              "$ref": "#/$defs/app-permissions"
+            },
+            "repository_selection": {
+              "description": "Describe whether all repositories have been selected or there's a selection involved",
+              "oneOf": [
+                {
+                  "const": "all"
+                },
+                {
+                  "const": "selected"
+                }
+              ]
+            },
+            "single_file_name": {
+              "example": "config.yaml",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "has_multiple_single_files": {
+              "example": true,
+              "type": "boolean"
+            },
+            "single_file_paths": {
+              "example": [
+                "config.yml",
+                ".github/issue_TEMPLATE.md"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "repositories_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "account": {
+              "$ref": "#/$defs/simple-user"
+            }
+          },
+          "required": [
+            "permissions",
+            "repository_selection",
+            "single_file_name",
+            "repositories_url",
+            "account"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "app-permissions": {
+      "title": "App Permissions",
+      "description": "The permissions granted to the user access token.",
+      "example": {
+        "contents": "read",
+        "issues": "read",
+        "deployments": "write",
+        "single_file": "read"
+      },
+      "type": "object",
+      "properties": {
+        "actions": {
+          "description": "The level of permission to grant the access token for GitHub Actions workflows, workflow runs, and artifacts.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "administration": {
+          "description": "The level of permission to grant the access token for repository creation, deletion, settings, teams, and collaborators creation.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "checks": {
+          "description": "The level of permission to grant the access token for checks on code.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "codespaces": {
+          "description": "The level of permission to grant the access token to create, edit, delete, and list Codespaces.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "contents": {
+          "description": "The level of permission to grant the access token for repository contents, commits, branches, downloads, releases, and merges.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "dependabot_secrets": {
+          "description": "The level of permission to grant the access token to manage Dependabot secrets.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "deployments": {
+          "description": "The level of permission to grant the access token for deployments and deployment statuses.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "environments": {
+          "description": "The level of permission to grant the access token for managing repository environments.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "issues": {
+          "description": "The level of permission to grant the access token for issues and related comments, assignees, labels, and milestones.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "metadata": {
+          "description": "The level of permission to grant the access token to search repositories, list collaborators, and access repository metadata.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "packages": {
+          "description": "The level of permission to grant the access token for packages published to GitHub Packages.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "pages": {
+          "description": "The level of permission to grant the access token to retrieve Pages statuses, configuration, and builds, as well as create new builds.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "pull_requests": {
+          "description": "The level of permission to grant the access token for pull requests and related comments, assignees, labels, milestones, and merges.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "repository_custom_properties": {
+          "description": "The level of permission to grant the access token to view and edit custom properties for a repository, when allowed by the property.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "repository_hooks": {
+          "description": "The level of permission to grant the access token to manage the post-receive hooks for a repository.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "repository_projects": {
+          "description": "The level of permission to grant the access token to manage repository projects, columns, and cards.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            },
+            {
+              "const": "admin"
+            }
+          ]
+        },
+        "secret_scanning_alerts": {
+          "description": "The level of permission to grant the access token to view and manage secret scanning alerts.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "secrets": {
+          "description": "The level of permission to grant the access token to manage repository secrets.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "security_events": {
+          "description": "The level of permission to grant the access token to view and manage security events like code scanning alerts.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "single_file": {
+          "description": "The level of permission to grant the access token to manage just a single file.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "statuses": {
+          "description": "The level of permission to grant the access token for commit statuses.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "vulnerability_alerts": {
+          "description": "The level of permission to grant the access token to manage Dependabot alerts.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "workflows": {
+          "description": "The level of permission to grant the access token to update GitHub Actions workflow files.",
+          "const": "write"
+        },
+        "members": {
+          "description": "The level of permission to grant the access token for organization teams and members.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_administration": {
+          "description": "The level of permission to grant the access token to manage access to an organization.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_custom_roles": {
+          "description": "The level of permission to grant the access token for custom repository roles management.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_custom_org_roles": {
+          "description": "The level of permission to grant the access token for custom organization roles management.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_custom_properties": {
+          "description": "The level of permission to grant the access token for custom property management.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            },
+            {
+              "const": "admin"
+            }
+          ]
+        },
+        "organization_copilot_seat_management": {
+          "description": "The level of permission to grant the access token for managing access to GitHub Copilot for members of an organization with a Copilot Business subscription. This property is in public preview and is subject to change.",
+          "const": "write"
+        },
+        "organization_announcement_banners": {
+          "description": "The level of permission to grant the access token to view and manage announcement banners for an organization.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_events": {
+          "description": "The level of permission to grant the access token to view events triggered by an activity in an organization.",
+          "const": "read"
+        },
+        "organization_hooks": {
+          "description": "The level of permission to grant the access token to manage the post-receive hooks for an organization.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_personal_access_tokens": {
+          "description": "The level of permission to grant the access token for viewing and managing fine-grained personal access token requests to an organization.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_personal_access_token_requests": {
+          "description": "The level of permission to grant the access token for viewing and managing fine-grained personal access tokens that have been approved by an organization.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_plan": {
+          "description": "The level of permission to grant the access token for viewing an organization's plan.",
+          "const": "read"
+        },
+        "organization_projects": {
+          "description": "The level of permission to grant the access token to manage organization projects and projects public preview (where available).",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            },
+            {
+              "const": "admin"
+            }
+          ]
+        },
+        "organization_packages": {
+          "description": "The level of permission to grant the access token for organization packages published to GitHub Packages.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_secrets": {
+          "description": "The level of permission to grant the access token to manage organization secrets.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_self_hosted_runners": {
+          "description": "The level of permission to grant the access token to view and manage GitHub Actions self-hosted runners available to an organization.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "organization_user_blocking": {
+          "description": "The level of permission to grant the access token to view and manage users blocked by the organization.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "team_discussions": {
+          "description": "The level of permission to grant the access token to manage team discussions and related comments.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "email_addresses": {
+          "description": "The level of permission to grant the access token to manage the email addresses belonging to a user.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "followers": {
+          "description": "The level of permission to grant the access token to manage the followers belonging to a user.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "git_ssh_keys": {
+          "description": "The level of permission to grant the access token to manage git SSH keys.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "gpg_keys": {
+          "description": "The level of permission to grant the access token to view and manage GPG keys belonging to a user.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "interaction_limits": {
+          "description": "The level of permission to grant the access token to view and manage interaction limits on a repository.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        },
+        "profile": {
+          "description": "The level of permission to grant the access token to manage the profile settings belonging to a user.",
+          "const": "write"
+        },
+        "starring": {
+          "description": "The level of permission to grant the access token to list and manage repositories a user is starring.",
+          "oneOf": [
+            {
+              "const": "read"
+            },
+            {
+              "const": "write"
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    }
+  }
+}

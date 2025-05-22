@@ -1,0 +1,25 @@
+{
+  "name": "@autoview/research",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "crawl": "ts-node src/crawl-openapis.ts",
+    "clear": "ts-node src/clear-all-components.ts",
+    "generate": "ts-node src/generate-all-components.ts",
+    "prepare": "ts-patch install"
+  },
+  "dependencies": {
+    "@autoview/agent": "workspace:^",
+    "@autoview/interface": "^7.3.1",
+    "@samchon/openapi": "^4.3.3",
+    "openai": "^4.95.0",
+    "react": "^19.1.0",
+    "typia": "^9.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "ts-node": "^10.9.2",
+    "ts-patch": "^3.3.0",
+    "typescript": "~5.8.3"
+  }
+}

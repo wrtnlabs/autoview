@@ -1,0 +1,29 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-workflow-access-to-repository"
+  },
+  "$defs": {
+    "actions-workflow-access-to-repository": {
+      "type": "object",
+      "properties": {
+        "access_level": {
+          "description": "Defines the level of access that workflows outside of the repository have to actions and reusable workflows within the\nrepository.\n\n`none` means the access is only possible from workflows in this repository. `user` level access allows sharing across user owned private repositories only. `organization` level access allows sharing across the organization.",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "user"
+            },
+            {
+              "const": "organization"
+            }
+          ]
+        }
+      },
+      "required": [
+        "access_level"
+      ]
+    }
+  }
+}

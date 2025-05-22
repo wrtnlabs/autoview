@@ -1,0 +1,434 @@
+{
+  "schema": {
+    "$ref": "#/$defs/shared.IntegerView"
+  },
+  "$defs": {
+    "IApiOpenV5AnnouncementsAnnounceAll.PostQuery": {
+      "type": "object",
+      "properties": {
+        "botName": {
+          "description": "Name of the bot sending the message",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "message.OpenMessageCreateRequest": {
+      "type": "object",
+      "properties": {
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.Block"
+          }
+        },
+        "plainText": {
+          "type": "string"
+        },
+        "buttons": {
+          "maxItems": 2,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.Button"
+          }
+        },
+        "files": {
+          "maxItems": 10,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.File"
+          }
+        },
+        "webPage": {
+          "$ref": "#/$defs/message.WebPage"
+        },
+        "form": {
+          "$ref": "#/$defs/message.form.Form"
+        },
+        "options": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "actAsManager"
+              },
+              {
+                "const": "displayAsChannel"
+              },
+              {
+                "const": "doNotPost"
+              },
+              {
+                "const": "doNotSearch"
+              },
+              {
+                "const": "doNotSendApp"
+              },
+              {
+                "const": "doNotUpdateDesk"
+              },
+              {
+                "const": "immutable"
+              },
+              {
+                "const": "private"
+              },
+              {
+                "const": "silent"
+              },
+              {
+                "const": "silentToManager"
+              },
+              {
+                "const": "silentToUser"
+              }
+            ]
+          }
+        },
+        "requestId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "message.Block": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "oneOf": [
+            {
+              "const": "bullets"
+            },
+            {
+              "const": "code"
+            },
+            {
+              "const": "text"
+            }
+          ]
+        },
+        "language": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.Block"
+          }
+        }
+      }
+    },
+    "message.Button": {
+      "required": [
+        "action",
+        "title"
+      ],
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "colorVariant": {
+          "oneOf": [
+            {
+              "const": "cobalt"
+            },
+            {
+              "const": "green"
+            },
+            {
+              "const": "orange"
+            },
+            {
+              "const": "red"
+            },
+            {
+              "const": "black"
+            },
+            {
+              "const": "pink"
+            },
+            {
+              "const": "purple"
+            }
+          ]
+        },
+        "action": {
+          "$ref": "#/$defs/message.action.Action"
+        },
+        "url": {
+          "type": "string",
+          "deprecated": true
+        }
+      }
+    },
+    "message.action.Action": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "attributes": {
+          "$ref": "#/$defs/message.action.Attributes"
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "message.action.Attributes": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "message.File": {
+      "required": [
+        "bucket",
+        "id",
+        "key",
+        "name",
+        "size"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "contentType": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "number",
+          "format": "double"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "orientation": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "animated": {
+          "type": "boolean"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "chatType": {
+          "type": "string"
+        },
+        "chatId": {
+          "type": "string"
+        }
+      }
+    },
+    "message.WebPage": {
+      "required": [
+        "id",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "imageUrl": {
+          "type": "string"
+        },
+        "videoUrl": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "width": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "height": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "bucket": {
+          "type": "string"
+        },
+        "previewKey": {
+          "type": "string"
+        },
+        "logo": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "message.form.Form": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "submittedAt": {
+          "example": 1744704943127,
+          "type": "number",
+          "format": "int64"
+        },
+        "inputs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/message.form.FormInput"
+          }
+        },
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "message.form.FormInput": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "object",
+          "properties": {},
+          "required": []
+        },
+        "readOnly": {
+          "type": "boolean"
+        },
+        "type": {
+          "oneOf": [
+            {
+              "const": "text"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "bool"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "radio"
+            },
+            {
+              "const": "singleSelect"
+            },
+            {
+              "const": "checkbox"
+            },
+            {
+              "const": "multiSelect"
+            }
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "bindingKey": {
+          "type": "string"
+        },
+        "dataType": {
+          "oneOf": [
+            {
+              "const": "string"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "list"
+            },
+            {
+              "const": "listOfNumber"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "boolean"
+            }
+          ]
+        },
+        "userChatProfileBindingKey": {
+          "type": "boolean"
+        },
+        "userProfileBindingKey": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "shared.IntegerView": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "required": []
+    }
+  }
+}

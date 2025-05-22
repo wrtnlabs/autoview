@@ -1,0 +1,55 @@
+{
+  "schema": {
+    "$ref": "#/$defs/code-scanning-sarifs-status"
+  },
+  "$defs": {
+    "code-scanning-sarifs-status": {
+      "type": "object",
+      "properties": {
+        "processing_status": {
+          "description": "`pending` files have not yet been processed, while `complete` means results from the SARIF have been stored. `failed` files have either not been processed at all, or could only be partially processed.",
+          "oneOf": [
+            {
+              "const": "pending"
+            },
+            {
+              "const": "complete"
+            },
+            {
+              "const": "failed"
+            }
+          ]
+        },
+        "analyses_url": {
+          "description": "The REST API URL for getting the analyses associated with the upload.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri",
+              "readOnly": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errors": {
+          "description": "Any errors that ocurred during processing of the delivery.",
+          "oneOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "readOnly": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}

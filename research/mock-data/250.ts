@@ -1,0 +1,8 @@
+
+import Component from "../components/250";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"next":2,"oneTimeMsgs":[{"id":"otmsg_001_sample","channelId":"marketing-channel-test","name":"Promotional Offer (Sample)","state":"waiting","sendMode":"reservedWithSenderTime","channelOperationId":"op_123_sample","sendMedium":"email","settings":{"type":"sample-email-settings"},"userQuery":{"key":"user.segment","type":"list","operator":{},"values":[{"segment":"testers"}],"and":[{"key":"user.age","type":"number","operator":{},"values":[{"min":18}]}]},"goalEventName":"purchaseCompleted","goalEventQuery":{"key":"order.value","type":"number","operator":{},"values":[{"min":100}]},"goalEventDuration":"7d","advertising":true,"sendToOfflineXms":false,"sendToOfflineEmail":true,"startAt":1716210000000,"localStartAt":"2025-05-20T13:00:00Z","createdAt":1716200000000,"updatedAt":1716203600000,"sent":0,"view":0,"goal":0,"click":0,"userChatExpireDuration":"3d"},{"id":"otmsg_002_sample","channelId":"marketing-channel-sample","name":"Account Activation Reminder (Test)","state":"sent","sendMode":"immediately","channelOperationId":"op_456_sample","sendMedium":"appLine","settings":{"type":"sample-appLine-settings"},"advertising":false,"sendToOfflineXms":true,"sendToOfflineEmail":false,"startAt":1716107200000,"localStartAt":"2025-05-18T09:30:00Z","createdAt":1716100000000,"updatedAt":1716103600000,"sent":150,"view":120,"goal":30,"click":15,"userChatExpireDuration":"5d","draft":{"oneTimeMsg":{"name":"Nested Draft Msg (Sample)","state":"draft","advertising":false}}}]};
+}

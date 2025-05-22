@@ -1,0 +1,36 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-hosted-runner-limits"
+  },
+  "$defs": {
+    "actions-hosted-runner-limits": {
+      "type": "object",
+      "properties": {
+        "public_ips": {
+          "title": "Static public IP Limits for GitHub-hosted Hosted Runners.",
+          "description": "Provides details of static public IP limits for GitHub-hosted Hosted Runners",
+          "type": "object",
+          "properties": {
+            "maximum": {
+              "description": "The maximum number of static public IP addresses that can be used for Hosted Runners.",
+              "example": 50,
+              "type": "integer"
+            },
+            "current_usage": {
+              "description": "The current number of static public IP addresses in use by Hosted Runners.",
+              "example": 17,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "maximum",
+            "current_usage"
+          ]
+        }
+      },
+      "required": [
+        "public_ips"
+      ]
+    }
+  }
+}

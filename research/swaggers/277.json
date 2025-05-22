@@ -1,0 +1,136 @@
+{
+  "schema": {
+    "$ref": "#/$defs/WebhooksView"
+  },
+  "$defs": {
+    "IApiOpenV5Webhooks.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "Unix timestamp value of the first webhook to be retrieved in descending order",
+          "example": 1744704943063,
+          "type": "number",
+          "format": "int64"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of results (range[1, 500])",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        }
+      },
+      "required": []
+    },
+    "WebhooksView": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "example": 1744704943061,
+          "type": "number",
+          "format": "int64"
+        },
+        "webhooks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/webhook.Webhook"
+          }
+        }
+      },
+      "required": []
+    },
+    "webhook.Webhook": {
+      "required": [
+        "apiVersion",
+        "name",
+        "scopes",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704943118,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "scopes": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "userChat.opened"
+              },
+              {
+                "const": "message.created.userChat"
+              },
+              {
+                "const": "message.created.teamChat"
+              },
+              {
+                "const": "lead.upserted.contact"
+              },
+              {
+                "const": "lead.upserted.subscription"
+              },
+              {
+                "const": "lead.deleted"
+              },
+              {
+                "const": "member.upserted.contact"
+              },
+              {
+                "const": "member.upserted.subscription"
+              },
+              {
+                "const": "member.deleted"
+              }
+            ]
+          }
+        },
+        "keywords": {
+          "maxItems": 20,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "deprecated": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "apiVersion": {
+          "type": "string"
+        },
+        "lastBlockedAt": {
+          "example": 1744704943118,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "blocked": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

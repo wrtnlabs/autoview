@@ -1,0 +1,8 @@
+
+import Component from "../components/875";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"ghsa_id":"GHSA-Test1-sample2","cve_id":"CVE-2025-0001","url":"https://api.github.com/security-advisories/GHSA-Test1-sample2","html_url":"https://github.com/advisories/GHSA-Test1-sample2","summary":"Sample security advisory summary (Test)","description":"This is a sample description for UI testing purposes. It includes more details to test text wrapping and display across UI components. All content is fictional and for demonstration only.","severity":"high","author":{"login":"test-author-sample","id":10001},"publisher":{"login":"test-publisher-sample","id":10002},"identifiers":[{"type":"GHSA","value":"GHSA-Test1-sample2"},{"type":"CVE","value":"CVE-2025-0001"}],"state":"published","created_at":"2025-05-01T08:30:00Z","updated_at":"2025-05-10T12:45:00Z","published_at":"2025-05-10T12:45:00Z","closed_at":null,"withdrawn_at":null,"submission":{"accepted":true},"vulnerabilities":[],"cvss":{"vector_string":"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H","score":9.8},"cvss_severities":{"cvss_v3":{"vector_string":"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H","score":9.8},"cvss_v4":null},"cwes":[{"cwe_id":"CWE-79","name":"Cross-site Scripting"}],"cwe_ids":["CWE-79"],"credits":[{"login":"contributor-test","type":"USER"}],"credits_detailed":[{"login":"contributor-test","type":"USER","contribution":"Initial report (Test)"}],"collaborating_users":[{"login":"collab-user-sample","id":20002}],"collaborating_teams":[{"name":"security-team-sample","id":30003}],"private_fork":null};
+}

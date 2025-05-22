@@ -1,0 +1,82 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsPrivateRegistries.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsPrivateRegistries.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "configurations"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "configurations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/org-private-registry-configuration"
+          }
+        }
+      }
+    },
+    "org-private-registry-configuration": {
+      "title": "Organization private registry",
+      "description": "Private registry configuration for an organization",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the private registry configuration.",
+          "example": "MAVEN_REPOSITORY_SECRET",
+          "type": "string"
+        },
+        "registry_type": {
+          "description": "The registry type.",
+          "const": "maven_repository"
+        },
+        "username": {
+          "description": "The username to use when authenticating with the private registry.",
+          "example": "monalisa",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "visibility": {
+          "description": "Which type of organization repositories have access to the private registry.",
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "private"
+            },
+            {
+              "const": "selected"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "registry_type",
+        "visibility",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

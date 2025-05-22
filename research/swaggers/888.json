@@ -1,0 +1,57 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/tag"
+    }
+  },
+  "$defs": {
+    "tag": {
+      "title": "Tag",
+      "description": "Tag",
+      "type": "object",
+      "properties": {
+        "name": {
+          "example": "v0.1",
+          "type": "string"
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "sha": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "sha",
+            "url"
+          ]
+        },
+        "zipball_url": {
+          "example": "https://github.com/octocat/Hello-World/zipball/v0.1",
+          "type": "string",
+          "format": "uri"
+        },
+        "tarball_url": {
+          "example": "https://github.com/octocat/Hello-World/tarball/v0.1",
+          "type": "string",
+          "format": "uri"
+        },
+        "node_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "node_id",
+        "commit",
+        "zipball_url",
+        "tarball_url"
+      ]
+    }
+  }
+}

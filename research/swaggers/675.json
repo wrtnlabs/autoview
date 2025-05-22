@@ -1,0 +1,168 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/code-scanning-analysis"
+    }
+  },
+  "$defs": {
+    "IApiReposCodeScanningAnalyses.GetQuery": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "code-scanning-analysis": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/code-scanning-ref"
+        },
+        "commit_sha": {
+          "$ref": "#/$defs/code-scanning-analysis-commit-sha"
+        },
+        "analysis_key": {
+          "$ref": "#/$defs/code-scanning-analysis-analysis-key"
+        },
+        "environment": {
+          "$ref": "#/$defs/code-scanning-analysis-environment"
+        },
+        "category": {
+          "$ref": "#/$defs/code-scanning-analysis-category"
+        },
+        "error": {
+          "example": "error reading field xyz",
+          "type": "string"
+        },
+        "created_at": {
+          "$ref": "#/$defs/code-scanning-analysis-created-at"
+        },
+        "results_count": {
+          "description": "The total number of results in the analysis.",
+          "type": "integer"
+        },
+        "rules_count": {
+          "description": "The total number of rules used in the analysis.",
+          "type": "integer"
+        },
+        "id": {
+          "description": "Unique identifier for this analysis.",
+          "type": "integer"
+        },
+        "url": {
+          "$ref": "#/$defs/code-scanning-analysis-url"
+        },
+        "sarif_id": {
+          "$ref": "#/$defs/code-scanning-analysis-sarif-id"
+        },
+        "tool": {
+          "$ref": "#/$defs/code-scanning-analysis-tool"
+        },
+        "deletable": {
+          "type": "boolean"
+        },
+        "warning": {
+          "description": "Warning generated when processing the analysis",
+          "example": "123 results were ignored",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref",
+        "commit_sha",
+        "analysis_key",
+        "environment",
+        "error",
+        "created_at",
+        "results_count",
+        "rules_count",
+        "id",
+        "url",
+        "sarif_id",
+        "tool",
+        "deletable",
+        "warning"
+      ]
+    },
+    "code-scanning-ref": {
+      "description": "The Git reference, formatted as `refs/pull/<number>/merge`, `refs/pull/<number>/head`,\n`refs/heads/<branch name>` or simply `<branch name>`.",
+      "type": "string"
+    },
+    "code-scanning-analysis-commit-sha": {
+      "description": "The SHA of the commit to which the analysis you are uploading relates.",
+      "type": "string",
+      "minLength": 40,
+      "maxLength": 40,
+      "pattern": "^[0-9a-fA-F]+$"
+    },
+    "code-scanning-analysis-analysis-key": {
+      "description": "Identifies the configuration under which the analysis was executed. For example, in GitHub Actions this includes the workflow filename and job name.",
+      "type": "string"
+    },
+    "code-scanning-analysis-environment": {
+      "description": "Identifies the variable values associated with the environment in which this analysis was performed.",
+      "type": "string"
+    },
+    "code-scanning-analysis-category": {
+      "description": "Identifies the configuration under which the analysis was executed. Used to distinguish between multiple analyses for the same tool and commit, but performed on different languages or different parts of the code.",
+      "type": "string"
+    },
+    "code-scanning-analysis-created-at": {
+      "description": "The time that the analysis was created in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "code-scanning-analysis-url": {
+      "description": "The REST API URL of the analysis resource.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "code-scanning-analysis-sarif-id": {
+      "description": "An identifier for the upload.",
+      "example": "6c81cd8e-b078-4ac3-a3be-1dad7dbd0b53",
+      "type": "string"
+    },
+    "code-scanning-analysis-tool": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/code-scanning-analysis-tool-name"
+        },
+        "version": {
+          "$ref": "#/$defs/code-scanning-analysis-tool-version"
+        },
+        "guid": {
+          "$ref": "#/$defs/code-scanning-analysis-tool-guid"
+        }
+      },
+      "required": []
+    },
+    "code-scanning-analysis-tool-name": {
+      "description": "The name of the tool used to generate the code scanning analysis.",
+      "type": "string"
+    },
+    "code-scanning-analysis-tool-version": {
+      "description": "The version of the tool used to generate the code scanning analysis.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-analysis-tool-guid": {
+      "description": "The GUID of the tool used to generate the code scanning analysis, if provided in the uploaded SARIF data.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

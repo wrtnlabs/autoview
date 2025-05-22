@@ -1,0 +1,334 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingAdministrator.IInvert"
+  },
+  "$defs": {
+    "IShoppingAdministrator.IJoin": {
+      "description": "Joining request info.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "IShoppingAdministrator.IInvert": {
+      "description": "Invert information starting from administrator info.\n\nInstead of accessing to the administrator information from the\n{@link IShoppingCustomer.member} -> {@link IShoppingMember.administrator},\n`IShoppingAdministrator.IInvert` starts from the administrator information\nand access to the customer, member and {@link IShoppingCitizen citizen}\ninformation inversely.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Discriminant for the type of customer",
+          "description": "Discriminant for the type of customer.",
+          "const": "administrator"
+        },
+        "member": {
+          "title": "Membership joining information",
+          "description": "Membership joining information.",
+          "$ref": "#/$defs/IShoppingMember.IInvert"
+        },
+        "customer": {
+          "title": "Customer, the connection information",
+          "description": "Customer, the connection information.",
+          "$ref": "#/$defs/IShoppingCustomer.IInvert"
+        },
+        "citizen": {
+          "title": "Real-name and mobile number authentication information",
+          "description": "Real-name and mobile number authentication information.",
+          "$ref": "#/$defs/IShoppingCitizen"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the administrator has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "member",
+        "customer",
+        "citizen",
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingMember.IInvert": {
+      "description": "Invert information of member.\n\nThis invert member information has been designed to be used for another\ninvert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "nickname": {
+          "title": "Nickname that uniquely identifies the member",
+          "description": "Nickname that uniquely identifies the member.",
+          "type": "string"
+        },
+        "emails": {
+          "title": "List of emails",
+          "description": "List of emails.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingMemberEmail"
+          }
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the member has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "nickname",
+        "emails",
+        "created_at"
+      ]
+    },
+    "IShoppingMemberEmail": {
+      "description": "Email address of member.\n\nThis shopping mall system allows multiple email addresses to be\nregistered for one {@link IShoppingMember member}. If you don't have to\nplan such multiple email addresses, just use only one.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Email address value",
+          "description": "Email address value.",
+          "type": "string",
+          "format": "email"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at"
+      ]
+    },
+    "IShoppingCustomer.IInvert": {
+      "description": "Inverted customer information.\n\nThis inverted customer information has been designed to be used for\nanother invert information of sellers and administrators like below.\n\n- {@link IShoppingSeller.IInvert}\n- {@link IShoppingAdministrator.IInvert}",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "channel": {
+          "title": "Belonged channel",
+          "description": "Belonged channel.",
+          "$ref": "#/$defs/IShoppingChannel"
+        },
+        "external_user": {
+          "title": "External user information",
+          "description": "External user information.\n\nWhen the customer has come from an external service.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingExternalUser"
+            }
+          ]
+        },
+        "href": {
+          "title": "Connection address",
+          "description": "Connection address.\n\nSame with {@link window.location.href} of client.",
+          "type": "string",
+          "format": "uri"
+        },
+        "referrer": {
+          "title": "Referrer address",
+          "description": "Referrer address.\n\nSame with {@link window.document.referrer} of client.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "string",
+              "maxLength": 0
+            }
+          ]
+        },
+        "ip": {
+          "title": "Connection IP Address",
+          "description": "Connection IP Address.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "ipv4"
+            },
+            {
+              "type": "string",
+              "format": "ipv6"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of the connection record",
+          "description": "Creation time of the connection record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "channel",
+        "external_user",
+        "href",
+        "referrer",
+        "ip",
+        "created_at"
+      ]
+    },
+    "IShoppingChannel": {
+      "description": "Channel information.\n\n`IShoppingChannel` is a concept that shapes the distribution channel in the\nmarket. Therefore, the difference in the channel in this e-commerce system\nmeans that it is another site or application.\n\nBy the way, if your shopping mall system requires only one channel, then\njust use only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name of the channel",
+          "description": "Name of the channel.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "code",
+        "name"
+      ]
+    },
+    "IShoppingExternalUser": {
+      "description": "External user information.\n\n`IShoppingExternalUser` is an entity dsigned for when this system needs\nto connect with external services and welcome their users as\n{@link IShoppingCustomer customers} of this service.\n\nFor reference, customers who connect from an external service must have\nthis record, and the external service user is identified through the two\nattributes {@link application} and {@link uid}. If a customer connected\nfrom an external service completes\n{@link IShoppingCitizen real-name authentication} from this service, each\ntime the external service user reconnects to this service and issues a\nnew customer authentication token, real-name authentication begins with\ncompleted.\n\nAnd {@link password} is the password issued to the user by the external\nservice system (the so-called permanent user authentication token), and\nis never the actual user password. However, for customers who entered the\nsame application and uid as the current external system user, this is to\ndetermine whether to view this as a correct external system user or a\nviolation.\n\nIn addition, additional information received from external services can\nbe recorded in the data field in JSON format.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "citizen": {
+          "title": "Citizen activation info",
+          "description": "Citizen activation info.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCitizen"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother word, first time when the external user connected.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "uid": {
+          "title": "Identifier key of external user from the external system",
+          "description": "Identifier key of external user from the external system.",
+          "type": "string"
+        },
+        "application": {
+          "title": "Identifier code of the external service",
+          "description": "Identifier code of the external service.\n\nIt can be same with {@link IShoppingChannel.code} in common.",
+          "type": "string"
+        },
+        "nickname": {
+          "title": "Nickname of external user in the external system",
+          "description": "Nickname of external user in the external system.",
+          "type": "string"
+        },
+        "data": {
+          "description": "Additional information about external user from the external\nsystem."
+        }
+      },
+      "required": [
+        "id",
+        "citizen",
+        "created_at",
+        "uid",
+        "application",
+        "nickname",
+        "data"
+      ]
+    },
+    "IShoppingCitizen": {
+      "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "mobile": {
+          "title": "Mobile number",
+          "description": "Mobile number.",
+          "x-wrtn-payment-order-mobile": true,
+          "type": "string",
+          "pattern": "^[0-9]*$"
+        },
+        "name": {
+          "title": "Real name, or equivalent nickname",
+          "description": "Real name, or equivalent nickname.",
+          "x-wrtn-payment-order-citizen": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "mobile",
+        "name"
+      ]
+    }
+  }
+}

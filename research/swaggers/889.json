@@ -1,0 +1,40 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/tag-protection"
+    }
+  },
+  "$defs": {
+    "tag-protection": {
+      "title": "Tag protection",
+      "description": "Tag protection",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 2,
+          "type": "integer"
+        },
+        "created_at": {
+          "example": "2011-01-26T19:01:12Z",
+          "type": "string"
+        },
+        "updated_at": {
+          "example": "2011-01-26T19:01:12Z",
+          "type": "string"
+        },
+        "enabled": {
+          "example": true,
+          "type": "boolean"
+        },
+        "pattern": {
+          "example": "v1.*",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern"
+      ]
+    }
+  }
+}

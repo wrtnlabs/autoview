@@ -1,0 +1,8 @@
+
+import Component from "../components/360";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"url":"https://api.example.com/marketplace/test-purchase","type":"marketplace_purchase","id":101,"login":"test-org-sample","organization_billing_email":"billing+test@example.org","email":"user.test@example.com","marketplace_pending_change":{"is_installed":false,"effective_date":"2025-06-01T00:00:00Z","unit_count":null,"id":202,"plan":{"url":"https://api.example.com/marketplace/plan/202","accounts_url":"https://api.example.com/marketplace/plan/202/accounts","id":202,"number":2,"name":"Premium Plan (Test)","description":"A test premium subscription plan for UI testing purposes.","monthly_price_in_cents":4900,"yearly_price_in_cents":49900,"price_model":"FLAT_RATE","has_free_trial":true,"unit_name":"seat","state":"published","bullets":["Priority support","Unlimited test seats","Detailed sample analytics"]}},"marketplace_purchase":{"billing_cycle":"monthly","next_billing_date":"2025-07-15T00:00:00Z","is_installed":true,"unit_count":5,"on_free_trial":false,"free_trial_ends_on":null,"updated_at":"2025-05-20T12:00:00Z","plan":{"url":"https://api.example.org/marketplace/plan/301","accounts_url":"https://api.example.org/marketplace/plan/301/accounts","id":301,"number":3,"name":"Enterprise Plan (Sample)","description":"Enterprise tier with advanced sample features for UI preview.","monthly_price_in_cents":9900,"yearly_price_in_cents":99000,"price_model":"PER_UNIT","has_free_trial":false,"unit_name":null,"state":"available","bullets":["Unlimited seats","Dedicated sample support"]}}};
+}

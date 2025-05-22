@@ -1,0 +1,399 @@
+{
+  "schema": {
+    "$ref": "#/$defs/organization-full"
+  },
+  "$defs": {
+    "organization-full": {
+      "title": "Organization Full",
+      "description": "Organization Full",
+      "type": "object",
+      "properties": {
+        "login": {
+          "example": "github",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEyOk9yZ2FuaXphdGlvbjE=",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://api.github.com/orgs/github",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/orgs/github/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/orgs/github/events",
+          "type": "string",
+          "format": "uri"
+        },
+        "hooks_url": {
+          "example": "https://api.github.com/orgs/github/hooks",
+          "type": "string"
+        },
+        "issues_url": {
+          "example": "https://api.github.com/orgs/github/issues",
+          "type": "string"
+        },
+        "members_url": {
+          "example": "https://api.github.com/orgs/github/members{/member}",
+          "type": "string"
+        },
+        "public_members_url": {
+          "example": "https://api.github.com/orgs/github/public_members{/member}",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string"
+        },
+        "description": {
+          "example": "A great organization",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "example": "github",
+          "type": "string"
+        },
+        "company": {
+          "example": "GitHub",
+          "type": "string"
+        },
+        "blog": {
+          "example": "https://github.com/blog",
+          "type": "string",
+          "format": "uri"
+        },
+        "location": {
+          "example": "San Francisco",
+          "type": "string"
+        },
+        "email": {
+          "example": "octocat@github.com",
+          "type": "string",
+          "format": "email"
+        },
+        "twitter_username": {
+          "example": "github",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "is_verified": {
+          "example": true,
+          "type": "boolean"
+        },
+        "has_organization_projects": {
+          "example": true,
+          "type": "boolean"
+        },
+        "has_repository_projects": {
+          "example": true,
+          "type": "boolean"
+        },
+        "public_repos": {
+          "example": 2,
+          "type": "integer"
+        },
+        "public_gists": {
+          "example": 1,
+          "type": "integer"
+        },
+        "followers": {
+          "example": 20,
+          "type": "integer"
+        },
+        "following": {
+          "example": 0,
+          "type": "integer"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "Organization",
+          "type": "string"
+        },
+        "total_private_repos": {
+          "example": 100,
+          "type": "integer"
+        },
+        "owned_private_repos": {
+          "example": 100,
+          "type": "integer"
+        },
+        "private_gists": {
+          "example": 81,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disk_usage": {
+          "example": 10000,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "collaborators": {
+          "description": "The number of collaborators on private repositories.\n\nThis field may be null if the number of private repositories is over 50,000.",
+          "example": 8,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "billing_email": {
+          "example": "org@example.com",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "email"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "space": {
+              "type": "integer"
+            },
+            "private_repos": {
+              "type": "integer"
+            },
+            "filled_seats": {
+              "type": "integer"
+            },
+            "seats": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "name",
+            "space",
+            "private_repos"
+          ]
+        },
+        "default_repository_permission": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "members_can_create_repositories": {
+          "example": true,
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "two_factor_requirement_enabled": {
+          "example": true,
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "members_allowed_repository_creation_type": {
+          "example": "all",
+          "type": "string"
+        },
+        "members_can_create_public_repositories": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_private_repositories": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_internal_repositories": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_pages": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_public_pages": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_private_pages": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_fork_private_repositories": {
+          "example": false,
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "web_commit_signoff_required": {
+          "example": false,
+          "type": "boolean"
+        },
+        "advanced_security_enabled_for_new_repositories": {
+          "description": "**Endpoint closing down notice.** Please use [code security configurations](https://docs.github.com/rest/code-security/configurations) instead.\n\nWhether GitHub Advanced Security is enabled for new repositories and repositories transferred to this organization.\n\nThis field is only visible to organization owners or members of a team with the security manager role.",
+          "example": false,
+          "type": "boolean",
+          "deprecated": true
+        },
+        "dependabot_alerts_enabled_for_new_repositories": {
+          "description": "**Endpoint closing down notice.** Please use [code security configurations](https://docs.github.com/rest/code-security/configurations) instead.\n\nWhether Dependabot alerts are automatically enabled for new repositories and repositories transferred to this organization.\n\nThis field is only visible to organization owners or members of a team with the security manager role.",
+          "example": false,
+          "type": "boolean",
+          "deprecated": true
+        },
+        "dependabot_security_updates_enabled_for_new_repositories": {
+          "description": "**Endpoint closing down notice.** Please use [code security configurations](https://docs.github.com/rest/code-security/configurations) instead.\n\nWhether Dependabot security updates are automatically enabled for new repositories and repositories transferred to this organization.\n\nThis field is only visible to organization owners or members of a team with the security manager role.",
+          "example": false,
+          "type": "boolean",
+          "deprecated": true
+        },
+        "dependency_graph_enabled_for_new_repositories": {
+          "description": "**Endpoint closing down notice.** Please use [code security configurations](https://docs.github.com/rest/code-security/configurations) instead.\n\nWhether dependency graph is automatically enabled for new repositories and repositories transferred to this organization.\n\nThis field is only visible to organization owners or members of a team with the security manager role.",
+          "example": false,
+          "type": "boolean",
+          "deprecated": true
+        },
+        "secret_scanning_enabled_for_new_repositories": {
+          "description": "**Endpoint closing down notice.** Please use [code security configurations](https://docs.github.com/rest/code-security/configurations) instead.\n\nWhether secret scanning is automatically enabled for new repositories and repositories transferred to this organization.\n\nThis field is only visible to organization owners or members of a team with the security manager role.",
+          "example": false,
+          "type": "boolean",
+          "deprecated": true
+        },
+        "secret_scanning_push_protection_enabled_for_new_repositories": {
+          "description": "**Endpoint closing down notice.** Please use [code security configurations](https://docs.github.com/rest/code-security/configurations) instead.\n\nWhether secret scanning push protection is automatically enabled for new repositories and repositories transferred to this organization.\n\nThis field is only visible to organization owners or members of a team with the security manager role.",
+          "example": false,
+          "type": "boolean",
+          "deprecated": true
+        },
+        "secret_scanning_push_protection_custom_link_enabled": {
+          "description": "Whether a custom link is shown to contributors who are blocked from pushing a secret by push protection.",
+          "example": false,
+          "type": "boolean"
+        },
+        "secret_scanning_push_protection_custom_link": {
+          "description": "An optional URL string to display to contributors who are blocked from pushing a secret.",
+          "example": "https://github.com/test-org/test-repo/blob/main/README.md",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "example": "2008-01-14T04:33:35Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "archived_at": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deploy_keys_enabled_for_repositories": {
+          "description": "Controls whether or not deploy keys may be added and used for repositories in the organization.",
+          "example": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "login",
+        "url",
+        "id",
+        "node_id",
+        "repos_url",
+        "events_url",
+        "hooks_url",
+        "issues_url",
+        "members_url",
+        "public_members_url",
+        "avatar_url",
+        "description",
+        "html_url",
+        "has_organization_projects",
+        "has_repository_projects",
+        "public_repos",
+        "public_gists",
+        "followers",
+        "following",
+        "type",
+        "created_at",
+        "updated_at",
+        "archived_at"
+      ]
+    }
+  }
+}

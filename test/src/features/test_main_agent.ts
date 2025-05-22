@@ -8,14 +8,7 @@ export async function test_main_agent(): Promise<void> {
   if (TestGlobal.env.CHATGPT_API_KEY === undefined)
     throw new Error("env.CHATGPT_API_KEY is not defined.");
 
-  const planVendor: IAutoViewVendor = {
-    model: "o3-mini-2025-01-31",
-    isThinkingEnabled: true,
-    api: new OpenAI({
-      apiKey: TestGlobal.env.CHATGPT_API_KEY,
-    }),
-  };
-  const codeVendor: IAutoViewVendor = {
+  const vendor: IAutoViewVendor = {
     model: "o3-mini-2025-01-31",
     isThinkingEnabled: true,
     api: new OpenAI({
@@ -24,18 +17,20 @@ export async function test_main_agent(): Promise<void> {
   };
 
   const agent = new AutoViewAgent({
-    vendor: planVendor,
-    codeVendor,
+    vendor,
     input: {
       type: "parameters",
       model: "chatgpt",
       parameters: schema,
     },
-    transformFunctionName: "transform_generated_by_test_main_agent",
   });
-  const { transformTsCode } = await agent.generate();
+  const result = await agent.generate();
 
-  console.log(transformTsCode);
+  if (result.status === "success") {
+    console.log(result.tsxCode);
+  } else {
+    console.log(result.reason);
+  }
 }
 
 const schema = {

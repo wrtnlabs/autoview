@@ -1,0 +1,45 @@
+{
+  "schema": {
+    "$ref": "#/$defs/network-settings"
+  },
+  "$defs": {
+    "network-settings": {
+      "title": "Hosted compute network settings resource",
+      "description": "A hosted compute network settings resource.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the network settings resource.",
+          "example": "220F78DACB92BBFBC5E6F22DE1CCF52309D",
+          "type": "string"
+        },
+        "network_configuration_id": {
+          "description": "The identifier of the network configuration that is using this settings resource.",
+          "example": "934E208B3EE0BD60CF5F752C426BFB53562",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the network settings resource.",
+          "example": "my-network-settings",
+          "type": "string"
+        },
+        "subnet_id": {
+          "description": "The subnet this network settings resource is configured for.",
+          "example": "/subscriptions/14839728-3ad9-43ab-bd2b-fa6ad0f75e2a/resourceGroups/my-rg/providers/Microsoft.Network/virtualNetworks/my-vnet/subnets/my-subnet",
+          "type": "string"
+        },
+        "region": {
+          "description": "The location of the subnet this network settings resource is configured for.",
+          "example": "eastus",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "subnet_id",
+        "region"
+      ]
+    }
+  }
+}

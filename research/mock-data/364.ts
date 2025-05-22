@@ -1,0 +1,8 @@
+
+import Component from "../components/364";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"url":"https://api.example.com/v1/plans/1","accounts_url":"https://api.example.com/v1/accounts?plan_id=1","id":1,"number":100,"name":"Free Plan (Sample)","description":"A free tier plan for testing and evaluation. Includes basic features and community support.","monthly_price_in_cents":0,"yearly_price_in_cents":0,"price_model":"FREE","has_free_trial":false,"unit_name":null,"state":"active","bullets":["Access to basic features","Community support","Unlimited sample projects"]},{"url":"https://api.example.com/v1/plans/2","accounts_url":"https://api.example.com/v1/accounts?plan_id=2","id":2,"number":200,"name":"Pro Plan (Test)","description":"A flat-rate plan offering advanced features and priority support for small teams.","monthly_price_in_cents":999,"yearly_price_in_cents":9999,"price_model":"FLAT_RATE","has_free_trial":true,"unit_name":null,"state":"active","bullets":["All Free Plan features","Priority email support","Up to 10 team members"]},{"url":"https://api.example.com/v1/plans/3","accounts_url":"https://api.example.com/v1/accounts?plan_id=3","id":3,"number":300,"name":"Enterprise Usage Plan (Demo)","description":"A usage-based plan billed per API call. Ideal for high-volume or variable workloads.","monthly_price_in_cents":200,"yearly_price_in_cents":2000,"price_model":"PER_UNIT","has_free_trial":true,"unit_name":"API call","state":"active","bullets":["Usage billed per API call","No monthly commitment","Scale seamlessly with demand"]}];
+}

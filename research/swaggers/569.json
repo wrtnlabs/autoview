@@ -1,0 +1,76 @@
+{
+  "schema": {
+    "$ref": "#/$defs/project-column"
+  },
+  "$defs": {
+    "IApiProjectsColumns.PostBody": {
+      "properties": {
+        "name": {
+          "description": "Name of the project column",
+          "example": "Remaining tasks",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object"
+    },
+    "project-column": {
+      "title": "Project Column",
+      "description": "Project columns contain cards of work.",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/projects/columns/367",
+          "type": "string",
+          "format": "uri"
+        },
+        "project_url": {
+          "example": "https://api.github.com/projects/120",
+          "type": "string",
+          "format": "uri"
+        },
+        "cards_url": {
+          "example": "https://api.github.com/projects/columns/367/cards",
+          "type": "string",
+          "format": "uri"
+        },
+        "id": {
+          "description": "The unique identifier of the project column",
+          "example": 42,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEzOlByb2plY3RDb2x1bW4zNjc=",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the project column",
+          "example": "Remaining tasks",
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2016-09-05T14:18:44Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "example": "2016-09-05T14:22:28Z",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "project_url",
+        "cards_url",
+        "name",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

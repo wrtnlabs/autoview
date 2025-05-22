@@ -1,18 +1,18 @@
 import {
-  CodeGeneration,
+  CodeGen,
   IAutoViewVendor,
-  PlanGeneration,
+  LlmUnrecoverableError,
+  convertSchema,
 } from "@autoview/agent";
 import {
   IAutoViewCompilerMetadata,
   IAutoViewCompilerResult,
-  IAutoViewComponentProps,
 } from "@autoview/interface";
-import { ChatGptTypeChecker } from "@samchon/openapi";
+import { ILlmSchemaV3_1 } from "@samchon/openapi";
 import * as fs from "fs/promises";
 import OpenAI from "openai";
 import * as path from "path";
-import typia from "typia";
+import { assertGuard } from "typia";
 
 import { TestGlobal } from "../TestGlobal";
 import * as Report from "./collect_ts_errors_report_agent";
@@ -65,10 +65,10 @@ export async function test_collect_ts_errors(): Promise<void> {
     await fs.mkdir(reportDir);
   }
 
-  const reportPath = path.join(reportDir, "report.md");
+  const reportPath = path.join(reportDir, "all-in-one-report.md");
   await fs.writeFile(reportPath, report, "utf-8");
 
-  const dumpPath = path.join(reportDir, "dump.md");
+  const dumpPath = path.join(reportDir, "all-in-one-dump.md");
   await fs.writeFile(dumpPath, dump, "utf-8");
 
   console.log(`report is generated at "${reportPath}"`);
@@ -277,38 +277,6 @@ function buildDump(results: IRunAttemptResult[]): string {
       mdLines.push("```");
       mdLines.push("");
 
-      if (result.plan != null) {
-        mdLines.push("```plaintext");
-        mdLines.push("plan.initial_analysis:");
-        mdLines.push(result.plan.initial_analysis);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.data_exploration:");
-        mdLines.push(result.plan.data_exploration);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.ideas:");
-        mdLines.push(result.plan.ideas);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.reasoning:");
-        mdLines.push(result.plan.reasoning);
-        mdLines.push("```");
-        mdLines.push("");
-
-        mdLines.push("```plaintext");
-        mdLines.push("plan.planning:");
-        mdLines.push(result.plan.planning);
-        mdLines.push("```");
-        mdLines.push("");
-      }
-
       mdLines.push("```ts");
       mdLines.push(error.tsCode);
       mdLines.push("```");
@@ -332,6 +300,27 @@ function buildDump(results: IRunAttemptResult[]): string {
 
       mdLines.push("```ts");
       mdLines.push(result.validTsCode);
+      mdLines.push("```");
+      mdLines.push("");
+
+      mdLines.push("---");
+      mdLines.push("");
+    }
+  }
+
+  mdLines.push("## System Errors");
+  mdLines.push("");
+
+  if (filterSystemErrors(results).length === 0) {
+    mdLines.push("*No error*");
+  } else {
+    for (const result of results) {
+      if (result.systemError === undefined) {
+        continue;
+      }
+
+      mdLines.push("```ts");
+      mdLines.push(JSON.stringify(result.systemError));
       mdLines.push("```");
       mdLines.push("");
 
@@ -453,14 +442,7 @@ async function collectAllTsErrors(
   schemaList: ISchema[],
   numOfAttemptsPerSchema: number,
 ): Promise<IRunAttemptResult[]> {
-  const planVendor: IAutoViewVendor = {
-    model: model as any,
-    isThinkingEnabled,
-    api: new OpenAI({
-      apiKey: TestGlobal.env.CHATGPT_API_KEY,
-    }),
-  };
-  const codeVendor: IAutoViewVendor = {
+  const vendor: IAutoViewVendor = {
     model: model as any,
     isThinkingEnabled,
     api: new OpenAI({
@@ -472,7 +454,7 @@ async function collectAllTsErrors(
     schemaList.flatMap((schema) =>
       new Array(numOfAttemptsPerSchema)
         .fill(0)
-        .map(() => runAttempt(counter, planVendor, codeVendor, schema)),
+        .map(() => runAttempt(counter, vendor, schema)),
     ),
   );
 
@@ -503,25 +485,25 @@ async function collectSchemaList(): Promise<ISchema[]> {
       continue;
     }
 
-    const schema: unknown = JSON.parse(
+    const schema = JSON.parse(
       await fs.readFile(
         path.join(__dirname, "collect_ts_errors_schemas", file),
         "utf-8",
       ),
     );
 
-    if (typeof schema !== "object" || schema === null) {
-      continue;
+    interface RawSchema {
+      schema: ILlmSchemaV3_1;
+      $defs: Record<string, ILlmSchemaV3_1>;
     }
 
-    const $defs = "$defs" in schema ? schema["$defs"] : {};
+    assertGuard<RawSchema>(schema);
+
+    const converted = convertSchema("3.1", schema.schema, schema.$defs);
 
     schemaList.push({
       name: file,
-      schema: {
-        $defs: $defs as any,
-        schema: schema as any,
-      },
+      schema: converted,
     });
   }
 
@@ -535,7 +517,6 @@ interface ITsError {
 
 interface IRunAttemptResult {
   schema: ISchema;
-  plan?: PlanGeneration.Output;
   errors: ITsError[];
   validTsCode?: string;
   systemError?: unknown;
@@ -543,87 +524,49 @@ interface IRunAttemptResult {
 
 async function runAttempt(
   counter: TestCounter,
-  planVendor: IAutoViewVendor,
-  codeVendor: IAutoViewVendor,
+  vendor: IAutoViewVendor,
   schema: ISchema,
 ): Promise<IRunAttemptResult> {
-  const planAgent = new PlanGeneration.Agent();
-  await planAgent.open();
+  const codegenAgent = new CodeGen.Agent();
+  await codegenAgent.open();
 
-  const codeAgent = new CodeGeneration.Agent();
-  await codeAgent.open();
+  const tsErrors: ITsError[] = [];
 
   try {
-    const components = componentSchema();
-    const tsErrors: ITsError[] = [];
-
-    const plan = await planAgent.execute({
-      vendor: planVendor,
+    const result = await codegenAgent.execute({
+      vendor,
       inputSchema: schema.schema,
-      componentSchema: components,
+      onCompilerError(tsCode, diagnostics) {
+        tsErrors.push({ tsCode, diagnostics });
+      },
     });
 
-    try {
-      const code = await codeAgent.execute({
-        vendor: codeVendor,
-        inputSchema: schema.schema,
-        componentSchema: components,
-        initialAnalysis: plan.initial_analysis,
-        dataExploration: plan.data_exploration,
-        ideas: plan.ideas,
-        reasoning: plan.reasoning,
-        planning: plan.planning,
-        transformFunctionName: "transform",
-        onCompilerError(tsCode, diagnostics) {
-          tsErrors.push({ tsCode, diagnostics });
-        },
-      });
-
-      counter.reportProgress("success");
-      return {
-        schema,
-        plan,
-        errors: tsErrors,
-        validTsCode: code.transformTsCode,
-      };
-    } catch {
+    counter.reportProgress("success");
+    return {
+      schema,
+      errors: tsErrors,
+      validTsCode: result.entireTsCode,
+    };
+  } catch (error: unknown) {
+    if (error instanceof LlmUnrecoverableError) {
       counter.reportProgress("hard failure");
       return {
         schema,
-        plan,
         errors: tsErrors,
       };
     }
-  } catch (error) {
+
     counter.reportProgress("system error");
     return {
       schema,
-      errors: [],
+      errors: tsErrors,
       systemError: error,
     };
   } finally {
-    await planAgent.close();
-    await codeAgent.close();
+    await codegenAgent.close();
   }
 }
 
-function componentSchema(): IAutoViewCompilerMetadata {
-  if (!ChatGptTypeChecker.isObject(PARAMETERS)) {
-    throw new Error("PARAMETERS is not an object.");
-  }
-
-  return {
-    $defs: PARAMETERS.$defs,
-    schema: PARAMETERS.properties["props"]!,
-  };
-}
-
-const PARAMETERS = typia.llm.parameters<
-  {
-    props: IAutoViewComponentProps;
-  },
-  "chatgpt",
-  {
-    reference: true;
-  }
->();
+// function componentSchema(): IAutoViewCompilerMetadata {
+//   return typia.json.schema<IAutoViewComponentProps>();
+// }

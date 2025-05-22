@@ -1,0 +1,106 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4GroupsInfiniteScrollingView"
+  },
+  "$defs": {
+    "IApiOpenV4Groups.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "Name of the first group to be retrieved in ascending order",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of results (range[1, 500])",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        }
+      },
+      "required": []
+    },
+    "legacy.open.v4.LegacyV4GroupsInfiniteScrollingView": {
+      "type": "object",
+      "properties": {
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/legacy.v4.LegacyV4Group"
+          }
+        },
+        "next": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.LegacyV4Group": {
+      "required": [
+        "name",
+        "scope"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "pattern": "[\\p{L}\\p{N}-_()]+",
+          "type": "string"
+        },
+        "scope": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "public"
+            },
+            {
+              "const": "private"
+            }
+          ]
+        },
+        "managerIds": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "icon": {
+          "pattern": "\\S+",
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "createdAt": {
+          "example": 1744704930266,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704930266,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "active": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

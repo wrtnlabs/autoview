@@ -1,0 +1,25 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsActionsHostedRunnersPlatforms.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsActionsHostedRunnersPlatforms.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "platforms"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "platforms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

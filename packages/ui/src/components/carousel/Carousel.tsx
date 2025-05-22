@@ -54,5 +54,6 @@ export const Carousel = ({
 const baseStyle = {
   position: "relative",
   width: "100%",
-  maxWidth: 320,
+  // TODO: temporarily removed maxWidth to prevent layout shift
+  // maxWidth: 320,
 };

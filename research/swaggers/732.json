@@ -1,0 +1,61 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposEnvironmentsDeploymentBranchPolicies.GetResponse"
+  },
+  "$defs": {
+    "IApiReposEnvironmentsDeploymentBranchPolicies.GetResponse": {
+      "type": "object",
+      "properties": {
+        "total_count": {
+          "description": "The number of deployment branch policies for the environment.",
+          "example": 2,
+          "type": "integer"
+        },
+        "branch_policies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/deployment-branch-policy"
+          }
+        }
+      },
+      "required": [
+        "total_count",
+        "branch_policies"
+      ]
+    },
+    "deployment-branch-policy": {
+      "title": "Deployment branch policy",
+      "description": "Details of a deployment branch or tag policy.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the branch or tag policy.",
+          "example": 361471,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDE2OkdhdGVCcmFuY2hQb2xpY3kzNjE0NzE=",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name pattern that branches or tags must match in order to deploy to the environment.",
+          "example": "release/*",
+          "type": "string"
+        },
+        "type": {
+          "description": "Whether this rule targets a branch or tag.",
+          "example": "branch",
+          "oneOf": [
+            {
+              "const": "branch"
+            },
+            {
+              "const": "tag"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}

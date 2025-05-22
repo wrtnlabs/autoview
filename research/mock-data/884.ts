@@ -1,0 +1,8 @@
+
+import Component from "../components/884";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"url":"https://api.example.org/repos/example-org/sample-repo/statuses/123456789","avatar_url":"https://avatars.example.org/u/42?v=4","id":42,"node_id":"MDI6U3RhdHVzNDI=","state":"success","description":"Sample status for UI component testing.","target_url":"https://ci.example.org/builds/1234","context":"continuous-integration/sample-ci","created_at":"2025-05-18T12:34:56Z","updated_at":"2025-05-18T13:00:00Z","creator":{"name":"Test User (Dev)","email":"test.user@example.com","login":"testuser-sample","id":101,"node_id":"MDQ6VXNlcjEwMQ==","avatar_url":"https://avatars.example.org/u/101?v=4","gravatar_id":null,"url":"https://api.example.org/users/testuser-sample","html_url":"https://www.example.com/testuser-sample","followers_url":"https://api.example.org/users/testuser-sample/followers","following_url":"https://api.example.org/users/testuser-sample/following","gists_url":"https://api.example.org/users/testuser-sample/gists","starred_url":"https://api.example.org/users/testuser-sample/starred","subscriptions_url":"https://api.example.org/users/testuser-sample/subscriptions","organizations_url":"https://api.example.org/users/testuser-sample/orgs","repos_url":"https://api.example.org/users/testuser-sample/repos","events_url":"https://api.example.org/users/testuser-sample/events","received_events_url":"https://api.example.org/users/testuser-sample/received_events","type":"User","site_admin":false,"starred_at":"2025-05-17T09:00:00Z","user_view_type":"public"}};
+}

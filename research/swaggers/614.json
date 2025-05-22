@@ -1,0 +1,59 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposActionsVariables.GetResponse"
+  },
+  "$defs": {
+    "IApiReposActionsVariables.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "variables"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "variables": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actions-variable"
+          }
+        }
+      }
+    },
+    "actions-variable": {
+      "title": "Actions Variable",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the variable.",
+          "example": "USERNAME",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value of the variable.",
+          "example": "octocat",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "The date and time at which the variable was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "example": "2019-01-24T22:45:36.000Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "description": "The date and time at which the variable was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "example": "2019-01-24T22:45:36.000Z",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

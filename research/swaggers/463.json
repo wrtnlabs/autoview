@@ -1,0 +1,29 @@
+{
+  "schema": {
+    "$ref": "#/$defs/api-insights-time-stats"
+  },
+  "$defs": {
+    "api-insights-time-stats": {
+      "title": "Time Stats",
+      "description": "API Insights usage time stats for an organization",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "timestamp": {
+            "type": "string"
+          },
+          "total_request_count": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rate_limited_request_count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": []
+      }
+    }
+  }
+}

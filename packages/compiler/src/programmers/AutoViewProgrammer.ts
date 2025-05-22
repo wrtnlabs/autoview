@@ -10,29 +10,31 @@ export namespace AutoViewProgrammer {
     ctx: IAutoViewProgrammerContext,
     inputComponents: OpenApi.IComponents,
     inputSchema: OpenApi.IJsonSchema,
+    inputSchemaPrefix: string,
     componentComponents: OpenApi.IComponents,
     componentSchema: OpenApi.IJsonSchema,
     transformFunctionName: string,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [
-      ts.factory.createModuleDeclaration(
-        undefined,
-        ts.factory.createIdentifier("IAutoView"),
-        ts.factory.createModuleBlock(
-          AutoViewDtoProgrammer.write(
-            ctx,
-            componentComponents,
-            componentSchema,
-            true,
-          ),
-        ),
-        ts.NodeFlags.Namespace,
+      AutoViewDtoProgrammer.write(
+        ctx,
+        componentComponents,
+        componentSchema,
+        "IAutoView",
+        false,
       ),
-      ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
+      AutoViewDtoProgrammer.write(
+        ctx,
+        inputComponents,
+        inputSchema,
+        inputSchemaPrefix,
+        false,
+      ),
       ...AutoViewTransformerProgrammer.write(
         ctx,
         inputSchema,
         transformFunctionName,
+        inputSchemaPrefix,
       ),
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];
@@ -44,18 +46,12 @@ export namespace AutoViewProgrammer {
     componentSchema: OpenApi.IJsonSchema,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [
-      ts.factory.createModuleDeclaration(
-        undefined,
-        ts.factory.createIdentifier("IAutoView"),
-        ts.factory.createModuleBlock(
-          AutoViewDtoProgrammer.write(
-            ctx,
-            componentComponents,
-            componentSchema,
-            true,
-          ),
-        ),
-        ts.NodeFlags.Namespace,
+      AutoViewDtoProgrammer.write(
+        ctx,
+        componentComponents,
+        componentSchema,
+        "IAutoView",
+        false,
       ),
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];
@@ -65,6 +61,7 @@ export namespace AutoViewProgrammer {
     ctx: IAutoViewProgrammerContext,
     inputComponents: OpenApi.IComponents,
     inputSchema: OpenApi.IJsonSchema,
+    inputSchemaPrefix: string,
     transformFunctionName: string,
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [
@@ -79,11 +76,18 @@ export namespace AutoViewProgrammer {
         ),
         ts.factory.createStringLiteral("@autoview/interface"),
       ),
-      ...AutoViewDtoProgrammer.write(ctx, inputComponents, inputSchema),
+      AutoViewDtoProgrammer.write(
+        ctx,
+        inputComponents,
+        inputSchema,
+        inputSchemaPrefix,
+        false,
+      ),
       ...AutoViewTransformerProgrammer.write(
         ctx,
         inputSchema,
         transformFunctionName,
+        inputSchemaPrefix,
       ),
     ];
     return [...ctx.importer.toStatements(() => ""), ...statements];

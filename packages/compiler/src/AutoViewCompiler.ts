@@ -3,166 +3,69 @@ import type {
   IAutoViewCompilerProps,
   IAutoViewCompilerResult,
 } from "@autoview/interface";
-import { OpenApi } from "@samchon/openapi";
-import { LlmSchemaComposer } from "@samchon/openapi/lib/composers/LlmSchemaComposer";
-import ts from "typescript";
 
 import { TypeScriptCompiler } from "./compilers/TypeScriptCompiler";
+import { AutoViewBoilerplateProgrammer } from "./programmers/AutoViewBoilerplateProgrammer";
 import { AutoViewImportProgrammer } from "./programmers/AutoViewImportProgrammer";
-import { AutoViewProgrammer } from "./programmers/AutoViewProgrammer";
-import { AutoViewRandomProgrammer } from "./programmers/AutoViewRandomProgrammer";
 import { IAutoViewProgrammerContext } from "./programmers/IAutoViewProgrammerContext";
 import { ErrorUtil } from "./utils/ErrorUtil";
 import { FilePrinter } from "./utils/FilePrinter";
 
 export class AutoViewCompiler {
-  private readonly inputComponents: OpenApi.IComponents;
-  private readonly inputSchema: OpenApi.IJsonSchema;
-  private readonly componentComponents: OpenApi.IComponents;
-  private readonly componentSchema: OpenApi.IJsonSchema;
+  private readonly inputSchema: IAutoViewCompilerMetadata;
   private readonly compilerOptions: IAutoViewCompilerProps.ICompilerOptions;
 
   public constructor(props: IAutoViewCompilerProps) {
-    const { components, schema } = getJsonSchema(props.inputMetadata);
-    const { components: componentComponents, schema: componentSchema } =
-      getJsonSchema(props.componentMetadata);
-    this.inputComponents = components;
-    this.inputSchema = schema;
-    this.componentComponents = componentComponents;
-    this.componentSchema = componentSchema;
+    this.inputSchema = props.inputMetadata;
     this.compilerOptions = {
       module: "esm",
     };
   }
 
-  public generateComponentDto(): string {
-    const ctx: IAutoViewProgrammerContext = {
-      importer: new AutoViewImportProgrammer(),
-    };
-    const statements: ts.Statement[] = AutoViewProgrammer.writeComponentOnly(
-      ctx,
-      this.componentComponents,
-      this.componentSchema,
-    );
-    const source: string = FilePrinter.write({ statements });
-
-    return source;
-  }
-
-  public generateBoilerplate(transformFunctionName: string): string {
-    const ctx: IAutoViewProgrammerContext = {
-      importer: new AutoViewImportProgrammer(),
-    };
-    const statements: ts.Statement[] = AutoViewProgrammer.write(
-      ctx,
-      this.inputComponents,
-      this.inputSchema,
-      this.componentComponents,
-      this.componentSchema,
-      transformFunctionName,
-    );
-    const source: string = FilePrinter.write({ statements });
-
-    return source;
-  }
-
-  public generateBoilerplateForRawTsCode(
-    transformFunctionName: string,
+  public generateBoilerplateForReactComponent(
+    alias: string,
+    subTypePrefix: string,
   ): string {
-    const ctx: IAutoViewProgrammerContext = {
+    const ctx = {
       importer: new AutoViewImportProgrammer(),
-    };
-    const statements: ts.Statement[] = AutoViewProgrammer.writeWithoutDto(
+    } satisfies IAutoViewProgrammerContext;
+    const statements = AutoViewBoilerplateProgrammer.write(
       ctx,
-      this.inputComponents,
-      this.inputSchema,
-      transformFunctionName,
+      this.inputSchema.schema,
+      this.inputSchema.components,
+      alias,
+      subTypePrefix,
+      true,
     );
-    const source: string = FilePrinter.write({ statements });
 
-    return source;
+    ctx.importer.external({
+      type: "default",
+      library: "react",
+      name: "React",
+    });
+
+    return FilePrinter.write({
+      statements: [...ctx.importer.toStatements(() => ""), ...statements],
+    });
   }
 
-  public async compile(
-    script: string,
-    transformFunctionName: string,
+  public async compileReactComponent(
+    boilerplate: string,
+    componentTsCode: string,
   ): Promise<IAutoViewCompilerResult> {
-    const ctx: IAutoViewProgrammerContext = {
-      importer: new AutoViewImportProgrammer(),
-    };
-    const statements: ts.Statement[] = AutoViewProgrammer.write(
-      ctx,
-      this.inputComponents,
-      this.inputSchema,
-      this.componentComponents,
-      this.componentSchema,
-      transformFunctionName,
-    );
-    const source: string = `${FilePrinter.write({ statements })}\n\n${script}`;
+    const source = `${boilerplate}\n\n${componentTsCode}`;
 
     try {
-      return TypeScriptCompiler.build(ctx, source, this.compilerOptions.module);
+      return TypeScriptCompiler.build(
+        source,
+        this.compilerOptions.module,
+        true,
+      );
     } catch (error) {
       return {
-        type: "error",
-        error: ErrorUtil.toJSON(error),
-      };
-    }
-  }
-
-  public async compileRandom(): Promise<IAutoViewCompilerResult> {
-    const ctx: IAutoViewProgrammerContext = {
-      importer: new AutoViewImportProgrammer(),
-    };
-    const statements: ts.Statement[] = AutoViewRandomProgrammer.write(
-      ctx,
-      this.inputComponents,
-      this.inputSchema,
-    );
-    const source: string = FilePrinter.write({ statements });
-
-    try {
-      return TypeScriptCompiler.build(ctx, source, this.compilerOptions.module);
-    } catch (error) {
-      return {
-        type: "error",
+        type: "exception",
         error: ErrorUtil.toJSON(error),
       };
     }
   }
 }
-
-const getJsonSchema = (
-  props: IAutoViewCompilerMetadata,
-): IAutoViewCompilerMetadata.IOfJsonSchema => {
-  if (isJsonSchema(props)) return props;
-  const components: OpenApi.IComponents = {
-    schemas: {},
-  };
-  const schema: OpenApi.IJsonSchema = isClaudeParameters(props)
-    ? LlmSchemaComposer.invert("claude")({
-        components,
-        $defs: props.parameters.$defs,
-        schema: props.parameters,
-      })
-    : LlmSchemaComposer.invert("claude")({
-        components,
-        $defs: props.$defs,
-        schema: props.schema,
-      });
-  return {
-    components,
-    schema,
-  };
-};
-
-const isJsonSchema = (
-  props: IAutoViewCompilerMetadata,
-): props is IAutoViewCompilerMetadata.IOfJsonSchema =>
-  (props as IAutoViewCompilerMetadata.IOfJsonSchema).components !== undefined;
-
-const isClaudeParameters = (
-  props: IAutoViewCompilerMetadata,
-): props is IAutoViewCompilerMetadata.IOfClaudeParameters =>
-  (props as IAutoViewCompilerMetadata.IOfClaudeParameters).parameters !==
-  undefined;

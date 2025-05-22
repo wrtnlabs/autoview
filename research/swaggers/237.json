@@ -1,0 +1,27 @@
+{
+  "schema": {
+    "$ref": "#/$defs/shared.StringView"
+  },
+  "$defs": {
+    "IApiOpenV5GroupsMessagesFile.GetQuery": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key"
+      ]
+    },
+    "shared.StringView": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

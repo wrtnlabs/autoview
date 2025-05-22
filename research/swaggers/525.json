@@ -1,0 +1,29 @@
+{
+  "schema": {
+    "$ref": "#/$defs/packages-billing-usage"
+  },
+  "$defs": {
+    "packages-billing-usage": {
+      "type": "object",
+      "properties": {
+        "total_gigabytes_bandwidth_used": {
+          "description": "Sum of the free and paid storage space (GB) for GitHuub Packages.",
+          "type": "integer"
+        },
+        "total_paid_gigabytes_bandwidth_used": {
+          "description": "Total paid storage space (GB) for GitHuub Packages.",
+          "type": "integer"
+        },
+        "included_gigabytes_bandwidth": {
+          "description": "Free storage space (GB) for GitHub Packages.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_gigabytes_bandwidth_used",
+        "total_paid_gigabytes_bandwidth_used",
+        "included_gigabytes_bandwidth"
+      ]
+    }
+  }
+}

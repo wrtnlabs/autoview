@@ -1,0 +1,49 @@
+{
+  "schema": {
+    "$ref": "#/$defs/tag-protection"
+  },
+  "$defs": {
+    "IApiReposTagsProtection.PostBody": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "description": "An optional glob pattern to match against when enforcing tag protection.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern"
+      ]
+    },
+    "tag-protection": {
+      "title": "Tag protection",
+      "description": "Tag protection",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 2,
+          "type": "integer"
+        },
+        "created_at": {
+          "example": "2011-01-26T19:01:12Z",
+          "type": "string"
+        },
+        "updated_at": {
+          "example": "2011-01-26T19:01:12Z",
+          "type": "string"
+        },
+        "enabled": {
+          "example": true,
+          "type": "boolean"
+        },
+        "pattern": {
+          "example": "v1.*",
+          "type": "string"
+        }
+      },
+      "required": [
+        "pattern"
+      ]
+    }
+  }
+}

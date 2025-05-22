@@ -1,0 +1,230 @@
+{
+  "schema": {
+    "$ref": "#/$defs/TryPagination_lt_AlarmType.ReadResponseType_gt_"
+  },
+  "$defs": {
+    "PaginationDto": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "page": {
+          "description": "페이지네이션의 페이지 값",
+          "x-typia-metaTags": [
+            {
+              "kind": "minimum",
+              "value": 1
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minimum",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number",
+          "minimum": 1
+        },
+        "limit": {
+          "description": "",
+          "x-typia-metaTags": [
+            {
+              "kind": "maximum",
+              "value": 100
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "maximum",
+              "text": [
+                {
+                  "text": "100",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number",
+          "maximum": 100
+        }
+      },
+      "required": [
+        "page",
+        "limit"
+      ]
+    },
+    "TryPagination_lt_AlarmType.ReadResponseType_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/PaginationResponseType_lt_AlarmType.ReadResponseType_gt_"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "PaginationResponseType_lt_AlarmType.ReadResponseType_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "list": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "array",
+          "items": {
+            "description": "",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "$ref": "#/$defs/AlarmType.Element"
+          }
+        },
+        "count": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "totalResult": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "totalPage": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "search": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string"
+        },
+        "page": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        }
+      },
+      "required": [
+        "list",
+        "count",
+        "totalResult",
+        "totalPage",
+        "page"
+      ]
+    },
+    "AlarmType.Element": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "userId": {
+          "description": "유저의 아이디",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "integer"
+        },
+        "resourceName": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string"
+        },
+        "resourceId": {
+          "description": "알람이 가리키는 리소스의 아이디로, 리소스마다 동일한 숫자의 아이디를 가질 수 있기에 유니크한 값이 아니다.",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "integer"
+        },
+        "redirectLink": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "userId"
+      ]
+    }
+  }
+}

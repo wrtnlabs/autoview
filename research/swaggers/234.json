@@ -1,0 +1,114 @@
+{
+  "schema": {
+    "$ref": "#/$defs/desk.GroupsInfiniteScrollingView"
+  },
+  "$defs": {
+    "IApiOpenV5Groups.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "description": "Name of the first group to be retrieved in ascending order",
+          "type": "string"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of results (range[1, 500])",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        }
+      },
+      "required": []
+    },
+    "desk.GroupsInfiniteScrollingView": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "type": "string"
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Group"
+          }
+        }
+      },
+      "required": []
+    },
+    "Group": {
+      "required": [
+        "scope",
+        "title"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "title": {
+          "pattern": "[\\p{L}\\p{N}-_()]+",
+          "type": "string"
+        },
+        "scope": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "public"
+            },
+            {
+              "const": "private"
+            }
+          ]
+        },
+        "managerIds": {
+          "maxItems": 2147483647,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "icon": {
+          "pattern": "\\S+",
+          "type": "string"
+        },
+        "liveMeetId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "description": {
+          "type": "string"
+        },
+        "createdAt": {
+          "example": 1744704937318,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704937319,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string",
+          "deprecated": true
+        },
+        "active": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

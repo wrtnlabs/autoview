@@ -1,0 +1,77 @@
+{
+  "schema": {
+    "$ref": "#/$defs/billing-usage-report"
+  },
+  "$defs": {
+    "billing-usage-report": {
+      "type": "object",
+      "properties": {
+        "usageItems": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "date": {
+                "description": "Date of the usage line item.",
+                "type": "string"
+              },
+              "product": {
+                "description": "Product name.",
+                "type": "string"
+              },
+              "sku": {
+                "description": "SKU name.",
+                "type": "string"
+              },
+              "quantity": {
+                "description": "Quantity of the usage line item.",
+                "type": "integer"
+              },
+              "unitType": {
+                "description": "Unit type of the usage line item.",
+                "type": "string"
+              },
+              "pricePerUnit": {
+                "description": "Price per unit of the usage line item.",
+                "type": "number"
+              },
+              "grossAmount": {
+                "description": "Gross amount of the usage line item.",
+                "type": "number"
+              },
+              "discountAmount": {
+                "description": "Discount amount of the usage line item.",
+                "type": "number"
+              },
+              "netAmount": {
+                "description": "Net amount of the usage line item.",
+                "type": "number"
+              },
+              "organizationName": {
+                "description": "Name of the organization.",
+                "type": "string"
+              },
+              "repositoryName": {
+                "description": "Name of the repository.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "date",
+              "product",
+              "sku",
+              "quantity",
+              "unitType",
+              "pricePerUnit",
+              "grossAmount",
+              "discountAmount",
+              "netAmount",
+              "organizationName"
+            ]
+          }
+        }
+      },
+      "required": []
+    }
+  }
+}

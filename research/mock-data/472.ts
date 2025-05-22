@@ -1,0 +1,8 @@
+
+import Component from "../components/472";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"id":1024,"login":"new-contributor-test","email":"new.contributor@example.com","role":"maintainer","created_at":"2025-05-19T09:15:00Z","failed_at":null,"failed_reason":null,"inviter":{"name":"Inviter Sample (Test Account)","email":"inviter.sample@example.org","login":"inviter-sample","id":501,"node_id":"NODEID_sampleInviter_abc123","avatar_url":"https://www.example.com/avatars/inviter-sample.png","gravatar_id":null,"url":"https://api.example.com/users/inviter-sample","html_url":"https://www.example.com/inviter-sample","followers_url":"https://api.example.com/users/inviter-sample/followers","following_url":"https://api.example.com/users/inviter-sample/following{/other_user}","gists_url":"https://api.example.com/users/inviter-sample/gists{/gist_id}","starred_url":"https://api.example.com/users/inviter-sample/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/inviter-sample/subscriptions","organizations_url":"https://api.example.com/users/inviter-sample/orgs","repos_url":"https://api.example.com/users/inviter-sample/repos","events_url":"https://api.example.com/users/inviter-sample/events{/privacy}","received_events_url":"https://api.example.com/users/inviter-sample/received_events","type":"User","site_admin":false,"starred_at":"2025-05-18T17:00:00Z","user_view_type":"simple"},"team_count":3,"node_id":"MDI6SW52aXRhdGlvbjp0ZXN0SW5pdDEyMw==","invitation_teams_url":"https://api.example.com/orgs/sample-org/invitations/1024/teams","invitation_source":"email"};
+}

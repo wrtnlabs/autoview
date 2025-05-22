@@ -1,0 +1,278 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/organization-programmatic-access-grant-request"
+    }
+  },
+  "$defs": {
+    "organization-programmatic-access-grant-request": {
+      "title": "Simple Organization Programmatic Access Grant Request",
+      "description": "Minimal representation of an organization programmatic access grant request for enumerations",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the request for access via fine-grained personal access token. The `pat_request_id` used to review PAT requests.",
+          "type": "integer"
+        },
+        "reason": {
+          "description": "Reason for requesting access.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner": {
+          "$ref": "#/$defs/simple-user"
+        },
+        "repository_selection": {
+          "description": "Type of repository selection requested.",
+          "oneOf": [
+            {
+              "const": "none"
+            },
+            {
+              "const": "all"
+            },
+            {
+              "const": "subset"
+            }
+          ]
+        },
+        "repositories_url": {
+          "description": "URL to the list of repositories requested to be accessed via fine-grained personal access token. Should only be followed when `repository_selection` is `subset`.",
+          "type": "string"
+        },
+        "permissions": {
+          "description": "Permissions requested, categorized by type of permission.",
+          "type": "object",
+          "properties": {
+            "organization": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "properties": {},
+              "required": []
+            },
+            "repository": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "properties": {},
+              "required": []
+            },
+            "other": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "properties": {},
+              "required": []
+            }
+          },
+          "required": []
+        },
+        "created_at": {
+          "description": "Date and time when the request for access was created.",
+          "type": "string"
+        },
+        "token_id": {
+          "description": "Unique identifier of the user's token. This field can also be found in audit log events and the organization's settings for their PAT grants.",
+          "type": "integer"
+        },
+        "token_name": {
+          "description": "The name given to the user's token. This field can also be found in an organization's settings page for Active Tokens.",
+          "type": "string"
+        },
+        "token_expired": {
+          "description": "Whether the associated fine-grained personal access token has expired.",
+          "type": "boolean"
+        },
+        "token_expires_at": {
+          "description": "Date and time when the associated fine-grained personal access token expires.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "token_last_used_at": {
+          "description": "Date and time when the associated fine-grained personal access token was last used for authentication.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "reason",
+        "owner",
+        "repository_selection",
+        "repositories_url",
+        "permissions",
+        "created_at",
+        "token_id",
+        "token_name",
+        "token_expired",
+        "token_expires_at",
+        "token_last_used_at"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    }
+  }
+}

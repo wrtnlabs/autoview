@@ -1,0 +1,521 @@
+{
+  "schema": {
+    "$ref": "#/$defs/campaign-summary"
+  },
+  "$defs": {
+    "IApiOrgsCampaigns.PatchBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the campaign",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "description": {
+          "description": "A description for the campaign",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255
+        },
+        "managers": {
+          "description": "The logins of the users to set as the campaign managers. At this time, only a single manager can be supplied.",
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string"
+          }
+        },
+        "team_managers": {
+          "description": "The slugs of the teams to set as the campaign managers.",
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "description": "The slug of each team",
+            "type": "string"
+          }
+        },
+        "ends_at": {
+          "description": "The end date and time of the campaign, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "contact_link": {
+          "description": "The contact link of the campaign. Must be a URI.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/campaign-state"
+        }
+      },
+      "required": []
+    },
+    "campaign-state": {
+      "title": "Campaign state",
+      "description": "Indicates whether a campaign is open or closed",
+      "oneOf": [
+        {
+          "const": "open"
+        },
+        {
+          "const": "closed"
+        }
+      ]
+    },
+    "campaign-summary": {
+      "title": "Campaign summary",
+      "description": "The campaign metadata and alert stats.",
+      "type": "object",
+      "properties": {
+        "number": {
+          "description": "The number of the newly created campaign",
+          "type": "integer"
+        },
+        "created_at": {
+          "description": "The date and time the campaign was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "description": "The date and time the campaign was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "name": {
+          "description": "The campaign name",
+          "type": "string"
+        },
+        "description": {
+          "description": "The campaign description",
+          "type": "string"
+        },
+        "managers": {
+          "description": "The campaign managers",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/simple-user"
+          }
+        },
+        "team_managers": {
+          "description": "The campaign team managers",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/team"
+          }
+        },
+        "published_at": {
+          "description": "The date and time the campaign was published, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "ends_at": {
+          "description": "The date and time the campaign has ended, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "closed_at": {
+          "description": "The date and time the campaign was closed, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ. Will be null if the campaign is still open.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "$ref": "#/$defs/campaign-state"
+        },
+        "contact_link": {
+          "description": "The contact link of the campaign.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "alert_stats": {
+          "type": "object",
+          "properties": {
+            "open_count": {
+              "description": "The number of open alerts",
+              "type": "integer"
+            },
+            "closed_count": {
+              "description": "The number of closed alerts",
+              "type": "integer"
+            },
+            "in_progress_count": {
+              "description": "The number of in-progress alerts",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "open_count",
+            "closed_count",
+            "in_progress_count"
+          ]
+        }
+      },
+      "required": [
+        "number",
+        "created_at",
+        "updated_at",
+        "description",
+        "managers",
+        "ends_at",
+        "state",
+        "contact_link"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "team": {
+      "title": "Team",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "description": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "privacy": {
+          "type": "string"
+        },
+        "notification_setting": {
+          "type": "string"
+        },
+        "permission": {
+          "type": "string"
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "pull": {
+              "type": "boolean"
+            },
+            "triage": {
+              "type": "boolean"
+            },
+            "push": {
+              "type": "boolean"
+            },
+            "maintain": {
+              "type": "boolean"
+            },
+            "admin": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "pull",
+            "triage",
+            "push",
+            "maintain",
+            "admin"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/rails/teams/core",
+          "type": "string",
+          "format": "uri"
+        },
+        "members_url": {
+          "type": "string"
+        },
+        "repositories_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "parent": {
+          "$ref": "#/$defs/nullable-team-simple"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "members_url",
+        "name",
+        "description",
+        "permission",
+        "html_url",
+        "repositories_url",
+        "slug",
+        "parent"
+      ]
+    },
+    "nullable-team-simple": {
+      "title": "Team Simple",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the team",
+              "example": 1,
+              "type": "integer"
+            },
+            "node_id": {
+              "example": "MDQ6VGVhbTE=",
+              "type": "string"
+            },
+            "url": {
+              "description": "URL for the team",
+              "example": "https://api.github.com/organizations/1/team/1",
+              "type": "string",
+              "format": "uri"
+            },
+            "members_url": {
+              "example": "https://api.github.com/organizations/1/team/1/members{/member}",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name of the team",
+              "example": "Justice League",
+              "type": "string"
+            },
+            "description": {
+              "description": "Description of the team",
+              "example": "A great team.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "permission": {
+              "description": "Permission that the team will have for its repositories",
+              "example": "admin",
+              "type": "string"
+            },
+            "privacy": {
+              "description": "The level of privacy this team should have",
+              "example": "closed",
+              "type": "string"
+            },
+            "notification_setting": {
+              "description": "The notification setting the team has set",
+              "example": "notifications_enabled",
+              "type": "string"
+            },
+            "html_url": {
+              "example": "https://github.com/orgs/rails/teams/core",
+              "type": "string",
+              "format": "uri"
+            },
+            "repositories_url": {
+              "example": "https://api.github.com/organizations/1/team/1/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "slug": {
+              "example": "justice-league",
+              "type": "string"
+            },
+            "ldap_dn": {
+              "description": "Distinguished Name (DN) that team maps to within LDAP environment",
+              "example": "uid=example,ou=users,dc=github,dc=com",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "url",
+            "members_url",
+            "name",
+            "description",
+            "permission",
+            "html_url",
+            "repositories_url",
+            "slug"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

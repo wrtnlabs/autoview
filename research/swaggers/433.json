@@ -1,0 +1,73 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsCodespacesSecrets.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsCodespacesSecrets.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "secrets"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "secrets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/codespaces-org-secret"
+          }
+        }
+      }
+    },
+    "codespaces-org-secret": {
+      "title": "Codespaces Secret",
+      "description": "Secrets for a GitHub Codespace.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the secret",
+          "example": "SECRET_NAME",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "The date and time at which the secret was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "description": "The date and time at which the secret was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "visibility": {
+          "description": "The type of repositories in the organization that the secret is visible to",
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "private"
+            },
+            {
+              "const": "selected"
+            }
+          ]
+        },
+        "selected_repositories_url": {
+          "description": "The API URL at which the list of repositories this secret is visible to can be retrieved",
+          "example": "https://api.github.com/orgs/ORGANIZATION/codespaces/secrets/SECRET_NAME/repositories",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "name",
+        "created_at",
+        "updated_at",
+        "visibility"
+      ]
+    }
+  }
+}

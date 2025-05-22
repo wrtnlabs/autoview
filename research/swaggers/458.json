@@ -1,0 +1,49 @@
+{
+  "schema": {
+    "$ref": "#/$defs/api-insights-route-stats"
+  },
+  "$defs": {
+    "api-insights-route-stats": {
+      "title": "Route Stats",
+      "description": "API Insights usage route stats for an actor",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "http_method": {
+            "description": "The HTTP method",
+            "type": "string"
+          },
+          "api_route": {
+            "description": "The API path's route template",
+            "type": "string"
+          },
+          "total_request_count": {
+            "description": "The total number of requests within the queried time period",
+            "type": "integer",
+            "format": "int64"
+          },
+          "rate_limited_request_count": {
+            "description": "The total number of requests that were rate limited within the queried time period",
+            "type": "integer",
+            "format": "int64"
+          },
+          "last_rate_limited_timestamp": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last_request_timestamp": {
+            "type": "string"
+          }
+        },
+        "required": []
+      }
+    }
+  }
+}

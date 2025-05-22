@@ -1,0 +1,63 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-cache-list"
+  },
+  "$defs": {
+    "actions-cache-list": {
+      "title": "Repository actions caches",
+      "description": "Repository actions caches",
+      "type": "object",
+      "properties": {
+        "total_count": {
+          "description": "Total number of caches",
+          "example": 2,
+          "type": "integer"
+        },
+        "actions_caches": {
+          "description": "Array of caches",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "example": 2,
+                "type": "integer"
+              },
+              "ref": {
+                "example": "refs/heads/main",
+                "type": "string"
+              },
+              "key": {
+                "example": "Linux-node-958aff96db2d75d67787d1e634ae70b659de937b",
+                "type": "string"
+              },
+              "version": {
+                "example": "73885106f58cc52a7df9ec4d4a5622a5614813162cb516c759a30af6bf56e6f0",
+                "type": "string"
+              },
+              "last_accessed_at": {
+                "example": "2019-01-24T22:45:36.000Z",
+                "type": "string",
+                "format": "date-time"
+              },
+              "created_at": {
+                "example": "2019-01-24T22:45:36.000Z",
+                "type": "string",
+                "format": "date-time"
+              },
+              "size_in_bytes": {
+                "example": 1024,
+                "type": "integer"
+              }
+            },
+            "required": []
+          }
+        }
+      },
+      "required": [
+        "total_count",
+        "actions_caches"
+      ]
+    }
+  }
+}

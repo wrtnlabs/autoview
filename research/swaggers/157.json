@@ -1,0 +1,51 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingSaleUnitStockSupplement"
+  },
+  "$defs": {
+    "IShoppingSaleUnitStockSupplement.ICreate": {
+      "description": "Creation information of the supplement.",
+      "type": "object",
+      "properties": {
+        "value": {
+          "title": "Supplemented quantity",
+          "description": "Supplemented quantity.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "value"
+      ]
+    },
+    "IShoppingSaleUnitStockSupplement": {
+      "description": "Supplementation of inventory quantity of stock.\n\nYou know what? If a {@link IShoppingSaleUnitStock stock} has been sold over\nits {@link IShoppingSaleUnitStock.ICreate.quantity initial inventory quantity},\nthe stock can't be sold anymore, because of out of stock. In that case, how the\n{@link IShoppingSeller} should do?\n\nWhen the sotck is sold out, seller can supplement the inventory record by\nregistering this `IShoppingSaleUnitStockSupplement` record. Right, this\n`IShoppingSaleUnitStockSupplement` is an entity that embodies the\nsupplementation of the inventory quantity of the belonged stock.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Supplemented quantity",
+          "description": "Supplemented quantity.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.\n\nAnother words, the time when inventory of the stock being supplemented.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at"
+      ]
+    }
+  }
+}

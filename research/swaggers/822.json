@@ -1,0 +1,19 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposPrivateVulnerabilityReporting.GetResponse"
+  },
+  "$defs": {
+    "IApiReposPrivateVulnerabilityReporting.GetResponse": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether or not private vulnerability reporting is enabled for the repository.",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "enabled"
+      ]
+    }
+  }
+}

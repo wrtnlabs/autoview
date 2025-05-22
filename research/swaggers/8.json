@@ -1,0 +1,69 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingDeposit"
+  },
+  "$defs": {
+    "IShoppingDeposit.ICreate": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "const": -1
+            },
+            {
+              "const": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "code",
+        "source",
+        "direction"
+      ]
+    },
+    "IShoppingDeposit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "const": -1
+            },
+            {
+              "const": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "code",
+        "source",
+        "direction"
+      ]
+    }
+  }
+}

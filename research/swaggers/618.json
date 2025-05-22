@@ -1,0 +1,89 @@
+{
+  "schema": {
+    "$ref": "#/$defs/workflow"
+  },
+  "$defs": {
+    "workflow": {
+      "title": "Workflow",
+      "description": "A GitHub Actions workflow",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 5,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDg6V29ya2Zsb3cxMg==",
+          "type": "string"
+        },
+        "name": {
+          "example": "CI",
+          "type": "string"
+        },
+        "path": {
+          "example": "ruby.yaml",
+          "type": "string"
+        },
+        "state": {
+          "example": "active",
+          "oneOf": [
+            {
+              "const": "active"
+            },
+            {
+              "const": "deleted"
+            },
+            {
+              "const": "disabled_fork"
+            },
+            {
+              "const": "disabled_inactivity"
+            },
+            {
+              "const": "disabled_manually"
+            }
+          ]
+        },
+        "created_at": {
+          "example": "2019-12-06T14:20:20.000Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "example": "2019-12-06T14:20:20.000Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "url": {
+          "example": "https://api.github.com/repos/actions/setup-ruby/workflows/5",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/actions/setup-ruby/blob/master/.github/workflows/ruby.yaml",
+          "type": "string"
+        },
+        "badge_url": {
+          "example": "https://github.com/actions/setup-ruby/workflows/CI/badge.svg",
+          "type": "string"
+        },
+        "deleted_at": {
+          "example": "2019-12-06T14:20:20.000Z",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "name",
+        "path",
+        "state",
+        "url",
+        "html_url",
+        "badge_url",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

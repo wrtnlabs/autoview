@@ -1,0 +1,47 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/email"
+    }
+  },
+  "$defs": {
+    "email": {
+      "title": "Email",
+      "description": "Email",
+      "type": "object",
+      "properties": {
+        "email": {
+          "example": "octocat@github.com",
+          "type": "string",
+          "format": "email"
+        },
+        "primary": {
+          "example": true,
+          "type": "boolean"
+        },
+        "verified": {
+          "example": true,
+          "type": "boolean"
+        },
+        "visibility": {
+          "example": "public",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "email",
+        "primary",
+        "verified",
+        "visibility"
+      ]
+    }
+  }
+}

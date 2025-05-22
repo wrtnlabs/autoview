@@ -1,0 +1,507 @@
+{
+  "schema": {
+    "$ref": "#/$defs/commit"
+  },
+  "$defs": {
+    "IApiReposMerges.PostBody": {
+      "type": "object",
+      "properties": {
+        "base": {
+          "description": "The name of the base branch that the head will be merged into.",
+          "type": "string"
+        },
+        "head": {
+          "description": "The head to merge. This can be a branch name or a commit SHA1.",
+          "type": "string"
+        },
+        "commit_message": {
+          "description": "Commit message to use for the merge commit. If omitted, a default message will be used.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "base",
+        "head"
+      ]
+    },
+    "commit": {
+      "title": "Commit",
+      "description": "Commit",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/commits/6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string",
+          "format": "uri"
+        },
+        "sha": {
+          "example": "6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string"
+        },
+        "node_id": {
+          "example": "MDY6Q29tbWl0NmRjYjA5YjViNTc4NzVmMzM0ZjYxYWViZWQ2OTVlMmU0MTkzZGI1ZQ==",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat/Hello-World/commit/6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string",
+          "format": "uri"
+        },
+        "comments_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/commits/6dcb09b5b57875f334f61aebed695e2e4193db5e/comments",
+          "type": "string",
+          "format": "uri"
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "example": "https://api.github.com/repos/octocat/Hello-World/commits/6dcb09b5b57875f334f61aebed695e2e4193db5e",
+              "type": "string",
+              "format": "uri"
+            },
+            "author": {
+              "$ref": "#/$defs/nullable-git-user"
+            },
+            "committer": {
+              "$ref": "#/$defs/nullable-git-user"
+            },
+            "message": {
+              "example": "Fix all the bugs",
+              "type": "string"
+            },
+            "comment_count": {
+              "example": 0,
+              "type": "integer"
+            },
+            "tree": {
+              "type": "object",
+              "properties": {
+                "sha": {
+                  "example": "827efc6d56897b048c772eb4087f854f46256132",
+                  "type": "string"
+                },
+                "url": {
+                  "example": "https://api.github.com/repos/octocat/Hello-World/tree/827efc6d56897b048c772eb4087f854f46256132",
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "sha",
+                "url"
+              ]
+            },
+            "verification": {
+              "$ref": "#/$defs/verification"
+            }
+          },
+          "required": [
+            "author",
+            "committer",
+            "comment_count",
+            "message",
+            "tree",
+            "url"
+          ]
+        },
+        "author": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/simple-user"
+            },
+            {
+              "$ref": "#/$defs/empty-object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "committer": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/simple-user"
+            },
+            {
+              "$ref": "#/$defs/empty-object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "sha": {
+                "example": "7638417db6d59f3c431d3e1f261cc637155684cd",
+                "type": "string"
+              },
+              "url": {
+                "example": "https://api.github.com/repos/octocat/Hello-World/commits/7638417db6d59f3c431d3e1f261cc637155684cd",
+                "type": "string",
+                "format": "uri"
+              },
+              "html_url": {
+                "example": "https://github.com/octocat/Hello-World/commit/7638417db6d59f3c431d3e1f261cc637155684cd",
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "required": [
+              "sha",
+              "url"
+            ]
+          }
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "additions": {
+              "type": "integer"
+            },
+            "deletions": {
+              "type": "integer"
+            },
+            "total": {
+              "type": "integer"
+            }
+          },
+          "required": []
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/diff-entry"
+          }
+        }
+      },
+      "required": [
+        "url",
+        "sha",
+        "node_id",
+        "html_url",
+        "comments_url",
+        "commit",
+        "author",
+        "committer",
+        "parents"
+      ]
+    },
+    "nullable-git-user": {
+      "title": "Git User",
+      "description": "Metaproperties for Git author/committer information.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "example": "\"Chris Wanstrath\"",
+              "type": "string"
+            },
+            "email": {
+              "example": "\"chris@ozmm.org\"",
+              "type": "string"
+            },
+            "date": {
+              "example": "\"2007-10-29T02:42:39.000-07:00\"",
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verification": {
+      "title": "Verification",
+      "type": "object",
+      "properties": {
+        "verified": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "signature": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "verified_at": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "verified",
+        "reason",
+        "payload",
+        "signature",
+        "verified_at"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "empty-object": {
+      "title": "Empty Object",
+      "description": "An object without any properties.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "diff-entry": {
+      "title": "Diff Entry",
+      "description": "Diff Entry",
+      "type": "object",
+      "properties": {
+        "sha": {
+          "example": "bbcd538c8e72b8c175046e27cc8f907076331401",
+          "type": "string"
+        },
+        "filename": {
+          "example": "file1.txt",
+          "type": "string"
+        },
+        "status": {
+          "example": "added",
+          "oneOf": [
+            {
+              "const": "added"
+            },
+            {
+              "const": "removed"
+            },
+            {
+              "const": "modified"
+            },
+            {
+              "const": "renamed"
+            },
+            {
+              "const": "copied"
+            },
+            {
+              "const": "changed"
+            },
+            {
+              "const": "unchanged"
+            }
+          ]
+        },
+        "additions": {
+          "example": 103,
+          "type": "integer"
+        },
+        "deletions": {
+          "example": 21,
+          "type": "integer"
+        },
+        "changes": {
+          "example": 124,
+          "type": "integer"
+        },
+        "blob_url": {
+          "example": "https://github.com/octocat/Hello-World/blob/6dcb09b5b57875f334f61aebed695e2e4193db5e/file1.txt",
+          "type": "string",
+          "format": "uri"
+        },
+        "raw_url": {
+          "example": "https://github.com/octocat/Hello-World/raw/6dcb09b5b57875f334f61aebed695e2e4193db5e/file1.txt",
+          "type": "string",
+          "format": "uri"
+        },
+        "contents_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/contents/file1.txt?ref=6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string",
+          "format": "uri"
+        },
+        "patch": {
+          "example": "@@ -132,7 +132,7 @@ module Test @@ -1000,7 +1000,7 @@ module Test",
+          "type": "string"
+        },
+        "previous_filename": {
+          "example": "file.txt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "additions",
+        "blob_url",
+        "changes",
+        "contents_url",
+        "deletions",
+        "filename",
+        "raw_url",
+        "sha",
+        "status"
+      ]
+    }
+  }
+}

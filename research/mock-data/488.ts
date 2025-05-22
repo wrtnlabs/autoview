@@ -1,0 +1,8 @@
+
+import Component from "../components/488";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"assignment":"direct","id":101,"node_id":"NODEID_TeamRole_abc123XYZ=","name":"Developers Team (Sample)","slug":"developers-team","description":"Team responsible for sample development tasks (Test).","privacy":"closed","notification_setting":"mentions","permission":"pull","permissions":{"pull":true,"triage":false,"push":true,"maintain":false,"admin":false},"url":"https://api.example.com/teams/101/role-assignments","html_url":"https://www.example.com/teams/developers-team/role-assignments/101","members_url":"https://api.example.com/teams/101/members","repositories_url":"https://api.example.com/teams/101/repos","parent":{"id":10,"node_id":"NODEID_SimpleTeam_001","url":"https://api.example.com/teams/10","members_url":"https://api.example.com/teams/10/members","name":"Engineering Team (Test)","description":null,"permission":"push","privacy":"closed","notification_setting":"all","html_url":"https://www.example.com/teams/engineering-test","repositories_url":"https://api.example.com/teams/10/repos","slug":"engineering-test","ldap_dn":"cn=Engineering,ou=Groups,dc=example,dc=com"}},{"id":202,"node_id":"NODEID_TeamRole_def456LMN=","name":"QA Team (Sample)","slug":"qa-team-sample","description":null,"permission":"push","permissions":{"pull":true,"triage":true,"push":false,"maintain":true,"admin":false},"url":"https://api.example.com/teams/202/role-assignments","html_url":"https://www.example.com/teams/qa-team-sample/role-assignments/202","members_url":"https://api.example.com/teams/202/members","repositories_url":"https://api.example.com/teams/202/repos","parent":null}];
+}

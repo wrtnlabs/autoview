@@ -1,0 +1,52 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/social-account"
+    }
+  },
+  "$defs": {
+    "IApiUserSocialAccounts.PostBody": {
+      "example": {
+        "account_urls": [
+          "https://www.linkedin.com/company/github/",
+          "https://twitter.com/github"
+        ]
+      },
+      "type": "object",
+      "properties": {
+        "account_urls": {
+          "description": "Full URLs for the social media profiles to add.",
+          "example": [],
+          "type": "array",
+          "items": {
+            "example": "https://twitter.com/github",
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "account_urls"
+      ]
+    },
+    "social-account": {
+      "title": "Social account",
+      "description": "Social media account",
+      "type": "object",
+      "properties": {
+        "provider": {
+          "example": "linkedin",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://www.linkedin.com/company/github/",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider",
+        "url"
+      ]
+    }
+  }
+}

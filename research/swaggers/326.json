@@ -1,0 +1,91 @@
+{
+  "schema": {
+    "$ref": "#/$defs/classroom"
+  },
+  "$defs": {
+    "classroom": {
+      "title": "Classroom",
+      "description": "A GitHub Classroom classroom",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the classroom.",
+          "example": 42,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the classroom.",
+          "example": "Programming Elixir",
+          "type": "string"
+        },
+        "archived": {
+          "description": "Whether classroom is archived.",
+          "example": false,
+          "type": "boolean"
+        },
+        "organization": {
+          "$ref": "#/$defs/simple-classroom-organization"
+        },
+        "url": {
+          "description": "The URL of the classroom on GitHub Classroom.",
+          "example": "https://classroom.github.com/classrooms/1-programming-elixir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "archived",
+        "organization",
+        "url"
+      ]
+    },
+    "simple-classroom-organization": {
+      "title": "Organization Simple for Classroom",
+      "description": "A GitHub organization.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 1,
+          "type": "integer"
+        },
+        "login": {
+          "example": "github",
+          "type": "string"
+        },
+        "node_id": {
+          "example": "MDEyOk9yZ2FuaXphdGlvbjE=",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/github",
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "example": "Github - Code thigns happen here",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "login",
+        "node_id",
+        "html_url",
+        "name",
+        "avatar_url"
+      ]
+    }
+  }
+}

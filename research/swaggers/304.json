@@ -1,0 +1,353 @@
+{
+  "schema": {
+    "oneOf": [
+      {
+        "$ref": "#/$defs/CANNOT_FIND_DESIGNER_PROFILE"
+      },
+      {
+        "$ref": "#/$defs/ResponseForm_lt_UserType.DetailProfileWithRelation_gt_"
+      }
+    ]
+  },
+  "$defs": {
+    "CANNOT_FIND_DESIGNER_PROFILE": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4018
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "디자이너의 프로필을 찾지 못했어요."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ResponseForm_lt_UserType.DetailProfileWithRelation_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/UserType.DetailProfileWithRelation"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "UserType.DetailProfileWithRelation": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "followStatus": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "oneOf": [
+            {
+              "const": "follow"
+            },
+            {
+              "const": "followUp"
+            },
+            {
+              "const": "reverse"
+            },
+            {
+              "const": "nothing"
+            }
+          ]
+        },
+        "myself": {
+          "description": "나 자신의 프로필인 경우에는 true, 아닌 경우에는 false로 나온다.",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "boolean"
+        },
+        "name": {
+          "description": "이름 칼럼으로 사용자의 이름을 의미",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "nickname": {
+          "description": "사용자의 별칭, 설정하지 않는 경우도 있다.",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "email": {
+          "description": "사용자의 이메일 주소로 로그인 시 필요",
+          "x-typia-metaTags": [
+            {
+              "kind": "format",
+              "value": "email"
+            },
+            {
+              "kind": "minLength",
+              "value": 4
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "format",
+              "text": [
+                {
+                  "text": "email",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "4",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "format": "email",
+          "minLength": 4,
+          "maxLength": 50
+        },
+        "birth": {
+          "description": "사용자의 생일을 의미하는 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "profileImage": {
+          "description": "사용자의 프로필 이미지",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverImage": {
+          "description": "사용자의 커버 이미지",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "introduce": {
+          "description": "",
+          "x-typia-metaTags": [
+            {
+              "kind": "maxLength",
+              "value": 2000
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "2000",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-metaTags": [
+                {
+                  "kind": "maxLength",
+                  "value": 2000
+                }
+              ],
+              "x-typia-jsDocTags": [
+                {
+                  "name": "maxLength",
+                  "text": [
+                    {
+                      "text": "2000",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string",
+              "maxLength": 2000
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "followStatus",
+        "name",
+        "nickname",
+        "email",
+        "id"
+      ]
+    }
+  }
+}

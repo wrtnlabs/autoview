@@ -1,0 +1,8 @@
+
+import Component from "../components/268";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"prev":"cursor_prev_abc","next":"cursor_next_def","messages":[{"chatKey":"chatkey_001","id":"msg_001","channelId":"channel123","chatType":"channel","chatId":"chat_001","personType":"user","personId":"user_001","createdAt":1700000100000},{"chatKey":"chatkey_002","id":"msg_002","channelId":"channel456","chatType":"direct","chatId":"chat_002","personType":"user","personId":"user_002","createdAt":1700000200000,"version":2,"plainText":"Hello, this is a test message for UI rendering (Sample).","updatedAt":1700000205000,"language":"en","requestId":"req_789","blocks":[{"type":"text","value":"This is a text block in the message.","blocks":[{"type":"bullets","value":"Bullet 1\nBullet 2","blocks":[]}]}],"thread":{"id":"thread_001","managerIds":["mgr_01"],"repliedManagerIds":["mgr_02","mgr_03"],"replyCount":2,"chatType":"direct","chatId":"chat_002","rootMessageId":"msg_000"},"buttons":[{"title":"Confirm","colorVariant":"green","action":{"type":"confirm_action"}}],"reactions":[{"emojiName":"thumbs_up","personKeys":["user_003","user_004"]}],"state":"sent","options":["private","silent"],"alertLevel":"none","threadMsg":false,"meetMsg":false,"broadcastedMsg":false,"workflowButton":false,"removedByWriter":false,"threadRoot":false,"meetRoot":false}],"bots":[{"id":"bot_001","name":"Sample Helper Bot","ai":true,"avatarUrl":"https://www.example.com/avatars/bot_001.png","channelId":"channel123","createdAt":1680000000000,"description":"This is a sample AI helper bot for testing.","color":"#123456","nameDescI18nMap":{"en":{"name":"Sample Helper Test Bot","description":"Bot for testing purposes."}}}]};
+}

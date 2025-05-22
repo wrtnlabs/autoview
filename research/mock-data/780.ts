@@ -1,0 +1,8 @@
+
+import Component from "../components/780";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"id":101,"node_id":"NODEID_IssueEvent_101","url":"https://api.example.org/repos/example-org/sample-repo/issues/events/101","actor":{"login":"sampleuser","id":501,"node_id":"NODEID_User_501","url":"https://api.example.org/users/sampleuser","avatar_url":"https://avatars.example.org/u/501?v=4","gravatar_id":null,"html_url":"https://github.com/sampleuser","followers_url":"https://api.example.org/users/sampleuser/followers","following_url":"https://api.example.org/users/sampleuser/following{/other_user}","gists_url":"https://api.example.org/users/sampleuser/gists{/gist_id}","starred_url":"https://api.example.org/users/sampleuser/starred{/owner}{/repo}","subscriptions_url":"https://api.example.org/users/sampleuser/subscriptions","organizations_url":"https://api.example.org/users/sampleuser/orgs","repos_url":"https://api.example.org/users/sampleuser/repos","events_url":"https://api.example.org/users/sampleuser/events{/privacy}","received_events_url":"https://api.example.org/users/sampleuser/received_events","type":"User","site_admin":false},"event":"labeled","commit_id":null,"commit_url":null,"created_at":"2025-05-19T12:34:56Z","label":{"name":"bug (Test)","color":"f29513"},"author_association":"CONTRIBUTOR","lock_reason":null},{"id":102,"node_id":"NODEID_IssueEvent_102","url":"https://api.example.org/repos/example-org/sample-repo/issues/events/102","actor":null,"event":"renamed","commit_id":null,"commit_url":null,"created_at":"2025-05-20T09:15:00Z","rename":{"from":"Old issue title","to":"New issue title (Test)"},"author_association":"MEMBER","lock_reason":null}];
+}

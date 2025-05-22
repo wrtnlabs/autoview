@@ -1,0 +1,37 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/repository-rule-detailed"
+    }
+  },
+  "$defs": {
+    "repository-rule-detailed": {
+      "title": "Repository Rule",
+      "description": "A repository rule with ruleset details.",
+      "oneOf": [
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {},
+        {}
+      ]
+    }
+  }
+}

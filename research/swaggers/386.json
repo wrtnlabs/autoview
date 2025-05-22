@@ -1,0 +1,24 @@
+{
+  "schema": {
+    "$ref": "#/$defs/oidc-custom-sub"
+  },
+  "$defs": {
+    "oidc-custom-sub": {
+      "title": "Actions OIDC Subject customization",
+      "description": "Actions OIDC Subject customization",
+      "type": "object",
+      "properties": {
+        "include_claim_keys": {
+          "description": "Array of unique strings. Each claim key can only contain alphanumeric characters and underscores.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "include_claim_keys"
+      ]
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schema": {
+    "$ref": "#/$defs/pages-deployment-status"
+  },
+  "$defs": {
+    "pages-deployment-status": {
+      "title": "GitHub Pages deployment status",
+      "type": "object",
+      "properties": {
+        "status": {
+          "description": "The current status of the deployment.",
+          "oneOf": [
+            {
+              "const": "deployment_in_progress"
+            },
+            {
+              "const": "syncing_files"
+            },
+            {
+              "const": "finished_file_sync"
+            },
+            {
+              "const": "updating_pages"
+            },
+            {
+              "const": "purging_cdn"
+            },
+            {
+              "const": "deployment_cancelled"
+            },
+            {
+              "const": "deployment_failed"
+            },
+            {
+              "const": "deployment_content_failed"
+            },
+            {
+              "const": "deployment_attempt_error"
+            },
+            {
+              "const": "deployment_lost"
+            },
+            {
+              "const": "succeed"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}

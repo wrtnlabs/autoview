@@ -1,0 +1,35 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsCopilotBillingSelectedUsers._DeleteResponse"
+  },
+  "$defs": {
+    "IApiOrgsCopilotBillingSelectedUsers._DeleteBody": {
+      "type": "object",
+      "properties": {
+        "selected_usernames": {
+          "description": "The usernames of the organization members for which to revoke access to GitHub Copilot.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "selected_usernames"
+      ]
+    },
+    "IApiOrgsCopilotBillingSelectedUsers._DeleteResponse": {
+      "description": "The total number of seats set to \"pending cancellation\" for the specified users.",
+      "type": "object",
+      "properties": {
+        "seats_cancelled": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "seats_cancelled"
+      ]
+    }
+  }
+}

@@ -1,0 +1,247 @@
+{
+  "schema": {
+    "$ref": "#/$defs/file-commit"
+  },
+  "$defs": {
+    "IApiReposContents._DeleteBody": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "description": "The commit message.",
+          "type": "string"
+        },
+        "sha": {
+          "description": "The blob SHA of the file being deleted.",
+          "type": "string"
+        },
+        "branch": {
+          "description": "The branch name. Default: the repository’s default branch",
+          "type": "string"
+        },
+        "committer": {
+          "description": "object containing information about the committer.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "The name of the author (or committer) of the commit",
+              "type": "string"
+            },
+            "email": {
+              "description": "The email of the author (or committer) of the commit",
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "author": {
+          "description": "object containing information about the author.",
+          "type": "object",
+          "properties": {
+            "name": {
+              "description": "The name of the author (or committer) of the commit",
+              "type": "string"
+            },
+            "email": {
+              "description": "The email of the author (or committer) of the commit",
+              "type": "string"
+            }
+          },
+          "required": []
+        }
+      },
+      "required": [
+        "message",
+        "sha"
+      ]
+    },
+    "file-commit": {
+      "title": "File Commit",
+      "description": "File Commit",
+      "type": "object",
+      "required": [
+        "content",
+        "commit"
+      ],
+      "properties": {
+        "content": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "path": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "integer"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "html_url": {
+                  "type": "string"
+                },
+                "git_url": {
+                  "type": "string"
+                },
+                "download_url": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "_links": {
+                  "type": "object",
+                  "properties": {
+                    "self": {
+                      "type": "string"
+                    },
+                    "git": {
+                      "type": "string"
+                    },
+                    "html": {
+                      "type": "string"
+                    }
+                  },
+                  "required": []
+                }
+              },
+              "required": []
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "commit": {
+          "type": "object",
+          "properties": {
+            "sha": {
+              "type": "string"
+            },
+            "node_id": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "html_url": {
+              "type": "string"
+            },
+            "author": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              },
+              "required": []
+            },
+            "committer": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              },
+              "required": []
+            },
+            "message": {
+              "type": "string"
+            },
+            "tree": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                },
+                "sha": {
+                  "type": "string"
+                }
+              },
+              "required": []
+            },
+            "parents": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string"
+                  },
+                  "html_url": {
+                    "type": "string"
+                  },
+                  "sha": {
+                    "type": "string"
+                  }
+                },
+                "required": []
+              }
+            },
+            "verification": {
+              "type": "object",
+              "properties": {
+                "verified": {
+                  "type": "boolean"
+                },
+                "reason": {
+                  "type": "string"
+                },
+                "signature": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "payload": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "verified_at": {
+                  "oneOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": []
+            }
+          },
+          "required": []
+        }
+      }
+    }
+  }
+}

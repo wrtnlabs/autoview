@@ -9,13 +9,14 @@ export namespace AutoViewTransformerProgrammer {
     ctx: IAutoViewProgrammerContext,
     inputSchema: OpenApi.IJsonSchema,
     transformFunctionName: string,
+    dtoPrefix: string,
   ): ts.Statement[] => {
     return [
       ts.factory.createTypeAliasDeclaration(
         undefined,
         ts.factory.createIdentifier("IAutoViewTransformerInputType"),
         undefined,
-        AutoViewSchemaProgrammer.writeSchema(ctx, inputSchema),
+        AutoViewSchemaProgrammer.writeSchema(ctx, inputSchema, `${dtoPrefix}.`),
       ),
       ts.factory.createFunctionDeclaration(
         [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)],

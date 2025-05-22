@@ -1,0 +1,84 @@
+{
+  "schema": {
+    "$ref": "#/$defs/label"
+  },
+  "$defs": {
+    "IApiReposLabels.PatchBody": {
+      "type": "object",
+      "properties": {
+        "new_name": {
+          "description": "The new name of the label. Emoji can be added to label names, using either native emoji or colon-style markup. For example, typing `:strawberry:` will render the emoji ![:strawberry:](https://github.githubassets.com/images/icons/emoji/unicode/1f353.png \":strawberry:\"). For a full list of available emoji and codes, see \"[Emoji cheat sheet](https://github.com/ikatyang/emoji-cheat-sheet).\"",
+          "type": "string"
+        },
+        "color": {
+          "description": "The [hexadecimal color code](http://www.color-hex.com/) for the label, without the leading `#`.",
+          "type": "string"
+        },
+        "description": {
+          "description": "A short description of the label. Must be 100 characters or fewer.",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "label": {
+      "title": "Label",
+      "description": "Color-coded labels help you categorize and filter your issues (just like labels in Gmail).",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier for the label.",
+          "example": 208045946,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDU6TGFiZWwyMDgwNDU5NDY=",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL for the label",
+          "example": "https://api.github.com/repositories/42/labels/bug",
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "description": "The name of the label.",
+          "example": "bug",
+          "type": "string"
+        },
+        "description": {
+          "description": "Optional description of the label, such as its purpose.",
+          "example": "Something isn't working",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "color": {
+          "description": "6-character hex code, without the leading #, identifying the color",
+          "example": "FFFFFF",
+          "type": "string"
+        },
+        "default": {
+          "description": "Whether this label comes by default in a new repository.",
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "name",
+        "description",
+        "color",
+        "default"
+      ]
+    }
+  }
+}

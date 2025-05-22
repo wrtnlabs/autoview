@@ -1,0 +1,8 @@
+
+import Component from "../components/308";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"ghsa_id":"GHSA-abcd-1234-efgh","cve_id":"CVE-2021-9999","url":"https://api.github.com/security-advisories/GHSA-abcd-1234-efgh","html_url":"https://github.com/advisories/GHSA-abcd-1234-efgh","repository_advisory_url":"https://api.github.com/repos/example-org/sample-repo/advisories/1234","summary":"Sample security advisory summary for UI testing.","description":"This is a fictional description providing details about the sample security advisory. It is used solely for demonstration purposes. Lorem ipsum dolor sit amet.","type":"reviewed","severity":"high","source_code_location":"https://raw.githubusercontent.com/example-org/sample-repo/main","identifiers":[{"type":"CVE","value":"CVE-2021-9999"},{"type":"GHSA","value":"GHSA-abcd-1234-efgh"}],"references":["https://example.com/reference1","https://example.org/advisory-details"],"published_at":"2025-05-19T14:30:00Z","updated_at":"2025-06-01T10:00:00Z","github_reviewed_at":"2025-05-20T09:15:00Z","nvd_published_at":"2025-05-21T08:00:00Z","withdrawn_at":null,"vulnerabilities":[{"package":"@example-org/sample-lib","vulnerable_versions":"<2.0.0","patched_versions":">=2.0.0"}],"cvss":{"vector_string":"AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H","score":9.8},"cvss_severities":{"cvss_v3":{"vector_string":"CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H","score":9.8},"cvss_v4":null},"epss":{"percentage":85.3,"percentile":99.1},"cwes":[{"cwe_id":"CWE-79","name":"Cross-site Scripting"}],"credits":[{"user":{"login":"test-user-sample","id":56789},"type":"AUTHOR"}]}];
+}

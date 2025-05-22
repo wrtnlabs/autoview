@@ -1,0 +1,35 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/porter-large-file"
+    }
+  },
+  "$defs": {
+    "porter-large-file": {
+      "title": "Porter Large File",
+      "description": "Porter Large File",
+      "type": "object",
+      "properties": {
+        "ref_name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "oid": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "oid",
+        "path",
+        "ref_name",
+        "size"
+      ]
+    }
+  }
+}

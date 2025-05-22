@@ -19,7 +19,8 @@ export const VerticalCard = ({
 };
 
 const baseStyle = {
-  maxWidth: 320,
+  // TODO: temporarily removed maxWidth to prevent layout shift
+  // maxWidth: 320,
   "[class*='CardMedia']": {
     width: "100%",
     minHeight: 200,

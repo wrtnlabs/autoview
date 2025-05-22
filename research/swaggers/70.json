@@ -1,0 +1,384 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IPageIShoppingMileageHistory"
+  },
+  "$defs": {
+    "IShoppingMileageHistory.IRequest": {
+      "type": "object",
+      "properties": {
+        "search": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingMileageHistory.IRequest.ISearch"
+            }
+          ]
+        },
+        "sort": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "const": "-mileage.source"
+                  },
+                  {
+                    "const": "-mileage.code"
+                  },
+                  {
+                    "const": "-mileage.direction"
+                  },
+                  {
+                    "const": "+mileage.source"
+                  },
+                  {
+                    "const": "+mileage.code"
+                  },
+                  {
+                    "const": "+mileage.direction"
+                  },
+                  {
+                    "const": "-history.value"
+                  },
+                  {
+                    "const": "-history.created_at"
+                  },
+                  {
+                    "const": "+history.value"
+                  },
+                  {
+                    "const": "+history.created_at"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "page": {
+          "title": "Page number",
+          "description": "Page number.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingMileageHistory.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "mileage": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingMileage.IRequest.ISearch"
+            }
+          ]
+        },
+        "citizen_id": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uuid"
+            }
+          ]
+        },
+        "from": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "to": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "minimum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        },
+        "maximum": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IShoppingMileage.IRequest.ISearch": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "code": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "const": -1
+            },
+            {
+              "const": 1
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IPageIShoppingMileageHistory": {
+      "description": "A page.\n\nCollection of records with pagination indformation.",
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "title": "Page information",
+          "description": "Page information.",
+          "$ref": "#/$defs/IPage.IPagination"
+        },
+        "data": {
+          "title": "List of records",
+          "description": "List of records.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingMileageHistory"
+          }
+        }
+      },
+      "required": [
+        "pagination",
+        "data"
+      ]
+    },
+    "IPage.IPagination": {
+      "description": "Page information.",
+      "type": "object",
+      "properties": {
+        "current": {
+          "title": "Current page number",
+          "description": "Current page number.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "records": {
+          "title": "Total records in the database",
+          "description": "Total records in the database.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "title": "Total pages",
+          "description": "Total pages.\n\nEqual to {@link records} / {@link limit} with ceiling.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "current",
+        "limit",
+        "records",
+        "pages"
+      ]
+    },
+    "IShoppingMileageHistory": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "citizen": {
+          "$ref": "#/$defs/IShoppingCitizen"
+        },
+        "mileage": {
+          "$ref": "#/$defs/IShoppingMileage"
+        },
+        "source_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "type": "number"
+        },
+        "balance": {
+          "type": "number"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "citizen",
+        "mileage",
+        "source_id",
+        "value",
+        "balance",
+        "created_at"
+      ]
+    },
+    "IShoppingCitizen": {
+      "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "mobile": {
+          "title": "Mobile number",
+          "description": "Mobile number.",
+          "x-wrtn-payment-order-mobile": true,
+          "type": "string",
+          "pattern": "^[0-9]*$"
+        },
+        "name": {
+          "title": "Real name, or equivalent nickname",
+          "description": "Real name, or equivalent nickname.",
+          "x-wrtn-payment-order-citizen": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "mobile",
+        "name"
+      ]
+    },
+    "IShoppingMileage": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            }
+          ]
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "direction": {
+          "oneOf": [
+            {
+              "const": -1
+            },
+            {
+              "const": 1
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at",
+        "code",
+        "source",
+        "direction"
+      ]
+    }
+  }
+}
