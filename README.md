@@ -29,7 +29,7 @@
 
 <h3 align="center">
 
-[Homepage](https://wrtnlabs.io/autoview) // [Documentation](https://wrtnlabs.io/autoview/docs) // [Tutorials](https://youtube.com) // [Playground](https://wrtnlabs.io/autoview/images/docs/playground.png)
+[Homepage](https://wrtnlabs.io/autoview) // [Documentation](https://wrtnlabs.io/autoview/docs) // [Tutorials](https://youtube.com) // [Playground](https://stackblitz.com/github/wrtnlabs/autoview-stackblitz-playground)
 
 </h3>
 
