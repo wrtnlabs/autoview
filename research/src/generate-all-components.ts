@@ -58,8 +58,8 @@ async function main(): Promise<void> {
           swaggerWithIndex.swagger,
         ),
     ),
-    20, // 20 concurrent requests
-    10000, // 10 seconds
+    40, // 40 concurrent requests
+    5000, // 5 seconds
   );
 
   console.log(
