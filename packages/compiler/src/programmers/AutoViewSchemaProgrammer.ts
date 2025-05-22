@@ -53,6 +53,41 @@ export namespace AutoViewSchemaProgrammer {
     else if (union.length === 1) return union[0]!;
     return ts.factory.createUnionTypeNode(union);
   };
+  export const writeSchemaForInterface = (
+    ctx: IAutoViewProgrammerContext,
+    schema: OpenApi.IJsonSchema,
+    referencePrefix: string,
+  ): ts.TypeElement[] => {
+    if (!OpenApiTypeChecker.isObject(schema)) {
+      return [];
+    }
+
+    const regular = () =>
+      Object.entries(schema.properties ?? []).map(([key, value]) =>
+        writeRegularProperty(
+          ctx,
+          {
+            required: schema.required ?? [],
+            key,
+            value,
+          },
+          referencePrefix,
+        ),
+      );
+    const dynamic = () =>
+      writeDynamicProperty(
+        ctx,
+        schema.additionalProperties as OpenApi.IJsonSchema,
+        referencePrefix,
+      );
+
+    return !!schema.properties?.length &&
+      typeof schema.additionalProperties === "object"
+      ? [...regular(), dynamic()]
+      : typeof schema.additionalProperties === "object"
+        ? [dynamic()]
+        : regular();
+  };
 
   /* -----------------------------------------------------------
     ATOMICS

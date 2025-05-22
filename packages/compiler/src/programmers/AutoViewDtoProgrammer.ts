@@ -64,22 +64,44 @@ export namespace AutoViewDtoProgrammer {
   ): ts.Statement[] => {
     const statements: ts.Statement[] = [];
     for (const [key, value] of dict) {
-      if (value.schema)
-        statements.push(
-          FilePrinter.description(
-            ts.factory.createTypeAliasDeclaration(
-              [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
-              ts.factory.createIdentifier(StringUtil.escapeNonVariable(key)),
-              undefined,
-              AutoViewSchemaProgrammer.writeSchema(
-                ctx,
-                value.schema,
-                `${dtoPrefix}.`,
+      if (value.schema) {
+        if (OpenApiTypeChecker.isObject(value.schema)) {
+          const members = AutoViewSchemaProgrammer.writeSchemaForInterface(
+            ctx,
+            value.schema,
+            `${dtoPrefix}.`,
+          );
+
+          statements.push(
+            FilePrinter.description(
+              ts.factory.createInterfaceDeclaration(
+                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+                ts.factory.createIdentifier(StringUtil.escapeNonVariable(key)),
+                undefined,
+                undefined,
+                members,
               ),
+              writeComment(value.schema),
             ),
-            writeComment(value.schema),
-          ),
-        );
+          );
+        } else
+          statements.push(
+            FilePrinter.description(
+              ts.factory.createTypeAliasDeclaration(
+                [ts.factory.createToken(ts.SyntaxKind.ExportKeyword)],
+                ts.factory.createIdentifier(StringUtil.escapeNonVariable(key)),
+                undefined,
+                AutoViewSchemaProgrammer.writeSchema(
+                  ctx,
+                  value.schema,
+                  `${dtoPrefix}.`,
+                ),
+              ),
+              writeComment(value.schema),
+            ),
+          );
+      }
+
       if (value.children.size)
         statements.push(
           ts.factory.createModuleDeclaration(
