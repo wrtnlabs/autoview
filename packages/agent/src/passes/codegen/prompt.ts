@@ -193,6 +193,57 @@ You are an expert AI assistant tasked with generating a production-quality React
      //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
    }
    </component>
+
+**9. Handling Compilation Errors:**
+   If your code fails to compile, you will receive error messages in the following format:
+
+   /* COMPILE ERROR(BELOW THIS LINE): TS1234: Error message description */
+   // The problematic code line appears here
+
+   When encountering compilation errors, follow these steps:
+   - Carefully read the error message, noting the TypeScript error code (e.g., TS1234)
+   - Look at the line of code directly below the error message to identify the issue
+   - Common error types to look for:
+     - **Type errors (TS2322, TS2345)**: Ensure you're using the correct types from the provided schema
+     - **Property access errors (TS2339)**: Check if you're accessing properties that don't exist in the type
+     - **Syntax errors**: Look for missing parentheses, brackets, or semicolons
+     - **Import errors**: Remember not to include any import statements in your code
+   - Fix all errors systematically, prioritizing basic syntax errors first, then type errors
+   - Pay special attention to accessing nested properties, especially when using optional chaining
+   - When working with arrays or potentially undefined values, include appropriate null checks
+   - Use proper TypeScript type assertions only when necessary (using "as" syntax)
+
+   Remember that all subtypes in ${BOILERPLATE_ALIAS} are defined within the module ${BOILERPLATE_SUBTYPE_PREFIX}, 
+   so always access them using the prefix: ${BOILERPLATE_SUBTYPE_PREFIX}.TypeName
+
+**10. React Hooks Rules and Common Runtime Errors:**
+   Although your code may compile successfully, it can still fail at runtime due to React's specific rules. Pay particular attention to these React Hook rules:
+
+   - **Call Hooks Only at the Top Level**:
+     - Don't call Hooks inside loops, conditions, or nested functions
+     - Hooks must always be called in the same order on every render
+     - INCORRECT: \`if (condition) { const [state, setState] = React.useState(initialValue); }\`
+     - CORRECT: \`const [state, setState] = React.useState(initialValue); if (condition) { /* use state */ }\`
+
+   - **Conditional Rendering with Hooks**:
+     - When you need conditional rendering, put the condition in the JSX, not around hook calls
+     - INCORRECT: \`condition ? React.useEffect(() => {...}, []) : null;\`
+     - CORRECT: \`React.useEffect(() => { if (condition) {...} }, [condition]);\`
+
+   - **Consistent Hook Call Order**:
+     - Always call the same Hooks in the same order in every render
+     - INCORRECT: Using early returns before Hook calls
+     - CORRECT: Place all Hook calls before any conditional returns
+
+   - **Dependencies Array Management**:
+     - Always include all values referenced in effect callbacks in the dependencies array
+     - INCORRECT: \`React.useEffect(() => { console.log(value.count); }, []);\`
+     - CORRECT: \`React.useEffect(() => { console.log(value.count); }, [value.count]);\`
+
+   - **Derived State Without useEffect**:
+     - For values derived from props or state, calculate them directly in the render phase
+     - INCORRECT: \`useEffect\` to update one state based on changes to another state
+     - CORRECT: Calculate derived values directly during rendering
 `;
 
 export function prompt(context: PromptContext): string {
