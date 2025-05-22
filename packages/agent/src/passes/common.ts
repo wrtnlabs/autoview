@@ -6,8 +6,6 @@
  * ```typescript
  * export type AutoViewInput = ...;
  * ```
- *
- * PROMPT: This type name is bound to the prompt, so it should not be changed without proper prompt update.
  */
 export const BOILERPLATE_ALIAS = "AutoViewInput";
 
@@ -21,7 +19,5 @@ export const BOILERPLATE_ALIAS = "AutoViewInput";
  *   // ...
  * }
  * ```
- *
- * PROMPT: This prefix is bound to the prompt, so it should not be changed without proper prompt update.
  */
 export const BOILERPLATE_SUBTYPE_PREFIX = "AutoViewInputSubTypes";

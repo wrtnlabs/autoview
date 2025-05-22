@@ -1,4 +1,5 @@
 import { renderPrompt } from "../../core/Prompt";
+import { BOILERPLATE_ALIAS, BOILERPLATE_SUBTYPE_PREFIX } from "../common";
 
 export interface PromptContext {
   boilerplate: string;
@@ -13,8 +14,8 @@ You are an expert AI assistant tasked with generating a production-quality React
 
 **2. Input Data Specification:**
    - The data to be displayed will conform to a JSON schema, provided as TypeScript interfaces within the \`<boilerplate>\` section.
-   - The main data prop for the component will be named \`value\`, and its type, \`AutoViewInput\`, will be derived from this schema.
-   - All subtypes of the type \`AutoViewInput\` is defined within the module \`AutoViewInputSubTypes\`, so don't forget to access them by prefixing the module name like \`AutoViewInputSubTypes.\`;
+   - The main data prop for the component will be named \`value\`, and its type, \`${BOILERPLATE_ALIAS}\`, will be derived from this schema.
+   - All subtypes of the type \`${BOILERPLATE_ALIAS}\` is defined within the module \`${BOILERPLATE_SUBTYPE_PREFIX}\`, so don't forget to access them by prefixing the module name like \`${BOILERPLATE_SUBTYPE_PREFIX}.\`;
 
    <boilerplate>
    {{boilerplate}}
@@ -22,13 +23,13 @@ You are an expert AI assistant tasked with generating a production-quality React
 
 **3. Generated React Component Requirements:**
    The React component you generate must satisfy the following:
-   - **Name and Signature:** The component must always be named \`VisualComponent\` and default exported with the signature: \`export default function VisualComponent(value: AutoViewInput): React.ReactNode\`.
-   - **Data Acceptance:** Accept input data via the \`value\` prop, conforming to the \`AutoViewInput\` type.
+   - **Name and Signature:** The component must always be named \`VisualComponent\` and default exported with the signature: \`export default function VisualComponent(value: ${BOILERPLATE_ALIAS}): React.ReactNode\`.
+   - **Data Acceptance:** Accept input data via the \`value\` prop, conforming to the \`${BOILERPLATE_ALIAS}\` type.
    - **Data Transformation & Aggregation (If Beneficial):**
      - Implement internal logic to transform, aggregate, or derive new values from the input data if it enhances clarity or provides more insightful presentation.
-     - *Example 1 (Derived Full Name):* If \`AutoViewInput\` contains \`firstName: string\` and \`lastName: string\`, create and display a combined \`fullName\` (e.g., \`const fullName = \`\${value.firstName} \${value.lastName}\`;\`).
-     - *Example 2 (Calculated Summary):* If \`AutoViewInput\` has \`transactions: { amount: number }[]\`, you might calculate and display \`totalSpent\` or \`averageTransactionAmount\`.
-     - *Example 3 (Status Mapping):* If \`AutoViewInput\` has \`status: 0\` (where 0 means 'Pending', 1 means 'Active'), transform this into a human-readable string like 'Pending'.
+     - *Example 1 (Derived Full Name):* If \`${BOILERPLATE_ALIAS}\` contains \`firstName: string\` and \`lastName: string\`, create and display a combined \`fullName\` (e.g., \`const fullName = \`\${value.firstName} \${value.lastName}\`;\`).
+     - *Example 2 (Calculated Summary):* If \`${BOILERPLATE_ALIAS}\` has \`transactions: { amount: number }[]\`, you might calculate and display \`totalSpent\` or \`averageTransactionAmount\`.
+     - *Example 3 (Status Mapping):* If \`${BOILERPLATE_ALIAS}\` has \`status: 0\` (where 0 means 'Pending', 1 means 'Active'), transform this into a human-readable string like 'Pending'.
    - **Selective and Purposeful Display:**
      - Render a visual output that includes only feasible, informative, and user-relevant properties.
      - Recognize that the input schema may originate from server responses and could contain internal IDs, verbose metadata, or non-essential properties. Critically evaluate and filter these out.
@@ -82,7 +83,7 @@ You are an expert AI assistant tasked with generating a production-quality React
 
    <component>
    // The component name must always be "VisualComponent"
-   export default function VisualComponent(value: AutoViewInput): React.ReactNode {
+   export default function VisualComponent(value: ${BOILERPLATE_ALIAS}): React.ReactNode {
      // 1. Define data aggregation/transformation functions or derived constants if necessary.
      //    (e.g., const displayName = \`\${value.firstName} \${value.lastName}\`;)
      //    (e.g., const formattedDate = new Date(value.timestamp).toLocaleDateString(...);)
