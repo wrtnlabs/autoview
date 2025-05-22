@@ -1,4 +1,4 @@
-import LucideReact from "lucide-react";
+import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
 import { tags } from "typia";
 
