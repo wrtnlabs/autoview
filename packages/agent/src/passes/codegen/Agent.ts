@@ -3,12 +3,13 @@ import { Driver, WorkerConnector } from "tgrid";
 import { is_node } from "tstl";
 
 import { AgentBase, LlmFailure, LlmProxy } from "../../core";
+import { BOILERPLATE_ALIAS, BOILERPLATE_SUBTYPE_PREFIX } from "../common";
 import { Input, Output } from "./dto";
 import { prompt } from "./prompt";
 
-const BOILERPLATE_ALIAS = "AutoViewInput";
-const BOILERPLATE_SUBTYPE_PREFIX = "AutoViewInputSubTypes";
-
+/**
+ * The agent for the code generation pass. This agent is responsible for generating the final React component code from the context.
+ */
 export class Agent implements AgentBase<Input, Output> {
   private worker: WorkerConnector<null, null, IAutoViewCompilerService> | null =
     null;
@@ -78,6 +79,16 @@ export class Agent implements AgentBase<Input, Output> {
   }
 }
 
+/**
+ * A high-order function for handling the text output from the LLM.
+ *
+ * The returned function extracts the component code from the text output and then compiles the component.
+ *
+ * It will throw `LlmFailure` if the component code is not found or the component code is invalid, so the LLM will be retried.
+ *
+ * @param service - The service for the code generation.
+ * @returns The function for handling the text output.
+ */
 function handleText(
   service: Driver<IAutoViewCompilerService, false>,
 ): (input: Input, text: string) => Promise<Output> {
@@ -132,6 +143,22 @@ interface TextOutput {
   component: string;
 }
 
+/**
+ * Parse the output text to the text output.
+ *
+ * This function expects the output text is formatted as follows:
+ *
+ * ```xml
+ * <component>
+ *   ...
+ * </component>
+ * ```
+ *
+ * PROMPT: This format is bound to the prompt, so it should not be changed without proper prompt update.
+ *
+ * @param text - The output text.
+ * @returns The parsed text output, including the component code.
+ */
 function parseOutput(text: string): TextOutput {
   const component = text.match(/<component>([\s\S]*?)<\/component>/);
 

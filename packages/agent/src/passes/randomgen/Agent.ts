@@ -6,9 +6,13 @@ import { is_node } from "tstl";
 import typia from "typia";
 
 import { AgentBase, LlmFailure, LlmProxy } from "../../core";
+import { BOILERPLATE_ALIAS, BOILERPLATE_SUBTYPE_PREFIX } from "../common";
 import { Input, Output } from "./dto";
 import { prompt } from "./prompt";
 
+/**
+ * The agent for the random data generation pass. This agent is responsible for generating the realistic mock data that matches with the input schema.
+ */
 export class Agent implements AgentBase<Input, Output> {
   private worker: WorkerConnector<null, null, IAutoViewCompilerService> | null =
     null;
@@ -40,8 +44,8 @@ export class Agent implements AgentBase<Input, Output> {
     });
 
     const boilerplate = await service.generateBoilerplateForReactComponent(
-      "AutoViewInput",
-      "AutoViewInputSubTypes",
+      BOILERPLATE_ALIAS,
+      BOILERPLATE_SUBTYPE_PREFIX,
     );
     const systemPrompt = prompt({
       boilerplate,
@@ -77,6 +81,17 @@ export class Agent implements AgentBase<Input, Output> {
   }
 }
 
+/**
+ * Handles the text output from the LLM.
+ *
+ * This function extracts the mock data from the text output and then validates the mock data with the input schema.
+ *
+ * It will throw `LlmFailure` if the mock data is not valid, so the LLM will be retried.
+ *
+ * @param input - The input of the pass.
+ * @param text - The text output from the LLM.
+ * @returns The output of the pass, a mock data.
+ */
 function handleText(input: Input, text: string): Output {
   const output = parseOutput(text);
 
@@ -93,7 +108,7 @@ function handleText(input: Input, text: string): Output {
 
   if (!result.success) {
     throw new LlmFailure(
-      `the mock data you've generated is not match with the type \`AutoViewInput\`; analyze the type again with the errors and try again: \n\n<error>\n${JSON.stringify(
+      `the mock data you've generated is not match with the type \`${BOILERPLATE_ALIAS}\`; analyze the type again with the errors and try again: \n\n<error>\n${JSON.stringify(
         result.errors,
         null,
         2,
@@ -107,9 +122,25 @@ function handleText(input: Input, text: string): Output {
 }
 
 interface TextOutput {
-  mock_data: any;
+  mock_data: unknown;
 }
 
+/**
+ * Parses the text output from the LLM.
+ *
+ * This function expects the output text is formatted as follows:
+ *
+ * ```xml
+ * <mock_data>
+ *   ...
+ * </mock_data>
+ * ```
+ *
+ * PROMPT: This format is bound to the prompt, so it should not be changed without proper prompt update.
+ *
+ * @param text - The text output from the LLM.
+ * @returns The parsed text output, including the mock data.
+ */
 function parseOutput(text: string): TextOutput {
   const mockData = text.match(/<mock_data>([\s\S]*?)<\/mock_data>/);
 
@@ -134,6 +165,18 @@ function parseOutput(text: string): TextOutput {
   }
 }
 
+/**
+ * Remove the invalid patterns from the schema and components.
+ *
+ * Since the `OpenApiValidator` expects valid regex patterns for `pattern` property of `string` type,
+ * this function must be called before using the schema with the `OpenApiValidator`.
+ *
+ * This function returns a copy of the schema and components with the invalid patterns removed.
+ *
+ * @param schema - The schema to remove the invalid patterns from.
+ * @param components - The components to remove the invalid patterns from.
+ * @returns The sanitized schema and components.
+ */
 function removeInvalidPattern(
   schema: OpenApi.IJsonSchema,
   components: OpenApi.IComponents,
