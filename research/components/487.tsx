@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Organization roles
      *
      * @title Organization Role
     */
-    export type organization_role = {
+    export interface organization_role {
         /**
          * The unique identifier of the role.
         */
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
          * The date and time the role was last updated.
         */
         updated_at: string;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -78,86 +79,108 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_role;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    name,
-    description,
-    base_role,
-    source,
-    permissions,
-    organization,
-    created_at,
-    updated_at,
-  } = value;
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
 
-  const formattedCreatedAt = new Date(created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const formattedCreatedAt = formatDate(value.created_at);
+  const formattedUpdatedAt = formatDate(value.updated_at);
 
-  const formattedUpdatedAt = new Date(updated_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const maxPermissionsToShow = 5;
+  const displayedPermissions = value.permissions.slice(0, maxPermissionsToShow);
+  const remainingPermissionsCount = value.permissions.length - displayedPermissions.length;
 
-  const permissionsToShow = permissions.slice(0, 3);
-  const extraPermissionsCount = permissions.length - permissionsToShow.length;
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const org = value.organization;
+  const orgLogin = org?.login ?? '';
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    orgLogin,
+  )}&background=random`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
+    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Role Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-gray-800 truncate">{value.name}</h2>
+        {value.base_role && (
+          <div className="flex items-center text-sm text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded">
+            <LucideReact.Shield size={16} className="mr-1" />
+            <span className="uppercase">{value.base_role}</span>
+          </div>
+        )}
+      </div>
 
-      {description && (
-        <p className="mt-2 text-gray-700 text-sm line-clamp-2">{description}</p>
+      {/* Description */}
+      {value.description && (
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{value.description}</p>
       )}
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {base_role && (
-          <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-            {capitalize(base_role)} Role
-          </span>
-        )}
-        {source && (
-          <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-            {source}
-          </span>
-        )}
-        {permissionsToShow.map((perm) => (
-          <span
-            key={perm}
-            className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded"
-          >
-            {perm}
-          </span>
-        ))}
-        {extraPermissionsCount > 0 && (
-          <span className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded">
-            +{extraPermissionsCount} more
-          </span>
-        )}
+      {/* Metadata Grid */}
+      <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-500">
+        {/* Source */}
+        <div className="flex items-center">
+          <LucideReact.Tag size={16} className="mr-1" />
+          <span>{value.source ?? '—'}</span>
+        </div>
+        {/* Organization */}
+        <div className="flex items-center">
+          <LucideReact.User size={16} className="mr-1" />
+          <span>{orgLogin || '—'}</span>
+        </div>
+        {/* Created At */}
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>{formattedCreatedAt}</span>
+        </div>
+        {/* Updated At */}
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>{formattedUpdatedAt}</span>
+        </div>
       </div>
 
-      <div className="mt-4 flex flex-col sm:flex-row sm:justify-between text-xs text-gray-500">
-        <span>Created: {formattedCreatedAt}</span>
-        <span className="mt-1 sm:mt-0">Updated: {formattedUpdatedAt}</span>
-      </div>
-
-      {organization && (
-        <div className="mt-4 flex items-center">
+      {/* Organization Avatar */}
+      {org && (
+        <div className="flex items-center mb-4">
           <img
-            src={organization.avatar_url}
-            alt={`${organization.login} avatar`}
-            className="w-6 h-6 rounded-full mr-2"
+            src={org.avatar_url}
+            alt={`${orgLogin} avatar`}
+            className="w-8 h-8 rounded-full object-cover mr-2"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = avatarPlaceholder;
+            }}
           />
-          <span className="text-sm text-gray-600 truncate">
-            {organization.login}
-          </span>
+          <span className="text-gray-700 text-sm">{org.name ?? orgLogin}</span>
         </div>
       )}
+
+      {/* Permissions */}
+      <div>
+        <h3 className="text-gray-800 font-medium text-sm mb-2">Permissions</h3>
+        {value.permissions.length === 0 ? (
+          <div className="text-gray-400 text-sm">No permissions assigned</div>
+        ) : (
+          <div className="flex flex-wrap gap-2">
+            {displayedPermissions.map((perm) => (
+              <span
+                key={perm}
+                className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
+              >
+                {perm}
+              </span>
+            ))}
+            {remainingPermissionsCount > 0 && (
+              <span className="text-gray-500 text-xs self-center">
+                +{remainingPermissionsCount} more
+              </span>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace open {
-        export type ChatBasedUserChatsView = {
+        export interface ChatBasedUserChatsView {
             prev?: string;
             next?: string;
             messages?: AutoViewInputSubTypes.Message[];
@@ -11,9 +12,9 @@ export namespace AutoViewInputSubTypes {
             users?: AutoViewInputSubTypes.user.User[];
             managers?: AutoViewInputSubTypes.Manager[];
             chatTags?: AutoViewInputSubTypes.ChatTag[];
-        };
+        }
     }
-    export type Message = {
+    export interface Message {
         chatKey: string;
         id: string;
         mainKey?: string;
@@ -58,15 +59,15 @@ export namespace AutoViewInputSubTypes {
         removedByWriter?: boolean;
         threadRoot?: boolean;
         meetRoot?: boolean;
-    };
+    }
     export namespace message {
-        export type Block = {
+        export interface Block {
             type: "bullets" | "code" | "text";
             language?: string;
             value?: string;
             blocks?: AutoViewInputSubTypes.message.Block[];
-        };
-        export type MessageThread = {
+        }
+        export interface MessageThread {
             id?: string;
             managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
             repliedManagerIds?: string[] & tags.UniqueItems;
@@ -74,9 +75,9 @@ export namespace AutoViewInputSubTypes {
             chatType?: string;
             chatId?: string;
             rootMessageId?: string;
-        };
+        }
         export namespace meet {
-            export type MessageMeet = {
+            export interface MessageMeet {
                 id?: string;
                 chatType?: string;
                 channelId?: string;
@@ -92,8 +93,8 @@ export namespace AutoViewInputSubTypes {
                 meetEndedAt?: number;
                 managerIds?: string[] & tags.UniqueItems;
                 meetType?: "front" | "call" | "team";
-            };
-            export type Call = {
+            }
+            export interface Call {
                 id?: string;
                 from?: string & tags.Default<"+18004424000">;
                 to?: string & tags.Default<"+18004424000">;
@@ -107,16 +108,16 @@ export namespace AutoViewInputSubTypes {
                 missedHandledAt?: number;
                 voiceMail?: boolean;
                 userPhoneNumberType?: "mobileNumber" | "landlineNumber";
-            };
-            export type Front = {
+            }
+            export interface Front {
                 id?: string;
                 direction?: "inbound" | "outbound";
                 missedReason?: "notInOperation" | "userLeft" | "ringTimeOver" | "inboundRateLimit" | "noOperator" | "exceededQueue" | "abandonedInQueue" | "workflow" | "preservedNumber" | "unregisteredNumber" | "blockedUser";
                 engagedAt?: number;
                 firstWaitingStartedAt?: number;
                 missedHandledAt?: number;
-            };
-            export type Recording = {
+            }
+            export interface Recording {
                 id: string;
                 bucket: string;
                 key: string;
@@ -128,9 +129,9 @@ export namespace AutoViewInputSubTypes {
                 channelId?: string;
                 chatType?: string;
                 chatId?: string;
-            };
+            }
         }
-        export type Button = {
+        export interface Button {
             title: string;
             colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
             action: AutoViewInputSubTypes.message.action.Action;
@@ -138,15 +139,16 @@ export namespace AutoViewInputSubTypes {
              * @deprecated
             */
             url?: string;
-        };
+        }
         export namespace action {
-            export type Action = {
+            export interface Action {
                 attributes?: AutoViewInputSubTypes.message.action.Attributes;
                 type: string;
-            };
-            export type Attributes = {};
+            }
+            export interface Attributes {
+            }
         }
-        export type File = {
+        export interface File {
             id: string;
             type?: string;
             name: string;
@@ -163,8 +165,8 @@ export namespace AutoViewInputSubTypes {
             channelId?: string;
             chatType?: string;
             chatId?: string;
-        };
-        export type WebPage = {
+        }
+        export interface WebPage {
             id: string;
             url: string;
             title?: string;
@@ -179,24 +181,24 @@ export namespace AutoViewInputSubTypes {
             previewKey?: string;
             logo?: string;
             name?: string;
-        };
-        export type Log = {
+        }
+        export interface Log {
             action?: "changeName" | "changeScope" | "close" | "autoClose" | "create" | "invite" | "join" | "assign" | "autoAssign" | "unassign" | "leave" | "open" | "autoOpen" | "enqueue" | "remove" | "snooze" | "addTags" | "removeTags" | "assignTeam" | "unassignTeam" | "joinMeet" | "leaveMeet" | "inviteMeet" | "missMeet" | "callbackMeet" | "processBranch" | "sendXms" | "addUserTags" | "removeUserTags" | "updatePriority" | "startWorkflow" | "endWorkflow" | "interruptWorkflow" | "interruptWorkflowByBot" | "tryOpenWithAlf";
             values?: string[];
             triggerType?: string;
             triggerId?: string;
-        };
-        export type Reaction = {
+        }
+        export interface Reaction {
             emojiName: string;
             personKeys?: string[] & tags.UniqueItems;
-        };
+        }
         export namespace form {
-            export type Form = {
+            export interface Form {
                 submittedAt?: number;
                 inputs?: AutoViewInputSubTypes.message.form.FormInput[];
                 type: string;
-            };
-            export type FormInput = {
+            }
+            export interface FormInput {
                 value?: {};
                 readOnly?: boolean;
                 type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
@@ -205,63 +207,63 @@ export namespace AutoViewInputSubTypes {
                 dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
                 userChatProfileBindingKey?: boolean;
                 userProfileBindingKey?: boolean;
-            };
+            }
         }
         export namespace userchat {
-            export type MessageMarketing = {
+            export interface MessageMarketing {
                 type?: string;
                 id?: string;
                 advertising?: boolean;
                 sendToOfflineXms?: boolean;
                 sendToOfflineEmail?: boolean;
                 exposureType?: "fullScreen";
-            };
+            }
             /**
              * @deprecated
             */
-            export type MessageSupportBot = {
+            export interface MessageSupportBot {
                 id?: string;
                 revisionId?: string;
                 sectionId?: string;
                 stepIndex?: number & tags.Type<"int32">;
                 buttons?: AutoViewInputSubTypes.supportbot.SupportBotRouteSection_dollar_Button[];
                 submitButtonIndex?: number & tags.Type<"int32">;
-            };
-            export type MessageWorkflow = {
+            }
+            export interface MessageWorkflow {
                 id?: string;
                 revisionId?: string;
                 sectionId?: string;
                 actionIndex?: number & tags.Type<"int32">;
                 submitButtonId?: string;
                 buttonBotMessage?: boolean;
-            };
+            }
         }
         export namespace alf {
-            export type MessageAlf = {
+            export interface MessageAlf {
                 type?: "complete" | "rag" | "incomplete" | "impossible" | "command" | "faq" | "failed" | "rateLimited" | "openUserChat" | "system";
                 references?: AutoViewInputSubTypes.message.alf.Reference[];
                 mentionAlfAnswered?: boolean;
-            };
-            export type Reference = {
+            }
+            export interface Reference {
                 index?: string;
                 type: string;
-            };
+            }
         }
     }
     export namespace supportbot {
-        export type SupportBotRouteSection_dollar_Button = {
+        export interface SupportBotRouteSection_dollar_Button {
             text: string;
             nextSectionId: string;
-        };
+        }
     }
     export namespace meet {
         export namespace ivr {
-            export type MessageIvr = {
+            export interface MessageIvr {
                 audioFile?: AutoViewInputSubTypes.message.File;
-            };
+            }
         }
     }
-    export type ChatSession = {
+    export interface ChatSession {
         key?: string;
         chatId?: string;
         teamChatSectionId?: string;
@@ -283,9 +285,9 @@ export namespace AutoViewInputSubTypes {
         chatType?: string;
         personType?: string;
         personId?: string;
-    };
+    }
     export namespace userchat {
-        export type UserChat = {
+        export interface UserChat {
             id?: string;
             channelId?: string;
             alfStateKey?: string;
@@ -351,52 +353,53 @@ export namespace AutoViewInputSubTypes {
             version?: number & tags.Type<"int32">;
             lastInboundEmailId?: string;
             alfRequestedAt?: number;
-        };
-        export namespace handling {
-            export type UserChatHandling = {
-                type: string;
-            };
         }
-        export type UserChatSource = {
+        export namespace handling {
+            export interface UserChatHandling {
+                type: string;
+            }
+        }
+        export interface UserChatSource {
             page?: string;
             marketing?: AutoViewInputSubTypes.userchat.UserChatSource_dollar_Marketing;
             supportBot?: AutoViewInputSubTypes.userchat.UserChatSource_dollar_SupportBot;
             workflow?: AutoViewInputSubTypes.userchat.UserChatSource_dollar_Workflow;
             appMessenger?: AutoViewInputSubTypes.userchat.UserChatSource_dollar_AppMessenger;
-        };
-        export type UserChatSource_dollar_Marketing = {
+        }
+        export interface UserChatSource_dollar_Marketing {
             id?: string;
             type?: string;
-        };
-        export type UserChatSource_dollar_SupportBot = {
+        }
+        export interface UserChatSource_dollar_SupportBot {
             id?: string;
             revisionId?: string;
             sectionPath?: string[];
-        };
-        export type UserChatSource_dollar_Workflow = {
+        }
+        export interface UserChatSource_dollar_Workflow {
             id?: string;
             revisionId?: string;
             traceId?: string;
             sectionPath?: string[];
             causeOfEnd?: string;
-        };
-        export type UserChatSource_dollar_AppMessenger = {
+        }
+        export interface UserChatSource_dollar_AppMessenger {
             id?: string;
             mediumType?: string;
             displayName?: string;
-        };
+        }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
+    }
+    export interface Operator {
+    }
     export namespace user {
-        export type User = {
+        export interface User {
             id?: string;
             channelId?: string;
             memberId?: string;
@@ -447,14 +450,14 @@ export namespace AutoViewInputSubTypes {
             landlineNumber?: string & tags.Default<"+18004424000">;
             constrainted?: boolean;
             systemLanguage?: string & tags.Default<"en">;
-        };
+        }
     }
     export namespace profile {
-        export type UserProfile = {
+        export interface UserProfile {
             [key: string]: {};
-        };
+        }
     }
-    export type WebInfo = {
+    export interface WebInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -462,8 +465,8 @@ export namespace AutoViewInputSubTypes {
         browserName?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type MobileInfo = {
+    }
+    export interface MobileInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -473,8 +476,8 @@ export namespace AutoViewInputSubTypes {
         sdkVersion?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type Manager = {
+    }
+    export interface Manager {
         id?: string;
         channelId?: string;
         accountId?: string;
@@ -539,18 +542,18 @@ export namespace AutoViewInputSubTypes {
         meetOperator?: boolean;
         emailForFront?: string;
         mobileNumberForFront?: string & tags.Default<"+18004424000">;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
-    export type ChatTag = {
+    }
+    export interface ChatTag {
         id?: string;
         channelId?: string;
         colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
@@ -562,7 +565,7 @@ export namespace AutoViewInputSubTypes {
         */
         followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
         createdAt?: number;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.open.ChatBasedUserChatsView;
 
@@ -571,95 +574,110 @@ export type AutoViewInput = AutoViewInputSubTypes.open.ChatBasedUserChatsView;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const messageCount: number = value.messages?.length ?? 0;
-  const sessionCount: number = value.sessions?.length ?? 0;
-  const userChatCount: number = value.userChats?.length ?? 0;
-  const userCount: number = value.users?.length ?? 0;
-  const managerCount: number = value.managers?.length ?? 0;
-  const tagCount: number = value.chatTags?.length ?? 0;
+  const messageCount = value.messages?.length ?? 0;
+  const sessionCount = value.sessions?.length ?? 0;
+  const userChatCount = value.userChats?.length ?? 0;
+  const userCount = value.users?.length ?? 0;
+  const managerCount = value.managers?.length ?? 0;
+  const tagCount = value.chatTags?.length ?? 0;
 
-  // Prepare a small preview of users and chats
-  const previewUsers = (value.users ?? []).slice(0, 3);
-  const extraUserCount = (value.users?.length ?? 0) - previewUsers.length;
-  const previewChats = (value.userChats ?? []).slice(0, 3);
-  const extraChatCount = (value.userChats?.length ?? 0) - previewChats.length;
+  // Get the three most recent messages with text
+  const recentMessages = (value.messages ?? [])
+    .filter((msg) => typeof msg.plainText === "string" && msg.plainText.trim() !== "")
+    .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+    .slice(0, 3);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <section className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Chat Overview</h2>
-      </header>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
+      {/* Header */}
+      <h3 className="flex items-center text-xl font-semibold text-gray-800">
+        <LucideReact.Activity className="mr-2 text-indigo-500" size={20} />
+        Chat Overview
+      </h3>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-500">Messages</span>
-          <span className="mt-1 text-2xl font-bold text-gray-900">{messageCount}</span>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="flex items-center space-x-2">
+          <LucideReact.MessageSquare className="text-blue-500" size={24} />
+          <div>
+            <div className="text-sm text-gray-500">Messages</div>
+            <div className="text-lg font-medium text-gray-900">{messageCount}</div>
+          </div>
         </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-500">Sessions</span>
-          <span className="mt-1 text-2xl font-bold text-gray-900">{sessionCount}</span>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Activity className="text-indigo-500" size={24} />
+          <div>
+            <div className="text-sm text-gray-500">Sessions</div>
+            <div className="text-lg font-medium text-gray-900">{sessionCount}</div>
+          </div>
         </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-500">User Chats</span>
-          <span className="mt-1 text-2xl font-bold text-gray-900">{userChatCount}</span>
+        <div className="flex items-center space-x-2">
+          <LucideReact.MessageCircle className="text-purple-500" size={24} />
+          <div>
+            <div className="text-sm text-gray-500">User Chats</div>
+            <div className="text-lg font-medium text-gray-900">{userChatCount}</div>
+          </div>
         </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-500">Users</span>
-          <span className="mt-1 text-2xl font-bold text-gray-900">{userCount}</span>
+        <div className="flex items-center space-x-2">
+          <LucideReact.User className="text-green-500" size={24} />
+          <div>
+            <div className="text-sm text-gray-500">Users</div>
+            <div className="text-lg font-medium text-gray-900">{userCount}</div>
+          </div>
         </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-500">Managers</span>
-          <span className="mt-1 text-2xl font-bold text-gray-900">{managerCount}</span>
+        <div className="flex items-center space-x-2">
+          <LucideReact.UserCheck className="text-yellow-500" size={24} />
+          <div>
+            <div className="text-sm text-gray-500">Managers</div>
+            <div className="text-lg font-medium text-gray-900">{managerCount}</div>
+          </div>
         </div>
-        <div className="flex flex-col items-center">
-          <span className="text-sm text-gray-500">Tags</span>
-          <span className="mt-1 text-2xl font-bold text-gray-900">{tagCount}</span>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Tag className="text-pink-500" size={24} />
+          <div>
+            <div className="text-sm text-gray-500">Tags</div>
+            <div className="text-lg font-medium text-gray-900">{tagCount}</div>
+          </div>
         </div>
       </div>
 
-      {(previewUsers.length > 0) && (
-        <div className="mt-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Active Users</h3>
-          <ul className="flex space-x-3">
-            {previewUsers.map((u, idx) => (
-              <li key={idx} className="text-sm text-gray-800 truncate">
-                {u.name ?? u.memberId ?? u.id ?? '—'}
+      {/* Recent Messages */}
+      <div>
+        <h4 className="mb-2 text-md font-semibold text-gray-700">Recent Messages</h4>
+        {recentMessages.length > 0 ? (
+          <ul className="space-y-3">
+            {recentMessages.map((msg) => (
+              <li
+                key={msg.id}
+                className="flex space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <LucideReact.MessageSquare className="mt-1 text-gray-400" size={20} />
+                <div className="flex-1">
+                  <p className="text-sm text-gray-800 line-clamp-2">{msg.plainText}</p>
+                  <div className="mt-1 flex items-center text-xs text-gray-500">
+                    <LucideReact.Calendar className="mr-1" size={12} />
+                    {msg.createdAt
+                      ? new Date(msg.createdAt).toLocaleString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "Unknown time"}
+                  </div>
+                </div>
               </li>
             ))}
-            {extraUserCount > 0 && (
-              <li className="text-sm text-gray-500">+{extraUserCount} more</li>
-            )}
           </ul>
-        </div>
-      )}
-
-      {(previewChats.length > 0) && (
-        <div className="mt-6">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Recent Chats</h3>
-          <ul className="space-y-1">
-            {previewChats.map((c, idx) => (
-              <li key={idx} className="text-sm text-gray-800 truncate">
-                {c.title ?? c.name ?? c.id ?? '—'}
-              </li>
-            ))}
-            {extraChatCount > 0 && (
-              <li className="text-sm text-gray-500">+{extraChatCount} more</li>
-            )}
-          </ul>
-        </div>
-      )}
-
-      {(value.prev || value.next) && (
-        <footer className="mt-6 flex justify-between text-sm text-gray-500">
-          <span>
-            {value.prev ? '← Previous Page' : 'No Previous Page'}
-          </span>
-          <span>
-            {value.next ? 'Next Page →' : 'No Next Page'}
-          </span>
-        </footer>
-      )}
-    </section>
+        ) : (
+          <div className="flex items-center justify-center py-6 text-gray-400">
+            <LucideReact.AlertCircle className="mr-2" size={24} />
+            No messages available
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

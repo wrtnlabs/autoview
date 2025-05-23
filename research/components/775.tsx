@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Comments provide a way for people to collaborate on an issue.
      *
      * @title Issue Comment
     */
-    export type issue_comment = {
+    export interface issue_comment {
         /**
          * Unique identifier of the issue comment
         */
@@ -30,7 +31,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -82,7 +83,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -110,12 +111,71 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -126,7 +186,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue_comment[];
 
@@ -136,90 +196,96 @@ export type AutoViewInput = AutoViewInputSubTypes.issue_comment[];
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const comments = Array.isArray(value) ? value : [];
-
-  const formatDate = (dateStr: string): string =>
-    new Date(dateStr).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
     });
 
-  const formatAssociation = (assoc: string): string =>
-    assoc
-      .toLowerCase()
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-
-  const reactionEmojis: Record<string, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    eyes: "👀",
-    rocket: "🚀",
-  };
-
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
     <div className="space-y-4">
       {comments.map((comment) => {
-        const author = comment.user;
-        const content = comment.body_text ?? comment.body ?? "";
-        const hasReactions = comment.reactions && Object.values(comment.reactions).some((n) => typeof n === "number" && n > 0);
+        const user = comment.user;
+        const displayName = user?.name ?? user?.login ?? "Unknown";
+        const avatarUrl =
+          user?.avatar_url ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            displayName,
+          )}&background=0D8ABC&color=fff`;
+        const created = comment.created_at
+          ? formatDate(comment.created_at)
+          : "";
+        const bodyText = comment.body_text ?? comment.body ?? "";
 
         return (
-          <div key={comment.id} className="p-4 bg-white rounded-lg shadow-sm">
-            <div className="flex items-start space-x-3">
+          <article
+            key={comment.id}
+            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          >
+            <header className="flex items-center space-x-3">
               <img
-                src={author?.avatar_url || ""}
-                alt={author?.login ? `${author.login} avatar` : "avatar"}
-                className="w-10 h-10 rounded-full object-cover bg-gray-100"
+                src={avatarUrl}
+                alt={displayName}
+                className="w-8 h-8 rounded-full object-cover"
+                onError={({ currentTarget }) => {
+                  currentTarget.onerror = null;
+                  currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    displayName,
+                  )}&background=0D8ABC&color=fff`;
+                }}
               />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900 truncate">
-                    {author?.login || "Unknown User"}
-                  </h4>
-                  <time className="text-xs text-gray-500">
-                    {formatDate(comment.created_at)}
-                  </time>
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-gray-900">
+                  {displayName}
+                </span>
+                <div className="flex items-center text-xs text-gray-500">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  <time dateTime={comment.created_at}>{created}</time>
+                  {comment.author_association && (
+                    <span className="ml-2 px-1.5 py-0.5 bg-gray-100 text-gray-600 text-[10px] rounded">
+                      {comment.author_association
+                        .toLowerCase()
+                        .replace(/_/g, " ")}
+                    </span>
+                  )}
                 </div>
-                {comment.author_association && (
-                  <span className="mt-1 inline-block px-2 py-0.5 text-xs font-medium text-blue-600 bg-blue-100 rounded">
-                    {formatAssociation(comment.author_association)}
-                  </span>
+              </div>
+            </header>
+            <p className="mt-2 text-gray-700 text-sm line-clamp-3">
+              {bodyText}
+            </p>
+            {comment.reactions && comment.reactions.total_count > 0 && (
+              <div className="mt-3 flex items-center space-x-4 text-gray-500 text-sm">
+                <div className="flex items-center gap-1">
+                  <LucideReact.ThumbsUp size={16} />
+                  <span>{comment.reactions["+1"]}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Heart size={16} className="text-pink-500" />
+                  <span>{comment.reactions.heart}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Laugh size={16} className="text-yellow-500" />
+                  <span>{comment.reactions.laugh}</span>
+                </div>
+                {comment.reactions.total_count >
+                  comment.reactions["+1"] +
+                    comment.reactions.heart +
+                    comment.reactions.laugh && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Smile size={16} />
+                    <span>{comment.reactions.total_count -
+                      (comment.reactions["+1"] +
+                        comment.reactions.heart +
+                        comment.reactions.laugh)}</span>
+                  </div>
                 )}
               </div>
-            </div>
-            {content && (
-              <p className="mt-3 text-sm text-gray-700 line-clamp-3">
-                {content}
-              </p>
             )}
-            {hasReactions && comment.reactions && (
-              <div className="mt-3 flex flex-wrap items-center space-x-4 text-xs text-gray-600">
-                {Object.entries(comment.reactions)
-                  .filter(([key, value]) => key in reactionEmojis && typeof value === "number" && value > 0)
-                  .map(([key, value]) => (
-                    <span key={key} className="flex items-center space-x-1">
-                      <span>{reactionEmojis[key]}</span>
-                      <span>{value as number}</span>
-                    </span>
-                  ))}
-              </div>
-            )}
-          </div>
+          </article>
         );
       })}
-      {comments.length === 0 && (
-        <div className="py-6 text-center text-gray-500">
-          No comments to display.
-        </div>
-      )}
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A page.
      *
      * Collection of records with pagination indformation.
     */
-    export type IPageIShoppingSection = {
+    export interface IPageIShoppingSection {
         /**
          * Page information.
          *
@@ -19,12 +20,12 @@ export namespace AutoViewInputSubTypes {
          * @title List of records
         */
         data: AutoViewInputSubTypes.IShoppingSection[];
-    };
+    }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -51,7 +52,7 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     /**
      * Section information.
@@ -68,7 +69,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -93,7 +94,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSection;
 
@@ -102,76 +103,69 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSection;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { pagination, data: sections } = value;
-  const { current, limit, records, pages } = pagination;
+  const {
+    pagination: { current, limit, records, pages },
+    data,
+  } = value;
 
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-
-  const formattedRecords = records.toLocaleString();
-  const formattedLimit = limit.toLocaleString();
+  const firstItem = records === 0 ? 0 : (current - 1) * limit + 1;
+  const lastItem = Math.min(current * limit, records);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Shopping Sections</h2>
-        <p className="mt-1 text-sm text-gray-600">
-          Page{" "}
-          <span className="font-medium text-gray-800">
-            {current} / {pages}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Pagination Summary */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+        <div className="flex items-center text-sm text-gray-600 gap-1">
+          <LucideReact.ListOrdered size={16} className="text-gray-400" aria-hidden="true" />
+          <span>
+            Showing {firstItem}&ndash;{lastItem} of {records} records
           </span>
-          {" · "}
-          <span className="font-medium text-gray-800">
-            {formattedRecords} records
+        </div>
+        <div className="flex items-center text-sm text-gray-600 gap-1 mt-2 md:mt-0">
+          <LucideReact.ChevronsLeft size={16} className="text-gray-400" aria-hidden="true" />
+          <span>
+            Page {current} of {pages}
           </span>
-          {" · "}
-          <span className="font-medium text-gray-800">
-            {formattedLimit} per page
-          </span>
-        </p>
-      </header>
+          <LucideReact.ChevronsRight size={16} className="text-gray-400" aria-hidden="true" />
+        </div>
+      </div>
 
+      {/* Data Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full text-left text-sm">
           <thead className="bg-gray-50">
             <tr>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide"
-              >
-                Name
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide"
-              >
-                Code
-              </th>
-              <th
-                scope="col"
-                className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide"
-              >
-                Created At
-              </th>
+              <th className="px-4 py-2 font-medium text-gray-700">Code</th>
+              <th className="px-4 py-2 font-medium text-gray-700">Name</th>
+              <th className="px-4 py-2 font-medium text-gray-700">Created At</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {sections.map((section) => (
-              <tr key={section.id}>
-                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-800">
-                  {section.name}
+          <tbody>
+            {data.map((section) => (
+              <tr key={section.id} className="border-t">
+                <td className="px-4 py-2">
+                  <div className="flex items-center gap-2 truncate">
+                    <LucideReact.Hash size={16} className="text-gray-400" aria-hidden="true" />
+                    <span className="truncate">{section.code}</span>
+                  </div>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
-                  {section.code}
+                <td className="px-4 py-2">
+                  <span className="font-medium text-gray-800 truncate">{section.name}</span>
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
-                  {formatDate(section.created_at)}
+                <td className="px-4 py-2">
+                  <div className="flex items-center gap-2">
+                    <LucideReact.Calendar size={16} className="text-gray-400" aria-hidden="true" />
+                    <time
+                      dateTime={section.created_at}
+                      className="text-gray-600"
+                    >
+                      {new Date(section.created_at).toLocaleString(undefined, {
+                        dateStyle: 'medium',
+                        timeStyle: 'short',
+                      })}
+                    </time>
+                  </div>
                 </td>
               </tr>
             ))}

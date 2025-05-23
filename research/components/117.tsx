@@ -1,4 +1,5 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Section information.
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 
@@ -49,26 +50,28 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const { name, code, created_at } = value;
+  const formattedDate = new Date(created_at).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between">
-        <h2 className="flex-1 text-lg font-semibold text-gray-800 truncate">
-          {value.name}
-        </h2>
-        <span className="ml-2 px-2 py-1 text-xs font-medium text-indigo-800 bg-indigo-100 rounded">
-          {value.code.toUpperCase()}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md w-full">
+      <div className="flex items-center mb-2">
+        <LucideReact.Layers size={20} className="text-blue-500 mr-2" />
+        <h2 className="text-xl font-semibold text-gray-800 truncate">{name}</h2>
       </div>
-      <p className="mt-2 text-sm text-gray-500">
-        Created on {formattedDate}
-      </p>
+      <div className="text-sm text-gray-600 mb-1">
+        <span className="font-medium">Code:</span> {code}
+      </div>
+      <div className="flex items-center text-sm text-gray-500">
+        <LucideReact.Calendar size={16} className="mr-1" />
+        <time dateTime={created_at}>{formattedDate}</time>
+      </div>
     </div>
   );
 }

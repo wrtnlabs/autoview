@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Combined Commit Status
      *
      * @title Combined Commit Status
     */
-    export type combined_commit_status = {
+    export interface combined_commit_status {
         state: string;
         statuses: AutoViewInputSubTypes.simple_commit_status[];
         sha: string;
@@ -14,11 +15,11 @@ export namespace AutoViewInputSubTypes {
         repository: AutoViewInputSubTypes.minimal_repository;
         commit_url: string & tags.Format<"uri">;
         url: string & tags.Format<"uri">;
-    };
+    }
     /**
      * @title Simple Commit Status
     */
-    export type simple_commit_status = {
+    export interface simple_commit_status {
         description: string | null;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
         url: string & tags.Format<"uri">;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -139,13 +140,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -168,19 +169,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -218,101 +219,147 @@ export type AutoViewInput = AutoViewInputSubTypes.combined_commit_status;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    state: overallState,
-    statuses,
-    sha,
-    total_count: totalCount,
-    repository,
-  } = value;
-
-  // Truncate SHA to 7 characters
+  const { state, statuses, sha, total_count, commit_url, repository } = value;
   const shortSha = sha.slice(0, 7);
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
 
-  // Repository display values
-  const repoName = repository.full_name;
-  const repoDescription = repository.description;
-
-  // Badge style map for different states
-  const badgeStyles: Record<string, { text: string; bg: string }> = {
-    success: { text: "text-green-800", bg: "bg-green-100" },
-    failure: { text: "text-red-800", bg: "bg-red-100" },
-    pending: { text: "text-yellow-800", bg: "bg-yellow-100" },
-    in_progress: { text: "text-yellow-800", bg: "bg-yellow-100" },
-    error: { text: "text-red-800", bg: "bg-red-100" },
-    canceled: { text: "text-gray-800", bg: "bg-gray-100" },
-    neutral: { text: "text-gray-800", bg: "bg-gray-100" },
-    queued: { text: "text-yellow-800", bg: "bg-yellow-100" },
-    default: { text: "text-blue-800", bg: "bg-blue-100" },
+  const getStatusIcon = (s: string, size: number = 16) => {
+    switch (s.toLowerCase()) {
+      case "success":
+        return (
+          <LucideReact.CheckCircle
+            size={size}
+            className="text-green-500"
+            strokeWidth={1.5}
+          />
+        );
+      case "pending":
+        return (
+          <LucideReact.Clock
+            size={size}
+            className="text-amber-500"
+            strokeWidth={1.5}
+          />
+        );
+      case "error":
+        return (
+          <LucideReact.AlertTriangle
+            size={size}
+            className="text-red-500"
+            strokeWidth={1.5}
+          />
+        );
+      case "failure":
+        return (
+          <LucideReact.XCircle
+            size={size}
+            className="text-red-500"
+            strokeWidth={1.5}
+          />
+        );
+      default:
+        return (
+          <LucideReact.HelpCircle
+            size={size}
+            className="text-gray-400"
+            strokeWidth={1.5}
+          />
+        );
+    }
   };
-  const overallBadge = badgeStyles[overallState] || badgeStyles.default;
-
-  // Find the most recent update timestamp among statuses
-  const lastUpdatedStatus = statuses.reduce((latest, current) => {
-    return new Date(current.updated_at) > new Date(latest.updated_at)
-      ? current
-      : latest;
-  }, statuses[0]);
-  const formattedLastUpdate = new Date(lastUpdatedStatus.updated_at).toLocaleString();
-
-  // Display only the first three statuses in the list
-  const displayStatuses = statuses.slice(0, 3);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
       {/* Repository Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex-1 pr-2">
-          <h3 className="text-lg font-semibold text-gray-800 truncate">
-            {repoName}
-          </h3>
-          {repoDescription && (
-            <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-              {repoDescription}
+      <div className="flex items-center space-x-3">
+        <img
+          src={repository.owner.avatar_url}
+          onError={(e) => {
+            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              repository.owner.login
+            )}&background=0D8ABC&color=fff`;
+          }}
+          alt={repository.owner.login}
+          className="w-10 h-10 rounded-full object-cover"
+        />
+        <div className="flex-1 min-w-0">
+          <a
+            href={repository.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-lg font-semibold text-blue-600 hover:underline truncate"
+          >
+            {repository.full_name}
+          </a>
+          {repository.description && (
+            <p className="text-sm text-gray-500 truncate">
+              {repository.description}
             </p>
           )}
         </div>
-        <span
-          className={`flex-shrink-0 px-2 py-1 text-xs font-medium uppercase rounded-full ${overallBadge.text} ${overallBadge.bg}`}
+      </div>
+
+      {/* Overall Commit Status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {getStatusIcon(state, 20)}
+          <span className="font-medium capitalize">{state}</span>
+          <span className="text-sm text-gray-500">
+            • {total_count} checks
+          </span>
+        </div>
+        <a
+          href={commit_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center text-gray-400 hover:text-gray-600 space-x-1"
         >
-          {overallState}
-        </span>
+          <span className="font-mono text-sm">{shortSha}</span>
+          <LucideReact.ExternalLink size={16} />
+        </a>
       </div>
 
-      {/* Commit and Update Info */}
-      <div className="mt-3 flex flex-wrap items-center text-sm text-gray-500">
-        <span className="truncate">
-          Commit: <span className="font-mono">{shortSha}</span>
-        </span>
-        <span className="mx-2">·</span>
-        <span>Updated: {formattedLastUpdate}</span>
-        <span className="mx-2">·</span>
-        <span>{totalCount} status{totalCount !== 1 ? "es" : ""}</span>
-      </div>
-
-      {/* Statuses List */}
-      <div className="mt-4 space-y-2">
-        {displayStatuses.map((s) => {
-          const style = badgeStyles[s.state] || badgeStyles.default;
-          return (
-            <div key={s.id} className="flex items-center justify-between">
-              <span className="flex-1 text-sm text-gray-700 truncate">
-                {s.context}
-              </span>
-              <span
-                className={`ml-2 flex-shrink-0 px-2 py-0.5 text-xs font-medium uppercase rounded-full ${style.text} ${style.bg}`}
-              >
-                {s.state}
-              </span>
+      {/* Individual Status Checks */}
+      <div className="space-y-2">
+        {statuses.map((item) => (
+          <div
+            key={item.id}
+            className="flex items-start space-x-2 p-3 border rounded-lg"
+          >
+            {getStatusIcon(item.state, 18)}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-sm truncate">
+                  {item.context}
+                </span>
+                {item.target_url && (
+                  <a
+                    href={item.target_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <LucideReact.Link size={16} />
+                  </a>
+                )}
+              </div>
+              {item.description && (
+                <p className="mt-1 text-xs text-gray-600 line-clamp-2">
+                  {item.description}
+                </p>
+              )}
+              <p className="mt-1 text-xs text-gray-400">
+                {formatDate(item.updated_at)}
+              </p>
             </div>
-          );
-        })}
-        {totalCount > displayStatuses.length && (
-          <p className="text-sm text-gray-500">
-            +{totalCount - displayStatuses.length} more
-          </p>
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );

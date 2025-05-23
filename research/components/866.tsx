@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type ruleset_version_with_state = {
+    export interface ruleset_version_with_state {
         /**
          * The ID of the previous version of the ruleset
         */
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
          * The state of the ruleset version
         */
         state: {};
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ruleset_version_with_state;
 
@@ -27,57 +28,47 @@ export type AutoViewInput = AutoViewInputSubTypes.ruleset_version_with_state;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const prevVersion = value.version_id;
-  const actorType = value.actor.type?.trim() || "System";
-  const actorId = value.actor.id !== undefined ? `#${value.actor.id}` : "";
-  const actorDisplay = actorId ? `${actorType} ${actorId}` : actorType;
-
-  const updatedDate = new Date(value.updated_at);
-  const formattedDate =
-    updatedDate.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }) +
-    ", " +
-    updatedDate.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-  const stateJson = JSON.stringify(value.state);
-  const truncatedState =
-    stateJson.length > 120 ? stateJson.slice(0, 120) + "…" : stateJson;
+  const formattedDate = new Date(value.updated_at).toLocaleString();
+  const actorDisplay = value.actor?.type
+    ? value.actor.id != null
+      ? `${value.actor.type} (ID: ${value.actor.id})`
+      : value.actor.type
+    : "Unknown actor";
+  const stateKeys = Object.keys(value.state || {});
+  const hasStateData = stateKeys.length > 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-800 mb-3">
-        Ruleset Version Update
-      </h2>
-      <dl className="space-y-2 text-gray-700">
-        <div className="flex justify-between">
-          <dt className="font-medium">Previous Version:</dt>
-          <dd className="truncate">{prevVersion}</dd>
+    <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-4 mx-auto">
+      <div className="flex items-center mb-3">
+        <LucideReact.GitCommit className="text-gray-600 mr-2" size={20} />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          Version {value.version_id}
+        </h2>
+      </div>
+      <div className="flex items-center text-gray-500 text-sm mb-2">
+        <LucideReact.Calendar className="mr-1" size={16} />
+        <span>{formattedDate}</span>
+      </div>
+      <div className="flex items-center text-gray-500 text-sm mb-4">
+        <LucideReact.User className="mr-1" size={16} />
+        <span>{actorDisplay}</span>
+      </div>
+      {hasStateData ? (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-1">
+            State Details
+          </h3>
+          <pre className="text-xs text-gray-600 bg-gray-100 p-2 rounded overflow-auto max-h-32">
+            {JSON.stringify(value.state, null, 2)}
+          </pre>
         </div>
-        <div className="flex justify-between">
-          <dt className="font-medium">Updated By:</dt>
-          <dd className="truncate">{actorDisplay}</dd>
+      ) : (
+        <div className="flex items-center text-gray-400 text-sm">
+          <LucideReact.AlertCircle className="mr-1" size={16} />
+          <span>No state information</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="font-medium">Updated At:</dt>
-          <dd className="truncate">{formattedDate}</dd>
-        </div>
-        {stateJson !== "{}" && (
-          <div>
-            <dt className="font-medium">State Snapshot:</dt>
-            <pre className="mt-1 p-2 bg-gray-100 text-sm rounded border border-gray-200 overflow-x-auto">
-              {truncatedState}
-            </pre>
-          </div>
-        )}
-      </dl>
+      )}
     </div>
   );
 }

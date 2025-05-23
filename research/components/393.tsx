@@ -1,6 +1,7 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type runner_groups_org = {
+    export interface runner_groups_org {
         id: number;
         name: string;
         visibility: string;
@@ -30,7 +31,7 @@ export namespace AutoViewInputSubTypes {
          * List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.
         */
         selected_workflows?: string[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner_groups_org;
 
@@ -39,127 +40,132 @@ export type AutoViewInput = AutoViewInputSubTypes.runner_groups_org;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const capitalize = (str: string) =>
-    str.charAt(0).toUpperCase() + str.slice(1);
-
-  // Visibility badge info
-  let visibilityLabel = capitalize(value.visibility);
-  let visibilityClass = "bg-gray-100 text-gray-800";
-  if (value.visibility === "public") {
-    visibilityClass = "bg-green-100 text-green-800";
-    visibilityLabel = "Public";
-  } else if (value.visibility === "private") {
-    visibilityClass = "bg-red-100 text-red-800";
-    visibilityLabel = "Private";
-  } else if (value.visibility === "selected") {
-    visibilityClass = "bg-yellow-100 text-yellow-800";
-    visibilityLabel = "Selected";
-  }
-
-  // Default badge
-  const defaultBadge =
-    value.default ? (
-      <span
-        key="default"
-        className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
-      >
-        Default
-      </span>
-    ) : null;
-
-  // Inherited badge
-  const inheritedBadge =
-    value.inherited ? (
-      <span
-        key="inherited"
-        className="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded"
-      >
-        Inherited
-      </span>
-    ) : null;
-
-  // Public repositories badge
-  const publicReposBadge = (
-    <span
-      key="allowsPublic"
-      className={`text-xs font-medium px-2.5 py-0.5 rounded ${
-        value.allows_public_repositories
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800"
-      }`}
-    >
-      {value.allows_public_repositories
-        ? "Public Repos Allowed"
-        : "Public Repos Restricted"}
-    </span>
-  );
-
-  // Workflow restrictions badge
-  const restrictedBadge = value.restricted_to_workflows ? (
-    <span
-      key="restricted"
-      className="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded"
-    >
-      Restricted to Workflows ({value.selected_workflows?.length ?? 0})
-    </span>
-  ) : null;
-
-  // Read-only workflow restrictions badge
-  const readOnlyBadge = value.workflow_restrictions_read_only ? (
-    <span
-      key="readonly"
-      className="bg-gray-200 text-gray-700 text-xs font-medium px-2.5 py-0.5 rounded flex items-center"
-    >
-      🔒 Read-only
-    </span>
-  ) : null;
+  const visibilityLabel =
+    value.visibility === "all"
+      ? "All repositories"
+      : value.visibility === "selected"
+      ? "Selected repositories"
+      : value.visibility;
+  const inheritedLabel = value.inherited ? "Yes" : "No";
+  const publicReposLabel = value.allows_public_repositories
+    ? "Allowed"
+    : "Not allowed";
+  const workflowRestrictionLabel = value.restricted_to_workflows
+    ? "Restricted"
+    : "None";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm max-w-sm mx-auto">
-      {/* Group Name */}
-      <h2 className="text-lg font-semibold text-gray-900 truncate">
-        {value.name}
-      </h2>
-
-      {/* Badges */}
-      <div className="mt-2 flex flex-wrap gap-2">
-        <span
-          key="visibility"
-          className={`${visibilityClass} text-xs font-medium px-2.5 py-0.5 rounded`}
-        >
-          {visibilityLabel}
-        </span>
-        {defaultBadge}
-        {inheritedBadge}
-        {publicReposBadge}
-        {restrictedBadge}
-        {readOnlyBadge}
+    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
+          {value.name}
+        </h2>
+        {value.default && (
+          <span className="flex items-center text-green-600 text-sm font-medium">
+            <LucideReact.CheckCircle size={16} className="mr-1" />
+            Default
+          </span>
+        )}
       </div>
 
-      {/* Selected workflows list */}
-      {value.selected_workflows && value.selected_workflows.length > 0 && (
-        <div className="mt-3">
-          <h3 className="text-sm font-medium text-gray-700 mb-1">
-            Selected Workflows
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {value.selected_workflows.slice(0, 3).map((w, idx) => (
-              <span
-                key={idx}
-                className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded truncate"
-              >
-                {w}
-              </span>
-            ))}
-            {value.selected_workflows.length > 3 && (
-              <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">
-                +{value.selected_workflows.length - 3} more
-              </span>
-            )}
-          </div>
+      <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm text-gray-700">
+        <div className="flex items-center col-span-1 sm:col-span-2">
+          {value.visibility === "all" ? (
+            <LucideReact.Users
+              size={16}
+              className="text-gray-400 mr-1"
+              aria-hidden="true"
+            />
+          ) : (
+            <LucideReact.Lock
+              size={16}
+              className="text-gray-400 mr-1"
+              aria-hidden="true"
+            />
+          )}
+          <dt className="font-medium">Visibility:</dt>
+          <dd className="ml-1">{visibilityLabel}</dd>
         </div>
-      )}
+
+        <div className="flex items-center">
+          <LucideReact.ArrowUpRight
+            size={16}
+            className="text-gray-400 mr-1"
+            aria-hidden="true"
+          />
+          <dt className="font-medium">Inherited:</dt>
+          <dd className="ml-1">{inheritedLabel}</dd>
+        </div>
+
+        <div className="flex items-center">
+          {value.allows_public_repositories ? (
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500 mr-1"
+              aria-hidden="true"
+            />
+          ) : (
+            <LucideReact.XCircle
+              size={16}
+              className="text-red-500 mr-1"
+              aria-hidden="true"
+            />
+          )}
+          <dt className="font-medium">Public repos:</dt>
+          <dd className="ml-1">{publicReposLabel}</dd>
+        </div>
+
+        {value.network_configuration_id && (
+          <div className="flex items-center">
+            <LucideReact.Server
+              size={16}
+              className="text-gray-400 mr-1"
+              aria-hidden="true"
+            />
+            <dt className="font-medium">Network config:</dt>
+            <dd className="ml-1">{value.network_configuration_id}</dd>
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <LucideReact.GitPullRequest
+            size={16}
+            className="text-gray-400 mr-1"
+            aria-hidden="true"
+          />
+          <dt className="font-medium">Workflow restrictions:</dt>
+          <dd className="ml-1">{workflowRestrictionLabel}</dd>
+        </div>
+
+        {value.restricted_to_workflows && value.selected_workflows && (
+          <div className="col-span-1 sm:col-span-2">
+            <dt className="font-medium">Selected workflows:</dt>
+            <dd className="mt-1 flex flex-wrap gap-1">
+              {value.selected_workflows.map((wf, idx) => (
+                <span
+                  key={idx}
+                  className="px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full text-xs truncate"
+                >
+                  {wf}
+                </span>
+              ))}
+            </dd>
+          </div>
+        )}
+
+        {value.workflow_restrictions_read_only && (
+          <div className="flex items-center col-span-1 sm:col-span-2">
+            <LucideReact.Lock
+              size={16}
+              className="text-gray-400 mr-1"
+              aria-hidden="true"
+            />
+            <dt className="font-medium">Read-only:</dt>
+            <dd className="ml-1">Workflow restrictions read-only</dd>
+          </div>
+        )}
+      </dl>
     </div>
   );
 }

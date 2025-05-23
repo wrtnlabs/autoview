@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Blob
      *
      * @title Blob
     */
-    export type blob = {
+    export interface blob {
         content: string;
         encoding: string;
         url: string & tags.Format<"uri">;
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
         size: (number & tags.Type<"int32">) | null;
         node_id: string;
         highlighted_content?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.blob;
 
@@ -23,51 +24,50 @@ export type AutoViewInput = AutoViewInputSubTypes.blob;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const sizeFormatted =
-    value.size !== null
-      ? value.size < 1024
-        ? `${value.size} bytes`
-        : `${(value.size / 1024).toFixed(2)} KB`
-      : "Unknown size";
-
-  const shaShort = value.sha.slice(0, 7);
-  const previewContent = value.highlighted_content ?? value.content;
+  const sizeDisplay = value.size !== null ? `${value.size.toLocaleString()} bytes` : "Unknown size";
+  const rawContent = value.highlighted_content ?? value.content;
+  const preview =
+    rawContent.length > 300 ? `${rawContent.slice(0, 300)}...` : rawContent;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full bg-white rounded-lg shadow-md p-4">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Blob Details</h2>
-
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-600 mb-4">
-        <div className="flex">
-          <dt className="font-medium w-24">URL:</dt>
-          <dd className="truncate">{value.url}</dd>
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-full">
+      <div className="flex items-center mb-4">
+        <LucideReact.FileText size={20} className="text-indigo-500" />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">Blob Details</h2>
+      </div>
+      <div className="space-y-3 text-gray-700 text-sm">
+        <div className="flex items-center">
+          <LucideReact.Link size={16} className="text-gray-500" aria-label="URL" />
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 text-blue-600 hover:underline truncate"
+          >
+            {value.url}
+          </a>
         </div>
-        <div className="flex">
-          <dt className="font-medium w-24">Encoding:</dt>
-          <dd>{value.encoding}</dd>
+        <div className="flex items-center">
+          <LucideReact.Code size={16} className="text-gray-500" aria-label="SHA" />
+          <span className="ml-2 font-mono text-xs">{value.sha}</span>
         </div>
-        <div className="flex">
-          <dt className="font-medium w-24">Size:</dt>
-          <dd>{sizeFormatted}</dd>
+        <div className="flex items-center">
+          <LucideReact.Database size={16} className="text-gray-500" aria-label="Size" />
+          <span className="ml-2">{sizeDisplay}</span>
         </div>
-        <div className="flex">
-          <dt className="font-medium w-24">SHA:</dt>
-          <dd className="font-mono">{shaShort}</dd>
+        <div>
+          <div className="mb-1 font-medium text-gray-600">Encoding</div>
+          <span className="inline-block bg-gray-100 text-gray-800 text-xs font-mono px-2 py-0.5 rounded">
+            {value.encoding}
+          </span>
         </div>
-      </dl>
-
-      <div className="bg-gray-100 rounded-md overflow-hidden">
-        {value.highlighted_content ? (
-          <div
-            className="prose prose-sm max-h-60 overflow-auto p-2"
-            dangerouslySetInnerHTML={{ __html: previewContent }}
-          />
-        ) : (
-          <pre className="p-2 font-mono text-sm text-gray-800 whitespace-pre-wrap line-clamp-6">
-            {previewContent}
+        <div>
+          <div className="mb-1 font-medium text-gray-600">Content Preview</div>
+          <pre className="max-h-40 overflow-auto bg-gray-50 p-2 rounded text-xs font-mono whitespace-pre-wrap break-words">
+            {preview}
           </pre>
-        )}
+        </div>
       </div>
     </div>
   );

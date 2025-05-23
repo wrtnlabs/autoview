@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A version of a software package
      *
      * @title Package Version
     */
-    export type package_version = {
+    export interface package_version {
         /**
          * Unique identifier of the package version.
         */
@@ -41,7 +42,7 @@ export namespace AutoViewInputSubTypes {
                 tag?: string[];
             };
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.package_version[];
 
@@ -49,100 +50,111 @@ export type AutoViewInput = AutoViewInputSubTypes.package_version[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Format ISO date strings into a human-readable format.
-  function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  // 1. Data formatting helper
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
-  }
 
-  const versions = value;
-  if (versions.length === 0) {
+  // 2. Handle empty state
+  if (!value || value.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-8">
-        No package versions available.
+      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2">No package versions available</span>
       </div>
     );
   }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="space-y-4">
-      {versions.map((v) => {
-        const created = formatDate(v.created_at);
-        const updated = formatDate(v.updated_at);
-        const deleted = v.deleted_at ? formatDate(v.deleted_at) : null;
-        const pkgType = v.metadata?.package_type;
-        const containerTags = v.metadata?.container?.tags;
-        const dockerTags = v.metadata?.docker?.tag;
-
-        return (
-          <div
-            key={v.id}
-            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800 truncate">
-                {v.name}
-              </h2>
-              {pkgType && (
-                <span className="px-2 py-1 text-xs font-medium text-indigo-800 bg-indigo-100 rounded">
-                  {pkgType.toUpperCase()}
-                </span>
-              )}
-            </div>
-
-            {v.license && (
-              <p className="mt-1 text-sm text-gray-600">License: {v.license}</p>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {value.map((pkg) => (
+        <div key={pkg.id} className="p-4 bg-white rounded-lg shadow">
+          {/* Header: Name and License */}
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-lg font-semibold text-gray-900 truncate">
+              {pkg.name}
+            </h3>
+            {pkg.license && (
+              <span className="px-2 py-0.5 text-xs font-medium text-gray-800 bg-gray-200 rounded">
+                {pkg.license}
+              </span>
             )}
-
-            {v.description && (
-              <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-                {v.description}
-              </p>
-            )}
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {containerTags &&
-                containerTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              {dockerTags &&
-                dockerTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
-            </div>
-
-            <div className="mt-3 text-sm text-gray-500 flex flex-wrap items-center gap-x-2">
-              <time dateTime={v.created_at}>Created: {created}</time>
-              <span className="hidden sm:inline">|</span>
-              <time dateTime={v.updated_at}>Updated: {updated}</time>
-              {deleted && (
-                <>
-                  <span className="hidden sm:inline">|</span>
-                  <time dateTime={v.deleted_at} className="text-red-600">
-                    Deleted: {deleted}
-                  </time>
-                </>
-              )}
-            </div>
           </div>
-        );
-      })}
+
+          {/* Description */}
+          {pkg.description && (
+            <p className="text-gray-700 text-sm line-clamp-2">
+              {pkg.description}
+            </p>
+          )}
+
+          {/* Dates */}
+          <div className="mt-3 space-y-1 text-gray-600 text-sm">
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar size={16} className="text-gray-400" />
+              <span>Created: {formatDate(pkg.created_at)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar size={16} className="text-gray-400" />
+              <span>Updated: {formatDate(pkg.updated_at)}</span>
+            </div>
+            {pkg.deleted_at && (
+              <div className="flex items-center gap-1 text-red-500">
+                <LucideReact.Trash2 size={16} className="text-red-400" />
+                <span>Deleted: {formatDate(pkg.deleted_at)}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Metadata badges */}
+          {pkg.metadata && (
+            <div className="mt-3 flex flex-wrap gap-2 text-sm">
+              <div className="flex items-center gap-1 text-gray-600">
+                <LucideReact.Package size={16} className="text-gray-400" />
+                <span>{pkg.metadata.package_type}</span>
+              </div>
+              {pkg.metadata.container?.tags?.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 text-gray-800 bg-gray-100 rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+              {pkg.metadata.docker?.tag?.map((tag) => (
+                <span
+                  key={tag}
+                  className="px-2 py-0.5 text-gray-800 bg-gray-100 rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Links */}
+          <div className="mt-3 space-y-1 text-gray-600 text-sm">
+            <div className="flex items-center gap-1">
+              <LucideReact.Link size={16} className="text-gray-400" />
+              <span className="truncate">{pkg.url}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Link size={16} className="text-gray-400" />
+              <span className="truncate">{pkg.package_html_url}</span>
+            </div>
+            {pkg.html_url && (
+              <div className="flex items-center gap-1">
+                <LucideReact.Link size={16} className="text-gray-400" />
+                <span className="truncate">{pkg.html_url}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
-  // 3. Return the React element.
 }

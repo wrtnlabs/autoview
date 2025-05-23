@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4OneTimeMsgsView = {
+                export interface LegacyV4OneTimeMsgsView {
                     oneTimeMsgs?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4OneTimeMsg[];
                     next?: number;
-                };
+                }
             }
         }
         export namespace v4 {
             export namespace marketing {
-                export type LegacyV4OneTimeMsg = {
+                export interface LegacyV4OneTimeMsg {
                     id?: string;
                     channelId?: string;
                     name: string;
@@ -37,18 +38,18 @@ export namespace AutoViewInputSubTypes {
                     goal?: number & tags.Type<"int32">;
                     click?: number & tags.Type<"int32">;
                     userChatExpireDuration?: string;
-                };
+                }
             }
         }
     }
     export namespace marketing {
-        export type SendMediumSettings = {
+        export interface SendMediumSettings {
             type: string;
-        };
-        export type OneTimeMsgDraft = {
+        }
+        export interface OneTimeMsgDraft {
             oneTimeMsg: AutoViewInputSubTypes.marketing.OneTimeMsg;
-        };
-        export type OneTimeMsg = {
+        }
+        export interface OneTimeMsg {
             id?: string;
             channelId?: string;
             name: string;
@@ -74,17 +75,18 @@ export namespace AutoViewInputSubTypes {
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
             userChatExpireDuration?: string;
-        };
+        }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
+    }
+    export interface Operator {
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4OneTimeMsgsView;
 
@@ -94,113 +96,170 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4OneTime
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const messages = value.oneTimeMsgs ?? [];
-  const messageCount = messages.length;
+  const totalCount = messages.length;
 
-  const sumMetrics = messages.reduce(
-    (acc, msg) => {
-      acc.sent += msg.sent ?? 0;
-      acc.view += msg.view ?? 0;
-      acc.goal += msg.goal ?? 0;
-      acc.click += msg.click ?? 0;
-      return acc;
-    },
-    { sent: 0, view: 0, goal: 0, click: 0 }
-  );
-
-  const formatDate = (ts?: number) =>
-    ts ? new Date(ts).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "--";
-
-  const stateStyles: Record<string, { label: string; classes: string }> = {
-    draft: { label: "Draft", classes: "bg-gray-100 text-gray-800" },
-    waiting: { label: "Waiting", classes: "bg-blue-100 text-blue-800" },
-    sent: { label: "Sent", classes: "bg-green-100 text-green-800" },
-    canceled: { label: "Canceled", classes: "bg-red-100 text-red-800" },
-    removed: { label: "Removed", classes: "bg-gray-200 text-gray-600 line-through" },
+  const formatDateTime = (timestamp?: number): string => {
+    if (!timestamp) return '-';
+    const date = new Date(timestamp);
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
-  const mediumLabels: Record<string, string> = {
-    appAlimtalk: "Alimtalk",
-    appLine: "LINE",
-    email: "Email",
-    inAppChat: "In-App Chat",
-    xms: "XMS",
+  const renderState = (state?: string) => {
+    switch (state) {
+      case 'draft':
+        return (
+          <div className="flex items-center text-gray-500">
+            <LucideReact.Edit size={16} aria-hidden={true} />
+            <span className="ml-1 text-sm">Draft</span>
+          </div>
+        );
+      case 'waiting':
+        return (
+          <div className="flex items-center text-amber-500">
+            <LucideReact.Clock size={16} aria-hidden={true} />
+            <span className="ml-1 text-sm">Waiting</span>
+          </div>
+        );
+      case 'sent':
+        return (
+          <div className="flex items-center text-green-500">
+            <LucideReact.CheckCircle size={16} aria-hidden={true} />
+            <span className="ml-1 text-sm">Sent</span>
+          </div>
+        );
+      case 'canceled':
+        return (
+          <div className="flex items-center text-red-500">
+            <LucideReact.XCircle size={16} aria-hidden={true} />
+            <span className="ml-1 text-sm">Canceled</span>
+          </div>
+        );
+      case 'removed':
+        return (
+          <div className="flex items-center text-gray-400">
+            <LucideReact.Trash2 size={16} aria-hidden={true} />
+            <span className="ml-1 text-sm">Removed</span>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex items-center text-gray-500">
+            <span className="ml-1 text-sm capitalize">{state}</span>
+          </div>
+        );
+    }
+  };
+
+  const renderMedium = (medium?: string) => {
+    if (!medium) return null;
+    let icon: React.ReactNode;
+    let label = medium;
+    switch (medium) {
+      case 'email':
+        icon = <LucideReact.Mail size={16} aria-hidden={true} />;
+        label = 'Email';
+        break;
+      case 'appAlimtalk':
+        icon = <LucideReact.MessageSquare size={16} aria-hidden={true} />;
+        label = 'Alimtalk';
+        break;
+      case 'appLine':
+        icon = <LucideReact.MessageSquare size={16} aria-hidden={true} />;
+        label = 'Line';
+        break;
+      case 'inAppChat':
+        icon = <LucideReact.MessageSquare size={16} aria-hidden={true} />;
+        label = 'In-App Chat';
+        break;
+      case 'xms':
+        icon = <LucideReact.MessageSquare size={16} aria-hidden={true} />;
+        label = 'XMS';
+        break;
+      default:
+        icon = <LucideReact.Link size={16} aria-hidden={true} />;
+    }
+    return (
+      <div className="flex items-center text-gray-400">
+        {icon}
+        <span className="ml-1 text-sm">{label}</span>
+      </div>
+    );
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="p-4 space-y-6">
-      {/* Summary */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-2xl font-semibold text-gray-800">One-Time Messages</h2>
-        <div className="mt-2 sm:mt-0 text-sm text-gray-500">
-          {messageCount} message{messageCount !== 1 ? "s" : ""} • Sent: {sumMetrics.sent} • Views: {sumMetrics.view} • Goals: {sumMetrics.goal} • Clicks: {sumMetrics.click}
-        </div>
+    <div className="w-full p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Messages ({totalCount})
+        </h2>
+        {value.next != null && (
+          <span className="text-sm text-gray-500">Next: {value.next}</span>
+        )}
       </div>
 
-      {/* Empty state */}
-      {messageCount === 0 && (
-        <div className="text-center text-gray-500 py-8">
-          No messages to display.
+      {totalCount === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} aria-hidden={true} />
+          <p className="mt-2">No messages available</p>
         </div>
-      )}
-
-      {/* Message cards */}
-      <div className="space-y-4">
-        {messages.map((msg, idx) => {
-          const stateInfo = stateStyles[msg.state] || { label: msg.state, classes: "bg-gray-100 text-gray-800" };
-          const medium = msg.sendMedium ? mediumLabels[msg.sendMedium] || msg.sendMedium : "—";
-
-          return (
-            <div
+      ) : (
+        <ul className="space-y-4">
+          {messages.map((msg, idx) => (
+            <li
               key={msg.id ?? idx}
-              className="p-4 bg-white rounded-lg shadow flex flex-col md:flex-row md:justify-between"
+              className="flex flex-col p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
             >
-              {/* Left section: title & meta */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900 truncate">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center space-x-2">
+                  {renderState(msg.state)}
+                  <span className="ml-2 text-gray-800 font-medium truncate">
                     {msg.name}
-                  </h3>
-                  <span className={`px-2 py-0.5 text-xs font-semibold rounded ${stateInfo.classes}`}>
-                    {stateInfo.label}
                   </span>
                 </div>
-                <div className="mt-2 flex flex-wrap text-sm text-gray-600 space-x-4">
-                  <span>Medium: {medium}</span>
-                  {msg.startAt && <span>Scheduled: {formatDate(msg.startAt)}</span>}
-                  {msg.createdAt && <span>Created: {formatDate(msg.createdAt)}</span>}
-                </div>
+                {renderMedium(msg.sendMedium)}
               </div>
 
-              {/* Right section: metrics */}
-              <div className="mt-4 md:mt-0 md:ml-6 flex-shrink-0 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Sent</div>
-                  <div className="mt-1 text-lg font-semibold text-gray-800">{msg.sent ?? 0}</div>
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3 text-gray-500 text-sm">
+                <div className="flex items-center">
+                  <LucideReact.Calendar size={16} aria-hidden={true} />
+                  <span className="ml-1">
+                    {formatDateTime(msg.startAt ?? msg.createdAt)}
+                  </span>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Views</div>
-                  <div className="mt-1 text-lg font-semibold text-gray-800">{msg.view ?? 0}</div>
+                {msg.sendMode && (
+                  <div className="flex items-center">
+                    <LucideReact.Clock size={16} aria-hidden={true} />
+                    <span className="ml-1 capitalize">{msg.sendMode}</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <LucideReact.Send size={16} aria-hidden={true} />
+                  <span className="ml-1">{msg.sent ?? 0}</span>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Goals</div>
-                  <div className="mt-1 text-lg font-semibold text-gray-800">{msg.goal ?? 0}</div>
+                <div className="flex items-center">
+                  <LucideReact.Eye size={16} aria-hidden={true} />
+                  <span className="ml-1">{msg.view ?? 0}</span>
                 </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">Clicks</div>
-                  <div className="mt-1 text-lg font-semibold text-gray-800">{msg.click ?? 0}</div>
+                <div className="flex items-center">
+                  <LucideReact.Flag size={16} aria-hidden={true} />
+                  <span className="ml-1">{msg.goal ?? 0}</span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.MousePointer size={16} aria-hidden={true} />
+                  <span className="ml-1">{msg.click ?? 0}</span>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Pagination indicator */}
-      {value.next != null && (
-        <div className="text-center text-sm text-gray-500">
-          More messages available...
-        </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

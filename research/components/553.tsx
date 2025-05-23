@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,19 +139,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -187,95 +188,108 @@ export type AutoViewInput = AutoViewInputSubTypes.minimal_repository[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // If there are no repositories, show a friendly empty state
-  if (!value || value.length === 0) {
-    return (
-      <div className="w-full py-8 text-center text-gray-500">
-        No repositories to display.
-      </div>
-    );
-  }
-
-  // Return a responsive grid of repository cards
+  // No additional hooks or state needed; derive formatted dates on render
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {value.map((repo) => {
-        // Choose the most recent date for display
-        const dateString =
-          repo.updated_at ?? repo.pushed_at ?? repo.created_at ?? "";
-        const formattedDate = dateString
-          ? new Date(dateString).toLocaleDateString("default", {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : "";
-
+        // Format the "updated_at" date
+        const updated =
+          repo.updated_at
+            ? new Date(repo.updated_at).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : null;
+        // Avatar fallback URL using ui‐avatars
+        const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          repo.owner.login,
+        )}&background=ccc&color=fff`;
         return (
           <div
             key={repo.id}
-            className="flex flex-col bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200 overflow-hidden"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition"
           >
-            {/* Header: Owner avatar and repo title */}
-            <div className="flex items-center px-4 py-3">
+            {/* Owner Info */}
+            <div className="flex items-center">
               <img
                 src={repo.owner.avatar_url}
-                alt={repo.owner.login}
-                className="w-10 h-10 rounded-full mr-3 flex-shrink-0"
+                alt={`${repo.owner.login} avatar`}
+                className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = avatarFallback;
+                }}
               />
-              <div className="min-w-0">
-                <a
-                  href={repo.html_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-lg font-semibold text-blue-600 hover:underline truncate"
-                >
-                  {repo.full_name}
-                </a>
-                <p className="text-sm text-gray-500 truncate">
-                  @{repo.owner.login}
-                </p>
-              </div>
+              <span className="ml-2 font-semibold text-gray-800">
+                {repo.owner.login}
+              </span>
             </div>
 
-            {/* Description (truncated) */}
+            {/* Repository Name */}
+            <h3 className="mt-3 text-lg font-bold text-blue-600 truncate">
+              {repo.name}
+            </h3>
+
+            {/* Description */}
             {repo.description && (
-              <p className="px-4 text-gray-700 text-sm line-clamp-3">
+              <p className="mt-2 text-gray-600 text-sm line-clamp-2">
                 {repo.description}
               </p>
             )}
 
-            {/* Metrics and topics */}
-            <div className="mt-auto px-4 py-3">
-              <div className="flex flex-wrap items-center text-sm text-gray-600 space-x-4">
-                <span className="flex items-center">
-                  <span className="text-yellow-500 mr-1">★</span>
-                  {repo.stargazers_count ?? 0}
-                </span>
-                <span className="flex items-center">
-                  <span className="mr-1">🍴</span>
-                  {repo.forks_count ?? 0}
-                </span>
-                {formattedDate && (
-                  <span className="whitespace-nowrap">
-                    Updated {formattedDate}
-                  </span>
-                )}
+            {/* Stats Row */}
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-gray-500 text-sm">
+              <div className="flex items-center">
+                <LucideReact.Star size={16} className="text-amber-400" />
+                <span className="ml-1">{repo.stargazers_count ?? 0}</span>
               </div>
-
-              {Array.isArray(repo.topics) && repo.topics.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {repo.topics.map((topic) => (
-                    <span
-                      key={topic}
-                      className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded"
-                    >
-                      {topic}
-                    </span>
-                  ))}
+              <div className="flex items-center">
+                <LucideReact.GitBranch size={16} className="text-gray-500" />
+                <span className="ml-1">{repo.forks_count ?? 0}</span>
+              </div>
+              {repo.open_issues_count !== undefined && (
+                <div className="flex items-center">
+                  <LucideReact.AlertCircle size={16} className="text-red-500" />
+                  <span className="ml-1">{repo.open_issues_count}</span>
+                </div>
+              )}
+              {updated && (
+                <div className="flex items-center">
+                  <LucideReact.Calendar size={16} className="text-gray-400" />
+                  <span className="ml-1">Updated {updated}</span>
                 </div>
               )}
             </div>
+
+            {/* Language Badge */}
+            {repo.language && (
+              <div className="mt-2">
+                <span className="inline-block bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full">
+                  {repo.language}
+                </span>
+              </div>
+            )}
+
+            {/* Topics */}
+            {repo.topics && repo.topics.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {repo.topics.slice(0, 3).map((topic) => (
+                  <span
+                    key={topic}
+                    className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+                  >
+                    {topic}
+                  </span>
+                ))}
+                {repo.topics.length > 3 && (
+                  <span className="text-gray-500 text-xs">
+                    +{repo.topics.length - 3} more
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         );
       })}

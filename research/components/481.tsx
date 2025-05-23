@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Org Membership
      *
      * @title Org Membership
     */
-    export type org_membership = {
+    export interface org_membership {
         url: string & tags.Format<"uri">;
         /**
          * The state of the member in the organization. The `pending` state indicates the user has not yet accepted an invitation.
@@ -22,13 +23,13 @@ export namespace AutoViewInputSubTypes {
         permissions?: {
             can_create_repository: boolean;
         };
-    };
+    }
     /**
      * A GitHub organization.
      *
      * @title Organization Simple
     */
-    export type organization_simple = {
+    export interface organization_simple {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -41,7 +42,7 @@ export namespace AutoViewInputSubTypes {
         public_members_url: string;
         avatar_url: string;
         description: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -79,109 +80,118 @@ export type AutoViewInput = AutoViewInputSubTypes.org_membership;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    organization,
-    state,
-    role,
-    user,
-    permissions,
-  } = value;
+  const user = value.user;
+  const userName = user ? user.name || user.login : "Unknown User";
+  const org = value.organization;
+  const orgName = org.login;
+  const orgDesc = org.description;
+  const stateIcon = value.state === "active" ? (
+    <LucideReact.CheckCircle className="text-green-500" size={16} />
+  ) : (
+    <LucideReact.Clock className="text-amber-500" size={16} />
+  );
+  const roleLabel = value.role
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+  const fallbackUserAvatar = user
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        userName
+      )}&background=0D8ABC&color=fff`
+    : `https://placehold.co/48x48/e2e8f0/1e293b?text=?`;
+  const fallbackOrgAvatar = `https://placehold.co/80x80/f8fafc/475569?text=${encodeURIComponent(
+    orgName
+  )}`;
 
-  const stateLabel = state === "active" ? "Active" : "Pending";
-  const stateColor =
-    state === "active"
-      ? "bg-green-100 text-green-800"
-      : "bg-yellow-100 text-yellow-800";
-
-  const roleLabel =
-    role === "admin"
-      ? "Admin"
-      : role === "billing_manager"
-      ? "Billing Manager"
-      : "Member";
-
-  const roleColor =
-    role === "admin"
-      ? "bg-blue-100 text-blue-800"
-      : role === "billing_manager"
-      ? "bg-purple-100 text-purple-800"
-      : "bg-gray-100 text-gray-800";
-
-  const orgDescription = organization.description ?? "";
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 max-w-md w-full mx-auto">
-      {/* Organization Header */}
-      <div className="flex items-center space-x-4">
+    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md">
+      {/* User Section */}
+      <div className="flex items-center">
         <img
-          src={organization.avatar_url}
-          alt={`${organization.login} avatar`}
-          className="w-12 h-12 rounded-full object-cover"
+          src={user?.avatar_url || fallbackUserAvatar}
+          alt={userName}
+          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = fallbackUserAvatar;
+          }}
         />
-        <div className="flex-1 overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {organization.login}
-          </h2>
-          {orgDescription && (
+        <div className="ml-4 flex-1 min-w-0">
+          <div className="text-lg font-semibold text-gray-900 flex items-center gap-2 truncate">
+            <LucideReact.User className="text-gray-500" size={16} />
+            <span className="truncate">{userName}</span>
+          </div>
+          {user?.html_url && (
+            <div className="flex items-center text-sm text-gray-500 gap-1 truncate">
+              <LucideReact.Link size={12} />
+              <span className="truncate">{user.html_url}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Organization Section */}
+      <div className="mt-4 flex items-start">
+        <img
+          src={org.avatar_url}
+          alt={orgName}
+          className="w-10 h-10 rounded-md object-cover flex-shrink-0"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = fallbackOrgAvatar;
+          }}
+        />
+        <div className="ml-3 flex-1 min-w-0">
+          <div className="text-md font-semibold text-gray-900 flex items-center gap-2 truncate">
+            <LucideReact.Building className="text-gray-500" size={16} />
+            <span className="truncate">{orgName}</span>
+          </div>
+          {orgDesc && (
             <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-              {orgDescription}
+              {orgDesc}
             </p>
           )}
         </div>
       </div>
 
-      {/* Divider */}
-      <hr className="my-4 border-gray-200" />
-
-      {/* Membership Status & Role */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <span
-          className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${stateColor}`}
-        >
-          {stateLabel}
-        </span>
-        <span
-          className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${roleColor}`}
-        >
-          {roleLabel}
-        </span>
-      </div>
-
-      {/* User Info */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">
-          Member Details
-        </h3>
-        {user ? (
-          <div className="flex items-center space-x-3">
-            <img
-              src={user.avatar_url}
-              alt={`${user.login} avatar`}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {user.name ?? user.login}
-              </p>
-              <p className="text-xs text-gray-500 truncate">
-                @{user.login}
-              </p>
-              {user.email && (
-                <p className="text-xs text-gray-500">{user.email}</p>
-              )}
-            </div>
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">No user information available.</p>
-        )}
+      {/* Membership Status and Role */}
+      <div className="mt-4 flex items-center justify-between text-sm">
+        <div className="flex items-center gap-1">
+          {stateIcon}
+          <span className="capitalize text-gray-700">{value.state}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Tag className="text-blue-500" size={16} />
+          <span className="text-gray-700">{roleLabel}</span>
+        </div>
       </div>
 
       {/* Permissions */}
-      {permissions && permissions.can_create_repository && (
-        <div className="mt-4">
-          <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-indigo-100 text-indigo-800">
-            Can create repositories
-          </span>
+      {value.permissions?.can_create_repository !== undefined && (
+        <div className="mt-3 flex items-center text-sm">
+          {value.permissions.can_create_repository ? (
+            <>
+              <LucideReact.GitBranch
+                className="text-green-500"
+                size={16}
+                strokeWidth={1.5}
+              />
+              <span className="ml-1 text-gray-700">
+                Can create repositories
+              </span>
+            </>
+          ) : (
+            <>
+              <LucideReact.Lock
+                className="text-red-500"
+                size={16}
+                strokeWidth={1.5}
+              />
+              <span className="ml-1 text-gray-700">
+                No repository permissions
+              </span>
+            </>
+          )}
         </div>
       )}
     </div>

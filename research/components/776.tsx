@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Comments provide a way for people to collaborate on an issue.
      *
      * @title Issue Comment
     */
-    export type issue_comment = {
+    export interface issue_comment {
         /**
          * Unique identifier of the issue comment
         */
@@ -30,7 +31,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -82,7 +83,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -110,12 +111,71 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -126,7 +186,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue_comment;
 
@@ -135,63 +195,94 @@ export type AutoViewInput = AutoViewInputSubTypes.issue_comment;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const user = value.user;
-  const userName = user?.name ?? user?.login ?? "Unknown User";
-  const userAvatar = user?.avatar_url;
-  const formattedAssociation = value.author_association
-    .split('_')
-    .map(word => word.charAt(0) + word.slice(1).toLowerCase())
-    .join(' ');
-  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+  const author = value.user;
+  const authorName = author?.login ?? "Unknown";
+  const avatarUrl =
+    author?.avatar_url ??
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      authorName
+    )}&background=random&color=fff`;
+  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
-  const rawHtml = value.body_html ?? '';
-  const stripped = rawHtml.replace(/<[^>]+>/g, '');
-  const content = (value.body_text ?? value.body ?? stripped).trim() || 'No comment content.';
-  const reactions = value.reactions;
-  const reactionsList = reactions
-    ? [
-        { count: reactions["+1"], icon: "👍" },
-        { count: reactions["-1"], icon: "👎" },
-        { count: reactions.laugh,  icon: "😄" },
-        { count: reactions.confused, icon: "😕" },
-        { count: reactions.heart,   icon: "❤️" },
-        { count: reactions.hooray,  icon: "🎉" },
-        { count: reactions.eyes,    icon: "👀" },
-        { count: reactions.rocket,  icon: "🚀" },
-      ].filter(item => item.count > 0)
-    : [];
+  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const isEdited = value.updated_at !== value.created_at;
+  const bodyText = value.body_text ?? value.body ?? "";
+
+  // Prepare reactions if available
+  const rawReactions = value.reactions;
+  const reactionEntries: [string, number][] = [];
+  if (rawReactions) {
+    if (rawReactions["+1"] > 0) reactionEntries.push(["+1", rawReactions["+1"]]);
+    if (rawReactions["-1"] > 0) reactionEntries.push(["-1", rawReactions["-1"]]);
+    if (rawReactions.laugh > 0) reactionEntries.push(["laugh", rawReactions.laugh]);
+    if (rawReactions.confused > 0)
+      reactionEntries.push(["confused", rawReactions.confused]);
+    if (rawReactions.heart > 0) reactionEntries.push(["heart", rawReactions.heart]);
+    if (rawReactions.hooray > 0) reactionEntries.push(["hooray", rawReactions.hooray]);
+    if (rawReactions.eyes > 0) reactionEntries.push(["eyes", rawReactions.eyes]);
+    if (rawReactions.rocket > 0)
+      reactionEntries.push(["rocket", rawReactions.rocket]);
+  }
+
+  const reactionIcons: Record<string, JSX.Element> = {
+    "+1": <LucideReact.ThumbsUp size={16} className="text-gray-500" />,
+    "-1": <LucideReact.ThumbsDown size={16} className="text-gray-500" />,
+    laugh: <LucideReact.Smile size={16} className="text-gray-500" />,
+    confused: <LucideReact.HelpCircle size={16} className="text-gray-500" />,
+    heart: <LucideReact.Heart size={16} className="text-gray-500" />,
+    hooray: <LucideReact.Sparkles size={16} className="text-gray-500" />,
+    eyes: <LucideReact.Eye size={16} className="text-gray-500" />,
+    rocket: <LucideReact.Rocket size={16} className="text-gray-500" />,
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex items-center mb-3">
-        {userAvatar && (
-          <img
-            src={userAvatar}
-            alt={`${userName} avatar`}
-            className="w-8 h-8 rounded-full mr-2 object-cover"
-          />
-        )}
-        <div>
-          <div className="text-sm font-semibold text-gray-800">{userName}</div>
-          <div className="text-xs text-gray-500 flex items-center space-x-1">
-            <span>{formattedAssociation}</span>
-            <span>·</span>
-            <time dateTime={value.created_at}>{formattedDate}</time>
+    <div className="max-w-md mx-auto bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+      <div className="flex items-start">
+        <img
+          src={avatarUrl}
+          alt={authorName}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              authorName
+            )}&background=random&color=fff`;
+          }}
+          className="w-8 h-8 rounded-full object-cover"
+        />
+        <div className="ml-3 flex-1">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold text-gray-900">{authorName}</span>
+            <span className="text-xs text-gray-400 capitalize">
+              {value.author_association.toLowerCase()}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center text-xs text-gray-500">
+            <LucideReact.Calendar className="mr-1" size={12} />
+            <time dateTime={value.created_at}>{createdAt}</time>
+            {isEdited && (
+              <span className="ml-2 text-gray-400">
+                · Edited <time dateTime={value.updated_at}>{updatedAt}</time>
+              </span>
+            )}
           </div>
         </div>
       </div>
-      <p className="text-gray-700 text-sm whitespace-pre-wrap line-clamp-5">
-        {content}
+
+      <p className="mt-4 text-gray-700 text-sm line-clamp-3 whitespace-pre-wrap">
+        {bodyText}
       </p>
-      {reactionsList.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center space-x-4 text-xs text-gray-600">
-          {reactionsList.map((item, index) => (
-            <div key={index} className="flex items-center space-x-1">
-              <span>{item.icon}</span>
-              <span>{item.count}</span>
+
+      {reactionEntries.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-3">
+          {reactionEntries.map(([key, count]) => (
+            <div key={key} className="flex items-center gap-1 text-xs text-gray-600">
+              {reactionIcons[key]}
+              <span>{count}</span>
             </div>
           ))}
         </div>

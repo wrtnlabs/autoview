@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
@@ -37,58 +38,102 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const users = value;
-  const userCount = users.length;
+  // Derived constants
+  const userCount = value.length;
+  const header = (
+    <div className="mb-4 flex items-center gap-2 text-gray-700">
+      <LucideReact.Users size={20} className="text-gray-500" />
+      <span className="text-lg font-semibold">
+        {userCount} {userCount === 1 ? "User" : "Users"}
+      </span>
+    </div>
+  );
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // No-data state
+  if (userCount === 0) {
+    return (
+      <div className="p-4 flex flex-col items-center text-gray-400">
+        {header}
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No users available</span>
+      </div>
+    );
+  }
+
+  // Main rendering
   return (
-    <div className="w-full p-4">
-      {/* Header with total count */}
-      <div className="mb-4">
-        <h2 className="text-xl font-bold text-gray-800">
-          GitHub Users ({userCount})
-        </h2>
-      </div>
-      {/* Responsive grid of user cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {users.map((user) => (
-          <div
-            key={user.id}
-            className="flex items-center p-4 bg-white rounded-lg shadow transition-shadow hover:shadow-md"
-          >
-            <img
-              src={user.avatar_url}
-              alt={user.login}
-              className="w-16 h-16 rounded-full flex-shrink-0"
-            />
-            <div className="ml-4 overflow-hidden">
-              {/* Display full name if available, otherwise login */}
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {user.name ?? user.login}
-              </h3>
-              {/* Display login as subtitle only when name is present */}
-              {user.name && (
-                <p className="text-sm text-gray-500 truncate">
-                  @{user.login}
-                </p>
-              )}
-              {/* Display email if available */}
-              {user.email && (
-                <p className="text-sm text-gray-500 truncate">
-                  {user.email}
-                </p>
-              )}
-              {/* Badge for site administrators */}
-              {user.site_admin && (
-                <span className="inline-block mt-1 px-2 py-0.5 text-xs font-medium text-white bg-red-500 rounded">
-                  ADMIN
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="p-4">
+      {header}
+      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {value.map((user: AutoViewInputSubTypes.simple_user) => {
+          const displayName = user.name ?? user.login;
+          const starredAt = user.starred_at
+            ? new Date(user.starred_at).toLocaleDateString()
+            : null;
+
+          return (
+            <li
+              key={user.id}
+              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition"
+            >
+              {/* Avatar and basic info */}
+              <div className="flex items-center space-x-4">
+                <img
+                  src={user.avatar_url}
+                  alt={`${displayName} avatar`}
+                  className="w-12 h-12 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        displayName
+                      )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base font-medium text-gray-800 truncate">
+                      {displayName}
+                    </span>
+                    <span className="text-xs text-gray-500 uppercase bg-gray-100 px-1 py-px rounded">
+                      {user.type}
+                    </span>
+                    {user.site_admin && (
+                      <LucideReact.CheckCircle
+                        size={16}
+                        className="text-blue-500"
+                        aria-label="Site Admin"
+                      />
+                    )}
+                  </div>
+                  <div className="mt-1 text-sm text-gray-500 truncate">
+                    @{user.login}
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact & links */}
+              <div className="mt-3 space-y-1">
+                {user.email && (
+                  <div className="flex items-center text-sm text-gray-600">
+                    <LucideReact.Mail size={16} className="text-gray-400" />
+                    <span className="ml-1 truncate">{user.email}</span>
+                  </div>
+                )}
+                <div className="flex items-center text-sm text-gray-600">
+                  <LucideReact.Link size={16} className="text-gray-400" />
+                  <span className="ml-1 truncate">{user.html_url}</span>
+                </div>
+                {starredAt && (
+                  <div className="flex items-center text-sm text-gray-600">
+                    <LucideReact.Star size={16} className="text-yellow-400" />
+                    <span className="ml-1">Starred at {starredAt}</span>
+                  </div>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

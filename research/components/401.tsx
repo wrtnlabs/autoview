@@ -1,21 +1,22 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsActionsRunnersGenerateJitconfig {
-        export type PostResponse = {
+        export interface PostResponse {
             runner: AutoViewInputSubTypes.runner;
             /**
              * The base64 encoded runner configuration.
             */
             encoded_jit_config: string;
-        };
+        }
     }
     /**
      * A self hosted runner
      *
      * @title Self hosted runners
     */
-    export type runner = {
+    export interface runner {
         /**
          * The ID of the runner.
         */
@@ -39,13 +40,13 @@ export namespace AutoViewInputSubTypes {
         busy: boolean;
         labels: AutoViewInputSubTypes.runner_label[];
         ephemeral?: boolean;
-    };
+    }
     /**
      * A label for a self hosted runner
      *
      * @title Self hosted runner label
     */
-    export type runner_label = {
+    export interface runner_label {
         /**
          * Unique identifier of the label.
         */
@@ -58,7 +59,7 @@ export namespace AutoViewInputSubTypes {
          * The type of label. Read-only labels are applied automatically when the runner is configured.
         */
         type?: "read-only" | "custom";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnersGenerateJitconfig.PostResponse;
 
@@ -66,81 +67,101 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnersGenerate
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data aggregation and transformation
   const { runner, encoded_jit_config } = value;
-  const {
-    name,
-    os,
-    status,
-    busy,
-    ephemeral,
-    labels,
-    runner_group_id,
-  } = runner;
 
-  // Capitalize status
-  const formattedStatus =
-    status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  // Map runner.status to an icon and color
+  const statusMap: Record<string, { icon: JSX.Element; color: string }> = {
+    online: { icon: <LucideReact.CheckCircle size={16} />, color: "text-green-500" },
+    offline: { icon: <LucideReact.XCircle size={16} />, color: "text-red-500" },
+    busy: { icon: <LucideReact.Loader size={16} className="animate-spin" />, color: "text-yellow-500" },
+    pending: { icon: <LucideReact.Clock size={16} />, color: "text-amber-500" },
+    running: { icon: <LucideReact.PlayCircle size={16} />, color: "text-blue-500" },
+  };
+  const statusKey = runner.status.toLowerCase();
+  const statusInfo = statusMap[statusKey] || { icon: <LucideReact.Circle size={16} />, color: "text-gray-500" };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Truncate long base64 config for preview
+  const configPreview =
+    encoded_jit_config.length > 80
+      ? encoded_jit_config.slice(0, 40) + "…" + encoded_jit_config.slice(-40)
+      : encoded_jit_config;
+
+  // 2. Visual composition
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Runner Header */}
-      <div className="mb-4">
-        <h2
-          className="text-xl font-semibold text-gray-800 truncate"
-          title={name}
-        >
-          {name}
-        </h2>
-        <div className="flex flex-wrap items-center space-x-2 mt-2">
-          <span className="text-sm text-gray-500">{os}</span>
-          <span className="px-2 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-            {formattedStatus}
-          </span>
-          {busy && (
-            <span className="px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded">
-              Busy
-            </span>
-          )}
-          {ephemeral && (
-            <span className="px-2 py-0.5 text-xs font-medium text-purple-800 bg-purple-100 rounded">
-              Ephemeral
-            </span>
-          )}
-        </div>
+    <div className="max-w-md mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      {/* Header: Runner Name */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Computer size={20} className="text-gray-700 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{runner.name}</h2>
       </div>
 
-      {/* Runner Group ID */}
-      {runner_group_id != null && (
-        <div className="mb-4 text-sm text-gray-600">
-          <span className="font-medium">Group ID:</span> {runner_group_id}
+      {/* Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+        {/* Operating System */}
+        <div className="flex items-center">
+          <LucideReact.Cpu size={16} className="text-gray-400 mr-1" />
+          <span>{runner.os}</span>
         </div>
-      )}
+
+        {/* Status */}
+        <div className="flex items-center">
+          <span className="mr-1">Status:</span>
+          <span className={`${statusInfo.color} flex items-center`}>
+            {statusInfo.icon}
+            <span className="ml-1 capitalize">{runner.status}</span>
+          </span>
+        </div>
+
+        {/* Busy Indicator */}
+        <div className="flex items-center">
+          <span className="mr-1">Busy:</span>
+          {runner.busy ? (
+            <LucideReact.Loader size={16} className="animate-spin text-yellow-500" />
+          ) : (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          )}
+        </div>
+
+        {/* Ephemeral Flag */}
+        {runner.ephemeral && (
+          <div className="flex items-center">
+            <LucideReact.Clock size={16} className="text-indigo-500 mr-1" />
+            <span>Ephemeral</span>
+          </div>
+        )}
+      </div>
 
       {/* Labels */}
-      {labels.length > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {labels.map((label) => (
-            <span
-              key={label.id ?? label.name}
-              className="px-2 py-0.5 text-xs font-medium text-gray-800 bg-gray-200 rounded"
-              title={label.type ?? "custom"}
-            >
-              {label.name}
-            </span>
-          ))}
+      {runner.labels.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-1">Labels:</h3>
+          <div className="flex flex-wrap gap-2">
+            {runner.labels.map((label) => {
+              const isReadOnly = label.type === "read-only";
+              return (
+                <span
+                  key={label.id ?? label.name}
+                  className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                    isReadOnly ? "bg-gray-100 text-gray-800" : "bg-blue-100 text-blue-800"
+                  }`}
+                >
+                  {label.name}
+                </span>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* Encoded JIT Config */}
+      {/* Encoded JIT Configuration Preview */}
       <div>
         <h3 className="text-sm font-medium text-gray-700 mb-1">
-          Encoded JIT Config
+          JIT Configuration (Base64)
         </h3>
-        <div className="bg-gray-100 rounded p-2 overflow-x-auto text-xs font-mono text-gray-800">
-          {encoded_jit_config}
-        </div>
+        <pre className="max-h-32 overflow-auto break-all p-2 bg-gray-50 rounded text-xs font-mono text-gray-700">
+          {configPreview}
+        </pre>
       </div>
     </div>
   );

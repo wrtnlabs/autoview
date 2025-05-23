@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repository invitations let you manage who you collaborate with.
      *
      * @title Repository Invitation
     */
-    export type repository_invitation = {
+    export interface repository_invitation {
         /**
          * Unique identifier of the repository invitation.
         */
@@ -29,13 +30,13 @@ export namespace AutoViewInputSubTypes {
         url: string;
         html_url: string;
         node_id: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -138,13 +139,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -167,19 +168,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -246,58 +247,125 @@ export type AutoViewInput = AutoViewInputSubTypes.repository_invitation;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const formattedDate = createdDate.toLocaleDateString('default', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
-  const permissionLabel =
-    value.permissions.charAt(0).toUpperCase() + value.permissions.slice(1);
-  const statusLabel = value.expired ? 'Expired' : 'Active';
-  const statusClasses = value.expired
-    ? 'bg-red-100 text-red-800'
-    : 'bg-green-100 text-green-800';
-  const inviteeName = value.invitee?.login ?? 'Unknown';
-  const inviterName = value.inviter?.login ?? 'Unknown';
-  const repoName = value.repository.full_name;
-  const repoDesc =
-    value.repository.description?.trim() || 'No description available.';
-  const truncatedDesc =
-    repoDesc.length > 100 ? repoDesc.slice(0, 100) + '…' : repoDesc;
+
+  // Map permission to color classes
+  const permissionColorMap: Record<
+    AutoViewInputSubTypes.repository_invitation["permissions"],
+    string
+  > = {
+    read: "text-blue-500",
+    write: "text-yellow-500",
+    triage: "text-indigo-500",
+    maintain: "text-purple-500",
+    admin: "text-red-500",
+  };
+
+  const statusIcon = value.expired ? (
+    <LucideReact.XCircle className="text-red-500" size={16} />
+  ) : (
+    <LucideReact.CheckCircle className="text-green-500" size={16} />
+  );
+  const statusText = value.expired ? "Expired" : "Active";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4 text-gray-800">
-      {/* Repository Title */}
-      <div>
-        <h2 className="text-lg font-semibold truncate">{repoName}</h2>
-        <p className="mt-1 text-sm text-gray-600 line-clamp-2">{truncatedDesc}</p>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Header: Repository name and status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LucideReact.GitBranch className="text-gray-500" size={20} />
+          <span className="font-semibold text-gray-800 truncate">
+            {value.repository.full_name}
+          </span>
+        </div>
+        <div className="flex items-center gap-1">
+          {statusIcon}
+          <span
+            className={`text-sm font-medium ${
+              value.expired ? "text-red-600" : "text-green-600"
+            }`}
+          >
+            {statusText}
+          </span>
+        </div>
       </div>
 
-      {/* Invitation Details */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Inviter</h3>
-          <p className="mt-1 text-sm">{inviterName}</p>
+      {/* Inviter and Invitee */}
+      <div className="mt-4 grid grid-cols-2 gap-4">
+        {/* Inviter */}
+        <div className="flex items-center gap-2">
+          {value.inviter?.avatar_url ? (
+            <img
+              src={value.inviter.avatar_url}
+              alt={`${value.inviter.login} avatar`}
+              className="w-8 h-8 rounded-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = 
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    value.inviter?.login || ""
+                  )}&background=0D8ABC&color=fff`;
+              }}
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <LucideReact.User className="text-gray-500" size={16} />
+            </div>
+          )}
+          <span className="text-gray-700 text-sm truncate">
+            {value.inviter?.login || "Unknown"}
+          </span>
         </div>
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Invitee</h3>
-          <p className="mt-1 text-sm">{inviteeName}</p>
+
+        {/* Invitee */}
+        <div className="flex items-center gap-2">
+          {value.invitee?.avatar_url ? (
+            <img
+              src={value.invitee.avatar_url}
+              alt={`${value.invitee.login} avatar`}
+              className="w-8 h-8 rounded-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = 
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    value.invitee?.login || ""
+                  )}&background=64748B&color=fff`;
+              }}
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <LucideReact.User className="text-gray-500" size={16} />
+            </div>
+          )}
+          <span className="text-gray-700 text-sm truncate">
+            {value.invitee?.login || "Unknown"}
+          </span>
         </div>
       </div>
 
-      {/* Meta Info */}
-      <div className="flex flex-wrap items-center gap-2 text-sm">
+      {/* Created date */}
+      <div className="mt-4 flex items-center text-gray-600 text-sm gap-2">
+        <LucideReact.Calendar size={16} className="text-gray-400" />
+        <span>Invited on {createdDate}</span>
+      </div>
+
+      {/* Permissions */}
+      <div className="mt-2 flex items-center text-sm gap-2">
+        <LucideReact.Tag
+          size={16}
+          className={permissionColorMap[value.permissions]}
+        />
         <span
-          className={`px-2 py-1 rounded-full font-medium ${statusClasses}`}
+          className={`font-medium ${
+            permissionColorMap[value.permissions]
+          }`}
         >
-          {statusLabel}
+          {value.permissions.charAt(0).toUpperCase() +
+            value.permissions.slice(1)}
         </span>
-        <span className="px-2 py-1 rounded-full bg-blue-50 text-blue-800">
-          {permissionLabel}
-        </span>
-        <span className="ml-auto text-gray-500">{formattedDate}</span>
       </div>
     </div>
   );

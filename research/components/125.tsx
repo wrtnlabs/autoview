@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Journey of delivery.
@@ -10,7 +11,7 @@ export namespace AutoViewInputSubTypes {
      * delivering {@link IShoppingOrderGood goods} to the
      * {@link IShoppingCustomer customer}.
     */
-    export type IShoppingDeliveryJourney = {
+    export interface IShoppingDeliveryJourney {
         /**
          * Primary Key.
          *
@@ -64,7 +65,7 @@ export namespace AutoViewInputSubTypes {
          * @title Completion time of the journey
         */
         completed_at: null | (string & tags.Format<"date-time">);
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeliveryJourney;
 
@@ -73,89 +74,115 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeliveryJourney;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const typeMap: Record<AutoViewInput["type"], { label: string; color: string }> = {
-    preparing:       { label: "Preparing",    color: "bg-gray-200 text-gray-800" },
-    manufacturing:   { label: "Manufacturing", color: "bg-blue-200 text-blue-800" },
-    shipping:        { label: "Shipping",      color: "bg-yellow-200 text-yellow-800" },
-    delivering:      { label: "Delivering",    color: "bg-green-200 text-green-800" },
-  };
-  const { label: typeLabel, color: typeColor } =
-    typeMap[value.type] || { label: value.type, color: "bg-gray-200 text-gray-800" };
-  const title = value.title ?? typeLabel;
-  const description = value.description ?? "No description available";
-
-  const formatDate = (dateStr: string | null) =>
-    dateStr
-      ? new Date(dateStr).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "2-digit",
+  const formatDateTime = (iso: string | null): string =>
+    iso
+      ? new Date(iso).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
         })
-      : null;
+      : "—";
 
-  const startedAt   = formatDate(value.started_at);
-  const completedAt = formatDate(value.completed_at);
+  const isDeleted = value.deleted_at !== null;
+  const isCompleted = !isDeleted && value.completed_at !== null;
+  const isInProgress = !isDeleted && value.started_at !== null && !isCompleted;
+  const statusLabel = isDeleted
+    ? "Deleted"
+    : isCompleted
+    ? "Completed"
+    : isInProgress
+    ? "In Progress"
+    : "Pending";
 
-  let duration: string | null = null;
-  if (value.started_at && value.completed_at) {
-    const diffMs = new Date(value.completed_at).getTime() - new Date(value.started_at).getTime();
-    const totalMinutes = Math.floor(diffMs / 60000);
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-    duration = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+  let statusIcon: JSX.Element;
+  if (isDeleted) {
+    statusIcon = (
+      <LucideReact.XCircle className="text-red-500 ml-2" size={16} />
+    );
+  } else if (isCompleted) {
+    statusIcon = (
+      <LucideReact.CheckCircle className="text-green-500 ml-2" size={16} />
+    );
+  } else if (isInProgress) {
+    statusIcon = (
+      <LucideReact.Clock className="text-amber-500 ml-2" size={16} />
+    );
+  } else {
+    statusIcon = (
+      <LucideReact.Info className="text-gray-400 ml-2" size={16} />
+    );
   }
 
-  let status = "Pending";
-  if (value.completed_at) status = "Completed";
-  else if (value.started_at) status = "In Progress";
+  const stepIcon: JSX.Element = (() => {
+    switch (value.type) {
+      case "preparing":
+        return <LucideReact.Package className="text-blue-500 mr-2" size={20} />;
+      case "manufacturing":
+        return <LucideReact.Settings className="text-indigo-500 mr-2" size={20} />;
+      case "shipping":
+        return <LucideReact.Truck className="text-emerald-500 mr-2" size={20} />;
+      case "delivering":
+        return <LucideReact.Home className="text-purple-500 mr-2" size={20} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400 mr-2" size={20} />;
+    }
+  })();
+
+  const title =
+    value.title && value.title.trim().length > 0
+      ? value.title
+      : value.type.charAt(0).toUpperCase() + value.type.slice(1);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="p-4 bg-white rounded-lg shadow flex flex-col space-y-3">
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <span
-          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${typeColor}`}
-        >
-          {typeLabel}
-        </span>
-        <span className="text-xs text-gray-500">{status}</span>
-      </div>
-
-      <h3 className="text-lg font-semibold text-gray-900 truncate">{title}</h3>
-
-      {description && (
-        <p className="text-gray-700 text-sm line-clamp-2">{description}</p>
-      )}
-
-      <div className="text-sm text-gray-600 space-y-1">
-        {startedAt && (
-          <div>
-            Start: <time dateTime={value.started_at!}>{startedAt}</time>
-          </div>
-        )}
-        {completedAt && (
-          <div>
-            End: <time dateTime={value.completed_at!}>{completedAt}</time>
-          </div>
-        )}
-        {duration && (
-          <div>
-            Duration: <span>{duration}</span>
-          </div>
-        )}
-        <div>
-          Logged:{" "}
-          <time dateTime={value.created_at}>
-            {new Date(value.created_at).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}
-          </time>
+        <div className="flex items-center">
+          {stepIcon}
+          <h3 className="text-lg font-semibold text-gray-900 truncate">
+            {title}
+          </h3>
+        </div>
+        <div className="flex items-center text-sm text-gray-600">
+          <span>{statusLabel}</span>
+          {statusIcon}
         </div>
       </div>
-    </article>
+
+      {/* Description */}
+      {value.description && (
+        <p className="mt-2 text-gray-600 text-sm line-clamp-3">
+          {value.description}
+        </p>
+      )}
+
+      {/* Timeline */}
+      <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>
+            {value.started_at
+              ? formatDateTime(value.started_at)
+              : "Not started"}
+          </span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.CheckCircle size={16} className="mr-1" />
+          <span>
+            {value.completed_at
+              ? formatDateTime(value.completed_at)
+              : "Not completed"}
+          </span>
+        </div>
+      </div>
+
+      {/* Deleted Info */}
+      {isDeleted && (
+        <div className="mt-2 flex items-center text-red-500 text-sm">
+          <LucideReact.XCircle size={16} className="mr-1" />
+          <span>Deleted on {formatDateTime(value.deleted_at)}</span>
+        </div>
+      )}
+    </div>
   );
 }

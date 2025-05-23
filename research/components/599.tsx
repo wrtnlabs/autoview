@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * An invocation of a workflow
      *
      * @title Workflow Run
     */
-    export type workflow_run = {
+    export interface workflow_run {
         /**
          * The ID of the workflow run.
         */
@@ -41,7 +42,7 @@ export namespace AutoViewInputSubTypes {
          * Attempt number of the run, 1 for first attempt and higher if the workflow was re-run.
         */
         run_attempt?: number & tags.Type<"int32">;
-        referenced_workflows?: any[] | null;
+        referenced_workflows?: AutoViewInputSubTypes.referenced_workflow[] | null;
         event: string;
         status: string | null;
         conclusion: string | null;
@@ -57,7 +58,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * Pull requests that are open with a `head_sha` or `head_branch` that matches the workflow run. The returned pull requests do not necessarily indicate pull requests that triggered the run.
         */
-        pull_requests: any[] | null;
+        pull_requests: AutoViewInputSubTypes.pull_request_minimal[] | null;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         actor?: AutoViewInputSubTypes.simple_user;
@@ -106,15 +107,49 @@ export namespace AutoViewInputSubTypes {
          * The event-specific title associated with the run or the run-name if set, or the value of `run-name` if it is set in the workflow.
         */
         display_title: string;
-    };
-    export type referenced_workflow = any;
-    export type pull_request_minimal = any;
+    }
+    /**
+     * A workflow referenced/reused by the initial caller workflow
+     *
+     * @title Referenced workflow
+    */
+    export interface referenced_workflow {
+        path: string;
+        sha: string;
+        ref?: string;
+    }
+    /**
+     * @title Pull Request Minimal
+    */
+    export interface pull_request_minimal {
+        id: number & tags.Type<"int32">;
+        number: number & tags.Type<"int32">;
+        url: string;
+        head: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+        base: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -137,7 +172,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A commit.
      *
@@ -159,7 +194,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * Timestamp of the commit
         */
-        timestamp: string & tags.Format<"date-time">;
+        timestamp: string;
         /**
          * Information about the Git author
         */
@@ -171,7 +206,7 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's author
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
         /**
          * Information about the Git committer
@@ -184,7 +219,7 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's committer
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
     } | null;
     /**
@@ -192,7 +227,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -295,19 +330,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -345,119 +380,128 @@ export type AutoViewInput = AutoViewInputSubTypes.workflow_run;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const displayTitle = value.name && value.name.trim() !== "" ? value.name : value.display_title;
+  const title = value.display_title || value.name || `Run #${value.run_number}`;
+  const createdDate = new Date(value.created_at).toLocaleString();
+  const startedDate = value.run_started_at
+    ? new Date(value.run_started_at).toLocaleString()
+    : null;
 
-  const formattedDate = (iso?: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A";
+  // Status icon mapping
+  let statusIcon: JSX.Element;
+  const st = value.status;
+  const concl = value.conclusion;
+  if (st === "in_progress") {
+    statusIcon = (
+      <LucideReact.Loader className="animate-spin text-blue-500" size={16} />
+    );
+  } else if (st === "queued") {
+    statusIcon = <LucideReact.Clock className="text-amber-500" size={16} />;
+  } else if (st === "completed") {
+    if (concl === "success") {
+      statusIcon = (
+        <LucideReact.CheckCircle className="text-green-500" size={16} />
+      );
+    } else if (concl === "failure") {
+      statusIcon = (
+        <LucideReact.AlertTriangle className="text-red-500" size={16} />
+      );
+    } else {
+      statusIcon = (
+        <LucideReact.XCircle className="text-gray-500" size={16} />
+      );
+    }
+  } else {
+    statusIcon = (
+      <LucideReact.HelpCircle className="text-gray-400" size={16} />
+    );
+  }
 
-  const createdAt = formattedDate(value.created_at);
-  const updatedAt = formattedDate(value.updated_at);
-  const startedAt = formattedDate(value.run_started_at ?? null);
-
-  const repositoryName = value.repository.full_name;
-  const branch = value.head_branch ?? "—";
-  const sha = value.head_sha.slice(0, 7);
-
-  const getStatusColor = (status?: string | null): string => {
-    if (!status) return "bg-gray-200 text-gray-800";
-    if (status.includes("in_progress")) return "bg-blue-100 text-blue-800";
-    if (status.includes("queued") || status.includes("requested")) return "bg-yellow-100 text-yellow-800";
-    if (status.includes("completed")) return "bg-green-100 text-green-800";
-    return "bg-gray-200 text-gray-800";
-  };
-
-  const getConclusionColor = (conclusion?: string | null): string => {
-    if (!conclusion) return "bg-gray-200 text-gray-800";
-    if (conclusion === "success") return "bg-green-100 text-green-800";
-    if (conclusion === "failure" || conclusion === "timed_out" || conclusion === "action_required")
-      return "bg-red-100 text-red-800";
-    if (conclusion === "cancelled" || conclusion === "neutral") return "bg-yellow-100 text-yellow-800";
-    return "bg-gray-200 text-gray-800";
+  // Avatar fallback generator
+  const avatarFallback = (login: string) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      login
+    )}&background=ccc&color=fff`;
+  const renderUser = (
+    user: AutoViewInputSubTypes.simple_user,
+    label: string
+  ) => {
+    const src = user.avatar_url || avatarFallback(user.login);
+    return (
+      <div className="flex items-center gap-2">
+        <img
+          src={src}
+          alt={user.login}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).onerror = null;
+            e.currentTarget.src = avatarFallback(user.login);
+          }}
+          className="w-6 h-6 rounded-full object-cover"
+        />
+        <span className="text-sm text-gray-700">{user.login}</span>
+        <span className="text-xs text-gray-400">{label}</span>
+      </div>
+    );
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 truncate">{displayTitle}</h2>
-        <div className="mt-1 text-sm text-gray-600">
-          Run #{value.run_number}
-          {value.run_attempt && value.run_attempt > 1 ? ` (Attempt ${value.run_attempt})` : ""}
-          {" • "}
-          {value.event}
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4 max-w-md">
+      {/* Header: Title & Status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LucideReact.Activity className="text-gray-600" size={20} />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {title}
+          </h2>
         </div>
-      </header>
-
-      <div className="flex flex-wrap gap-2 mb-4">
-        <span className={`px-2 py-1 text-xs font-medium rounded ${getStatusColor(value.status)}`}>
-          {value.status ?? "Unknown"}
-        </span>
-        <span className={`px-2 py-1 text-xs font-medium rounded ${getConclusionColor(value.conclusion)}`}>
-          {value.conclusion ?? "N/A"}
-        </span>
-      </div>
-
-      <div className="space-y-3 text-sm text-gray-700">
-        <div className="flex justify-between">
-          <span className="font-medium">Repository:</span>
-          <span className="truncate">{repositoryName}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium">Branch:</span>
-          <span className="truncate">{branch}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium">Commit:</span>
-          <span className="font-mono">{sha}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium">Started:</span>
-          <span>{startedAt}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium">Created:</span>
-          <span>{createdAt}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium">Updated:</span>
-          <span>{updatedAt}</span>
+        <div className="flex items-center gap-1">
+          {statusIcon}
+          <span className="text-sm text-gray-600 capitalize">
+            {concl || st || "unknown"}
+          </span>
         </div>
       </div>
 
-      {(value.actor || value.triggering_actor) && (
-        <div className="mt-4 border-t pt-4 space-y-3">
-          {value.actor && (
-            <div className="flex items-center space-x-2">
-              <img
-                src={value.actor.avatar_url}
-                alt={`${value.actor.login} avatar`}
-                className="w-6 h-6 rounded-full"
-              />
-              <span className="text-sm font-medium text-gray-800 truncate">{value.actor.login}</span>
-              <span className="text-xs text-gray-500">Actor</span>
-            </div>
-          )}
-          {value.triggering_actor && (
-            <div className="flex items-center space-x-2">
-              <img
-                src={value.triggering_actor.avatar_url}
-                alt={`${value.triggering_actor.login} avatar`}
-                className="w-6 h-6 rounded-full"
-              />
-              <span className="text-sm font-medium text-gray-800 truncate">{value.triggering_actor.login}</span>
-              <span className="text-xs text-gray-500">Trigger</span>
-            </div>
-          )}
+      {/* Metadata Grid */}
+      <div className="grid grid-cols-2 gap-3 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created: {createdDate}</span>
         </div>
-      )}
-    </article>
+        {startedDate && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Play size={16} className="text-gray-400" />
+            <span>Started: {startedDate}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1">
+          <LucideReact.GitBranch size={16} className="text-gray-400" />
+          <span>{value.head_branch || value.head_sha.slice(0, 7)}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.GitPullRequest size={16} className="text-gray-400" />
+          <span>{value.pull_requests?.length ?? 0} PR(s)</span>
+        </div>
+      </div>
+
+      {/* Actors */}
+      <div className="flex flex-wrap gap-4">
+        {value.actor && renderUser(value.actor, "Actor")}
+        {value.triggering_actor &&
+          renderUser(value.triggering_actor, "Triggered")}
+      </div>
+
+      {/* Repository & Path */}
+      <div className="text-sm text-gray-500 truncate">
+        <div className="flex items-center gap-1">
+          <LucideReact.Repeat size={16} className="text-gray-400" />
+          <span>{value.repository.full_name}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.FileText size={16} className="text-gray-400" />
+          <span className="truncate">{value.path}</span>
+        </div>
+      </div>
+    </div>
   );
 }

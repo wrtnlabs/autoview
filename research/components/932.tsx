@@ -1,11 +1,12 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The public key used for setting user Codespaces' Secrets.
      *
      * @title CodespacesUserPublicKey
     */
-    export type codespaces_user_public_key = {
+    export interface codespaces_user_public_key {
         /**
          * The identifier for the key.
         */
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
          * The Base64 encoded public key.
         */
         key: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.codespaces_user_public_key;
 
@@ -22,27 +23,27 @@ export type AutoViewInput = AutoViewInputSubTypes.codespaces_user_public_key;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Split the Base64 key into 64-character segments for improved readability.
-  const segmentedKey: string[] = value.key.match(/.{1,64}/g) ?? [value.key];
+  // 1. Destructure the input value for clarity
+  const { key_id, key } = value;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    A simple card layout displaying the Key ID and the Public Key in a scrollable code block.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Codespaces User Public Key
-      </h2>
-      <div className="mb-4">
-        <span className="text-sm font-medium text-gray-600">Key ID:</span>
-        <p className="mt-1 text-sm text-gray-900 break-all">{value.key_id}</p>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Key ID Section */}
+      <div className="flex items-center mb-2 text-gray-700">
+        <LucideReact.Key size={16} className="mr-2 text-gray-500" />
+        <span className="font-medium">Key ID:</span>
+        <span className="ml-1 font-mono break-all">{key_id}</span>
       </div>
-      <div>
-        <span className="text-sm font-medium text-gray-600">Public Key:</span>
-        <pre className="mt-1 p-3 bg-gray-100 text-xs font-mono text-gray-800 rounded border border-gray-200 overflow-x-auto whitespace-pre-wrap">
-          {segmentedKey.join("\n")}
-        </pre>
+
+      {/* Public Key Section */}
+      <div className="flex items-center mb-1 text-gray-700">
+        <LucideReact.Code size={16} className="mr-2 text-gray-500" />
+        <span className="font-medium">Public Key</span>
       </div>
+      <pre className="font-mono text-xs bg-gray-100 p-2 rounded break-all overflow-x-auto">
+        {key}
+      </pre>
     </div>
   );
 }

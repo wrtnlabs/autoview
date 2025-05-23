@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type ChatSessionsView = {
+    export interface ChatSessionsView {
         sessions?: AutoViewInputSubTypes.ChatSession[];
-    };
-    export type ChatSession = {
+    }
+    export interface ChatSession {
         key?: string;
         chatId?: string;
         teamChatSectionId?: string;
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
         chatType?: string;
         personType?: string;
         personId?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ChatSessionsView;
 
@@ -34,72 +35,90 @@ export type AutoViewInput = AutoViewInputSubTypes.ChatSessionsView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data transformation: sort sessions by most recent activity timestamp
   const sessions = value.sessions ?? [];
+  const sortedSessions = [...sessions].sort((a, b) => {
+    const aTime = a.updatedAt ?? a.postedAt ?? a.receivedAt ?? 0;
+    const bTime = b.updatedAt ?? b.postedAt ?? b.receivedAt ?? 0;
+    return bTime - aTime;
+  });
 
-  const formatDate = (ts?: number): string => {
-    if (!ts) return "N/A";
-    return new Date(ts).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // 2. Handle empty state
+  if (sortedSessions.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-2 text-lg">No chat sessions available</p>
+      </div>
+    );
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Render list of chat sessions
   return (
-    <div className="w-full p-2 space-y-4">
-      {sessions.length === 0 ? (
-        <div className="text-center text-gray-500">No chat sessions available.</div>
-      ) : (
-        sessions.map((session, index) => {
-          const unreadCount = session.unread ?? 0;
-          const lastActivity =
-            session.updatedAt ??
-            session.postedAt ??
-            session.receivedAt ??
-            session.readAt ??
-            session.createdAt;
-          const title = session.channelId
-            ? `Channel: ${session.channelId}`
-            : session.chatType
-            ? `${session.chatType.charAt(0).toUpperCase() + session.chatType.slice(1)} Chat`
-            : "Chat Session";
+    <div className="space-y-4">
+      {sortedSessions.map((session, idx) => {
+        // derive display name
+        const name =
+          session.chatId ??
+          session.personId ??
+          session.teamChatSectionId ??
+          'Untitled Chat';
+        // derive last activity time
+        const timestamp =
+          session.updatedAt ??
+          session.postedAt ??
+          session.receivedAt ??
+          session.createdAt ??
+          0;
+        const formattedTime = new Date(timestamp).toLocaleString();
+        const unreadCount = session.unread ?? 0;
+        const alertCount = session.alert ?? 0;
 
-          return (
-            <div
-              key={session.id ?? session.key ?? index}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow"
-            >
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">{title}</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  Last activity: {formatDate(lastActivity)}
-                </p>
-              </div>
-              <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-wrap gap-2">
-                {unreadCount > 0 && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                    {unreadCount} unread
-                  </span>
-                )}
-                {session.watch && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                    Watching: {session.watch}
-                  </span>
-                )}
-                {session.allMentionImportant && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    @ Mentions Highlighted
-                  </span>
-                )}
+        // choose watch icon
+        let WatchIcon: JSX.Element | null = null;
+        if (session.watch === 'all') {
+          WatchIcon = <LucideReact.Eye size={16} className="text-blue-500" />;
+        } else if (session.watch === 'info') {
+          WatchIcon = <LucideReact.EyeOff size={16} className="text-yellow-500" />;
+        }
+
+        return (
+          <div
+            key={session.key ?? session.id ?? idx}
+            className="flex items-center justify-between p-3 bg-white rounded-lg shadow-sm hover:bg-gray-50"
+          >
+            <div className="flex items-center space-x-3">
+              <LucideReact.MessageSquare size={24} className="text-gray-500" />
+              <div className="flex flex-col overflow-hidden">
+                <span className="font-medium text-gray-900 truncate">{name}</span>
+                <span className="flex items-center space-x-1 text-sm text-gray-500 truncate">
+                  <LucideReact.Calendar size={14} />
+                  <span>{formattedTime}</span>
+                </span>
               </div>
             </div>
-          );
-        })
-      )}
+            <div className="flex items-center space-x-4">
+              {WatchIcon}
+              {alertCount > 0 && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Bell size={16} className="text-red-500" />
+                  <span className="text-sm font-semibold text-red-500">
+                    {alertCount}
+                  </span>
+                </div>
+              )}
+              {unreadCount > 0 && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Mail size={16} className="text-blue-500" />
+                  <span className="text-sm font-semibold text-blue-500">
+                    {unreadCount}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

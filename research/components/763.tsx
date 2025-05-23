@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Delivery made by a webhook.
      *
      * @title Webhook delivery
     */
-    export type hook_delivery = {
+    export interface hook_delivery {
         /**
          * Unique identifier of the delivery.
         */
@@ -79,7 +80,7 @@ export namespace AutoViewInputSubTypes {
             */
             payload: string | null;
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.hook_delivery;
 
@@ -88,127 +89,97 @@ export type AutoViewInput = AutoViewInputSubTypes.hook_delivery;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const deliveredDate = new Date(value.delivered_at).toLocaleString();
-  const throttledDate = value.throttled_at
-    ? new Date(value.throttled_at).toLocaleString()
-    : null;
-  const durationMs = `${value.duration} ms`;
-  const redelivery = value.redelivery ? "Yes" : "No";
-  const installationId = value.installation_id ?? "—";
-  const repositoryId = value.repository_id ?? "—";
-  const requestHeadersCount = value.request.headers
-    ? Object.keys(value.request.headers).length
-    : 0;
-  const responseHeadersCount = value.response.headers
-    ? Object.keys(value.response.headers).length
-    : 0;
-  const reqPayloadRaw = value.request.payload
-    ? JSON.stringify(value.request.payload, null, 2)
-    : null;
-  const resPayloadRaw = value.response.payload;
-  const truncate = (text: string | null, length: number) => {
-    if (!text) return "—";
-    return text.length > length ? text.slice(0, length) + "…" : text;
-  };
-  const reqPreview = truncate(reqPayloadRaw, 200);
-  const resPreview = truncate(resPayloadRaw, 200);
+  const deliveredDate = new Date(value.delivered_at);
+  const formattedDeliveredAt = deliveredDate.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const durationLabel = `${value.duration}ms`;
+  const statusCode = value.status_code;
+  const isSuccess = statusCode >= 200 && statusCode < 300;
+  const StatusIcon =
+    isSuccess
+      ? LucideReact.CheckCircle
+      : statusCode >= 400 && statusCode < 500
+      ? LucideReact.AlertTriangle
+      : LucideReact.XCircle;
+  const statusColor = isSuccess
+    ? "text-green-500"
+    : statusCode >= 400 && statusCode < 500
+    ? "text-amber-500"
+    : "text-red-500";
+  const guidShort =
+    value.guid.length > 8 ? `${value.guid.slice(0, 8)}…` : value.guid;
+  const urlDisplay = value.url
+    ? value.url.length > 30
+      ? `${value.url.slice(0, 30)}…`
+      : value.url
+    : "";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden divide-y divide-gray-200">
-      {/* Header */}
-      <div className="p-4 bg-gray-50">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Webhook Delivery #{value.id}
-        </h2>
-        <p className="text-sm text-gray-600">GUID: {value.guid}</p>
+    <div className="max-w-md p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-lg font-semibold text-gray-800">
+          Delivery #{value.id}
+        </span>
+        <div className="flex items-center gap-1">
+          <StatusIcon size={16} className={statusColor} />
+          <span className="text-sm font-medium capitalize text-gray-700">
+            {value.status}
+          </span>
+        </div>
       </div>
-
-      {/* Main Details */}
-      <div className="p-4 space-y-3">
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Delivered At:</span>
-          <span className="text-sm font-medium text-gray-800">
-            {deliveredDate}
-          </span>
+      <div className="grid grid-cols-1 gap-y-2 text-sm text-gray-600">
+        <div className="flex items-center gap-2">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>{formattedDeliveredAt}</span>
         </div>
-        {throttledDate && (
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-600">Throttled At:</span>
-            <span className="text-sm font-medium text-gray-800">
-              {throttledDate}
-            </span>
-          </div>
-        )}
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Status:</span>
-          <span className="text-sm font-medium text-gray-800">
-            {value.status} ({value.status_code})
-          </span>
+        <div className="flex items-center gap-2">
+          <LucideReact.Clock size={16} className="text-gray-400" strokeWidth={1.5} />
+          <span>{durationLabel}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Duration:</span>
-          <span className="text-sm font-medium text-gray-800">
-            {durationMs}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Redelivery:</span>
-          <span className="text-sm font-medium text-gray-800">
-            {redelivery}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Event:</span>
-          <span className="text-sm font-medium text-gray-800">
+        <div className="flex items-center gap-2">
+          <LucideReact.Tag size={16} className="text-gray-400" />
+          <span>
             {value.event}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Action:</span>
-          <span className="text-sm font-medium text-gray-800">
-            {value.action ?? "—"}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Installation ID:</span>
-          <span className="text-sm font-medium text-gray-800">
-            {installationId}
-          </span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-sm text-gray-600">Repository ID:</span>
-          <span className="text-sm font-medium text-gray-800">
-            {repositoryId}
+            {value.action ? ` / ${value.action}` : ""}
           </span>
         </div>
         {value.url && (
-          <div>
-            <span className="text-sm text-gray-600 block">URL:</span>
-            <p className="text-sm text-blue-600 truncate">{value.url}</p>
+          <div className="flex items-center gap-2">
+            <LucideReact.Link size={16} className="text-gray-400" />
+            <a
+              href={value.url}
+              className="truncate text-blue-600 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {urlDisplay}
+            </a>
           </div>
         )}
-      </div>
-
-      {/* Request & Response Sections */}
-      <div className="p-4 bg-gray-50 space-y-4">
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700">Request</h3>
-          <div className="mt-1 text-xs text-gray-600">
-            Headers: {requestHeadersCount} | Payload:
+        {value.redelivery && (
+          <div className="flex items-center gap-2">
+            <LucideReact.RefreshCcw size={16} className="text-indigo-500" />
+            <span>Redelivery</span>
           </div>
-          <pre className="mt-1 bg-gray-100 p-2 rounded text-xs font-mono text-gray-800 max-h-24 overflow-auto">
-            {reqPreview}
-          </pre>
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700">Response</h3>
-          <div className="mt-1 text-xs text-gray-600">
-            Headers: {responseHeadersCount} | Payload:
+        )}
+        {value.throttled_at && (
+          <div className="flex items-center gap-2">
+            <LucideReact.AlertTriangle size={16} className="text-amber-500" />
+            <span>
+              Throttled at{" "}
+              {new Date(value.throttled_at).toLocaleString(undefined, {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })}
+            </span>
           </div>
-          <pre className="mt-1 bg-gray-100 p-2 rounded text-xs font-mono text-gray-800 max-h-24 overflow-auto">
-            {resPreview}
-          </pre>
+        )}
+        <div className="flex items-center gap-2">
+          <LucideReact.Hash size={16} className="text-gray-400" />
+          <span className="font-mono">{guidShort}</span>
         </div>
       </div>
     </div>

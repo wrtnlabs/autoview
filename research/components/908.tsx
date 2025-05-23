@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A team discussion is a persistent record of a free-form conversation within a team.
      *
      * @title Team Discussion
     */
-    export type team_discussion = {
+    export interface team_discussion {
         author: AutoViewInputSubTypes.nullable_simple_user;
         /**
          * The main text of the discussion.
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         url: string & tags.Format<"uri">;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -76,7 +77,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -87,7 +88,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_discussion;
 
@@ -96,88 +97,80 @@ export type AutoViewInput = AutoViewInputSubTypes.team_discussion;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at).toLocaleDateString("default", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  const authorName = value.author?.name || value.author?.login || "Unknown";
+  const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    authorName
+  )}&background=random&color=fff`;
+  const createdDate = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
-  const updatedDate =
-    value.updated_at !== null
-      ? new Date(value.updated_at).toLocaleDateString("default", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : null;
-  const authorName = value.author?.login ?? "Unknown";
-  const avatarUrl = value.author?.avatar_url;
-  const discussionNumber = `#${value.number}`;
-  const bodyExcerpt =
-    value.body.length > 200
-      ? value.body.slice(0, 200).trim() + "..."
-      : value.body;
+  const editedDate = value.last_edited_at
+    ? new Date(value.last_edited_at).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">{value.title}</h2>
-        <div className="flex space-x-1">
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex items-center justify-between">
+        <h2 className="flex items-center gap-1 text-lg font-semibold text-gray-900">
+          {value.title}
           {value.pinned && (
-            <span className="px-2 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-              Pinned
-            </span>
+            <LucideReact.Bookmark
+              size={16}
+              className="text-yellow-500"
+              aria-label="Pinned"
+            />
           )}
           {value.private && (
-            <span className="px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded">
-              Private
-            </span>
+            <LucideReact.Lock
+              size={16}
+              className="text-gray-500"
+              aria-label="Private"
+            />
           )}
+        </h2>
+      </div>
+
+      <div className="flex items-center mt-3">
+        <img
+          src={value.author?.avatar_url || placeholderAvatar}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = placeholderAvatar;
+          }}
+          alt={authorName}
+          className="w-8 h-8 rounded-full object-cover"
+        />
+        <span className="ml-2 text-sm font-medium text-gray-700">
+          {authorName}
+        </span>
+      </div>
+
+      <p className="mt-4 text-gray-700 text-sm line-clamp-3">{value.body}</p>
+
+      <div className="mt-4 flex flex-wrap items-center space-x-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.MessageSquare size={16} className="text-gray-500" />
+          <span>{value.comments_count}</span>
         </div>
-      </div>
-
-      {/* Meta Info */}
-      <div className="mt-2 flex items-center text-sm text-gray-500">
-        {avatarUrl && (
-          <img
-            src={avatarUrl}
-            alt={authorName}
-            className="w-6 h-6 rounded-full mr-2 flex-shrink-0"
-          />
-        )}
-        <span className="truncate">{authorName}</span>
-        <span className="mx-2">·</span>
-        <span>{discussionNumber}</span>
-        <span className="mx-2">·</span>
-        <span>Created {createdDate}</span>
-        {updatedDate && (
-          <>
-            <span className="mx-2">·</span>
-            <span>Updated {updatedDate}</span>
-          </>
-        )}
-      </div>
-
-      {/* Body Excerpt */}
-      <p className="mt-3 text-gray-700 text-sm line-clamp-3">
-        {bodyExcerpt}
-      </p>
-
-      {/* Footer: Comments & Reactions */}
-      <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-        <span>{value.comments_count} Comments</span>
         {value.reactions && (
-          <div className="flex items-center space-x-2">
-            <span>👍 {value.reactions["+1"]}</span>
-            <span>👎 {value.reactions["-1"]}</span>
-            <span>❤ {value.reactions.heart}</span>
-            <span>🎉 {value.reactions.hooray}</span>
-            <span>😄 {value.reactions.laugh}</span>
-            <span>😕 {value.reactions.confused}</span>
-            <span>🚀 {value.reactions.rocket}</span>
-            <span>👀 {value.reactions.eyes}</span>
+          <div className="flex items-center gap-1">
+            <LucideReact.Heart size={16} className="text-red-500" />
+            <span>{value.reactions.total_count}</span>
           </div>
+        )}
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-500" />
+          <span>{createdDate}</span>
+        </div>
+        {editedDate && (
+          <span className="ml-2 italic text-gray-400">
+            (edited {editedDate})
+          </span>
         )}
       </div>
     </div>

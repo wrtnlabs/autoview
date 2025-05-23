@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A check performed on the code of a given code change
      *
      * @title CheckRun
     */
-    export type check_run = {
+    export interface check_run {
         /**
          * The id of the check.
         */
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
         */
         pull_requests: AutoViewInputSubTypes.pull_request_minimal[];
         deployment?: AutoViewInputSubTypes.deployment_simple;
-    };
+    }
     /**
      * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
      *
@@ -64,7 +65,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -92,12 +93,71 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * @title Pull Request Minimal
     */
-    export type pull_request_minimal = {
+    export interface pull_request_minimal {
         id: number & tags.Type<"int32">;
         number: number & tags.Type<"int32">;
         url: string;
@@ -119,13 +179,13 @@ export namespace AutoViewInputSubTypes {
                 name: string;
             };
         };
-    };
+    }
     /**
      * A deployment created as the result of an Actions check run from a workflow that references an environment
      *
      * @title Deployment
     */
-    export type deployment_simple = {
+    export interface deployment_simple {
         url: string & tags.Format<"uri">;
         /**
          * Unique identifier of the deployment
@@ -155,132 +215,141 @@ export namespace AutoViewInputSubTypes {
         */
         production_environment?: boolean;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.check_run;
 
 
 
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data derivations and formatting
-  const shortSha = value.head_sha.slice(0, 7);
-  const started = value.started_at
-    ? new Date(value.started_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
-    : 'N/A';
+  // 1. Data transformation and derived values
+  const startedDate = value.started_at ? new Date(value.started_at) : null;
+  const completedDate = value.completed_at ? new Date(value.completed_at) : null;
+  const formattedStarted = startedDate ? startedDate.toLocaleString() : "N/A";
+  const formattedCompleted = completedDate ? completedDate.toLocaleString() : "N/A";
   const duration =
-    value.started_at && value.completed_at
-      ? (() => {
-          const ms =
-            new Date(value.completed_at).getTime() - new Date(value.started_at).getTime();
-          const m = Math.floor(ms / 60000);
-          const s = Math.floor((ms % 60000) / 1000);
-          return `${m > 0 ? `${m}m ` : ''}${s}s`;
-        })()
+    startedDate && completedDate
+      ? `${Math.round((completedDate.getTime() - startedDate.getTime()) / 1000)}s`
       : null;
 
-  // Badge mapping
-  let statusLabel = '';
-  let badgeBg = '';
-  let badgeText = '';
-  if (value.status === 'completed') {
+  // Determine status icon and label
+  let statusIcon: JSX.Element;
+  let statusLabel = value.status.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  if (value.status === "completed") {
     switch (value.conclusion) {
-      case 'success':
-        statusLabel = 'Success';
-        badgeBg = 'bg-green-100';
-        badgeText = 'text-green-800';
+      case "success":
+        statusIcon = <LucideReact.CheckCircle size={20} className="text-green-500" />;
+        statusLabel = "Success";
         break;
-      case 'failure':
-        statusLabel = 'Failure';
-        badgeBg = 'bg-red-100';
-        badgeText = 'text-red-800';
+      case "failure":
+        statusIcon = <LucideReact.XCircle size={20} className="text-red-500" />;
+        statusLabel = "Failure";
         break;
-      case 'neutral':
-        statusLabel = 'Neutral';
-        badgeBg = 'bg-gray-100';
-        badgeText = 'text-gray-800';
+      case "neutral":
+        statusIcon = <LucideReact.MinusCircle size={20} className="text-gray-500" />;
+        statusLabel = "Neutral";
         break;
-      case 'cancelled':
-        statusLabel = 'Cancelled';
-        badgeBg = 'bg-gray-100';
-        badgeText = 'text-gray-800';
+      case "cancelled":
+        statusIcon = <LucideReact.XCircle size={20} className="text-gray-400" />;
+        statusLabel = "Cancelled";
         break;
-      case 'skipped':
-        statusLabel = 'Skipped';
-        badgeBg = 'bg-gray-100';
-        badgeText = 'text-gray-800';
+      case "skipped":
+        statusIcon = <LucideReact.SkipForward size={20} className="text-yellow-500" />;
+        statusLabel = "Skipped";
         break;
-      case 'timed_out':
-        statusLabel = 'Timed Out';
-        badgeBg = 'bg-red-100';
-        badgeText = 'text-red-800';
+      case "timed_out":
+        statusIcon = <LucideReact.Clock size={20} className="text-amber-500" />;
+        statusLabel = "Timed Out";
         break;
-      case 'action_required':
-        statusLabel = 'Action Required';
-        badgeBg = 'bg-red-100';
-        badgeText = 'text-red-800';
+      case "action_required":
+        statusIcon = <LucideReact.AlertTriangle size={20} className="text-red-600" />;
+        statusLabel = "Action Required";
         break;
       default:
-        statusLabel = 'Completed';
-        badgeBg = 'bg-gray-100';
-        badgeText = 'text-gray-800';
+        statusIcon = <LucideReact.HelpCircle size={20} className="text-gray-400" />;
+        statusLabel = "Completed";
     }
   } else {
-    const map: Record<string, { label: string; bg: string; text: string }> = {
-      queued: { label: 'Queued', bg: 'bg-gray-100', text: 'text-gray-800' },
-      in_progress: { label: 'In Progress', bg: 'bg-blue-100', text: 'text-blue-800' },
-      waiting: { label: 'Waiting', bg: 'bg-yellow-100', text: 'text-yellow-800' },
-      requested: { label: 'Requested', bg: 'bg-yellow-100', text: 'text-yellow-800' },
-      pending: { label: 'Pending', bg: 'bg-yellow-100', text: 'text-yellow-800' },
-    };
-    const entry = map[value.status] || {
-      label: value.status,
-      bg: 'bg-gray-100',
-      text: 'text-gray-800',
-    };
-    statusLabel = entry.label;
-    badgeBg = entry.bg;
-    badgeText = entry.text;
+    statusIcon = <LucideReact.Clock size={20} className="text-amber-500" />;
   }
 
-  // Summary or title
-  const displaySummary =
-    value.output.summary ?? value.output.title ?? 'No details available';
-
-  // Pull requests display
-  const prCount = value.pull_requests.length;
-  const prLabels = value.pull_requests.slice(0, 3).map((pr) => `#${pr.number}`);
-  const prDisplay =
-    prLabels.join(', ') + (prCount > 3 ? ` +${prCount - 3} more` : '');
-
-  // 2. JSX structure with Tailwind CSS
+  // 2. Visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
-            {value.name}
-          </h3>
-          <div className="text-sm text-gray-500 mt-1 truncate">
-            Commit: {shortSha}
-          </div>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header: name and status */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
+        <div className="flex items-center space-x-1">
+          {statusIcon}
+          <span className="text-sm font-medium text-gray-700">{statusLabel}</span>
         </div>
-        <span
-          className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${badgeBg} ${badgeText}`}
-        >
-          {statusLabel}
-        </span>
       </div>
-      <div className="text-sm text-gray-500 mb-1">Started: {started}</div>
-      {duration && (
-        <div className="text-sm text-gray-500 mb-3">Duration: {duration}</div>
+
+      {/* Info grid */}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 mb-4">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400 mr-1" />
+          <span className="font-medium text-gray-700">Started:</span>
+          <span className="ml-1">{formattedStarted}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400 mr-1" />
+          <span className="font-medium text-gray-700">Completed:</span>
+          <span className="ml-1">{formattedCompleted}</span>
+        </div>
+        {duration && (
+          <div className="flex items-center col-span-2">
+            <LucideReact.Clock size={16} className="text-gray-400 mr-1" />
+            <span className="font-medium text-gray-700">Duration:</span>
+            <span className="ml-1">{duration}</span>
+          </div>
+        )}
+        {value.app && (
+          <div className="flex items-center col-span-2">
+            <LucideReact.GitBranch size={16} className="text-gray-400 mr-1" />
+            <span className="font-medium text-gray-700">App:</span>
+            <span className="ml-1 truncate">{value.app.name}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Output section */}
+      {(value.output.title || value.output.summary) && (
+        <div className="mb-4">
+          {value.output.title && (
+            <h3 className="text-md font-semibold text-gray-700 mb-1 truncate">{value.output.title}</h3>
+          )}
+          {value.output.summary && (
+            <p className="text-sm text-gray-600 line-clamp-3">{value.output.summary}</p>
+          )}
+        </div>
       )}
-      <p className="text-sm text-gray-700 mb-3 line-clamp-3">{displaySummary}</p>
-      <div className="flex flex-wrap text-sm text-gray-600 space-x-4">
-        <div>Annotations: {value.output.annotations_count}</div>
-        {prCount > 0 && <div>PRs: {prDisplay}</div>}
-        {value.app && <div>App: {value.app.name}</div>}
-        {value.deployment && <div>Env: {value.deployment.environment}</div>}
-      </div>
+
+      {/* Pull requests */}
+      {value.pull_requests.length > 0 && (
+        <div className="mb-4">
+          <div className="flex items-center text-sm text-gray-700 mb-2">
+            <LucideReact.GitPullRequest size={16} className="text-gray-400 mr-1" />
+            <span className="font-medium">Pull Requests</span>
+          </div>
+          <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+            {value.pull_requests.map((pr) => (
+              <li key={pr.id}>
+                #{pr.number} in <span className="font-medium">{pr.head.repo.name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Deployment info */}
+      {value.deployment && (
+        <div className="flex items-center text-sm text-gray-700">
+          <LucideReact.Truck size={16} className="text-gray-400 mr-1" />
+          <span className="font-medium">Deployment:</span>
+          <span className="ml-1">{value.deployment.environment}</span>
+        </div>
+      )}
     </div>
   );
 }

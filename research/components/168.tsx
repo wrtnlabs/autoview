@@ -1,4 +1,5 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Section information.
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 
@@ -49,25 +50,32 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Format the ISO date into a human-readable string.
-  const formattedCreatedAt = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      <h2 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h2>
-      <div className="mt-2 flex flex-wrap items-center space-x-2">
-        <span className="text-sm font-medium text-gray-700">Section Code:</span>
-        <span className="inline-block px-2 py-0.5 text-sm bg-gray-100 text-gray-800 rounded">
-          {value.code}
-        </span>
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-sm">
+      {/* Section Name */}
+      <div className="flex items-center mb-2">
+        <LucideReact.MapPin size={20} className="text-gray-700 mr-2" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h2>
       </div>
-      <div className="mt-3 text-sm text-gray-500">
-        Created on {formattedCreatedAt}
+
+      {/* Code and Creation Date */}
+      <div className="flex items-center text-sm text-gray-600 space-x-4">
+        <div className="flex items-center">
+          <LucideReact.Tag size={16} className="text-gray-400 mr-1" aria-hidden="true" />
+          <span className="font-medium">{value.code}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400 mr-1" aria-hidden="true" />
+          <time dateTime={value.created_at}>{formattedDate}</time>
+        </div>
       </div>
     </div>
   );

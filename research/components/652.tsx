@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -27,7 +28,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -42,7 +43,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -77,96 +78,81 @@ export type AutoViewInput = AutoViewInputSubTypes.team[];
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const capitalize = (str: string): string =>
-    str.charAt(0).toUpperCase() + str.slice(1);
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // If no teams to display, show an empty state
   if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No teams available.
+      <div className="flex items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mr-2" />
+        <span>No teams available</span>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {value.map((team) => {
-        const {
-          id,
-          name,
-          description,
-          permission,
-          privacy,
-          notification_setting,
-          permissions,
-          parent,
-        } = team;
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      {value.map((team) => (
+        <div
+          key={team.id}
+          className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+        >
+          {/* Team Header */}
+          <div className="flex items-center mb-2">
+            <LucideReact.Users size={20} className="text-blue-500" />
+            <h2 className="ml-2 text-lg font-semibold text-gray-800 truncate">
+              {team.name}
+            </h2>
+          </div>
 
-        // Derive list of granular permissions if provided
-        const grantedActions = permissions
-          ? (Object.entries(permissions) as [keyof typeof permissions, boolean][])
-              .filter(([, allowed]) => allowed)
-              .map(([action]) => capitalize(action))
-          : [];
+          {/* Slug */}
+          <div className="flex items-center text-sm text-gray-500 mb-2">
+            <LucideReact.Tag size={16} className="mr-1" />
+            <span className="truncate">{team.slug}</span>
+          </div>
 
-        return (
-          <article
-            key={id}
-            className="bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col"
-          >
-            <div className="p-4 flex-1 flex flex-col">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
-                {name}
-              </h2>
-              {description ? (
-                <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm line-clamp-3">
-                  {description}
-                </p>
-              ) : (
-                <p className="mt-2 italic text-gray-400 text-sm">
-                  No description available.
-                </p>
-              )}
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                  {capitalize(permission)}
-                </span>
-                {privacy && (
-                  <span className="inline-block bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    {capitalize(privacy)}
-                  </span>
-                )}
-                {notification_setting && (
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    {capitalize(notification_setting.replace(/_/g, " "))}
-                  </span>
-                )}
-              </div>
-              {grantedActions.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1">
-                  {grantedActions.map((act) => (
-                    <span
-                      key={act}
-                      className="text-xs text-white bg-indigo-500 px-1.5 py-0.5 rounded"
-                    >
-                      {act}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {parent && parent.name && (
-                <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                  Parent Team: <span className="font-medium">{parent.name}</span>
-                </p>
-              )}
+          {/* Description */}
+          {team.description ? (
+            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              {team.description}
+            </p>
+          ) : (
+            <p className="text-gray-400 italic text-sm mb-3">
+              No description provided
+            </p>
+          )}
+
+          {/* Badges: Permission, Privacy, Notification */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            <span className="flex items-center bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">
+              <LucideReact.Key size={12} className="mr-1" />
+              {team.permission.charAt(0).toUpperCase() + team.permission.slice(1)}
+            </span>
+            {team.privacy && (
+              <span className="flex items-center bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded">
+                <LucideReact.Lock size={12} className="mr-1" />
+                {team.privacy.charAt(0).toUpperCase() + team.privacy.slice(1)}
+              </span>
+            )}
+            {team.notification_setting && (
+              <span className="flex items-center bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-1 rounded">
+                <LucideReact.Bell size={12} className="mr-1" />
+                {team.notification_setting
+                  .split('_')
+                  .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                  .join(' ')}
+              </span>
+            )}
+          </div>
+
+          {/* Parent Team */}
+          {team.parent && (
+            <div className="flex items-center text-sm text-gray-700">
+              <LucideReact.CornerDownRight size={16} className="text-gray-400" />
+              <span className="ml-1 truncate">Parent: {team.parent.name}</span>
             </div>
-          </article>
-        );
-      })}
+          )}
+        </div>
+      ))}
     </div>
   );
 }

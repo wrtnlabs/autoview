@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Email
      *
      * @title Email
     */
-    export type email = {
+    export interface email {
         email: string & tags.Format<"email">;
         primary: boolean;
         verified: boolean;
         visibility: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.email[];
 
@@ -21,51 +22,74 @@ export type AutoViewInput = AutoViewInputSubTypes.email[];
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const totalEmails = value.length;
-  const verifiedCount = value.filter(item => item.verified).length;
-  const sortedEmails = [...value].sort((a, b) => Number(b.primary) - Number(a.primary));
-  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  const verifiedCount = value.filter((item) => item.verified).length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  if (totalEmails === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-center text-gray-500">
+        <LucideReact.AlertCircle size={48} aria-label="No data" />
+        <p className="mt-2 text-sm">No email addresses available.</p>
+      </div>
+    );
+  }
 
-  // 3. Return the React element.
   return (
-    <div className="bg-white rounded-lg shadow p-4 w-full max-w-md mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Email Addresses</h2>
-        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded">
-          {totalEmails}
-        </span>
-      </div>
-
+    <div className="p-4 bg-white rounded-lg shadow-md">
       {/* Summary */}
-      <div className="text-sm text-gray-600 mb-4">
-        <span>{verifiedCount} verified</span>
-        <span className="mx-2">·</span>
-        <span>{totalEmails - verifiedCount} unverified</span>
+      <div className="mb-4 flex flex-wrap items-center text-sm text-gray-600 space-x-4">
+        <div>
+          Total emails:{" "}
+          <span className="font-medium text-gray-800">{totalEmails}</span>
+        </div>
+        <div>
+          Verified:{" "}
+          <span className="font-medium text-gray-800">{verifiedCount}</span>
+        </div>
       </div>
-
-      {/* Email List */}
-      <ul className="space-y-3">
-        {sortedEmails.map((item, idx) => (
-          <li key={idx} className="flex items-center justify-between">
-            <div className="flex flex-col flex-1 min-w-0">
-              <p className="text-gray-900 font-medium truncate">{item.email}</p>
-              {item.visibility != null && (
-                <p className="text-gray-500 text-xs truncate">{capitalize(item.visibility)}</p>
-              )}
+      {/* Email list */}
+      <ul className="divide-y divide-gray-200">
+        {value.map((item) => (
+          <li
+            key={item.email}
+            className="flex items-center justify-between py-2"
+          >
+            <div className="flex items-center gap-2 overflow-hidden">
+              <LucideReact.Mail
+                className="text-gray-400 shrink-0"
+                size={16}
+                aria-label="Email icon"
+              />
+              <span className="text-gray-800 truncate">{item.email}</span>
             </div>
-            <div className="flex flex-shrink-0 space-x-2 ml-3">
-              {item.primary && (
-                <span className="inline-block px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                  Primary
-                </span>
-              )}
+            <div className="flex items-center gap-3">
               {item.verified && (
-                <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
-                  Verified
-                </span>
+                <LucideReact.CheckCircle
+                  className="text-green-500"
+                  size={16}
+                  aria-label="Verified"
+                  role="img"
+                />
+              )}
+              {item.primary && (
+                <LucideReact.Star
+                  className="text-yellow-500"
+                  size={16}
+                  aria-label="Primary"
+                  role="img"
+                />
+              )}
+              {item.visibility && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Eye
+                    className="text-gray-400"
+                    size={16}
+                    aria-label="Visibility"
+                  />
+                  <span className="text-gray-600 text-xs capitalize">
+                    {item.visibility}
+                  </span>
+                </div>
               )}
             </div>
           </li>

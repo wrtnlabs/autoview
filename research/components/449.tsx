@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Organization Invitation
      *
      * @title Organization Invitation
     */
-    export type organization_invitation = {
+    export interface organization_invitation {
         id: number & tags.Type<"int32">;
         login: string | null;
         email: string | null;
@@ -19,13 +20,13 @@ export namespace AutoViewInputSubTypes {
         node_id: string;
         invitation_teams_url: string;
         invitation_source?: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -48,7 +49,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_invitation[];
 
@@ -57,66 +58,127 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_invitation[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const invitations = value;
   const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
     <div className="space-y-4">
-      {value.length === 0 ? (
-        <p className="text-center text-gray-500">No invitations available.</p>
+      {invitations.length === 0 ? (
+        <div className="flex flex-col items-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2 text-lg">No invitations found</span>
+        </div>
       ) : (
-        value.map((inv) => {
-          const displayName = inv.login ?? inv.email ?? "—";
-          const inviterName = inv.inviter.name ?? inv.inviter.login;
-          const status = inv.failed_at ? "Failed" : "Pending";
-          const statusColor = inv.failed_at
-            ? "text-red-600 bg-red-100"
-            : "text-blue-600 bg-blue-100";
+        invitations.map((inv) => {
+          const hasFailed = Boolean(inv.failed_at);
+          const statusLabel = hasFailed ? "Failed" : "Pending";
+          const statusIcon = hasFailed ? (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          ) : (
+            <LucideReact.Clock size={16} className="text-amber-500" />
+          );
 
           return (
             <div
               key={inv.id}
-              className="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-white rounded-lg shadow"
+              className="flex flex-col md:flex-row items-start md:items-center p-4 bg-white rounded-lg shadow"
             >
-              <img
-                src={inv.inviter.avatar_url}
-                alt={`${inviterName} avatar`}
-                className="w-10 h-10 rounded-full mr-4 flex-shrink-0"
-              />
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {displayName}
-                  </h3>
-                  <span
-                    className={`px-2 py-1 text-sm font-medium ${statusColor} rounded`}
-                  >
-                    {status}
+              {/* Inviter Avatar */}
+              <div className="flex-shrink-0">
+                <img
+                  src={inv.inviter.avatar_url}
+                  alt={inv.inviter.login}
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      inv.inviter.login,
+                    )}&background=random`;
+                  }}
+                />
+              </div>
+              <div className="mt-2 md:mt-0 md:ml-4 flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Invitee */}
+                <div>
+                  <div className="flex items-center text-sm font-medium text-gray-900">
+                    <LucideReact.User
+                      size={16}
+                      className="mr-1 text-gray-500"
+                    />
+                    {inv.login || inv.email || "N/A"}
+                  </div>
+                  {inv.email && (
+                    <div className="flex items-center mt-1 text-sm text-gray-500">
+                      <LucideReact.Mail size={16} className="mr-1" />
+                      <span className="truncate">{inv.email}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Role */}
+                <div>
+                  <div className="text-sm text-gray-500">Role</div>
+                  <span className="inline-block px-2 py-0.5 mt-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded">
+                    {inv.role}
                   </span>
                 </div>
-                <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-gray-600">
-                  <div>
-                    <span className="font-medium">Role:</span> {inv.role}
-                  </div>
-                  <div>
-                    <span className="font-medium">Teams:</span> {inv.team_count}
-                  </div>
-                  <div>
-                    <span className="font-medium">Invited by:</span> {inviterName}
-                  </div>
-                  <div>
-                    <span className="font-medium">Created:</span> {formatDate(inv.created_at)}
+
+                {/* Created At */}
+                <div>
+                  <div className="text-sm text-gray-500">Invited On</div>
+                  <div className="flex items-center mt-1 text-sm text-gray-700">
+                    <LucideReact.Calendar
+                      size={16}
+                      className="mr-1 text-gray-400"
+                    />
+                    {formatDate(inv.created_at)}
                   </div>
                 </div>
-                {inv.failed_at && inv.failed_reason && (
-                  <p className="mt-2 text-sm text-red-500">
-                    <span className="font-medium">Reason:</span> {inv.failed_reason}
-                  </p>
+
+                {/* Status */}
+                <div>
+                  <div className="text-sm text-gray-500">Status</div>
+                  <div className="flex items-center mt-1 text-sm text-gray-700">
+                    {statusIcon}
+                    <span className="ml-1">{statusLabel}</span>
+                  </div>
+                  {hasFailed && inv.failed_reason && (
+                    <div
+                      className="mt-1 text-xs text-red-500 line-clamp-1"
+                      title={inv.failed_reason}
+                    >
+                      {inv.failed_reason}
+                    </div>
+                  )}
+                </div>
+
+                {/* Team Count */}
+                <div>
+                  <div className="text-sm text-gray-500">Teams</div>
+                  <div className="flex items-center mt-1 text-sm text-gray-700">
+                    <LucideReact.Users
+                      size={16}
+                      className="mr-1 text-gray-400"
+                    />
+                    <span>{inv.team_count}</span>
+                  </div>
+                </div>
+
+                {/* Source */}
+                {inv.invitation_source && (
+                  <div className="sm:col-span-2">
+                    <div className="text-sm text-gray-500">Source</div>
+                    <div className="mt-1 text-sm text-gray-700 truncate">
+                      {inv.invitation_source}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

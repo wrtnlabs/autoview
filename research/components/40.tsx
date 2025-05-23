@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Category of channel.
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
      * Furthermore, `IShoppingChannelCategory` is designed to merge between themselves,
      * so there is no burden to edit the category at any time.
     */
-    export type IShoppingChannelCategory = {
+    export interface IShoppingChannelCategory {
         /**
          * Parent category info.
          *
          * @title Parent category info
         */
-        parent: null | any;
+        parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
         /**
          * List of children categories with hierarchical structure.
          *
@@ -79,13 +80,61 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
-        export type IInvert = any;
+        /**
+         * Invert category information with parent category.
+        */
+        export interface IInvert {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        }
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -128,7 +177,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory;
@@ -138,61 +187,81 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { name, code, created_at, children } = value;
-  const formattedCreatedDate = new Date(created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 
-  // Recursive renderer for hierarchical children
-  function renderChildren(
-    list: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
-    depth = 0,
-  ): React.ReactNode {
-    if (!list.length) return null;
-    return (
-      <ul className={`${depth > 0 ? 'pl-4' : ''} list-disc`}>
-        {list.map((child) => {
-          const childDate = new Date(child.created_at).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          });
-          return (
-            <li key={child.id} className="mb-2">
-              <div className="flex flex-col">
-                <span className="text-gray-800 font-medium truncate">{child.name}</span>
-                <div className="flex flex-wrap items-center text-sm text-gray-500 space-x-3">
-                  <span>
-                    Code: <span className="text-gray-700">{child.code}</span>
-                  </span>
-                  <span>Created: {childDate}</span>
-                </div>
-              </div>
-              {renderChildren(child.children, depth + 1)}
-            </li>
-          );
-        })}
-      </ul>
-    );
+  // Build breadcrumb of parent categories
+  const ancestors: string[] = [];
+  let curr = value.parent;
+  while (curr) {
+    ancestors.push(curr.name);
+    curr = curr.parent;
   }
+  ancestors.reverse();
+
+  // Count all descendant subcategories recursively
+  function countDesc(
+    children: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
+  ): number {
+    return children.reduce((sum, child) => sum + 1 + countDesc(child.children), 0);
+  }
+  const descendantCount = countDesc(value.children);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md">
-      <h2 className="text-xl font-semibold text-gray-800 truncate">{name}</h2>
-      <div className="mt-1 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
-        <div>
-          Code: <span className="text-gray-700">{code}</span>
-        </div>
-        <div>Created: {formattedCreatedDate}</div>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Header: Category name and code */}
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
+        <span className="text-sm text-gray-500">{value.code}</span>
       </div>
-      {children.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-lg font-medium text-gray-700">Subcategories ({children.length})</h3>
-          {renderChildren(children)}
+
+      {/* Created date */}
+      <div className="flex items-center text-sm text-gray-500 mb-2">
+        <LucideReact.Calendar className="mr-1" size={16} />
+        <span>Created: {formattedDate}</span>
+      </div>
+
+      {/* Breadcrumb of ancestors */}
+      {ancestors.length > 0 && (
+        <div className="flex items-center text-sm text-gray-500 mb-2">
+          <LucideReact.FolderTree className="mr-1" size={16} />
+          <nav className="flex items-center flex-wrap gap-1">
+            {ancestors.map((name, idx) => (
+              <span key={idx} className="truncate">
+                {name}
+                <span className="mx-1">›</span>
+              </span>
+            ))}
+            <span className="font-medium text-gray-700 truncate">{value.name}</span>
+          </nav>
+        </div>
+      )}
+
+      {/* Descendant count */}
+      <div className="flex items-center text-sm text-gray-500 mb-3">
+        <LucideReact.List className="mr-1" size={16} />
+        <span>{descendantCount} subcategories</span>
+      </div>
+
+      {/* Immediate children as tags */}
+      {value.children.length > 0 && (
+        <div className="mt-2">
+          <h3 className="text-sm font-medium text-gray-700 mb-1">Subcategories</h3>
+          <div className="flex flex-wrap gap-2">
+            {value.children.map((child) => (
+              <span
+                key={child.id}
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded-full"
+              >
+                <LucideReact.Tag size={12} className="text-gray-500" />
+                <span className="truncate">{child.name}</span>
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

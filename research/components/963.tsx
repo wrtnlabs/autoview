@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Org Membership
      *
      * @title Org Membership
     */
-    export type org_membership = {
+    export interface org_membership {
         url: string & tags.Format<"uri">;
         /**
          * The state of the member in the organization. The `pending` state indicates the user has not yet accepted an invitation.
@@ -22,13 +23,13 @@ export namespace AutoViewInputSubTypes {
         permissions?: {
             can_create_repository: boolean;
         };
-    };
+    }
     /**
      * A GitHub organization.
      *
      * @title Organization Simple
     */
-    export type organization_simple = {
+    export interface organization_simple {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -41,7 +42,7 @@ export namespace AutoViewInputSubTypes {
         public_members_url: string;
         avatar_url: string;
         description: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -79,75 +80,100 @@ export type AutoViewInput = AutoViewInputSubTypes.org_membership;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const org = value.organization;
-  const user = value.user;
-  const stateLabel = value.state === "active" ? "Active" : "Pending";
-  const stateClasses =
-    value.state === "active"
-      ? "bg-green-100 text-green-800"
-      : "bg-yellow-100 text-yellow-800";
-  const roleLabel =
-    value.role === "admin"
-      ? "Admin"
-      : value.role === "billing_manager"
-      ? "Billing Manager"
-      : "Member";
-  const canCreateRepo = value.permissions?.can_create_repository ?? false;
-  const description = org.description ?? "";
+  const { organization, user, state, role, permissions } = value;
+  const displayName = user ? (user.name ?? user.login) : null;
+  const description = organization.description;
+  const roleLabelMap = {
+    admin: "Admin",
+    member: "Member",
+    billing_manager: "Billing Manager",
+  } as const;
+  const roleLabel = roleLabelMap[role];
+  const orgAvatarFallback = "https://placehold.co/100x100/e2e8f0/1e293b?text=Org";
+  const userAvatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName ?? organization.login
+  )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Organization header */}
-      <div className="flex items-center space-x-4">
-        <img
-          src={org.avatar_url}
-          alt={`${org.login} avatar`}
-          className="w-12 h-12 rounded-full object-cover"
-        />
-        <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {org.login}
-          </h2>
-          <p className="text-gray-500 text-sm truncate">{org.url}</p>
+    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="p-4 space-y-4">
+        {/* Organization Section */}
+        <div className="flex items-start justify-between">
+          <div className="flex items-center">
+            <img
+              src={organization.avatar_url}
+              alt={`${organization.login} avatar`}
+              className="w-12 h-12 rounded-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = orgAvatarFallback;
+              }}
+            />
+            <div className="ml-3">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {organization.login}
+              </h3>
+              {description && (
+                <p className="text-sm text-gray-500 line-clamp-2">
+                  {description}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="flex-shrink-0">
+            {state === "active" ? (
+              <LucideReact.CheckCircle
+                className="text-green-500"
+                size={20}
+                aria-label="Active membership"
+              />
+            ) : (
+              <LucideReact.Clock
+                className="text-amber-500"
+                size={20}
+                aria-label="Pending membership"
+              />
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* Organization description */}
-      {description && (
-        <p className="text-gray-700 text-sm mt-2 line-clamp-2">
-          {description}
-        </p>
-      )}
-
-      {/* Membership state and user info */}
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center space-x-3">
-          <img
-            src={user?.avatar_url ?? ""}
-            alt={`${user?.login ?? "Unknown User"} avatar`}
-            className="w-8 h-8 rounded-full object-cover"
-          />
-          <p className="text-gray-900 text-sm font-medium truncate">
-            {user?.login ?? "Unknown User"}
-          </p>
+        {/* User Section */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center min-w-0">
+            <img
+              src={user?.avatar_url ?? userAvatarFallback}
+              alt={displayName ? `${displayName} avatar` : "User avatar"}
+              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = userAvatarFallback;
+              }}
+            />
+            <div className="ml-3 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {displayName ?? user?.login ?? "Unknown User"}
+              </p>
+              {user?.email && (
+                <p className="text-xs text-gray-500 truncate">
+                  {user.email}
+                </p>
+              )}
+            </div>
+          </div>
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            {roleLabel}
+          </span>
         </div>
-        <span
-          className={`px-2 py-0.5 text-xs font-semibold rounded-full ${stateClasses}`}
-        >
-          {stateLabel}
-        </span>
-      </div>
 
-      {/* Role and permissions */}
-      <div className="flex items-center justify-between mt-3">
-        <span className="px-2 py-0.5 text-xs font-semibold text-indigo-800 bg-indigo-100 rounded-full">
-          {roleLabel}
-        </span>
-        {canCreateRepo && (
-          <p className="text-green-600 text-xs font-medium">
-            ✓ Can create repository
-          </p>
+        {/* Permissions */}
+        {permissions?.can_create_repository && (
+          <div className="flex items-center text-green-600 text-sm">
+            <LucideReact.Key
+              className="mr-1"
+              size={16}
+              aria-label="Create repository permission"
+            />
+            <span>Can create repositories</span>
+          </div>
         )}
       </div>
     </div>

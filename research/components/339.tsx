@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type organization_secret_scanning_alert = {
+    export interface organization_secret_scanning_alert {
         number?: AutoViewInputSubTypes.alert_number;
         created_at?: AutoViewInputSubTypes.alert_created_at;
         updated_at?: AutoViewInputSubTypes.nullable_alert_updated_at;
@@ -74,7 +75,7 @@ export namespace AutoViewInputSubTypes {
          * A boolean value representing whether or not alert is base64 encoded
         */
         is_base64_encoded?: boolean | null;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -137,7 +138,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple Repository
     */
-    export type simple_repository = {
+    export interface simple_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -319,13 +320,13 @@ export namespace AutoViewInputSubTypes {
          * The API URL to list the hooks on the repository.
         */
         hooks_url: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -348,7 +349,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_secret_scanning_alert[];
 
@@ -357,104 +358,123 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_secret_scanning_a
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const alerts: AutoViewInput = value;
-  const formatDate = (dateStr?: string | null): string =>
-    dateStr ? new Date(dateStr).toLocaleString() : "—";
+  const resolutionLabels: Record<NonNullable<AutoViewInputSubTypes.secret_scanning_alert_resolution>, string> = {
+    false_positive: "False Positive",
+    wont_fix: "Won't Fix",
+    revoked: "Revoked",
+    used_in_tests: "Used in Tests",
+    null: "",
+  } as any;
+
+  const formatDate = (dateStr?: string | null): string => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!alerts || alerts.length === 0) {
+  // Empty state
+  if (!value || value.length === 0) {
     return (
-      <p className="text-center text-gray-500 py-8">
-        No secret scanning alerts to display.
-      </p>
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="text-gray-300" />
+        <span className="mt-2 text-lg">No secret scanning alerts found</span>
+      </div>
     );
   }
 
+  // List of alert cards
   return (
-    <div className="space-y-4">
-      {alerts.map((alert) => {
-        // Prepare badges for state and validity
-        const stateBadge =
-          alert.state === "resolved" ? (
-            <span className="px-2 py-1 text-green-800 bg-green-100 rounded-full text-xs font-medium uppercase">
-              Resolved
-            </span>
-          ) : (
-            <span className="px-2 py-1 text-yellow-800 bg-yellow-100 rounded-full text-xs font-medium uppercase">
-              Open
-            </span>
-          );
-
-        const validityBadge = alert.validity === "active" ? (
-          <span className="px-2 py-1 text-green-800 bg-green-100 rounded-full text-xs font-medium">
-            Active
-          </span>
-        ) : alert.validity === "inactive" ? (
-          <span className="px-2 py-1 text-gray-800 bg-gray-100 rounded-full text-xs font-medium">
-            Inactive
-          </span>
-        ) : (
-          <span className="px-2 py-1 text-yellow-800 bg-yellow-100 rounded-full text-xs font-medium">
-            Unknown
-          </span>
-        );
-
-        const repoName = alert.repository?.full_name || "—";
-        const secretType = alert.secret_type_display_name || alert.secret_type || "—";
+    <div className="flex flex-col">
+      {value.map((alert, idx) => {
+        const repoName =
+          alert.repository?.full_name ?? alert.repository?.name ?? "Unknown Repository";
+        const createdAt = formatDate(alert.created_at);
+        const resolvedAt = formatDate(alert.resolved_at);
+        const stateIcon =
+          alert.state === "resolved" ? LucideReact.CheckCircle : LucideReact.AlertTriangle;
+        const stateColor = alert.state === "resolved" ? "text-green-500" : "text-yellow-500";
+        const stateLabel = alert.state === "resolved" ? "Resolved" : "Open";
+        const resolutionText =
+          alert.state === "resolved" && alert.resolution
+            ? resolutionLabels[alert.resolution]
+            : "";
+        const secretType = alert.secret_type_display_name ?? alert.secret_type ?? "Unknown Type";
 
         return (
           <div
-            key={alert.number}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200"
+            key={idx}
+            className="p-4 mb-4 bg-white rounded-lg shadow-md first:mt-0 last:mb-0"
           >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Alert #{alert.number}
-              </h3>
-              {stateBadge}
+            {/* Header: Repository & Alert Number */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2 text-gray-700">
+                <LucideReact.Folder size={16} />
+                <span className="font-semibold truncate">{repoName}</span>
+              </div>
+              <span className="text-sm text-gray-500">#{alert.number}</span>
             </div>
 
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
-              <div>
-                <span className="font-medium">Repository:</span> {repoName}
+            {/* Metadata: Created, State, Secret Type */}
+            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
+              <div className="flex items-center gap-1">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span>{createdAt}</span>
               </div>
-              <div>
-                <span className="font-medium">Secret Type:</span> {secretType}
+              <div className="flex items-center gap-1">
+                {React.createElement(stateIcon, { size: 16, className: stateColor })}
+                <span>{stateLabel}</span>
               </div>
-              <div>
-                <span className="font-medium">Created:</span>{" "}
-                {formatDate(alert.created_at as string)}
+              <div className="flex items-center gap-1">
+                <LucideReact.Tag size={16} className="text-gray-400" />
+                <span>{secretType}</span>
               </div>
-              {alert.state === "resolved" && (
-                <div>
-                  <span className="font-medium">Resolved:</span>{" "}
-                  {formatDate(alert.resolved_at)}
+            </div>
+
+            {/* Resolved details */}
+            {alert.state === "resolved" && (
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-2">
+                {resolutionText && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.CheckCircle size={16} className="text-green-500" />
+                    <span>{resolutionText}</span>
+                  </div>
+                )}
+                {alert.resolved_at && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Calendar size={16} className="text-gray-400" />
+                    <span>{resolvedAt}</span>
+                  </div>
+                )}
+                {alert.resolved_by?.login && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.User size={16} className="text-gray-400" />
+                    <span>{alert.resolved_by.login}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Flags: Public Leak, Multi-Repo, Push Bypass */}
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              {alert.publicly_leaked && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.AlertTriangle size={16} className="text-red-500" />
+                  <span>Publicly Leaked</span>
                 </div>
               )}
-            </div>
-
-            <div className="mt-3 flex flex-wrap gap-2">
-              {alert.resolution && (
-                <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">
-                  {alert.resolution.replace(/_/g, " ").toUpperCase()}
-                </span>
+              {alert.multi_repo && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Users size={16} className="text-gray-500" />
+                  <span>Multi-Repo</span>
+                </div>
               )}
               {alert.push_protection_bypassed && (
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                  Bypass Requested
-                </span>
+                <div className="flex items-center gap-1">
+                  <LucideReact.ShieldOff size={16} className="text-orange-500" />
+                  <span>Bypassed</span>
+                </div>
               )}
-              {alert.publicly_leaked && (
-                <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                  Publicly Leaked
-                </span>
-              )}
-              {alert.multi_repo && (
-                <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-                  Multi-Repo Alert
-                </span>
-              )}
-              {validityBadge}
             </div>
           </div>
         );

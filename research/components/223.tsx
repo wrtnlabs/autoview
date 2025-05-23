@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type BotsView = {
+    export interface BotsView {
         next?: number;
         bots?: AutoViewInputSubTypes.bot.CustomBot[];
-    };
+    }
     export namespace bot {
-        export type CustomBot = {
+        export interface CustomBot {
             id?: string;
             channelId?: string;
             name: string;
@@ -19,84 +20,102 @@ export namespace AutoViewInputSubTypes {
             color: string & tags.Default<"#123456">;
             avatarUrl?: string;
             ai?: boolean;
-        };
+        }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.BotsView;
 
 
 
-// The component name must always be "VisualComponent"
+// The component name is "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Derived constants and helper functions
   const bots = value.bots ?? [];
-  const formatDate = (ts?: number) =>
-    ts
-      ? new Date(ts).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
-      : "";
-  const getInitials = (name: string) =>
-    name
-      .split(" ")
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase();
+  const formatDate = (timestamp?: number): string =>
+    timestamp
+      ? new Date(timestamp).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "Unknown";
+  const getPlaceholderAvatar = (name: string): string =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name,
+    )}&background=0D8ABC&color=fff`;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose visual structure
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      {bots.length === 0 ? (
-        <p className="text-gray-500 text-center">No bots available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {bots.map((bot, idx) => (
-            <li key={idx} className="flex items-start space-x-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center text-gray-500 text-lg font-semibold">
-                {bot.avatarUrl ? (
-                  <img src={bot.avatarUrl} alt={bot.name} className="w-full h-full object-cover" />
-                ) : (
-                  getInitials(bot.name)
-                )}
+      {bots.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {bots.map((bot, index) => (
+            <div
+              key={index}
+              className="flex flex-col bg-gray-50 rounded-lg overflow-hidden shadow-sm"
+            >
+              <div className="w-full aspect-square bg-gray-200">
+                <img
+                  src={bot.avatarUrl ?? getPlaceholderAvatar(bot.name)}
+                  alt={bot.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = getPlaceholderAvatar(bot.name);
+                  }}
+                />
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="p-4 flex-1 flex flex-col">
                 <div className="flex items-center">
-                  <h3 className="text-gray-900 font-medium truncate">{bot.name}</h3>
+                  <h3 className="font-semibold text-lg text-gray-800 truncate">
+                    {bot.name}
+                  </h3>
+                  <span
+                    className="w-3 h-3 ml-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: bot.color }}
+                  />
                   {bot.ai && (
-                    <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                      AI
-                    </span>
+                    <LucideReact.Bot
+                      className="ml-auto text-blue-500"
+                      size={16}
+                      aria-label="AI Bot"
+                    />
                   )}
                 </div>
                 {bot.description && (
-                  <p className="text-gray-700 text-sm mt-1 line-clamp-2">{bot.description}</p>
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+                    {bot.description}
+                  </p>
                 )}
-                <div className="flex items-center space-x-2 mt-1 text-gray-500 text-xs">
-                  {bot.createdAt && <span>Created: {formatDate(bot.createdAt)}</span>}
-                  <span className="inline-flex items-center">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: bot.color }}></span>
-                    <span className="ml-1">Color</span>
-                  </span>
-                  {bot.nameDescI18nMap && Object.keys(bot.nameDescI18nMap).length > 0 && (
-                    <span>{Object.keys(bot.nameDescI18nMap).length} locales</span>
-                  )}
+                <div className="mt-4 text-xs text-gray-500 flex items-center">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  <span>{formatDate(bot.createdAt)}</span>
                 </div>
               </div>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center text-gray-500 py-10">
+          <LucideReact.AlertCircle size={48} className="mb-2" />
+          <span>No bots available</span>
+        </div>
       )}
-      {/* Next page indicator */}
-      {value.next !== undefined && (
-        <p className="mt-4 text-gray-600 text-sm">Next Page: {value.next}</p>
+
+      {value.next != null && bots.length > 0 && (
+        <div className="mt-4 flex justify-end text-sm text-gray-500">
+          <span>Next token: {value.next}</span>
+        </div>
       )}
     </div>
   );

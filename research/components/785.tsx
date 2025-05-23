@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Comments provide a way for people to collaborate on an issue.
      *
      * @title Issue Comment
     */
-    export type issue_comment = {
+    export interface issue_comment {
         /**
          * Unique identifier of the issue comment
         */
@@ -30,7 +31,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -82,7 +83,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -110,12 +111,71 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -126,7 +186,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue_comment[];
 
@@ -134,125 +194,115 @@ export type AutoViewInput = AutoViewInputSubTypes.issue_comment[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Helper: Format a date string as "MMM D, YYYY"
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  // Renders a list of GitHub issue comments with avatar, author, timestamp, content preview, and reactions.
 
-  // 2. Helper: Get a simple relative time (s, m, h, d ago)
-  const getRelativeTime = (iso: string): string => {
-    const now = Date.now();
-    const then = new Date(iso).getTime();
-    const diff = now - then;
-    const sec = Math.floor(diff / 1000);
-    if (sec < 60) return `${sec}s ago`;
-    const min = Math.floor(sec / 60);
-    if (min < 60) return `${min}m ago`;
-    const hr = Math.floor(min / 60);
-    if (hr < 24) return `${hr}h ago`;
-    const day = Math.floor(hr / 24);
-    if (day < 7) return `${day}d ago`;
-    return formatDate(iso);
-  };
-
-  // 3. Emoji mapping for reactions
-  const reactionIcons: Record<string, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    eyes: "👀",
-    rocket: "🚀",
-  };
-
-  // 4. Handle no comments
-  if (!value || value.length === 0) {
-    return (
-      <div className="py-6 text-center text-gray-500">
-        No comments yet.
-      </div>
-    );
-  }
-
-  // 5. Render comment list
   return (
-    <div className="space-y-4 mx-auto max-w-md">
-      {value.map((comment) => {
-        const user = comment.user;
-        const login = user?.login ?? "Unknown";
-        const avatar = user?.avatar_url;
-        const timeLabel = getRelativeTime(comment.created_at);
-        const content = comment.body_text ?? comment.body ?? "";
-        const reactions = comment.reactions;
-        // Build list of non-zero reaction entries
-        const entries: [string, number][] = reactions
-          ? (Object.entries(reactions) as [string, any][])
-              .filter(
-                ([key, cnt]) =>
-                  key !== "url" &&
-                  key !== "total_count" &&
-                  typeof cnt === "number" &&
-                  cnt > 0
-              ) as [string, number][]
-          : [];
+    <div className="space-y-4">
+      {value.length === 0 ? (
+        <div className="p-4 text-center text-gray-500 flex items-center justify-center gap-2">
+          <LucideReact.MessageSquare size={24} color="currentColor" />
+          <span>No comments available.</span>
+        </div>
+      ) : (
+        <ul className="space-y-4">
+          {value.map((comment) => {
+            const { id, body_text, body, created_at, user, reactions } = comment;
+            const content = body_text ?? body ?? 'No content';
+            const displayName = user?.name ?? user?.login ?? 'Unknown user';
+            const avatarUrl =
+              user?.avatar_url ??
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                displayName,
+              )}&background=random&color=fff`;
+            const formattedDate = new Date(created_at).toLocaleString();
 
-        return (
-          <div
-            key={comment.id}
-            className="flex bg-white rounded-lg shadow p-4"
-          >
-            {avatar ? (
-              <img
-                src={avatar}
-                alt={login}
-                className="w-10 h-10 rounded-full mr-4 flex-shrink-0"
-              />
-            ) : (
-              <div className="w-10 h-10 bg-gray-200 rounded-full mr-4 flex-shrink-0 flex items-center justify-center text-gray-500">
-                ?
-              </div>
-            )}
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center">
-                <span className="font-semibold text-gray-800">
-                  {login}
-                </span>
-                {comment.author_association && (
-                  <span className="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
-                    {comment.author_association}
-                  </span>
-                )}
-                <span className="ml-auto text-xs text-gray-500">
-                  {timeLabel}
-                </span>
-              </div>
-              <p className="mt-2 text-gray-700 text-sm line-clamp-3">
-                {content || "No content."}
-              </p>
-              {entries.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-2 text-sm">
-                  {entries.map(([key, cnt]) => (
-                    <span
-                      key={key}
-                      className="flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full"
-                    >
-                      <span className="mr-1">
-                        {reactionIcons[key] || key}
-                      </span>
-                      {cnt}
-                    </span>
-                  ))}
+            // Extract reaction entries with count > 0 (excluding url and total_count)
+            const reactionEntries = reactions
+              ? (Object.entries(reactions).filter(
+                  ([key, val]) =>
+                    key !== 'url' &&
+                    key !== 'total_count' &&
+                    typeof val === 'number' &&
+                    val > 0,
+                ) as [keyof AutoViewInputSubTypes.reaction_rollup, number][])
+              : [];
+
+            return (
+              <li
+                key={id}
+                className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+              >
+                <div className="flex items-center">
+                  <img
+                    src={avatarUrl}
+                    alt={displayName}
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        displayName,
+                      )}&background=random&color=fff`;
+                    }}
+                  />
+                  <div className="ml-3 flex-grow">
+                    <p className="text-sm font-medium text-gray-900">{displayName}</p>
+                    <div className="flex items-center text-xs text-gray-500">
+                      <LucideReact.Calendar className="mr-1" size={14} />
+                      <span>{formattedDate}</span>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+
+                <p className="mt-2 text-gray-700 text-sm line-clamp-3">{content}</p>
+
+                {reactionEntries.length > 0 && (
+                  <div className="flex items-center space-x-4 mt-3 text-gray-500">
+                    {reactionEntries.map(([key, count]) => {
+                      let Icon = LucideReact.Heart;
+                      let color: string | undefined;
+
+                      switch (key) {
+                        case '+1':
+                          Icon = LucideReact.ThumbsUp;
+                          break;
+                        case '-1':
+                          Icon = LucideReact.ThumbsDown;
+                          break;
+                        case 'laugh':
+                          Icon = LucideReact.Smile;
+                          break;
+                        case 'confused':
+                          Icon = LucideReact.Frown;
+                          break;
+                        case 'heart':
+                          Icon = LucideReact.Heart;
+                          color = '#e0245e';
+                          break;
+                        case 'hooray':
+                          Icon = LucideReact.Star;
+                          color = '#fcdc00';
+                          break;
+                        case 'eyes':
+                          Icon = LucideReact.Eye;
+                          break;
+                        case 'rocket':
+                          Icon = LucideReact.Rocket;
+                          break;
+                      }
+
+                      return (
+                        <div key={key} className="flex items-center text-xs">
+                          <Icon className="mr-1" size={14} color={color} />
+                          <span>{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

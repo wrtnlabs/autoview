@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Order completion and payment information.
@@ -21,7 +22,7 @@ export namespace AutoViewInputSubTypes {
      * In addition, even after payment has been made, there may be cases where it is
      * suddenly cancelled, so please be aware of this as well.
     */
-    export type IShoppingOrderPublish = {
+    export interface IShoppingOrderPublish {
         /**
          * List of deliveries.
          *
@@ -68,7 +69,7 @@ export namespace AutoViewInputSubTypes {
          * @title Address where the {@link IShoppingOrderGood goods} to be delivered
         */
         address: AutoViewInputSubTypes.IShoppingAddress;
-    };
+    }
     /**
      * Delivery information.
      *
@@ -88,7 +89,7 @@ export namespace AutoViewInputSubTypes {
      * manufacturing, planning, shipping and delivering. Those steps are represented by
      * another subsidiary entity {@link IShoppingDeliveryJourney}.
     */
-    export type IShoppingDelivery = {
+    export interface IShoppingDelivery {
         /**
          * Primary Key.
          *
@@ -131,7 +132,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of the record
         */
         created_at: string;
-    };
+    }
     /**
      * Seller information.
      *
@@ -144,7 +145,7 @@ export namespace AutoViewInputSubTypes {
      * to operate sales. Also, seller must do the
      * {@link IShoppingCitizen real-name and mobile authentication}, too.
     */
-    export type IShoppingSeller = {
+    export interface IShoppingSeller {
         /**
          * Primary Key.
          *
@@ -159,7 +160,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation tmie of record
         */
         created_at: string;
-    };
+    }
     /**
      * Journey of delivery.
      *
@@ -169,7 +170,7 @@ export namespace AutoViewInputSubTypes {
      * delivering {@link IShoppingOrderGood goods} to the
      * {@link IShoppingCustomer customer}.
     */
-    export type IShoppingDeliveryJourney = {
+    export interface IShoppingDeliveryJourney {
         /**
          * Primary Key.
          *
@@ -223,7 +224,7 @@ export namespace AutoViewInputSubTypes {
          * @title Completion time of the journey
         */
         completed_at: null | (string & tags.Format<"date-time">);
-    };
+    }
     /**
      * Which stocks are delivered.
      *
@@ -235,7 +236,7 @@ export namespace AutoViewInputSubTypes {
      * or weight problem, it is possible to have multiple `IShoppingDeliveryPiece`
      * records for a single stock.
     */
-    export type IShoppingDeliveryPiece = {
+    export interface IShoppingDeliveryPiece {
         /**
          * Primary Key.
          *
@@ -268,18 +269,18 @@ export namespace AutoViewInputSubTypes {
          * @title Quantity of the stock
         */
         quantity: number;
-    };
-    export type IShoppingDeliveryShipper = {
+    }
+    export interface IShoppingDeliveryShipper {
         id: string & tags.Format<"uuid">;
         created_at: string & tags.Format<"date-time">;
         company: null | string;
         name: string;
         mobile: string;
-    };
+    }
     /**
      * The address information.
     */
-    export type IShoppingAddress = {
+    export interface IShoppingAddress {
         /**
          * Primary Key.
          *
@@ -348,7 +349,7 @@ export namespace AutoViewInputSubTypes {
          * @title Special description if required
         */
         special_note: null | string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingOrderPublish;
 
@@ -357,93 +358,197 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingOrderPublish;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDateTime = (dt: string | null) =>
-    dt
-      ? new Date(dt).toLocaleString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
+  const formatDate = (dateStr: string | null): string =>
+    dateStr
+      ? new Date(dateStr).toLocaleString("en-US", {
+          dateStyle: "medium",
+          timeStyle: "short",
         })
-      : '-';
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+      : "-";
 
-  const orderCreated = formatDateTime(value.created_at);
-  const orderPaid = formatDateTime(value.paid_at);
-  const orderCancelled = formatDateTime(value.cancelled_at);
-  const orderState = capitalize(value.state);
+  const totalDeliveries = value.deliveries.length;
+  const totalItemsDelivered = value.deliveries.reduce(
+    (sum, d) => sum + d.pieces.reduce((s, p) => s + p.quantity, 0),
+    0
+  );
 
-  const addr = value.address;
-  const fullAddress = `${addr.possession}, ${addr.department}, ${addr.city}, ${addr.province}, ${addr.country}, ${addr.zip_code}`;
+  const statusMap: Record<
+    AutoViewInput["state"],
+    { label: string; icon: React.ReactNode }
+  > = {
+    none: {
+      label: "Pending",
+      icon: (
+        <LucideReact.Clock
+          className="text-gray-500"
+          size={20}
+          role="img"
+          aria-label="Pending"
+        />
+      ),
+    },
+    preparing: {
+      label: "Preparing",
+      icon: (
+        <LucideReact.Settings
+          className="text-amber-500"
+          size={20}
+          role="img"
+          aria-label="Preparing"
+        />
+      ),
+    },
+    manufacturing: {
+      label: "Manufacturing",
+      icon: (
+        <LucideReact.Package
+          className="text-purple-500"
+          size={20}
+          role="img"
+          aria-label="Manufacturing"
+        />
+      ),
+    },
+    shipping: {
+      label: "Shipping",
+      icon: (
+        <LucideReact.Truck
+          className="text-blue-500"
+          size={20}
+          role="img"
+          aria-label="Shipping"
+        />
+      ),
+    },
+    delivering: {
+      label: "Delivering",
+      icon: (
+        <LucideReact.Truck
+          className="text-teal-500"
+          size={20}
+          role="img"
+          aria-label="Delivering"
+        />
+      ),
+    },
+    arrived: {
+      label: "Delivered",
+      icon: (
+        <LucideReact.CheckCircle
+          className="text-green-500"
+          size={20}
+          role="img"
+          aria-label="Delivered"
+        />
+      ),
+    },
+    underway: {
+      label: "Underway",
+      icon: (
+        <LucideReact.ArrowUpRight
+          className="text-blue-500"
+          size={20}
+          role="img"
+          aria-label="Underway"
+        />
+      ),
+    },
+  };
+
+  const status = statusMap[value.state];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-lg mx-auto">
-      <h2 className="text-lg font-semibold mb-2 text-gray-800">Order Summary</h2>
-      <dl className="mb-4 space-y-1">
-        <div className="flex justify-between">
-          <dt className="font-medium text-gray-600">Order ID:</dt>
-          <dd className="text-gray-800 truncate">{value.id}</dd>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
+      {/* Header: Order ID and Status */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
+          Order #{value.id}
+        </h2>
+        <div className="flex items-center mt-2 sm:mt-0">
+          {status.icon}
+          <span className="ml-2 text-sm font-medium text-gray-700">
+            {status.label}
+          </span>
         </div>
-        <div className="flex justify-between">
-          <dt className="font-medium text-gray-600">Status:</dt>
-          <dd className="text-gray-800">{orderState}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="font-medium text-gray-600">Created:</dt>
-          <dd className="text-gray-800">{orderCreated}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="font-medium text-gray-600">Paid:</dt>
-          <dd className="text-gray-800">{orderPaid}</dd>
-        </div>
-        {value.cancelled_at && (
-          <div className="flex justify-between">
-            <dt className="font-medium text-gray-600">Cancelled:</dt>
-            <dd className="text-gray-800">{orderCancelled}</dd>
-          </div>
-        )}
-      </dl>
-
-      <div className="mb-4">
-        <h3 className="text-md font-medium mb-1 text-gray-800">Delivery Address</h3>
-        <p className="text-gray-800">{addr.name}</p>
-        <p className="text-gray-800">{fullAddress}</p>
-        <p className="text-gray-600">{addr.mobile}</p>
-        {addr.special_note && (
-          <p className="text-gray-500 italic truncate">{addr.special_note}</p>
-        )}
       </div>
 
-      <div>
-        <h3 className="text-md font-medium mb-2 text-gray-800">
-          Deliveries ({value.deliveries.length})
-        </h3>
-        <ul className="space-y-3">
-          {value.deliveries.map((delivery) => {
-            const dState = capitalize(delivery.state);
-            const dCreated = formatDateTime(delivery.created_at);
-            return (
-              <li key={delivery.id} className="p-3 border border-gray-200 rounded-md bg-gray-50">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-gray-700 truncate">
-                    Delivery {delivery.id}
-                  </span>
-                  <span className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
-                    {dState}
-                  </span>
-                </div>
-                <div className="mt-2 text-sm text-gray-600 space-y-1">
-                  <p>Pieces: {delivery.pieces.length}</p>
-                  <p>Journeys: {delivery.journeys.length}</p>
-                  <p>Shippers: {delivery.shippers.length}</p>
-                  <p>Created: {dCreated}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left: Dates & Stats */}
+        <div className="space-y-3">
+          <div className="flex items-center text-gray-600">
+            <LucideReact.Calendar size={16} className="mr-2" />
+            <span className="text-sm">
+              Created: {formatDate(value.created_at)}
+            </span>
+          </div>
+          <div className="flex items-center text-gray-600">
+            {value.paid_at ? (
+              <LucideReact.CheckCircle
+                size={16}
+                className="mr-2 text-green-500"
+              />
+            ) : (
+              <LucideReact.Clock size={16} className="mr-2 text-amber-500" />
+            )}
+            <span className="text-sm">
+              Paid: {value.paid_at ? formatDate(value.paid_at) : "Pending"}
+            </span>
+          </div>
+          {value.cancelled_at && (
+            <div className="flex items-center text-gray-600">
+              <LucideReact.AlertCircle
+                size={16}
+                className="mr-2 text-red-500"
+              />
+              <span className="text-sm">
+                Cancelled: {formatDate(value.cancelled_at)}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center text-gray-600">
+            <LucideReact.Package size={16} className="mr-2" />
+            <span className="text-sm">{totalDeliveries} deliveries</span>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <LucideReact.ListOrdered size={16} className="mr-2" />
+            <span className="text-sm">
+              {totalItemsDelivered} items delivered
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Shipping Address */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-gray-800">
+            Shipping Address
+          </h3>
+          <div className="flex items-center text-gray-600">
+            <LucideReact.User size={16} className="mr-2" />
+            <span className="text-sm">{value.address.name}</span>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <LucideReact.Phone size={16} className="mr-2" />
+            <span className="text-sm">{value.address.mobile}</span>
+          </div>
+          <div className="flex items-start text-gray-600">
+            <LucideReact.MapPin size={16} className="mr-2 mt-1" />
+            <span className="text-sm leading-tight">
+              {value.address.possession}, {value.address.department},{" "}
+              {value.address.city}, {value.address.province},{" "}
+              {value.address.country}, {value.address.zip_code}
+            </span>
+          </div>
+          {value.address.special_note && (
+            <div className="flex items-start text-gray-600">
+              <LucideReact.Edit3 size={16} className="mr-2 mt-1" />
+              <span className="text-sm italic leading-tight">
+                {value.address.special_note}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

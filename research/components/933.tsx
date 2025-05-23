@@ -1,11 +1,12 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Secrets for a GitHub Codespace.
      *
      * @title Codespaces Secret
     */
-    export type codespaces_secret = {
+    export interface codespaces_secret {
         /**
          * The name of the secret
         */
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
          * The API URL at which the list of repositories this secret is visible to can be retrieved
         */
         selected_repositories_url: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.codespaces_secret;
 
@@ -35,58 +36,64 @@ export type AutoViewInput = AutoViewInputSubTypes.codespaces_secret;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const updatedDate = new Date(value.updated_at);
-  const formattedCreatedAt = createdDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  });
-  const formattedUpdatedAt = updatedDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  });
-  const visibilityLabels: Record<AutoViewInput["visibility"], string> = {
-    all: "All repositories",
-    private: "Private repositories",
-    selected: "Selected repositories",
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+
+  const createdAt = formatDate(value.created_at);
+  const updatedAt = formatDate(value.updated_at);
+
+  const visibilityMapping: Record<
+    AutoViewInputSubTypes.codespaces_secret['visibility'],
+    { label: string; icon: JSX.Element }
+  > = {
+    all: {
+      label: 'All repositories',
+      icon: <LucideReact.Globe size={16} className="text-gray-500" />,
+    },
+    private: {
+      label: 'Private',
+      icon: <LucideReact.Lock size={16} className="text-gray-500" />,
+    },
+    selected: {
+      label: 'Selected repositories',
+      icon: <LucideReact.Users size={16} className="text-gray-500" />,
+    },
   };
-  const visibilityLabel = visibilityLabels[value.visibility];
+
+  const visibilityInfo = visibilityMapping[value.visibility];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-sm w-full mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 truncate">
-        {value.name}
-      </h2>
-      <dl className="mt-3 space-y-2 text-sm text-gray-600">
-        <div className="flex justify-between">
-          <dt className="font-medium">Created</dt>
-          <dd>{formattedCreatedAt}</dd>
+    <div className="max-w-md w-full p-4 bg-white rounded-lg shadow">
+      <div className="flex items-center mb-4">
+        <LucideReact.Key size={20} className="text-gray-700 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {value.name}
+        </h2>
+      </div>
+      <div className="space-y-3 text-sm text-gray-600">
+        <div className="flex items-center">
+          {visibilityInfo.icon}
+          <span className="ml-2">{visibilityInfo.label}</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="font-medium">Updated</dt>
-          <dd>{formattedUpdatedAt}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="font-medium">Visibility</dt>
-          <dd>{visibilityLabel}</dd>
-        </div>
-        {value.visibility === "selected" && (
-          <div>
-            <dt className="font-medium">Repositories URL</dt>
-            <dd className="mt-1 text-blue-600 break-all truncate">
-              {value.selected_repositories_url}
-            </dd>
+        {value.visibility === 'selected' && (
+          <div className="flex items-start">
+            <LucideReact.Link size={16} className="text-gray-500 mt-0.5" />
+            <span className="ml-2 break-all text-xs">{value.selected_repositories_url}</span>
           </div>
         )}
-      </dl>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-500" />
+          <span className="ml-2">Created: {createdAt}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.RefreshCw size={16} className="text-gray-500" />
+          <span className="ml-2">Updated: {updatedAt}</span>
+        </div>
+      </div>
     </div>
   );
 }

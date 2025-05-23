@@ -1,19 +1,20 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiInstallationRepositories {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             repositories: AutoViewInputSubTypes.repository[];
             repository_selection?: string;
-        };
+        }
     }
     /**
      * A repository on GitHub.
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -217,7 +218,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -236,7 +237,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -259,71 +260,100 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiInstallationRepositories.GetResponse;
 
 
 
-// The component name is always "VisualComponent"
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const total = value.total_count;
-  const repos = value.repositories;
-  const selected = value.repository_selection;
-
-  const formatDate = (isoString?: string | null): string => {
-    if (!isoString) return 'N/A';
-    const date = new Date(isoString);
-    return date.toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+  const { total_count, repositories } = value;
+  function formatDate(dateString: string | null): string {
+    if (!dateString) return "";
+    return new Date(dateString).toLocaleDateString("default", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
-  };
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
-  const content = (
-    <div className="p-4 bg-gray-50">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Repositories ({total})
-        </h2>
-        {selected && (
-          <p className="text-gray-600 text-sm">
-            Selected:{' '}
-            <span className="font-medium text-gray-800">{selected}</span>
-          </p>
-        )}
-      </header>
+  return (
+    <div className="p-4 space-y-4">
+      {/* Summary */}
+      <div className="flex items-center text-gray-700 text-sm">
+        <LucideReact.GitBranch size={16} className="mr-1" />
+        <span>{total_count} repositories</span>
+      </div>
+
+      {/* Repository List */}
       <ul className="space-y-4">
-        {repos.map((repo) => (
+        {repositories.map((repo) => (
           <li key={repo.id} className="p-4 bg-white rounded-lg shadow">
-            <div className="flex flex-col sm:flex-row sm:justify-between">
+            <div className="flex items-start space-x-4">
+              {/* Owner Avatar */}
+              <img
+                src={repo.owner.avatar_url}
+                alt={repo.owner.login}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    repo.owner.login,
+                  )}&background=0D8ABC&color=fff`;
+                }}
+                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              />
+
               <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-medium text-blue-600 truncate">
-                  {repo.name}
-                </h3>
-                <p className="text-gray-700 text-sm mt-1 line-clamp-2">
-                  {repo.description ?? 'No description available.'}
-                </p>
-                <div className="flex flex-wrap items-center mt-2 text-gray-500 text-xs">
-                  {repo.language && (
-                    <span className="bg-gray-200 text-gray-800 px-2 py-0.5 rounded-full mr-2 mb-2">
-                      {repo.language}
-                    </span>
-                  )}
-                  {repo.license && (
-                    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full mr-2 mb-2">
-                      {repo.license.name}
-                    </span>
-                  )}
-                  <span className="mr-4">★ {repo.stargazers_count}</span>
-                  <span className="mr-4">🍴 {repo.forks_count}</span>
-                  <span className="whitespace-nowrap">
-                    Updated: {formatDate(repo.updated_at)}
+                {/* Header: Name & Visibility */}
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900 truncate">
+                    {repo.full_name}
+                  </h3>
+                  <span
+                    className={`px-2 py-1 text-xs font-medium rounded ${
+                      repo.private
+                        ? "bg-red-100 text-red-800"
+                        : "bg-green-100 text-green-800"
+                    }`}
+                  >
+                    {repo.private ? "Private" : "Public"}
                   </span>
+                </div>
+
+                {/* Description */}
+                {repo.description && (
+                  <p className="text-gray-600 mt-1 text-sm line-clamp-2">
+                    {repo.description}
+                  </p>
+                )}
+
+                {/* Stats */}
+                <div className="flex items-center space-x-4 mt-2 text-gray-500 text-sm">
+                  <div className="flex items-center">
+                    <LucideReact.Star
+                      size={16}
+                      className="mr-1 text-yellow-500"
+                    />
+                    <span>{repo.stargazers_count}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.GitBranch size={16} className="mr-1" />
+                    <span>{repo.forks_count}</span>
+                  </div>
+                  {repo.language && (
+                    <div className="flex items-center">
+                      <LucideReact.Code size={16} className="mr-1" />
+                      <span>{repo.language}</span>
+                    </div>
+                  )}
+                  {repo.updated_at && (
+                    <div className="flex items-center">
+                      <LucideReact.Calendar size={16} className="mr-1" />
+                      <span>{formatDate(repo.updated_at)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -332,7 +362,4 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
       </ul>
     </div>
   );
-
-  // 3. Return the React element.
-  return content;
 }

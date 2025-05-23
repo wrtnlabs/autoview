@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Full Repository
      *
      * @title Full Repository
     */
-    export type full_repository = {
+    export interface full_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -157,13 +158,13 @@ export namespace AutoViewInputSubTypes {
          * The custom properties that were defined for the repository. The keys are the custom property names, and the values are the corresponding custom property values.
         */
         custom_properties?: {};
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -186,7 +187,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A repository on GitHub.
      *
@@ -203,7 +204,7 @@ export namespace AutoViewInputSubTypes {
         */
         name: string;
         full_name: string;
-        license: any;
+        license: AutoViewInputSubTypes.nullable_license_simple;
         forks: number & tags.Type<"int32">;
         permissions?: {
             admin: boolean;
@@ -212,7 +213,7 @@ export namespace AutoViewInputSubTypes {
             push: boolean;
             maintain?: boolean;
         };
-        owner: any;
+        owner: AutoViewInputSubTypes.simple_user;
         /**
          * Whether the repository is private or public.
         */
@@ -444,7 +445,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -648,18 +649,18 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * Code of Conduct Simple
      *
      * @title Code Of Conduct Simple
     */
-    export type code_of_conduct_simple = {
+    export interface code_of_conduct_simple {
         url: string & tags.Format<"uri">;
         key: string;
         name: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -697,125 +698,89 @@ export type AutoViewInput = AutoViewInputSubTypes.full_repository;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Formatting large counts (e.g., 1500 ⇒ 1.5K)
-  function formatCount(n: number): string {
-    return n >= 1000
-      ? `${(n / 1000).toFixed(1).replace(/\.0$/, "")}K`
-      : n.toString();
-  }
-
-  //    Formatting the last updated date
-  const formattedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  const updatedDate = new Date(value.updated_at).toLocaleDateString('default', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   });
-
-  //    Destructure relevant fields
-  const {
-    full_name,
-    description,
-    owner,
-    language,
-    stargazers_count,
-    forks_count,
-    open_issues_count,
-    topics,
-    private: isPrivate,
-    archived,
-  } = value;
-
-  const stars = formatCount(stargazers_count);
-  const forks = formatCount(forks_count);
-  const issues = formatCount(open_issues_count);
+  const licenseName = value.license?.spdx_id ?? value.license?.name ?? 'Unknown';
+  const language = value.language ?? 'Unknown';
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-      {/* Header: Owner avatar, repo name, language */}
-      <div className="flex items-center mb-3">
-        <img
-          src={owner.avatar_url}
-          alt={owner.login}
-          className="w-10 h-10 rounded-full mr-3 flex-shrink-0"
-        />
-        <div className="flex flex-col overflow-hidden">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">
-            {full_name}
-          </h2>
-          <span className="text-sm text-gray-500 truncate">
-            {language ?? "Unknown"}
-          </span>
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow hover:shadow-md transition">
+      {/* Header: Name + privacy icon + last updated */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center text-lg font-semibold text-gray-800 truncate">
+          {value.private ? (
+            <LucideReact.Lock className="text-gray-500 mr-1" size={16} />
+          ) : (
+            <LucideReact.GitBranch className="text-gray-500 mr-1" size={16} />
+          )}
+          <span className="truncate">{value.name}</span>
+        </div>
+        <div className="text-sm text-gray-500">{updatedDate}</div>
+      </div>
+
+      {/* Description */}
+      {value.description && (
+        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{value.description}</p>
+      )}
+
+      {/* Stats & metadata */}
+      <div className="flex flex-wrap items-center text-sm text-gray-500 mb-3 space-x-4">
+        {/* Owner */}
+        <div className="flex items-center">
+          <img
+            src={value.owner.avatar_url}
+            alt={`${value.owner.login} avatar`}
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = 
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  value.owner.login
+                )}&background=random&color=fff`;
+            }}
+            className="w-5 h-5 rounded-full object-cover mr-1"
+          />
+          <span>{value.owner.login}</span>
+        </div>
+
+        {/* Stars */}
+        <div className="flex items-center">
+          <LucideReact.Star className="text-amber-400 mr-1" size={16} />
+          <span>{value.stargazers_count}</span>
+        </div>
+
+        {/* Forks */}
+        <div className="flex items-center">
+          <LucideReact.GitBranch className="text-gray-500 mr-1" size={16} />
+          <span>{value.forks_count}</span>
+        </div>
+
+        {/* Open issues */}
+        <div className="flex items-center">
+          <LucideReact.AlertCircle className="text-red-500 mr-1" size={16} />
+          <span>{value.open_issues_count}</span>
+        </div>
+
+        {/* Language */}
+        <div className="flex items-center">
+          <LucideReact.Code className="text-gray-500 mr-1" size={16} />
+          <span>{language}</span>
+        </div>
+
+        {/* License */}
+        <div className="flex items-center">
+          <LucideReact.FileText className="text-gray-500 mr-1" size={16} />
+          <span>{licenseName}</span>
         </div>
       </div>
 
-      {/* Description (truncated) */}
-      {description && (
-        <p className="text-sm text-gray-700 mb-3 line-clamp-3">
-          {description}
-        </p>
-      )}
-
-      {/* Stats and Badges */}
-      <div className="flex flex-wrap items-center text-sm text-gray-600 space-x-4 mb-3">
-        <span className="flex items-center">
-          <svg
-            className="w-4 h-4 mr-1 text-yellow-500 flex-shrink-0"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.37 2.455a1 1 0 00-.364 1.118l1.287 3.957c.3.921-.755 1.688-1.538 1.118l-3.37-2.455a1 1 0 00-1.175 0l-3.37 2.455c-.783.57-1.838-.197-1.538-1.118l1.287-3.957a1 1 0 00-.364-1.118L2.063 9.384c-.783-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.05 2.927z" />
-          </svg>
-          {stars}
-        </span>
-        <span className="flex items-center">
-          <svg
-            className="w-4 h-4 mr-1 text-gray-500 flex-shrink-0"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M10 2a2 2 0 00-2 2v12l4-2 4 2V4a2 2 0 00-2-2H10z" />
-          </svg>
-          {forks}
-        </span>
-        <span className="flex items-center">
-          <svg
-            className="w-4 h-4 mr-1 text-red-500 flex-shrink-0"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M18 13V7a1 1 0 00-1-1h-5V4a2 2 0 10-4 0v2H3a1 1 0 00-1 1v6a1 1 0 001 1h5v2a2 2 0 104 0v-2h5a1 1 0 001-1z" />
-          </svg>
-          {issues}
-        </span>
-        {isPrivate && (
-          <span className="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">
-            Private
-          </span>
-        )}
-        {archived && (
-          <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-            Archived
-          </span>
-        )}
+      {/* Repository URL (display only) */}
+      <div className="flex items-center text-sm text-gray-500 truncate">
+        <LucideReact.Link className="text-gray-400 mr-1 flex-shrink-0" size={16} />
+        <span className="truncate">{value.html_url}</span>
       </div>
-
-      {/* Topics */}
-      {topics && topics.length > 0 && (
-        <div className="flex flex-wrap mb-3">
-          {topics.map((topic) => (
-            <span
-              key={topic}
-              className="text-xs bg-blue-100 text-blue-800 mr-2 mb-2 px-2 py-1 rounded-full truncate"
-            >
-              {topic}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Footer: Last updated */}
-      <p className="text-xs text-gray-500">Updated on {formattedDate}</p>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Project cards represent a scope of work.
      *
      * @title Project Card
     */
-    export type project_card = {
+    export interface project_card {
         url: string & tags.Format<"uri">;
         /**
          * The project card's ID
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
         column_url: string & tags.Format<"uri">;
         content_url?: string & tags.Format<"uri">;
         project_url: string & tags.Format<"uri">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -64,82 +65,98 @@ export type AutoViewInput = AutoViewInputSubTypes.project_card;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdAt = new Date(value.created_at);
-  const updatedAt = new Date(value.updated_at);
-
-  const formattedCreated = createdAt.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  const formattedCreated = new Date(value.created_at).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
-  const formattedUpdated = updatedAt.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  const formattedUpdated = new Date(value.updated_at).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
-
-  const isArchived = Boolean(value.archived);
-  const statusLabel = isArchived ? 'Archived' : 'Active';
-  const statusColor = isArchived
-    ? 'bg-red-100 text-red-800'
-    : 'bg-green-100 text-green-800';
-
-  const creator = value.creator;
-  const creatorLogin = creator?.login ?? 'Unknown User';
-  const creatorName = creator?.name ?? '';
-  const avatarUrl = creator?.avatar_url;
-
-  const rawNote = value.note ?? '';
-  const displayNote =
-    rawNote.trim().length > 0 ? rawNote.trim() : 'No description provided.';
-
-  const columnName = value.column_name ?? 'Unassigned Column';
+  // Fallback name for avatar placeholder
+  const avatarName = value.creator
+    ? value.creator.name || value.creator.login
+    : "Unknown";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow-md p-4 flex flex-col space-y-4">
-      {/* Header with creator info and status badge */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {avatarUrl && (
+    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-4 flex flex-col space-y-4">
+      {/* Header: Note and Archived Badge */}
+      <div className="flex justify-between items-start">
+        <h2 className="text-lg font-semibold text-gray-900 line-clamp-2">
+          {value.note ?? "No Description"}
+        </h2>
+        {value.archived && (
+          <div className="flex items-center text-sm text-gray-500 bg-gray-100 rounded-full px-2 py-0.5">
+            <LucideReact.Archive size={16} className="mr-1" />
+            <span>Archived</span>
+          </div>
+        )}
+      </div>
+
+      {/* Meta Information: Column, Project URL, Content URL */}
+      <div className="text-sm text-gray-700 space-y-2">
+        {value.column_name && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Tag size={16} className="text-gray-500" />
+            <span>{value.column_name}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1">
+          <LucideReact.Link size={16} className="text-gray-500" />
+          <span className="break-all truncate">{value.project_url}</span>
+        </div>
+        {value.content_url && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Link2 size={16} className="text-gray-500" />
+            <span className="break-all truncate">{value.content_url}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Footer: Creator and Timestamps */}
+      <div className="flex items-center justify-between text-sm text-gray-600">
+        <div className="flex items-center gap-2">
+          {value.creator ? (
             <img
-              src={avatarUrl}
-              alt={creatorLogin}
-              className="w-10 h-10 rounded-full object-cover"
+              src={value.creator.avatar_url}
+              alt={value.creator.login}
+              className="w-8 h-8 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  avatarName
+                )}&background=0D8ABC&color=fff`;
+              }}
             />
+          ) : (
+            <LucideReact.User size={24} className="text-gray-400" />
           )}
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900">
-              {creatorLogin}
+            <span className="font-medium text-gray-800">
+              {value.creator?.name ?? value.creator?.login ?? "Unknown"}
             </span>
-            {creatorName && (
-              <span className="text-xs text-gray-500 truncate">
-                {creatorName}
-              </span>
-            )}
+            <span className="text-gray-500">
+              @{value.creator?.login ?? "unknown"}
+            </span>
           </div>
         </div>
-        <span
-          className={`text-xs font-semibold px-2 py-1 rounded-full ${statusColor}`}
-        >
-          {statusLabel}
-        </span>
-      </div>
-
-      {/* Column name */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 truncate">
-          {columnName}
-        </h3>
-      </div>
-
-      {/* Card note */}
-      <p className="text-sm text-gray-700 line-clamp-3">{displayNote}</p>
-
-      {/* Timestamps */}
-      <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>Created: {formattedCreated}</span>
-        <span>Updated: {formattedUpdated}</span>
+        <div className="flex flex-col items-end">
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span>Created {formattedCreated}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Clock size={16} className="text-gray-400" />
+            <span>Updated {formattedUpdated}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

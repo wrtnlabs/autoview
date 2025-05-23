@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type root = {
+    export interface root {
         current_user_url: string & tags.Format<"uri-template">;
         current_user_authorizations_html_url: string & tags.Format<"uri-template">;
         authorizations_url: string & tags.Format<"uri-template">;
@@ -38,7 +39,7 @@ export namespace AutoViewInputSubTypes {
         user_organizations_url: string & tags.Format<"uri-template">;
         user_repositories_url: string & tags.Format<"uri-template">;
         user_search_url: string & tags.Format<"uri-template">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.root;
 
@@ -47,48 +48,49 @@ export type AutoViewInput = AutoViewInputSubTypes.root;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const endpointEntries = (Object.keys(value) as Array<keyof AutoViewInput>)
-    .map((key) => {
-      const url = (value as any)[key] as string | undefined;
-      if (!url) return null;
-      // Humanize the key: replace underscores with spaces and capitalize words
+  //    Transform snake_case keys into human-readable labels and filter out any undefined URLs.
+  const endpoints: { key: string; label: string; url: string }[] = Object.entries(value)
+    .filter(([, url]) => typeof url === "string" && url.length > 0)
+    .map(([key, url]) => {
       const label = key
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-      // Mark deprecated endpoints
-      const deprecated = key === 'hub_url';
-      return { key, label, url, deprecated };
-    })
-    .filter((item): item is { key: keyof AutoViewInput; label: string; url: string; deprecated: boolean } => item !== null);
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+      return { key, label, url: url as string };
+    });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
+  //    Render a titled card with a scrollable list of API endpoints.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        GitHub API Root Endpoints
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full overflow-x-auto">
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        API Endpoints
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {endpointEntries.map(({ key, label, url, deprecated }) => (
-          <div key={key} className="flex flex-col">
-            <div className="flex items-center">
-              <span className="text-sm font-medium text-gray-700">{label}</span>
-              {deprecated && (
-                <span className="ml-2 px-1.5 py-0.5 bg-red-100 text-red-800 text-xs rounded">
-                  Deprecated
-                </span>
-              )}
+      <ul className="space-y-3">
+        {endpoints.map((endpoint) => (
+          <li
+            key={endpoint.key}
+            className="flex items-start gap-2 text-sm text-gray-700"
+          >
+            <LucideReact.Link
+              size={16}
+              className="text-gray-400 flex-shrink-0 mt-0.5"
+              aria-label="Endpoint URL"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-gray-800">
+                {endpoint.label}
+              </div>
+              <code
+                className="block font-mono text-indigo-600 truncate"
+                title={endpoint.url}
+              >
+                {endpoint.url}
+              </code>
             </div>
-            <a
-              href={url}
-              className="text-sm text-blue-600 truncate hover:underline"
-              title={url}
-            >
-              {url}
-            </a>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

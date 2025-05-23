@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Color-coded labels help you categorize and filter your issues (just like labels in Gmail).
      *
      * @title Label
     */
-    export type label = {
+    export interface label {
         /**
          * Unique identifier for the label.
         */
@@ -32,7 +33,7 @@ export namespace AutoViewInputSubTypes {
          * Whether this label comes by default in a new repository.
         */
         "default": boolean;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.label;
 
@@ -41,45 +42,49 @@ export type AutoViewInput = AutoViewInputSubTypes.label;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Compute the CSS-friendly hex color and determine text color for readability.
-  const hexColor = `#${value.color}`;
-  // Parse the hex to RGB to compute brightness for contrast
-  const { r, g, b } = (() => {
-    const h = value.color.padStart(6, "0");
-    return {
-      r: parseInt(h.slice(0, 2), 16),
-      g: parseInt(h.slice(2, 4), 16),
-      b: parseInt(h.slice(4, 6), 16),
-    };
+  //    Derive a full hex color and choose text color (black/white) based on luminance for contrast.
+  const backgroundHex = `#${value.color}`;
+  const isLight = (() => {
+    const r = parseInt(value.color.slice(0, 2), 16);
+    const g = parseInt(value.color.slice(2, 4), 16);
+    const b = parseInt(value.color.slice(4, 6), 16);
+    // Standard luminance formula; threshold tuned for readability
+    return (r * 299 + g * 587 + b * 114) / 1000 > 186;
   })();
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  // If brightness is high, use dark text; otherwise, light text
-  const textColorClass = brightness > 128 ? "text-gray-900" : "text-white";
+  const textColorClass = isLight ? "text-black" : "text-white";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-xs p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center space-x-2">
+    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
+      {/* Label pill with dynamic background and text color */}
+      <div className="flex items-center justify-between">
         <span
-          className={`inline-block px-3 py-1 text-sm font-medium ${textColorClass} rounded-full`}
-          style={{ backgroundColor: hexColor }}
+          className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${textColorClass}`}
+          style={{ backgroundColor: backgroundHex }}
         >
           {value.name}
         </span>
+        {/* Default indicator */}
         {value.default && (
-          <span className="px-2 py-0.5 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
-            Default
-          </span>
+          <div className="flex items-center text-green-600 text-sm">
+            <LucideReact.CheckCircle className="mr-1" size={16} />
+            <span>Default</span>
+          </div>
         )}
       </div>
+
+      {/* Optional description, truncated to two lines */}
       {value.description && (
-        <p className="mt-2 text-gray-600 text-sm line-clamp-3">
+        <p className="mt-2 text-gray-600 text-sm line-clamp-2">
           {value.description}
         </p>
       )}
-      <p className="mt-3 text-xs text-gray-500">
-        Color code: <span className="font-mono">{hexColor}</span>
-      </p>
+
+      {/* URL display with link icon and truncation */}
+      <div className="mt-3 flex items-center text-gray-500 text-sm space-x-1">
+        <LucideReact.Link size={16} />
+        <span className="truncate">{value.url}</span>
+      </div>
     </div>
   );
 }

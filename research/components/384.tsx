@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A Github-hosted hosted runner.
      *
      * @title GitHub-hosted hosted runner
     */
-    export type actions_hosted_runner = {
+    export interface actions_hosted_runner {
         /**
          * The unique identifier of the hosted runner.
         */
@@ -45,7 +46,7 @@ export namespace AutoViewInputSubTypes {
          * The time at which the runner was last used, in ISO 8601 format.
         */
         last_active_on?: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * Provides details of a hosted runner image
      *
@@ -74,7 +75,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Github-owned VM details.
     */
-    export type actions_hosted_runner_machine_spec = {
+    export interface actions_hosted_runner_machine_spec {
         /**
          * The ID used for the `size` parameter when creating a new runner.
         */
@@ -91,13 +92,13 @@ export namespace AutoViewInputSubTypes {
          * The available SSD storage for the machine spec.
         */
         storage_gb: number & tags.Type<"int32">;
-    };
+    }
     /**
      * Provides details of Public IP for a GitHub-hosted larger runners
      *
      * @title Public IP for a GitHub-hosted larger runners.
     */
-    export type public_ip = {
+    export interface public_ip {
         /**
          * Whether public IP is enabled.
         */
@@ -110,7 +111,7 @@ export namespace AutoViewInputSubTypes {
          * The length of the IP prefix.
         */
         length?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_hosted_runner;
 
@@ -118,103 +119,115 @@ export type AutoViewInput = AutoViewInputSubTypes.actions_hosted_runner;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants.
-  const {
-    name,
-    status,
-    platform,
-    image_details,
-    machine_size_details: { cpu_cores, memory_gb, storage_gb },
-    maximum_runners,
-    public_ip_enabled,
-    public_ips,
-    last_active_on,
-  } = value;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const statusIcon: React.ReactNode = (() => {
+    switch (value.status) {
+      case "Ready":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "Provisioning":
+        return <LucideReact.Loader className="animate-spin text-amber-500" size={16} />;
+      case "Shutdown":
+        return <LucideReact.XCircle className="text-gray-500" size={16} />;
+      case "Deleting":
+        return <LucideReact.Trash2 className="text-red-500" size={16} />;
+      case "Stuck":
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      default:
+        return null;
+    }
+  })();
 
-  const statusColors: Record<AutoViewInput["status"], string> = {
-    Ready: "bg-green-100 text-green-800",
-    Provisioning: "bg-yellow-100 text-yellow-800",
-    Shutdown: "bg-gray-100 text-gray-800",
-    Deleting: "bg-red-100 text-red-800",
-    Stuck: "bg-red-100 text-red-800",
-  };
-  const statusClass = statusColors[status] ?? "bg-gray-100 text-gray-800";
+  const formattedLastActive = value.last_active_on
+    ? new Date(value.last_active_on).toLocaleString()
+    : null;
 
-  const formattedAbsoluteDate = last_active_on
-    ? new Intl.DateTimeFormat("en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-      }).format(new Date(last_active_on))
-    : "Never";
+  const maxRunners = value.maximum_runners ?? 10;
+  const imageDetails = value.image_details;
+  const machine = value.machine_size_details;
 
-  const relativeLastActive = last_active_on
-    ? (() => {
-        const now = Date.now();
-        const then = new Date(last_active_on).getTime();
-        const diffSec = Math.floor((now - then) / 1000);
-        if (diffSec < 60) return "Just now";
-        if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
-        if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
-        return formattedAbsoluteDate;
-      })()
-    : "Never";
+  const sourceLabel = imageDetails?.source
+    ? imageDetails.source.charAt(0).toUpperCase() + imageDetails.source.slice(1)
+    : "";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm mx-auto">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
-        <span className={`text-xs font-medium px-2 py-1 rounded ${statusClass}`}>
-          {status}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md w-full">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
+        {statusIcon}
       </div>
 
-      <div className="text-sm text-gray-600 mb-2">
-        <span className="font-medium">Platform:</span> {platform}
-      </div>
-
-      {image_details && (
-        <div className="text-sm text-gray-700 mb-2">
-          <span className="font-medium">Image:</span> {image_details.display_name} (
-          {image_details.size_gb} GB)
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.Server size={16} className="text-gray-500 mr-1" />
+          <span>{value.platform}</span>
         </div>
-      )}
 
-      <div className="text-sm text-gray-700 mb-2">
-        <span className="font-medium">Specs:</span> {cpu_cores} CPU · {memory_gb} GB RAM · {storage_gb} GB Storage
-      </div>
-
-      {maximum_runners !== undefined && (
-        <div className="text-sm text-gray-700 mb-2">
-          <span className="font-medium">Max Runners:</span> {maximum_runners}
-        </div>
-      )}
-
-      <div className="text-sm text-gray-700 mb-2">
-        <span className="font-medium">Network:</span>{" "}
-        <span
-          className={`text-xs font-medium px-2 py-1 rounded ${
-            public_ip_enabled ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {public_ip_enabled ? "Public IPs Enabled" : "Private Only"}
-        </span>
-        {public_ip_enabled && public_ips && public_ips.length > 0 && (
-          <div className="flex flex-wrap mt-1">
-            {public_ips.map((ip, idx) => (
-              <span
-                key={idx}
-                className="text-xs text-gray-800 bg-gray-100 px-2 py-1 rounded mr-1 mb-1"
-              >
-                {ip.prefix && ip.length ? `${ip.prefix}/${ip.length}` : "N/A"}
-              </span>
-            ))}
+        {imageDetails && (
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Image size={16} className="text-gray-500 mr-1" />
+            <span>
+              {imageDetails.display_name} ({imageDetails.size_gb} GB, {sourceLabel})
+            </span>
           </div>
         )}
-      </div>
 
-      <div className="text-sm text-gray-600">
-        <span className="font-medium">Last Active:</span> {relativeLastActive}
+        <div className="flex flex-wrap gap-4 mt-2">
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Cpu size={16} className="text-gray-500 mr-1" />
+            <span>{machine.cpu_cores} cores</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Server size={16} className="text-gray-500 mr-1" />
+            <span>{machine.memory_gb} GB RAM</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.HardDrive size={16} className="text-gray-500 mr-1" />
+            <span>{machine.storage_gb} GB Storage</span>
+          </div>
+        </div>
+
+        <div className="flex items-center text-sm text-gray-600 mt-2">
+          <LucideReact.Users size={16} className="text-gray-500 mr-1" />
+          <span>Max Runners: {maxRunners}</span>
+        </div>
+
+        <div className="flex items-center text-sm mt-2">
+          <span className="font-medium text-gray-700 mr-1">Public IP:</span>
+          {value.public_ip_enabled ? (
+            <span className="flex items-center text-green-600 gap-1">
+              <LucideReact.CheckCircle size={16} /> Enabled
+            </span>
+          ) : (
+            <span className="flex items-center text-red-500 gap-1">
+              <LucideReact.XCircle size={16} /> Disabled
+            </span>
+          )}
+        </div>
+
+        {value.public_ip_enabled && value.public_ips && value.public_ips.length > 0 && (
+          <div className="mt-2 text-sm text-gray-600">
+            <span className="font-medium text-gray-700">IP Ranges:</span>
+            <ul className="list-disc list-inside ml-5 mt-1">
+              {value.public_ips.map((ip, idx) => {
+                const prefix = ip.prefix ?? "―";
+                const length = ip.length != null ? ip.length : "―";
+                return (
+                  <li key={idx}>
+                    {prefix}/{length}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
+        {formattedLastActive && (
+          <div className="mt-3 flex items-center text-sm text-gray-600">
+            <LucideReact.Calendar size={16} className="text-gray-500 mr-1" />
+            <span>Last Active: {formattedLastActive}</span>
+          </div>
+        )}
       </div>
     </div>
   );

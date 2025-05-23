@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingChannel {
         /**
          * Hierarchical channel information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * Children categories with hierarchical structure.
              *
@@ -36,13 +37,13 @@ export namespace AutoViewInputSubTypes {
              * @title Name of the channel
             */
             name: string;
-        };
+        }
     }
     export namespace IShoppingChannelCategory {
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -85,7 +86,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannel.IHierarchical;
@@ -94,55 +95,64 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannel.IHierarchical
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation: format creation date
-  const createdDate = new Date(value.created_at);
-  const formattedCreatedAt = createdDate.toLocaleDateString(undefined, {
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formattedChannelDate = new Date(value.created_at).toLocaleDateString(undefined, {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
   });
 
-  // Tailwind indentation classes by depth
-  const indentClasses = ["pl-0", "pl-4", "pl-8", "pl-12", "pl-16"];
-
   // Recursive renderer for nested categories
-  function renderCategories(
+  const renderCategories = (
     categories: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
-    depth = 0,
-  ): React.ReactNode {
-    return (
-      <ul>
-        {categories.map((cat) => {
-          const indent = indentClasses[depth] || indentClasses[indentClasses.length - 1];
-          return (
-            <li key={cat.id} className={`${indent} mb-2`}>
-              <div className="flex flex-wrap items-baseline">
-                <span className="font-medium text-gray-900">{cat.name}</span>
-                <span className="ml-2 text-xs text-gray-500 truncate">{cat.code}</span>
-              </div>
-              {cat.children && cat.children.length > 0 && renderCategories(cat.children, depth + 1)}
-            </li>
-          );
-        })}
-      </ul>
-    );
-  }
+  ): JSX.Element => (
+    <ul className="space-y-2">
+      {categories.map((cat) => (
+        <li key={cat.id}>
+          <div className="flex items-center gap-1">
+            <LucideReact.Tag size={16} className="text-gray-400" />
+            <span className="font-medium text-gray-800 truncate">{cat.name}</span>
+            <span className="text-gray-500 text-sm truncate">({cat.code})</span>
+          </div>
+          {cat.children.length > 0 && (
+            <div className="ml-4 border-l border-gray-200 pl-4 mt-1">
+              {renderCategories(cat.children)}
+            </div>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 max-w-full">
-      <div className="mb-4">
-        <h1 className="text-xl font-semibold text-gray-900 truncate">{value.name}</h1>
-        <p className="text-sm text-gray-600 mb-1">{value.code}</p>
-        <p className="text-xs text-gray-500">Created: {formattedCreatedAt}</p>
+    <div className="w-full max-w-md bg-white p-4 rounded-lg shadow-sm">
+      {/* Channel Header */}
+      <div className="flex items-center mb-2">
+        <LucideReact.Layers size={20} className="text-indigo-500 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
       </div>
-      {value.categories && value.categories.length > 0 ? (
-        <section>
-          <h2 className="text-lg font-medium text-gray-800 mb-2">Categories</h2>
-          {renderCategories(value.categories)}
-        </section>
+
+      {/* Channel Meta */}
+      <div className="flex flex-wrap items-center text-gray-500 text-sm mb-4 gap-4">
+        <div className="flex items-center gap-1">
+          <LucideReact.Tag size={16} />
+          <span className="truncate">Code: {value.code}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span className="truncate">Created: {formattedChannelDate}</span>
+        </div>
+      </div>
+
+      {/* Categories Tree */}
+      {value.categories.length > 0 ? (
+        <div>{renderCategories(value.categories)}</div>
       ) : (
-        <p className="text-sm text-gray-500">No categories available</p>
+        <div className="flex items-center justify-center text-gray-400 py-6">
+          <LucideReact.AlertCircle size={24} className="mr-2" />
+          <span>No categories available</span>
+        </div>
       )}
     </div>
   );

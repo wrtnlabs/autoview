@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4ManagersInfiniteScrollingView = {
+                export interface LegacyV4ManagersInfiniteScrollingView {
                     managers?: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager[];
                     onlines?: AutoViewInputSubTypes.legacy.v4.LegacyV4Online[];
                     next?: string;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Manager = {
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -48,25 +49,25 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4Online = {
+            }
+            export interface LegacyV4Online {
                 channelId?: string;
                 personType?: string;
                 personId?: string;
                 id?: string;
-            };
+            }
         }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ManagersInfiniteScrollingView;
 
@@ -74,89 +75,86 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Manager
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data aggregation and transformations
   const managers = value.managers ?? [];
   const onlines = value.onlines ?? [];
-  const managerCount = managers.length;
-  const onlineCount = onlines.length;
+  const totalManagers = managers.length;
+  const totalOnline = onlines.length;
+  const hasMore = Boolean(value.next);
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Helper to format role label
+  const formatRole = (role: 'owner' | 'member'): string =>
+    role === 'owner' ? 'Owner' : 'Member';
+
+  // Helper to get avatar source with fallback
+  const getAvatarSrc = (manager: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager): string =>
+    manager.avatarUrl
+      ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(manager.name)}&background=random&color=fff`;
+
+  // 2. Compose visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {/* Header with summary */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Managers ({managerCount})
-        </h2>
-        <div className="text-sm text-gray-500">{onlineCount} online</div>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Summary */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Users size={20} className="mr-2" />
+          <span className="font-semibold">{totalManagers}</span>
+          <span className="ml-1">Managers</span>
+        </div>
+        <div className="flex items-center text-gray-700 mt-2 sm:mt-0">
+          <LucideReact.CheckCircle size={20} className="mr-2 text-green-500" />
+          <span className="font-semibold">{totalOnline}</span>
+          <span className="ml-1">Online</span>
+        </div>
       </div>
-
-      {/* List of managers */}
-      {managerCount === 0 ? (
-        <p className="text-gray-500">No managers available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {managers.map((mgr) => {
-            const {
-              id,
-              name,
-              description,
-              showDescriptionToFront,
-              avatarUrl,
-              email,
-              showEmailToFront,
-              role,
-            } = mgr;
-            const displayRole =
-              role?.charAt(0).toUpperCase() + role.slice(1);
-            const initial = name?.charAt(0).toUpperCase() ?? "";
-
-            return (
-              <li
-                key={id ?? name}
-                className="flex items-center space-x-4"
-              >
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={`${name} avatar`}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-lg font-medium">
-                    {initial}
+      {/* Managers List */}
+      <ul className="space-y-4">
+        {managers.map((manager, index) => (
+          <li key={manager.id ?? index} className="flex items-center space-x-4">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+              <img
+                src={getAvatarSrc(manager)}
+                alt={manager.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src =
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(manager.name)}&background=ccc&color=555`;
+                }}
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between">
+                <h3 className="text-gray-900 font-medium truncate">{manager.name}</h3>
+                <span
+                  className={`px-2 py-0.5 text-xs font-semibold rounded ${
+                    manager.role === 'owner'
+                      ? 'bg-blue-100 text-blue-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {formatRole(manager.role)}
+                </span>
+              </div>
+              <div className="mt-1 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+                <div className="flex items-center truncate">
+                  <LucideReact.Mail size={16} className="mr-1" />
+                  <span className="truncate">{manager.email}</span>
+                </div>
+                {manager.showMobileNumberToFront && manager.mobileNumberForFront && (
+                  <div className="flex items-center truncate">
+                    <LucideReact.Phone size={16} className="mr-1" />
+                    <span className="truncate">{manager.mobileNumberForFront}</span>
                   </div>
                 )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline justify-between">
-                    <h3 className="text-md font-medium text-gray-900 truncate">
-                      {name}
-                    </h3>
-                    <span className="ml-2 px-2 py-0.5 text-xs font-medium text-indigo-800 bg-indigo-100 rounded-full">
-                      {displayRole}
-                    </span>
-                  </div>
-                  {showDescriptionToFront && description && (
-                    <p className="text-sm text-gray-600 line-clamp-2 mt-1">
-                      {description}
-                    </p>
-                  )}
-                  {showEmailToFront && email && (
-                    <p className="text-sm text-gray-600 mt-1">{email}</p>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {/* Indicator if more data is available */}
-      {value.next && (
-        <div className="mt-4 text-center">
-          <span className="text-sm text-indigo-600">
-            More available...
-          </span>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {/* Load More Indicator */}
+      {hasMore && (
+        <div className="mt-6 flex justify-center">
+          <LucideReact.Loader className="animate-spin text-gray-400" size={24} />
         </div>
       )}
     </div>

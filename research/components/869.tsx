@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type secret_scanning_alert = {
+    export interface secret_scanning_alert {
         number?: AutoViewInputSubTypes.alert_number;
         created_at?: AutoViewInputSubTypes.alert_created_at;
         updated_at?: AutoViewInputSubTypes.nullable_alert_updated_at;
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
          * A boolean value representing whether or not alert is base64 encoded
         */
         is_base64_encoded?: boolean | null;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -139,142 +140,161 @@ export type AutoViewInput = AutoViewInputSubTypes.secret_scanning_alert;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDateTime = (iso?: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A";
+  const createdAt = value.created_at
+    ? new Date(value.created_at).toLocaleString()
+    : null;
+  const updatedAt = value.updated_at
+    ? new Date(value.updated_at).toLocaleString()
+    : null;
+  const resolvedAt = value.resolved_at
+    ? new Date(value.resolved_at).toLocaleString()
+    : null;
 
-  const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+  // Resolution mapping
+  type ResolutionKey = Exclude<
+    AutoViewInputSubTypes.secret_scanning_alert["resolution"],
+    null | undefined
+  >;
+  const resolutionMap: Record<ResolutionKey, string> = {
+    false_positive: "False Positive",
+    wont_fix: "Won't Fix",
+    revoked: "Revoked",
+    used_in_tests: "Used in Tests",
+  };
+  const resolutionText =
+    value.resolution != null
+      ? resolutionMap[value.resolution as ResolutionKey]
+      : undefined;
 
-  const state = value.state ?? "open";
-  const stateBadge =
-    state === "resolved" ? (
-      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
-        Resolved
-      </span>
-    ) : (
-      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
-        Open
-      </span>
-    );
+  // Validity mapping
+  type ValidityKey = Exclude<
+    AutoViewInputSubTypes.secret_scanning_alert["validity"],
+    undefined
+  >;
+  const validityMap: Record<
+    ValidityKey,
+    { label: string; icon: JSX.Element }
+  > = {
+    active: {
+      label: "Active",
+      icon: <LucideReact.CheckCircle className="text-green-500" size={16} />,
+    },
+    inactive: {
+      label: "Inactive",
+      icon: <LucideReact.XCircle className="text-amber-500" size={16} />,
+    },
+    unknown: {
+      label: "Unknown",
+      icon: <LucideReact.HelpCircle className="text-gray-500" size={16} />,
+    },
+  };
+  const validityKey = value.validity as ValidityKey | undefined;
 
-  const resolution =
-    value.resolution && value.resolution !== null
-      ? value.resolution
-          .split("_")
-          .map(capitalize)
-          .join(" ")
-      : null;
-
-  const secretTypeName = value.secret_type_display_name || value.secret_type || "Unknown";
-
-  const validity = value.validity ?? "unknown";
-  const validityBadge = {
-    active: (
-      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
-        Valid
-      </span>
-    ),
-    inactive: (
-      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">
-        Inactive
-      </span>
-    ),
-    unknown: (
-      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">
-        Unknown
-      </span>
-    ),
-  }[validity];
-
-  const booleanBadge = (flag: boolean | null | undefined, trueText: string, falseText: string) =>
-    flag ? (
-      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
-        {trueText}
-      </span>
-    ) : (
-      <span className="inline-block px-2 py-1 text-xs font-medium rounded bg-gray-100 text-gray-800">
-        {falseText}
-      </span>
-    );
-
-  const createdAt = formatDateTime(value.created_at);
-  const updatedAt = value.updated_at ? formatDateTime(value.updated_at) : null;
-  const resolvedAt = value.resolved_at ? formatDateTime(value.resolved_at) : null;
-
-  const resolvedBy = value.resolved_by?.login ?? null;
-
-  const resolutionComment =
-    value.resolution_comment && value.resolution_comment.length > 0
-      ? value.resolution_comment.length > 100
-        ? value.resolution_comment.slice(0, 100) + "..."
-        : value.resolution_comment
-      : null;
+  // State icon and label
+  const isOpen = value.state === "open";
+  const stateIcon = isOpen ? (
+    <LucideReact.AlertTriangle className="text-yellow-500" size={16} />
+  ) : (
+    <LucideReact.CheckCircle className="text-green-500" size={16} />
+  );
+  const stateLabel = isOpen ? "Open" : "Resolved";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="w-full max-w-md mx-auto bg-white shadow-md rounded-lg overflow-hidden p-4 space-y-4">
+    <div className="p-4 bg-white rounded-lg shadow-md divide-y divide-gray-200">
       {/* Header */}
-      <div className="flex justify-between items-start">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Alert #{value.number ?? "N/A"}
-        </h2>
-        {stateBadge}
+      <div className="flex items-center justify-between pb-3">
+        <div className="flex items-center gap-2">
+          {stateIcon}
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            Alert #{value.number}
+            {value.secret_type_display_name
+              ? `: ${value.secret_type_display_name}`
+              : ""}
+          </h2>
+        </div>
+        <span
+          className={`px-2 py-0.5 text-xs font-medium ${
+            isOpen
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-green-100 text-green-800"
+          } rounded-full`}
+        >
+          {stateLabel}
+        </span>
       </div>
 
-      {/* Badges row */}
-      <div className="flex flex-wrap gap-2">
-        {validityBadge}
-        {booleanBadge(value.publicly_leaked, "Publicly Leaked", "Not Leaked")}
-        {booleanBadge(value.multi_repo, "Multi-Repo", "Single-Repo")}
-        {booleanBadge(value.push_protection_bypassed, "Bypassed", "Protected")}
-      </div>
-
-      {/* Details */}
-      <div className="space-y-2 text-sm text-gray-700">
-        <div className="flex justify-between">
-          <span className="font-medium">Secret Type</span>
-          <span>{secretTypeName}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="font-medium">Detected At</span>
-          <span>{createdAt}</span>
-        </div>
+      {/* Details Grid */}
+      <div className="pt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
+        {createdAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Created: {createdAt}</span>
+          </div>
+        )}
         {updatedAt && (
-          <div className="flex justify-between">
-            <span className="font-medium">Updated</span>
-            <span>{updatedAt}</span>
+          <div className="flex items-center gap-1">
+            <LucideReact.RefreshCw size={16} />
+            <span>Updated: {updatedAt}</span>
           </div>
         )}
-        {state === "resolved" && resolvedAt && (
-          <div className="flex justify-between">
-            <span className="font-medium">Resolved At</span>
-            <span>{resolvedAt}</span>
+        {!isOpen && resolvedAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Resolved: {resolvedAt}</span>
           </div>
         )}
-        {resolution && (
-          <div className="flex justify-between">
-            <span className="font-medium">Resolution</span>
-            <span>{resolution}</span>
+        {value.resolved_by?.login && (
+          <div className="flex items-center gap-1">
+            <LucideReact.UserCheck size={16} />
+            <span>By: {value.resolved_by.login}</span>
           </div>
         )}
-        {resolvedBy && (
-          <div className="flex justify-between">
-            <span className="font-medium">Resolved By</span>
-            <span>{resolvedBy}</span>
+        {resolutionText && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Edit3 size={16} />
+            <span>Resolution: {resolutionText}</span>
           </div>
         )}
-        {resolutionComment && (
-          <div>
-            <span className="font-medium">Comment</span>
-            <p className="mt-1 text-gray-600">{resolutionComment}</p>
+        {value.resolution_comment && (
+          <div className="col-span-full">
+            <p className="text-gray-600 line-clamp-2">
+              <strong>Comment:</strong> {value.resolution_comment}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Status & Flags */}
+      <div className="pt-4 flex flex-wrap items-center gap-4 text-sm">
+        {validityKey && (
+          <div className="flex items-center gap-1 text-gray-700">
+            {validityMap[validityKey].icon}
+            <span>{validityMap[validityKey].label}</span>
+          </div>
+        )}
+        {value.publicly_leaked && (
+          <div className="flex items-center gap-1 text-red-500">
+            <LucideReact.AlertCircle size={16} />
+            <span>Leaked</span>
+          </div>
+        )}
+        {value.multi_repo && (
+          <div className="flex items-center gap-1 text-blue-500">
+            <LucideReact.Users size={16} />
+            <span>Multi-Repo</span>
+          </div>
+        )}
+        {value.is_base64_encoded && (
+          <div className="flex items-center gap-1 text-indigo-500">
+            <LucideReact.Tag size={16} />
+            <span>Base64</span>
+          </div>
+        )}
+        {value.push_protection_bypassed && (
+          <div className="flex items-center gap-1 text-amber-500">
+            <LucideReact.ShieldOff size={16} />
+            <span>Bypassed</span>
           </div>
         )}
       </div>

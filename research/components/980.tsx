@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A public SSH key used to sign Git commits
      *
      * @title SSH Signing Key
     */
-    export type ssh_signing_key = {
+    export interface ssh_signing_key {
         key: string;
         id: number & tags.Type<"int32">;
         title: string;
         created_at: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ssh_signing_key[];
 
@@ -19,57 +20,66 @@ export type AutoViewInput = AutoViewInputSubTypes.ssh_signing_key[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const keyCount = value.length;
-  // Helper to format dates uniformly
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  // Helper to mask long SSH keys for concise display
-  const maskKey = (key: string) => {
-    if (key.length <= 50) return key;
-    const prefix = key.slice(0, 20);
-    const suffix = key.slice(-20);
-    return `${prefix}…${suffix}`;
-  };
+  // 1. Data aggregation/transformation
+  const keys: AutoViewInputSubTypes.ssh_signing_key[] = value;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Handle empty state
+  if (keys.length === 0) {
+    return (
+      <div className="flex flex-col items-center text-gray-400 py-8">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No SSH signing keys available</span>
+      </div>
+    );
+  }
+
+  // 3. Render list of SSH signing keys
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-xl font-bold text-gray-800 mb-4">
-        SSH Signing Keys ({keyCount})
-      </h2>
-      {keyCount === 0 ? (
-        <p className="text-gray-600">No SSH signing keys available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {value.map((item) => {
-            const created = formatDate(item.created_at);
-            const displayKey = maskKey(item.key);
-            return (
-              <li
-                key={item.id}
-                className="bg-white p-4 rounded-lg shadow-sm flex flex-col sm:flex-row sm:justify-between"
-              >
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {item.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">Created: {created}</p>
-                </div>
-                <div className="mt-3 sm:mt-0 sm:ml-6 flex-shrink-0">
-                  <code className="block text-xs font-mono text-gray-700 bg-gray-100 py-1 px-2 rounded overflow-x-auto">
-                    {displayKey}
-                  </code>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
+    <ul role="list" className="space-y-4">
+      {keys.map((item) => {
+        const { id, title, key, created_at } = item;
+        // Format created date
+        const formattedDate = new Date(created_at).toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        // Truncate long key for preview
+        const keyPreview =
+          key.length > 30 ? `${key.slice(0, 15)}…${key.slice(-10)}` : key;
+
+        return (
+          <li
+            key={id}
+            className="p-4 bg-white rounded-lg shadow flex flex-col md:flex-row md:items-center md:justify-between"
+          >
+            {/* Title with icon */}
+            <div className="flex items-center space-x-2">
+              <LucideReact.Key className="text-indigo-500" size={20} />
+              <h3 className="text-gray-900 font-medium truncate">{title}</h3>
+            </div>
+
+            {/* Metadata: creation date and ID */}
+            <div className="mt-2 md:mt-0 flex flex-col md:flex-row md:items-center md:space-x-4 text-sm text-gray-500">
+              <div className="flex items-center">
+                <LucideReact.Calendar className="mr-1" size={16} />
+                <time dateTime={created_at}>{formattedDate}</time>
+              </div>
+              <div className="flex items-center mt-1 md:mt-0">
+                <LucideReact.Hash className="mr-1" size={16} />
+                <span>#{id}</span>
+              </div>
+            </div>
+
+            {/* Key preview */}
+            <div className="mt-3 md:mt-0 text-sm font-mono text-gray-700 truncate">
+              {keyPreview}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

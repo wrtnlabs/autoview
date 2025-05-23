@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Color-coded labels help you categorize and filter your issues (just like labels in Gmail).
      *
      * @title Label
     */
-    export type label = {
+    export interface label {
         /**
          * Unique identifier for the label.
         */
@@ -32,7 +33,7 @@ export namespace AutoViewInputSubTypes {
          * Whether this label comes by default in a new repository.
         */
         "default": boolean;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.label;
 
@@ -40,54 +41,54 @@ export type AutoViewInput = AutoViewInputSubTypes.label;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Derive full hex color and compute text contrast for accessibility.
-  const backgroundColor = `#${value.color}`;
+  // Derived constants
+  const labelColor = `#${value.color}`;
+  const displayUrl =
+    value.url.length > 30 ? `${value.url.slice(0, 30)}…` : value.url;
+  const hasDescription = Boolean(value.description);
 
-  // Compute brightness to determine if text should be light or dark.
-  const hex = value.color.startsWith("#") ? value.color.slice(1) : value.color;
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
-  // Standard luminance formula
-  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-  const textColor = brightness > 128 ? "#1f2937" : "#ffffff"; // dark gray or white
-
-  // Truncate description to two lines if present
-  const hasDescription = typeof value.description === "string" && value.description.trim().length > 0;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  // Compose the visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-xs w-full">
-      <div className="flex items-center justify-between">
+    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 max-w-full sm:max-w-sm">
+      {/* Header with color swatch, name, and default indicator */}
+      <div className="flex items-center gap-2">
         <span
-          className="inline-block px-3 py-1 rounded-full text-sm font-medium"
-          style={{ backgroundColor, color: textColor }}
-        >
+          className="w-3 h-3 rounded-full shrink-0"
+          style={{ backgroundColor: labelColor }}
+          aria-label={`Label color ${labelColor}`}
+        />
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
           {value.name}
-        </span>
+        </h2>
         {value.default && (
-          <span className="ml-2 inline-block px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">
+          <span className="inline-flex items-center text-green-600 text-sm font-medium ml-2">
             Default
+            <LucideReact.CheckCircle
+              className="ml-1"
+              size={16}
+              aria-label="Default label"
+            />
           </span>
         )}
       </div>
-      {hasDescription && (
-        <p className="mt-2 text-gray-600 text-sm line-clamp-2">
-          {value.description}
-        </p>
-      )}
-      <div className="mt-3 text-xs text-gray-400">
-        {/* Show source node ID or URL only if needed for context; here we show the URL truncated */}
-        <a
-          href={value.url}
-          className="underline truncate block"
-          title={value.url}
-          onClick={(e) => e.preventDefault()}
-        >
-          {value.url}
-        </a>
+
+      {/* Description or placeholder */}
+      <p
+        className={`mt-2 text-gray-600 text-sm ${
+          hasDescription ? "line-clamp-3" : "italic"
+        }`}
+      >
+        {hasDescription ? value.description : "No description provided."}
+      </p>
+
+      {/* URL display */}
+      <div className="flex items-center gap-1 mt-3 text-sm text-gray-500">
+        <LucideReact.Link
+          className="shrink-0"
+          size={16}
+          aria-label="Label URL"
+        />
+        <span className="truncate">{displayUrl}</span>
       </div>
     </div>
   );

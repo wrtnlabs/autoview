@@ -1,20 +1,21 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Gist Simple
      *
      * @title Gist Simple
     */
-    export type gist_simple = {
+    export interface gist_simple {
         forks?: {
             id?: string;
             url?: string & tags.Format<"uri">;
-            user?: any;
+            user?: AutoViewInputSubTypes.public_user;
             created_at?: string & tags.Format<"date-time">;
             updated_at?: string & tags.Format<"date-time">;
         }[] | null;
-        history?: any[] | null;
+        history?: AutoViewInputSubTypes.gist_history[] | null;
         /**
          * Gist
          *
@@ -44,9 +45,9 @@ export namespace AutoViewInputSubTypes {
             description: string | null;
             comments: number & tags.Type<"int32">;
             comments_enabled?: boolean;
-            user: any;
+            user: AutoViewInputSubTypes.nullable_simple_user;
             comments_url: string & tags.Format<"uri">;
-            owner?: any;
+            owner?: AutoViewInputSubTypes.nullable_simple_user;
             truncated?: boolean;
             forks?: any[];
             history?: any[];
@@ -84,16 +85,81 @@ export namespace AutoViewInputSubTypes {
         comments_url?: string;
         owner?: AutoViewInputSubTypes.simple_user;
         truncated?: boolean;
-    };
-    export type public_user = any;
-    export type gist_history = any;
-    export type nullable_simple_user = any;
+    }
+    /**
+     * Public User
+     *
+     * @title Public User
+    */
+    export interface public_user {
+        login: string;
+        id: number & tags.Type<"int32">;
+        user_view_type?: string;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        name: string | null;
+        company: string | null;
+        blog: string | null;
+        location: string | null;
+        email: (string & tags.Format<"email">) | null;
+        notification_email?: (string & tags.Format<"email">) | null;
+        hireable: boolean | null;
+        bio: string | null;
+        twitter_username?: string | null;
+        public_repos: number & tags.Type<"int32">;
+        public_gists: number & tags.Type<"int32">;
+        followers: number & tags.Type<"int32">;
+        following: number & tags.Type<"int32">;
+        created_at: string & tags.Format<"date-time">;
+        updated_at: string & tags.Format<"date-time">;
+        plan?: {
+            collaborators: number & tags.Type<"int32">;
+            name: string;
+            space: number & tags.Type<"int32">;
+            private_repos: number & tags.Type<"int32">;
+        };
+        private_gists?: number & tags.Type<"int32">;
+        total_private_repos?: number & tags.Type<"int32">;
+        owned_private_repos?: number & tags.Type<"int32">;
+        disk_usage?: number & tags.Type<"int32">;
+        collaborators?: number & tags.Type<"int32">;
+    }
+    /**
+     * Gist History
+     *
+     * @title Gist History
+    */
+    export interface gist_history {
+        user?: AutoViewInputSubTypes.nullable_simple_user;
+        version?: string;
+        committed_at?: string & tags.Format<"date-time">;
+        change_status?: {
+            total?: number & tags.Type<"int32">;
+            additions?: number & tags.Type<"int32">;
+            deletions?: number & tags.Type<"int32">;
+        };
+        url?: string & tags.Format<"uri">;
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export type nullable_simple_user = {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -116,7 +182,36 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    } | null;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.gist_simple;
 
@@ -125,105 +220,139 @@ export type AutoViewInput = AutoViewInputSubTypes.gist_simple;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const owner = value.owner;
-  const description = value.description?.trim() || "No description provided.";
+  const ownerName =
+    value.owner?.login ||
+    (typeof value.user === "string" ? value.user : "Unknown");
+  const ownerAvatar =
+    value.owner?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      ownerName,
+    )}&background=0D8ABC&color=fff`;
+  const forksCount = value.forks?.length ?? 0;
+  const historyCount = value.history?.length ?? 0;
+  const commentsCount = value.comments ?? 0;
+
+  const fileEntries = value.files
+    ? Object.entries(value.files).filter(
+        ([, file]) => file !== null && file !== undefined,
+      )
+    : [];
+  const fileCount = fileEntries.length;
+  const displayedFiles = fileEntries.slice(0, 3);
+  const moreFiles = fileCount - displayedFiles.length;
+
   const createdAt = value.created_at
     ? new Date(value.created_at).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       })
-    : "Unknown date";
+    : "";
   const updatedAt = value.updated_at
     ? new Date(value.updated_at).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       })
-    : null;
+    : "";
 
-  // Extract file names
-  const fileNames = value.files
-    ? Object.values(value.files)
-        .filter((f): f is NonNullable<typeof f> => f != null && !!f.filename)
-        .map((f) => f.filename!)
-    : [];
-  const totalFiles = fileNames.length;
-  const visibleFiles = fileNames.slice(0, 3);
-  const remainingFiles = totalFiles - visibleFiles.length;
-
-  // Counts
-  const forksCount = Array.isArray(value.forks) ? value.forks.length : 0;
-  const commentsCount = typeof value.comments === "number" ? value.comments : 0;
+  const isPublic = value["public"] !== false;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Header: Owner, Dates, Visibility */}
-      <div className="flex items-center p-4 space-x-4">
-        {owner?.avatar_url && (
-          <img
-            src={owner.avatar_url}
-            alt={owner.login}
-            className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-          />
+    <div className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Description */}
+      <div className="flex items-center justify-between">
+        <p className="text-gray-800 font-semibold text-lg line-clamp-2">
+          {value.description || "No description"}
+        </p>
+        {value.fork_of && (
+          <div className="inline-flex items-center gap-1 text-xs font-medium bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+            <LucideReact.GitBranch size={12} />
+            Forked
+          </div>
         )}
-        <div className="flex-1 min-w-0">
-          <p className="text-gray-900 font-semibold truncate">
-            {owner?.login || "Unknown User"}
-          </p>
-          <p className="text-gray-500 text-sm">Created: {createdAt}</p>
-        </div>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            value.public
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {value.public ? "Public" : "Private"}
+      </div>
+
+      {/* Owner and Status */}
+      <div className="flex items-center gap-2 mt-3">
+        <img
+          src={ownerAvatar}
+          alt={ownerName}
+          className="h-8 w-8 rounded-full object-cover"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              ownerName,
+            )}&background=0D8ABC&color=fff`;
+          }}
+        />
+        <span className="text-gray-700 text-sm font-medium">{ownerName}</span>
+        <span className="ml-auto inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full bg-white border border-gray-200 text-gray-600">
+          {isPublic ? (
+            <LucideReact.Unlock size={14} className="text-green-500 mr-1" />
+          ) : (
+            <LucideReact.Lock size={14} className="text-red-500 mr-1" />
+          )}
+          {isPublic ? "Public" : "Private"}
         </span>
       </div>
 
-      {/* Description */}
-      <div className="px-4">
-        <p className="text-gray-700 text-sm line-clamp-3">{description}</p>
-      </div>
-
-      {/* Files List */}
-      {totalFiles > 0 && (
-        <div className="px-4 mt-4">
-          <p className="text-gray-800 text-sm font-medium">
-            Files ({totalFiles})
-          </p>
-          <ul className="mt-1 list-disc list-inside text-gray-600 text-sm">
-            {visibleFiles.map((name, idx) => (
-              <li key={idx} className="truncate">
-                {name}
-              </li>
-            ))}
-            {remainingFiles > 0 && (
-              <li className="text-gray-500">... and {remainingFiles} more</li>
-            )}
-          </ul>
+      {/* Dates */}
+      {(createdAt || updatedAt) && (
+        <div className="flex items-center gap-4 text-gray-500 text-xs mt-2">
+          {createdAt && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar size={14} />
+              <span>Created: {createdAt}</span>
+            </div>
+          )}
+          {updatedAt && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Edit3 size={14} />
+              <span>Updated: {updatedAt}</span>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Footer: Comments, Forks, Updated */}
-      <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between text-gray-600 text-sm">
-        <div className="flex items-center space-x-2">
-          <span className="text-lg">💬</span>
-          <span>{commentsCount}</span>
+      {/* Files */}
+      <div className="mt-4">
+        <div className="text-gray-600 text-sm font-medium">
+          Files ({fileCount})
         </div>
-        <div className="flex items-center space-x-2">
-          <span className="text-lg">🔀</span>
+        <ul className="mt-1 space-y-1">
+          {displayedFiles.map(([name], idx) => (
+            <li
+              key={idx}
+              className="flex items-center gap-2 text-gray-700 text-sm truncate"
+            >
+              <LucideReact.FileText
+                size={16}
+                className="text-indigo-500 flex-shrink-0"
+              />
+              <span className="truncate">{name}</span>
+            </li>
+          ))}
+        </ul>
+        {moreFiles > 0 && (
+          <p className="mt-1 text-gray-500 text-xs">+{moreFiles} more</p>
+        )}
+      </div>
+
+      {/* Stats */}
+      <div className="flex items-center gap-6 text-gray-500 text-sm mt-4">
+        <div className="flex items-center gap-1">
+          <LucideReact.GitBranch size={16} />
           <span>{forksCount}</span>
         </div>
-        {updatedAt && (
-          <div className="text-gray-500 truncate">
-            Updated: {updatedAt}
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          <LucideReact.History size={16} />
+          <span>{historyCount}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.MessageCircle size={16} />
+          <span>{commentsCount}</span>
+        </div>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A comment made to a gist.
      *
      * @title Gist Comment
     */
-    export type gist_comment = {
+    export interface gist_comment {
         id: number & tags.Type<"int32">;
         node_id: string;
         url: string & tags.Format<"uri">;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         author_association: AutoViewInputSubTypes.author_association;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -62,85 +63,82 @@ export type AutoViewInput = AutoViewInputSubTypes.gist_comment;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const user = value.user;
-  const displayName = user?.name?.trim() || user?.login || "Unknown";
-  const avatarUrl = user?.avatar_url;
-  const createdDate = new Date(value.created_at).toLocaleString(undefined, {
+  const createdAt = new Date(value.created_at);
+  const formattedCreated = createdAt.toLocaleString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "numeric",
-    minute: "2-digit",
+    minute: "numeric",
   });
   const isEdited = value.updated_at !== value.created_at;
-  const editedDate = isEdited
-    ? new Date(value.updated_at).toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      })
-    : "";
-  const assocLabel = value.author_association
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-  const assocColors: Record<string, string> = {
-    OWNER: "bg-purple-100 text-purple-800",
-    MEMBER: "bg-indigo-100 text-indigo-800",
-    COLLABORATOR: "bg-green-100 text-green-800",
-    CONTRIBUTOR: "bg-blue-100 text-blue-800",
-    FIRST_TIMER: "bg-yellow-100 text-yellow-800",
-    FIRST_TIME_CONTRIBUTOR: "bg-yellow-100 text-yellow-800",
-    MANNEQUIN: "bg-gray-100 text-gray-800",
+
+  // Determine user display information
+  const user = value.user;
+  const loginName = user?.login ?? "Unknown User";
+  const displayName = user?.name ? `${user.name} (${loginName})` : loginName;
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    loginName
+  )}&background=0D8ABC&color=fff`;
+
+  // Map author_association to badge styles
+  const associationStyles: Record<AutoViewInputSubTypes.author_association, string> = {
+    OWNER: "bg-green-100 text-green-800",
+    MEMBER: "bg-blue-100 text-blue-800",
+    COLLABORATOR: "bg-yellow-100 text-yellow-800",
+    CONTRIBUTOR: "bg-purple-100 text-purple-800",
+    FIRST_TIMER: "bg-indigo-100 text-indigo-800",
+    FIRST_TIME_CONTRIBUTOR: "bg-indigo-100 text-indigo-800",
+    MANNEQUIN: "bg-pink-100 text-pink-800",
     NONE: "bg-gray-100 text-gray-800",
   };
-  const badgeStyle = assocColors[value.author_association] || "bg-gray-100 text-gray-800";
+  const badgeClass = associationStyles[value.author_association];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <article className="flex items-start p-4 bg-white rounded-lg shadow-md w-full max-w-md">
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt={displayName}
-          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-        />
-      ) : (
-        <div className="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center">
-          <span className="text-gray-400 text-xl">?</span>
-        </div>
-      )}
-      <div className="flex-1 ml-4">
-        <header className="flex flex-wrap items-center space-x-2">
-          <h3 className="font-semibold text-gray-900 truncate">{displayName}</h3>
-          <span
-            className={`${badgeStyle} text-xs font-medium px-2 py-0.5 rounded`}
-          >
-            {assocLabel}
-          </span>
-          <time
-            dateTime={value.created_at}
-            className="text-sm text-gray-500"
-          >
-            {createdDate}
-          </time>
-          {isEdited && (
-            <time
-              dateTime={value.updated_at}
-              className="text-sm text-gray-400 italic"
+    <article className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      <header className="flex items-center gap-3">
+        {user ? (
+          <img
+            src={user.avatar_url}
+            alt={loginName}
+            onError={(e) => {
+              const target = e.currentTarget as HTMLImageElement;
+              target.onerror = null;
+              target.src = avatarPlaceholder;
+            }}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          <LucideReact.User
+            size={40}
+            className="text-gray-400"
+            aria-label="Unknown user"
+          />
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <h3 className="font-medium text-gray-900 truncate">{displayName}</h3>
+            <span
+              className={`ml-2 px-2 py-0.5 text-xs font-medium rounded-full ${badgeClass}`}
             >
-              (edited)
+              {value.author_association}
+            </span>
+          </div>
+          <div className="flex items-center text-gray-500 text-sm mt-1">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <time dateTime={value.created_at} className="truncate">
+              {formattedCreated}
             </time>
-          )}
-        </header>
-        <p className="mt-2 text-gray-700 text-sm overflow-hidden line-clamp-3">
-          {value.body}
-        </p>
-      </div>
+            {isEdited && (
+              <span className="ml-2 italic text-gray-400 text-xs">(edited)</span>
+            )}
+          </div>
+        </div>
+      </header>
+      <p className="mt-3 text-gray-700 whitespace-pre-line line-clamp-3">
+        {value.body}
+      </p>
     </article>
   );
 }

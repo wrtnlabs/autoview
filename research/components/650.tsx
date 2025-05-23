@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -27,7 +28,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -42,7 +43,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -79,92 +80,54 @@ export type AutoViewInput = AutoViewInputSubTypes.team[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Sort teams alphabetically by name for consistent display.
-  const teams = [...value].sort((a, b) => a.name.localeCompare(b.name));
-
-  //    Helper to render granular permission badges from the permissions object.
-  const renderPermissionBadges = (
-    permissions?: AutoViewInputSubTypes.team['permissions'],
-  ) => {
-    if (!permissions) return null;
-    return Object.entries(permissions)
-      .filter(([, allowed]) => allowed)
-      .map(([key]) => (
-        <span
-          key={key}
-          className="inline-block bg-indigo-100 text-indigo-800 text-xs font-medium mr-1 px-2 py-0.5 rounded-full capitalize"
-        >
-          {key}
-        </span>
-      ));
-  };
+  // 1. Helper to capitalize words
+  const capitalize = (s: string) =>
+    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
-  return teams.length === 0 ? (
-    <p className="text-center text-gray-500">No teams available.</p>
-  ) : (
-    <ul className="space-y-4">
-      {teams.map((team) => (
-        <li key={team.id} className="p-4 bg-white rounded-lg shadow">
-          {/* Header: Team name and slug */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-800 truncate">
-                {team.name}
-              </h2>
-              <span className="text-sm text-gray-500">@{team.slug}</span>
-            </div>
-            <div className="mt-2 sm:mt-0 flex flex-wrap items-center">
-              {/* Primary permission badge */}
-              <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2 py-0.5 rounded-full capitalize">
-                {team.permission}
-              </span>
-              {/* Optional privacy and notification badges */}
-              {team.privacy && (
-                <span className="inline-block bg-green-100 text-green-800 text-xs font-medium mr-2 px-2 py-0.5 rounded-full capitalize">
-                  {team.privacy}
-                </span>
-              )}
-              {team.notification_setting && (
-                <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-0.5 rounded-full capitalize">
-                  {team.notification_setting}
-                </span>
-              )}
-            </div>
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {value.map((team) => (
+        <div
+          key={team.id}
+          className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-150"
+        >
+          {/* Header: Team icon and name */}
+          <div className="flex items-center gap-2">
+            <LucideReact.Users size={20} className="text-indigo-500" />
+            <h3 className="text-lg font-semibold text-gray-900 truncate">
+              {team.name}
+            </h3>
           </div>
 
-          {/* Description (truncated to two lines) */}
-          {team.description && (
-            <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-              {team.description}
-            </p>
-          )}
-
-          {/* Granular GitHub permissions */}
-          {team.permissions && (
-            <div className="mt-3">
-              <h3 className="text-sm font-medium text-gray-600 mb-1">
-                Access Rights:
-              </h3>
-              <div className="flex flex-wrap">
-                {renderPermissionBadges(team.permissions)}
-              </div>
-            </div>
-          )}
-
-          {/* Parent team, if exists */}
-          {team.parent && (
-            <p className="mt-3 text-gray-600 text-sm">
-              Parent Team:
-              <span className="ml-1 font-medium text-gray-800">
+          {/* Subheader: slug and optional parent team */}
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-gray-500 text-sm">@{team.slug}</span>
+            {team.parent && (
+              <span className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded">
                 {team.parent.name}
               </span>
-            </p>
-          )}
-        </li>
+            )}
+          </div>
+
+          {/* Description (truncated) */}
+          <p className="text-gray-600 text-sm mt-2 line-clamp-2">
+            {team.description || "No description provided."}
+          </p>
+
+          {/* Footer: privacy and default permission */}
+          <div className="flex items-center gap-4 mt-4">
+            <div className="flex items-center gap-1 text-gray-500 text-sm">
+              <LucideReact.Lock size={16} />
+              <span>{team.privacy ? capitalize(team.privacy) : "Visible"}</span>
+            </div>
+            <div className="flex items-center gap-1 text-gray-500 text-sm">
+              <LucideReact.Shield size={16} />
+              <span>{capitalize(team.permission)}</span>
+            </div>
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }

@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Installation
      *
      * @title Installation
     */
-    export type installation = {
+    export interface installation {
         /**
          * The ID of the installation.
         */
         id: number & tags.Type<"int32">;
-        account: any | any | null;
+        account: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise | null;
         /**
          * Describe whether all repositories have been selected or there's a selection involved
         */
@@ -36,15 +37,74 @@ export namespace AutoViewInputSubTypes {
         suspended_by: AutoViewInputSubTypes.nullable_simple_user;
         suspended_at: (string & tags.Format<"date-time">) | null;
         contact_email?: string | null;
-    };
-    export type simple_user = any;
-    export type enterprise = any;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * The permissions granted to the user access token.
      *
      * @title App Permissions
     */
-    export type app_permissions = {
+    export interface app_permissions {
         /**
          * The level of permission to grant the access token for GitHub Actions workflows, workflow runs, and artifacts.
         */
@@ -237,7 +297,7 @@ export namespace AutoViewInputSubTypes {
          * The level of permission to grant the access token to list and manage repositories a user is starring.
         */
         starring?: "read" | "write";
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -272,98 +332,138 @@ export type AutoViewInput = AutoViewInputSubTypes.installation;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  // 1. Derive formatted dates and counts
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const updatedAt = new Date(value.updated_at).toLocaleString();
+  const suspendedAt = value.suspended_at ? new Date(value.suspended_at).toLocaleString() : null;
 
-  const repoSelection =
-    value.repository_selection === 'all' ? 'All Repositories' : 'Selected Repositories';
+  const permissionEntries = Object.entries(value.permissions) as [string, string | undefined][];
+  const grantedPermissions = permissionEntries.filter(([_, mode]) => mode !== undefined);
+  const permissionCount = grantedPermissions.length;
+
   const eventsCount = value.events.length;
-  const createdAt = formatDate(value.created_at);
-  const updatedAt = formatDate(value.updated_at);
-  const isSuspended = Boolean(value.suspended_at && value.suspended_by);
-  const suspendedDate = isSuspended && value.suspended_at ? formatDate(value.suspended_at) : '';
-  const suspendedBy = isSuspended && value.suspended_by ? value.suspended_by.login : '';
-  const hasSingleFile = Boolean(value.single_file_name);
-  const multiFileCount = value.single_file_paths?.length ?? 0;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Prepare account display (simple_user or enterprise)
+  let accountDisplay: React.ReactNode = (
+    <span className="italic text-gray-500 text-sm">No account assigned</span>
+  );
+  if (value.account) {
+    if ("login" in value.account) {
+      // simple_user
+      const login = value.account.login;
+      const avatarUrl = value.account.avatar_url;
+      accountDisplay = (
+        <div className="flex items-center gap-2">
+          <img
+            src={avatarUrl}
+            alt={login}
+            className="w-6 h-6 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                login,
+              )}&background=0D8ABC&color=fff`;
+            }}
+          />
+          <span className="text-sm font-medium text-gray-800 truncate">{login}</span>
+        </div>
+      );
+    } else {
+      // enterprise
+      const name = value.account.name;
+      const avatarUrl = value.account.avatar_url;
+      accountDisplay = (
+        <div className="flex items-center gap-2">
+          <img
+            src={avatarUrl}
+            alt={name}
+            className="w-6 h-6 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = `https://placehold.co/32x32/e2e8f0/1e293b?text=${encodeURIComponent(
+                name.charAt(0),
+              )}`;
+            }}
+          />
+          <div className="flex flex-col">
+            <span className="text-sm font-medium text-gray-800 truncate">{name}</span>
+            <span className="text-xs text-gray-500 uppercase">Enterprise</span>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // 3. Check suspension status
+  const isSuspended = !!(value.suspended_at && value.suspended_by);
+  const suspendedBy = value.suspended_by?.login ?? "";
+
+  // 4. Compose visual structure
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.app_slug}</h2>
-        {isSuspended && (
-          <span className="text-sm font-medium text-red-700 bg-red-100 px-2 py-0.5 rounded-full">
-            Suspended
-          </span>
-        )}
+    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm max-w-md mx-auto">
+      {/* Header */}
+      <div className="mb-3">
+        <h2 className="text-xl font-semibold text-gray-800 truncate">{value.app_slug}</h2>
+        <p className="text-sm text-gray-500">App ID: {value.app_id}</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-600">
-        <div>
-          <div className="font-medium text-gray-700">Installation ID</div>
-          <div>{value.id}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-700">App ID</div>
-          <div>{value.app_id}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-700">Repositories</div>
-          <div>{repoSelection}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-700">Events Count</div>
-          <div>{eventsCount}</div>
-        </div>
-        <div className="col-span-2">
-          <div className="font-medium text-gray-700">Created</div>
-          <div>{createdAt}</div>
-        </div>
-        <div className="col-span-2">
-          <div className="font-medium text-gray-700">Last Updated</div>
-          <div>{updatedAt}</div>
-        </div>
-        {value.contact_email && (
-          <div className="col-span-2">
-            <div className="font-medium text-gray-700">Contact Email</div>
-            <div className="truncate">{value.contact_email}</div>
-          </div>
-        )}
-        {hasSingleFile && (
-          <div className="col-span-2">
-            <div className="font-medium text-gray-700">Single File</div>
-            <div className="truncate">
-              {value.single_file_name}
-              {multiFileCount > 0 && ` +${multiFileCount} more`}
-            </div>
-          </div>
+      {/* Details List */}
+      <ul className="space-y-2 text-sm">
+        <li className="flex items-center gap-2">
+          <LucideReact.User size={16} className="text-gray-500" />
+          <span className="text-gray-600">Account:</span>
+          {accountDisplay}
+        </li>
+        <li className="flex items-center gap-2">
+          <LucideReact.Folder size={16} className="text-gray-500" />
+          <span className="text-gray-600">Repositories:</span>
+          <span className="font-medium text-gray-800">
+            {value.repository_selection === "all" ? "All Repositories" : "Selected Repositories"}
+          </span>
+        </li>
+        <li className="flex items-center gap-2">
+          <LucideReact.Key size={16} className="text-gray-500" />
+          <span className="text-gray-600">Permissions:</span>
+          <span className="font-medium text-gray-800">{permissionCount} granted</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <LucideReact.Bell size={16} className="text-gray-500" />
+          <span className="text-gray-600">Events:</span>
+          <span className="font-medium text-gray-800">{eventsCount} subscribed</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span className="text-gray-600">Created:</span>
+          <span className="font-medium text-gray-800">{createdAt}</span>
+        </li>
+        <li className="flex items-center gap-2">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span className="text-gray-600">Updated:</span>
+          <span className="font-medium text-gray-800">{updatedAt}</span>
+        </li>
+        {value.single_file_name && (
+          <li className="flex items-center gap-2">
+            <LucideReact.FileText size={16} className="text-gray-500" />
+            <span className="text-gray-600">Single File:</span>
+            <span className="font-medium text-gray-800 truncate">{value.single_file_name}</span>
+          </li>
         )}
         {isSuspended && (
-          <div className="col-span-2">
-            <div className="font-medium text-gray-700">Suspended By</div>
-            <div className="flex items-center space-x-2">
-              {value.suspended_by?.avatar_url && (
-                <img
-                  src={value.suspended_by.avatar_url}
-                  alt={suspendedBy}
-                  className="w-6 h-6 rounded-full"
-                />
-              )}
-              <span className="truncate">{suspendedBy}</span>
-              <span className="text-gray-500">on {suspendedDate}</span>
-            </div>
-          </div>
+          <li className="flex items-center gap-2 text-red-600">
+            <LucideReact.XCircle size={16} />
+            <span className="text-red-600">Suspended:</span>
+            <span className="font-medium">
+              {suspendedBy} on {suspendedAt}
+            </span>
+          </li>
         )}
-      </div>
+        {value.contact_email && (
+          <li className="flex items-center gap-2">
+            <LucideReact.Mail size={16} className="text-gray-500" />
+            <span className="text-gray-600">Contact:</span>
+            <span className="font-medium text-gray-800 truncate">{value.contact_email}</span>
+          </li>
+        )}
+      </ul>
     </div>
   );
 }

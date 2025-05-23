@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub Classroom accepted assignment
      *
      * @title Classroom Accepted Assignment
     */
-    export type classroom_accepted_assignment = {
+    export interface classroom_accepted_assignment {
         /**
          * Unique identifier of the repository.
         */
@@ -30,24 +31,24 @@ export namespace AutoViewInputSubTypes {
         students: AutoViewInputSubTypes.simple_classroom_user[];
         repository: AutoViewInputSubTypes.simple_classroom_repository;
         assignment: AutoViewInputSubTypes.simple_classroom_assignment;
-    };
+    }
     /**
      * A GitHub user simplified for Classroom.
      *
      * @title Simple Classroom User
     */
-    export type simple_classroom_user = {
+    export interface simple_classroom_user {
         id: number & tags.Type<"int32">;
         login: string;
         avatar_url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
-    };
+    }
     /**
      * A GitHub repository view for Classroom
      *
      * @title Simple Classroom Repository
     */
-    export type simple_classroom_repository = {
+    export interface simple_classroom_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -72,13 +73,13 @@ export namespace AutoViewInputSubTypes {
          * The default branch for the repository.
         */
         default_branch: string;
-    };
+    }
     /**
      * A GitHub Classroom assignment
      *
      * @title Simple Classroom Assignment
     */
-    export type simple_classroom_assignment = {
+    export interface simple_classroom_assignment {
         /**
          * Unique identifier of the repository.
         */
@@ -148,13 +149,13 @@ export namespace AutoViewInputSubTypes {
         */
         deadline: (string & tags.Format<"date-time">) | null;
         classroom: AutoViewInputSubTypes.simple_classroom;
-    };
+    }
     /**
      * A GitHub Classroom classroom
      *
      * @title Simple Classroom
     */
-    export type simple_classroom = {
+    export interface simple_classroom {
         /**
          * Unique identifier of the classroom.
         */
@@ -171,7 +172,7 @@ export namespace AutoViewInputSubTypes {
          * The url of the classroom on GitHub Classroom.
         */
         url: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.classroom_accepted_assignment[];
 
@@ -179,117 +180,141 @@ export type AutoViewInput = AutoViewInputSubTypes.classroom_accepted_assignment[
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleDateString("default", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "No deadline";
-
-  const assignments = Array.isArray(value) ? value : [];
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (assignments.length === 0) {
+  // Empty state
+  if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No assignments to display.
+      <div className="text-center text-gray-500 py-8">
+        <LucideReact.AlertCircle size={48} className="mx-auto mb-4" />
+        <p>No assignments available.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="px-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Classroom Accepted Assignments ({assignments.length})
-        </h2>
-      </div>
-      {assignments.map((item) => (
-        <div
-          key={item.id}
-          className="mx-4 bg-white rounded-lg shadow-md overflow-hidden"
-        >
-          <div className="p-4">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
+    <ul className="space-y-4">
+      {value.map((item, idx) => {
+        const {
+          assignment,
+          repository,
+          students,
+          commit_count,
+          grade,
+          submitted,
+          passing,
+        } = item;
+        const formattedDeadline = assignment.deadline
+          ? new Date(assignment.deadline).toLocaleString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+            })
+          : "No deadline";
+
+        return (
+          <li key={idx} className="p-4 bg-white rounded-lg shadow">
+            <div className="flex flex-col sm:flex-row sm:justify-between">
+              {/* Left: Assignment details */}
+              <div className="flex-1">
                 <h3 className="text-lg font-semibold text-gray-900 truncate">
-                  {item.assignment.title}
+                  {assignment.title}
                 </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  {item.assignment.type === "group"
-                    ? "Group Assignment"
-                    : "Individual Assignment"}
-                </p>
-              </div>
-              <div className="ml-4 flex-shrink-0 text-sm text-gray-600">
-                {formatDate(item.assignment.deadline)}
-              </div>
-            </div>
 
-            <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
-              <div>
-                <span className="font-medium">Repository:</span>{" "}
-                <span className="truncate">{item.repository.full_name}</span>
-              </div>
-              <div>
-                <span className="font-medium">Commits:</span>{" "}
-                {item.commit_count}
-              </div>
-              <div>
-                <span className="font-medium">Submitted:</span>{" "}
-                {item.submitted ? "Yes" : "No"}
-              </div>
-              <div>
-                <span className="font-medium">Passing:</span>{" "}
-                {item.passing ? "Yes" : "No"}
-              </div>
-              <div>
-                <span className="font-medium">Grade:</span> {item.grade}
-              </div>
-              <div>
-                <span className="font-medium">Students:</span>{" "}
-                {item.students.length}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <div className="text-sm font-medium text-gray-600 mb-1">
-                Student Avatars
-              </div>
-              <div className="flex -space-x-2 overflow-hidden">
-                {item.students.slice(0, 5).map((student) => (
-                  <img
-                    key={student.id}
-                    src={student.avatar_url}
-                    alt={student.login}
-                    className="inline-block h-8 w-8 rounded-full ring-2 ring-white"
-                  />
-                ))}
-                {item.students.length > 5 && (
-                  <div className="inline-flex items-center justify-center h-8 w-8 rounded-full bg-gray-200 text-xs font-medium text-gray-600 ring-2 ring-white">
-                    +{item.students.length - 5}
+                {/* Student avatars */}
+                <div className="mt-2 flex items-center">
+                  <div className="flex -space-x-2">
+                    {students.map((student) => (
+                      <img
+                        key={student.id}
+                        src={student.avatar_url}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            student.login
+                          )}&background=0D8ABC&color=fff`;
+                        }}
+                        alt={student.login}
+                        title={student.login}
+                        className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover"
+                      />
+                    ))}
                   </div>
-                )}
-              </div>
-            </div>
+                  <span className="ml-3 text-sm text-gray-600">
+                    {students.length}{" "}
+                    {students.length > 1 ? "students" : "student"}
+                  </span>
+                </div>
 
-            <div className="mt-4 border-t pt-4 text-sm text-gray-600">
-              <div>
-                <span className="font-medium">Classroom:</span>{" "}
-                {item.assignment.classroom.name}
-                {item.assignment.classroom.archived && (
-                  <span className="ml-1 text-red-500">(Archived)</span>
-                )}
+                {/* Metadata */}
+                <div className="mt-3 flex flex-wrap text-sm text-gray-600 space-x-4">
+                  <div className="flex items-center">
+                    <LucideReact.Link className="text-gray-400" size={16} />
+                    <a
+                      href={repository.html_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 hover:underline truncate"
+                    >
+                      {repository.full_name}
+                    </a>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Code className="text-gray-400" size={16} />
+                    <span className="ml-1">{commit_count} commits</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Calendar className="text-gray-400" size={16} />
+                    <span className="ml-1">{formattedDeadline}</span>
+                  </div>
+                  {assignment.language && (
+                    <div className="flex items-center">
+                      <LucideReact.Code className="text-gray-400" size={16} />
+                      <span className="ml-1">{assignment.language}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Status and grade */}
+              <div className="mt-4 sm:mt-0 flex flex-col sm:items-end space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    Submitted:
+                  </span>
+                  {submitted ? (
+                    <LucideReact.CheckCircle
+                      className="text-green-500"
+                      size={16}
+                    />
+                  ) : (
+                    <LucideReact.XCircle className="text-red-500" size={16} />
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    Passing:
+                  </span>
+                  {passing ? (
+                    <LucideReact.CheckCircle
+                      className="text-green-500"
+                      size={16}
+                    />
+                  ) : (
+                    <LucideReact.XCircle className="text-red-500" size={16} />
+                  )}
+                </div>
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Star className="text-amber-400" size={16} />
+                  <span className="text-sm font-medium text-gray-700">
+                    {grade}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      ))}
-    </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

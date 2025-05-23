@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub Classroom assignment
      *
      * @title Classroom Assignment
     */
-    export type classroom_assignment = {
+    export interface classroom_assignment {
         /**
          * Unique identifier of the repository.
         */
@@ -77,13 +78,13 @@ export namespace AutoViewInputSubTypes {
         deadline: (string & tags.Format<"date-time">) | null;
         starter_code_repository: AutoViewInputSubTypes.simple_classroom_repository;
         classroom: AutoViewInputSubTypes.classroom;
-    };
+    }
     /**
      * A GitHub repository view for Classroom
      *
      * @title Simple Classroom Repository
     */
-    export type simple_classroom_repository = {
+    export interface simple_classroom_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -108,13 +109,13 @@ export namespace AutoViewInputSubTypes {
          * The default branch for the repository.
         */
         default_branch: string;
-    };
+    }
     /**
      * A GitHub Classroom classroom
      *
      * @title Classroom
     */
-    export type classroom = {
+    export interface classroom {
         /**
          * Unique identifier of the classroom.
         */
@@ -132,164 +133,187 @@ export namespace AutoViewInputSubTypes {
          * The URL of the classroom on GitHub Classroom.
         */
         url: string;
-    };
+    }
     /**
      * A GitHub organization.
      *
      * @title Organization Simple for Classroom
     */
-    export type simple_classroom_organization = {
+    export interface simple_classroom_organization {
         id: number & tags.Type<"int32">;
         login: string;
         node_id: string;
         html_url: string & tags.Format<"uri">;
         name: string | null;
         avatar_url: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.classroom_assignment;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDeadline: string = value.deadline
+  // Derived constants for display
+  const typeIcon =
+    value.type === 'individual' ? (
+      <LucideReact.User size={16} className="text-gray-500" />
+    ) : (
+      <LucideReact.Users size={16} className="text-gray-500" />
+    );
+  const typeLabel =
+    value.type === 'individual' ? 'Individual Assignment' : 'Group Assignment';
+
+  const deadlineFormatted = value.deadline
     ? new Date(value.deadline).toLocaleString(undefined, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
       })
-    : 'No Deadline';
+    : 'No deadline';
 
-  const submissionRate: number =
-    value.accepted > 0 ? Math.round((value.submitted / value.accepted) * 100) : 0;
-  const passingRate: number =
-    value.submitted > 0 ? Math.round((value.passing / value.submitted) * 100) : 0;
+  const privacyIcon = value.public_repo ? (
+    <LucideReact.Unlock size={16} className="text-green-500" />
+  ) : (
+    <LucideReact.Lock size={16} className="text-red-500" />
+  );
 
-  const maxTeamsDisplay: string | number =
-    value.max_teams === null ? 'Unlimited' : value.max_teams;
-  const maxMembersDisplay: string | number =
-    value.max_members === null ? 'Unlimited' : value.max_members;
+  const stats = [
+    {
+      icon: <LucideReact.UserCheck size={16} className="text-blue-500" />,
+      label: 'Accepted',
+      count: value.accepted,
+    },
+    {
+      icon: <LucideReact.FileCheck size={16} className="text-yellow-500" />,
+      label: 'Submitted',
+      count: value.submitted,
+    },
+    {
+      icon: <LucideReact.Award size={16} className="text-green-500" />,
+      label: 'Passing',
+      count: value.passing,
+    },
+  ];
 
-  const assignmentType: string =
-    value.type === 'group' ? 'Group Assignment' : 'Individual Assignment';
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = 'https://placehold.co/40x40/e2e8f0/1e293b?text=Org';
+  };
 
-  const orgName: string =
-    value.classroom.organization.name || value.classroom.organization.login;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white rounded-lg shadow p-6 space-y-6 max-w-md mx-auto">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-xl font-semibold text-gray-800 truncate">
-          {value.title}
-        </h2>
-        <span className="mt-1 sm:mt-0 text-sm font-medium text-indigo-600">
-          {assignmentType}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
+      {/* Header: Title & Classroom */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center space-x-3">
+          <img
+            src={value.classroom.organization.avatar_url}
+            onError={handleImgError}
+            alt={value.classroom.organization.name ?? value.classroom.organization.login}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 truncate">{value.title}</h2>
+            <p className="text-sm text-gray-500">{value.classroom.name}</p>
+          </div>
+        </div>
+        <a
+          href={value.classroom.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 md:mt-0 flex items-center space-x-1 text-blue-600 hover:underline"
+        >
+          <LucideReact.Link size={16} />
+          <span className="text-sm">View Classroom</span>
+        </a>
       </div>
 
-      {/* Subtitle */}
-      <p className="text-sm text-gray-500">
-        Editor: <span className="text-gray-700">{value.editor}</span> ·
-        Language:{' '}
-        <span className="text-gray-700">{value.language}</span>
-      </p>
-
-      {/* Details Grid */}
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-        <div>
-          <dt className="font-medium text-gray-500">Classroom</dt>
-          <dd className="mt-1 flex items-center text-gray-700 truncate">
-            <img
-              src={value.classroom.organization.avatar_url}
-              alt=""
-              className="w-5 h-5 rounded-full mr-2 flex-shrink-0"
-            />
-            <span className="truncate">
-              {orgName} / {value.classroom.name}
-            </span>
-          </dd>
+      {/* Key Attributes */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+        <div className="flex items-center space-x-2">
+          {typeIcon}
+          <span className="text-sm text-gray-700">{typeLabel}</span>
         </div>
-        <div>
-          <dt className="font-medium text-gray-500">Deadline</dt>
-          <dd className="mt-1 text-gray-700">{formattedDeadline}</dd>
+        <div className="flex items-center space-x-2">
+          {privacyIcon}
+          <span className="text-sm text-gray-700">
+            {value.public_repo ? 'Public Repo' : 'Private Repo'}
+          </span>
         </div>
-        <div>
-          <dt className="font-medium text-gray-500">Invitations</dt>
-          <dd className="mt-1 text-gray-700">
-            {value.invitations_enabled ? 'Enabled' : 'Disabled'}
-          </dd>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Calendar size={16} className="text-gray-500" />
+          <span className="text-sm text-gray-700">{deadlineFormatted}</span>
         </div>
-        <div>
-          <dt className="font-medium text-gray-500">Invite Link</dt>
-          <dd className="mt-1">
-            <code className="block text-xs text-blue-600 truncate">
-              {value.invite_link}
-            </code>
-          </dd>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Edit size={16} className="text-gray-500" />
+          <span className="text-sm text-gray-700">{value.editor}</span>
         </div>
-        <div>
-          <dt className="font-medium text-gray-500">Repository</dt>
-          <dd className="mt-1 text-gray-700">
-            {value.public_repo ? 'Public' : 'Private'}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-500">Students Are Admins</dt>
-          <dd className="mt-1 text-gray-700">
-            {value.students_are_repo_admins ? 'Yes' : 'No'}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-medium text-gray-500">Feedback PRs</dt>
-          <dd className="mt-1 text-gray-700">
-            {value.feedback_pull_requests_enabled ? 'Enabled' : 'Disabled'}
-          </dd>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Code size={16} className="text-gray-500" />
+          <span className="text-sm text-gray-700">{value.language}</span>
         </div>
         {value.type === 'group' && (
           <>
-            <div>
-              <dt className="font-medium text-gray-500">Max Teams</dt>
-              <dd className="mt-1 text-gray-700">{maxTeamsDisplay}</dd>
+            <div className="flex items-center space-x-2">
+              <LucideReact.Users size={16} className="text-gray-500" />
+              <span className="text-sm text-gray-700">
+                Max Teams: {value.max_teams ?? 'Unlimited'}
+              </span>
             </div>
-            <div>
-              <dt className="font-medium text-gray-500">Max Members/Team</dt>
-              <dd className="mt-1 text-gray-700">{maxMembersDisplay}</dd>
+            <div className="flex items-center space-x-2">
+              <LucideReact.User size={16} className="text-gray-500" />
+              <span className="text-sm text-gray-700">
+                Max Members: {value.max_members ?? 'Unlimited'}
+              </span>
             </div>
           </>
         )}
-        <div className="sm:col-span-2">
-          <dt className="font-medium text-gray-500">Starter Code</dt>
-          <dd className="mt-1 text-gray-700 truncate">
-            {value.starter_code_repository.full_name}
-            @
-            {value.starter_code_repository.default_branch}
-          </dd>
-        </div>
-      </dl>
+      </div>
 
       {/* Statistics */}
-      <div className="border-t pt-4 grid grid-cols-3 text-center text-sm">
-        <div>
-          <p className="text-lg font-semibold text-gray-800">
-            {value.accepted}
-          </p>
-          <p className="text-gray-500">Accepted</p>
+      <div>
+        <p className="text-sm font-medium text-gray-800 mb-2">Stats</p>
+        <div className="flex space-x-6">
+          {stats.map(({ icon, label, count }) => (
+            <div key={label} className="flex items-center space-x-1">
+              {icon}
+              <span className="text-sm text-gray-700">
+                {label}: {count}
+              </span>
+            </div>
+          ))}
         </div>
-        <div>
-          <p className="text-lg font-semibold text-gray-800">
-            {value.submitted} ({submissionRate}%)
-          </p>
-          <p className="text-gray-500">Submitted</p>
-        </div>
-        <div>
-          <p className="text-lg font-semibold text-gray-800">
-            {value.passing} ({passingRate}%)
-          </p>
-          <p className="text-gray-500">Passing</p>
-        </div>
+      </div>
+
+      {/* Links */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <a
+          href={value.invitations_enabled ? value.invite_link : undefined}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex items-center space-x-2 text-sm ${
+            value.invitations_enabled ? 'text-blue-600 hover:underline' : 'text-gray-400'
+          }`}
+        >
+          {value.invitations_enabled ? (
+            <LucideReact.Link size={16} />
+          ) : (
+            <LucideReact.XCircle size={16} />
+          )}
+          <span>
+            {value.invitations_enabled ? 'Join Link' : 'Invitations Disabled'}
+          </span>
+        </a>
+        <a
+          href={value.starter_code_repository.html_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center space-x-2 text-sm text-blue-600 hover:underline"
+        >
+          <LucideReact.GitBranch size={16} />
+          <span>Starter Code</span>
+        </a>
       </div>
     </div>
   );

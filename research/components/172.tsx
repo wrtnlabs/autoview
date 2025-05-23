@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4BotView = {
+                export interface LegacyV4BotView {
                     bot?: AutoViewInputSubTypes.legacy.v4.LegacyV4Bot;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Bot = {
+            export interface LegacyV4Bot {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -18,13 +19,13 @@ export namespace AutoViewInputSubTypes {
                 avatar?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
                 avatarUrl?: string;
                 color: string & tags.Default<"#123456">;
-            };
-            export type LegacyV4TinyFile = {
+            }
+            export interface LegacyV4TinyFile {
                 bucket: string;
                 key: string;
                 width?: number & tags.Type<"int32">;
                 height?: number & tags.Type<"int32">;
-            };
+            }
         }
     }
 }
@@ -32,59 +33,67 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4BotView
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   const bot = value.bot;
+
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   if (!bot) {
     return (
-      <div className="p-4 text-sm text-gray-500">
-        No bot data available.
+      <div className="p-4 bg-white rounded-lg shadow text-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mx-auto mb-2" />
+        <p>No bot data available.</p>
       </div>
     );
   }
 
-  // Derived/Formatted values
-  const createdDate = bot.createdAt
-    ? new Date(bot.createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    : 'Unknown';
-  const avatarUrl = bot.avatarUrl;
-  const colorDotStyle = { backgroundColor: bot.color };
+  const name = bot.name;
+  const placeholderBg = bot.color.replace('#', '') || '123456';
+  const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    name,
+  )}&background=${placeholderBg}&color=fff`;
+  const avatarSrc =
+    bot.avatarUrl ??
+    (bot.avatar
+      ? `https://${bot.avatar.bucket}.s3.amazonaws.com/${bot.avatar.key}`
+      : defaultAvatar);
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  };
+  const formattedDate = bot.createdAt
+    ? new Date(bot.createdAt).toLocaleDateString(undefined, dateOptions)
+    : undefined;
 
-  // Visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="flex flex-col sm:flex-row items-center p-4 bg-white rounded-lg shadow-md">
-      {avatarUrl ? (
+    <div className="p-4 bg-white rounded-lg shadow flex items-center space-x-4">
+      <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
         <img
-          src={avatarUrl}
-          alt={`${bot.name} avatar`}
-          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          src={avatarSrc}
+          alt={`${name} avatar`}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = defaultAvatar;
+          }}
+          className="w-full h-full object-cover"
         />
-      ) : (
-        <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">
-          <span className="text-lg font-semibold">
-            {bot.name.charAt(0)}
-          </span>
-        </div>
-      )}
-
-      <div className="mt-3 sm:mt-0 sm:ml-4 flex-1 min-w-0">
-        <h2 className="text-lg font-medium text-gray-900 truncate">
-          {bot.name}
-        </h2>
-        <p className="text-sm text-gray-500">
-          Created: {createdDate}
-        </p>
       </div>
-
-      <div className="mt-3 sm:mt-0 sm:ml-4">
-        <span
-          className="inline-block w-4 h-4 rounded-full"
-          style={colorDotStyle}
-          title={`Color: ${bot.color}`}
-        />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center space-x-2">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
+          <span
+            className="inline-block w-2 h-2 rounded-full flex-shrink-0"
+            style={{ backgroundColor: bot.color }}
+            title={`Color ${bot.color}`}
+          />
+        </div>
+        {formattedDate && (
+          <div className="flex items-center text-sm text-gray-500 mt-1">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <span>{formattedDate}</span>
+          </div>
+        )}
       </div>
     </div>
   );

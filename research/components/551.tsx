@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A team's access to a project.
      *
      * @title Team Project
     */
-    export type team_project = {
+    export interface team_project {
         owner_url: string;
         url: string;
         html_url: string;
@@ -33,13 +34,13 @@ export namespace AutoViewInputSubTypes {
             write: boolean;
             admin: boolean;
         };
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -62,94 +63,160 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_project[];
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalProjects = value.length;
-  const privateCount = value.filter((p) => p["private"] === true).length;
-  const publicCount = totalProjects - privateCount;
+  // Date formatting options
+  const dateOpts: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  // Helper to format ISO date strings
+  const formatDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, dateOpts);
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Render when no projects
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} aria-hidden="true" />
+        <p className="mt-2">No projects available</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      {/* Summary Header */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-lg font-semibold text-gray-700">Projects Summary</h2>
-        <div className="mt-3 sm:mt-0 flex space-x-4 text-sm text-gray-600">
-          <div>
-            Total: <span className="font-medium text-gray-900">{totalProjects}</span>
+    <div className="space-y-4">
+      {value.map((project) => (
+        <div
+          key={project.id}
+          className="bg-white rounded-lg shadow hover:shadow-md transition p-5 flex flex-col md:flex-row md:justify-between"
+        >
+          {/* Left section: title and description */}
+          <div className="md:flex-1">
+            <div className="flex items-center">
+              <img
+                src={project.creator.avatar_url}
+                alt={project.creator.login}
+                className="w-10 h-10 rounded-full object-cover"
+                onError={(e) => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  img.onerror = null;
+                  img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    project.creator.login
+                  )}&background=0D8ABC&color=fff`;
+                }}
+              />
+              <div className="ml-3">
+                <h2 className="text-lg font-semibold text-gray-800">{project.name}</h2>
+                <div className="flex items-center text-sm text-gray-500 space-x-4">
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Hash size={14} aria-hidden="true" />
+                    <span>#{project.number}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <LucideReact.User size={14} aria-hidden="true" />
+                    <span>{project.creator.login}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {project.body ? (
+              <p className="mt-3 text-gray-600 line-clamp-2">{project.body}</p>
+            ) : (
+              <div className="mt-3 flex items-center text-gray-400">
+                <LucideReact.FileText size={16} aria-hidden="true" />
+                <span className="ml-1 italic">No description</span>
+              </div>
+            )}
           </div>
-          <div>
-            Public: <span className="font-medium">{publicCount}</span>
-          </div>
-          <div>
-            Private: <span className="font-medium">{privateCount}</span>
+
+          {/* Right section: metadata */}
+          <div className="mt-4 md:mt-0 md:ml-6 flex flex-col space-y-3 text-sm text-gray-600">
+            <div className="flex items-center gap-2">
+              <LucideReact.Calendar size={16} aria-hidden="true" />
+              <span>Created: {formatDate(project.created_at)}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <LucideReact.Calendar size={16} aria-hidden="true" />
+              <span>Updated: {formatDate(project.updated_at)}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="font-medium">State:</span>
+              {project.state === 'open' ? (
+                <LucideReact.CheckCircle
+                  className="text-green-500"
+                  size={16}
+                  role="img"
+                  aria-label="Open"
+                />
+              ) : (
+                <LucideReact.XCircle
+                  className="text-red-500"
+                  size={16}
+                  role="img"
+                  aria-label="Closed"
+                />
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="font-medium">Permissions:</span>
+              <div className="flex items-center gap-2">
+                {project.permissions.read ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={14}
+                    role="img"
+                    aria-label="Read"
+                  />
+                ) : (
+                  <LucideReact.XCircle
+                    className="text-red-500"
+                    size={14}
+                    role="img"
+                    aria-label="No Read"
+                  />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {project.permissions.write ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={14}
+                    role="img"
+                    aria-label="Write"
+                  />
+                ) : (
+                  <LucideReact.XCircle
+                    className="text-red-500"
+                    size={14}
+                    role="img"
+                    aria-label="No Write"
+                  />
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {project.permissions.admin ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={14}
+                    role="img"
+                    aria-label="Admin"
+                  />
+                ) : (
+                  <LucideReact.XCircle
+                    className="text-red-500"
+                    size={14}
+                    role="img"
+                    aria-label="No Admin"
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Project List */}
-      <div className="space-y-4">
-        {value.map((project) => (
-          <div
-            key={project.id}
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200"
-          >
-            {/* Title and State */}
-            <div className="flex justify-between items-start">
-              <h3 className="text-xl font-semibold text-gray-800 truncate">
-                {project.name}
-              </h3>
-              <span
-                className={
-                  "px-2 py-1 text-xs font-semibold rounded " +
-                  (project.state === "open"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800")
-                }
-              >
-                {project.state.charAt(0).toUpperCase() + project.state.slice(1)}
-              </span>
-            </div>
-
-            {/* Description */}
-            {project.body && (
-              <p className="mt-2 text-gray-600 line-clamp-2">
-                {project.body}
-              </p>
-            )}
-
-            {/* Footer: Creator and Dates */}
-            <div className="mt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm text-gray-500">
-              <div className="flex items-center space-x-2">
-                <img
-                  src={project.creator.avatar_url}
-                  alt={project.creator.login}
-                  className="w-6 h-6 rounded-full"
-                />
-                <span className="truncate">{project.creator.login}</span>
-              </div>
-              <div className="mt-2 sm:mt-0 flex space-x-4">
-                <div>Created: {formatDate(project.created_at)}</div>
-                <div>Updated: {formatDate(project.updated_at)}</div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      ))}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type actions_hosted_runner_limits = {
+    export interface actions_hosted_runner_limits {
         /**
          * Provides details of static public IP limits for GitHub-hosted Hosted Runners
          *
@@ -17,7 +18,7 @@ export namespace AutoViewInputSubTypes {
             */
             current_usage: number & tags.Type<"int32">;
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_hosted_runner_limits;
 
@@ -27,32 +28,30 @@ export type AutoViewInput = AutoViewInputSubTypes.actions_hosted_runner_limits;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { current_usage, maximum } = value.public_ips;
-  // Prevent division by zero and clamp between 0 and 100
-  const usageRatio = maximum > 0 ? current_usage / maximum : 0;
-  const percentage = Math.round(Math.min(Math.max(usageRatio * 100, 0), 100));
+  const usagePercent = maximum > 0 ? Math.round((current_usage / maximum) * 100) : 0;
+  const usageLabel = `${current_usage} of ${maximum}`;
+  const percentLabel = `${usagePercent}% used`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    We render a card showing "Static Public IP Limits" with a usage bar.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-medium text-gray-800">Static Public IP Limits</h2>
-      <div className="mt-3 flex justify-between text-sm text-gray-600">
-        <span>Used</span>
-        <span>{current_usage} of {maximum}</span>
+    <div className="max-w-sm w-full mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-3">
+        <LucideReact.Server size={20} className="text-blue-500 mr-2" />
+        <h3 className="text-lg font-semibold text-gray-800">
+          Static Public IP Limits
+        </h3>
       </div>
-      <div className="mt-2 relative">
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 transition-width duration-300"
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-        <div className="absolute inset-0 flex items-center justify-end pr-1">
-          <span className="text-xs font-medium text-gray-700">{percentage}%</span>
-        </div>
+      <div className="flex justify-between items-baseline">
+        <span className="text-2xl font-bold text-gray-900">{usageLabel}</span>
+        <span className="text-sm text-gray-600">{percentLabel}</span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2 mt-2 overflow-hidden">
+        <div
+          className="bg-blue-500 h-full"
+          style={{ width: `${usagePercent}%` }}
+        />
       </div>
     </div>
   );
-  // 3. Return the React element.
-  //    All displayed data is filtered, transformed, and formatted per guidelines.
 }

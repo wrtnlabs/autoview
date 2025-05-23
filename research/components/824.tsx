@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Projects are a way to organize columns and cards of work.
      *
      * @title Project
     */
-    export type project = {
+    export interface project {
         owner_url: string & tags.Format<"uri">;
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
@@ -37,7 +38,7 @@ export namespace AutoViewInputSubTypes {
          * Whether or not this project can be seen by everyone. Only present if owner is an organization.
         */
         "private"?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -75,80 +76,89 @@ export type AutoViewInput = AutoViewInputSubTypes.project;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-  const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-  const stateLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
-  const stateBadgeClasses =
-    value.state === 'open'
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800';
+  const {
+    name,
+    body,
+    state,
+    number,
+    creator,
+    created_at,
+    updated_at,
+    organization_permission,
+    private: isPrivate,
+  } = value;
+
+  const formattedCreatedAt = new Date(created_at).toLocaleString();
+  const formattedUpdatedAt = new Date(updated_at).toLocaleString();
+  const stateIcon =
+    state === "open" ? (
+      <LucideReact.CheckCircle className="text-green-500" size={16} />
+    ) : (
+      <LucideReact.XCircle className="text-red-500" size={16} />
+    );
+  const stateLabel = state.charAt(0).toUpperCase() + state.slice(1);
+  const projectNumber = `#${number}`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header: Project Name and Number */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-baseline">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
-        <span className="text-sm text-gray-500 mt-1 sm:mt-0">#{value.number}</span>
-      </div>
-
-      {/* Dates */}
-      <div className="flex flex-wrap items-center text-sm text-gray-500 mt-1 space-x-2">
-        <span>Created: {createdDate}</span>
-        <span>•</span>
-        <span>Updated: {updatedDate}</span>
-      </div>
-
-      {/* Description */}
-      {value.body ? (
-        <p className="text-gray-700 text-sm mt-3 line-clamp-3">
-          {value.body}
-        </p>
-      ) : null}
-
-      {/* Badges: State, Org Permission, Privacy */}
-      <div className="flex flex-wrap items-center space-x-2 mt-4">
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${stateBadgeClasses}`}
-        >
-          {stateLabel}
-        </span>
-        {value.organization_permission ? (
-          <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-            {value.organization_permission}
-          </span>
-        ) : null}
-        {value.private ? (
-          <span
-            className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-            title="Private project"
-          >
-            🔒 Private
-          </span>
-        ) : null}
-      </div>
-
-      {/* Creator */}
-      {value.creator ? (
-        <div className="flex items-center mt-4">
-          <img
-            src={value.creator.avatar_url}
-            alt={value.creator.login}
-            className="w-6 h-6 rounded-full flex-shrink-0"
-          />
-          <span className="ml-2 text-gray-800 text-sm truncate">
-            {value.creator.login}
-          </span>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {stateIcon}
+          <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
+          <span className="text-sm text-gray-500">{projectNumber}</span>
+          {isPrivate && (
+            <LucideReact.Lock
+              className="text-gray-500"
+              size={16}
+              aria-label="Private"
+            />
+          )}
         </div>
-      ) : null}
+        {organization_permission && (
+          <span className="px-2 py-0.5 text-xs font-medium text-gray-700 bg-gray-100 rounded">
+            {organization_permission.charAt(0).toUpperCase() +
+              organization_permission.slice(1)}
+          </span>
+        )}
+      </div>
+
+      {body && (
+        <p className="mt-2 text-sm text-gray-700 line-clamp-2">{body}</p>
+      )}
+
+      <div className="mt-4 space-y-1 text-xs text-gray-500">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={14} className="text-gray-400" />
+          <span>Created: {formattedCreatedAt}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={14} className="text-gray-400" />
+          <span>Updated: {formattedUpdatedAt}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          {stateIcon}
+          <span>Status: {stateLabel}</span>
+        </div>
+      </div>
+
+      {creator && (
+        <div className="mt-4 flex items-center space-x-2">
+          <img
+            src={creator.avatar_url}
+            alt={creator.login}
+            className="w-6 h-6 rounded-full object-cover"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                creator.login
+              )}&background=0D8ABC&color=fff`;
+            }}
+          />
+          <div className="text-sm text-gray-800 truncate">
+            {creator.name || creator.login}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,27 +1,28 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4ThreadView = {
+                export interface LegacyV4ThreadView {
                     chat?: AutoViewInputSubTypes.legacy.v4.LegacyV4Chat;
                     message?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Message;
                     bot?: AutoViewInputSubTypes.legacy.v4.LegacyV4Bot;
                     managers?: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager[];
                     thread?: AutoViewInputSubTypes.legacy.v4.LegacyV4Thread;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Chat = {
+            export interface LegacyV4Chat {
                 active?: boolean;
                 channelId?: string;
                 id?: string;
                 managerIds?: string[] & tags.UniqueItems;
-            };
+            }
             export namespace message {
-                export type LegacyV4Message = {
+                export interface LegacyV4Message {
                     chatKey?: string;
                     id?: string;
                     mainKey?: string;
@@ -52,19 +53,19 @@ export namespace AutoViewInputSubTypes {
                     threadMsg?: boolean;
                     broadcastedMsg?: boolean;
                     rootMessageId?: string;
-                };
-                export type LegacyV4Block = {
+                }
+                export interface LegacyV4Block {
                     type: "bullets" | "code" | "text";
                     language?: string;
                     value?: string;
                     blocks?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block[];
-                };
-                export type LegacyV4Button = {
+                }
+                export interface LegacyV4Button {
                     title: string;
                     colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
                     url: string;
-                };
-                export type LegacyV4File = {
+                }
+                export interface LegacyV4File {
                     id: string;
                     type?: string;
                     name: string;
@@ -81,41 +82,41 @@ export namespace AutoViewInputSubTypes {
                     channelId?: string;
                     chatType?: string;
                     chatId?: string;
-                };
-                export type LegacyV4Log = {
+                }
+                export interface LegacyV4Log {
                     action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
                     values?: string[];
-                };
-                export type LegacyV4Reaction = {
+                }
+                export interface LegacyV4Reaction {
                     emojiName: string;
                     personKeys?: string[] & tags.UniqueItems;
                     empty?: boolean;
-                };
-                export type LegacyV4ProfileBotInput = {
+                }
+                export interface LegacyV4ProfileBotInput {
                     id?: string;
                     key?: string;
                     type?: string;
                     name?: string;
                     value?: AutoViewInputSubTypes.AttributeValue;
-                };
-                export type LegacyV4MessageMarketing = {
+                }
+                export interface LegacyV4MessageMarketing {
                     type?: string;
                     id?: string;
                     advertising?: boolean;
                     sendToOfflineXms?: boolean;
                     sendToOfflineEmail?: boolean;
                     exposureType?: "fullScreen";
-                };
-                export type LegacyV4MessageSupportBot = {
+                }
+                export interface LegacyV4MessageSupportBot {
                     id?: string;
                     revisionId?: string;
                     sectionId?: string;
                     stepIndex?: number & tags.Type<"int32">;
                     buttons?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
                     submitButtonIndex?: number & tags.Type<"int32">;
-                };
+                }
             }
-            export type LegacyV4WebPage = {
+            export interface LegacyV4WebPage {
                 id: string;
                 url: string;
                 title?: string;
@@ -130,12 +131,12 @@ export namespace AutoViewInputSubTypes {
                 previewKey?: string;
                 logo?: string;
                 name?: string;
-            };
-            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+            }
+            export interface LegacyV4SupportBotRouteSection_dollar_LegacyV4Button {
                 text: string;
                 nextSectionId: string;
-            };
-            export type LegacyV4Bot = {
+            }
+            export interface LegacyV4Bot {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -143,14 +144,14 @@ export namespace AutoViewInputSubTypes {
                 avatar?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
                 avatarUrl?: string;
                 color: string & tags.Default<"#123456">;
-            };
-            export type LegacyV4TinyFile = {
+            }
+            export interface LegacyV4TinyFile {
                 bucket: string;
                 key: string;
                 width?: number & tags.Type<"int32">;
                 height?: number & tags.Type<"int32">;
-            };
-            export type LegacyV4Manager = {
+            }
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -186,8 +187,8 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4Thread = {
+            }
+            export interface LegacyV4Thread {
                 id?: string;
                 channelId?: string;
                 managerIds?: string[] & tags.UniqueItems;
@@ -201,10 +202,10 @@ export namespace AutoViewInputSubTypes {
                 chatId?: string;
                 chatKey?: string;
                 rootMessageId?: string;
-            };
+            }
         }
     }
-    export type AttributeValue = {
+    export interface AttributeValue {
         s?: string;
         n?: string;
         b?: {
@@ -235,17 +236,17 @@ export namespace AutoViewInputSubTypes {
         }[];
         "null"?: boolean;
         bool?: boolean;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ThreadView;
 
@@ -254,110 +255,126 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ThreadV
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isActive = value.chat?.active;
-  const channelId = value.chat?.channelId || "Unknown Channel";
-
-  // Derive a text preview from plainText or blocks
-  const rawText = value.message?.plainText
-    || value.message?.blocks?.map(b => b.value || "").join(" ")
-    || "No content available";
-
-  // Truncate to 200 characters for safety
-  const previewText = rawText.length > 200 ? rawText.slice(0, 197) + "..." : rawText;
-
-  // Format dates
-  const createdAt = value.message?.createdAt
-    ? new Date(value.message.createdAt).toLocaleString()
-    : undefined;
-  const updatedAt = value.thread?.updatedAt
-    ? new Date(value.thread.updatedAt).toLocaleString()
-    : undefined;
-
-  // Map message state to badge styles
-  const stateMap: Record<string, { label: string; bg: string; text: string }> = {
-    sending: { label: "Sending", bg: "bg-blue-100", text: "text-blue-800" },
-    sent:    { label: "Sent",    bg: "bg-green-100", text: "text-green-800" },
-    failed:  { label: "Failed",  bg: "bg-red-100",  text: "text-red-800" },
-    removed: { label: "Removed", bg: "bg-gray-100", text: "text-gray-800" },
-  };
-  const stateKey = value.message?.state || "removed";
-  const stateInfo = stateMap[stateKey] || stateMap.removed;
-
-  // Bot info
-  const botName = value.bot?.name;
-  const botColor = value.bot?.color || "#888";
-
-  // Thread info
+  const chatActive = value.chat?.active;
+  const channelId = value.chat?.channelId ?? "";
+  const managerCount = value.managers?.length ?? 0;
   const replyCount = value.thread?.replyCount ?? 0;
+  const lastUpdated = value.thread?.updatedAt
+    ? new Date(value.thread.updatedAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
 
-  // Managers
-  const mgrs = value.managers || [];
-  const managerLabel =
-    mgrs.length === 1 ? mgrs[0].name : `${mgrs.length} managers`;
+  const msg = value.message;
+  const messageText = msg?.plainText?.trim() ?? "";
+  const createdAt = msg?.createdAt
+    ? new Date(msg.createdAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+
+  const getStateIcon = (state?: string) => {
+    switch (state) {
+      case "sending":
+        return <LucideReact.Clock className="text-amber-500" size={16} />;
+      case "sent":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "failed":
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      case "removed":
+        return <LucideReact.XCircle className="text-gray-400" size={16} />;
+      default:
+        return null;
+    }
+  };
+
+  const botName = value.bot?.name;
+  const botAvatarUrl = value.bot?.avatarUrl;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-600"
-            }`}
-          >
-            {isActive ? "Active" : "Inactive"}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto space-y-4">
+      {/* Header: Chat & Bot Info */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {chatActive ? (
+            <LucideReact.CheckCircle className="text-green-500" size={16} />
+          ) : (
+            <LucideReact.XCircle className="text-gray-400" size={16} />
+          )}
+          <span className="text-sm font-medium text-gray-700 truncate">
+            {channelId || "No Channel"}
           </span>
-          <span className="text-sm text-gray-500 truncate">{channelId}</span>
         </div>
         {botName && (
-          <span
-            className="px-2 py-1 rounded text-sm font-semibold text-white truncate"
-            style={{ backgroundColor: botColor }}
-          >
-            {botName}
-          </span>
+          <div className="flex items-center gap-2">
+            <LucideReact.User className="text-gray-500" size={16} />
+            <span className="text-sm text-gray-600 truncate">{botName}</span>
+          </div>
         )}
       </div>
 
-      {/* Content Preview */}
-      <p className="mt-3 text-gray-700 text-sm leading-relaxed line-clamp-2">
-        {previewText}
-      </p>
+      {/* Thread Summary */}
+      <div className="flex items-center text-sm text-gray-600 gap-4">
+        <div className="flex items-center gap-1">
+          <LucideReact.MessageCircle size={16} className="text-gray-500" />
+          <span>{replyCount} replies</span>
+        </div>
+        {lastUpdated && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} className="text-gray-500" />
+            <span>{lastUpdated}</span>
+          </div>
+        )}
+      </div>
 
-      {/* Footer */}
-      <div className="mt-4 flex flex-wrap justify-between items-center text-xs text-gray-500">
-        <div className="flex space-x-4">
-          {createdAt && (
-            <div>
-              <span className="font-semibold text-gray-700">Created:</span>{" "}
-              {createdAt}
-            </div>
-          )}
-          {updatedAt && (
-            <div>
-              <span className="font-semibold text-gray-700">Updated:</span>{" "}
-              {updatedAt}
-            </div>
-          )}
+      {/* Message Preview */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between text-sm text-gray-500">
+          <span>Message:</span>
+          <div className="flex items-center gap-1">
+            {getStateIcon(msg?.state)}
+            {createdAt && <span>{createdAt}</span>}
+          </div>
         </div>
-        <div className="flex items-center space-x-3 mt-2 sm:mt-0">
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${stateInfo.bg} ${stateInfo.text}`}
-          >
-            {stateInfo.label}
-          </span>
-          <span>
-            <span className="font-semibold text-gray-700">Replies:</span>{" "}
-            {replyCount}
-          </span>
-          {mgrs.length > 0 && (
-            <span title={mgrs.map(m => m.name).join(", ")}>
-              <span className="font-semibold text-gray-700">Managers:</span>{" "}
-              {managerLabel}
-            </span>
-          )}
-        </div>
+        {messageText ? (
+          <p className="text-gray-700 text-sm line-clamp-3">{messageText}</p>
+        ) : (
+          <div className="flex items-center gap-2 text-gray-400">
+            <LucideReact.AlertCircle size={20} />
+            <span>No message content</span>
+          </div>
+        )}
+      </div>
+
+      {/* Managers */}
+      <div>
+        <h4 className="text-sm font-medium text-gray-700 mb-2">Managers ({managerCount})</h4>
+        {managerCount > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {value.managers!.map((mgr, idx) => (
+              <span
+                key={idx}
+                className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full truncate"
+                title={mgr.name}
+              >
+                {mgr.name}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-gray-400">
+            <LucideReact.UserMinus size={16} />
+            <span>No managers assigned</span>
+          </div>
+        )}
       </div>
     </div>
   );

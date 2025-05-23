@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A Dependabot alert.
     */
-    export type dependabot_alert = {
+    export interface dependabot_alert {
         number: AutoViewInputSubTypes.alert_number;
         /**
          * The state of the Dependabot alert.
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
         dismissed_comment: (string & tags.MaxLength<280>) | null;
         fixed_at: AutoViewInputSubTypes.alert_fixed_at;
         auto_dismissed_at?: AutoViewInputSubTypes.alert_auto_dismissed_at;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -58,7 +59,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * Details for the vulnerable package.
     */
-    export type dependabot_alert_package = {
+    export interface dependabot_alert_package {
         /**
          * The package's language or package management ecosystem.
         */
@@ -67,11 +68,11 @@ export namespace AutoViewInputSubTypes {
          * The unique package name within its ecosystem.
         */
         name: string;
-    };
+    }
     /**
      * Details for the GitHub Security Advisory.
     */
-    export type dependabot_alert_security_advisory = {
+    export interface dependabot_alert_security_advisory {
         /**
          * The unique GitHub Security Advisory ID assigned to the advisory.
         */
@@ -158,11 +159,11 @@ export namespace AutoViewInputSubTypes {
          * The time that the advisory was withdrawn in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.
         */
         withdrawn_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * Details pertaining to one vulnerable version range for the advisory.
     */
-    export type dependabot_alert_security_vulnerability = {
+    export interface dependabot_alert_security_vulnerability {
         "package": AutoViewInputSubTypes.dependabot_alert_package;
         /**
          * The severity of the vulnerability.
@@ -181,7 +182,7 @@ export namespace AutoViewInputSubTypes {
             */
             identifier: string;
         } | null;
-    };
+    }
     export type cvss_severities = {
         cvss_v3?: {
             /**
@@ -276,106 +277,118 @@ export type AutoViewInput = AutoViewInputSubTypes.dependabot_alert;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    number,
-    state,
-    dependency,
-    security_advisory: advisory,
-    html_url,
-  } = value;
-
-  // Format state badge
-  const stateLabels: Record<string, string> = {
-    open: "Open",
-    fixed: "Fixed",
-    dismissed: "Dismissed",
-    auto_dismissed: "Auto Dismissed",
+  const stateColorMap: Record<AutoViewInputSubTypes.dependabot_alert['state'], string> = {
+    open: 'text-amber-500',
+    fixed: 'text-green-500',
+    dismissed: 'text-gray-500',
+    auto_dismissed: 'text-purple-500',
   };
-  const stateColors: Record<string, string> = {
-    open: "bg-blue-100 text-blue-800",
-    fixed: "bg-green-100 text-green-800",
-    dismissed: "bg-gray-100 text-gray-700",
-    auto_dismissed: "bg-yellow-100 text-yellow-800",
+  const stateIconMap: Record<AutoViewInputSubTypes.dependabot_alert['state'], React.ComponentType<any>> = {
+    open: LucideReact.AlertCircle,
+    fixed: LucideReact.CheckCircle,
+    dismissed: LucideReact.XCircle,
+    auto_dismissed: LucideReact.XCircle,
   };
-  const displayState = stateLabels[state] || state;
-  const stateClass = stateColors[state] || "bg-gray-100 text-gray-700";
-
-  // Package info
-  const pkg = dependency["package"];
-  const packageName = pkg?.name ?? "Unknown Package";
-  const ecosystem = pkg?.ecosystem ?? "dependency";
-
-  // Advisory info
-  const severityColors: Record<string, string> = {
-    low: "bg-green-100 text-green-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    high: "bg-red-100 text-red-800",
-    critical: "bg-red-200 text-red-900",
-  };
-  const severityClass = severityColors[advisory.severity] ?? "bg-gray-100 text-gray-700";
-  const publishedDate = new Date(advisory.published_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const cvssScore = advisory.cvss.score !== null && advisory.cvss.score !== undefined
-    ? advisory.cvss.score.toFixed(1)
-    : null;
+  const StateIcon = stateIconMap[value.state];
+  const formatDate = (iso?: string | null) =>
+    iso
+      ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+      : '-';
+  const dismissReason = value.dismissed_reason?.replace(/_/g, ' ') ?? '';
+  const vulnerabilityCount = value.security_advisory.vulnerabilities.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-3">
-      <div className="flex justify-between items-start">
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header: Alert ID and State */}
+      <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-900">
-          Dependabot Alert #{number}
+          Dependabot Alert #{value.number}
         </h2>
-        <span className={`px-2 py-1 text-xs font-medium rounded ${stateClass}`}>
-          {displayState}
-        </span>
+        <div className={`flex items-center ${stateColorMap[value.state]}`}>
+          <StateIcon size={20} strokeWidth={2} />
+          <span className="ml-1 capitalize">{value.state.replace('_', ' ')}</span>
+        </div>
       </div>
-      <div className="flex flex-wrap items-center text-sm text-gray-600 space-x-2">
-        <span className="font-medium">{packageName}</span>
-        <span className="capitalize">({ecosystem})</span>
-      </div>
-      <div className="flex flex-wrap items-center space-x-2">
-        <span className={`px-2 py-0.5 text-xs font-medium uppercase rounded ${severityClass}`}>
-          {advisory.severity}
-        </span>
-        {cvssScore && (
-          <span className="text-sm font-medium text-gray-700">CVSS {cvssScore}</span>
-        )}
-        <span className="text-sm text-gray-500">{publishedDate}</span>
-      </div>
-      <p className="text-gray-700 text-sm line-clamp-3">{advisory.summary}</p>
-      {advisory.vulnerabilities.length > 0 && (
-        advisory.vulnerabilities.length <= 3 ? (
-          <ul className="text-gray-700 text-sm list-disc list-inside space-y-1">
-            {advisory.vulnerabilities.map((vul, idx) => (
-              <li key={idx}>
-                <span className="font-medium">{vul["package"].name}</span>:{" "}
-                {vul.vulnerable_version_range}
-                {vul.first_patched_version
-                  ? ` → patched in ${vul.first_patched_version.identifier}`
-                  : ""}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="text-sm text-gray-600">
-            {advisory.vulnerabilities.length} vulnerable version ranges
-          </p>
-        )
+
+      {/* Dependency Info */}
+      {value.dependency.package && (
+        <div className="flex items-center text-sm text-gray-700">
+          <LucideReact.Package size={16} className="text-gray-400" />
+          <span className="ml-1">
+            {value.dependency.package.name} ({value.dependency.package.ecosystem})
+          </span>
+        </div>
       )}
-      <div className="flex justify-end">
-        <a
-          href={html_url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline text-sm"
-        >
-          View on GitHub
-        </a>
+
+      {/* Advisory Summary */}
+      <div className="border-t pt-2 space-y-2">
+        <div className="flex items-center text-sm text-gray-700">
+          <LucideReact.AlertTriangle size={16} className="text-red-500" />
+          <span className="ml-1 font-medium capitalize">
+            {value.security_advisory.severity}
+          </span>
+          <span className="ml-2 text-gray-500">
+            ({vulnerabilityCount} vuln{vulnerabilityCount !== 1 ? 's' : ''})
+          </span>
+        </div>
+        <p className="text-sm text-gray-900 line-clamp-2">
+          {value.security_advisory.summary}
+        </p>
       </div>
+
+      {/* CVSS Score */}
+      <div className="flex items-center text-sm text-gray-700">
+        <LucideReact.BarChart2 size={16} className="text-purple-500" />
+        <span className="ml-1">
+          CVSS Score: {value.security_advisory.cvss.score.toFixed(1)}
+        </span>
+      </div>
+
+      {/* Timeline */}
+      <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={14} />
+          <span className="ml-1">Created: {formatDate(value.created_at)}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.RefreshCw size={14} />
+          <span className="ml-1">Updated: {formatDate(value.updated_at)}</span>
+        </div>
+        {value.dismissed_at && (
+          <div className="flex items-center">
+            <LucideReact.XCircle size={14} />
+            <span className="ml-1">Dismissed: {formatDate(value.dismissed_at)}</span>
+          </div>
+        )}
+        {value.fixed_at && (
+          <div className="flex items-center">
+            <LucideReact.CheckCircle size={14} />
+            <span className="ml-1">Fixed: {formatDate(value.fixed_at)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Dismiss Reason & Comment */}
+      {dismissReason && (
+        <div className="text-sm text-gray-700">
+          <span className="font-medium">Reason:</span> {dismissReason}
+        </div>
+      )}
+      {value.dismissed_comment && (
+        <p className="text-sm text-gray-700 line-clamp-2">
+          "{value.dismissed_comment}"
+        </p>
+      )}
+
+      {/* Link */}
+      {value.html_url && (
+        <div className="flex items-center text-xs text-gray-500 truncate">
+          <LucideReact.Link size={14} />
+          <span className="ml-1 break-all">{value.html_url}</span>
+        </div>
+      )}
     </div>
   );
 }

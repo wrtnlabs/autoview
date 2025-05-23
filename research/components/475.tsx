@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The type of issue.
@@ -30,11 +31,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -45,82 +46,107 @@ export type AutoViewInput = AutoViewInputSubTypes.issue_type;
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Handle null or missing data
+  // 1. Data transformations and derived values
+  const colorMap: Record<string, string> = {
+    gray: "bg-gray-500",
+    blue: "bg-blue-500",
+    green: "bg-green-500",
+    yellow: "bg-yellow-400",
+    orange: "bg-orange-500",
+    red: "bg-red-500",
+    pink: "bg-pink-500",
+    purple: "bg-purple-500",
+  };
+
+  // Handle null or missing value
   if (!value) {
     return (
-      <div className="p-4 text-center text-gray-500 italic">
-        No issue type data available.
+      <div className="flex flex-col items-center justify-center p-4 text-gray-400">
+        <LucideReact.AlertCircle size={24} className="mb-2" />
+        <span>No issue type data available</span>
       </div>
     );
   }
 
-  // Destructure relevant fields
-  const { name, description, color, created_at, updated_at, is_enabled } = value;
+  const createdDate = value.created_at
+    ? new Date(value.created_at).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "—";
 
-  // Format dates into a human-readable form
-  const formattedCreated = created_at
-    ? new Date(created_at).toLocaleDateString(undefined, {
+  const updatedDate = value.updated_at
+    ? new Date(value.updated_at).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       })
     : null;
-  const formattedUpdated = updated_at
-    ? new Date(updated_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
 
-  // Map the schema's color to Tailwind CSS utility classes
-  const colorClasses: Record<string, string> = {
-    gray: "bg-gray-100 text-gray-800",
-    blue: "bg-blue-100 text-blue-800",
-    green: "bg-green-100 text-green-800",
-    yellow: "bg-yellow-100 text-yellow-800",
-    orange: "bg-orange-100 text-orange-800",
-    red: "bg-red-100 text-red-800",
-    pink: "bg-pink-100 text-pink-800",
-    purple: "bg-purple-100 text-purple-800",
-  };
+  const badgeColor = value.color
+    ? colorMap[value.color] || "bg-gray-200"
+    : "bg-gray-200";
 
-  // Prepare status badge styling
-  const statusBadge = is_enabled
-    ? { label: "Enabled", classes: "bg-green-100 text-green-800" }
-    : { label: "Disabled", classes: "bg-red-100 text-red-800" };
-
-  // Compose and return the visual structure
+  // 2. JSX structure with Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full">
-      <div className="flex items-center justify-between">
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col gap-3">
+      {/* Header: Icon, Name, Color Badge */}
+      <div className="flex items-center gap-2">
+        <LucideReact.Tag size={20} className="text-gray-500" />
         <h2 className="text-lg font-semibold text-gray-900 truncate">
-          {name}
+          {value.name}
         </h2>
-        {color && (
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded ${
-              colorClasses[color] ?? ""
-            }`}
-          >
-            {color}
-          </span>
+        <span
+          className={`w-3 h-3 rounded-full ${badgeColor}`}
+          aria-label={value.color ?? "none"}
+        />
+      </div>
+
+      {/* Description */}
+      <div className="text-gray-600 text-sm">
+        {value.description ? (
+          <p className="line-clamp-2">{value.description}</p>
+        ) : (
+          <p className="italic text-gray-400">No description provided</p>
         )}
       </div>
 
-      {description && (
-        <p className="mt-2 text-gray-700 overflow-hidden line-clamp-3">
-          {description}
-        </p>
-      )}
-
-      <div className="mt-4 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
-        {formattedCreated && <span>Created: {formattedCreated}</span>}
-        {formattedUpdated && <span>Updated: {formattedUpdated}</span>}
-        <span className={`px-2 py-0.5 rounded text-xs font-medium ${statusBadge.classes}`}>
-          {statusBadge.label}
-        </span>
+      {/* Metadata: Created, Updated, Status */}
+      <div className="flex flex-wrap items-center gap-4 text-gray-500 text-xs">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={14} className="text-gray-400" />
+          <span>Created: {createdDate}</span>
+        </div>
+        {updatedDate && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={14} className="text-gray-400" />
+            <span>Updated: {updatedDate}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1 ml-auto">
+          {value.is_enabled ? (
+            <>
+              <LucideReact.CheckCircle
+                size={14}
+                className="text-green-500"
+                aria-label="Enabled"
+              />
+              <span>Enabled</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.XCircle
+                size={14}
+                className="text-red-500"
+                aria-label="Disabled"
+              />
+              <span>Disabled</span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

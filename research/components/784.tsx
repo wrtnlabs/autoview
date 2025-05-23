@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
      *
      * @title Issue
     */
-    export type issue = {
+    export interface issue {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -52,7 +53,7 @@ export namespace AutoViewInputSubTypes {
             "default"?: boolean;
         })[];
         assignee: AutoViewInputSubTypes.nullable_simple_user;
-        assignees?: any[] | null;
+        assignees?: AutoViewInputSubTypes.simple_user[] | null;
         milestone: AutoViewInputSubTypes.nullable_milestone;
         locked: boolean;
         active_lock_reason?: string | null;
@@ -78,7 +79,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         sub_issues_summary?: AutoViewInputSubTypes.sub_issues_summary;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -113,7 +114,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -136,7 +137,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A collection of related issues and pull requests.
      *
@@ -161,7 +162,7 @@ export namespace AutoViewInputSubTypes {
         */
         title: string;
         description: string | null;
-        creator: any;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
         open_issues: number & tags.Type<"int32">;
         closed_issues: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
@@ -198,11 +199,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -213,7 +214,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -417,7 +418,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -447,7 +448,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -475,7 +476,38 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -485,7 +517,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -496,100 +528,141 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
     /**
      * @title Sub-issues Summary
     */
-    export type sub_issues_summary = {
+    export interface sub_issues_summary {
         total: number & tags.Type<"int32">;
         completed: number & tags.Type<"int32">;
         percent_completed: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derived/display values
-  const stateLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
-  const stateColor =
-    value.state === "open"
-      ? "bg-green-100 text-green-800"
-      : "bg-red-100 text-red-800";
-  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
+  // 1. Data transformation and derived values
+  const createdDate = new Date(value.created_at);
+  const formattedDate = createdDate.toLocaleDateString("default", {
     month: "short",
     day: "numeric",
-  });
-  const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
     year: "numeric",
-    month: "short",
-    day: "numeric",
   });
-  const authorLogin = value.user?.login ?? "Unknown";
-  const avatarUrl = value.user?.avatar_url;
-  const bodyText = value.body_text ?? value.body ?? "";
-  const labels: string[] = value.labels.map((lbl) =>
-    typeof lbl === "string" ? lbl : lbl.name ?? ""
-  );
 
-  // 2. JSX structure with Tailwind CSS
+  const rawBody = value.body_text ?? value.body ?? "";
+  const previewText =
+    rawBody.length > 200 ? `${rawBody.slice(0, 200)}...` : rawBody;
+
+  const labelsNormalized = Array.isArray(value.labels)
+    ? value.labels.map((lbl) =>
+        typeof lbl === "string"
+          ? { name: lbl, color: "gray" }
+          : { name: lbl.name ?? "", color: lbl.color ?? "gray" }
+      )
+    : [];
+
+  const reactionCount = value.reactions?.total_count ?? 0;
+  const author = value.user;
+  const authorName = author?.login ?? "Unknown";
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    authorName
+  )}&background=random`;
+
+  // 2. Visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt={`${authorLogin} avatar`}
-              className="w-8 h-8 rounded-full"
+    <div className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-colors duration-150">
+      {/* Header: status, number, author, date */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div className="flex items-center gap-2">
+          {value.state === "open" ? (
+            <LucideReact.Circle
+              size={16}
+              className="text-green-500 flex-shrink-0"
+            />
+          ) : (
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-red-500 flex-shrink-0"
             />
           )}
-          <div className="text-sm text-gray-600">
-            <span className="font-medium text-gray-800">{authorLogin}</span>
-            <span className="ml-2">opened on {createdDate}</span>
+          <span
+            className={`text-sm font-semibold ${
+              value.state === "open" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {value.state.charAt(0).toUpperCase() + value.state.slice(1)}
+          </span>
+          <span className="text-sm text-gray-500">#{value.number}</span>
+        </div>
+        <div className="flex items-center gap-4 mt-2 sm:mt-0">
+          <div className="flex items-center gap-1">
+            {author?.avatar_url ? (
+              <img
+                src={author.avatar_url}
+                alt={authorName}
+                className="h-5 w-5 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = avatarFallback;
+                }}
+              />
+            ) : (
+              <LucideReact.User size={16} className="text-gray-500" />
+            )}
+            <span className="text-sm text-gray-600">{authorName}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Clock size={16} className="text-gray-500" />
+            <span className="text-sm text-gray-600">{formattedDate}</span>
           </div>
         </div>
-        <span
-          className={`px-2 py-1 text-xs font-semibold rounded ${stateColor}`}
-        >
-          {stateLabel}
-        </span>
       </div>
 
       {/* Title */}
-      <h3 className="mt-3 text-lg font-semibold text-gray-900 truncate">
-        #{value.number} {value.title}
-      </h3>
+      <h2 className="mt-3 text-lg font-bold text-gray-800 line-clamp-2">
+        {value.title}
+      </h2>
 
       {/* Labels */}
-      {labels.length > 0 && (
-        <div className="mt-2 flex flex-wrap">
-          {labels.map((lbl, idx) => (
+      {labelsNormalized.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {labelsNormalized.map((lbl, idx) => (
             <span
               key={idx}
-              className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full mr-2 mb-2"
+              className={`text-xs font-medium px-2 py-0.5 rounded ${
+                lbl.color === "gray" ? "bg-gray-200 text-gray-700" : ""
+              }`}
+              style={
+                lbl.color !== "gray"
+                  ? { backgroundColor: `#${lbl.color}`, color: "#fff" }
+                  : undefined
+              }
             >
-              {lbl}
+              {lbl.name}
             </span>
           ))}
         </div>
       )}
 
-      {/* Body snippet */}
-      {bodyText && (
+      {/* Body preview */}
+      {previewText && (
         <p className="mt-2 text-sm text-gray-700 line-clamp-2">
-          {bodyText}
+          {previewText}
         </p>
       )}
 
-      {/* Footer */}
-      <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
-        <span>💬 {value.comments} comments</span>
-        <span>Updated {updatedDate}</span>
+      {/* Footer: comments and reactions */}
+      <div className="mt-4 flex items-center gap-4">
+        <div className="flex items-center gap-1">
+          <LucideReact.MessageCircle size={16} className="text-gray-500" />
+          <span className="text-sm text-gray-600">{value.comments}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.ThumbsUp size={16} className="text-gray-500" />
+          <span className="text-sm text-gray-600">{reactionCount}</span>
+        </div>
       </div>
     </div>
   );

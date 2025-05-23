@@ -1,34 +1,38 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace shared {
-        export type StringView = {
+        export interface StringView {
             result?: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.shared.StringView;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const rawText = value.result ?? "";
-  const trimmedText = rawText.trim();
-  const hasText = trimmedText.length > 0;
+  // Derived display text and presence flag
+  const text = value.result?.trim() ?? '';
+  const hasText = text.length > 0;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-sm">
-      {hasText ? (
-        <p className="text-gray-800 text-base leading-relaxed overflow-hidden line-clamp-3">
-          {trimmedText}
-        </p>
-      ) : (
-        <p className="text-gray-500 italic text-base">
-          No result available.
-        </p>
-      )}
+    <div className="p-4 bg-white rounded-lg shadow sm:flex sm:items-start">
+      <div className="flex-shrink-0">
+        {hasText ? (
+          <LucideReact.FileText size={24} className="text-gray-500" aria-hidden="true" />
+        ) : (
+          <LucideReact.AlertCircle size={24} className="text-gray-400" aria-hidden="true" />
+        )}
+      </div>
+      <div className="mt-3 sm:mt-0 sm:ml-4 flex-1">
+        <h3 className="text-lg font-medium text-gray-900">Result</h3>
+        {hasText ? (
+          <p className="mt-2 text-gray-700 whitespace-pre-wrap line-clamp-3">{text}</p>
+        ) : (
+          <p className="mt-2 text-gray-500">No result available</p>
+        )}
+      </div>
     </div>
   );
 }

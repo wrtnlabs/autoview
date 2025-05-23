@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Thread
      *
      * @title Thread
     */
-    export type thread = {
+    export interface thread {
         id: string;
         repository: AutoViewInputSubTypes.minimal_repository;
         subject: {
@@ -21,13 +22,13 @@ export namespace AutoViewInputSubTypes {
         last_read_at: string | null;
         url: string;
         subscription_url: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -130,13 +131,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -159,19 +160,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -211,54 +212,68 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formatDate = (iso: string): string => {
     const date = new Date(iso);
-    return date.toLocaleString("default", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-    });
+    return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  };
+
+  const formatRelativeTime = (iso: string): string => {
+    const now = Date.now();
+    const then = new Date(iso).getTime();
+    const delta = now - then;
+    const seconds = Math.floor(delta / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 30) return `${days}d ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+    const years = Math.floor(months / 12);
+    return `${years}y ago`;
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-4 text-lg">No threads to display</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {value.map((thread) => {
-        const updatedAt = formatDate(thread.updated_at);
-        const lastReadAt = thread.last_read_at ? formatDate(thread.last_read_at) : null;
-
+        const { id, repository, subject, reason, unread, updated_at } = thread;
         return (
           <div
-            key={thread.id}
-            className="bg-white rounded-lg shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
+            key={id}
+            className="flex items-start space-x-4 p-4 bg-white rounded-lg shadow-sm"
           >
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-800 truncate">
-                {thread.subject.title}
-              </h3>
-              <p className="text-sm text-gray-600 mt-1 truncate">
-                {thread.repository.full_name}
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <span className="text-xs font-medium bg-indigo-100 text-indigo-800 rounded px-2 py-0.5">
-                  {thread.reason}
-                </span>
-                <span
-                  className={`text-xs font-medium rounded px-2 py-0.5 ${
-                    thread.unread
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {thread.unread ? "Unread" : "Read"}
+            <div className="mt-1">
+              {unread ? (
+                <LucideReact.Mail className="text-blue-500" size={20} />
+              ) : (
+                <LucideReact.MailOpen className="text-gray-400" size={20} />
+              )}
+            </div>
+            <div className="flex-1 space-y-1">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
+                  {subject.title}
+                </h3>
+                <span className="text-xs text-gray-500">
+                  {formatRelativeTime(updated_at)}
                 </span>
               </div>
-            </div>
-            <div className="mt-3 sm:mt-0 sm:ml-6 text-gray-500 text-xs flex flex-col items-end">
-              <span>{updatedAt}</span>
-              {lastReadAt && (
-                <span className="mt-1">Last read: {lastReadAt}</span>
-              )}
+              <div className="flex items-center text-xs text-gray-500 space-x-2">
+                <LucideReact.GitBranch size={14} />
+                <span>{repository.full_name}</span>
+                <span>·</span>
+                <span className="capitalize">{reason}</span>
+              </div>
             </div>
           </div>
         );

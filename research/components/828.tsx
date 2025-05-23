@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Review Comments are comments on a portion of the Pull Request's diff.
      *
      * @title Pull Request Review Comment
     */
-    export type pull_request_review_comment = {
+    export interface pull_request_review_comment {
         /**
          * URL for the pull request review comment
         */
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         body_html?: string;
         body_text?: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,7 +139,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -148,7 +149,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -159,7 +160,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.pull_request_review_comment;
 
@@ -168,77 +169,92 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_review_comment;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  });
-  const fileLocation = `${value.path}${typeof value.line === 'number' ? `:${value.line}` : ''}`;
+  const author = value.user;
+  const avatarUrl = author.avatar_url;
+  const displayName = author.name || author.login;
+  const association =
+    value.author_association.charAt(0) +
+    value.author_association.slice(1).toLowerCase();
+  const formattedDate = new Date(value.created_at).toLocaleString();
+  const content = value.body_text || value.body;
+  const fileLocation = value.path + (value.line !== undefined ? `:${value.line}` : '');
 
-  // Map author_association to human-readable form
-  const authorAssociation = value.author_association
-    .split('_')
-    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
-    .join(' ');
-
-  // Prepare reactions
   const reactions = value.reactions;
-  const reactionEmojiMap: Record<string, string> = {
-    '+1': '👍',
-    '-1': '👎',
-    laugh: '😄',
-    confused: '😕',
-    heart: '❤️',
-    hooray: '🎉',
-    eyes: '👀',
-    rocket: '🚀',
+  const reactionIconMap: Record<string, React.ComponentType<any>> = {
+    "+1": LucideReact.ThumbsUp,
+    "-1": LucideReact.ThumbsDown,
+    laugh: LucideReact.Smile,
+    heart: LucideReact.Heart,
+    rocket: LucideReact.Rocket,
+    eyes: LucideReact.Eye,
   };
-  const reactionsArray = reactions
-    ? (Object.entries(reactionEmojiMap) as [keyof typeof reactions, string][])
-        .filter(([key]) => (reactions as any)[key] > 0)
-        .map(([key, emoji]) => ({
-          emoji,
-          count: (reactions as any)[key] as number,
-        }))
+  const activeReactions = reactions
+    ? (Object.entries(reactions) as [string, number][])
+        .filter(
+          ([key, count]) =>
+            key !== "url" &&
+            key !== "total_count" &&
+            typeof count === "number" &&
+            count > 0
+        )
     : [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-sm p-4 space-y-4">
-      {/* Header: Avatar, username, association, date */}
-      <div className="flex items-center space-x-3">
-        <img
-          src={value.user.avatar_url}
-          alt={value.user.login}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <div className="flex flex-col">
-          <p className="text-sm font-medium text-gray-900">{value.user.login}</p>
-          <div className="flex items-center space-x-2 text-xs text-gray-500">
-            <span>{authorAssociation}</span>
-            <span>·</span>
-            <span>{formattedDate}</span>
+    <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col space-y-4">
+      {/* Header: Avatar, Name, Association, Date */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-3">
+          <img
+            src={avatarUrl}
+            alt={displayName}
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null;
+              currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                displayName
+              )}&background=888&color=fff`;
+            }}
+            className="w-8 h-8 rounded-full object-cover"
+          />
+          <div className="flex flex-col">
+            <span className="font-medium text-gray-900 dark:text-gray-100">
+              {displayName}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {association}
+            </span>
           </div>
+        </div>
+        <div className="flex items-center text-gray-400 text-xs">
+          <LucideReact.Calendar size={14} className="mr-1" />
+          <span>{formattedDate}</span>
         </div>
       </div>
 
-      {/* File path and line */}
-      <div className="text-xs text-gray-500 truncate">{fileLocation}</div>
+      {/* File path and location */}
+      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+        <LucideReact.FileText size={16} className="mr-1" />
+        <span className="truncate">{fileLocation}</span>
+      </div>
 
-      {/* Comment body */}
-      <div className="text-gray-800 text-sm line-clamp-3">{value.body}</div>
+      {/* Comment content */}
+      <p className="text-gray-800 dark:text-gray-200 text-sm line-clamp-3">
+        {content}
+      </p>
 
       {/* Reactions */}
-      {reactionsArray.length > 0 && (
-        <div className="flex flex-wrap items-center space-x-3 text-gray-600">
-          {reactionsArray.map((r, i) => (
-            <span key={i} className="flex items-center space-x-1 text-sm">
-              <span>{r.emoji}</span>
-              <span>{r.count}</span>
-            </span>
-          ))}
+      {reactions?.total_count! > 0 && (
+        <div className="flex items-center space-x-4 text-gray-500 text-sm">
+          {activeReactions.map(([type, count]) => {
+            const Icon = reactionIconMap[type];
+            if (!Icon) return null;
+            return (
+              <div key={type} className="flex items-center space-x-1">
+                <Icon size={16} className="text-current" />
+                <span>{count}</span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

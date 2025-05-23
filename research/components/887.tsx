@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repository invitations let you manage who you collaborate with.
      *
      * @title Repository Invitation
     */
-    export type repository_subscription = {
+    export interface repository_subscription {
         /**
          * Determines if notifications should be received from this repository.
         */
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         url: string & tags.Format<"uri">;
         repository_url: string & tags.Format<"uri">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.repository_subscription;
 
@@ -28,61 +29,88 @@ export type AutoViewInput = AutoViewInputSubTypes.repository_subscription;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Derive repository path (e.g., "owner/repo") from the full URL.
-  const repoPath = (() => {
-    try {
-      const parts = value.repository_url.split("/").filter(Boolean);
-      return parts.slice(-2).join("/") || value.repository_url;
-    } catch {
-      return value.repository_url;
-    }
-  })();
-
-  //    Format the creation date into a human-readable string.
-  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-
-  //    Determine subscription status text and corresponding badge color.
-  let statusText: string;
-  let statusClasses: string;
-  if (value.ignored) {
-    statusText = "Notifications Ignored";
-    statusClasses = "bg-red-100 text-red-800";
-  } else if (value.subscribed) {
-    statusText = "Subscribed";
-    statusClasses = "bg-green-100 text-green-800";
-  } else {
-    statusText = "Unsubscribed";
-    statusClasses = "bg-gray-100 text-gray-800";
-  }
+  const formattedDate = new Date(value.created_at).toLocaleString();
+  const statusInfo = value.ignored
+    ? {
+        label: "Notifications Blocked",
+        icon: (
+          <LucideReact.BellOff
+            className="text-red-500"
+            size={16}
+            aria-label="Blocked"
+          />
+        ),
+      }
+    : value.subscribed
+    ? {
+        label: "Subscribed",
+        icon: (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={16}
+            aria-label="Subscribed"
+          />
+        ),
+      }
+    : {
+        label: "Not Subscribed",
+        icon: (
+          <LucideReact.BellOff
+            className="text-gray-500"
+            size={16}
+            aria-label="Not Subscribed"
+          />
+        ),
+      };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header: repository name and status badge */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{repoPath}</h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${statusClasses}`}
-        >
-          {statusText}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md">
+      <div className="flex items-center gap-2">
+        {statusInfo.icon}
+        <span className="text-gray-800 font-medium">{statusInfo.label}</span>
       </div>
 
-      {/* Metadata: creation date */}
-      <div className="text-sm text-gray-600 mb-2">
-        <span className="font-medium">Created:</span> {formattedDate}
-      </div>
-
-      {/* Optional reason for subscription/ignore */}
       {value.reason && (
-        <div className="text-sm italic text-gray-500 line-clamp-2">
-          <span className="font-medium">Reason:</span> {value.reason}
+        <div className="mt-3 flex items-start gap-2">
+          <LucideReact.Info
+            className="text-blue-500 mt-0.5"
+            size={16}
+            aria-label="Reason"
+          />
+          <p className="text-gray-600 text-sm leading-snug">{value.reason}</p>
         </div>
       )}
+
+      <div className="mt-3 flex items-center gap-2">
+        <LucideReact.Calendar
+          className="text-gray-400"
+          size={16}
+          aria-label="Created At"
+        />
+        <time
+          dateTime={value.created_at}
+          className="text-gray-600 text-sm"
+        >
+          {formattedDate}
+        </time>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2">
+        <LucideReact.Link
+          className="text-blue-500"
+          size={16}
+          aria-label="Repository URL"
+        />
+        <a
+          href={value.repository_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline truncate"
+        >
+          {value.repository_url}
+        </a>
+      </div>
     </div>
   );
 }

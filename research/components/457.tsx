@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Delivery made by a webhook.
      *
      * @title Webhook delivery
     */
-    export type hook_delivery = {
+    export interface hook_delivery {
         /**
          * Unique identifier of the delivery.
         */
@@ -79,7 +80,7 @@ export namespace AutoViewInputSubTypes {
             */
             payload: string | null;
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.hook_delivery;
 
@@ -89,98 +90,86 @@ export type AutoViewInput = AutoViewInputSubTypes.hook_delivery;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const deliveredAt = new Date(value.delivered_at).toLocaleString();
-  const throttledAt = value.throttled_at
-    ? new Date(value.throttled_at).toLocaleString()
-    : 'N/A';
-  const redelivery = value.redelivery ? 'Yes' : 'No';
-  const durationMs = `${value.duration} ms`;
-  const action = value.action ?? 'N/A';
-  const installationId = value.installation_id ?? 'N/A';
-  const repositoryId = value.repository_id ?? 'N/A';
-  const urlDisplay = value.url
-    ? value.url.length > 40
-      ? `${value.url.slice(0, 40)}…`
-      : value.url
-    : 'N/A';
-  const hasRequestHeaders = value.request.headers !== null;
-  const hasRequestPayload = value.request.payload !== null;
-  const responsePayloadLength =
-    typeof value.response.payload === 'string'
-      ? `${value.response.payload.length} chars`
-      : 'None';
-  const hasResponseHeaders = value.response.headers !== null;
-  const statusColor =
-    value.status_code >= 200 && value.status_code < 300
-      ? 'bg-green-100 text-green-800'
-      : value.status_code < 400
-      ? 'bg-yellow-100 text-yellow-800'
-      : 'bg-red-100 text-red-800';
+  const throttledAt = value.throttled_at ? new Date(value.throttled_at).toLocaleString() : null;
+
+  const statusCode = value.status_code;
+  let StatusIcon = LucideReact.Clock;
+  let statusColor = 'text-amber-500';
+  if (statusCode >= 200 && statusCode < 300) {
+    StatusIcon = LucideReact.CheckCircle;
+    statusColor = 'text-green-500';
+  } else if (statusCode >= 400) {
+    StatusIcon = LucideReact.AlertTriangle;
+    statusColor = 'text-red-500';
+  }
+
+  const eventAction = value.action ? `${value.event}/${value.action}` : value.event;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto w-full bg-white rounded-lg shadow-md p-4">
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.event}
-        </h2>
-        <span
-          className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded ${statusColor}`}
-        >
-          {value.status}
-        </span>
+        <h2 className="text-lg font-semibold text-gray-800">Webhook Delivery</h2>
+        {value.redelivery && (
+          <LucideReact.RefreshCcw
+            className="text-yellow-500"
+            size={20}
+            aria-label="Redelivery"
+          />
+        )}
       </div>
-      <dl className="grid grid-cols-1 gap-y-2 gap-x-4 sm:grid-cols-2">
-        <dt className="font-medium text-gray-700">Delivery ID</dt>
-        <dd className="text-gray-900">{value.id}</dd>
-
-        <dt className="font-medium text-gray-700">GUID</dt>
-        <dd className="text-gray-900 truncate">{value.guid}</dd>
-
-        <dt className="font-medium text-gray-700">Delivered At</dt>
-        <dd className="text-gray-900">{deliveredAt}</dd>
-
-        <dt className="font-medium text-gray-700">Duration</dt>
-        <dd className="text-gray-900">{durationMs}</dd>
-
-        <dt className="font-medium text-gray-700">Status Code</dt>
-        <dd className="text-gray-900">{value.status_code}</dd>
-
-        <dt className="font-medium text-gray-700">Redelivery?</dt>
-        <dd className="text-gray-900">{redelivery}</dd>
-
-        <dt className="font-medium text-gray-700">Action</dt>
-        <dd className="text-gray-900">{action}</dd>
-
-        <dt className="font-medium text-gray-700">Installation ID</dt>
-        <dd className="text-gray-900">{installationId}</dd>
-
-        <dt className="font-medium text-gray-700">Repository ID</dt>
-        <dd className="text-gray-900">{repositoryId}</dd>
-
-        <dt className="font-medium text-gray-700">Throttled At</dt>
-        <dd className="text-gray-900">{throttledAt}</dd>
-
-        <dt className="col-span-2 font-medium text-gray-700">Webhook URL</dt>
-        <dd className="col-span-2 text-gray-900 truncate">{urlDisplay}</dd>
-
-        <dt className="font-medium text-gray-700">Req. Headers</dt>
-        <dd className="text-gray-900">
-          {hasRequestHeaders ? 'Present' : 'None'}
-        </dd>
-
-        <dt className="font-medium text-gray-700">Req. Payload</dt>
-        <dd className="text-gray-900">
-          {hasRequestPayload ? 'Present' : 'None'}
-        </dd>
-
-        <dt className="font-medium text-gray-700">Resp. Headers</dt>
-        <dd className="text-gray-900">
-          {hasResponseHeaders ? 'Present' : 'None'}
-        </dd>
-
-        <dt className="font-medium text-gray-700">Resp. Payload</dt>
-        <dd className="text-gray-900">{responsePayloadLength}</dd>
-      </dl>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Hash className="text-gray-400 mr-1" size={16} />
+          <span>#{value.id}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Code className="text-gray-400 mr-1" size={16} />
+          <span className="break-all">{value.guid}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar className="text-gray-400 mr-1" size={16} />
+          <span>{deliveredAt}</span>
+        </div>
+        {throttledAt && (
+          <div className="flex items-center">
+            <LucideReact.Clock className="text-amber-500 mr-1" size={16} />
+            <span>Throttled: {throttledAt}</span>
+          </div>
+        )}
+        <div className="flex items-center col-span-1 sm:col-span-2">
+          <StatusIcon className={`${statusColor} mr-1`} size={16} />
+          <span className="capitalize">
+            {value.status} ({statusCode})
+          </span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Flag className="text-gray-400 mr-1" size={16} />
+          <span>{eventAction}</span>
+        </div>
+        {value.installation_id != null && (
+          <div className="flex items-center">
+            <LucideReact.Package className="text-gray-400 mr-1" size={16} />
+            <span>App ID: {value.installation_id}</span>
+          </div>
+        )}
+        {value.repository_id != null && (
+          <div className="flex items-center">
+            <LucideReact.GitBranch className="text-gray-400 mr-1" size={16} />
+            <span>Repo ID: {value.repository_id}</span>
+          </div>
+        )}
+        {value.url && (
+          <div className="flex items-center col-span-1 sm:col-span-2 break-all">
+            <LucideReact.Link className="text-gray-400 mr-1" size={16} />
+            <span>{value.url}</span>
+          </div>
+        )}
+        <div className="flex items-center">
+          <LucideReact.Clock className="text-gray-400 mr-1" size={16} />
+          <span>Duration: {value.duration} ms</span>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Check suite configuration preferences for a repository.
      *
      * @title Check Suite Preference
     */
-    export type check_suite_preference = {
+    export interface check_suite_preference {
         preferences: {
             auto_trigger_checks?: {
                 app_id: number & tags.Type<"int32">;
@@ -14,13 +15,13 @@ export namespace AutoViewInputSubTypes {
             }[];
         };
         repository: AutoViewInputSubTypes.minimal_repository;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -123,13 +124,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -152,19 +153,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -202,105 +203,129 @@ export type AutoViewInput = AutoViewInputSubTypes.check_suite_preference;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { preferences, repository } = value;
-  const checks = preferences.auto_trigger_checks ?? [];
-  const enabledCount = checks.filter((c) => c.setting).length;
+  const { repository, preferences } = value;
+  const owner = repository.owner;
+  const autoChecks = preferences.auto_trigger_checks ?? [];
 
-  // Truncate long descriptions
-  const description =
-    repository.description && repository.description.length > 100
-      ? repository.description.slice(0, 100) + "..."
-      : repository.description;
-
-  // Helper to format large numbers
-  const formatNumber = (n: number | undefined): string => {
-    if (n === undefined) return "0";
-    return n >= 1000 ? (n / 1000).toFixed(1) + "K" : String(n);
+  // Fallback handler for owner avatar
+  const handleAvatarError = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>,
+  ) => {
+    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      owner.login,
+    )}&background=0D8ABC&color=fff`;
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6 max-w-md mx-auto">
-      {/* Repository Info */}
-      <section className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-        <img
-          src={repository.owner.avatar_url}
-          alt={`${repository.owner.login} avatar`}
-          className="w-12 h-12 rounded-full flex-shrink-0"
-        />
-        <div className="mt-3 sm:mt-0 flex-1">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">
-            {repository.full_name}
-          </h2>
-          {description && (
-            <p className="text-gray-600 text-sm mt-1 line-clamp-2">
-              {description}
-            </p>
-          )}
-          <div className="flex flex-wrap items-center mt-2 space-x-2">
-            <span
-              className={`px-2 py-0.5 text-xs font-medium rounded ${
-                repository.private
-                  ? "bg-red-100 text-red-800"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              {repository.private ? "Private" : "Public"}
-            </span>
-            {repository.language && (
-              <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded">
-                {repository.language}
-              </span>
-            )}
-            {repository.default_branch && (
-              <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded">
-                branch: {repository.default_branch}
-              </span>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center mt-3 text-gray-500 text-sm space-x-4">
-            <span>⭐ {formatNumber(repository.stargazers_count)}</span>
-            <span>🍴 {formatNumber(repository.forks_count)}</span>
-            <span>👀 {formatNumber(repository.watchers_count)}</span>
-            <span>❗ {formatNumber(repository.open_issues_count)}</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Auto Trigger Checks */}
-      <section>
-        <h3 className="text-md font-medium text-gray-800 mb-2">
-          Auto Trigger Checks ({checks.length}){" "}
-          <span className="text-sm text-gray-500">
-            • Enabled: {enabledCount}
-          </span>
-        </h3>
-        {checks.length === 0 ? (
-          <p className="text-gray-600 text-sm">
-            No auto trigger checks configured.
-          </p>
+    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md max-w-md mx-auto">
+      {/* Repository Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
+          {repository.full_name}
+        </h2>
+        {repository.private ? (
+          <LucideReact.Lock
+            className="text-gray-500"
+            size={20}
+            aria-label="Private repository"
+          />
         ) : (
-          <ul className="divide-y divide-gray-200 border border-gray-100 rounded">
-            {checks.map((check) => (
-              <li
-                key={check.app_id}
-                className="flex justify-between items-center px-4 py-2"
-              >
-                <span className="text-gray-700 text-sm">
-                  App ID {check.app_id}
-                </span>
-                <span
-                  className={`text-sm font-medium ${
-                    check.setting ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {check.setting ? "Enabled" : "Disabled"}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <LucideReact.Unlock
+            className="text-gray-500"
+            size={20}
+            aria-label="Public repository"
+          />
         )}
-      </section>
+      </div>
+
+      {/* Description */}
+      {repository.description && (
+        <p className="mt-2 text-gray-700 dark:text-gray-300 text-sm line-clamp-2">
+          {repository.description}
+        </p>
+      )}
+
+      {/* Meta info: owner, language, stars, forks, issues, updated */}
+      <div className="mt-3 flex flex-wrap items-center space-x-4 text-gray-600 dark:text-gray-400 text-sm">
+        <div className="flex items-center space-x-1">
+          <img
+            src={owner.avatar_url}
+            alt={owner.login}
+            className="w-6 h-6 rounded-full object-cover"
+            onError={handleAvatarError}
+          />
+          <span className="truncate">{owner.login}</span>
+        </div>
+        {repository.language && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Code className="text-gray-400" size={16} />
+            <span>{repository.language}</span>
+          </div>
+        )}
+        <div className="flex items-center space-x-1">
+          <LucideReact.Star className="text-yellow-500" size={16} />
+          <span>{repository.stargazers_count ?? 0}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.GitBranch className="text-gray-500" size={16} />
+          <span>{repository.forks_count ?? 0}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.AlertCircle className="text-gray-500" size={16} />
+          <span>{repository.open_issues_count ?? 0}</span>
+        </div>
+        {repository.updated_at && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Calendar className="text-gray-400" size={16} />
+            <span>{new Date(repository.updated_at).toLocaleDateString()}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Auto Trigger Checks Section */}
+      <div className="mt-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+            Auto Trigger Checks ({autoChecks.length})
+          </h3>
+          {autoChecks.length === 0 && (
+            <LucideReact.AlertCircle
+              className="text-gray-400"
+              size={20}
+              aria-label="No auto trigger checks"
+            />
+          )}
+        </div>
+        <ul className="mt-2 space-y-2">
+          {autoChecks.map((check) => (
+            <li
+              key={check.app_id}
+              className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300"
+            >
+              <span>App ID {check.app_id}</span>
+              {check.setting ? (
+                <LucideReact.CheckCircle
+                  className="text-green-500"
+                  size={16}
+                  aria-label="Enabled"
+                />
+              ) : (
+                <LucideReact.XCircle
+                  className="text-red-500"
+                  size={16}
+                  aria-label="Disabled"
+                />
+              )}
+            </li>
+          ))}
+          {autoChecks.length === 0 && (
+            <li className="text-sm text-gray-500">
+              No configurations found.
+            </li>
+          )}
+        </ul>
+      </div>
     </div>
   );
 }

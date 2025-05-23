@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Code Frequency Stat
@@ -14,125 +15,119 @@ export type AutoViewInput = AutoViewInputSubTypes.code_frequency_stat[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Handle empty or invalid data
-  if (!Array.isArray(value) || value.length === 0) {
+  // Handle empty data state
+  if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No code frequency data available.
+      <div className="w-full max-w-md mx-auto py-8 flex flex-col items-center text-gray-400">
+        <LucideReact.AlertCircle size={48} className="mb-4" />
+        <span className="text-lg">No code frequency data available.</span>
       </div>
     );
   }
 
-  // 1. Transform raw data into structured stats and sort by date
-  type Stat = { date: Date; additions: number; deletions: number };
-  const stats: Stat[] = value
-    .map((entry) => {
-      const [timestamp = 0, additions = 0, deletions = 0] = entry;
-      return {
-        date: new Date(timestamp * 1000),
-        additions,
-        deletions,
-      };
-    })
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+  // 1. Data aggregation and transformation
+  const totalAdditions = value.reduce((sum, stat) => sum + (stat[1] ?? 0), 0);
+  const totalDeletions = value.reduce((sum, stat) => sum + (stat[2] ?? 0), 0);
+  const netTotal = totalAdditions - totalDeletions;
+  const recentStats = value.slice(-8);
 
-  // 2. Compute aggregate metrics
-  const totalAdditions = stats.reduce((sum, s) => sum + s.additions, 0);
-  const totalDeletions = stats.reduce((sum, s) => sum + s.deletions, 0);
-  const netChanges = totalAdditions - totalDeletions;
-  const averageNet = stats.length > 0 ? netChanges / stats.length : 0;
+  const formatDate = (timestamp: number) =>
+    new Date(timestamp * 1000).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
 
-  // 3. Prepare recent weeks (last 5)
-  const recentStats = stats.slice(-5);
-  const formatDate = (date: Date) =>
-    date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-
-  // 4. Render the visual component
+  // 2. Visual structure using JSX and Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
-        <div className="p-4 bg-gray-50 rounded-lg text-center">
-          <div className="text-sm font-medium text-gray-500 uppercase">
-            Total Additions
-          </div>
-          <div className="mt-1 text-2xl font-semibold text-green-600">
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">
+        Code Frequency Stats
+      </h2>
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="flex flex-col items-center">
+          <LucideReact.PlusCircle size={20} className="text-green-500" />
+          <span className="mt-1 text-sm font-medium text-gray-700">
+            Additions
+          </span>
+          <span className="text-lg font-semibold text-green-600">
             {totalAdditions.toLocaleString()}
-          </div>
+          </span>
         </div>
-        <div className="p-4 bg-gray-50 rounded-lg text-center">
-          <div className="text-sm font-medium text-gray-500 uppercase">
-            Total Deletions
-          </div>
-          <div className="mt-1 text-2xl font-semibold text-red-600">
+        <div className="flex flex-col items-center">
+          <LucideReact.MinusCircle size={20} className="text-red-500" />
+          <span className="mt-1 text-sm font-medium text-gray-700">
+            Deletions
+          </span>
+          <span className="text-lg font-semibold text-red-600">
             {totalDeletions.toLocaleString()}
-          </div>
+          </span>
         </div>
-        <div className="p-4 bg-gray-50 rounded-lg text-center">
-          <div className="text-sm font-medium text-gray-500 uppercase">
-            Net Changes
-          </div>
-          <div className="mt-1 text-2xl font-semibold text-gray-800">
-            {netChanges.toLocaleString()}
-          </div>
-        </div>
-        <div className="p-4 bg-gray-50 rounded-lg text-center">
-          <div className="text-sm font-medium text-gray-500 uppercase">
-            Avg Net/Week
-          </div>
-          <div className="mt-1 text-2xl font-semibold text-gray-800">
-            {averageNet.toFixed(1)}
-          </div>
+        <div className="flex flex-col items-center">
+          <LucideReact.TrendingUp
+            size={20}
+            className={netTotal >= 0 ? "text-green-500" : "text-red-500"}
+          />
+          <span className="mt-1 text-sm font-medium text-gray-700">Net</span>
+          <span
+            className={`text-lg font-semibold ${
+              netTotal >= 0 ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {netTotal.toLocaleString()}
+          </span>
         </div>
       </div>
-
-      {/* Recent Weeks Table */}
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Week
-              </th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Additions
-              </th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Deletions
-              </th>
-              <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Net
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {recentStats.map((stat, idx) => {
-              const net = stat.additions - stat.deletions;
-              return (
-                <tr key={idx}>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                    {formatDate(stat.date)}
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-green-600 text-right">
-                    +{stat.additions.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-red-600 text-right">
-                    -{stat.deletions.toLocaleString()}
-                  </td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-800 text-right">
-                    {net >= 0 ? "+" : "-"}
-                    {Math.abs(net).toLocaleString()}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Footer Note */}
-      <div className="mt-2 text-sm text-gray-500">
-        Showing last {recentStats.length} weeks out of {stats.length}
+        <div className="flex mb-2 px-2">
+          <span className="w-1/4 text-xs font-medium text-gray-500">
+            Week
+          </span>
+          <span className="w-1/4 text-xs font-medium text-gray-500">Add</span>
+          <span className="w-1/4 text-xs font-medium text-gray-500">Del</span>
+          <span className="w-1/4 text-xs font-medium text-gray-500">Net</span>
+        </div>
+        {recentStats.map((stat, idx) => {
+          const [weekTs, adds, dels] = stat;
+          const net = adds - dels;
+          return (
+            <div
+              key={idx}
+              className="flex justify-between items-center py-2 px-2 border-b border-gray-100"
+            >
+              <div className="w-1/4 flex items-center">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span className="ml-1 text-sm text-gray-700">
+                  {formatDate(weekTs)}
+                </span>
+              </div>
+              <div className="w-1/4 flex items-center">
+                <LucideReact.Plus size={16} className="text-green-500" />
+                <span className="ml-1 text-sm text-green-600">
+                  {adds.toLocaleString()}
+                </span>
+              </div>
+              <div className="w-1/4 flex items-center">
+                <LucideReact.Minus size={16} className="text-red-500" />
+                <span className="ml-1 text-sm text-red-600">
+                  {dels.toLocaleString()}
+                </span>
+              </div>
+              <div className="w-1/4 flex items-center">
+                <LucideReact.TrendingUp
+                  size={16}
+                  className={net >= 0 ? "text-green-500" : "text-red-500"}
+                />
+                <span
+                  className={`ml-1 text-sm font-medium ${
+                    net >= 0 ? "text-green-600" : "text-red-600"
+                  }`}
+                >
+                  {net.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

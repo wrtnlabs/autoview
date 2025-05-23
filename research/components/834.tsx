@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Diff Entry
      *
      * @title Diff Entry
     */
-    export type diff_entry = {
+    export interface diff_entry {
         sha: string;
         filename: string;
         status: "added" | "removed" | "modified" | "renamed" | "copied" | "changed" | "unchanged";
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         contents_url: string & tags.Format<"uri">;
         patch?: string;
         previous_filename?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.diff_entry[];
 
@@ -26,68 +27,107 @@ export type AutoViewInput = AutoViewInputSubTypes.diff_entry[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data aggregation for summary
   const totalFiles = value.length;
   const totalAdditions = value.reduce((sum, entry) => sum + entry.additions, 0);
   const totalDeletions = value.reduce((sum, entry) => sum + entry.deletions, 0);
+  const totalChanges = value.reduce((sum, entry) => sum + entry.changes, 0);
 
-  const statusStyles: Record<AutoViewInputSubTypes.diff_entry["status"], string> = {
-    added:    "bg-green-100 text-green-800",
-    removed:  "bg-red-100 text-red-800",
-    modified: "bg-yellow-100 text-yellow-800",
-    renamed:  "bg-blue-100 text-blue-800",
-    copied:   "bg-teal-100 text-teal-800",
-    changed:  "bg-purple-100 text-purple-800",
-    unchanged:"bg-gray-100 text-gray-800",
+  // 2. Map diff status to corresponding icon and color
+  const getStatusIcon = (
+    status: AutoViewInputSubTypes.diff_entry["status"]
+  ): JSX.Element => {
+    switch (status) {
+      case "added":
+        return <LucideReact.PlusCircle className="text-green-500" size={16} />;
+      case "removed":
+        return <LucideReact.Trash2 className="text-red-500" size={16} />;
+      case "modified":
+        return <LucideReact.Edit2 className="text-amber-500" size={16} />;
+      case "renamed":
+        return <LucideReact.ArrowRightCircle className="text-indigo-500" size={16} />;
+      case "copied":
+        return <LucideReact.Copy className="text-purple-500" size={16} />;
+      case "changed":
+        return <LucideReact.RefreshCw className="text-blue-500" size={16} />;
+      case "unchanged":
+        return <LucideReact.MinusCircle className="text-gray-400" size={16} />;
+      default:
+        return <LucideReact.MinusCircle className="text-gray-400" size={16} />;
+    }
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Render component
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">Code Changes</h2>
-      <p className="text-sm text-gray-500 mb-4">
-        {totalFiles} file{totalFiles !== 1 ? "s" : ""} changed &middot;{" "}
-        <span className="text-green-600">+{totalAdditions}</span> &middot;{" "}
-        <span className="text-red-600">-{totalDeletions}</span>
-      </p>
-      <ul className="space-y-4">
-        {value.map((entry) => {
-          const badgeStyle = statusStyles[entry.status];
-          const displayFilename =
-            entry.status === "renamed" && entry.previous_filename
-              ? `${entry.previous_filename} → ${entry.filename}`
-              : entry.filename;
-          const formattedStatus =
-            entry.status.charAt(0).toUpperCase() + entry.status.slice(1);
+    <div className="w-full max-w-full p-4 bg-white rounded-lg shadow-sm">
+      {/* Summary Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+        <div className="flex items-center text-gray-700 text-sm mb-2 sm:mb-0">
+          <LucideReact.ListChecks size={16} className="mr-1" />
+          <span>{totalFiles} file{totalFiles !== 1 ? "s" : ""}</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-700 space-x-4">
+          <div className="flex items-center">
+            <LucideReact.Plus size={16} className="text-green-500 mr-1" />
+            <span>{totalAdditions}</span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.Minus size={16} className="text-red-500 mr-1" />
+            <span>{totalDeletions}</span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.RefreshCw size={16} className="text-blue-500 mr-1" />
+            <span>{totalChanges}</span>
+          </div>
+        </div>
+      </div>
 
-          return (
-            <li
-              key={entry.sha}
-              className="p-4 bg-gray-50 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-base font-medium text-gray-900 truncate">
-                  {displayFilename}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">SHA: {entry.sha}</p>
-              </div>
-              <div className="flex items-center mt-3 sm:mt-0 sm:ml-4 space-x-3">
-                <span className={`px-2 py-1 text-xs font-semibold rounded ${badgeStyle}`}>
-                  {formattedStatus}
+      {/* Diff Entry List */}
+      <div className="divide-y divide-gray-200">
+        {value.map((entry) => (
+          <div
+            key={entry.sha + entry.filename}
+            className="py-2 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center"
+          >
+            {/* File Info */}
+            <div className="flex items-center w-full sm:w-1/2 overflow-hidden">
+              <LucideReact.FileText size={20} className="text-gray-500 mr-2" />
+              <div className="flex flex-col overflow-hidden">
+                <span className="font-medium text-gray-800 truncate">
+                  {entry.filename}
                 </span>
-                <span className="text-sm text-green-600">+{entry.additions}</span>
-                <span className="text-sm text-red-600">-{entry.deletions}</span>
+                {entry.status === "renamed" && entry.previous_filename && (
+                  <span className="text-gray-500 text-sm truncate">
+                    renamed from {entry.previous_filename}
+                  </span>
+                )}
               </div>
-              {entry.patch && (
-                <pre className="mt-3 bg-gray-100 text-gray-700 text-sm font-mono p-2 rounded max-h-24 overflow-y-auto w-full sm:w-auto">
-                  {entry.patch}
-                </pre>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+            </div>
+
+            {/* Status & Counts */}
+            <div className="flex items-center mt-2 sm:mt-0 space-x-4">
+              <div className="flex items-center">
+                {getStatusIcon(entry.status)}
+                <span className="ml-1 text-gray-600 text-sm capitalize">
+                  {entry.status}
+                </span>
+              </div>
+              <div className="flex items-center text-green-600 text-sm">
+                <LucideReact.Plus size={14} className="mr-1" />
+                <span>{entry.additions}</span>
+              </div>
+              <div className="flex items-center text-red-600 text-sm">
+                <LucideReact.Minus size={14} className="mr-1" />
+                <span>{entry.deletions}</span>
+              </div>
+              <div className="flex items-center text-blue-600 text-sm">
+                <LucideReact.RefreshCw size={14} className="mr-1" />
+                <span>{entry.changes}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
-  // 3. Return the React element.
 }

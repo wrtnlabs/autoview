@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A run of a CodeQL query against one or more repositories.
      *
      * @title Variant Analysis
     */
-    export type code_scanning_variant_analysis = {
+    export interface code_scanning_variant_analysis {
         /**
          * The ID of the variant analysis.
         */
@@ -73,13 +74,13 @@ export namespace AutoViewInputSubTypes {
             no_codeql_db_repos: AutoViewInputSubTypes.code_scanning_variant_analysis_skipped_repo_group;
             over_limit_repos: AutoViewInputSubTypes.code_scanning_variant_analysis_skipped_repo_group;
         };
-    };
+    }
     /**
      * A GitHub repository.
      *
      * @title Simple Repository
     */
-    export type simple_repository = {
+    export interface simple_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -261,13 +262,13 @@ export namespace AutoViewInputSubTypes {
          * The API URL to list the hooks on the repository.
         */
         hooks_url: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -290,7 +291,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * The language targeted by the CodeQL query
     */
@@ -300,7 +301,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository Identifier
     */
-    export type code_scanning_variant_analysis_repository = {
+    export interface code_scanning_variant_analysis_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -319,12 +320,12 @@ export namespace AutoViewInputSubTypes {
         "private": boolean;
         stargazers_count: number & tags.Type<"int32">;
         updated_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * The new status of the CodeQL variant analysis repository task.
     */
     export type code_scanning_variant_analysis_status = "pending" | "in_progress" | "succeeded" | "failed" | "canceled" | "timed_out";
-    export type code_scanning_variant_analysis_skipped_repo_group = {
+    export interface code_scanning_variant_analysis_skipped_repo_group {
         /**
          * The total number of repositories that were skipped for this reason.
         */
@@ -333,7 +334,7 @@ export namespace AutoViewInputSubTypes {
          * A list of repositories that were skipped. This list may not include all repositories that were skipped. This is only available when the repository was found and the user has access to it.
         */
         repositories: AutoViewInputSubTypes.code_scanning_variant_analysis_repository[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_scanning_variant_analysis;
 
@@ -341,142 +342,181 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_variant_analysis
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso?: string | null) =>
-    iso ? new Date(iso).toLocaleString() : '—';
+  // 1. Data transformations and derived values
+  const createdAt = value.created_at
+    ? new Date(value.created_at).toLocaleString()
+    : null;
+  const completedAt = value.completed_at
+    ? new Date(value.completed_at).toLocaleString()
+    : null;
+  const statusMap: Record<string, { icon: JSX.Element; label: string }> = {
+    in_progress: {
+      icon: <LucideReact.Clock className="text-amber-500" size={16} />,
+      label: "In Progress",
+    },
+    succeeded: {
+      icon: <LucideReact.CheckCircle className="text-green-500" size={16} />,
+      label: "Succeeded",
+    },
+    failed: {
+      icon: <LucideReact.AlertTriangle className="text-red-500" size={16} />,
+      label: "Failed",
+    },
+    cancelled: {
+      icon: <LucideReact.XCircle className="text-gray-500" size={16} />,
+      label: "Cancelled",
+    },
+  };
+  const currentStatus = statusMap[value.status] || {
+    icon: <LucideReact.AlertCircle className="text-gray-500" size={16} />,
+    label: value.status,
+  };
 
-  const createdAt = formatDate(value.created_at);
-  const updatedAt = formatDate(value.updated_at);
-  const completedAt = formatDate(value.completed_at);
-
-  const repos = value.scanned_repositories ?? [];
-  const totalScanned = repos.length;
-  const statusCounts = repos.reduce<Record<string, number>>((acc, repo) => {
+  const scanned = value.scanned_repositories ?? [];
+  const totalScanned = scanned.length;
+  const statusCounts = scanned.reduce((acc, repo) => {
     const key = repo.analysis_status;
     acc[key] = (acc[key] || 0) + 1;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
-  const rawStatus = value.status;
-  const formatStatus = (s: string) =>
-    s
-      .split('_')
-      .map((w) => w[0].toUpperCase() + w.slice(1))
-      .join(' ');
-  const statusText = formatStatus(rawStatus);
-  const badgeClasses: Record<string, string> = {
-    in_progress: 'bg-blue-100 text-blue-800',
-    succeeded: 'bg-green-100 text-green-800',
-    failed: 'bg-red-100 text-red-800',
-    cancelled: 'bg-gray-100 text-gray-800',
-  };
-  const statusClass = badgeClasses[rawStatus] || 'bg-gray-100 text-gray-800';
-
-  const skips = value.skipped_repositories;
-  const skipGroups: { label: string; count: number }[] = skips
+  const skipped = value.skipped_repositories;
+  const skippedGroups = skipped
     ? [
         {
-          label: 'Access Mismatch',
-          count: skips.access_mismatch_repos.repository_count,
+          label: "Access Mismatch",
+          count: skipped.access_mismatch_repos.repository_count,
         },
         {
-          label: 'Not Found',
-          count: skips.not_found_repos.repository_count,
+          label: "Not Found",
+          count: skipped.not_found_repos.repository_count,
         },
         {
-          label: 'No CodeQL DB',
-          count: skips.no_codeql_db_repos.repository_count,
+          label: "No CodeQL DB",
+          count: skipped.no_codeql_db_repos.repository_count,
         },
         {
-          label: 'Over Limit',
-          count: skips.over_limit_repos.repository_count,
+          label: "Over Limit",
+          count: skipped.over_limit_repos.repository_count,
         },
       ].filter((g) => g.count > 0)
     : [];
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  const languageMap: Record<string, string> = {
+    cpp: "C++",
+    csharp: "C#",
+    go: "Go",
+    java: "Java",
+    javascript: "JavaScript",
+    python: "Python",
+    ruby: "Ruby",
+    rust: "Rust",
+    swift: "Swift",
+  };
+  const queryLang = languageMap[value.query_language] || value.query_language;
+
+  // 2. JSX composition
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="p-4 bg-white rounded-lg shadow-sm space-y-6">
+      {/* Header: ID and Status */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <h2 className="text-lg font-semibold text-gray-800">
           Variant Analysis #{value.id}
         </h2>
-        <span
-          className={`mt-2 sm:mt-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}`}
-        >
-          {statusText}
-        </span>
-      </header>
-
-      <div className="mt-3 text-sm text-gray-600 space-y-1">
-        <p>
-          <span className="font-medium text-gray-800">Controller:</span>{' '}
-          {value.controller_repo.full_name}
-        </p>
-        <p>
-          <span className="font-medium text-gray-800">Actor:</span>{' '}
-          {value.actor.login}
-        </p>
-        {value.actions_workflow_run_id != null && (
-          <p>
-            <span className="font-medium text-gray-800">
-              Workflow Run ID:
-            </span>{' '}
-            {value.actions_workflow_run_id}
-          </p>
-        )}
+        <div className="flex items-center mt-2 sm:mt-0 space-x-1">
+          {currentStatus.icon}
+          <span className="text-sm font-medium text-gray-700">
+            {currentStatus.label}
+          </span>
+        </div>
       </div>
 
-      <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
-        <div>
-          <dt className="font-medium">Created</dt>
-          <dd>{createdAt}</dd>
+      {/* Core Details */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <LucideReact.Calendar className="text-gray-400" size={16} />
+            <span>Created:</span>
+            <span className="font-medium">{createdAt || "—"}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <LucideReact.Calendar className="text-gray-400" size={16} />
+            <span>Completed:</span>
+            <span className="font-medium">{completedAt || "—"}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <LucideReact.FileText className="text-gray-400" size={16} />
+            <span>Language:</span>
+            <span className="font-medium">{queryLang}</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <LucideReact.User className="text-gray-400" size={16} />
+            <span>Actor:</span>
+            <span className="font-medium">{value.actor.login}</span>
+          </div>
         </div>
-        <div>
-          <dt className="font-medium">Updated</dt>
-          <dd>{updatedAt}</dd>
+        <div className="space-y-3">
+          <div className="flex items-center space-x-2">
+            <LucideReact.GitBranch className="text-gray-400" size={16} />
+            <span>Controller Repo:</span>
+            <span className="font-medium">
+              {value.controller_repo.full_name}
+            </span>
+          </div>
+          <div>
+            <span className="block text-gray-500">Download URL:</span>
+            <p className="mt-1 text-xs text-blue-600 break-all">
+              {value.query_pack_url}
+            </p>
+          </div>
         </div>
-        <div>
-          <dt className="font-medium">Completed</dt>
-          <dd>{completedAt}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Language</dt>
-          <dd className="capitalize">{value.query_language}</dd>
-        </div>
-      </dl>
+      </div>
 
-      <section className="mt-4">
-        <h3 className="text-sm font-medium text-gray-900">Scan Summary</h3>
-        <div className="mt-2 flex flex-wrap gap-3 text-xs">
-          <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded">
-            Total: {totalScanned}
-          </span>
-          <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-            Succeeded: {statusCounts['succeeded'] || 0}
-          </span>
-          <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">
-            In Progress: {statusCounts['in_progress'] || 0}
-          </span>
-          <span className="bg-red-100 text-red-800 px-2 py-1 rounded">
-            Failed: {statusCounts['failed'] || 0}
-          </span>
+      {/* Scanned Repositories Summary */}
+      {totalScanned > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-800">
+            Scanned Repositories ({totalScanned})
+          </h3>
+          <div className="flex flex-wrap gap-2 mt-2 text-xs">
+            {Object.entries(statusCounts).map(([key, count]) => {
+              const map = statusMap[key] || {
+                icon: <LucideReact.AlertCircle size={14} />,
+                label: key.replace(/_/g, " "),
+              };
+              return (
+                <span
+                  key={key}
+                  className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded"
+                >
+                  {map.icon}
+                  <span>
+                    {map.label}: {count}
+                  </span>
+                </span>
+              );
+            })}
+          </div>
         </div>
-      </section>
+      )}
 
-      {skipGroups.length > 0 && (
-        <section className="mt-4">
-          <h3 className="text-sm font-medium text-gray-900">
+      {/* Skipped Repositories Summary */}
+      {skippedGroups.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-800">
             Skipped Repositories
           </h3>
-          <ul className="mt-2 list-disc list-inside text-sm text-gray-700 space-y-1">
-            {skipGroups.map((group) => (
-              <li key={group.label}>
-                {group.label}: {group.count}
-              </li>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {skippedGroups.map((g) => (
+              <span
+                key={g.label}
+                className="text-xs bg-yellow-50 text-amber-800 px-2 py-1 rounded"
+              >
+                {g.label}: {g.count}
+              </span>
             ))}
-          </ul>
-        </section>
+          </div>
+        </div>
       )}
     </div>
   );

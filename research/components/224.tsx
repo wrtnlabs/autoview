@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type BotView = {
+    export interface BotView {
         bot?: AutoViewInputSubTypes.bot.CustomBot;
-    };
+    }
     export namespace bot {
-        export type CustomBot = {
+        export interface CustomBot {
             id?: string;
             channelId?: string;
             name: string;
@@ -18,18 +19,18 @@ export namespace AutoViewInputSubTypes {
             color: string & tags.Default<"#123456">;
             avatarUrl?: string;
             ai?: boolean;
-        };
+        }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.BotView;
 
@@ -39,81 +40,88 @@ export type AutoViewInput = AutoViewInputSubTypes.BotView;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const bot = value.bot;
-  if (!bot) return null;
-
-  // Format created date
-  const createdDate = bot.createdAt
+  // Fallback avatar URL based on bot name
+  const defaultAvatar = bot
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(bot.name)}&background=0D8ABC&color=fff`
+    : "";
+  const avatarSrc = bot?.avatarUrl ?? defaultAvatar;
+  // Format creation date if available
+  const formattedDate = bot?.createdAt
     ? new Date(bot.createdAt).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
-        day: "numeric",
+        day: "numeric"
       })
     : null;
-
-  // Count of available translations
-  const translationsCount = bot.nameDescI18nMap
+  // Count of localized name entries
+  const translationsCount = bot?.nameDescI18nMap
     ? Object.keys(bot.nameDescI18nMap).length
     : 0;
 
-  // Truncate description for performance & layout
-  const descriptionDisplay = bot.description
-    ? bot.description.length > 200
-      ? bot.description.slice(0, 200) + "…"
-      : bot.description
-    : null;
-
-  // Derive initials for fallback avatar
-  const initials = bot.name.charAt(0).toUpperCase();
-
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!bot) {
+    return (
+      <div className="flex items-center justify-center p-4 bg-gray-100 text-gray-500 rounded-lg">
+        <LucideReact.AlertCircle size={24} className="mr-2" />
+        <span>No Bot Data</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col sm:flex-row items-center sm:items-start bg-white p-4 rounded-lg shadow-md">
+    <div className="p-4 bg-white rounded-lg shadow-md flex items-start gap-4 max-w-md mx-auto">
       {/* Avatar */}
-      {bot.avatarUrl ? (
+      <div className="flex-shrink-0">
         <img
-          src={bot.avatarUrl}
+          src={avatarSrc}
           alt={`${bot.name} avatar`}
-          className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+          className="w-16 h-16 rounded-full object-cover bg-gray-200"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = defaultAvatar;
+          }}
         />
-      ) : (
-        <div
-          className="w-16 h-16 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-          style={{ backgroundColor: bot.color }}
-        >
-          {initials}
-        </div>
-      )}
-
-      {/* Info Section */}
-      <div className="mt-4 sm:mt-0 sm:ml-4 text-center sm:text-left flex-1">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
-          {/* Bot Name */}
-          <h2 className="text-lg font-semibold text-gray-900">{bot.name}</h2>
-          {/* AI Badge */}
+      </div>
+      {/* Details */}
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">{bot.name}</h2>
           {bot.ai && (
-            <span className="mt-1 sm:mt-0 inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">
-              AI Bot
-            </span>
-          )}
-          {/* Translations Badge */}
-          {translationsCount > 0 && (
-            <span className="mt-1 sm:mt-0 inline-block bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">
-              {translationsCount} lang{translationsCount > 1 ? "s" : ""}
-            </span>
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500"
+              aria-label="AI Bot"
+            />
           )}
         </div>
-
-        {/* Created Date */}
-        {createdDate && (
-          <p className="text-gray-500 text-sm mt-1">{createdDate}</p>
-        )}
-
-        {/* Description */}
-        {descriptionDisplay && (
-          <p className="text-gray-700 text-sm mt-2 line-clamp-2">
-            {descriptionDisplay}
+        {bot.description && (
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+            {bot.description}
           </p>
         )}
+        <div className="flex flex-wrap items-center text-sm text-gray-500 gap-4 mt-3">
+          {formattedDate && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar size={14} aria-label="Creation Date" />
+              <span>Joined {formattedDate}</span>
+            </div>
+          )}
+          {translationsCount > 0 && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Globe size={14} aria-label="Locales" />
+              <span>
+                {translationsCount} locale{translationsCount > 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
+          <div className="flex items-center gap-1">
+            <LucideReact.Palette size={14} aria-label="Color" />
+            <div
+              className="w-3 h-3 rounded"
+              style={{ backgroundColor: bot.color }}
+              title={`Color: ${bot.color}`}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

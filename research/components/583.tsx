@@ -1,10 +1,11 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type actions_repository_permissions = {
+    export interface actions_repository_permissions {
         enabled: AutoViewInputSubTypes.actions_enabled;
         allowed_actions?: AutoViewInputSubTypes.allowed_actions;
         selected_actions_url?: AutoViewInputSubTypes.selected_actions_url;
-    };
+    }
     /**
      * Whether GitHub Actions is enabled on the repository.
     */
@@ -24,39 +25,85 @@ export type AutoViewInput = AutoViewInputSubTypes.actions_repository_permissions
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const enabledLabel = value.enabled ? 'Enabled' : 'Disabled';
-
-  const allowedActionLabels: Record<AutoViewInputSubTypes.allowed_actions, string> = {
-    all: 'All actions',
-    local_only: 'Local only',
-    selected: 'Selected actions'
+  // 1. Data transformation & derived constants
+  const isEnabled = value.enabled;
+  const policy = value.allowed_actions;
+  const policyLabels: Record<AutoViewInputSubTypes.allowed_actions, string> = {
+    all: "All Actions",
+    local_only: "Local Only",
+    selected: "Selected Actions",
   };
-  const allowedKey = value.allowed_actions ?? 'all';
-  const allowedActionsLabel = allowedActionLabels[allowedKey];
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. JSX composition
   return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">Repository Actions Permissions</h2>
-      <dl className="space-y-2 text-sm text-gray-700">
-        <div className="flex justify-between">
-          <dt>Status:</dt>
-          <dd className={`font-medium ${value.enabled ? 'text-green-600' : 'text-red-600'}`}>
-            {enabledLabel}
-          </dd>
-        </div>
-        <div className="flex justify-between">
-          <dt>Allowed Actions:</dt>
-          <dd className="font-medium text-gray-800">{allowedActionsLabel}</dd>
-        </div>
-        {value.allowed_actions === 'selected' && value.selected_actions_url && (
-          <div className="flex flex-col">
-            <dt className="text-xs text-gray-500">Selected Actions URL</dt>
-            <dd className="text-xs text-blue-600 truncate">{value.selected_actions_url}</dd>
-          </div>
+    <div className="w-full max-w-sm bg-white p-4 rounded-lg shadow-md">
+      {/* Enabled / Disabled Status */}
+      <div className="flex items-center">
+        {isEnabled ? (
+          <LucideReact.CheckCircle
+            aria-label="Actions enabled"
+            className="text-green-500"
+            size={20}
+          />
+        ) : (
+          <LucideReact.XCircle
+            aria-label="Actions disabled"
+            className="text-red-500"
+            size={20}
+          />
         )}
-      </dl>
+        <span
+          className={`ml-2 font-medium ${
+            isEnabled ? "text-gray-900" : "text-gray-500"
+          }`}
+        >
+          Actions {isEnabled ? "Enabled" : "Disabled"}
+        </span>
+      </div>
+
+      {/* Allowed Actions Policy */}
+      {isEnabled && policy && (
+        <div className="mt-4 flex items-center">
+          {policy === "all" && (
+            <LucideReact.ShieldCheck
+              aria-label="All actions allowed"
+              className="text-green-500"
+              size={16}
+            />
+          )}
+          {policy === "local_only" && (
+            <LucideReact.Shield
+              aria-label="Local-only actions allowed"
+              className="text-amber-500"
+              size={16}
+            />
+          )}
+          {policy === "selected" && (
+            <LucideReact.Shield
+              aria-label="Selected actions allowed"
+              className="text-blue-500"
+              size={16}
+            />
+          )}
+          <span className="ml-2 text-sm font-medium text-gray-800">
+            {policyLabels[policy]}
+          </span>
+        </div>
+      )}
+
+      {/* Selected Actions URL (when policy is 'selected') */}
+      {isEnabled && policy === "selected" && value.selected_actions_url && (
+        <div className="mt-2 flex items-start">
+          <LucideReact.Link
+            aria-label="Configuration URL"
+            className="text-gray-400 mt-0.5"
+            size={16}
+          />
+          <span className="ml-2 text-xs text-gray-500 truncate">
+            {value.selected_actions_url}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

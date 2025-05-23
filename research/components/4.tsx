@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingAdministrator {
         /**
@@ -11,7 +12,7 @@ export namespace AutoViewInputSubTypes {
          * and access to the customer, member and {@link IShoppingCitizen citizen}
          * information inversely.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Discriminant for the type of customer.
              *
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingMember {
         /**
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -89,7 +90,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Email address of member.
@@ -98,7 +99,7 @@ export namespace AutoViewInputSubTypes {
      * registered for one {@link IShoppingMember member}. If you don't have to
      * plan such multiple email addresses, just use only one.
     */
-    export type IShoppingMemberEmail = {
+    export interface IShoppingMemberEmail {
         /**
          * Primary Key.
          *
@@ -117,7 +118,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingCustomer {
         /**
          * Inverted customer information.
@@ -128,7 +129,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -148,7 +149,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title External user information
             */
-            external_user: null | any;
+            external_user: null | AutoViewInputSubTypes.IShoppingExternalUser;
             /**
              * Connection address.
              *
@@ -177,7 +178,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of the connection record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Channel information.
@@ -189,7 +190,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -214,8 +215,80 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
-    export type IShoppingExternalUser = any;
+    }
+    /**
+     * External user information.
+     *
+     * `IShoppingExternalUser` is an entity dsigned for when this system needs
+     * to connect with external services and welcome their users as
+     * {@link IShoppingCustomer customers} of this service.
+     *
+     * For reference, customers who connect from an external service must have
+     * this record, and the external service user is identified through the two
+     * attributes {@link application} and {@link uid}. If a customer connected
+     * from an external service completes
+     * {@link IShoppingCitizen real-name authentication} from this service, each
+     * time the external service user reconnects to this service and issues a
+     * new customer authentication token, real-name authentication begins with
+     * completed.
+     *
+     * And {@link password} is the password issued to the user by the external
+     * service system (the so-called permanent user authentication token), and
+     * is never the actual user password. However, for customers who entered the
+     * same application and uid as the current external system user, this is to
+     * determine whether to view this as a correct external system user or a
+     * violation.
+     *
+     * In addition, additional information received from external services can
+     * be recorded in the data field in JSON format.
+    */
+    export interface IShoppingExternalUser {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Citizen activation info.
+         *
+         * @title Citizen activation info
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Creation time of record.
+         *
+         * Another word, first time when the external user connected.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier key of external user from the external system.
+         *
+         * @title Identifier key of external user from the external system
+        */
+        uid: string;
+        /**
+         * Identifier code of the external service.
+         *
+         * It can be same with {@link IShoppingChannel.code} in common.
+         *
+         * @title Identifier code of the external service
+        */
+        application: string;
+        /**
+         * Nickname of external user in the external system.
+         *
+         * @title Nickname of external user in the external system
+        */
+        nickname: string;
+        /**
+         * Additional information about external user from the external
+         * system.
+        */
+        data: any;
+    }
     /**
      * Citizen verification information.
      *
@@ -231,7 +304,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, real name and mobile phone authentication information are
      * encrypted and stored.
     */
-    export type IShoppingCitizen = {
+    export interface IShoppingCitizen {
         /**
          * Primary Key.
          *
@@ -256,7 +329,7 @@ export namespace AutoViewInputSubTypes {
          * @title Real name, or equivalent nickname
         */
         name: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingAdministrator.IInvert;
 
@@ -265,106 +338,138 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingAdministrator.IInvert
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const adminSince = new Date(value.created_at).toLocaleString();
-  const memberSince = new Date(value.member.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const connectionSince = new Date(value.customer.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const emailList = value.member.emails.map((e) => e.value);
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+  const { member, customer, citizen, created_at: adminCreated } = value;
+  const memberJoined = formatDate(member.created_at);
+  const adminJoined = formatDate(adminCreated);
+  const citizenVerified = formatDate(citizen.created_at);
+  const customerConnected = formatDate(customer.created_at);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Administrator Details</h2>
-      <div className="space-y-6">
-        {/* General Administrator Info */}
-        <section>
-          <h3 className="text-lg font-medium text-gray-700 mb-2">Profile</h3>
-          <dl className="grid grid-cols-1 gap-y-2 sm:grid-cols-2 sm:gap-x-6">
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Full Name</dt>
-              <dd className="mt-1 text-sm text-gray-900">{value.citizen.name}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Mobile</dt>
-              <dd className="mt-1 text-sm text-gray-900">{value.citizen.mobile}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Joined Administrator</dt>
-              <dd className="mt-1 text-sm text-gray-900">{adminSince}</dd>
-            </div>
-          </dl>
-        </section>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header */}
+      <div className="flex items-center space-x-2">
+        <LucideReact.ShieldCheck className="text-blue-500" size={20} />
+        <h2 className="text-lg font-semibold text-gray-800">
+          Administrator Profile
+        </h2>
+      </div>
 
-        {/* Member Information */}
-        <section>
-          <h3 className="text-lg font-medium text-gray-700 mb-2">Membership</h3>
-          <dl className="grid grid-cols-1 gap-y-2 sm:grid-cols-2 sm:gap-x-6">
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Nickname</dt>
-              <dd className="mt-1 text-sm text-gray-900">{value.member.nickname}</dd>
+      {/* Member Information */}
+      <div className="bg-gray-50 p-3 rounded space-y-2">
+        <h3 className="flex items-center text-sm font-medium text-gray-700">
+          <LucideReact.User className="mr-1" size={16} />
+          Member
+        </h3>
+        <div className="text-gray-800 font-medium">{member.nickname}</div>
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Calendar className="mr-1" size={14} />
+          Joined {memberJoined}
+        </div>
+        <div className="mt-1 flex flex-wrap gap-2">
+          {member.emails.map((email) => (
+            <div
+              key={email.id}
+              className="flex items-center text-gray-600 text-sm"
+            >
+              <LucideReact.Mail className="mr-1" size={14} />
+              {email.value}
             </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Emails</dt>
-              <dd className="mt-1 flex flex-wrap gap-2">
-                {emailList.map((email) => (
-                  <span
-                    key={email}
-                    className="bg-gray-100 text-gray-800 text-xs font-mono px-2 py-1 rounded-lg"
-                  >
-                    {email}
-                  </span>
-                ))}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Member Since</dt>
-              <dd className="mt-1 text-sm text-gray-900">{memberSince}</dd>
-            </div>
-          </dl>
-        </section>
+          ))}
+        </div>
+      </div>
 
-        {/* Customer Connection Info */}
-        <section>
-          <h3 className="text-lg font-medium text-gray-700 mb-2">Connection</h3>
-          <dl className="grid grid-cols-1 gap-y-2 sm:grid-cols-2 sm:gap-x-6">
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Channel</dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                {value.customer.channel.name} ({value.customer.channel.code})
-              </dd>
+      {/* Citizen Verification */}
+      <div className="bg-gray-50 p-3 rounded space-y-2">
+        <h3 className="flex items-center text-sm font-medium text-gray-700">
+          <LucideReact.BadgeCheck className="mr-1" size={16} />
+          Verification
+        </h3>
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.User className="mr-1" size={14} />
+          {citizen.name}
+        </div>
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Phone className="mr-1" size={14} />
+          {citizen.mobile}
+        </div>
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Calendar className="mr-1" size={14} />
+          Verified {citizenVerified}
+        </div>
+      </div>
+
+      {/* Customer Connection */}
+      <div className="bg-gray-50 p-3 rounded space-y-2">
+        <h3 className="flex items-center text-sm font-medium text-gray-700">
+          <LucideReact.Globe className="mr-1" size={16} />
+          Customer
+        </h3>
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Tag className="mr-1" size={14} />
+          Channel: {customer.channel.name}
+        </div>
+        {customer.external_user && (
+          <div className="mt-1 space-y-1">
+            <div className="flex items-center text-gray-600 text-sm">
+              <LucideReact.Shield className="mr-1" size={14} />
+              External: {customer.external_user.application} @{" "}
+              {customer.external_user.uid}
             </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">IP Address</dt>
-              <dd className="mt-1 text-sm text-gray-900">{value.customer.ip}</dd>
-            </div>
-            <div className="sm:col-span-2">
-              <dt className="text-sm font-medium text-gray-500">URL</dt>
-              <dd className="mt-1 text-sm text-gray-900 overflow-hidden truncate">
-                {value.customer.href}
-              </dd>
-            </div>
-            {value.customer.referrer && (
-              <div className="sm:col-span-2">
-                <dt className="text-sm font-medium text-gray-500">Referrer</dt>
-                <dd className="mt-1 text-sm text-gray-900 overflow-hidden truncate">
-                  {value.customer.referrer}
-                </dd>
-              </div>
+            {customer.external_user.citizen && (
+              <>
+                <div className="flex items-center text-gray-600 text-sm">
+                  <LucideReact.User className="mr-1" size={14} />
+                  {customer.external_user.citizen.name}
+                </div>
+                <div className="flex items-center text-gray-600 text-sm">
+                  <LucideReact.Phone className="mr-1" size={14} />
+                  {customer.external_user.citizen.mobile}
+                </div>
+              </>
             )}
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Connected On</dt>
-              <dd className="mt-1 text-sm text-gray-900">{connectionSince}</dd>
-            </div>
-          </dl>
-        </section>
+          </div>
+        )}
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Link className="mr-1" size={14} />
+          {customer.href}
+        </div>
+        {customer.referrer && (
+          <div className="flex items-center text-gray-600 text-sm">
+            <LucideReact.Link className="mr-1" size={14} />
+            Referrer: {customer.referrer}
+          </div>
+        )}
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Wifi className="mr-1" size={14} />
+          IP: {customer.ip}
+        </div>
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Calendar className="mr-1" size={14} />
+          Connected {customerConnected}
+        </div>
+      </div>
+
+      {/* Administrator Details */}
+      <div className="bg-gray-50 p-3 rounded space-y-2">
+        <h3 className="flex items-center text-sm font-medium text-gray-700">
+          <LucideReact.UserCheck className="mr-1" size={16} />
+          Administrator
+        </h3>
+        <div className="flex items-center text-gray-600 text-sm">
+          <span className="font-medium text-gray-800 mr-1">Type:</span>
+          {value.type}
+        </div>
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Calendar className="mr-1" size={14} />
+          Signed Up {adminJoined}
+        </div>
       </div>
     </div>
   );

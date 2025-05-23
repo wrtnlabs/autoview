@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Private registry configuration for an organization
      *
      * @title Organization private registry
     */
-    export type org_private_registry_configuration = {
+    export interface org_private_registry_configuration {
         /**
          * The name of the private registry configuration.
         */
@@ -25,7 +26,7 @@ export namespace AutoViewInputSubTypes {
         visibility: "all" | "private" | "selected";
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.org_private_registry_configuration;
 
@@ -34,64 +35,96 @@ export type AutoViewInput = AutoViewInputSubTypes.org_private_registry_configura
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedCreatedAt = new Date(value.created_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  const {
+    name,
+    registry_type,
+    username,
+    visibility,
+    created_at,
+    updated_at,
+  } = value;
+
+  // Human-readable registry type
+  const registryTypeLabel = registry_type
+    .split('_')
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(' ');
+
+  // Format dates for display
+  const formattedCreatedAt = new Date(created_at).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
-  const formattedUpdatedAt = new Date(value.updated_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  const formattedUpdatedAt = new Date(updated_at).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
   });
-  const registryTypeLabel =
-    value.registry_type === "maven_repository"
-      ? "Maven Repository"
-      : value.registry_type;
-  const visibilityLabels: Record<AutoViewInput["visibility"], string> = {
-    all: "All Repositories",
-    private: "Private Repositories",
-    selected: "Selected Repositories",
-  };
-  const visibilityLabel = visibilityLabels[value.visibility] ?? value.visibility;
-  const authLabel = value.username ? value.username : "No Authentication";
+
+  // Visibility icon and label
+  let visibilityIcon: JSX.Element;
+  let visibilityLabel: string;
+  switch (visibility) {
+    case 'all':
+      visibilityIcon = <LucideReact.Users className="text-blue-500" size={16} />;
+      visibilityLabel = 'All';
+      break;
+    case 'private':
+      visibilityIcon = <LucideReact.Lock className="text-red-500" size={16} />;
+      visibilityLabel = 'Private';
+      break;
+    case 'selected':
+      visibilityIcon = <LucideReact.UserCheck className="text-green-500" size={16} />;
+      visibilityLabel = 'Selected';
+      break;
+    default:
+      visibilityIcon = <LucideReact.AlertTriangle className="text-gray-400" size={16} />;
+      visibilityLabel = visibility;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.name}
-        </h2>
-        <span className="mt-2 sm:mt-0 inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-          {registryTypeLabel}
-        </span>
-      </header>
-
-      <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-600">
-        <div>
-          <dt className="font-medium text-gray-700">Visibility</dt>
-          <dd>{visibilityLabel}</dd>
+    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6 flex flex-col gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-900 truncate">{name}</h2>
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.Database className="mr-1 text-gray-500" size={16} />
+          <span>{registryTypeLabel}</span>
         </div>
-        <div>
-          <dt className="font-medium text-gray-700">Authentication</dt>
-          <dd className="truncate">{authLabel}</dd>
+      </div>
+
+      {/* Details */}
+      <dl className="grid grid-cols-1 gap-3 text-gray-700 text-sm">
+        {/* Username */}
+        <div className="flex items-center">
+          <LucideReact.User className="mr-2 text-gray-500" size={16} />
+          <span>{username ?? <span className="italic text-gray-400">No user</span>}</span>
+        </div>
+
+        {/* Visibility */}
+        <div className="flex items-center">
+          {visibilityIcon}
+          <span className="ml-2">{visibilityLabel}</span>
+        </div>
+
+        {/* Created At */}
+        <div className="flex items-center">
+          <LucideReact.Calendar className="mr-2 text-gray-500" size={16} />
+          <span>Created: {formattedCreatedAt}</span>
+        </div>
+
+        {/* Updated At */}
+        <div className="flex items-center">
+          <LucideReact.Calendar className="mr-2 text-gray-500" size={16} />
+          <span>Updated: {formattedUpdatedAt}</span>
         </div>
       </dl>
-
-      <footer className="mt-4 border-t border-gray-200 pt-4 text-xs text-gray-500 grid grid-cols-1 sm:grid-cols-2 gap-y-2">
-        <div>
-          <span className="font-medium">Created:</span> {formattedCreatedAt}
-        </div>
-        <div>
-          <span className="font-medium">Updated:</span> {formattedUpdatedAt}
-        </div>
-      </footer>
     </div>
   );
 }

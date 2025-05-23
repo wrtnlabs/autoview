@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A migration.
      *
      * @title Migration
     */
-    export type migration = {
+    export interface migration {
         id: number & tags.Type<"int32">;
         owner: AutoViewInputSubTypes.nullable_simple_user;
         guid: string;
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
          * Exclude related items from being returned in the response in order to improve performance of the request. The array can include any of: `"repositories"`.
         */
         exclude?: string[];
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -66,7 +67,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -270,7 +271,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -289,7 +290,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -312,93 +313,138 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.migration;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdAt = new Date(value.created_at).toLocaleString();
-  const updatedAt = new Date(value.updated_at).toLocaleString();
-  const stateText = value.state.charAt(0).toUpperCase() + value.state.slice(1);
+  // 1. Data transformation and derived values
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+  const stateKey = value.state.toLowerCase();
+  // derive human-readable state label
+  const stateLabel = value.state
+    .split(/[_\s]/)
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join(" ");
+  // choose icon based on state
+  const stateIcon =
+    ["completed", "exported", "finished"].some((k) => stateKey.includes(k)) ? (
+      <LucideReact.CheckCircle
+        className="text-green-500"
+        size={20}
+        aria-label={stateLabel}
+      />
+    ) : ["failed", "error"].some((k) => stateKey.includes(k)) ? (
+      <LucideReact.AlertTriangle
+        className="text-red-500"
+        size={20}
+        aria-label={stateLabel}
+      />
+    ) : ["pending", "in_progress", "waiting"].some((k) => stateKey.includes(k)) ? (
+      <LucideReact.Clock
+        className="text-amber-500"
+        size={20}
+        aria-label={stateLabel}
+      />
+    ) : (
+      <LucideReact.Info
+        className="text-blue-500"
+        size={20}
+        aria-label={stateLabel}
+      />
+    );
+
+  const ownerLogin = value.owner?.login || "Unknown";
+  const avatarSrc =
+    value.owner?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      ownerLogin
+    )}&background=0D8ABC&color=fff`;
+
   const repoCount = value.repositories.length;
-  const displayedRepos = value.repositories.slice(0, 3).map((repo) => repo.name);
-  const extraRepoCount = repoCount > 3 ? repoCount - 3 : 0;
-  const ownerName = value.owner?.login ?? "Unknown Owner";
-  const ownerAvatar = value.owner?.avatar_url;
+  const displayedRepos = value.repositories.slice(0, 3).map((r) => r.name);
 
-  const flagLabels: Record<string, string> = {
-    lock_repositories: "Repositories Locked",
-    exclude_metadata: "Metadata Excluded",
-    exclude_git_data: "Git Data Excluded",
-    exclude_attachments: "Attachments Excluded",
-    exclude_releases: "Releases Excluded",
-    exclude_owner_projects: "Owner Projects Excluded",
-    org_metadata_only: "Org Metadata Only",
-  };
-
-  const flags = (Object.keys(flagLabels) as Array<keyof typeof flagLabels>)
-    .filter((key) => (value as any)[key])
-    .map((key) => flagLabels[key]);
-
-  if (value.archive_url) {
-    flags.push("Archive Available");
-  }
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. JSX structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="max-w-md w-full mx-auto bg-white shadow rounded-lg p-4 space-y-4">
+      {/* Header: Migration ID and State */}
+      <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-800">
           Migration #{value.id}
         </h2>
-        <span className="text-sm font-medium text-indigo-600">{stateText}</span>
+        <div className="flex items-center space-x-1">
+          {stateIcon}
+          <span className="text-gray-700 text-sm">{stateLabel}</span>
+        </div>
       </div>
 
-      {/* Owner and Timestamps */}
-      <div className="flex items-center space-x-4 text-sm text-gray-500">
-        {ownerAvatar && (
-          <img
-            src={ownerAvatar}
-            alt={`${ownerName} avatar`}
-            className="w-8 h-8 rounded-full"
-          />
+      {/* Owner Info */}
+      <div className="flex items-center space-x-3">
+        <img
+          src={avatarSrc}
+          alt="Owner Avatar"
+          className="h-10 w-10 rounded-full object-cover"
+          onError={(e) => {
+            const tgt = e.currentTarget as HTMLImageElement;
+            tgt.onerror = null;
+            tgt.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              ownerLogin
+            )}&background=0D8ABC&color=fff`;
+          }}
+        />
+        <div className="text-gray-700 font-medium">{ownerLogin}</div>
+      </div>
+
+      {/* Timestamps */}
+      <div className="flex flex-col space-y-1 text-gray-600 text-sm">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="inline mr-1" />
+          <span>Created:</span>
+          <span className="ml-1 font-medium text-gray-800">
+            {formatDate(value.created_at)}
+          </span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="inline mr-1" />
+          <span>Updated:</span>
+          <span className="ml-1 font-medium text-gray-800">
+            {formatDate(value.updated_at)}
+          </span>
+        </div>
+      </div>
+
+      {/* Repositories */}
+      <div className="space-y-2">
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Database size={16} className="inline mr-1" />
+          <span>Repositories:</span>
+          <span className="ml-1 font-medium text-gray-800">{repoCount}</span>
+        </div>
+        {repoCount > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {displayedRepos.map((name) => (
+              <span
+                key={name}
+                className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs truncate max-w-[8rem]"
+              >
+                {name}
+              </span>
+            ))}
+            {repoCount > displayedRepos.length && (
+              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                +{repoCount - displayedRepos.length} more
+              </span>
+            )}
+          </div>
         )}
-        <div className="flex flex-col">
-          <span>{ownerName}</span>
-          <span>Created: {createdAt}</span>
-          <span>Updated: {updatedAt}</span>
-        </div>
       </div>
-
-      {/* Repositories Summary */}
-      <div>
-        <p className="text-sm font-medium text-gray-700">
-          Repositories ({repoCount}):
-        </p>
-        <p className="text-sm text-gray-600">
-          {displayedRepos.join(", ")}
-          {extraRepoCount > 0 && ` and ${extraRepoCount} more`}
-        </p>
-      </div>
-
-      {/* Flags / Badges */}
-      {flags.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {flags.map((label) => (
-            <span
-              key={label}
-              className="inline-block bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded-full"
-            >
-              {label}
-            </span>
-          ))}
-        </div>
-      )}
     </div>
   );
 }

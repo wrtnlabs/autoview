@@ -1,4 +1,7 @@
-import { IAutoViewCompilerService } from "@autoview/interface";
+import {
+  IAutoViewCompilerResult,
+  IAutoViewCompilerService,
+} from "@autoview/interface";
 import { Driver, WorkerConnector } from "tgrid";
 import { is_node } from "tstl";
 
@@ -44,6 +47,32 @@ export class Agent implements AgentBase<Input, Output> {
       BOILERPLATE_ALIAS,
       BOILERPLATE_SUBTYPE_PREFIX,
     );
+
+    // compile the boilerplate first to detect if the schema is valid
+    const preCompileResult = await service.compileReactComponent(
+      boilerplate,
+      "",
+    );
+
+    if (preCompileResult.type === "failure") {
+      if (
+        preCompileResult.diagnostics.some((item) =>
+          item.messageText.includes("circularly references itself"),
+        )
+      ) {
+        // if the schema is circularly references itself,
+        // it means that the schema is invalid.
+        throw new Error(
+          "[INVALID SCHEMA] the schema is circularly references itself; unable to generate the code",
+        );
+      }
+
+      // otherwise, this is an internal issue.
+      throw new Error(
+        `[INTERNAL BUG] failed to compile the boilerplate!\n\nBoilerplate:\n${boilerplate}\n\nDiagnostics:\n${JSON.stringify(preCompileResult.diagnostics, null, 2)}`,
+      );
+    }
+
     const systemPrompt = prompt({
       boilerplate,
       pre_defined_components_info: "NO-COMPONENTS-SUPPORTED-YET",
@@ -51,6 +80,29 @@ export class Agent implements AgentBase<Input, Output> {
 
     const results = await new LlmProxy<Input, Output>()
       .withTextHandler(handleText(service))
+      .withPreGenerationCallback(
+        async (api, body, options, backoffStrategy) => {
+          if (!input.onPreLlmGeneration) {
+            return;
+          }
+
+          const result = await input.onPreLlmGeneration(
+            input.sessionId,
+            api,
+            body,
+            options,
+            backoffStrategy,
+          );
+
+          if (typeof result === "function") {
+            return async (completion) => {
+              await result(input.sessionId, completion);
+            };
+          }
+
+          return;
+        },
+      )
       .call(
         input,
         input.vendor.api,
@@ -122,12 +174,22 @@ function handleText(
         }
       }
 
+      const rendered = renderInterlacedDiagnostics(
+        boilerplate,
+        output.component,
+        result.diagnostics,
+      );
+
+      if (!rendered.includes("COMPILE ERROR(BELOW THIS LINE)")) {
+        // if the rendered code does not contain the error message,
+        // it means that our boilerplate is not compilable.
+        throw new Error(
+          `[INTERNAL BUG] boilerplate is not compilable!\n\nBoilerplate:\n${boilerplate}\n\nDiagnostics:\n${JSON.stringify(result.diagnostics, null, 2)}`,
+        );
+      }
+
       throw new LlmFailure(
-        `your code failed to compile; please review the error and try again:\n\n<error>\n${JSON.stringify(
-          result.diagnostics,
-          null,
-          2,
-        )}\n</error>`,
+        `your code failed to compile; please review the error and try again:\n\n<result>\n${rendered}\n</result>`,
       );
     }
 
@@ -176,4 +238,56 @@ function parseOutput(text: string): TextOutput {
   return {
     component: stripped,
   };
+}
+
+function renderInterlacedDiagnostics(
+  boilerplate: string,
+  componentTsCode: string,
+  diagnostics: IAutoViewCompilerResult.IDiagnostic[],
+): string {
+  diagnostics.sort((a, b) => (b.start ?? 0) - (a.start ?? 0));
+
+  const entireTsCode = `${boilerplate}\n\n${componentTsCode}`;
+  const lines = entireTsCode.split("\n");
+  const lineIndices: number[] = [0];
+
+  for (let i = 0; i < lines.length; ++i) {
+    lineIndices.push(lineIndices[i]! + (lines[i]!.length + 1));
+  }
+
+  function findLineIndex(index: number): number {
+    let low = 0;
+    let high = lineIndices.length - 1;
+
+    while (low !== high) {
+      const mid = Math.floor((low + high) / 2);
+      const midLineStartIndex = lineIndices[mid]!;
+      const midLineEndIndex = lineIndices[mid + 1]!;
+
+      if (midLineStartIndex <= index && index < midLineEndIndex) {
+        return mid;
+      }
+
+      if (index < midLineStartIndex) {
+        high = mid;
+      } else {
+        low = mid + 1;
+      }
+    }
+
+    return low;
+  }
+
+  for (const item of diagnostics) {
+    const lineIndex = findLineIndex(item.start!);
+    const indentCount = item.start! - lineIndices[lineIndex]!;
+    const line = lines[lineIndex]!;
+
+    lines[lineIndex] =
+      `${" ".repeat(indentCount)}/* COMPILE ERROR(BELOW THIS LINE): TS${item.code}: ${item.messageText} */\n${line}`;
+  }
+
+  const boilerplateLineCount = boilerplate.split("\n").length;
+
+  return lines.slice(boilerplateLineCount).join("\n").trim();
 }

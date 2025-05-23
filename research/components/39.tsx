@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingChannelCategory {
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -48,7 +49,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[];
@@ -58,60 +59,56 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory.IHier
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString("default", {
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
       year: "numeric",
-      month: "long",
+      month: "short",
       day: "numeric",
     });
 
-  // Recursive renderer for hierarchical categories
   const renderCategory = (
     cat: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical,
-    depth: number = 0,
-  ): React.ReactNode => {
-    const indent = depth * 16; // pixels
-    return (
+    level = 0
+  ): React.ReactNode => (
+    <div key={cat.id}>
       <div
-        key={cat.id}
-        style={{ marginLeft: indent }}
-        className="bg-white shadow rounded-lg p-4 mb-4"
+        className="flex items-center justify-between py-2"
+        style={{ marginLeft: level * 16 }}
       >
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-800 truncate">
+        <div className="flex items-center space-x-2 truncate">
+          <LucideReact.Tag className="text-blue-500" size={16} />
+          <span className="font-medium text-gray-800 truncate">
             {cat.name}
-          </h3>
-          {cat.children.length > 0 && (
-            <span className="text-sm text-gray-500">
-              {cat.children.length} sub
-              {cat.children.length === 1 ? "category" : "categories"}
-            </span>
-          )}
+          </span>
+          <span className="text-sm text-gray-500 truncate">
+            ({cat.code})
+          </span>
         </div>
-        <div className="mt-2 text-sm text-gray-600">
-          <span className="font-medium">Code:</span> {cat.code}
+        <div className="flex items-center space-x-1 text-sm text-gray-400">
+          <LucideReact.Calendar size={16} />
+          <span>{formatDate(cat.created_at)}</span>
         </div>
-        <div className="mt-1 text-sm text-gray-600">
-          <span className="font-medium">Created:</span> {formatDate(cat.created_at)}
-        </div>
-        {cat.children.length > 0 && (
-          <div className="mt-4 space-y-2">
-            {cat.children.map((child) => renderCategory(child, depth + 1))}
-          </div>
-        )}
       </div>
-    );
-  };
+      {cat.children &&
+        cat.children.length > 0 &&
+        cat.children.map((child) => renderCategory(child, level + 1))}
+    </div>
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!Array.isArray(value) || value.length === 0) {
+  if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No categories available.
+      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span>No categories available</span>
       </div>
     );
   }
 
   // 3. Return the React element.
-  return <div className="space-y-2">{value.map((cat) => renderCategory(cat))}</div>;
+  return (
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      {value.map((cat) => renderCategory(cat))}
+    </div>
+  );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Porter Author
      *
      * @title Porter Author
     */
-    export type porter_author = {
+    export interface porter_author {
         id: number & tags.Type<"int32">;
         remote_id: string;
         remote_name: string;
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
         name: string;
         url: string & tags.Format<"uri">;
         import_url: string & tags.Format<"uri">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.porter_author[];
 
@@ -22,58 +23,58 @@ export type AutoViewInput = AutoViewInputSubTypes.porter_author[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation: count the number of authors
-  const count = value.length;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const authors = value;
+  const authorCount = authors.length;
 
-  // 2. Handle empty state
-  if (count === 0) {
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (authorCount === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-sm">
-        <p className="text-center text-gray-500">No authors available.</p>
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={24} className="text-gray-300" />
+        <span className="mt-2 text-sm">No authors available.</span>
       </div>
     );
   }
 
-  // 3. Compose the visual structure using JSX and Tailwind CSS
+  // 3. Return the React element.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Header with author count */}
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Authors ({count})
-      </h2>
-
-      {/* List of authors */}
-      <ul className="divide-y divide-gray-100">
-        {value.map((author) => (
-          <li
-            key={author.id}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3"
+      <div className="flex items-center mb-4">
+        <LucideReact.Users size={20} className="text-gray-600" />
+        <span className="ml-2 text-lg font-semibold text-gray-800">
+          {`Authors (${authorCount})`}
+        </span>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {authors.map((author) => (
+          <div
+            key={author.remote_id}
+            className="p-4 border border-gray-200 rounded-lg space-y-2"
           >
-            {/* Main author info */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {author.name}
-              </p>
-              <p className="mt-1 text-sm text-gray-500 truncate">
-                Platform: {author.remote_name}
-              </p>
-              <p className="mt-1 text-sm text-gray-500 truncate">
-                {author.email}
-              </p>
+            <div className="flex items-center text-gray-800">
+              <LucideReact.User size={16} className="text-gray-500" />
+              <span className="ml-2 font-medium truncate">{author.name}</span>
             </div>
-
-            {/* URL info */}
-            <div className="mt-2 sm:mt-0 sm:ml-6 flex-shrink-0 text-sm text-gray-500 space-y-1">
-              <p className="truncate">
-                URL: {author.url}
-              </p>
-              <p className="truncate">
-                Import URL: {author.import_url}
-              </p>
+            <div className="flex items-center text-gray-600">
+              <LucideReact.Globe size={16} className="text-gray-400" />
+              <span className="ml-2 truncate">{author.remote_name}</span>
             </div>
-          </li>
+            <div className="flex items-center text-gray-600">
+              <LucideReact.Mail size={16} className="text-gray-400" />
+              <span className="ml-2 truncate">{author.email}</span>
+            </div>
+            <div className="flex items-center text-gray-600">
+              <LucideReact.Link size={16} className="text-gray-400" />
+              <span className="ml-2 truncate">{author.url}</span>
+            </div>
+            <div className="flex items-center text-gray-600">
+              <LucideReact.ExternalLink size={16} className="text-gray-400" />
+              <span className="ml-2 truncate">{author.import_url}</span>
+            </div>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

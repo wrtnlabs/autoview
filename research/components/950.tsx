@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A unique encryption key
      *
      * @title GPG Key
     */
-    export type gpg_key = {
+    export interface gpg_key {
         id: number & tags.Type<"int32">;
         name?: string | null;
         primary_key_id: (number & tags.Type<"int32">) | null;
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
         expires_at: (string & tags.Format<"date-time">) | null;
         revoked: boolean;
         raw_key: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.gpg_key;
 
@@ -52,108 +53,106 @@ export type AutoViewInput = AutoViewInputSubTypes.gpg_key;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const formattedCreated = createdDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const expiresDate = value.expires_at ? new Date(value.expires_at) : null;
-  const formattedExpires = expiresDate
-    ? expiresDate.toLocaleString(undefined, { year: "numeric", month: "long", day: "numeric" })
-    : "Never";
-  const now = new Date();
-  const isExpired = expiresDate ? expiresDate < now : false;
-  const statusLabel = value.revoked ? "Revoked" : isExpired ? "Expired" : "Active";
-  const statusColor = value.revoked || isExpired
-    ? "bg-red-100 text-red-800"
-    : "bg-green-100 text-green-800";
-  const keyIdShort = value.key_id.slice(-16).toUpperCase();
+  const displayName = value.name ?? value.key_id;
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  const createdAt = formatDate(value.created_at);
+  const expiresAt = value.expires_at ? formatDate(value.expires_at) : "Never";
+  const status = value.revoked ? "Revoked" : "Active";
+  const statusIcon = value.revoked ? (
+    <LucideReact.XCircle size={16} className="text-red-500" aria-label="Revoked" />
+  ) : (
+    <LucideReact.CheckCircle size={16} className="text-green-500" aria-label="Active" />
+  );
   const capabilities = [
-    { name: "Sign", enabled: value.can_sign },
-    { name: "Encrypt Comm", enabled: value.can_encrypt_comms },
-    { name: "Encrypt Storage", enabled: value.can_encrypt_storage },
-    { name: "Certify", enabled: value.can_certify },
-  ];
-  const subkeyCount = value.subkeys?.length ?? 0;
-  const emailList = value.emails.filter((e) => typeof e.email === "string");
+    { label: "Signing", enabled: value.can_sign, icon: <LucideReact.Pen size={12} className="text-blue-500" /> },
+    { label: "Encrypt Comm", enabled: value.can_encrypt_comms, icon: <LucideReact.Lock size={12} className="text-indigo-500" /> },
+    { label: "Encrypt Storage", enabled: value.can_encrypt_storage, icon: <LucideReact.Shield size={12} className="text-indigo-500" /> },
+    { label: "Certify", enabled: value.can_certify, icon: <LucideReact.BadgeCheck size={12} className="text-green-500" /> },
+  ].filter((cap) => cap.enabled);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800">
-            {value.name || "GPG Key"}
-          </h2>
-          <p className="text-sm text-gray-500">
-            Key ID: <span className="font-mono text-gray-700">{keyIdShort}</span>
-          </p>
+    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md text-gray-800">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LucideReact.Key size={20} className="text-gray-600" aria-hidden />
+          <h2 className="text-lg font-semibold truncate">{displayName}</h2>
         </div>
-        <span className={`px-2 py-1 text-xs font-medium rounded ${statusColor}`}>
-          {statusLabel}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div>
-          <p className="text-xs text-gray-500">Created</p>
-          <p className="text-sm text-gray-700">{formattedCreated}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Expires</p>
-          <p className="text-sm text-gray-700">{formattedExpires}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Subkeys</p>
-          <p className="text-sm text-gray-700">{subkeyCount}</p>
+        <div className="flex items-center gap-1">
+          {statusIcon}
+          <span className="text-sm font-medium">{status}</span>
         </div>
       </div>
 
-      <div>
-        <p className="text-sm text-gray-600 font-medium mb-2">Capabilities</p>
-        <div className="flex flex-wrap gap-2">
-          {capabilities.map((cap) => (
-            <span
-              key={cap.name}
-              className={`px-2 py-1 text-xs font-medium rounded ${
-                cap.enabled ? "bg-green-50 text-green-800" : "bg-gray-100 text-gray-500"
-              }`}
-            >
-              {cap.name}
-            </span>
-          ))}
+      {/* Dates */}
+      <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" aria-hidden />
+          <span>Created: {createdAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.CalendarOff size={16} className="text-gray-400" aria-hidden />
+          <span>Expires: {expiresAt}</span>
         </div>
       </div>
 
-      <div>
-        <p className="text-sm text-gray-600 font-medium mb-2">Emails</p>
-        <ul className="space-y-1">
-          {emailList.map((e, i) => (
-            <li key={i} className="flex items-center text-sm text-gray-700">
-              <span className="truncate">{e.email}</span>
-              {e.verified ? (
-                <svg
-                  className="w-4 h-4 ml-2 text-green-500 flex-shrink-0"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M13.78 3.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 8.59a.75.75 0 111.06-1.06L6 10.25l6.72-6.72a.75.75 0 011.06 0z" />
-                </svg>
-              ) : (
-                <svg
-                  className="w-4 h-4 ml-2 text-red-500 flex-shrink-0"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z" />
-                </svg>
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Emails */}
+      {value.emails.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700">Emails</h3>
+          <ul className="mt-2 space-y-1 text-sm">
+            {value.emails.map((e, idx) => (
+              <li key={idx} className="flex items-center gap-2">
+                <LucideReact.Mail size={16} className="text-gray-400" aria-hidden />
+                <span className="truncate">{e.email ?? "—"}</span>
+                {e.verified && (
+                  <LucideReact.BadgeCheck
+                    size={16}
+                    className="text-blue-500"
+                    aria-label="Verified"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Subkeys */}
+      {value.subkeys.length > 0 && (
+        <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+          <LucideReact.Key size={16} className="text-gray-400" aria-hidden />
+          <span>
+            {value.subkeys.length} subkey{value.subkeys.length > 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
+
+      {/* Capabilities */}
+      {capabilities.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700">Capabilities</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {capabilities.map((cap) => (
+              <span
+                key={cap.label}
+                className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
+              >
+                {cap.icon}
+                <span>{cap.label}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
+  // 3. Return the React element.
+  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

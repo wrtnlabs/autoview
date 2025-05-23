@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Projects are a way to organize columns and cards of work.
      *
      * @title Project
     */
-    export type project = {
+    export interface project {
         owner_url: string & tags.Format<"uri">;
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
@@ -37,7 +38,7 @@ export namespace AutoViewInputSubTypes {
          * Whether or not this project can be seen by everyone. Only present if owner is an organization.
         */
         "private"?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -75,82 +76,106 @@ export type AutoViewInput = AutoViewInputSubTypes.project;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusLabel = value.state === "open" ? "Open" : "Closed";
-  const statusColor =
+  const projectState =
     value.state === "open"
-      ? "bg-green-100 text-green-800"
-      : "bg-red-100 text-red-800";
+      ? { label: "Open", icon: <LucideReact.CheckCircle className="text-green-500" size={16} /> }
+      : { label: "Closed", icon: <LucideReact.XCircle className="text-red-500" size={16} /> };
 
-  const isPrivate = value["private"] === true;
-  const permissionLabel = value.organization_permission
-    ? `${value.organization_permission.charAt(0).toUpperCase()}${value.organization_permission.slice(1)}`
-    : "";
+  const privacy =
+    value["private"]
+      ? { label: "Private", icon: <LucideReact.Lock className="text-gray-500" size={16} /> }
+      : { label: "Public", icon: <LucideReact.Unlock className="text-gray-500" size={16} /> };
 
-  const createdDate = new Intl.DateTimeFormat("en-US", {
+  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
-    day: "numeric"
-  }).format(new Date(value.created_at));
-
-  const updatedDate = new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+  });
+  const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
-    day: "numeric"
-  }).format(new Date(value.updated_at));
+    day: "numeric",
+  });
 
-  const creatorName = value.creator
-    ? value.creator.name || value.creator.login
-    : "Unknown";
-  const creatorAvatar = value.creator?.avatar_url || "";
-
-  const bodyPreview = value.body
-    ? value.body.length > 200
-      ? value.body.slice(0, 200).trim() + "…"
-      : value.body
-    : "No description provided.";
+  const creator = value.creator;
+  const creatorName = creator?.name ?? creator?.login ?? "Unknown";
+  const avatarUrl = creator?.avatar_url;
+  const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    creatorName,
+  )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-start">
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div className="flex items-center">
+          <h2 className="text-lg font-semibold text-gray-800">
             {value.name}
+            <span className="ml-2 text-sm text-gray-500">#{value.number}</span>
           </h2>
-          <div className="mt-2 flex flex-wrap gap-2 text-xs">
-            <span className={`px-2 py-1 rounded ${statusColor}`}>
-              {statusLabel}
+          {value.organization_permission && (
+            <span className="ml-3 px-2 py-0.5 text-xs font-medium text-indigo-800 bg-indigo-100 rounded">
+              {value.organization_permission.charAt(0).toUpperCase() +
+                value.organization_permission.slice(1)}
             </span>
-            {isPrivate && (
-              <span className="px-2 py-1 rounded bg-gray-200 text-gray-800">
-                Private
-              </span>
-            )}
-            {permissionLabel && (
-              <span className="px-2 py-1 rounded bg-blue-100 text-blue-800">
-                {permissionLabel}
-              </span>
-            )}
+          )}
+        </div>
+        <div className="mt-2 sm:mt-0 flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            {projectState.icon}
+            <span className="text-sm text-gray-600">{projectState.label}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {privacy.icon}
+            <span className="text-sm text-gray-600">{privacy.label}</span>
           </div>
         </div>
-        {creatorAvatar && (
-          <img
-            src={creatorAvatar}
-            alt={`${creatorName} avatar`}
-            className="w-10 h-10 rounded-full ml-4 flex-shrink-0"
-          />
-        )}
       </div>
 
-      <p className="mt-4 text-sm text-gray-600 line-clamp-3">
-        {bodyPreview}
+      <p className="mt-3 text-gray-700 line-clamp-3">
+        {value.body ?? "No description provided."}
       </p>
 
-      <div className="mt-4 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
-        <span className="whitespace-nowrap">#{value.number}</span>
-        <span className="whitespace-nowrap">Created: {createdDate}</span>
-        <span className="whitespace-nowrap">Updated: {updatedDate}</span>
-        <span className="whitespace-nowrap">By: {creatorName}</span>
+      <div className="mt-4 border-t border-gray-200 pt-4 flex flex-col sm:flex-row sm:justify-between sm:items-center text-sm text-gray-600">
+        <div className="flex items-center gap-2">
+          {avatarUrl ? (
+            <img
+              src={avatarUrl}
+              alt={creatorName}
+              className="w-6 h-6 rounded-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = placeholderAvatar;
+              }}
+            />
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+              <LucideReact.User className="text-gray-400" size={16} />
+            </div>
+          )}
+          <span>{creatorName}</span>
+        </div>
+        <div className="mt-2 sm:mt-0 flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar className="text-gray-400" size={16} />
+            <span>Created: {createdDate}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar className="text-gray-400" size={16} />
+            <span>Updated: {updatedDate}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <a
+          href={value.html_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center text-blue-600 hover:underline"
+        >
+          <LucideReact.Link size={16} className="mr-1" />
+          View on GitHub
+        </a>
       </div>
     </div>
   );

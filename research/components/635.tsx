@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Protected Branch Pull Request Review
      *
      * @title Protected Branch Pull Request Review
     */
-    export type protected_branch_pull_request_review = {
+    export interface protected_branch_pull_request_review {
         url?: string & tags.Format<"uri">;
         dismissal_restrictions?: {
             /**
@@ -49,13 +50,13 @@ export namespace AutoViewInputSubTypes {
          * Whether the most recent push must be approved by someone other than the person who pushed it.
         */
         require_last_push_approval?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -78,13 +79,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -105,7 +106,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -120,7 +121,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -166,7 +167,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -194,7 +195,38 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.protected_branch_pull_request_review;
 
@@ -203,182 +235,172 @@ export type AutoViewInput = AutoViewInputSubTypes.protected_branch_pull_request_
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    dismiss_stale_reviews,
-    require_code_owner_reviews,
-    required_approving_review_count,
-    require_last_push_approval,
-    dismissal_restrictions,
-    bypass_pull_request_allowances,
-  } = value;
-
-  const approvalsCount = required_approving_review_count ?? 1;
-  const yesNo = (flag: boolean | undefined) => (flag ? "Yes" : "No");
-
-  const drUsers = dismissal_restrictions?.users ?? [];
-  const drTeams = dismissal_restrictions?.teams ?? [];
-  const drApps = dismissal_restrictions?.apps ?? [];
-
-  const baUsers = bypass_pull_request_allowances?.users ?? [];
-  const baTeams = bypass_pull_request_allowances?.teams ?? [];
-  const baApps = bypass_pull_request_allowances?.apps ?? [];
+  const dismissalUsers = value.dismissal_restrictions?.users ?? [];
+  const dismissalTeams = value.dismissal_restrictions?.teams ?? [];
+  const dismissalAppsRaw = value.dismissal_restrictions?.apps ?? [];
+  const dismissalApps = dismissalAppsRaw.filter(
+    (app): app is NonNullable<typeof app> => app !== null,
+  );
+  const bypassUsers = value.bypass_pull_request_allowances?.users ?? [];
+  const bypassTeams = value.bypass_pull_request_allowances?.teams ?? [];
+  const bypassAppsRaw = value.bypass_pull_request_allowances?.apps ?? [];
+  const bypassApps = bypassAppsRaw.filter(
+    (app): app is NonNullable<typeof app> => app !== null,
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6 max-w-md mx-auto">
-      <h2 className="text-xl font-semibold text-gray-800">
-        Protected Branch Pull Request Review
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-6 text-gray-700">
+      <h2 className="flex items-center text-xl font-semibold text-gray-900 gap-2">
+        <LucideReact.GitPullRequest size={20} className="text-gray-600" />
+        Pull Request Review Settings
       </h2>
-
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-        <div>
-          <dt className="text-sm font-medium text-gray-600">Dismiss Stale Reviews</dt>
-          <dd className="mt-1 text-gray-900">{yesNo(dismiss_stale_reviews)}</dd>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex items-center">
+          {value.dismiss_stale_reviews ? (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          ) : (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          )}
+          <span className="ml-2">Dismiss stale reviews</span>
         </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-600">Require Code Owner Reviews</dt>
-          <dd className="mt-1 text-gray-900">{yesNo(require_code_owner_reviews)}</dd>
+        <div className="flex items-center">
+          {value.require_code_owner_reviews ? (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          ) : (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          )}
+          <span className="ml-2">Require code owner reviews</span>
         </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-600">Required Approvals</dt>
-          <dd className="mt-1 text-gray-900">{approvalsCount}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-600">Require Last Push Approval</dt>
-          <dd className="mt-1 text-gray-900">{yesNo(require_last_push_approval)}</dd>
-        </div>
-      </dl>
-
-      {/* Bypass Pull Request Allowances */}
-      {(baUsers.length > 0 || baTeams.length > 0 || baApps.length > 0) && (
-        <section className="space-y-2">
-          <h3 className="text-lg font-medium text-gray-700">
-            Bypass Pull Request Allowances
-          </h3>
-          <div className="space-y-2">
-            {baUsers.length > 0 && (
-              <div>
-                <dt className="text-sm font-medium text-gray-600">Users</dt>
-                <dd className="mt-1 flex flex-wrap gap-2">
-                  {baUsers.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center space-x-2 bg-gray-50 px-2 py-1 rounded"
-                    >
-                      <img
-                        src={user.avatar_url}
-                        alt={user.login}
-                        className="w-5 h-5 rounded-full"
-                      />
-                      <span className="text-sm text-gray-800 truncate max-w-xs">
-                        {user.login}
-                      </span>
-                    </div>
-                  ))}
-                </dd>
-              </div>
-            )}
-            {baTeams.length > 0 && (
-              <div>
-                <dt className="text-sm font-medium text-gray-600">Teams</dt>
-                <dd className="mt-1 flex flex-wrap gap-2">
-                  {baTeams.map((team) => (
-                    <span
-                      key={team.id}
-                      className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
-                    >
-                      {team.name}
-                    </span>
-                  ))}
-                </dd>
-              </div>
-            )}
-            {baApps.length > 0 && (
-              <div>
-                <dt className="text-sm font-medium text-gray-600">Apps</dt>
-                <dd className="mt-1 flex flex-wrap gap-2">
-                  {baApps.map(
-                    (app, idx) =>
-                      app && (
-                        <span
-                          key={app.id ?? idx}
-                          className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded"
-                        >
-                          {app.name}
-                        </span>
-                      )
-                  )}
-                </dd>
-              </div>
-            )}
+        {typeof value.required_approving_review_count === 'number' && (
+          <div className="flex items-center">
+            <LucideReact.Users size={16} className="text-gray-600" />
+            <span className="ml-2">
+              Required approving reviews: {value.required_approving_review_count}
+            </span>
           </div>
-        </section>
-      )}
-
-      {/* Dismissal Restrictions */}
-      {(drUsers.length > 0 || drTeams.length > 0 || drApps.length > 0) && (
-        <section className="space-y-2">
-          <h3 className="text-lg font-medium text-gray-700">
-            Dismissal Restrictions
-          </h3>
-          <div className="space-y-2">
-            {drUsers.length > 0 && (
-              <div>
-                <dt className="text-sm font-medium text-gray-600">Users</dt>
-                <dd className="mt-1 flex flex-wrap gap-2">
-                  {drUsers.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center space-x-2 bg-gray-50 px-2 py-1 rounded"
-                    >
-                      <img
-                        src={user.avatar_url}
-                        alt={user.login}
-                        className="w-5 h-5 rounded-full"
-                      />
-                      <span className="text-sm text-gray-800 truncate max-w-xs">
-                        {user.login}
-                      </span>
-                    </div>
-                  ))}
-                </dd>
-              </div>
-            )}
-            {drTeams.length > 0 && (
-              <div>
-                <dt className="text-sm font-medium text-gray-600">Teams</dt>
-                <dd className="mt-1 flex flex-wrap gap-2">
-                  {drTeams.map((team) => (
-                    <span
-                      key={team.id}
-                      className="inline-block px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
-                    >
-                      {team.name}
-                    </span>
-                  ))}
-                </dd>
-              </div>
-            )}
-            {drApps.length > 0 && (
-              <div>
-                <dt className="text-sm font-medium text-gray-600">Apps</dt>
-                <dd className="mt-1 flex flex-wrap gap-2">
-                  {drApps.map(
-                    (app, idx) =>
-                      app && (
-                        <span
-                          key={app.id ?? idx}
-                          className="inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded"
-                        >
-                          {app.name}
-                        </span>
-                      )
-                  )}
-                </dd>
-              </div>
-            )}
-          </div>
-        </section>
+        )}
+        <div className="flex items-center">
+          {value.require_last_push_approval ? (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          ) : (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          )}
+          <span className="ml-2">Require last push approval</span>
+        </div>
+      </div>
+      <div>
+        <h3 className="text-sm font-medium text-gray-900">Dismissal Restrictions</h3>
+        {dismissalUsers.length + dismissalTeams.length + dismissalApps.length > 0 ? (
+          <ul className="mt-2 space-y-2 max-h-44 overflow-y-auto">
+            {dismissalUsers.map((user) => (
+              <li key={user.id} className="flex items-center gap-2">
+                <img
+                  src={user.avatar_url}
+                  alt={user.login}
+                  className="w-6 h-6 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user.login,
+                    )}&background=cccccc&color=ffffff`;
+                  }}
+                />
+                <a
+                  href={user.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline truncate"
+                >
+                  {user.login}
+                </a>
+              </li>
+            ))}
+            {dismissalTeams.map((team) => (
+              <li key={team.id} className="flex items-center gap-2">
+                <LucideReact.Users size={16} className="text-gray-500" />
+                <span className="truncate">{team.name}</span>
+              </li>
+            ))}
+            {dismissalApps.map((app) => (
+              <li key={app.id} className="flex items-center gap-2">
+                <LucideReact.Layers size={16} className="text-gray-500" />
+                <a
+                  href={app.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline truncate"
+                >
+                  {app.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="mt-2 text-sm text-gray-500 italic">None specified</div>
+        )}
+      </div>
+      <div>
+        <h3 className="text-sm font-medium text-gray-900">Bypass Approvals</h3>
+        {bypassUsers.length + bypassTeams.length + bypassApps.length > 0 ? (
+          <ul className="mt-2 space-y-2 max-h-44 overflow-y-auto">
+            {bypassUsers.map((user) => (
+              <li key={user.id} className="flex items-center gap-2">
+                <img
+                  src={user.avatar_url}
+                  alt={user.login}
+                  className="w-6 h-6 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user.login,
+                    )}&background=cccccc&color=ffffff`;
+                  }}
+                />
+                <a
+                  href={user.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline truncate"
+                >
+                  {user.login}
+                </a>
+              </li>
+            ))}
+            {bypassTeams.map((team) => (
+              <li key={team.id} className="flex items-center gap-2">
+                <LucideReact.Users size={16} className="text-gray-500" />
+                <span className="truncate">{team.name}</span>
+              </li>
+            ))}
+            {bypassApps.map((app) => (
+              <li key={app.id} className="flex items-center gap-2">
+                <LucideReact.Layers size={16} className="text-gray-500" />
+                <a
+                  href={app.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline truncate"
+                >
+                  {app.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="mt-2 text-sm text-gray-500 italic">None specified</div>
+        )}
+      </div>
+      {value.url && (
+        <div className="flex items-center text-sm text-gray-500">
+          <LucideReact.Link size={16} className="text-gray-500" />
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 hover:underline truncate break-all"
+          >
+            {value.url}
+          </a>
+        </div>
       )}
     </div>
   );

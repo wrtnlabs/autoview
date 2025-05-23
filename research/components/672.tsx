@@ -1,10 +1,11 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type code_scanning_autofix = {
+    export interface code_scanning_autofix {
         status: AutoViewInputSubTypes.code_scanning_autofix_status;
         description: AutoViewInputSubTypes.code_scanning_autofix_description;
         started_at: AutoViewInputSubTypes.code_scanning_autofix_started_at;
-    };
+    }
     /**
      * The status of an autofix.
     */
@@ -25,52 +26,67 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_autofix;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusConfig: Record<AutoViewInputSubTypes.code_scanning_autofix_status, { label: string; color: string }> = {
-    pending:  { label: 'Pending',  color: 'bg-yellow-100 text-yellow-800' },
-    success:  { label: 'Success',  color: 'bg-green-100 text-green-800' },
-    error:    { label: 'Error',    color: 'bg-red-100 text-red-800' },
-    outdated: { label: 'Outdated', color: 'bg-gray-100 text-gray-800' },
+  const statusMap: Record<AutoViewInputSubTypes.code_scanning_autofix_status, {
+    icon: React.ReactNode;
+    label: string;
+    textClass: string;
+  }> = {
+    pending: {
+      icon: <LucideReact.Clock className="text-amber-500" size={16} aria-label="Pending" />,
+      label: "Pending",
+      textClass: "text-amber-600",
+    },
+    error: {
+      icon: <LucideReact.AlertTriangle className="text-red-500" size={16} aria-label="Error" />,
+      label: "Error",
+      textClass: "text-red-600",
+    },
+    success: {
+      icon: <LucideReact.CheckCircle className="text-green-500" size={16} aria-label="Success" />,
+      label: "Success",
+      textClass: "text-green-600",
+    },
+    outdated: {
+      icon: <LucideReact.RefreshCw className="text-gray-500" size={16} aria-label="Outdated" />,
+      label: "Outdated",
+      textClass: "text-gray-600",
+    },
   };
-  const { label: statusLabel, color: statusColor } = statusConfig[value.status];
+
+  const { icon: statusIcon, label: statusLabel, textClass: statusTextClass } = statusMap[value.status];
 
   const startedDate = new Date(value.started_at);
-  const formattedDate = startedDate.toLocaleString(undefined, {
-    year: 'numeric', month: 'short', day: 'numeric',
-    hour: 'numeric', minute: 'numeric'
-  });
-
-  const now = Date.now();
-  const diff = now - startedDate.getTime();
-  let relativeTime: string;
-  if (diff < 60_000) {
-    relativeTime = 'Just now';
-  } else if (diff < 3_600_000) {
-    const m = Math.floor(diff / 60_000);
-    relativeTime = `${m} minute${m !== 1 ? 's' : ''} ago`;
-  } else if (diff < 86_400_000) {
-    const h = Math.floor(diff / 3_600_000);
-    relativeTime = `${h} hour${h !== 1 ? 's' : ''} ago`;
-  } else {
-    const d = Math.floor(diff / 86_400_000);
-    relativeTime = `${d} day${d !== 1 ? 's' : ''} ago`;
-  }
-
-  const description = value.description ?? 'No description available.';
+  const formattedDate = !isNaN(startedDate.getTime())
+    ? startedDate.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : value.started_at;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-2">
-        <span className={`px-2 py-1 text-sm font-medium rounded ${statusColor}`}>
-          {statusLabel}
-        </span>
-        <time className="text-xs text-gray-500" dateTime={value.started_at} title={formattedDate}>
-          {relativeTime}
-        </time>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Status */}
+      <div className="flex items-center mb-2">
+        {statusIcon}
+        <span className={`ml-2 font-medium ${statusTextClass}`}>{statusLabel}</span>
       </div>
-      <p className="text-gray-700 text-sm line-clamp-2">
-        {description}
-      </p>
+
+      {/* Started At */}
+      <div className="flex items-center text-sm text-gray-500 mb-4">
+        <LucideReact.Calendar size={16} className="flex-shrink-0" aria-label="Started at" />
+        <time className="ml-1">{formattedDate}</time>
+      </div>
+
+      {/* Description */}
+      {value.description ? (
+        <p className="text-gray-700 text-sm line-clamp-3">{value.description}</p>
+      ) : (
+        <p className="text-gray-500 italic text-sm">No description provided.</p>
+      )}
     </div>
   );
 }

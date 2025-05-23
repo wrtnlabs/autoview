@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A reply to a discussion within a team.
      *
      * @title Team Discussion Comment
     */
-    export type team_discussion_comment = {
+    export interface team_discussion_comment {
         author: AutoViewInputSubTypes.nullable_simple_user;
         /**
          * The main text of the comment.
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         url: string & tags.Format<"uri">;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_discussion_comment;
 
@@ -82,85 +83,96 @@ export type AutoViewInput = AutoViewInputSubTypes.team_discussion_comment;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { author, body_html, created_at, last_edited_at, reactions } = value;
-  const displayName = author
-    ? author.name?.trim() || author.login
-    : "Unknown User";
-  const avatarUrl = author?.avatar_url || "";
-  const formattedCreated = new Date(created_at).toLocaleDateString(
-    undefined,
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-  );
-  const formattedEdited = last_edited_at
-    ? new Date(last_edited_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+  const createdDate = new Date(value.created_at);
+  const formattedCreatedAt = createdDate.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+
+  const editedDate = value.last_edited_at ? new Date(value.last_edited_at) : null;
+  const formattedEditedAt = editedDate
+    ? editedDate.toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
       })
     : null;
 
-  // Build a filtered list of reactions with emojis
-  let reactionData: { emoji: string; count: number }[] = [];
-  if (reactions) {
-    reactionData = [
-      { emoji: "👍", count: reactions["+1"] },
-      { emoji: "👎", count: reactions["-1"] },
-      { emoji: "😄", count: reactions.laugh },
-      { emoji: "😕", count: reactions.confused },
-      { emoji: "❤️", count: reactions.heart },
-      { emoji: "🎉", count: reactions.hooray },
-      { emoji: "👀", count: reactions.eyes },
-      { emoji: "🚀", count: reactions.rocket },
-    ].filter((r) => r.count > 0);
-  }
+  const author = value.author;
+  const authorName = author ? author.name ?? author.login : 'Unknown';
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    authorName,
+  )}&background=0D8ABC&color=fff`;
+  const avatarUrl = author?.avatar_url ?? avatarPlaceholder;
+
+  // Prepare reactions if available
+  const reactions = value.reactions;
+  type ReactionItem = { key: string; icon: React.ReactNode; count: number; ariaLabel: string };
+  const reactionItems: ReactionItem[] = reactions
+    ? [
+        { key: '+1', icon: <LucideReact.ThumbsUp size={16} />, count: reactions['+1'], ariaLabel: 'Thumbs up' },
+        { key: '-1', icon: <LucideReact.ThumbsDown size={16} />, count: reactions['-1'], ariaLabel: 'Thumbs down' },
+        { key: 'laugh', icon: <LucideReact.Smile size={16} className="text-green-500" />, count: reactions.laugh, ariaLabel: 'Laugh' },
+        { key: 'confused', icon: <span className="text-gray-600">😕</span>, count: reactions.confused, ariaLabel: 'Confused' },
+        { key: 'heart', icon: <LucideReact.Heart size={16} className="text-red-500" />, count: reactions.heart, ariaLabel: 'Heart' },
+        { key: 'hooray', icon: <span className="text-amber-500">🎉</span>, count: reactions.hooray, ariaLabel: 'Hooray' },
+        { key: 'eyes', icon: <LucideReact.Eye size={16} />, count: reactions.eyes, ariaLabel: 'Eyes' },
+        { key: 'rocket', icon: <LucideReact.Rocket size={16} />, count: reactions.rocket, ariaLabel: 'Rocket' },
+      ].filter(item => item.count > 0)
+    : [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex items-center">
-        {avatarUrl && (
-          <img
-            src={avatarUrl}
-            alt={displayName}
-            className="w-8 h-8 rounded-full mr-3"
-          />
-        )}
+    <div className="p-4 bg-white rounded-lg shadow-sm space-y-4">
+      {/* Header: avatar, author, timestamps, comment number */}
+      <div className="flex items-center space-x-3">
+        <img
+          src={avatarUrl}
+          alt={authorName}
+          className="w-8 h-8 rounded-full object-cover"
+          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+            e.currentTarget.src = avatarPlaceholder;
+          }}
+        />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
-            {displayName}
-          </p>
-          <p className="text-xs text-gray-500">{formattedCreated}</p>
+          <div className="text-sm font-medium text-gray-900 truncate">{authorName}</div>
+          <div className="flex items-center text-xs text-gray-500 space-x-1">
+            <LucideReact.Calendar size={14} />
+            <span>{formattedCreatedAt}</span>
+            {formattedEditedAt && (
+              <>
+                <span>•</span>
+                <span>edited {formattedEditedAt}</span>
+              </>
+            )}
+          </div>
         </div>
-        {formattedEdited && (
-          <span className="ml-2 text-xs text-gray-400 italic whitespace-nowrap">
-            Edited {formattedEdited}
-          </span>
-        )}
+        <div className="text-xs text-gray-400">#{value.number}</div>
       </div>
 
+      {/* Comment content */}
       <div
-        className="mt-3 prose prose-sm max-w-none text-gray-800 line-clamp-6"
-        dangerouslySetInnerHTML={{ __html: body_html }}
+        className="prose prose-sm max-w-none text-gray-800 break-words line-clamp-4"
+        dangerouslySetInnerHTML={{ __html: value.body_html }}
       />
 
-      {reactionData.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {reactionData.map((r, idx) => (
-            <span
-              key={idx}
-              className="flex items-center space-x-1 text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded"
+      {/* Reactions summary */}
+      {reactionItems.length > 0 && (
+        <div className="flex items-center space-x-4 pt-2 border-t border-gray-200">
+          {reactionItems.map(item => (
+            <div
+              key={item.key}
+              className="flex items-center text-sm text-gray-600 space-x-1"
+              aria-label={item.ariaLabel}
             >
-              <span>{r.emoji}</span>
-              <span>{r.count}</span>
-            </span>
+              {item.icon}
+              <span>{item.count}</span>
+            </div>
           ))}
         </div>
       )}

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Deployment protection rule
      *
      * @title Deployment protection rule
     */
-    export type deployment_protection_rule = {
+    export interface deployment_protection_rule {
         /**
          * The unique identifier for the deployment protection rule.
         */
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
         */
         enabled: boolean;
         app: AutoViewInputSubTypes.custom_deployment_rule_app;
-    };
+    }
     /**
      * A GitHub App that is providing a custom deployment protection rule.
      *
      * @title Custom deployment protection rule app
     */
-    export type custom_deployment_rule_app = {
+    export interface custom_deployment_rule_app {
         /**
          * The unique identifier of the deployment protection rule integration.
         */
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
          * The node ID for the deployment protection rule integration.
         */
         node_id: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.deployment_protection_rule;
 
@@ -52,32 +53,68 @@ export type AutoViewInput = AutoViewInputSubTypes.deployment_protection_rule;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusText = value.enabled ? "Enabled" : "Disabled";
-  const statusColor = value.enabled
-    ? "bg-green-100 text-green-800"
-    : "bg-red-100 text-red-800";
-  // Convert slug to a human‐friendly title (e.g., "my-app" → "My App")
-  const appName = value.app.slug
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  const { id, enabled, app } = value;
+  const { slug, integration_url } = app;
+
+  // Derive a human-readable rule name from the slug (e.g., "custom-rule-app" → "Custom Rule App")
+  const ruleName = slug
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+
+  // Remove protocol for a cleaner URL display
+  const displayUrl = integration_url.replace(/^https?:\/\//, "");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 sm:space-x-4">
-      <div className="flex flex-col space-y-1">
-        <h2 className="text-lg font-semibold text-gray-900">{appName}</h2>
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-600">Integration URL:</span>
-          <span className="mt-0.5 text-sm text-gray-500 truncate block sm:w-64">
-            {value.app.integration_url}
-          </span>
-        </div>
+    <div className="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      {/* Header: Rule Name and Status */}
+      <div className="flex items-center justify-between mb-3">
+        <h2
+          className="text-lg font-semibold text-gray-800 truncate"
+          title={ruleName}
+        >
+          {ruleName}
+        </h2>
+        <span role="img" aria-label={enabled ? "Enabled" : "Disabled"}>
+          {enabled ? (
+            <LucideReact.CheckCircle
+              className="text-green-500"
+              size={20}
+              strokeWidth={1.5}
+            />
+          ) : (
+            <LucideReact.XCircle
+              className="text-red-500"
+              size={20}
+              strokeWidth={1.5}
+            />
+          )}
+        </span>
       </div>
-      <span
-        className={`inline-flex items-center px-2 py-1 text-sm font-semibold rounded-full ${statusColor}`}
-      >
-        {statusText}
-      </span>
+
+      {/* Rule ID */}
+      <div className="flex items-center text-sm text-gray-600 mb-2">
+        <LucideReact.Hash
+          className="text-gray-400"
+          size={16}
+          strokeWidth={1.5}
+        />
+        <span className="ml-1">Rule ID: {id}</span>
+      </div>
+
+      {/* Integration URL */}
+      <div className="flex items-center text-sm text-gray-600">
+        <LucideReact.Link
+          className="text-gray-400"
+          size={16}
+          strokeWidth={1.5}
+        />
+        <span className="ml-1 truncate" title={integration_url}>
+          {displayUrl}
+        </span>
+      </div>
     </div>
   );
 }

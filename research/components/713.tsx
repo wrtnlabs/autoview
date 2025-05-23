@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Contributor
      *
      * @title Contributor
     */
-    export type contributor = {
+    export interface contributor {
         login?: string;
         id?: number & tags.Type<"int32">;
         node_id?: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         email?: string;
         name?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.contributor[];
 
@@ -38,100 +39,92 @@ export type AutoViewInput = AutoViewInputSubTypes.contributor[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Compute total contributions to derive each contributor's share percentage.
-  const totalContributions = value.reduce(
-    (acc, contributor) => acc + (contributor.contributions ?? 0),
-    0
-  )
+  // Sort contributors by contributions descending
+  const sortedContributors = React.useMemo(
+    () =>
+      [...value].sort(
+        (a, b) =>
+          (b.contributions ?? 0) - (a.contributions ?? 0)
+      ),
+    [value]
+  );
 
-  // Filter out any entries without a login or contributions
-  const contributors = value.filter(
-    (contributor) =>
-      typeof contributor.login === "string" &&
-      typeof contributor.contributions === "number"
-  )
+  // Fallback placeholder generator for avatars
+  const getAvatarSrc = (contributor: AutoViewInputSubTypes.contributor) => {
+    if (contributor.avatar_url) return contributor.avatar_url;
+    const name = contributor.name || contributor.login || "User";
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name
+    )}&background=random&color=fff`;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // If no valid contributors, show a fallback message.
-  if (contributors.length === 0) {
+  if (!sortedContributors.length) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No contributors available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No contributors available</span>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <h2 className="flex items-center text-lg font-semibold mb-4 text-gray-800">
+        <LucideReact.Users size={20} className="mr-2 text-gray-600" />
         Contributors
       </h2>
-      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {contributors.map((contributor) => {
-          const {
-            id,
-            login,
-            name,
-            avatar_url,
-            contributions,
-            site_admin,
-          } = contributor
-
-          // Derive a display name and a unique key
-          const displayName = name?.trim() ? name : login!
-          const key = id ?? login!
-
-          // Compute percent share, rounded to nearest integer
-          const percent =
-            totalContributions > 0
-              ? Math.round((contributions! / totalContributions) * 100)
-              : 0
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {sortedContributors.map((contributor) => {
+          const login = contributor.login ?? "Unknown";
+          const displayName = contributor.name && contributor.name !== login
+            ? contributor.name
+            : login;
+          const contributions = contributor.contributions ?? 0;
+          const avatarSrc = getAvatarSrc(contributor);
 
           return (
-            <li
-              key={key}
-              className="flex items-center space-x-4 p-4 bg-white rounded-lg shadow"
+            <div
+              key={contributor.id ?? login}
+              className="flex flex-col items-center p-4 bg-gray-50 rounded-lg border border-gray-100"
             >
-              {/* Avatar */}
-              <img
-                src={avatar_url || undefined}
-                alt={displayName}
-                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-              />
-
-              {/* Textual Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-900 font-medium truncate">
-                    {displayName}
-                  </span>
-                  {site_admin && (
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                      Admin
-                    </span>
-                  )}
-                </div>
-                <div className="text-gray-500 text-sm">
-                  {contributions!.toLocaleString()} contributions
-                </div>
-
-                {/* Contribution share bar */}
-                <div className="mt-2 w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                  <div
-                    className="bg-green-500 h-2"
-                    style={{ width: `${percent}%` }}
-                  />
-                </div>
+              <div className="w-16 h-16 mb-2">
+                <img
+                  src={avatarSrc}
+                  alt={login}
+                  className="w-full h-full rounded-full object-cover"
+                />
               </div>
-
-              {/* Percentage Label */}
-              <span className="text-gray-600 text-sm flex-shrink-0">
-                {percent}%
-              </span>
-            </li>
-          )
+              <div className="text-center">
+                <div className="text-sm font-medium text-gray-900 truncate">
+                  {displayName}
+                </div>
+                {displayName !== login && (
+                  <div className="text-xs text-gray-500 truncate">
+                    @{login}
+                  </div>
+                )}
+              </div>
+              <div className="mt-2 flex items-center text-gray-600 text-sm">
+                <LucideReact.GitCommit size={14} className="mr-1" />
+                <span>{contributions.toLocaleString()}</span>
+              </div>
+              {contributor.site_admin && (
+                <div className="mt-1 flex items-center text-blue-500 text-xs">
+                  <LucideReact.ShieldCheck size={14} className="mr-1" />
+                  <span>Admin</span>
+                </div>
+              )}
+              {contributor.email && (
+                <div className="mt-2 flex items-center text-gray-500 text-xs w-full truncate px-2">
+                  <LucideReact.Mail size={12} className="mr-1 flex-shrink-0" />
+                  <span className="truncate">{contributor.email}</span>
+                </div>
+              )}
+            </div>
+          );
         })}
-      </ul>
+      </div>
     </div>
-  )
+  );
 }

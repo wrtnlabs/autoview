@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Code Frequency Stat
@@ -12,88 +13,96 @@ export type AutoViewInput = AutoViewInputSubTypes.code_frequency_stat[];
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  if (!Array.isArray(value) || value.length === 0) {
+  // Derive statistics from the code frequency data
+  const stats = Array.isArray(value) ? value : [];
+  const totalWeeks = stats.length;
+
+  // Helper functions for formatting
+  const formatNumber = (n: number) => new Intl.NumberFormat().format(n);
+  const formatDate = (ts: number) =>
+    new Date(ts * 1000).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+  // If there's no data, show an empty state
+  if (totalWeeks === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No code frequency data available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-3 text-sm">No code frequency data available.</span>
       </div>
     );
   }
 
-  const totalAdditions = value.reduce((sum, week) => sum + (week[1] ?? 0), 0);
-  const totalDeletions = value.reduce((sum, week) => sum + (week[2] ?? 0), 0);
-  const netChange = totalAdditions - totalDeletions;
+  // Compute totals and averages
+  let totalAdditions = 0;
+  let totalDeletions = 0;
+  stats.forEach((weekStat) => {
+    const [_, adds = 0, dels = 0] = weekStat;
+    totalAdditions += adds;
+    totalDeletions += Math.abs(dels);
+  });
+  const avgAdditions = Math.round(totalAdditions / totalWeeks);
+  const avgDeletions = Math.round(totalDeletions / totalWeeks);
 
-  const recent = value.slice(-5);
-  const formatDate = (ts: number) =>
-    new Date(ts * 1000).toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+  // Last week's data for spotlight
+  const lastWeek = stats[stats.length - 1];
+  const [lastTs = 0, lastAdds = 0, lastDels = 0] = lastWeek;
+  const lastDate = formatDate(lastTs);
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
-        <div className="flex-1 bg-green-50 p-4 rounded-lg border border-green-200">
-          <div className="text-sm font-medium text-green-700">Total Additions</div>
-          <div className="mt-1 text-2xl font-semibold text-green-800">
-            {totalAdditions.toLocaleString()}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <div className="flex items-center mb-4">
+        <LucideReact.Activity size={20} className="text-indigo-500 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800">Code Frequency</h2>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="flex items-center">
+          <LucideReact.Plus size={20} className="text-green-500 mr-2" />
+          <div>
+            <div className="text-sm text-gray-500">Total Additions</div>
+            <div className="text-lg font-semibold text-gray-900">{formatNumber(totalAdditions)}</div>
           </div>
         </div>
-        <div className="flex-1 bg-red-50 p-4 rounded-lg border border-red-200">
-          <div className="text-sm font-medium text-red-700">Total Deletions</div>
-          <div className="mt-1 text-2xl font-semibold text-red-800">
-            {totalDeletions.toLocaleString()}
+        <div className="flex items-center">
+          <LucideReact.Minus size={20} className="text-red-500 mr-2" />
+          <div>
+            <div className="text-sm text-gray-500">Total Deletions</div>
+            <div className="text-lg font-semibold text-gray-900">{formatNumber(totalDeletions)}</div>
           </div>
         </div>
-        <div
-          className={`flex-1 p-4 rounded-lg border ${
-            netChange >= 0 ? "bg-blue-50 border-blue-200" : "bg-gray-50 border-gray-200"
-          }`}
-        >
-          <div className="text-sm font-medium text-blue-700">Net Change</div>
-          <div className="mt-1 text-2xl font-semibold text-blue-800">
-            {netChange >= 0
-              ? `+${netChange.toLocaleString()}`
-              : netChange.toLocaleString()}
+        <div className="flex items-center">
+          <LucideReact.Clock size={20} className="text-blue-500 mr-2" />
+          <div>
+            <div className="text-sm text-gray-500">Avg Additions/Week</div>
+            <div className="text-lg font-semibold text-gray-900">{formatNumber(avgAdditions)}</div>
+          </div>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Clock size={20} className="text-blue-500 mr-2" />
+          <div>
+            <div className="text-sm text-gray-500">Avg Deletions/Week</div>
+            <div className="text-lg font-semibold text-gray-900">{formatNumber(avgDeletions)}</div>
           </div>
         </div>
       </div>
 
       <div>
-        <div className="text-sm font-medium text-gray-700 mb-2">Recent 5 Weeks</div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr>
-                <th className="py-2 pr-4">Week</th>
-                <th className="py-2 pr-4">Additions</th>
-                <th className="py-2">Deletions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recent.map((week, idx) => {
-                const date = formatDate(week[0] ?? 0);
-                const adds = week[1] ?? 0;
-                const dels = week[2] ?? 0;
-                return (
-                  <tr key={idx} className="border-t border-gray-100">
-                    <td className="py-2 pr-4 text-gray-800">{date}</td>
-                    <td className="py-2 pr-4 text-green-600 font-medium">
-                      +{adds.toLocaleString()}
-                    </td>
-                    <td className="py-2 text-red-600 font-medium">
-                      -{dels.toLocaleString()}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div className="text-sm text-gray-500">Last Week ({lastDate})</div>
+        <div className="flex items-center gap-6 mt-2">
+          <div className="flex items-center text-green-600">
+            <LucideReact.Plus size={16} className="mr-1" />
+            <span className="font-medium">{formatNumber(lastAdds)}</span>
+          </div>
+          <div className="flex items-center text-red-600">
+            <LucideReact.Minus size={16} className="mr-1" />
+            <span className="font-medium">{formatNumber(Math.abs(lastDels))}</span>
+          </div>
         </div>
       </div>
     </div>

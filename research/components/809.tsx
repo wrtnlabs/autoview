@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A collection of related issues and pull requests.
      *
      * @title Milestone
     */
-    export type milestone = {
+    export interface milestone {
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
         labels_url: string & tags.Format<"uri">;
@@ -32,7 +33,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         closed_at: (string & tags.Format<"date-time">) | null;
         due_on: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -70,110 +71,125 @@ export type AutoViewInput = AutoViewInputSubTypes.milestone;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    title,
-    number,
-    state,
-    description,
-    open_issues,
-    closed_issues,
-    created_at,
-    updated_at,
-    closed_at,
-    due_on,
-    creator,
-  } = value;
-
-  // Date parsing and formatting
-  const createdDate = new Date(created_at);
-  const dueDate = due_on ? new Date(due_on) : null;
-
-  const formattedCreated = createdDate.toLocaleDateString(undefined, {
+  const createdAtFormatted = new Date(value.created_at).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
-
-  const formattedDue = dueDate
-    ? dueDate.toLocaleDateString(undefined, {
+  const updatedAtFormatted = new Date(value.updated_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  const dueOnFormatted = value.due_on
+    ? new Date(value.due_on).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+  const closedOnFormatted = value.closed_at
+    ? new Date(value.closed_at).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
       })
     : null;
 
-  // Issue completion percentage
-  const totalIssues = open_issues + closed_issues;
-  const completionPercent =
-    totalIssues > 0 ? Math.round((closed_issues / totalIssues) * 100) : 0;
+  const totalIssues = value.open_issues + value.closed_issues;
+  const completionRate =
+    totalIssues > 0 ? Math.round((value.closed_issues / totalIssues) * 100) : 0;
+
+  const creatorName = value.creator?.name ?? value.creator?.login ?? "Unknown";
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    creatorName,
+  )}&background=0D8ABC&color=fff`;
+  const avatarUrl = value.creator?.avatar_url ?? avatarPlaceholder;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-4">
-      {/* Header: Title, Number and State */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          #{number} {title}
-        </h2>
+    <div className="p-4 bg-white rounded-lg shadow-sm sm:p-6">
+      {/* Header: Number, Title, Status */}
+      <div className="flex justify-between items-start">
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">
+            <span className="text-indigo-600">#{value.number}</span>{" "}
+            {value.title}
+          </h3>
+        </div>
         <span
-          className={
-            state === "open"
-              ? "text-green-700 bg-green-100 px-2 py-1 rounded-full text-xs font-medium"
-              : "text-red-700 bg-red-100 px-2 py-1 rounded-full text-xs font-medium"
-          }
+          className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-medium ${
+            value.state === "open"
+              ? "bg-amber-100 text-amber-800"
+              : "bg-green-100 text-green-800"
+          }`}
         >
-          {state.charAt(0).toUpperCase() + state.slice(1)}
+          {value.state === "open" ? (
+            <LucideReact.Clock className="mr-1" size={14} />
+          ) : (
+            <LucideReact.CheckCircle className="mr-1" size={14} />
+          )}
+          {value.state.charAt(0).toUpperCase() + value.state.slice(1)}
         </span>
       </div>
 
-      {/* Description (truncated) */}
-      {description && (
-        <p className="text-gray-600 text-sm line-clamp-3">{description}</p>
+      {/* Description */}
+      {value.description && (
+        <p className="text-gray-700 text-sm mt-2 line-clamp-3">
+          {value.description}
+        </p>
       )}
 
-      {/* Progress Bar for Issues */}
-      <div className="space-y-1">
-        <div className="flex justify-between text-xs text-gray-600">
-          <span>Progress</span>
-          <span>{completionPercent}%</span>
+      {/* Metadata: Dates & Creator */}
+      <div className="mt-4 flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2">
+        <div className="flex items-center">
+          <LucideReact.Calendar className="mr-1" size={14} />
+          <span title={value.created_at}>Created: {createdAtFormatted}</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-          <div
-            className="bg-blue-500 h-full"
-            style={{ width: `${completionPercent}%` }}
+        <div className="flex items-center">
+          <LucideReact.Clock className="mr-1" size={14} />
+          <span title={value.updated_at}>Updated: {updatedAtFormatted}</span>
+        </div>
+        {dueOnFormatted && (
+          <div className="flex items-center">
+            <LucideReact.Calendar className="mr-1" size={14} />
+            <span title={dueOnFormatted}>{`Due: ${dueOnFormatted}`}</span>
+          </div>
+        )}
+        {closedOnFormatted && (
+          <div className="flex items-center">
+            <LucideReact.Calendar className="mr-1" size={14} />
+            <span title={closedOnFormatted}>{`Closed: ${closedOnFormatted}`}</span>
+          </div>
+        )}
+        <div className="flex items-center">
+          <img
+            src={avatarUrl}
+            alt={creatorName}
+            className="w-6 h-6 rounded-full object-cover mr-1"
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              img.src = avatarPlaceholder;
+            }}
           />
-        </div>
-        <div className="text-xs text-gray-500">
-          {closed_issues} closed / {open_issues} open
+          <span>By {creatorName}</span>
         </div>
       </div>
 
-      {/* Footer: Creator and Dates */}
-      <div className="flex items-center justify-between pt-2 border-t border-gray-200">
-        <div className="flex items-center space-x-2">
-          {creator && creator.avatar_url ? (
-            <img
-              src={creator.avatar_url}
-              alt={creator.login}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-8 h-8 bg-gray-300 rounded-full" />
-          )}
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-800">
-              {creator?.login ?? "Unknown"}
-            </span>
-            <span className="text-xs text-gray-500">
-              Created {formattedCreated}
-            </span>
-          </div>
+      {/* Issue Progress */}
+      <div className="mt-4">
+        <div className="flex justify-between mb-1 text-sm text-gray-600">
+          <span>Progress</span>
+          <span>
+            {value.closed_issues} / {totalIssues}
+          </span>
         </div>
-        {formattedDue && (
-          <div className="text-xs text-gray-500">
-            Due {formattedDue}
-          </div>
-        )}
+        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-green-500"
+            style={{ width: `${completionRate}%` }}
+          />
+        </div>
       </div>
     </div>
   );

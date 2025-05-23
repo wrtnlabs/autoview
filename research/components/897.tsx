@@ -1,24 +1,25 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * View Traffic
      *
      * @title View Traffic
     */
-    export type view_traffic = {
+    export interface view_traffic {
         count: number & tags.Type<"int32">;
         uniques: number & tags.Type<"int32">;
         views: AutoViewInputSubTypes.traffic[];
-    };
+    }
     /**
      * @title Traffic
     */
-    export type traffic = {
+    export interface traffic {
         timestamp: string & tags.Format<"date-time">;
         uniques: number & tags.Type<"int32">;
         count: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.view_traffic;
 
@@ -29,76 +30,79 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const totalViews = value.count;
   const totalUniques = value.uniques;
-  const recordCount = value.views.length;
-  const avgViews = recordCount > 0 ? totalViews / recordCount : 0;
-  const avgUniques = recordCount > 0 ? totalUniques / recordCount : 0;
-
-  const formatter = new Intl.NumberFormat('en-US');
-  const formattedViews = formatter.format(totalViews);
-  const formattedUniques = formatter.format(totalUniques);
-  const formattedAvgViews = formatter.format(Math.round(avgViews));
-  const formattedAvgUniques = formatter.format(Math.round(avgUniques));
-
+  // Sort recent entries by timestamp descending
   const sortedViews = [...value.views].sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
-  const recentViews = sortedViews.slice(0, 5);
-
-  const formatDate = (iso: string) => {
-    const d = new Date(iso);
-    return d.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
+  // Only display the 10 most recent entries
+  const recentViews = sortedViews.slice(0, 10);
+  const formatDateTime = (ts: string): string =>
+    new Date(ts).toLocaleString(undefined, {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-3 sm:space-y-0">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Traffic Summary</h2>
-          <p className="text-sm text-gray-600">
-            Over <span className="font-medium">{formattedViews}</span> views &{' '}
-            <span className="font-medium">{formattedUniques}</span> unique visitors
-          </p>
+      {/* Overview Header */}
+      <h2 className="text-lg font-semibold mb-4">Traffic Overview</h2>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="flex items-center p-3 bg-gray-50 rounded">
+          <LucideReact.Eye className="text-gray-500 mr-2" size={20} />
+          <div>
+            <div className="text-sm text-gray-500">Total Views</div>
+            <div className="text-xl font-medium text-gray-900">
+              {totalViews.toLocaleString()}
+            </div>
+          </div>
         </div>
-        <div className="flex space-x-6">
+        <div className="flex items-center p-3 bg-gray-50 rounded">
+          <LucideReact.Users className="text-gray-500 mr-2" size={20} />
           <div>
-            <p className="text-xs text-gray-500 uppercase">Entries</p>
-            <p className="text-base font-medium text-gray-900">{recordCount}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase">Avg Views</p>
-            <p className="text-base font-medium text-gray-900">{formattedAvgViews}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500 uppercase">Avg Uniques</p>
-            <p className="text-base font-medium text-gray-900">{formattedAvgUniques}</p>
+            <div className="text-sm text-gray-500">Unique Visitors</div>
+            <div className="text-xl font-medium text-gray-900">
+              {totalUniques.toLocaleString()}
+            </div>
           </div>
         </div>
       </div>
-      <div>
-        <h3 className="text-md font-semibold text-gray-900 mb-2">Recent Activity</h3>
-        <ul className="divide-y divide-gray-200">
-          {recentViews.map((item, index) => (
-            <li key={index} className="py-2 flex flex-col sm:flex-row justify-between">
-              <span className="text-sm text-gray-700">{formatDate(item.timestamp)}</span>
-              <div className="mt-1 sm:mt-0 flex space-x-4">
-                <span className="text-sm text-gray-700">
-                  {formatter.format(item.count)} views
-                </span>
-                <span className="text-sm text-gray-700">
-                  {formatter.format(item.uniques)} uniques
-                </span>
+
+      {/* Recent Traffic List */}
+      <h3 className="text-md font-semibold mb-2">Recent Traffic</h3>
+      <ul className="divide-y divide-gray-200">
+        {recentViews.map((entry, idx) => (
+          <li key={idx} className="flex justify-between items-center py-2">
+            <div className="flex items-center text-sm text-gray-700">
+              <LucideReact.Calendar
+                className="text-gray-400 mr-1"
+                size={16}
+              />
+              <span className="truncate">
+                {formatDateTime(entry.timestamp)}
+              </span>
+            </div>
+            <div className="flex items-center text-sm text-gray-700 space-x-4">
+              <div className="flex items-center">
+                <LucideReact.Eye className="text-gray-500 mr-1" size={16} />
+                <span>{entry.count.toLocaleString()}</span>
               </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+              <div className="flex items-center">
+                <LucideReact.Users
+                  className="text-gray-500 mr-1"
+                  size={16}
+                />
+                <span>{entry.uniques.toLocaleString()}</span>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

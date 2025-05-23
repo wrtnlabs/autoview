@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A CodeQL database.
      *
      * @title CodeQL Database
     */
-    export type code_scanning_codeql_database = {
+    export interface code_scanning_codeql_database {
         /**
          * The ID of the CodeQL database.
         */
@@ -44,13 +45,13 @@ export namespace AutoViewInputSubTypes {
          * The commit SHA of the repository at the time the CodeQL database was created.
         */
         commit_oid?: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_scanning_codeql_database;
 
@@ -82,94 +83,81 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_codeql_database;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const uploaderName = value.uploader.name ?? value.uploader.login;
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    uploaderName,
+  )}&background=0D8ABC&color=fff`;
+
   const formatBytes = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(1)} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(1)} MB`;
-    return `${(mb / 1024).toFixed(1)} GB`;
+    const k = 1024;
+    if (bytes < k) return `${bytes} B`;
+    const sizes = ['KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k)) - 1;
+    const num = bytes / Math.pow(k, i + 2);
+    return `${num.toFixed(2).replace(/\.00$/, '')} ${sizes[i]}`;
   };
 
-  const formatDate = (iso: string): string => {
-    const date = new Date(iso);
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const commitShort = value.commit_oid
-    ? value.commit_oid.slice(0, 7)
-    : null;
+  const formattedSize = formatBytes(value.size);
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const updatedAt = new Date(value.updated_at).toLocaleString();
+  const commitHash = value.commit_oid ? value.commit_oid.slice(0, 7) : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      {/* Header: Database Name and Language */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.name}
-        </h2>
-        <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-          {value.language}
-        </span>
-      </div>
-
-      {/* Metadata Grid */}
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600 mb-4">
-        <div>
-          <dt className="font-medium">Size</dt>
-          <dd>{formatBytes(value.size)}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Content Type</dt>
-          <dd className="truncate">{value.content_type}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Created</dt>
-          <dd>{formatDate(value.created_at)}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Updated</dt>
-          <dd>{formatDate(value.updated_at)}</dd>
-        </div>
-      </dl>
-
-      {/* Uploader Info */}
-      <div className="flex items-center space-x-3 mb-4">
+    <div className="max-w-md w-full bg-white rounded-lg shadow p-6 space-y-4">
+      <div className="flex items-center space-x-4">
         <img
           src={value.uploader.avatar_url}
-          alt={`${value.uploader.login} avatar`}
-          className="w-10 h-10 rounded-full object-cover border border-gray-200"
+          alt={`${uploaderName} avatar`}
+          className="w-10 h-10 rounded-full object-cover"
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            img.onerror = null;
+            img.src = avatarFallback;
+          }}
         />
-        <div className="text-sm">
-          <p className="font-medium text-gray-800 truncate">
-            {value.uploader.login}
-          </p>
-          {value.uploader.name && (
-            <p className="text-gray-500 truncate">{value.uploader.name}</p>
-          )}
+        <div>
+          <div className="text-gray-900 font-semibold">{uploaderName}</div>
+          <div className="text-gray-500 text-sm">@{value.uploader.login}</div>
         </div>
       </div>
 
-      {/* Optional Commit and URL */}
-      <div className="text-sm text-gray-600 space-y-2">
-        {commitShort && (
-          <div>
-            <span className="font-medium">Commit:</span>{' '}
-            <code className="bg-gray-100 px-1 rounded">{commitShort}</code>
+      <div>
+        <h2 className="text-xl font-semibold text-gray-800">{value.name}</h2>
+        <div className="mt-1">
+          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
+            {value.language}
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
+        <div className="flex items-center space-x-1">
+          <LucideReact.FileText size={16} />
+          <span>{value.content_type}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Archive size={16} />
+          <span>{formattedSize}</span>
+        </div>
+        <div className="flex items-center space-x-1 col-span-2">
+          <LucideReact.Link size={16} />
+          <span className="truncate">{value.url}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span>Created: {createdAt}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span>Updated: {updatedAt}</span>
+        </div>
+        {commitHash && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Code size={16} />
+            <span>{commitHash}</span>
           </div>
         )}
-        <div>
-          <span className="font-medium">Download URL:</span>
-          <p className="mt-1 break-all truncate text-blue-600">
-            {value.url}
-          </p>
-        </div>
       </div>
     </div>
   );

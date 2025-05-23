@@ -1,20 +1,21 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Gist Simple
      *
      * @title Gist Simple
     */
-    export type gist_simple = {
+    export interface gist_simple {
         forks?: {
             id?: string;
             url?: string & tags.Format<"uri">;
-            user?: any;
+            user?: AutoViewInputSubTypes.public_user;
             created_at?: string & tags.Format<"date-time">;
             updated_at?: string & tags.Format<"date-time">;
         }[] | null;
-        history?: any[] | null;
+        history?: AutoViewInputSubTypes.gist_history[] | null;
         /**
          * Gist
          *
@@ -44,9 +45,9 @@ export namespace AutoViewInputSubTypes {
             description: string | null;
             comments: number & tags.Type<"int32">;
             comments_enabled?: boolean;
-            user: any;
+            user: AutoViewInputSubTypes.nullable_simple_user;
             comments_url: string & tags.Format<"uri">;
-            owner?: any;
+            owner?: AutoViewInputSubTypes.nullable_simple_user;
             truncated?: boolean;
             forks?: any[];
             history?: any[];
@@ -84,16 +85,81 @@ export namespace AutoViewInputSubTypes {
         comments_url?: string;
         owner?: AutoViewInputSubTypes.simple_user;
         truncated?: boolean;
-    };
-    export type public_user = any;
-    export type gist_history = any;
-    export type nullable_simple_user = any;
+    }
+    /**
+     * Public User
+     *
+     * @title Public User
+    */
+    export interface public_user {
+        login: string;
+        id: number & tags.Type<"int32">;
+        user_view_type?: string;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        name: string | null;
+        company: string | null;
+        blog: string | null;
+        location: string | null;
+        email: (string & tags.Format<"email">) | null;
+        notification_email?: (string & tags.Format<"email">) | null;
+        hireable: boolean | null;
+        bio: string | null;
+        twitter_username?: string | null;
+        public_repos: number & tags.Type<"int32">;
+        public_gists: number & tags.Type<"int32">;
+        followers: number & tags.Type<"int32">;
+        following: number & tags.Type<"int32">;
+        created_at: string & tags.Format<"date-time">;
+        updated_at: string & tags.Format<"date-time">;
+        plan?: {
+            collaborators: number & tags.Type<"int32">;
+            name: string;
+            space: number & tags.Type<"int32">;
+            private_repos: number & tags.Type<"int32">;
+        };
+        private_gists?: number & tags.Type<"int32">;
+        total_private_repos?: number & tags.Type<"int32">;
+        owned_private_repos?: number & tags.Type<"int32">;
+        disk_usage?: number & tags.Type<"int32">;
+        collaborators?: number & tags.Type<"int32">;
+    }
+    /**
+     * Gist History
+     *
+     * @title Gist History
+    */
+    export interface gist_history {
+        user?: AutoViewInputSubTypes.nullable_simple_user;
+        version?: string;
+        committed_at?: string & tags.Format<"date-time">;
+        change_status?: {
+            total?: number & tags.Type<"int32">;
+            additions?: number & tags.Type<"int32">;
+            deletions?: number & tags.Type<"int32">;
+        };
+        url?: string & tags.Format<"uri">;
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export type nullable_simple_user = {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -116,7 +182,36 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    } | null;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.gist_simple;
 
@@ -124,133 +219,101 @@ export type AutoViewInput = AutoViewInputSubTypes.gist_simple;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derived constants for formatting and aggregation
-  const createdAt = value.created_at
-    ? new Date(value.created_at).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    : 'Unknown date';
-  const updatedAt = value.updated_at
-    ? new Date(value.updated_at).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    : undefined;
-  const description = value.description ?? 'No description provided.';
+  // 1. Define data aggregation/transformation functions or derived constants
+  const owner = value.owner;
+  const ownerName = owner?.name ?? owner?.login ?? "Unknown";
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    ownerName,
+  )}&background=0D8ABC&color=fff`;
   const fileEntries = value.files
-    ? Object.entries(value.files).filter(([, file]) => file != null)
+    ? Object.entries(value.files).filter(([, f]) => f != null)
     : [];
   const fileCount = fileEntries.length;
-  const fileNames = fileEntries.map(([name]) => name);
+  const displayedFiles = fileEntries.slice(0, 2).map(([name]) => name);
+  const extraFilesCount = fileCount - displayedFiles.length;
   const forksCount = value.forks?.length ?? 0;
+  const historyCount = value.history?.length ?? 0;
   const commentsCount = value.comments ?? 0;
-  const isPublic = value['public'] ?? false;
-  const owner = value.owner;
+  const isPublic = value["public"] ?? false;
+  const formattedDate = value.created_at
+    ? new Date(value.created_at).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Header: Owner info and visibility */}
+    <div className="max-w-sm w-full bg-white rounded-lg shadow-md overflow-hidden">
       <div className="flex items-center p-4">
-        {owner ? (
+        <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex-shrink-0">
           <img
-            src={owner.avatar_url}
-            alt={owner.login}
-            className="w-10 h-10 rounded-full mr-3 flex-shrink-0"
+            src={owner?.avatar_url ?? avatarPlaceholder}
+            alt={ownerName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = avatarPlaceholder;
+            }}
           />
-        ) : (
-          <div className="w-10 h-10 bg-gray-200 rounded-full mr-3 flex-shrink-0" />
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="text-lg font-semibold text-gray-900 truncate">
-            {owner ? owner.login : 'Unknown Owner'}
-          </p>
-          <p className="text-sm text-gray-600">
-            {isPublic ? 'Public Gist' : 'Private Gist'}
-          </p>
         </div>
-      </div>
-
-      {/* Body: Description and file summary */}
-      <div className="px-4 pb-4">
-        <p className="text-gray-800 mb-3 line-clamp-3">{description}</p>
-
-        {fileCount > 0 && (
-          <div className="flex flex-wrap items-center mb-2 space-x-2 text-sm">
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">
-              {fileCount} {fileCount === 1 ? 'File' : 'Files'}
-            </span>
-            {fileNames.slice(0, 3).map((name) => (
-              <span
-                key={name}
-                className="truncate max-w-[100px] bg-gray-50 text-gray-600 px-2 py-1 rounded"
-              >
-                {name}
-              </span>
-            ))}
-            {fileCount > 3 && (
-              <span className="text-gray-500">+{fileCount - 3} more</span>
-            )}
+        <div className="ml-3 flex-1">
+          <div className="flex items-center text-sm font-semibold text-gray-800">
+            <LucideReact.User size={16} className="text-gray-500 mr-1" />
+            <span className="truncate">{ownerName}</span>
           </div>
-        )}
-
-        <div className="flex items-center space-x-4 text-sm text-gray-600">
-          <span className="flex items-center">
-            <svg
-              className="w-4 h-4 mr-1 text-gray-500"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M6 2a1 1 0 00-1 1v1h10V3a1 1 0 10-2 0v1H8V3a1 1 0 00-1-1z" />
-              <path
-                fillRule="evenodd"
-                d="M4 6h12v10a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm2 2v6h8V8H6z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Created {createdAt}
-          </span>
-          {updatedAt && (
-            <span className="flex items-center">
-              <svg
-                className="w-4 h-4 mr-1 text-gray-500"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 2a8 8 0 018 8h-2a6 6 0 10-6 6v2a8 8 0 010-16z" />
-              </svg>
-              Updated {updatedAt}
-            </span>
+          {formattedDate && (
+            <div className="flex items-center text-xs text-gray-500 mt-1">
+              <LucideReact.Calendar size={12} className="mr-1" />
+              <span>{formattedDate}</span>
+            </div>
           )}
         </div>
       </div>
-
-      {/* Footer: Comments and forks */}
-      <div className="border-t px-4 py-2 flex items-center justify-between text-sm text-gray-600">
-        <span className="flex items-center">
-          <svg
-            className="w-4 h-4 mr-1 text-gray-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M18 10c0 3.866-3.582 7-8 7-1.317 0-2.555-.277-3.637-.777L2 18l1.777-4.363A7.945 7.945 0 012 10c0-3.866 3.582-7 8-7s8 3.134 8 7z" />
-          </svg>
-          {commentsCount} {commentsCount === 1 ? 'Comment' : 'Comments'}
-        </span>
-        <span className="flex items-center">
-          <svg
-            className="w-4 h-4 mr-1 text-gray-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h3v-2H5V5h10v3h2V5a2 2 0 00-2-2H5z" />
-            <path d="M14 12l4-4-4-4v3H9v2h5v3z" />
-          </svg>
-          {forksCount} {forksCount === 1 ? 'Fork' : 'Forks'}
-        </span>
+      <div className="px-4 pb-4">
+        {value.description != null && value.description !== "" && (
+          <p className="text-gray-700 text-sm line-clamp-2 mb-3">
+            {value.description}
+          </p>
+        )}
+        <div className="flex flex-wrap items-center text-xs text-gray-500 gap-4">
+          <div className="flex items-center">
+            <LucideReact.FileText size={12} className="mr-1" />
+            <span>
+              {fileCount} file{fileCount === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.GitBranch size={12} className="mr-1" />
+            <span>{forksCount}</span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.Hash size={12} className="mr-1" />
+            <span>{historyCount}</span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.MessageCircle size={12} className="mr-1" />
+            <span>{commentsCount}</span>
+          </div>
+          <div className="flex items-center">
+            {isPublic ? (
+              <LucideReact.Unlock size={12} className="text-green-500 mr-1" />
+            ) : (
+              <LucideReact.Lock size={12} className="text-red-500 mr-1" />
+            )}
+            <span>{isPublic ? "Public" : "Private"}</span>
+          </div>
+        </div>
+        {fileCount > 0 && (
+          <div className="mt-3 text-xs text-gray-500">
+            <span className="font-semibold">Files:</span>{" "}
+            <span className="truncate">
+              {displayedFiles.join(", ")}
+              {extraFilesCount > 0 ? ` +${extraFilesCount} more` : ""}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

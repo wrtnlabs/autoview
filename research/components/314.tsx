@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Delivery made by a webhook.
      *
      * @title Webhook delivery
     */
-    export type hook_delivery = {
+    export interface hook_delivery {
         /**
          * Unique identifier of the delivery.
         */
@@ -79,7 +80,7 @@ export namespace AutoViewInputSubTypes {
             */
             payload: string | null;
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.hook_delivery;
 
@@ -87,129 +88,82 @@ export type AutoViewInput = AutoViewInputSubTypes.hook_delivery;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const deliveredAt = new Date(value.delivered_at).toLocaleString();
-  const throttledAt = value.throttled_at
+  // 1. Derived constants and data transformations
+  const displayTitle = value.action ? `${value.event} – ${value.action}` : value.event;
+  const formattedDeliveredAt = new Date(value.delivered_at).toLocaleString();
+  const formattedThrottledAt = value.throttled_at
     ? new Date(value.throttled_at).toLocaleString()
     : null;
-  const durationMs = `${value.duration} ms`;
-
   const statusCode = value.status_code;
-  const statusText = value.status;
-  let statusColorClass = 'bg-gray-500 text-white';
-  if (statusCode >= 200 && statusCode < 300) statusColorClass = 'bg-green-500 text-white';
-  else if (statusCode >= 300 && statusCode < 400) statusColorClass = 'bg-blue-500 text-white';
-  else if (statusCode >= 400 && statusCode < 500) statusColorClass = 'bg-yellow-500 text-white';
-  else if (statusCode >= 500) statusColorClass = 'bg-red-500 text-white';
-
-  const reqHeaderCount = value.request.headers
-    ? Object.keys(value.request.headers).length
-    : 0;
-  const reqPayloadCount =
-    value.request.payload && typeof value.request.payload === 'object'
+  const statusIcon =
+    statusCode < 300 ? (
+      <LucideReact.CheckCircle className="text-green-500" size={16} />
+    ) : statusCode < 400 ? (
+      <LucideReact.AlertTriangle className="text-amber-500" size={16} />
+    ) : (
+      <LucideReact.XCircle className="text-red-500" size={16} />
+    );
+  const requestPayloadCount =
+    value.request.payload && typeof value.request.payload === "object"
       ? Object.keys(value.request.payload).length
       : 0;
-  const resHeaderCount = value.response.headers
-    ? Object.keys(value.response.headers).length
-    : 0;
-  const resPayloadLength = value.response.payload
-    ? value.response.payload.length
-    : 0;
+  const responsePreview = value.response.payload
+    ? value.response.payload.length > 100
+      ? `${value.response.payload.slice(0, 100)}…`
+      : value.response.payload
+    : "No payload";
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. JSX structure using Tailwind CSS for layout and styling
   return (
-    <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow">
-      {/* Header: Event, Action, Badges, Timestamp */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-        <div className="flex flex-wrap items-center space-x-2">
-          <span className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            {value.event}
-            {value.action ? ` / ${value.action}` : ''}
-          </span>
-          {value.redelivery && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
-              Redelivery
-            </span>
-          )}
-          {throttledAt && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-              Throttled
-            </span>
-          )}
+    <div className="max-w-md mx-auto bg-white p-4 rounded-lg shadow-md text-gray-800">
+      {/* Header: Event & Status */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold truncate">{displayTitle}</h2>
+        <div className="flex items-center gap-1">
+          {statusIcon}
+          <span className="text-sm">{value.status}</span>
         </div>
-        <span className="text-sm text-gray-500 dark:text-gray-400 mt-2 sm:mt-0">
-          {deliveredAt}
-        </span>
       </div>
 
-      {/* Core Details */}
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700 dark:text-gray-300">
-        <div>
-          <dt className="font-medium">Status</dt>
-          <dd>
-            <span
-              className={`px-2 py-0.5 rounded text-xs font-medium ${statusColorClass}`}
-            >
-              {statusText}
-            </span>
-          </dd>
+      {/* Core Delivery Details */}
+      <div className="space-y-2 text-sm">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-500" />
+          <span>Delivered: {formattedDeliveredAt}</span>
         </div>
-        <div>
-          <dt className="font-medium">Status Code</dt>
-          <dd>{statusCode}</dd>
+        <div className="flex items-center gap-1">
+          <LucideReact.Clock size={16} className="text-gray-500" />
+          <span>Duration: {value.duration} ms</span>
         </div>
-        <div>
-          <dt className="font-medium">Duration</dt>
-          <dd>{durationMs}</dd>
-        </div>
-        {value.installation_id != null && (
-          <div>
-            <dt className="font-medium">Installation ID</dt>
-            <dd>{value.installation_id}</dd>
+        {value.redelivery && (
+          <div className="flex items-center gap-1 text-blue-600">
+            <LucideReact.RefreshCcw size={16} />
+            <span>Redelivery</span>
           </div>
         )}
-        {value.repository_id != null && (
-          <div>
-            <dt className="font-medium">Repository ID</dt>
-            <dd>{value.repository_id}</dd>
+        {formattedThrottledAt && (
+          <div className="flex items-center gap-1 text-amber-600">
+            <LucideReact.AlertTriangle size={16} />
+            <span>Throttled: {formattedThrottledAt}</span>
           </div>
         )}
         {value.url && (
-          <div className="col-span-1 sm:col-span-2">
-            <dt className="font-medium">Target URL</dt>
-            <dd className="truncate">{value.url}</dd>
+          <div className="flex items-center gap-1">
+            <LucideReact.Link size={16} className="text-gray-500" />
+            <span className="truncate break-all">{value.url}</span>
           </div>
         )}
-      </dl>
+      </div>
 
-      {/* Request & Response Summaries */}
-      <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4 text-sm text-gray-700 dark:text-gray-300">
-        <div className="mb-4">
-          <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">
-            Request Summary
-          </h3>
-          <ul className="list-disc list-inside">
-            <li>
-              Headers: {reqHeaderCount}{' '}
-              {reqHeaderCount === 1 ? 'entry' : 'entries'}
-            </li>
-            <li>Payload keys: {reqPayloadCount}</li>
-          </ul>
+      {/* Request & Response Summary */}
+      <div className="mt-4 space-y-3 text-sm">
+        <div>
+          <h3 className="font-medium mb-1">Request</h3>
+          <p>Payload fields: {requestPayloadCount}</p>
         </div>
         <div>
-          <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-1">
-            Response Summary
-          </h3>
-          <ul className="list-disc list-inside">
-            <li>
-              Headers: {resHeaderCount}{' '}
-              {resHeaderCount === 1 ? 'entry' : 'entries'}
-            </li>
-            <li>
-              Payload length: {resPayloadLength} character
-              {resPayloadLength === 1 ? '' : 's'}
-            </li>
-          </ul>
+          <h3 className="font-medium mb-1">Response</h3>
+          <p className="break-all whitespace-pre-wrap">{responsePreview}</p>
         </div>
       </div>
     </div>

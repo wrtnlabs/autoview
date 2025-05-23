@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
      *
      * @title Reaction
     */
-    export type reaction = {
+    export interface reaction {
         id: number & tags.Type<"int32">;
         node_id: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -54,80 +55,95 @@ export type AutoViewInput = AutoViewInputSubTypes.reaction[];
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const totalReactions = value.length;
+  if (totalReactions === 0) {
+    return (
+      <div className="flex flex-col items-center p-4 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span>No reactions yet</span>
+      </div>
+    );
+  }
 
-  // Map reaction content to emoji
-  const emojiMap: Record<AutoViewInputSubTypes.reaction["content"], string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    rocket: "🚀",
-    eyes: "👀",
+  type ReactionType = AutoViewInputSubTypes.reaction["content"];
+  const contentCounts = value.reduce((acc, reaction) => {
+    const key = reaction.content as ReactionType;
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {} as Record<ReactionType, number>);
+
+  // Reaction metadata mapping
+  const reactionMeta: Record<ReactionType, React.ReactNode> = {
+    "+1": <LucideReact.ThumbsUp size={16} strokeWidth={2} className="text-green-500" />,
+    "-1": <LucideReact.ThumbsDown size={16} strokeWidth={2} className="text-red-500" />,
+    laugh: <LucideReact.Laugh size={16} strokeWidth={2} className="text-yellow-500" />,
+    confused: <LucideReact.Frown size={16} strokeWidth={2} className="text-amber-500" />,
+    heart: <LucideReact.Heart size={16} strokeWidth={2} className="text-pink-500" />,
+    hooray: <LucideReact.Star size={16} strokeWidth={2} className="text-violet-500" />,
+    rocket: <LucideReact.Rocket size={16} strokeWidth={2} className="text-indigo-500" />,
+    eyes: <LucideReact.Eye size={16} strokeWidth={2} className="text-blue-500" />,
   };
 
-  // Count reactions by content
-  const reactionCounts = value.reduce<Record<string, number>>((acc, reaction) => {
-    acc[reaction.content] = (acc[reaction.content] || 0) + 1;
-    return acc;
-  }, {});
+  // Sorted reaction types by count descending
+  const sortedTypes = (Object.keys(contentCounts) as ReactionType[]).sort(
+    (a, b) => (contentCounts[b] ?? 0) - (contentCounts[a] ?? 0)
+  );
 
-  // Get latest reactions with non-null users, sorted by date descending
-  const latestReactions = value
-    .filter((r) => r.user !== null)
-    .sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    )
-    .slice(0, 5);
+  // Date formatting options
+  const dateOptions: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        Reactions ({totalReactions})
-      </h2>
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      {/* Reaction summary chips */}
+      <div className="flex overflow-x-auto gap-2 mb-4">
+        {sortedTypes.map((type) => (
+          <span
+            key={type}
+            className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-full text-sm whitespace-nowrap"
+          >
+            {reactionMeta[type]}
+            <span className="text-gray-700">{contentCounts[type]}</span>
+          </span>
+        ))}
+      </div>
 
-      {totalReactions === 0 ? (
-        <p className="text-gray-500">No reactions yet.</p>
-      ) : (
-        <>
-          {/* Summary badges */}
-          <div className="flex flex-wrap items-center gap-2">
-            {Object.entries(reactionCounts).map(([content, count]) => (
-              <div
-                key={content}
-                className="flex items-center bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm shadow-sm"
-              >
-                <span className="mr-1">{emojiMap[content as any]}</span>
-                <span>{count}</span>
-              </div>
-            ))}
-          </div>
+      {/* Detailed reaction list */}
+      <ul className="space-y-3">
+        {value.map((reaction) => {
+          const login = reaction.user?.login ?? "Unknown";
+          const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            login
+          )}&background=0D8ABC&color=fff`;
 
-          {/* Latest reactors' avatars */}
-          {latestReactions.length > 0 && (
-            <div className="mt-4">
-              <p className="text-gray-600 text-sm mb-2">Latest Reacted:</p>
-              <div className="flex -space-x-2">
-                {latestReactions.map((reaction) => {
-                  const user = reaction.user!;
-                  return (
-                    <img
-                      key={reaction.id}
-                      src={user.avatar_url}
-                      alt={user.login}
-                      title={`${user.login} reacted ${emojiMap[reaction.content]}`}
-                      className="w-8 h-8 rounded-full border-2 border-white shadow"
-                    />
-                  );
-                })}
+          return (
+            <li key={reaction.id} className="flex items-center gap-3">
+              <img
+                src={reaction.user?.avatar_url ?? fallbackAvatar}
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = fallbackAvatar;
+                }}
+                alt={login}
+                className="w-8 h-8 rounded-full object-cover"
+              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-gray-900 truncate">{login}</span>
+                  {reactionMeta[reaction.content]}
+                </div>
+                <span className="text-sm text-gray-500">
+                  {new Date(reaction.created_at).toLocaleString(undefined, dateOptions)}
+                </span>
               </div>
-            </div>
-          )}
-        </>
-      )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

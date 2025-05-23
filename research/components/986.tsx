@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
@@ -37,44 +38,61 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Compose the user cards grid
+  // Handle empty state
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <p className="text-lg">No users available.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {value.map((user, index) => {
-        // Derived display name: prefer name, fallback to login
-        const displayName = user.name?.trim() ? user.name : user.login;
-        // Email may be null
-        const email = user.email ?? null;
-        // Site admin badge flag
-        const isAdmin = user.site_admin;
+    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {value.map((user: AutoViewInputSubTypes.simple_user) => {
+        const displayName = user.name?.trim() || user.login;
+        const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          displayName,
+        )}&background=0D8ABC&color=fff`;
 
         return (
           <div
-            key={index}
-            className="flex items-center bg-white p-4 rounded-lg shadow hover:shadow-lg transition-shadow"
+            key={user.id}
+            className="flex flex-col items-center text-center p-4 bg-white rounded-lg shadow-md"
           >
-            <img
-              src={user.avatar_url}
-              alt={`${displayName} avatar`}
-              className="w-16 h-16 rounded-full flex-shrink-0"
-            />
-            <div className="ml-4 flex-1 overflow-hidden">
-              <h2 className="text-lg font-semibold text-gray-900 truncate">
-                {displayName}
-              </h2>
-              <p className="text-sm text-gray-600 truncate">
-                @{user.login}
-              </p>
-              {email && (
-                <p className="mt-1 text-sm text-gray-500 truncate">
-                  {email}
-                </p>
-              )}
+            <div className="w-24 h-24 mb-3 rounded-full overflow-hidden bg-gray-100">
+              <img
+                src={user.avatar_url}
+                alt={displayName}
+                className="object-cover w-full h-full"
+                onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                  e.currentTarget.src = avatarFallback;
+                }}
+              />
             </div>
-            {isAdmin && (
-              <span className="ml-3 inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-xs font-medium rounded">
-                Admin
-              </span>
+            <h3 className="text-lg font-semibold text-gray-900 truncate">
+              {displayName}
+            </h3>
+            <p className="flex items-center mt-1 text-gray-500 text-sm truncate">
+              <LucideReact.User size={16} className="mr-1" />
+              @{user.login}
+            </p>
+            {user.email && (
+              <p className="flex items-center mt-1 text-gray-500 text-sm truncate">
+                <LucideReact.Mail size={16} className="mr-1" />
+                {user.email}
+              </p>
+            )}
+            <p className="flex items-center mt-1 text-gray-500 text-sm truncate">
+              <LucideReact.Link size={16} className="mr-1" />
+              {user.html_url}
+            </p>
+            {user.site_admin && (
+              <div className="flex items-center mt-2 text-green-600 text-sm">
+                <LucideReact.CheckCircle size={16} className="mr-1" />
+                Site Admin
+              </div>
             )}
           </div>
         );

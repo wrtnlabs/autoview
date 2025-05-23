@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * API Insights usage time stats for an organization
@@ -19,102 +20,133 @@ export type AutoViewInput = AutoViewInputSubTypes.api_insights_time_stats;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Filter out entries without a valid timestamp and sort by newest first
-  const entries = value
-    .filter((e) => e.timestamp)
-    .map((e) => ({
-      timestamp: e.timestamp!,
-      total: e.total_request_count ?? 0,
-      rateLimited: e.rate_limited_request_count ?? 0,
-    }))
-    .sort(
-      (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-    );
+  const stats = Array.isArray(value) ? value : [];
 
-  // Summary calculations
-  const totalRequests = entries.reduce((sum, e) => sum + e.total, 0);
-  const totalRateLimited = entries.reduce((sum, e) => sum + e.rateLimited, 0);
-  const count = entries.length;
-  const avgRequests = count > 0 ? totalRequests / count : 0;
-  const errorRate = totalRequests > 0 ? (totalRateLimited / totalRequests) * 100 : 0;
+  const totalRequestsSum = stats.reduce(
+    (sum, item) => sum + (item.total_request_count ?? 0),
+    0
+  );
+  const rateLimitedSum = stats.reduce(
+    (sum, item) => sum + (item.rate_limited_request_count ?? 0),
+    0
+  );
+  const rateLimitedPct =
+    totalRequestsSum > 0 ? (rateLimitedSum / totalRequestsSum) * 100 : 0;
 
-  // Recent entries (up to 5)
-  const recentEntries = entries.slice(0, 5);
+  const sortedStats = [...stats].sort((a, b) => {
+    const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return ta - tb;
+  });
 
-  // Number formatter
-  const nf = new Intl.NumberFormat();
+  const formatDate = (iso?: string): string => {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (count === 0) {
+  const formatNumber = (num: number): string => num.toLocaleString();
+
+  const formatPercent = (num: number): string => `${num.toFixed(2)}%`;
+
+  // 2. Handle empty state
+  if (stats.length === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No usage data available.
+      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle
+          size={48}
+          className="text-gray-400"
+          aria-hidden="true"
+        />
+        <span className="mt-4 text-lg">No data available</span>
       </div>
     );
   }
 
+  // 3. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        API Insights Usage
-      </h2>
-
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-50 p-3 rounded">
-          <p className="text-sm text-gray-500">Total Requests</p>
-          <p className="text-2xl font-medium text-gray-900">
-            {nf.format(totalRequests)}
-          </p>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.Server
+            size={20}
+            className="text-blue-500"
+            aria-hidden="true"
+          />
+          <div className="ml-3">
+            <div className="text-sm text-gray-500">Total Requests</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {formatNumber(totalRequestsSum)}
+            </div>
+          </div>
         </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <p className="text-sm text-gray-500">Rate-Limited</p>
-          <p className="text-2xl font-medium text-gray-900">
-            {nf.format(totalRateLimited)}
-          </p>
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.AlertTriangle
+            size={20}
+            className="text-red-500"
+            aria-hidden="true"
+          />
+          <div className="ml-3">
+            <div className="text-sm text-gray-500">Rate Limited</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {formatNumber(rateLimitedSum)}
+            </div>
+          </div>
         </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <p className="text-sm text-gray-500">Avg per Interval</p>
-          <p className="text-2xl font-medium text-gray-900">
-            {avgRequests.toFixed(1)}
-          </p>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <p className="text-sm text-gray-500">Error Rate</p>
-          <p className="text-2xl font-medium text-gray-900">
-            {errorRate.toFixed(1)}%
-          </p>
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.Percent
+            size={20}
+            className="text-green-500"
+            aria-hidden="true"
+          />
+          <div className="ml-3">
+            <div className="text-sm text-gray-500">Rate Limit %</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {formatPercent(rateLimitedPct)}
+            </div>
+          </div>
         </div>
       </div>
 
-      <div>
-        <h3 className="text-md font-semibold text-gray-700 mb-2">
-          Recent Stats
-        </h3>
-        <div className="flex justify-between text-xs font-medium text-gray-500 uppercase mb-1">
-          <span>Date</span>
-          <span>Total</span>
-          <span>Rate-Ltd</span>
-        </div>
-        <ul>
-          {recentEntries.map((entry, idx) => (
-            <li
-              key={idx}
-              className="flex justify-between items-center text-sm text-gray-600 py-2 border-b last:border-b-0"
-            >
-              <span className="truncate">
-                {new Date(entry.timestamp).toLocaleString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </span>
-              <span className="mx-2">{nf.format(entry.total)}</span>
-              <span className="text-red-500">{nf.format(entry.rateLimited)}</span>
-            </li>
-          ))}
-        </ul>
+      {/* Detailed table */}
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm text-left text-gray-600">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2">Time</th>
+              <th className="px-4 py-2">Total</th>
+              <th className="px-4 py-2">Rate Limited</th>
+              <th className="px-4 py-2">% Rate Limit</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedStats.map((item, idx) => {
+              const total = item.total_request_count ?? 0;
+              const limited = item.rate_limited_request_count ?? 0;
+              const pct = total > 0 ? (limited / total) * 100 : 0;
+              return (
+                <tr
+                  key={idx}
+                  className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                >
+                  <td className="px-4 py-2 whitespace-nowrap">
+                    {formatDate(item.timestamp)}
+                  </td>
+                  <td className="px-4 py-2">{formatNumber(total)}</td>
+                  <td className="px-4 py-2">{formatNumber(limited)}</td>
+                  <td className="px-4 py-2">{formatPercent(pct)}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

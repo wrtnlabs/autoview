@@ -1,9 +1,10 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * System Information.
     */
-    export type ISystem = {
+    export interface ISystem {
         /**
          * Random Unique ID.
          *
@@ -30,12 +31,12 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of this server
         */
         created_at: string;
-    };
+    }
     export namespace ISystem {
         /**
          * Git commit info.
         */
-        export type ICommit = {
+        export interface ICommit {
             shortHash: string;
             branch: string;
             hash: string;
@@ -48,20 +49,20 @@ export namespace AutoViewInputSubTypes {
             committed_at: string;
             notes?: string;
             tags: string[];
-        };
+        }
         export namespace ICommit {
             /**
              * Git user account info.
             */
-            export type IUser = {
+            export interface IUser {
                 name: string;
                 email: string;
-            };
+            }
         }
         /**
          * NPM package info.
         */
-        export type IPackage = {
+        export interface IPackage {
             name: string;
             version: string;
             description: string;
@@ -84,14 +85,14 @@ export namespace AutoViewInputSubTypes {
                 registry: string;
             };
             files?: string[];
-        };
+        }
     }
     /**
      * Construct a type with a set of properties K of type T
     */
-    export type Recordstringstring = {
+    export interface Recordstringstring {
         [key: string]: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ISystem;
 
@@ -100,82 +101,137 @@ export type AutoViewInput = AutoViewInputSubTypes.ISystem;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const startedAt = new Date(value.created_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const commitDate = new Date(value.commit.committed_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const createdAt = new Date(value.created_at).toLocaleString();
+
+  const commit = value.commit;
+  const {
+    subject: commitSubject,
+    shortHash,
+    branch,
+    author: { name: commitAuthor },
+    committed_at,
+    tags = [],
+  } = commit;
+  const commitDate = new Date(committed_at).toLocaleString();
+
   const pkg = value["package"];
-  const pkgDisplay = `${pkg.name} v${pkg.version}`;
-  const argsCount = value.arguments.length;
+  const {
+    name: packageName,
+    version: packageVersion,
+    description,
+    repository: { url: repoUrl },
+    homepage,
+    bugs: { url: bugUrl },
+    license,
+  } = pkg;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Header */}
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">System Overview</h2>
-
-      {/* Core System Info */}
-      <dl className="grid grid-cols-2 gap-x-4 text-sm text-gray-600 mb-6">
-        <div>
-          <dt className="font-medium">ID</dt>
-          <dd>{value.uid}</dd>
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
+      {/* Server Creation Time */}
+      <section>
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <LucideReact.Calendar className="text-gray-500" size={20} />
+          <span>Server Created</span>
+        </h2>
+        <div className="mt-1 text-gray-600 flex items-center gap-2">
+          <LucideReact.Calendar size={16} />
+          <span>{createdAt}</span>
         </div>
-        <div>
-          <dt className="font-medium">Started</dt>
-          <dd>{startedAt}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Args</dt>
-          <dd>{argsCount} item{argsCount !== 1 ? 's' : ''}</dd>
-        </div>
-      </dl>
-
-      {/* Commit Section */}
-      <section className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Last Commit</h3>
-        <div className="text-gray-600 text-sm mb-1">
-          <span className="font-medium">{value.commit.branch}</span>
-          <span className="mx-2 text-gray-400">/</span>
-          <span className="font-mono">{value.commit.shortHash}</span>
-        </div>
-        <p className="text-gray-800 text-sm mb-1 line-clamp-2">{value.commit.subject}</p>
-        <div className="flex items-center text-gray-500 text-xs mb-2">
-          <span>{value.commit.author.name}</span>
-          <span className="mx-1">•</span>
-          <span>{commitDate}</span>
-        </div>
-        {value.commit.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {value.commit.tags.map((tag, idx) => (
-              <span
-                key={idx}
-                className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full truncate"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
       </section>
 
-      {/* Package Section */}
+      {/* Latest Commit */}
       <section>
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">Package</h3>
-        <p className="text-gray-800 font-medium mb-1">{pkgDisplay}</p>
-        <p className="text-gray-600 text-sm mb-2 line-clamp-2">{pkg.description}</p>
-        <div className="flex flex-wrap items-center text-gray-500 text-xs space-x-4">
-          <span>License: {pkg.license}</span>
-          {pkg.repository?.url && (
-            <span>Repo: {pkg.repository.url.replace(/^(https?:\/\/)?/, '')}</span>
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <LucideReact.GitBranch className="text-gray-500" size={20} />
+          <span>Latest Commit</span>
+        </h2>
+        <div className="mt-2 space-y-1">
+          <div className="flex items-center gap-2 text-gray-700">
+            <LucideReact.GitCommit size={16} />
+            <span className="font-medium">{commitSubject}</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
+            <div className="flex items-center gap-1">
+              <LucideReact.GitBranch size={16} />
+              <span>{branch}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Hash size={16} />
+              <span>{shortHash}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.User size={16} />
+              <span>{commitAuthor}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar size={16} />
+              <span>{commitDate}</span>
+            </div>
+          </div>
+          {tags.length > 0 && (
+            <div className="flex items-center gap-2 text-gray-600 text-sm">
+              <LucideReact.Tag size={16} />
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-xs"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
+        </div>
+      </section>
+
+      {/* Package Information */}
+      <section>
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <LucideReact.Archive className="text-gray-500" size={20} />
+          <span>Package</span>
+        </h2>
+        <div className="mt-2 space-y-2 text-gray-600 text-sm">
+          <div className="text-gray-800">
+            <span className="font-medium">{packageName}</span>
+            <span className="ml-1">v{packageVersion}</span>
+          </div>
+          <p className="line-clamp-2">{description}</p>
+          <div className="flex flex-wrap items-center gap-4">
+            <a
+              href={repoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:underline text-xs"
+            >
+              <LucideReact.Link size={16} />
+              <span>Repository</span>
+            </a>
+            <a
+              href={homepage}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:underline text-xs"
+            >
+              <LucideReact.Link size={16} />
+              <span>Homepage</span>
+            </a>
+            <a
+              href={bugUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-blue-600 hover:underline text-xs"
+            >
+              <LucideReact.Bug size={16} />
+              <span>Issues</span>
+            </a>
+            <div className="flex items-center gap-1 text-xs">
+              <LucideReact.Tag size={16} />
+              <span>{license}</span>
+            </div>
+          </div>
         </div>
       </section>
     </div>

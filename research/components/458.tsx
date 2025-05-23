@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * API Insights usage route stats for an actor
@@ -33,112 +34,149 @@ export type AutoViewInput = AutoViewInputSubTypes.api_insights_route_stats;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalRequests = value.reduce(
-    (sum, item) => sum + (item.total_request_count ?? 0),
+  // 1. Define data aggregation/transformation functions or derived constants
+  const totalRequests: number = value.reduce(
+    (acc, item) => acc + (item.total_request_count ?? 0),
     0,
   );
-  const totalRateLimited = value.reduce(
-    (sum, item) => sum + (item.rate_limited_request_count ?? 0),
+  const totalRateLimited: number = value.reduce(
+    (acc, item) => acc + (item.rate_limited_request_count ?? 0),
     0,
   );
-  const overallRateLimitedPct =
+  const rateLimitPercent: number =
     totalRequests > 0 ? (totalRateLimited / totalRequests) * 100 : 0;
 
-  const formatNumber = (num: number) =>
-    new Intl.NumberFormat(undefined, {
-      notation: "compact",
-      compactDisplay: "short",
-    }).format(num);
+  const formatDate = (isoString?: string | null): string => {
+    if (!isoString) return '-';
+    const date = new Date(isoString);
+    return isNaN(date.getTime()) ? '-' : date.toLocaleString();
+  };
 
-  const formatDateTime = (iso?: string | null) =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="w-full p-4 bg-gray-50 rounded-lg">
-      {/* Summary */}
-      <div className="mb-6 p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row sm:justify-between">
-        <div className="text-center sm:text-left">
-          <div className="text-gray-500 text-sm">Total Requests</div>
-          <div className="text-xl font-semibold text-gray-800">
-            {formatNumber(totalRequests)}
-          </div>
-        </div>
-        <div className="mt-4 sm:mt-0 text-center sm:text-left">
-          <div className="text-gray-500 text-sm">Rate Limited</div>
-          <div className="text-xl font-semibold text-gray-800">
-            {formatNumber(totalRateLimited)}{" "}
-            <span className="text-sm text-gray-500">
-              ({overallRateLimitedPct.toFixed(1)}%)
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Detailed Route Cards */}
-      <div className="space-y-4">
-        {value.map((item, idx) => {
-          const method = item.http_method?.toUpperCase() ?? "–";
-          const route = item.api_route ?? "Unknown Route";
-          const total = item.total_request_count ?? 0;
-          const limited = item.rate_limited_request_count ?? 0;
-          const pct = total > 0 ? (limited / total) * 100 : 0;
-
-          return (
-            <div
-              key={`${method}-${route}-${idx}`}
-              className="bg-white rounded-lg shadow-sm p-4 flex flex-col sm:flex-row sm:justify-between"
-            >
-              <div className="flex items-center space-x-2 truncate">
-                <span className="px-2 py-0.5 text-xs font-semibold uppercase text-blue-800 bg-blue-100 rounded">
-                  {method}
-                </span>
-                <span className="text-gray-800 font-medium truncate">
-                  {route}
-                </span>
-              </div>
-              <div className="mt-4 sm:mt-0 grid grid-cols-2 gap-4 text-sm text-gray-600">
-                <div>
-                  <div className="text-gray-500">Requests</div>
-                  <div className="text-gray-800 font-semibold">
-                    {formatNumber(total)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-gray-500">Rate Limited</div>
-                  <div className="text-gray-800 font-semibold">
-                    {formatNumber(limited)}{" "}
-                    <span className="text-xs text-gray-500">
-                      ({pct.toFixed(1)}%)
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <div className="text-gray-500">Last Request</div>
-                  <div className="text-gray-800">
-                    {formatDateTime(item.last_request_timestamp)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-gray-500">Last Rate Limit</div>
-                  <div className="text-gray-800">
-                    {formatDateTime(item.last_rate_limited_timestamp)}
-                  </div>
-                </div>
-              </div>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-lg font-semibold mb-4">API Route Stats</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        <div className="flex items-center p-3 bg-gray-50 rounded-md">
+          <LucideReact.Server size={24} className="text-blue-500 mr-3" />
+          <div>
+            <div className="text-sm text-gray-500">Total Requests</div>
+            <div className="text-xl font-bold">
+              {totalRequests.toLocaleString()}
             </div>
-          );
-        })}
+          </div>
+        </div>
+        <div className="flex items-center p-3 bg-gray-50 rounded-md">
+          <LucideReact.AlertTriangle size={24} className="text-red-500 mr-3" />
+          <div>
+            <div className="text-sm text-gray-500">Rate Limited</div>
+            <div className="text-xl font-bold">
+              {totalRateLimited.toLocaleString()}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center p-3 bg-gray-50 rounded-md">
+          <LucideReact.Percent size={24} className="text-green-500 mr-3" />
+          <div>
+            <div className="text-sm text-gray-500">Rate Limit %</div>
+            <div className="text-xl font-bold">
+              {rateLimitPercent.toFixed(2)}%
+            </div>
+          </div>
+        </div>
       </div>
+
+      {value.length === 0 ? (
+        <div className="flex flex-col items-center py-10 text-gray-500">
+          <LucideReact.AlertCircle size={32} />
+          <span className="mt-2">No API route data available</span>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Method
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase"
+                >
+                  Route
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase"
+                >
+                  Total
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase"
+                >
+                  Rate Limited
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase"
+                >
+                  Last Request
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase"
+                >
+                  Last Rate Limited
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {value.map((item, idx) => (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="px-4 py-2">
+                    <span className="px-2 py-1 uppercase text-xs font-medium bg-gray-100 text-gray-800 rounded">
+                      {item.http_method ?? '-'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2">
+                    <span className="text-blue-600 text-sm truncate block max-w-xs">
+                      {item.api_route ?? '-'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-right text-sm text-gray-700">
+                    {(item.total_request_count ?? 0).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-2 text-right text-sm text-gray-700">
+                    {(item.rate_limited_request_count ?? 0).toLocaleString()}
+                  </td>
+                  <td className="px-4 py-2 text-right text-sm text-gray-700">
+                    <div className="flex justify-end items-center gap-1">
+                      <LucideReact.Calendar
+                        size={16}
+                        className="text-gray-400"
+                      />
+                      <span>{formatDate(item.last_request_timestamp)}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-2 text-right text-sm text-gray-700">
+                    <div className="flex justify-end items-center gap-1">
+                      <LucideReact.Calendar
+                        size={16}
+                        className="text-gray-400"
+                      />
+                      <span>{formatDate(item.last_rate_limited_timestamp)}</span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A comment made to a gist.
      *
      * @title Gist Comment
     */
-    export type gist_comment = {
+    export interface gist_comment {
         id: number & tags.Type<"int32">;
         node_id: string;
         url: string & tags.Format<"uri">;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         author_association: AutoViewInputSubTypes.author_association;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -59,73 +60,80 @@ export type AutoViewInput = AutoViewInputSubTypes.gist_comment;
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const updatedDate = new Date(value.updated_at);
-  const isEdited = updatedDate.getTime() > createdDate.getTime();
-  const formattedCreated = createdDate.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
+  const displayName =
+    value.user?.name && value.user.name.trim() !== ""
+      ? value.user.name
+      : value.user?.login ?? "Unknown User";
+  const placeholderUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName
+  )}&background=0D8ABC&color=fff`;
+  const avatarSrc = value.user?.avatar_url ?? placeholderUrl;
+  const isEdited = value.updated_at !== value.created_at;
+  const createdAt = new Date(value.created_at);
+  const updatedAt = new Date(value.updated_at);
+  const formattedCreated = createdAt.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
-  const formattedUpdated = isEdited
-    ? updatedDate.toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-      })
-    : '';
-  const user = value.user;
-  const username = user?.login ?? 'Unknown User';
-  const avatarUrl = user?.avatar_url ?? '';
-  const association = value.author_association
-    .split('_')
-    .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
-    .join(' ');
+  const formattedUpdated = updatedAt.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const assocLabel = value.author_association
+    .split("_")
+    .map(
+      (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+    )
+    .join(" ");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
-      <div className="flex items-center space-x-3">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={username}
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-            👤
+    <div className="max-w-md w-full bg-white rounded-lg shadow-sm p-4">
+      <div className="flex items-start">
+        <img
+          src={avatarSrc}
+          alt={displayName}
+          className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = placeholderUrl;
+          }}
+        />
+        <div className="ml-3 flex-1">
+          <div className="flex items-center flex-wrap">
+            <span className="font-medium text-gray-900">{displayName}</span>
+            <span className="ml-2 mt-0.5 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+              {assocLabel}
+            </span>
           </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-gray-900 truncate">{username}</h3>
-          <p className="text-xs text-gray-500">
-            <time dateTime={value.created_at}>{formattedCreated}</time>
+          <div className="flex items-center text-sm text-gray-500 mt-1 flex-wrap gap-x-2">
+            <LucideReact.Calendar size={16} className="flex-shrink-0" />
+            <span>{formattedCreated}</span>
             {isEdited && (
               <>
-                {' '}
-                <span aria-label="edited">
-                  (edited <time dateTime={value.updated_at}>{formattedUpdated}</time>)
-                </span>
+                <LucideReact.Edit2 size={16} className="flex-shrink-0 ml-4" />
+                <span>Edited: {formattedUpdated}</span>
               </>
             )}
-          </p>
+          </div>
         </div>
-        <span className="ml-auto bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
-          {association}
-        </span>
       </div>
-      <div className="mt-3 text-gray-800 text-sm leading-relaxed line-clamp-4 whitespace-pre-wrap">
+      <p className="text-gray-700 mt-4 line-clamp-3 whitespace-pre-wrap break-words">
         {value.body}
+      </p>
+      <div className="flex items-center text-sm text-gray-500 mt-3 overflow-hidden">
+        <LucideReact.Link size={16} className="flex-shrink-0" />
+        <span className="ml-1 truncate">{value.url}</span>
       </div>
     </div>
   );
-  // 3. Return the React element.
-  // Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

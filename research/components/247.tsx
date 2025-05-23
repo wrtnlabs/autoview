@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type ManagersView = {
+        export interface ManagersView {
             managers?: AutoViewInputSubTypes.Manager[];
-        };
+        }
     }
-    export type Manager = {
+    export interface Manager {
         id?: string;
         channelId?: string;
         accountId?: string;
@@ -71,17 +72,17 @@ export namespace AutoViewInputSubTypes {
         meetOperator?: boolean;
         emailForFront?: string;
         mobileNumberForFront?: string & tags.Default<"+18004424000">;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.ManagersView;
 
@@ -89,109 +90,96 @@ export type AutoViewInput = AutoViewInputSubTypes.desk.ManagersView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data transformation and derived values
   const managers = value.managers ?? [];
 
-  // Format a timestamp (ms since epoch) to a readable date
-  const formatDate = (ms?: number): string =>
-    ms
-      ? new Date(ms).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "";
-
-  // Generate initials from a full name
-  const getInitials = (name: string): string =>
-    name
-      .split(" ")
-      .map((part) => part.charAt(0).toUpperCase())
-      .slice(0, 2)
-      .join("");
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Empty state
   if (managers.length === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-sm text-gray-500 text-center">
-        No managers available
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span className="text-lg">No managers available</span>
       </div>
     );
   }
 
+  // 3. Compose the visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm">
-      <ul className="space-y-4">
-        {managers.map((mgr, idx) => {
-          const name = mgr.name;
-          const description =
-            mgr.showDescriptionToFront && mgr.description
-              ? mgr.description
-              : "";
-          const email =
-            mgr.showEmailToFront && (mgr.emailForFront || mgr.email)
-              ? mgr.emailForFront || mgr.email
-              : "";
-          const mobile =
-            mgr.showMobileNumberToFront &&
-            (mgr.mobileNumberForFront || mgr.mobileNumber)
-              ? mgr.mobileNumberForFront || mgr.mobileNumber
-              : "";
-          const joined = formatDate(mgr.createdAt);
-          const avatarUrl = mgr.avatarUrl;
-          const initials = getInitials(name);
+    <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {managers.map((manager, idx) => {
+        const name = manager.name;
+        const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          name
+        )}&background=0D8ABC&color=fff`;
+        const avatarSrc = manager.avatarUrl ?? avatarFallback;
+        const description =
+          manager.showDescriptionToFront && manager.description
+            ? manager.description
+            : undefined;
+        const email =
+          manager.showEmailToFront && manager.email ? manager.email : undefined;
+        const mobile =
+          manager.showMobileNumberToFront && manager.mobileNumber
+            ? manager.mobileNumber
+            : undefined;
 
-          return (
-            <li
-              key={mgr.id ?? idx}
-              className="flex items-start space-x-4"
-            >
-              <div className="flex-shrink-0">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt={name}
-                    className="w-12 h-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-medium">
-                    {initials}
-                  </div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-gray-900 font-semibold text-base truncate">
+        return (
+          <article
+            key={manager.id ?? idx}
+            className="p-4 bg-white rounded-lg shadow transition-shadow hover:shadow-md"
+          >
+            <div className="flex items-start space-x-4">
+              <img
+                src={avatarSrc}
+                alt={name}
+                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = avatarFallback;
+                }}
+              />
+              <div className="flex-1">
+                <h3 className="flex items-center text-lg font-semibold text-gray-900">
                   {name}
+                  {manager.operator && (
+                    <LucideReact.UserCheck
+                      size={16}
+                      className="ml-2 text-green-500"
+                      aria-label="Operator"
+                    />
+                  )}
                 </h3>
                 {description && (
-                  <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                  <p className="mt-1 text-gray-600 text-sm line-clamp-2">
                     {description}
                   </p>
                 )}
-                <div className="mt-2 space-y-1 text-gray-700 text-sm">
-                  {email && (
-                    <p>
-                      <span className="font-medium">Email:</span>{" "}
-                      <span className="truncate">{email}</span>
-                    </p>
-                  )}
-                  {mobile && (
-                    <p>
-                      <span className="font-medium">Mobile:</span>{" "}
-                      <span className="truncate">{mobile}</span>
-                    </p>
-                  )}
-                </div>
-                {joined && (
-                  <p className="text-gray-400 text-xs mt-2">
-                    Joined: {joined}
-                  </p>
+                {(email || mobile) && (
+                  <div className="mt-3 space-y-1">
+                    {email && (
+                      <div className="flex items-center text-gray-700 text-sm">
+                        <LucideReact.Mail
+                          size={16}
+                          className="mr-2 text-gray-400"
+                        />
+                        <span className="truncate">{email}</span>
+                      </div>
+                    )}
+                    {mobile && (
+                      <div className="flex items-center text-gray-700 text-sm">
+                        <LucideReact.Phone
+                          size={16}
+                          className="mr-2 text-gray-400"
+                        />
+                        <span className="truncate">{mobile}</span>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+            </div>
+          </article>
+        );
+      })}
+    </section>
   );
 }

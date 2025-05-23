@@ -47,10 +47,6 @@ export default function AutoViewComp({ index }: AutoViewCompProps) {
     );
   }
 
-  const Comp = component;
-
-  console.log(Comp);
-
   // @ts-ignore
-  return <Comp {...random()} />;
+  return component(random());
 }

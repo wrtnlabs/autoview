@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Delivery made by a webhook, without request and response information.
      *
      * @title Simple webhook delivery
     */
-    export type hook_delivery_item = {
+    export interface hook_delivery_item {
         /**
          * Unique identifier of the webhook delivery.
         */
@@ -55,7 +56,7 @@ export namespace AutoViewInputSubTypes {
          * Time when the webhook delivery was throttled.
         */
         throttled_at?: (string & tags.Format<"date-time">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.hook_delivery_item[];
 
@@ -64,89 +65,127 @@ export type AutoViewInput = AutoViewInputSubTypes.hook_delivery_item[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalCount = value.length;
-  const redeliveryCount = value.filter(item => item.redelivery).length;
-  const throttledCount = value.filter(item => item.throttled_at != null).length;
-  const avgDuration = totalCount > 0
-    ? Math.round(value.reduce((sum, item) => sum + item.duration, 0) / totalCount)
-    : 0;
+  const items = value;
+  const total = items.length;
+  const redeliveryCount = items.filter((i) => i.redelivery).length;
+  const avgDuration =
+    total > 0
+      ? Math.round(items.reduce((sum, i) => sum + i.duration, 0) / total)
+      : 0;
 
-  // Helper to format timestamps
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
+
+  const getStatusIcon = (code: number) => {
+    if (code < 300)
+      return <LucideReact.CheckCircle size={16} className="text-green-500" />;
+    if (code < 400)
+      return <LucideReact.Clock size={16} className="text-amber-500" />;
+    return <LucideReact.AlertTriangle size={16} className="text-red-500" />;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-6">
-      {/* Summary Header */}
-      <div className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Webhook Deliveries</h2>
-        <div className="mt-3 sm:mt-0 flex flex-wrap gap-4 text-sm text-gray-600">
-          <div>Total: <span className="font-medium text-gray-800">{totalCount}</span></div>
-          <div>Avg Duration: <span className="font-medium text-gray-800">{avgDuration} ms</span></div>
-          <div>Redeliveries: <span className="font-medium text-gray-800">{redeliveryCount}</span></div>
-          <div>Throttled: <span className="font-medium text-gray-800">{throttledCount}</span></div>
+    <div className="p-4 space-y-6">
+      {/* Summary Card */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Delivery Summary
+        </h2>
+        <div className="flex flex-wrap gap-6">
+          <div className="flex items-center gap-2">
+            <LucideReact.List size={16} className="text-gray-500" />
+            <div>
+              <div className="text-sm text-gray-500">Total</div>
+              <div className="text-lg font-bold text-gray-900">{total}</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <LucideReact.RotateCw size={16} className="text-gray-500" />
+            <div>
+              <div className="text-sm text-gray-500">Redeliveries</div>
+              <div className="text-lg font-bold text-gray-900">
+                {redeliveryCount}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <LucideReact.Clock size={16} className="text-gray-500" />
+            <div>
+              <div className="text-sm text-gray-500">Avg. Duration</div>
+              <div className="text-lg font-bold text-gray-900">
+                {avgDuration} ms
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Delivery List */}
-      <div className="space-y-4">
-        {value.map(item => (
-          <div
+      {/* Delivery Items List */}
+      <ul className="space-y-4">
+        {items.map((item) => (
+          <li
             key={item.id}
-            className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between"
+            className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
           >
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium text-gray-800">Event:</span>
-                <span className="text-gray-600 truncate">{item.event}</span>
-                {item.action && (
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
-                    {item.action}
-                  </span>
-                )}
+            <div className="flex justify-between items-start">
+              <div className="flex flex-col">
+                <div className="text-md font-semibold text-gray-900 truncate">
+                  {item.event}
+                  {item.action ? `: ${item.action}` : ""}
+                </div>
+                <div className="text-sm text-gray-500 truncate">
+                  {item.guid}
+                </div>
               </div>
-              <div className="mt-1 text-sm text-gray-600">
-                Delivered: {formatDate(item.delivered_at)}
+              <div className="flex items-center gap-2">
+                {getStatusIcon(item.status_code)}
+                <span className="text-sm font-medium text-gray-900">
+                  {item.status_code} {item.status}
+                </span>
               </div>
             </div>
-
-            <div className="mt-4 sm:mt-0 flex flex-wrap items-center gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-800">Duration:</span>
-                <span className="ml-1">{item.duration} ms</span>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <LucideReact.Calendar size={16} />
+                <span>{formatDate(item.delivered_at)}</span>
               </div>
-
-              <div>
-                <span className="font-medium text-gray-800">Status:</span>
-                <span className="ml-1">{item.status_code} – {item.status}</span>
+              <div className="flex items-center gap-1">
+                <LucideReact.Clock size={16} />
+                <span>{item.duration} ms</span>
               </div>
-
-              <div
-                className={`px-2 py-0.5 rounded text-xs ${
-                  item.redelivery
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : 'bg-green-100 text-green-800'
-                }`}
-              >
-                {item.redelivery ? 'Redelivery' : 'First Delivery'}
+              <div className="flex items-center gap-1">
+                {item.redelivery ? (
+                  <LucideReact.RotateCw
+                    size={16}
+                    className="text-blue-500"
+                  />
+                ) : (
+                  <LucideReact.CheckCircle
+                    size={16}
+                    className="text-green-500"
+                  />
+                )}
+                <span>
+                  {item.redelivery ? "Redelivery" : "First Delivery"}
+                </span>
               </div>
-
               {item.throttled_at && (
-                <div className="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded">
-                  Throttled
+                <div className="flex items-center gap-1 text-amber-600">
+                  <LucideReact.AlertTriangle size={16} />
+                  <span>Throttled at {formatDate(item.throttled_at)}</span>
                 </div>
               )}
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

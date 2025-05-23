@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Commit Comment
      *
      * @title Commit Comment
     */
-    export type commit_comment = {
+    export interface commit_comment {
         html_url: string & tags.Format<"uri">;
         url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -21,7 +22,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         author_association: AutoViewInputSubTypes.author_association;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -60,7 +61,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -71,7 +72,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.commit_comment[];
 
@@ -79,107 +80,116 @@ export type AutoViewInput = AutoViewInputSubTypes.commit_comment[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const comments = value;
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
+  // 1. Early return for empty data
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-4 text-gray-500">
+        <LucideReact.AlertCircle className="text-gray-400" size={24} />
+        <span className="mt-2">No comments available.</span>
+      </div>
+    );
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Render list of commit comments
   return (
     <div className="space-y-4">
-      {comments.map((comment) => {
-        const {
-          id,
-          body,
-          path,
-          line,
-          user,
-          created_at,
-          author_association,
-          reactions,
-        } = comment;
-        const displayName = user?.name ?? user?.login ?? "Unknown";
-        const avatarUrl = user?.avatar_url;
+      {value.map((comment) => {
+        const user = comment.user;
+        const userName = user?.name ?? user?.login ?? "Unknown";
+        const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          userName
+        )}&background=0D8ABC&color=fff`;
+        const avatarUrl = user?.avatar_url ?? placeholderAvatar;
+        const formattedDate = new Date(comment.created_at).toLocaleString(
+          undefined,
+          { dateStyle: "medium", timeStyle: "short" }
+        );
+
+        // Build reaction icons list for non-zero counts
+        const reactions = comment.reactions;
+        const reactionList: { icon: JSX.Element; count: number }[] = [];
+        if (reactions) {
+          if (reactions["+1"] > 0)
+            reactionList.push({
+              icon: <LucideReact.ThumbsUp size={16} className="text-gray-500" />,
+              count: reactions["+1"],
+            });
+          if (reactions["-1"] > 0)
+            reactionList.push({
+              icon: <LucideReact.ThumbsDown size={16} className="text-gray-500" />,
+              count: reactions["-1"],
+            });
+          if (reactions.laugh > 0)
+            reactionList.push({
+              icon: <LucideReact.Smile size={16} className="text-gray-500" />,
+              count: reactions.laugh,
+            });
+          if (reactions.confused > 0)
+            reactionList.push({
+              icon: <LucideReact.Frown size={16} className="text-gray-500" />,
+              count: reactions.confused,
+            });
+          if (reactions.heart > 0)
+            reactionList.push({
+              icon: <LucideReact.Heart size={16} className="text-gray-500" />,
+              count: reactions.heart,
+            });
+          if (reactions.hooray > 0)
+            reactionList.push({
+              icon: <LucideReact.Star size={16} className="text-gray-500" />,
+              count: reactions.hooray,
+            });
+          if (reactions.eyes > 0)
+            reactionList.push({
+              icon: <LucideReact.Eye size={16} className="text-gray-500" />,
+              count: reactions.eyes,
+            });
+          if (reactions.rocket > 0)
+            reactionList.push({
+              icon: <LucideReact.Rocket size={16} className="text-gray-500" />,
+              count: reactions.rocket,
+            });
+        }
 
         return (
-          <div
-            key={id}
-            className="p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row sm:space-x-4"
-          >
-            {avatarUrl && (
+          <div key={comment.id} className="p-4 bg-white rounded-lg shadow">
+            <div className="flex items-center mb-2">
               <img
                 src={avatarUrl}
-                alt={displayName}
-                className="w-12 h-12 rounded-full flex-shrink-0 mb-3 sm:mb-0"
+                alt={`${userName} avatar`}
+                className="w-10 h-10 rounded-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = placeholderAvatar;
+                }}
               />
-            )}
-            <div className="flex-1">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-wrap items-center space-x-2">
-                  <span className="font-semibold text-gray-800 truncate">
-                    {displayName}
-                  </span>
-                  {user?.login && (
-                    <span className="text-sm text-gray-500 truncate">
-                      @{user.login}
-                    </span>
-                  )}
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
-                    {author_association}
-                  </span>
-                </div>
-                <span className="text-sm text-gray-500 mt-1 sm:mt-0">
-                  {formatDate(created_at)}
-                </span>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-gray-800">{userName}</p>
+                <p className="flex items-center text-xs text-gray-500">
+                  <LucideReact.Calendar className="mr-1" size={14} />
+                  {formattedDate}
+                </p>
+                {comment.path && (
+                  <p className="flex items-center text-xs text-gray-400 mt-0.5 truncate">
+                    <LucideReact.FileText className="mr-1" size={14} />
+                    {comment.path}
+                    {comment.line !== null ? `:${comment.line}` : ""}
+                  </p>
+                )}
               </div>
-
-              {path && (
-                <div className="mt-2 text-sm text-gray-600 truncate">
-                  <span className="font-medium">File:</span>{" "}
-                  {path}
-                  {line !== null ? `:${line}` : ""}
-                </div>
-              )}
-
-              <p className="mt-3 text-gray-700 text-sm line-clamp-3">
-                {body}
-              </p>
-
-              {reactions && (
-                <div className="mt-4 flex flex-wrap items-center space-x-4 text-gray-600 text-sm">
-                  <div className="flex items-center space-x-1">
-                    <span>👍</span>
-                    <span>{reactions["+1"]}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <span>👎</span>
-                    <span>{reactions["-1"]}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <span>😂</span>
-                    <span>{reactions.laugh}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <span>❤️</span>
-                    <span>{reactions.heart}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <span>🚀</span>
-                    <span>{reactions.rocket}</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <span>👀</span>
-                    <span>{reactions.eyes}</span>
-                  </div>
-                  <span className="ml-auto text-gray-500">
-                    {reactions.total_count} reactions
-                  </span>
-                </div>
-              )}
             </div>
+            <p className="text-sm text-gray-700 line-clamp-3 whitespace-pre-wrap">
+              {comment.body}
+            </p>
+            {reactionList.length > 0 && (
+              <div className="flex flex-wrap items-center gap-4 mt-3 text-sm">
+                {reactionList.map((r, idx) => (
+                  <div key={idx} className="flex items-center gap-1">
+                    {r.icon}
+                    <span>{r.count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}

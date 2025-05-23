@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type organization_secret_scanning_alert = {
+    export interface organization_secret_scanning_alert {
         number?: AutoViewInputSubTypes.alert_number;
         created_at?: AutoViewInputSubTypes.alert_created_at;
         updated_at?: AutoViewInputSubTypes.nullable_alert_updated_at;
@@ -74,7 +75,7 @@ export namespace AutoViewInputSubTypes {
          * A boolean value representing whether or not alert is base64 encoded
         */
         is_base64_encoded?: boolean | null;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -137,7 +138,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple Repository
     */
-    export type simple_repository = {
+    export interface simple_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -319,13 +320,13 @@ export namespace AutoViewInputSubTypes {
          * The API URL to list the hooks on the repository.
         */
         hooks_url: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -348,7 +349,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_secret_scanning_alert[];
 
@@ -356,132 +357,149 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_secret_scanning_a
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Utility functions for formatting and deriving labels
-  const formatDate = (dateStr?: string | null): string =>
-    dateStr ? new Date(dateStr).toLocaleString() : '-';
+  // Utility: format ISO date strings to locale
+  const formatDate = (d?: string | null): string => {
+    if (!d) return "—";
+    try {
+      return new Date(d).toLocaleString();
+    } catch {
+      return d;
+    }
+  };
 
-  const capitalize = (str?: string | null): string =>
-    str ? str.charAt(0).toUpperCase() + str.slice(1) : '-';
-
-  const resolutionLabel = (res?: string | null): string =>
-    res
-      ? res
-          .split('_')
-          .map((w) => capitalize(w))
-          .join(' ')
-      : '-';
-
-  const maskSecret = (sec?: string): string =>
-    sec
-      ? sec.length > 12
-        ? `${sec.slice(0, 6)}…${sec.slice(-4)}`
-        : sec
-      : '-';
-
-  // 2. Early return if no data
-  if (!value || value.length === 0) {
+  // Empty state placeholder
+  if (value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No secret-scanning alerts to display.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No secret scanning alerts found</span>
       </div>
     );
   }
 
-  // 3. Compose the visual structure
+  // Render list of alerts
   return (
-    <div className="space-y-6">
-      {value.map((alert, idx) => (
-        <div
-          key={idx}
-          className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-3"
-        >
-          {/* Header: Alert number and state */}
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Alert #{alert.number ?? '-'}
-            </h3>
-            <span
-              className={`px-2 py-1 text-xs font-medium rounded-full ${
-                alert.state === 'open'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-200 text-gray-800'
-              }`}
-            >
-              {capitalize(alert.state)}
-            </span>
-          </div>
+    <div className="space-y-4">
+      {value.map((alert, idx) => {
+        const isResolved = alert.state === "resolved";
 
-          {/* Resolution info if resolved */}
-          {alert.state === 'resolved' && (
-            <div className="text-sm text-gray-600">
-              Resolved{' '}
-              <span className="font-medium">
-                {resolutionLabel(alert.resolution)}
-              </span>{' '}
-              at <span className="font-medium">{formatDate(alert.resolved_at)}</span>
-              {alert.resolved_by?.login
-                ? ` by ${alert.resolved_by.login}`
-                : ''}
+        // State icon
+        const stateIcon = isResolved ? (
+          <LucideReact.CheckCircle className="text-green-500" size={16} />
+        ) : (
+          <LucideReact.Clock className="text-amber-500" size={16} />
+        );
+        // Validity icon
+        const validityIcon =
+          alert.validity === "active" ? (
+            <LucideReact.CheckCircle
+              className="text-green-500"
+              size={16}
+              aria-label="Validity: Active"
+            />
+          ) : alert.validity === "inactive" ? (
+            <LucideReact.XCircle
+              className="text-red-500"
+              size={16}
+              aria-label="Validity: Inactive"
+            />
+          ) : (
+            <LucideReact.HelpCircle
+              className="text-gray-500"
+              size={16}
+              aria-label="Validity: Unknown"
+            />
+          );
+
+        return (
+          <div key={idx} className="p-4 bg-white rounded-lg shadow">
+            {/* Header: Alert number and state */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1 text-sm font-semibold text-gray-800">
+                <LucideReact.AlertTriangle className="text-red-500" size={16} />
+                <span>Alert #{alert.number ?? "—"}</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm capitalize">
+                {stateIcon}
+                <span>{alert.state ?? "—"}</span>
+              </div>
             </div>
-          )}
 
-          {/* Timestamps */}
-          <div className="flex flex-wrap text-sm text-gray-500 gap-x-4">
-            <div>Created: {formatDate(alert.created_at)}</div>
-            {alert.updated_at && <div>Updated: {formatDate(alert.updated_at)}</div>}
-          </div>
+            {/* Repository */}
+            {alert.repository?.full_name && (
+              <div className="flex items-center gap-1 text-xs text-gray-600 mb-2 truncate">
+                <LucideReact.GitBranch className="text-gray-500" size={16} />
+                <span>{alert.repository.full_name}</span>
+              </div>
+            )}
 
-          {/* Repository */}
-          {alert.repository && (
-            <div className="text-sm text-gray-700">
-              <span className="font-medium">Repo:</span>{' '}
-              {alert.repository.full_name}
+            {/* Secret Type */}
+            {alert.secret_type_display_name && (
+              <div className="flex items-center gap-1 text-xs text-gray-600 mb-2">
+                <LucideReact.Tag className="text-blue-500" size={16} />
+                <span>{alert.secret_type_display_name}</span>
+              </div>
+            )}
+
+            {/* Dates */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-500 mb-2">
+              <div className="flex items-center gap-1">
+                <LucideReact.Calendar size={16} />
+                <span>Created: {formatDate(alert.created_at)}</span>
+              </div>
+              {isResolved && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={16} />
+                  <span>Resolved: {formatDate(alert.resolved_at)}</span>
+                </div>
+              )}
             </div>
-          )}
 
-          {/* Badges for flags */}
-          <div className="flex flex-wrap gap-2">
-            {alert.validity && (
-              <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  alert.validity === 'active'
-                    ? 'bg-green-100 text-green-800'
-                    : alert.validity === 'inactive'
-                    ? 'bg-red-100 text-red-800'
-                    : 'bg-yellow-100 text-yellow-800'
-                }`}
-              >
-                Validity: {capitalize(alert.validity)}
-              </span>
-            )}
-            {alert.publicly_leaked && (
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                Publicly Leaked
-              </span>
-            )}
-            {alert.multi_repo && (
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                Multi-Repo
-              </span>
-            )}
-            {alert.push_protection_bypassed && (
-              <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                Push Bypassed
-              </span>
-            )}
-          </div>
+            {/* Flags and status icons */}
+            <div className="flex flex-wrap items-center gap-3 text-xs">
+              {validityIcon}
+              {alert.publicly_leaked && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.ShieldOff
+                    className="text-red-500"
+                    size={16}
+                    aria-label="Publicly leaked"
+                  />
+                  <span>Leaked</span>
+                </div>
+              )}
+              {alert.multi_repo && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Users
+                    className="text-gray-500"
+                    size={16}
+                    aria-label="Found in multiple repositories"
+                  />
+                  <span>Multi-repo</span>
+                </div>
+              )}
+              {alert.is_base64_encoded && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Key
+                    className="text-gray-500"
+                    size={16}
+                    aria-label="Base64 encoded"
+                  />
+                  <span>Base64</span>
+                </div>
+              )}
+            </div>
 
-          {/* Secret type and masked secret */}
-          <div className="text-sm text-gray-700">
-            <span className="font-medium">Secret Type:</span>{' '}
-            {alert.secret_type_display_name || alert.secret_type || '-'}
+            {/* Alert URL (display only) */}
+            {alert.html_url && (
+              <div className="mt-2 flex items-center gap-1 text-xs text-blue-600 truncate">
+                <LucideReact.Link size={16} />
+                <span>{alert.html_url}</span>
+              </div>
+            )}
           </div>
-          <div className="text-sm text-gray-700">
-            <span className="font-medium">Secret:</span>{' '}
-            <span className="font-mono">{maskSecret(alert.secret)}</span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

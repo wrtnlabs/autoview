@@ -1,15 +1,16 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace open {
         export namespace marketing {
-            export type OneTimeMsgView = {
+            export interface OneTimeMsgView {
                 oneTimeMsg?: AutoViewInputSubTypes.marketing.OneTimeMsg;
-            };
+            }
         }
     }
     export namespace marketing {
-        export type OneTimeMsg = {
+        export interface OneTimeMsg {
             id?: string;
             channelId?: string;
             name: string;
@@ -35,23 +36,24 @@ export namespace AutoViewInputSubTypes {
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
             userChatExpireDuration?: string;
-        };
-        export type SendMediumSettings = {
+        }
+        export interface SendMediumSettings {
             type: string;
-        };
-        export type OneTimeMsgDraft = {
+        }
+        export interface OneTimeMsgDraft {
             oneTimeMsg: AutoViewInputSubTypes.marketing.OneTimeMsg;
-        };
+        }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
+    }
+    export interface Operator {
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.open.marketing.OneTimeMsgView;
 
@@ -59,148 +61,196 @@ export type AutoViewInput = AutoViewInputSubTypes.open.marketing.OneTimeMsgView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const msg = value.oneTimeMsg;
+  // Empty state if no message
   if (!msg) {
     return (
-      <div className="p-4 text-center text-gray-500 italic">
-        No message data available
+      <div className="flex flex-col items-center justify-center p-6 text-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mb-2" />
+        <p className="text-sm">No message data available</p>
       </div>
     );
   }
 
-  // 1. Define data aggregation/transformation functions or derived constants
-  const statusMap = {
-    draft: "Draft",
-    waiting: "Waiting",
-    sent: "Sent",
-    canceled: "Canceled",
-    removed: "Removed",
-  } as const;
-  const sendModeMap = {
-    immediately: "Immediately",
-    reservedWithSenderTime: "Reserved (Sender Time)",
-    reservedWithReceiverTime: "Reserved (Receiver Time)",
-  } as const;
-  const sendMediumMap = {
-    appAlimtalk: "App Alimtalk",
-    appLine: "App Line",
-    email: "Email",
-    inAppChat: "In-App Chat",
-    xms: "XMS",
-  } as const;
+  // State mapping for label, icon, and colors
+  const stateMap: Record<AutoViewInputSubTypes.marketing.OneTimeMsg['state'], {
+    label: string;
+    icon: JSX.Element;
+    bg: string;
+    text: string;
+  }> = {
+    draft: {
+      label: 'Draft',
+      icon: <LucideReact.Edit2 size={16} />,
+      bg: 'bg-gray-100',
+      text: 'text-gray-800',
+    },
+    waiting: {
+      label: 'Scheduled',
+      icon: <LucideReact.Clock size={16} />,
+      bg: 'bg-amber-100',
+      text: 'text-amber-800',
+    },
+    sent: {
+      label: 'Sent',
+      icon: <LucideReact.CheckCircle size={16} />,
+      bg: 'bg-green-100',
+      text: 'text-green-800',
+    },
+    canceled: {
+      label: 'Canceled',
+      icon: <LucideReact.XCircle size={16} />,
+      bg: 'bg-red-100',
+      text: 'text-red-800',
+    },
+    removed: {
+      label: 'Removed',
+      icon: <LucideReact.Trash2 size={16} />,
+      bg: 'bg-red-50',
+      text: 'text-red-600',
+    },
+  };
+  const stateInfo = stateMap[msg.state];
 
-  function formatTimestamp(ts?: number): string {
-    if (!ts) return "-";
-    return new Date(ts).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  // Send medium mapping
+  type MediumKey = Exclude<AutoViewInputSubTypes.marketing.OneTimeMsg['sendMedium'], undefined>;
+  const mediumMap: Partial<Record<MediumKey, { label: string; icon: JSX.Element }>> = {
+    email: {
+      label: 'Email',
+      icon: <LucideReact.Mail size={16} />,
+    },
+    inAppChat: {
+      label: 'In-App Chat',
+      icon: <LucideReact.MessageSquare size={16} />,
+    },
+    appAlimtalk: {
+      label: 'Alimtalk',
+      icon: <LucideReact.MessageCircle size={16} />,
+    },
+    appLine: {
+      label: 'LINE',
+      icon: <LucideReact.MessageCircle size={16} />,
+    },
+    xms: {
+      label: 'XMS',
+      icon: <LucideReact.MessageSquare size={16} />,
+    },
+  };
+  const mediumInfo = msg.sendMedium ? mediumMap[msg.sendMedium as MediumKey] : undefined;
 
-  function formatLocalDateTime(dt?: string): string {
-    if (!dt) return "-";
-    const d = new Date(dt);
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  // Format dates
+  const formattedStart = msg.localStartAt
+    ? new Date(msg.localStartAt).toLocaleString()
+    : msg.startAt
+      ? new Date(msg.startAt).toLocaleString()
+      : '—';
+  const createdAt = msg.createdAt
+    ? new Date(msg.createdAt).toLocaleString()
+    : '—';
+  const updatedAt = msg.updatedAt
+    ? new Date(msg.updatedAt).toLocaleString()
+    : '—';
 
-  const formattedStatus = statusMap[msg.state] || msg.state;
-  const formattedSendMode = msg.sendMode ? sendModeMap[msg.sendMode] : "";
-  const formattedMedium = msg.sendMedium ? sendMediumMap[msg.sendMedium] : "";
-  const scheduledAt =
-    msg.localStartAt || msg.startAt ? (
-      msg.localStartAt
-        ? formatLocalDateTime(msg.localStartAt)
-        : formatTimestamp(msg.startAt)
-    ) : null;
-
-  const metrics = [
-    { label: "Sent", value: msg.sent ?? 0 },
-    { label: "Views", value: msg.view ?? 0 },
-    { label: "Clicks", value: msg.click ?? 0 },
-    { label: "Goals", value: msg.goal ?? 0 },
+  // Stats with defaults
+  const stats: { label: string; value: number; icon: JSX.Element }[] = [
+    { label: 'Sent', value: msg.sent ?? 0, icon: <LucideReact.Send size={16} /> },
+    { label: 'Opened', value: msg.view ?? 0, icon: <LucideReact.Eye size={16} /> },
+    { label: 'Clicked', value: msg.click ?? 0, icon: <LucideReact.MousePointer size={16} /> },
+    { label: 'Goal', value: msg.goal ?? 0, icon: <LucideReact.Target size={16} /> },
   ];
 
+  // Feature badges
+  const badges: JSX.Element[] = [];
+  if (msg.advertising) {
+    badges.push(
+      <span
+        key="adv"
+        className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-blue-100 text-blue-800"
+      >
+        <LucideReact.Megaphone size={12} className="mr-1" />
+        Advertising
+      </span>
+    );
+  }
+  if (msg.sendToOfflineEmail) {
+    badges.push(
+      <span
+        key="off-email"
+        className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-purple-100 text-purple-800"
+      >
+        <LucideReact.Mail size={12} className="mr-1" />
+        Offline Email
+      </span>
+    );
+  }
+  if (msg.sendToOfflineXms) {
+    badges.push(
+      <span
+        key="off-xms"
+        className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-indigo-100 text-indigo-800"
+      >
+        <LucideReact.MessageSquare size={12} className="mr-1" />
+        Offline XMS
+      </span>
+    );
+  }
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <article className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+    <div className="p-4 bg-white rounded-lg shadow-sm">
       {/* Header */}
-      <header className="mb-3">
-        <h2 className="text-xl font-semibold text-gray-800 truncate">
-          {msg.name}
-        </h2>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <span
-            className={`px-2 py-0.5 text-sm font-medium rounded ${
-              msg.state === "sent"
-                ? "bg-green-100 text-green-800"
-                : msg.state === "draft" || msg.state === "waiting"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-red-100 text-red-800"
-            }`}
-          >
-            {formattedStatus}
-          </span>
-          {formattedMedium && (
-            <span className="px-2 py-0.5 text-sm text-gray-700 bg-gray-100 rounded">
-              {formattedMedium}
-            </span>
-          )}
-          {formattedSendMode && (
-            <span className="px-2 py-0.5 text-sm text-gray-700 bg-gray-100 rounded">
-              {formattedSendMode}
-            </span>
-          )}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 truncate">
+          <LucideReact.MessageSquare size={24} className="text-indigo-500 flex-shrink-0" />
+          <h3 className="text-lg font-semibold text-gray-900 truncate">{msg.name}</h3>
         </div>
-      </header>
+        <div
+          className={`inline-flex items-center px-2 py-1 text-sm font-medium rounded ${stateInfo.bg} ${stateInfo.text}`}
+        >
+          {stateInfo.icon}
+          <span className="ml-1">{stateInfo.label}</span>
+        </div>
+      </div>
 
-      {/* Schedule & Flags */}
-      <section className="mb-4 text-sm text-gray-600 space-y-1">
-        {scheduledAt && (
-          <p>
-            <strong>Scheduled At:</strong> {scheduledAt}
-          </p>
+      {/* Medium & Dates */}
+      <div className="mt-3 flex flex-wrap items-center text-sm text-gray-600 space-x-4">
+        {mediumInfo && (
+          <div className="flex items-center space-x-1">
+            {mediumInfo.icon}
+            <span>{mediumInfo.label}</span>
+          </div>
         )}
-        <div className="flex flex-wrap gap-2">
-          {msg.advertising && (
-            <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
-              Advertising
-            </span>
-          )}
-          {msg.sendToOfflineXms && (
-            <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-800 rounded">
-              Offline XMS
-            </span>
-          )}
-          {msg.sendToOfflineEmail && (
-            <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-800 rounded">
-              Offline Email
-            </span>
-          )}
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span>Scheduled: {formattedStart}</span>
         </div>
-      </section>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Clock size={16} />
+          <span>Created: {createdAt}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.RefreshCw size={16} />
+          <span>Updated: {updatedAt}</span>
+        </div>
+      </div>
 
-      {/* Metrics */}
-      <section>
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Metrics</h3>
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-          {metrics.map(({ label, value }) => (
-            <div key={label} className="flex justify-between">
-              <dt className="text-gray-600">{label}</dt>
-              <dd className="font-medium text-gray-800">
-                {value.toLocaleString()}
-              </dd>
+      {/* Stats */}
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {stats.map((s) => (
+          <div key={s.label} className="flex items-center space-x-2">
+            {s.icon}
+            <div>
+              <p className="text-sm font-medium text-gray-900">{s.value}</p>
+              <p className="text-xs text-gray-500">{s.label}</p>
             </div>
-          ))}
-        </dl>
-      </section>
-    </article>
+          </div>
+        ))}
+      </div>
+
+      {/* Badges */}
+      {badges.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{badges}</div>}
+    </div>
   );
 }

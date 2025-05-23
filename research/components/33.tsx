@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IPageIShoppingSaleReview {
         /**
@@ -7,7 +8,7 @@ export namespace AutoViewInputSubTypes {
          *
          * Collection of records with pagination indformation.
         */
-        export type IAbridge = {
+        export interface IAbridge {
             /**
              * Page information.
              *
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
              * @title List of records
             */
             data: AutoViewInputSubTypes.IShoppingSaleReview.IAbridge[];
-        };
+        }
     }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -53,13 +54,13 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     export namespace IShoppingSaleReview {
         /**
          * Abridged information of the review.
         */
-        export type IAbridge = {
+        export interface IAbridge {
             /**
              * Score of the review.
              *
@@ -77,7 +78,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Formal answer for the inquiry by the seller
             */
-            answer: null | any;
+            answer: null | AutoViewInputSubTypes.IShoppingSaleInquiryAnswer.IAbridge;
             /**
              * Whether the seller has viewed the inquiry or not.
              *
@@ -130,7 +131,7 @@ export namespace AutoViewInputSubTypes {
              * @title List of attachment files
             */
             files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
-        };
+        }
     }
     /**
      * Customer information, but not a person but a connection basis.
@@ -162,7 +163,7 @@ export namespace AutoViewInputSubTypes {
      * Therefore, identification and tracking of customers can be done very
      * systematically.
     */
-    export type IShoppingCustomer = {
+    export interface IShoppingCustomer {
         /**
          * Discriminant for the type of customer.
          *
@@ -176,7 +177,7 @@ export namespace AutoViewInputSubTypes {
          *
          * @title Membership information
         */
-        member: null | any;
+        member: null | AutoViewInputSubTypes.IShoppingMember;
         /**
          * Citizen information.
          *
@@ -184,7 +185,7 @@ export namespace AutoViewInputSubTypes {
          *
          * @title Citizen information
         */
-        citizen: null | any;
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
         /**
          * Primary Key.
          *
@@ -204,7 +205,7 @@ export namespace AutoViewInputSubTypes {
          *
          * @title External user information
         */
-        external_user: null | any;
+        external_user: null | AutoViewInputSubTypes.IShoppingExternalUser;
         /**
          * Connection address.
          *
@@ -233,9 +234,196 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of the connection record
         */
         created_at: string;
-    };
-    export type IShoppingMember = any;
-    export type IShoppingCitizen = any;
+    }
+    /**
+     * Member Account.
+     *
+     * `IShoppingMember` is an entity that symbolizes the case when a
+     * {@link IShoppingCustomer} signs up as a member of this shopping mall
+     * system.
+     *
+     * If a `IShoppingMember` has seller or administrator property. it means that
+     * the {@link IShoppingCustomer} has acting as a {@link IShoppingSeller seller}
+     * or {@link IShoppingAdministrator administrator} at the same time.
+    */
+    export interface IShoppingMember {
+        /**
+         * Citizen information.
+         *
+         * Only when has verified as a citizen, with mobile number and real name.
+         *
+         * For reference, if the member has signed up as a seller or administrator,
+         * this citizen information must be.
+         *
+         * @title Citizen information
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Seller information.
+         *
+         * If the member also signed up as a seller.
+         *
+         * @title Seller information
+        */
+        seller: null | AutoViewInputSubTypes.IShoppingSeller;
+        /**
+         * Administrator information.
+         *
+         * If the member also signed up as an administrator.
+         *
+         * @title Administrator information
+        */
+        administrator: null | AutoViewInputSubTypes.IShoppingAdministrator;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Nickname that uniquely identifies the member.
+         *
+         * @title Nickname that uniquely identifies the member
+        */
+        nickname: string;
+        /**
+         * List of emails.
+         *
+         * @title List of emails
+        */
+        emails: AutoViewInputSubTypes.IShoppingMemberEmail[];
+        /**
+         * Creation time of record.
+         *
+         * Another words, the time when the member has signed up.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    }
+    /**
+     * Citizen verification information.
+     *
+     * `IShoppingCitizen` is an entity that records the user's
+     * {@link name real name} and {@link mobile} input information.
+     *
+     * For reference, in South Korea, real name authentication is required for
+     * e-commerce participants, so the name attribute is important. However, the
+     * situation is different overseas, so in reality, mobile attributes are the
+     * most important, and identification of individual person is also done based
+     * on this mobile.
+     *
+     * Of course, real name and mobile phone authentication information are
+     * encrypted and stored.
+    */
+    export interface IShoppingCitizen {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Mobile number.
+         *
+         * @title Mobile number
+        */
+        mobile: string;
+        /**
+         * Real name, or equivalent nickname.
+         *
+         * @title Real name, or equivalent nickname
+        */
+        name: string;
+    }
+    /**
+     * Seller information.
+     *
+     * `IShoppingSeller` is an entity that embodies a person who registers
+     * {@link IShoppingSale sales} to operate selling activities, with
+     * {@link IShoppingMember membership} joining.
+     *
+     * For reference, unlike {@link IShoppingCustomer customers} which can
+     * participate even without membership joining, seller must join membership
+     * to operate sales. Also, seller must do the
+     * {@link IShoppingCitizen real-name and mobile authentication}, too.
+    */
+    export interface IShoppingSeller {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation tmie of record.
+         *
+         * Another words, the time when the seller has signed up.
+         *
+         * @title Creation tmie of record
+        */
+        created_at: string;
+    }
+    /**
+     * Administrator account.
+     *
+     * `IShoppingAdministrator` is an entity that embodies a person who manages
+     * the shopping mall system, with {@link IShoppingMember membership} joining.
+     *
+     * For reference, unlike {@link IShoppingCustomer customers} which can participate
+     * even without membership joining, administrator must join membership to operate
+     * managements. Also, administrator must perform the
+     * {@link IShoppingCitizen real-name and mobile authentication}, too.
+    */
+    export interface IShoppingAdministrator {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * Another words, the time when the administrator has signed up.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    }
+    /**
+     * Email address of member.
+     *
+     * This shopping mall system allows multiple email addresses to be
+     * registered for one {@link IShoppingMember member}. If you don't have to
+     * plan such multiple email addresses, just use only one.
+    */
+    export interface IShoppingMemberEmail {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Email address value.
+         *
+         * @title Email address value
+        */
+        value: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    }
     /**
      * Channel information.
      *
@@ -246,7 +434,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -271,13 +459,133 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
-    export type IShoppingExternalUser = any;
+    }
+    /**
+     * External user information.
+     *
+     * `IShoppingExternalUser` is an entity dsigned for when this system needs
+     * to connect with external services and welcome their users as
+     * {@link IShoppingCustomer customers} of this service.
+     *
+     * For reference, customers who connect from an external service must have
+     * this record, and the external service user is identified through the two
+     * attributes {@link application} and {@link uid}. If a customer connected
+     * from an external service completes
+     * {@link IShoppingCitizen real-name authentication} from this service, each
+     * time the external service user reconnects to this service and issues a
+     * new customer authentication token, real-name authentication begins with
+     * completed.
+     *
+     * And {@link password} is the password issued to the user by the external
+     * service system (the so-called permanent user authentication token), and
+     * is never the actual user password. However, for customers who entered the
+     * same application and uid as the current external system user, this is to
+     * determine whether to view this as a correct external system user or a
+     * violation.
+     *
+     * In addition, additional information received from external services can
+     * be recorded in the data field in JSON format.
+    */
+    export interface IShoppingExternalUser {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Citizen activation info.
+         *
+         * @title Citizen activation info
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Creation time of record.
+         *
+         * Another word, first time when the external user connected.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier key of external user from the external system.
+         *
+         * @title Identifier key of external user from the external system
+        */
+        uid: string;
+        /**
+         * Identifier code of the external service.
+         *
+         * It can be same with {@link IShoppingChannel.code} in common.
+         *
+         * @title Identifier code of the external service
+        */
+        application: string;
+        /**
+         * Nickname of external user in the external system.
+         *
+         * @title Nickname of external user in the external system
+        */
+        nickname: string;
+        /**
+         * Additional information about external user from the external
+         * system.
+        */
+        data: any;
+    }
     export namespace IShoppingSaleInquiryAnswer {
-        export type IAbridge = any;
+        export interface IAbridge {
+            seller: AutoViewInputSubTypes.IShoppingSeller;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Title of the last snapshot.
+             *
+             * @title Title of the last snapshot
+            */
+            title: string;
+            /**
+             * Creation time of the article.
+             *
+             * @title Creation time of the article
+            */
+            created_at: string;
+            /**
+             * Modification time of the article.
+             *
+             * In other words, the time when the last snapshot was created.
+             *
+             * @title Modification time of the article
+            */
+            updated_at: string;
+            /**
+             * Format of body.
+             *
+             * Same meaning with extension like `html`, `md`, `txt`.
+             *
+             * @title Format of body
+            */
+            format: "html" | "md" | "txt";
+            /**
+             * Content body of article.
+             *
+             * @title Content body of article
+            */
+            body: string;
+            /**
+             * List of attachment files.
+             *
+             * @title List of attachment files
+            */
+            files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
+        }
     }
     export namespace IAttachmentFile {
-        export type ICreate = {
+        export interface ICreate {
             /**
              * File name, except extension.
              *
@@ -300,7 +608,7 @@ export namespace AutoViewInputSubTypes {
              * @title URL path of the real file
             */
             url: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSaleReview.IAbridge;
@@ -310,67 +618,102 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSaleReview.IAbri
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { current, pages, records } = value.pagination;
-
-  // Format ISO date strings into a human-readable format.
-  const formatDate = (iso: string): string => {
-    const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
+  const { pagination, data } = value;
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full p-4">
-      {/* Pagination Summary */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 text-sm text-gray-600">
-        <span className="mb-1 sm:mb-0">Page {current} of {pages}</span>
-        <span>Total {records} review{records !== 1 ? "s" : ""}</span>
-      </div>
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">Sale Reviews</h2>
+        <div className="text-sm text-gray-500 mt-1 sm:mt-0">
+          Page {pagination.current} of {pagination.pages} (Total: {pagination.records})
+        </div>
+      </header>
 
-      {/* Review List */}
-      <div className="space-y-6">
-        {value.data.map((review) => (
-          <div
-            key={review.id}
-            className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow"
-          >
-            {/* Title and Score */}
-            <div className="flex justify-between items-start">
-              <h3 className="flex-1 text-lg font-semibold text-gray-800 truncate">
-                {review.title}
-              </h3>
-              <span className="ml-4 inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-sm font-medium rounded">
-                {review.score.toFixed(1)}
-              </span>
-            </div>
-
-            {/* Body Preview */}
-            <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-              {review.body}
-            </p>
-
-            {/* Metadata */}
-            <div className="mt-4 flex flex-wrap gap-3 text-xs text-gray-500">
-              <span>{formatDate(review.created_at)}</span>
-              <span>
-                {review.read_by_seller
-                  ? <span className="inline-flex items-center px-1.5 py-0.5 bg-green-100 text-green-800 rounded">Read</span>
-                  : <span className="inline-flex items-center px-1.5 py-0.5 bg-red-100 text-red-800 rounded">Unread</span>}
-              </span>
-              <span>
-                {review.answer
-                  ? <span className="inline-flex items-center px-1.5 py-0.5 bg-green-50 text-green-700 rounded">Answered</span>
-                  : <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded">No Answer</span>}
-              </span>
-              <span>Channel: {review.customer.channel.name}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+      {data.length === 0 ? (
+        <div className="flex flex-col items-center py-10 text-gray-400">
+          <LucideReact.AlertCircle size={48} aria-label="No reviews" />
+          <span className="mt-2">No reviews available</span>
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-200">
+          {data.map((review) => (
+            <article
+              key={review.id}
+              className="py-4 flex flex-col sm:flex-row sm:justify-between"
+            >
+              <div className="flex-1 pr-2">
+                <h3 className="text-lg font-medium text-gray-800 truncate">
+                  {review.title}
+                </h3>
+                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                  {review.body}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+                  <div className="flex items-center">
+                    <LucideReact.Star className="text-amber-400" size={16} />
+                    <span className="ml-1">{review.score.toFixed(1)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Calendar className="text-gray-400" size={16} />
+                    <span className="ml-1">{formatDate(review.created_at)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Link className="text-gray-400" size={16} />
+                    <span className="ml-1">{review.customer.channel.name}</span>
+                  </div>
+                  {review.files.length > 0 && (
+                    <div className="flex items-center">
+                      <LucideReact.FileText
+                        className="text-indigo-500"
+                        size={16}
+                      />
+                      <span className="ml-1">
+                        {review.files.length} file
+                        {review.files.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="mt-3 sm:mt-0 flex items-center space-x-4">
+                {review.read_by_seller ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={16}
+                    aria-label="Read by seller"
+                  />
+                ) : (
+                  <LucideReact.Clock
+                    className="text-amber-500"
+                    size={16}
+                    aria-label="Unread by seller"
+                  />
+                )}
+                {review.answer ? (
+                  <LucideReact.MessageSquare
+                    className="text-blue-500"
+                    size={16}
+                    aria-label="Answered"
+                  />
+                ) : (
+                  <LucideReact.MessageSquare
+                    className="text-gray-400"
+                    size={16}
+                    aria-label="No answer yet"
+                  />
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

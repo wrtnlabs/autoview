@@ -1,14 +1,15 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4CampaignsView = {
+                export interface LegacyV4CampaignsView {
                     campaigns?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign[];
                     msgs?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4CampaignMsg[];
                     next?: number;
-                };
+                }
             }
         }
         export namespace v4 {
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
                  *
                  * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
                 */
-                export type LegacyV4Campaign = {
+                export interface LegacyV4Campaign {
                     id?: string;
                     channelId?: string;
                     name: string;
@@ -52,8 +53,8 @@ export namespace AutoViewInputSubTypes {
                     click?: number & tags.Type<"int32">;
                     userChatExpireDuration?: string;
                     managerId?: string;
-                };
-                export type LegacyV4CampaignMsg = {
+                }
+                export interface LegacyV4CampaignMsg {
                     id: string;
                     campaignId?: string;
                     name: string;
@@ -65,35 +66,36 @@ export namespace AutoViewInputSubTypes {
                     view?: number & tags.Type<"int32">;
                     goal?: number & tags.Type<"int32">;
                     click?: number & tags.Type<"int32">;
-                };
+                }
             }
         }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
-    export type TimeRange = {
+    }
+    export interface Operator {
+    }
+    export interface TimeRange {
         dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
         from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
         to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-    };
+    }
     export namespace marketing {
-        export type CampaignDraft = {
+        export interface CampaignDraft {
             campaign: AutoViewInputSubTypes.marketing.Campaign;
             msgs: AutoViewInputSubTypes.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
-        };
+        }
         /**
          * ### 이벤트 기록
          *
          * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
         */
-        export type Campaign = {
+        export interface Campaign {
             id?: string;
             channelId?: string;
             name: string;
@@ -131,16 +133,16 @@ export namespace AutoViewInputSubTypes {
             userChatExpireDuration?: string;
             managerId?: string;
             recipeCaseId?: string;
-        };
-        export type HoldingPropertyConstant = {
+        }
+        export interface HoldingPropertyConstant {
             baseEventName: string;
             baseEventKey: string;
             eventQuery?: AutoViewInputSubTypes.Expression;
             baseEventType: "triggerEvent" | "additionalFilter";
             operator?: AutoViewInputSubTypes.EventSchema;
             values?: {};
-        };
-        export type CampaignMsg = {
+        }
+        export interface CampaignMsg {
             id: string;
             campaignId?: string;
             channelId?: string;
@@ -153,12 +155,12 @@ export namespace AutoViewInputSubTypes {
             view?: number & tags.Type<"int32">;
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
-        };
-        export type SendMediumSettings = {
+        }
+        export interface SendMediumSettings {
             type: string;
-        };
+        }
     }
-    export type EventSchema = {
+    export interface EventSchema {
         id?: string;
         channelId?: string;
         eventName?: string;
@@ -168,7 +170,7 @@ export namespace AutoViewInputSubTypes {
         createdAt?: number;
         updatedAt?: number;
         icon?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4CampaignsView;
 
@@ -176,133 +178,152 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Campaig
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data extraction and derived functions
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const campaigns = value.campaigns ?? [];
   const msgs = value.msgs ?? [];
-  const nextToken = value.next;
+  const totalCampaigns = campaigns.length;
+  const totalMessages = msgs.length;
+  const hasData = totalCampaigns > 0 || totalMessages > 0;
 
-  const formatDate = (ts?: number) =>
-    ts
-      ? new Date(ts).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "-";
-
-  const formatNumber = (num?: number) =>
-    num != null ? num.toLocaleString() : "0";
-
-  const stateColor: Record<string, string> = {
-    draft: "bg-gray-200 text-gray-800",
-    active: "bg-green-100 text-green-800",
-    stopped: "bg-yellow-100 text-yellow-800",
-    removed: "bg-red-100 text-red-800",
+  const stateIcon = (state?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign["state"]) => {
+    switch (state) {
+      case "active":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} aria-label="Active" />;
+      case "draft":
+        return <LucideReact.Clock className="text-gray-500" size={16} aria-label="Draft" />;
+      case "stopped":
+        return <LucideReact.XCircle className="text-yellow-500" size={16} aria-label="Stopped" />;
+      case "removed":
+        return <LucideReact.Trash2 className="text-red-500" size={16} aria-label="Removed" />;
+      default:
+        return null;
+    }
   };
 
-  const mediumLabel: Record<string, string> = {
-    appAlimtalk: "App Alimtalk",
-    appLine: "App Line",
-    email: "Email",
-    inAppChat: "In-App Chat",
-    xms: "XMS",
+  const mediumLabel = (m: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign["sendMedium"]) => {
+    const map: Record<string, string> = {
+      appAlimtalk: "AlimTalk",
+      appLine: "LINE",
+      email: "Email",
+      inAppChat: "In-App Chat",
+      xms: "XMS",
+    };
+    return map[m] ?? m;
+  };
+
+  const renderCampaign = (
+    c: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign,
+    i: number
+  ) => {
+    const created = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "--";
+    return (
+      <div key={i} className="mb-4 p-4 bg-white rounded-lg shadow">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-lg font-medium text-gray-800 truncate">{c.name}</h3>
+          {stateIcon(c.state)}
+        </div>
+        <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-2">
+          <span className="flex items-center gap-1">
+            <LucideReact.Tag size={12} className="text-gray-400" />
+            <span>{mediumLabel(c.sendMedium)}</span>
+          </span>
+          <span className="flex items-center gap-1">
+            <LucideReact.Calendar size={12} className="text-gray-400" />
+            <span>{created}</span>
+          </span>
+        </div>
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+          {typeof c.sent === "number" && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Send size={12} className="text-gray-400" />
+              <span>{c.sent}</span>
+            </div>
+          )}
+          {typeof c.view === "number" && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Eye size={12} className="text-gray-400" />
+              <span>{c.view}</span>
+            </div>
+          )}
+          {typeof c.click === "number" && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Pointer size={12} className="text-gray-400" />
+              <span>{c.click}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderMessage = (
+    m: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4CampaignMsg,
+    i: number
+  ) => {
+    const created = m.createdAt ? new Date(m.createdAt).toLocaleDateString() : "--";
+    return (
+      <div key={i} className="mb-4 p-4 bg-white rounded-lg shadow">
+        <div className="flex justify-between items-center mb-2">
+          <h4 className="text-md font-medium text-gray-800 truncate">{m.name}</h4>
+          <span className="text-sm text-gray-500">{mediumLabel(m.sendMedium)}</span>
+        </div>
+        <div className="flex items-center text-sm text-gray-500 mb-2">
+          <LucideReact.Calendar size={12} className="text-gray-400" />
+          <span className="ml-1">{created}</span>
+        </div>
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+          {typeof m.sent === "number" && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Send size={12} className="text-gray-400" />
+              <span>{m.sent}</span>
+            </div>
+          )}
+          {typeof m.view === "number" && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Eye size={12} className="text-gray-400" />
+              <span>{m.view}</span>
+            </div>
+          )}
+          {typeof m.click === "number" && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Pointer size={12} className="text-gray-400" />
+              <span>{m.click}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="p-4 space-y-8">
-      {/* Summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Campaigns ({campaigns.length})
-        </h2>
-        <h2 className="mt-2 sm:mt-0 text-xl font-semibold text-gray-900">
-          Messages ({msgs.length})
-        </h2>
-      </div>
-
-      {/* Campaigns List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {campaigns.map((camp) => (
-          <div
-            key={camp.id ?? Math.random()}
-            className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-800 truncate">
-                {camp.name}
-              </h3>
-              {camp.state && (
-                <span
-                  className={`px-2 py-0.5 text-xs font-semibold uppercase rounded ${stateColor[camp.state] ||
-                    "bg-gray-100 text-gray-800"}`}
-                >
-                  {camp.state}
-                </span>
-              )}
-            </div>
-            <p className="mt-2 text-sm text-gray-600">
-              {mediumLabel[camp.sendMedium] || camp.sendMedium}
-            </p>
-            <p className="mt-1 text-sm text-gray-600">
-              {formatDate(camp.startAt)} – {formatDate(camp.endAt)}
-            </p>
-            <div className="mt-4 flex space-x-4 text-sm text-gray-700">
-              <div>
-                <span className="font-semibold">{formatNumber(camp.sent)}</span>{" "}
-                Sent
-              </div>
-              <div>
-                <span className="font-semibold">{formatNumber(camp.view)}</span>{" "}
-                Viewed
-              </div>
-              <div>
-                <span className="font-semibold">{formatNumber(camp.click)}</span>{" "}
-                Clicked
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Messages List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {msgs.map((msg) => (
-          <div
-            key={msg.id}
-            className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-800 truncate">
-                {msg.name}
-              </h3>
-              <span className="text-xs text-gray-500">
-                {mediumLabel[msg.sendMedium] || msg.sendMedium}
-              </span>
-            </div>
-            <div className="mt-4 flex space-x-4 text-sm text-gray-700">
-              <div>
-                <span className="font-semibold">{formatNumber(msg.sent)}</span>{" "}
-                Sent
-              </div>
-              <div>
-                <span className="font-semibold">{formatNumber(msg.view)}</span>{" "}
-                Viewed
-              </div>
-              <div>
-                <span className="font-semibold">{formatNumber(msg.click)}</span>{" "}
-                Clicked
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 3. Return the React element. */}
-      {nextToken != null && (
-        <div className="text-right text-sm text-gray-500">
-          Next Token: <span className="font-medium">{nextToken}</span>
+    <div className="p-4">
+      {!hasData && (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2">No campaigns or messages available</span>
         </div>
+      )}
+
+      {totalCampaigns > 0 && (
+        <section className="mb-6">
+          <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-800 mb-4">
+            <LucideReact.Layers size={20} className="text-gray-600" />
+            Campaigns ({totalCampaigns})
+          </h2>
+          <div>{campaigns.map(renderCampaign)}</div>
+        </section>
+      )}
+
+      {totalMessages > 0 && (
+        <section>
+          <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-800 mb-4">
+            <LucideReact.MessageSquare size={20} className="text-gray-600" />
+            Messages ({totalMessages})
+          </h2>
+          <div>{msgs.map(renderMessage)}</div>
+        </section>
       )}
     </div>
   );

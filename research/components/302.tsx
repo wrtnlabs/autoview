@@ -1,132 +1,68 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type ResponseForm_lt_true_gt_ = any;
-    export type ALREADY_FOLLOW_USER = any;
-    export type CANNOT_FIND_ONE_DESIGNER_TO_FOLLOW = any;
-    export type CANNOT_FOLLOW_MYSELF = any;
+    export interface ResponseForm_lt_true_gt_ {
+        result: true;
+        code: 1000;
+        requestToResponse?: string;
+        data: true;
+    }
+    export interface ALREADY_FOLLOW_USER {
+        type: "business";
+        result: false;
+        code: 4008;
+        data: "\uC774\uBBF8 \uC88B\uC544\uC694\uB97C \uB204\uB978 \uB514\uC790\uC774\uB108\uB2D8\uC785\uB2C8\uB2E4!";
+    }
+    export interface CANNOT_FIND_ONE_DESIGNER_TO_FOLLOW {
+        type: "business";
+        result: false;
+        code: 4009;
+        data: "\uD314\uB85C\uC6B0\uD560 \uB514\uC790\uC774\uB108\uB2D8\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
+    }
+    export interface CANNOT_FOLLOW_MYSELF {
+        type: "business";
+        result: false;
+        code: 4017;
+        data: "\uC124\uB9C8 \uC790\uAE30 \uC790\uC2E0\uC744 \uD314\uB85C\uC6B0\uD558\uB824\uACE0 \uD588\uC5B4\uC694?!";
+    }
 }
-export type AutoViewInput = any | any | any | any;
+export type AutoViewInput = AutoViewInputSubTypes.ResponseForm_lt_true_gt_ | AutoViewInputSubTypes.ALREADY_FOLLOW_USER | AutoViewInputSubTypes.CANNOT_FIND_ONE_DESIGNER_TO_FOLLOW | AutoViewInputSubTypes.CANNOT_FOLLOW_MYSELF;
 
 
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const val = value as any;
-  type StatusType = 'success' | 'alreadyFollowing' | 'notFound' | 'selfFollow' | 'unknown';
-  let statusType: StatusType = 'unknown';
+  const isSuccess = value.result === true;
+  const containerBg = isSuccess ? 'bg-green-50' : 'bg-red-50';
+  const containerBorder = isSuccess ? 'border-green-400' : 'border-red-400';
+  const textColor = isSuccess ? 'text-green-800' : 'text-red-800';
 
-  if (val && typeof val === 'object') {
-    // Success detection: ResponseForm<true> often has a data field === true
-    if (val.data === true) {
-      statusType = 'success';
-    }
-    // Error code discriminators
-    if (val === 'ALREADY_FOLLOW_USER' || val.code === 'ALREADY_FOLLOW_USER') {
-      statusType = 'alreadyFollowing';
-    }
-    if (
-      val === 'CANNOT_FIND_ONE_DESIGNER_TO_FOLLOW' ||
-      val.code === 'CANNOT_FIND_ONE_DESIGNER_TO_FOLLOW'
-    ) {
-      statusType = 'notFound';
-    }
-    if (val === 'CANNOT_FOLLOW_MYSELF' || val.code === 'CANNOT_FOLLOW_MYSELF') {
-      statusType = 'selfFollow';
-    }
-  }
+  // Select appropriate icon
+  const StatusIcon = isSuccess
+    ? <LucideReact.CheckCircle className="text-green-500" size={20} aria-hidden="true" />
+    : <LucideReact.AlertTriangle className="text-red-500" size={20} aria-hidden="true" />;
 
-  // 2. Prepare message and styling maps
-  const messageMap: Record<StatusType, string> = {
-    success: 'Successfully followed the user.',
-    alreadyFollowing: 'You are already following this user.',
-    notFound: 'Unable to find a designer to follow.',
-    selfFollow: 'You cannot follow yourself.',
-    unknown: 'Received an unexpected response.',
-  };
-  const colorMap: Record<StatusType, string> = {
-    success: 'bg-green-50 text-green-700',
-    alreadyFollowing: 'bg-blue-50 text-blue-700',
-    notFound: 'bg-yellow-50 text-yellow-700',
-    selfFollow: 'bg-red-50 text-red-700',
-    unknown: 'bg-gray-50 text-gray-700',
-  };
+  // Determine main message to display
+  const message: string = isSuccess
+    ? (value as AutoViewInputSubTypes.ResponseForm_lt_true_gt_).requestToResponse
+      ?? 'Operation completed successfully.'
+    : (value as Exclude<AutoViewInput, AutoViewInputSubTypes.ResponseForm_lt_true_gt_>).data;
 
-  const message = messageMap[statusType];
-  const colorClasses = colorMap[statusType];
-
-  // 3. Fallback JSON preview for unknown cases (truncated)
-  const rawJson = JSON.stringify(val, null, 2);
-  const details =
-    statusType === 'unknown'
-      ? rawJson.length > 200
-        ? rawJson.slice(0, 200) + '...'
-        : rawJson
-      : null;
-
-  // 4. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div
-      className={
-        'max-w-sm mx-auto p-4 rounded-lg shadow-md ' +
-        colorClasses +
-        ' flex flex-col'
-      }
-    >
-      <div className="flex items-center">
-        <span className="flex-shrink-0">
-          {statusType === 'success' && (
-            <svg
-              className="h-5 w-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M16.707 5.293a1 1 0 01.083 1.32l-.083.094L8 15l-4.707-4.707a1 1 0 011.32-1.497l.094.083L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-          )}
-          {statusType === 'alreadyFollowing' && (
-            <svg
-              className="h-5 w-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 2a6 6 0 016 6v1h1a1 1 0 010 2h-1v1a6 6 0 01-6 6 6 6 0 01-6-6v-1H3a1 1 0 010-2h1V8a6 6 0 016-6z" />
-            </svg>
-          )}
-          {(statusType === 'notFound' || statusType === 'selfFollow') && (
-            <svg
-              className="h-5 w-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11V5a1 1 0 10-2 0v2a1 1 0 002 0zm0 2a1 1 0 10-2 0v4a1 1 0 002 0V9z"
-                clipRule="evenodd"
-              />
-            </svg>
-          )}
-          {statusType === 'unknown' && (
-            <svg
-              className="h-5 w-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M18 10c0 4.418-3.582 8-8 8s-8-3.582-8-8 3.582-8 8-8 8 3.582 8 8zm-8-3a1 1 0 00-1 1v1a1 1 0 002 0V8a1 1 0 00-1-1zm1 5a1 1 0 11-2 0 1 1 0 012 0z" />
-            </svg>
-          )}
-        </span>
-        <p className="ml-2 text-sm md:text-base font-medium">{message}</p>
+    <div className={`flex items-start p-4 ${containerBg} border-l-4 ${containerBorder} rounded-md`}>
+      <div className="mr-3 mt-1">
+        {StatusIcon}
       </div>
-      {details && (
-        <pre className="mt-3 p-2 bg-white rounded text-xs text-gray-700 overflow-x-auto line-clamp-6">
-          {details}
-        </pre>
-      )}
+      <div className="flex-1">
+        <p className={`text-sm font-medium ${textColor}`}>
+          {message}
+        </p>
+        <p className="mt-1 text-xs text-gray-500">
+          Code: {value.code}
+        </p>
+      </div>
     </div>
   );
 }

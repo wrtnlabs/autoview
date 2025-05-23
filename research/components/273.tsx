@@ -1,14 +1,15 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type UserView = {
+        export interface UserView {
             user?: AutoViewInputSubTypes.user.User;
             online?: AutoViewInputSubTypes.Online;
-        };
+        }
     }
     export namespace user {
-        export type User = {
+        export interface User {
             id?: string;
             channelId?: string;
             memberId?: string;
@@ -59,14 +60,14 @@ export namespace AutoViewInputSubTypes {
             landlineNumber?: string & tags.Default<"+18004424000">;
             constrainted?: boolean;
             systemLanguage?: string & tags.Default<"en">;
-        };
+        }
     }
     export namespace profile {
-        export type UserProfile = {
+        export interface UserProfile {
             [key: string]: {};
-        };
+        }
     }
-    export type WebInfo = {
+    export interface WebInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -74,8 +75,8 @@ export namespace AutoViewInputSubTypes {
         browserName?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type MobileInfo = {
+    }
+    export interface MobileInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -85,13 +86,13 @@ export namespace AutoViewInputSubTypes {
         sdkVersion?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type Online = {
+    }
+    export interface Online {
         channelId?: string;
         personType?: string;
         personId?: string;
         id?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.UserView;
 
@@ -102,124 +103,183 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   const user = value.user;
   if (!user) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No user data available
+      <div className="p-4 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-500">
+        <LucideReact.AlertCircle size={24} aria-label="No data" />
+        <span className="ml-2">No user data</span>
       </div>
     );
   }
 
-  // 1. Define data aggregation/transformation functions or derived constants
-  const fullName = user.name?.trim() || "Unnamed User";
-  const typeLabel = user.type
-    ? user.type.charAt(0).toUpperCase() + user.type.slice(1)
-    : "Unknown";
-  const isOnline = Boolean(value.online);
-  const lastSeen = user.lastSeenAt
+  // Derived and formatted values
+  const displayName = user.name ?? "Unnamed User";
+  const userType =
+    user.type != null
+      ? user.type.charAt(0).toUpperCase() + user.type.slice(1)
+      : null;
+  const formattedLastSeen = user.lastSeenAt
     ? new Date(user.lastSeenAt).toLocaleString()
     : null;
-  const email = user.email || null;
-  const mobile = user.mobileNumber || null;
-  const unreadCount = user.unread ?? 0;
-  const alertCount = user.alert ?? 0;
-  const location = [user.city, user.country].filter(Boolean).join(", ") || null;
-  const tags = user.tags ?? [];
+  const location = [user.city, user.province, user.country]
+    .filter(Boolean)
+    .join(", ");
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName
+  )}&background=0D8ABC&color=fff`;
+  const avatarUrl = user.avatarUrl || avatarFallback;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  const tagsCount = user.tags?.length ?? 0;
+  const sessions = user.sessionsCount ?? 0;
+  const unread = user.unread ?? 0;
+  const alerts = user.alert ?? 0;
+  const webSessions = user.web?.sessionsCount ?? 0;
+  const mobileSessions = user.mobile?.sessionsCount ?? 0;
+  const isOnline = Boolean(value.online);
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
-      {/* Avatar & Online Status */}
-      <div className="relative flex-shrink-0">
-        {user.avatarUrl ? (
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full">
+      {/* Header */}
+      <div className="flex items-center">
+        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200">
           <img
-            src={user.avatarUrl}
-            alt={fullName}
-            className="w-16 h-16 rounded-full object-cover"
+            src={avatarUrl}
+            alt={displayName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              const img = e.currentTarget;
+              img.onerror = null;
+              img.src = avatarFallback;
+            }}
           />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-500">
-            {fullName
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
-          </div>
-        )}
-        <span
-          className={[
-            "absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white",
-            isOnline ? "bg-green-500" : "bg-gray-400",
-          ].join(" ")}
-        />
+        </div>
+        <div className="ml-4 overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">
+            {displayName}
+          </h2>
+          {userType && (
+            <span className="mt-1 inline-block px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+              {userType}
+            </span>
+          )}
+        </div>
+        <div className="ml-auto">
+          {isOnline ? (
+            <LucideReact.CheckCircle
+              className="text-green-500"
+              size={16}
+              aria-label="Online"
+            />
+          ) : (
+            <LucideReact.XCircle
+              className="text-gray-400"
+              size={16}
+              aria-label="Offline"
+            />
+          )}
+        </div>
       </div>
 
-      {/* User Info */}
-      <div className="flex-1 flex flex-col space-y-2">
-        {/* Name, Type, Online */}
-        <div className="flex items-center">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {fullName}
-          </h2>
-          <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full truncate">
-            {typeLabel}
-          </span>
-          {isOnline && (
-            <span className="ml-2 flex items-center text-green-600 text-xs font-medium">
-              ● Online
-            </span>
-          )}
-        </div>
-
-        {/* Contact & Location */}
-        <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-600">
-          {email && (
-            <span className="flex items-center truncate">
-              📧 {email}
-              {user.emailQualified && (
-                <span className="ml-1 text-green-500">✓</span>
-              )}
-            </span>
-          )}
-          {mobile && (
-            <span className="flex items-center truncate">
-              📱 {mobile}
-              {user.mobileNumberQualified && (
-                <span className="ml-1 text-green-500">✓</span>
-              )}
-            </span>
-          )}
-          {location && (
-            <span className="flex items-center truncate">📍 {location}</span>
-          )}
-          {!isOnline && lastSeen && (
-            <span className="flex items-center truncate">
-              Last seen: {lastSeen}
-            </span>
-          )}
-        </div>
-
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap mt-2 space-x-2">
-            {tags.slice(0, 5).map((tag, idx) => (
-              <span
-                key={idx}
-                className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full truncate"
-              >
-                {tag}
-              </span>
-            ))}
-            {tags.length > 5 && (
-              <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full">
-                +{tags.length - 5} more
-              </span>
-            )}
+      {/* Contact & Meta */}
+      <div className="mt-4 space-y-2 text-gray-700">
+        {user.email && (
+          <div className="flex items-center">
+            <LucideReact.Mail
+              size={16}
+              className="text-gray-400"
+              aria-label="Email"
+            />
+            <span className="ml-2 truncate">{user.email}</span>
           </div>
         )}
+        {user.mobileNumber && (
+          <div className="flex items-center">
+            <LucideReact.Phone
+              size={16}
+              className="text-gray-400"
+              aria-label="Phone"
+            />
+            <span className="ml-2 truncate">{user.mobileNumber}</span>
+          </div>
+        )}
+        {formattedLastSeen && (
+          <div className="flex items-center">
+            <LucideReact.Clock
+              size={16}
+              className="text-gray-400"
+              aria-label="Last seen"
+            />
+            <span className="ml-2">{formattedLastSeen}</span>
+          </div>
+        )}
+        {location && (
+          <div className="flex items-center">
+            <LucideReact.MapPin
+              size={16}
+              className="text-gray-400"
+              aria-label="Location"
+            />
+            <span className="ml-2 truncate">{location}</span>
+          </div>
+        )}
+      </div>
 
-        {/* Stats */}
-        <div className="flex space-x-4 mt-2 text-sm text-gray-700">
-          <span>Messages: {unreadCount}</span>
-          <span>Alerts: {alertCount}</span>
+      {/* Stats */}
+      <div className="mt-4 flex flex-wrap gap-4 text-gray-700">
+        <div className="flex items-center">
+          <LucideReact.Tag
+            size={16}
+            className="text-gray-400"
+            aria-label="Tags"
+          />
+          <span className="ml-2">{tagsCount} tags</span>
         </div>
+        <div className="flex items-center">
+          <LucideReact.Users
+            size={16}
+            className="text-gray-400"
+            aria-label="Sessions"
+          />
+          <span className="ml-2">{sessions} sessions</span>
+        </div>
+        {unread > 0 && (
+          <div className="flex items-center">
+            <LucideReact.MessageCircle
+              size={16}
+              className="text-gray-400"
+              aria-label="Unread messages"
+            />
+            <span className="ml-2">{unread} unread</span>
+          </div>
+        )}
+        {alerts > 0 && (
+          <div className="flex items-center">
+            <LucideReact.AlertOctagon
+              size={16}
+              className="text-gray-400"
+              aria-label="Alerts"
+            />
+            <span className="ml-2">{alerts} alerts</span>
+          </div>
+        )}
+        {webSessions > 0 && (
+          <div className="flex items-center">
+            <LucideReact.Globe
+              size={16}
+              className="text-gray-400"
+              aria-label="Web sessions"
+            />
+            <span className="ml-2">{webSessions} web</span>
+          </div>
+        )}
+        {mobileSessions > 0 && (
+          <div className="flex items-center">
+            <LucideReact.Smartphone
+              size={16}
+              className="text-gray-400"
+              aria-label="Mobile sessions"
+            />
+            <span className="ml-2">{mobileSessions} mobile</span>
+          </div>
+        )}
       </div>
     </div>
   );

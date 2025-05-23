@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Data related to a release.
      *
      * @title Release Asset
     */
-    export type release_asset = {
+    export interface release_asset {
         url: string & tags.Format<"uri">;
         browser_download_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         uploader: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -64,69 +65,97 @@ export type AutoViewInput = AutoViewInputSubTypes.release_asset;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedSize = (() => {
-    const bytes = value.size;
+  const formatBytes = (bytes: number): string => {
     if (bytes < 1024) return `${bytes} B`;
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(2)} KB`;
-    const mb = kb / 1024;
-    return `${mb.toFixed(2)} MB`;
-  })();
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  };
 
-  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-
+  const formattedSize = formatBytes(value.size);
+  const formattedCreated = new Date(value.created_at).toLocaleString();
+  const formattedUpdated = new Date(value.updated_at).toLocaleString();
   const stateLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
-  const stateClasses =
-    value.state === 'uploaded'
-      ? 'bg-green-100 text-green-800'
-      : 'bg-blue-100 text-blue-800';
 
-  const uploaderLogin = value.uploader?.login ?? 'Unknown';
-  const uploaderAvatar = value.uploader?.avatar_url ?? '';
+  const uploaderLogin = value.uploader?.login ?? "Unknown uploader";
+  const avatarUrl =
+    value.uploader?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      uploaderLogin
+    )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm mx-auto">
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
-            {value.name}
-          </h3>
-          {value.label && (
-            <p className="mt-1 text-sm text-gray-500 truncate">
-              {value.label}
-            </p>
-          )}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Uploader Info */}
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+          <img
+            src={avatarUrl}
+            alt={uploaderLogin}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src =
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  uploaderLogin
+                )}&background=0D8ABC&color=fff`;
+            }}
+          />
         </div>
-        <span
-          className={`ml-2 inline-block px-2 py-1 text-xs font-semibold rounded-full ${stateClasses}`}
-        >
-          {stateLabel}
-        </span>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-gray-800">{uploaderLogin}</span>
+          <span className="text-xs text-gray-500">Created: {formattedCreated}</span>
+        </div>
       </div>
 
-      <div className="mt-4 flex items-center">
-        {uploaderAvatar && (
-          <img
-            src={uploaderAvatar}
-            alt={uploaderLogin}
-            className="h-8 w-8 rounded-full object-cover"
+      {/* Asset Name and Label */}
+      <div className="mt-4">
+        <div className="flex items-center space-x-2">
+          <LucideReact.FileText className="text-indigo-500" size={20} />
+          <h3 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h3>
+        </div>
+        {value.label && (
+          <p className="mt-1 text-sm text-gray-500 truncate">{value.label}</p>
+        )}
+      </div>
+
+      {/* Details Grid */}
+      <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span>{new Date(value.created_at).toLocaleDateString()}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span>Updated: {formattedUpdated}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Download size={16} />
+          <span>{value.download_count.toLocaleString()} downloads</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.HardDrive size={16} />
+          <span>{formattedSize}</span>
+        </div>
+      </div>
+
+      {/* State */}
+      <div className="mt-4 flex items-center text-sm text-gray-700">
+        <span>Status:</span>
+        {value.state === "open" ? (
+          <LucideReact.CheckCircle
+            className="ml-2 text-green-500"
+            size={16}
+            aria-label={stateLabel}
+          />
+        ) : (
+          <LucideReact.UploadCloud
+            className="ml-2 text-gray-500"
+            size={16}
+            aria-label={stateLabel}
           />
         )}
-        <p className="ml-2 text-sm text-gray-700">{uploaderLogin}</p>
+        <span className="ml-1">{stateLabel}</span>
       </div>
-
-      <p className="mt-4 text-sm text-gray-600">
-        {value.content_type} · {formattedSize} · {value.download_count}{' '}
-        downloads
-      </p>
-      <p className="mt-2 text-sm text-gray-500">
-        Uploaded on {createdDate}
-      </p>
     </div>
   );
 }

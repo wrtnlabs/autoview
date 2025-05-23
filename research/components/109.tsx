@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Category of channel.
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
      * Furthermore, `IShoppingChannelCategory` is designed to merge between themselves,
      * so there is no burden to edit the category at any time.
     */
-    export type IShoppingChannelCategory = {
+    export interface IShoppingChannelCategory {
         /**
          * Parent category info.
          *
          * @title Parent category info
         */
-        parent: null | any;
+        parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
         /**
          * List of children categories with hierarchical structure.
          *
@@ -79,13 +80,61 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
-        export type IInvert = any;
+        /**
+         * Invert category information with parent category.
+        */
+        export interface IInvert {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        }
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -128,7 +177,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory;
@@ -138,65 +187,70 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const childrenCount = value.children.length;
+  //    Build the parent category path.
+  const parentNames: string[] = [];
+  let currentParent = value.parent;
+  while (currentParent) {
+    parentNames.unshift(currentParent.name);
+    currentParent = currentParent.parent;
+  }
+  // Derive display text for category path.
+  const categoryPath =
+    parentNames.length > 0
+      ? `${parentNames.join(" / ")} / ${value.name}`
+      : value.name;
 
-  // Recursive function to render hierarchical children
-  const renderChildren = (
-    nodes: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
-    level = 0,
-  ): React.ReactNode => {
-    if (!nodes || nodes.length === 0) return null;
-    return (
-      <ul>
-        {nodes.map((node) => (
-          <li key={node.id} className="mb-2">
-            <div
-              className="flex justify-between items-center"
-              style={{ marginLeft: level * 16 }}
-            >
-              <span className="text-gray-800 truncate">{node.name}</span>
-              <span className="text-xs text-gray-500">
-                {node.children.length}{' '}
-                {node.children.length === 1 ? 'Subcategory' : 'Subcategories'}
-              </span>
-            </div>
-            {renderChildren(node.children, level + 1)}
-          </li>
-        ))}
-      </ul>
-    );
-  };
+  // Summarize child categories (show up to 3 names, then "+n more").
+  const childCount = value.children.length;
+  const childNames = value.children.map((child) => child.name);
+  const displayedChildNames = childNames.slice(0, 3);
+  const childrenSummary =
+    childCount > 0
+      ? displayedChildNames.join(", ") +
+        (childCount > 3 ? `, +${childCount - 3} more` : "")
+      : "";
+
+  // Format the creation date for readability.
+  const formattedDate = new Date(value.created_at).toLocaleDateString(
+    undefined,
+    { year: "numeric", month: "short", day: "numeric" }
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow min-w-0">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h2>
-        <span className="mt-2 sm:mt-0 text-sm text-gray-500">{formattedDate}</span>
-      </div>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md">
+      {/* Category Name */}
+      <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <LucideReact.Tag className="text-blue-500" size={20} />
+        <span className="truncate">{value.name}</span>
+      </h2>
 
-      <div className="flex flex-wrap items-center space-x-2 mb-4">
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-          {value.code}
-        </span>
-        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded">
-          {childrenCount} {childrenCount === 1 ? 'Subcategory' : 'Subcategories'}
-        </span>
-      </div>
+      {/* Creation Date */}
+      <p className="mt-1 text-sm text-gray-500 flex items-center">
+        <LucideReact.Calendar size={16} className="mr-1" />
+        Created: {formattedDate}
+      </p>
 
-      {childrenCount > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Subcategories</h3>
-          {renderChildren(value.children)}
-        </div>
+      {/* Parent Path (if exists) */}
+      {parentNames.length > 0 && (
+        <p className="mt-1 text-sm text-gray-500 flex items-center">
+          <LucideReact.ArrowUp size={16} className="mr-1" />
+          <span className="truncate">Parent: {parentNames.join(" / ")}</span>
+        </p>
       )}
+
+      {/* Subcategory Summary */}
+      <p className="mt-3 text-sm text-gray-700 flex items-start gap-2">
+        <LucideReact.ChevronsDown
+          size={16}
+          className="mt-[2px] text-gray-500"
+        />
+        {childCount > 0 ? (
+          <span className="truncate">Subcategories: {childrenSummary}</span>
+        ) : (
+          <span className="text-gray-400">No subcategories</span>
+        )}
+      </p>
     </div>
   );
 }

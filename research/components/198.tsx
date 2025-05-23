@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4PluginView = {
+                export interface LegacyV4PluginView {
                     plugin?: AutoViewInputSubTypes.legacy.v4.LegacyV4Plugin;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Plugin = {
+            export interface LegacyV4Plugin {
                 id?: string;
                 key?: string & tags.Format<"uuid">;
                 channelId?: string;
@@ -49,21 +50,21 @@ export namespace AutoViewInputSubTypes {
                  * @deprecated
                 */
                 showPoweredBy?: boolean;
-            };
-            export type LegacyV4TinyFile = {
+            }
+            export interface LegacyV4TinyFile {
                 bucket: string;
                 key: string;
                 width?: number & tags.Type<"int32">;
                 height?: number & tags.Type<"int32">;
-            };
+            }
         }
     }
-    export type I18nText = {
+    export interface I18nText {
         text?: string;
         en?: string;
         ja?: string;
         ko?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4PluginView;
 
@@ -75,99 +76,179 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   const plugin = value.plugin;
   if (!plugin) {
     return (
-      <div className="p-4 text-gray-500 italic">
-        No Plugin Data Available
+      <div className="flex flex-col items-center justify-center p-4 text-gray-500">
+        <LucideReact.AlertCircle className="text-gray-400" size={48} />
+        <p className="mt-2">No plugin data available</p>
       </div>
     );
   }
 
-  const {
-    name,
-    state,
-    createdAt,
-    color,
-    botName,
-    welcomeI18n,
-    deskImageUrl,
-    mobileImageUrl,
-    runRate,
-  } = plugin;
-
-  const formattedDate = createdAt
-    ? new Date(createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+  const formattedDate = plugin.createdAt
+    ? new Date(plugin.createdAt).toLocaleString()
     : 'N/A';
 
-  const statusDisplay =
-    state === 'active' ? 'Active' :
-    state === 'waiting' ? 'Waiting' :
-    'Unknown';
-
-  const statusColorClass =
-    state === 'active'
-      ? 'bg-green-100 text-green-800'
-      : state === 'waiting'
-      ? 'bg-yellow-100 text-yellow-800'
-      : 'bg-gray-100 text-gray-800';
-
   const welcomeText =
-    welcomeI18n?.text ||
-    welcomeI18n?.en ||
-    welcomeI18n?.ja ||
-    welcomeI18n?.ko ||
+    plugin.welcomeI18n?.text ?? plugin.welcomeI18n?.en ?? '';
+
+  const profileMessage =
+    plugin.profileBotMessageI18n?.text ??
+    plugin.profileBotMessageI18n?.en ??
     '';
 
-  const runRateDisplay =
-    runRate !== undefined ? `${(runRate * 100).toFixed(0)}%` : undefined;
+  const runRatePercent =
+    plugin.runRate != null ? Math.round(plugin.runRate * 100) : null;
+
+  const urlCount = plugin.urlWhitelist?.length ?? 0;
+
+  // Image error handlers
+  const handleErrorDesk = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src =
+      'https://placehold.co/400x300/f1f5f9/64748b?text=Desktop+Image';
+  };
+  const handleErrorMobile = (
+    e: React.SyntheticEvent<HTMLImageElement, Event>
+  ) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src =
+      'https://placehold.co/200x300/f1f5f9/64748b?text=Mobile+Image';
+  };
+
+  // State icon
+  const stateIcon =
+    plugin.state === 'active' ? (
+      <LucideReact.CheckCircle className="text-green-500" size={16} />
+    ) : (
+      <LucideReact.Clock className="text-amber-500" size={16} />
+    );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div
-      className="border-l-4 p-4 bg-white rounded-lg shadow-md"
-      style={{ borderLeftColor: color }}
-    >
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          {name}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {plugin.name}
         </h2>
-        <span
-          className={`px-2 py-0.5 text-xs font-semibold rounded-full ${statusColorClass}`}
-        >
-          {statusDisplay}
-        </span>
-      </div>
-
-      <div className="mt-1 text-sm text-gray-600">
-        <span>Bot: {botName}</span>
-        <span className="mx-2">|</span>
-        <span>Created: {formattedDate}</span>
-      </div>
-
-      {(deskImageUrl || mobileImageUrl) && (
-        <img
-          src={deskImageUrl || mobileImageUrl}
-          alt={name}
-          className="w-full h-32 object-cover rounded mt-4"
-        />
-      )}
-
-      {welcomeText && (
-        <p className="mt-3 text-gray-700 text-sm line-clamp-2">
-          {welcomeText}
-        </p>
-      )}
-
-      {runRateDisplay && (
-        <div className="mt-3 text-sm text-gray-600">
-          Run Rate:{' '}
-          <span className="font-medium text-gray-800">
-            {runRateDisplay}
+        <div className="flex items-center gap-1">
+          {stateIcon}
+          <span className="text-sm text-gray-600 capitalize">
+            {plugin.state ?? 'Unknown'}
           </span>
         </div>
-      )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Left Side: Metadata */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <LucideReact.Calendar size={16} className="text-gray-500" />
+            <span>Created: {formattedDate}</span>
+          </div>
+
+          {plugin.botName && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <LucideReact.User size={16} className="text-gray-500" />
+              <span>{plugin.botName}</span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <span>Color:</span>
+            <span
+              className="inline-block w-4 h-4 rounded border"
+              style={{ backgroundColor: plugin.color }}
+            />
+            <span>{plugin.color}</span>
+          </div>
+
+          {runRatePercent != null && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <LucideReact.BarChart2 size={16} className="text-gray-500" />
+              <span>Run Rate: {runRatePercent}%</span>
+            </div>
+          )}
+
+          {urlCount > 0 && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <LucideReact.Link size={16} className="text-gray-500" />
+              <span>Whitelist URLs: {urlCount}</span>
+            </div>
+          )}
+
+          {welcomeText && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700">
+                Welcome Message
+              </h3>
+              <p className="text-sm text-gray-600 line-clamp-3">
+                {welcomeText}
+              </p>
+            </div>
+          )}
+
+          {plugin.profileBot != null && (
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <span>Profile Bot:</span>
+              {plugin.profileBot ? (
+                <LucideReact.CheckCircle
+                  className="text-green-500"
+                  size={16}
+                />
+              ) : (
+                <LucideReact.XCircle className="text-red-500" size={16} />
+              )}
+            </div>
+          )}
+
+          {profileMessage && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700">
+                Profile Bot Message
+              </h3>
+              <p className="text-sm text-gray-600 line-clamp-3">
+                {profileMessage}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Right Side: Images */}
+        <div className="space-y-4">
+          {plugin.deskImageUrl && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-1">
+                Desktop Image
+              </h3>
+              <div className="aspect-[4/3] w-full bg-gray-100 overflow-hidden rounded">
+                <img
+                  src={plugin.deskImageUrl}
+                  alt="Desktop preview"
+                  className="object-cover w-full h-full"
+                  onError={handleErrorDesk}
+                />
+              </div>
+            </div>
+          )}
+
+          {plugin.mobileImageUrl && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-1">
+                Mobile Image
+              </h3>
+              <div className="aspect-[2/3] w-full bg-gray-100 overflow-hidden rounded">
+                <img
+                  src={plugin.mobileImageUrl}
+                  alt="Mobile preview"
+                  className="object-cover w-full h-full"
+                  onError={handleErrorMobile}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

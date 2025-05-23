@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type WebhookView = {
+    export interface WebhookView {
         webhook?: AutoViewInputSubTypes.webhook.Webhook;
-    };
+    }
     export namespace webhook {
-        export type Webhook = {
+        export interface Webhook {
             id?: string;
             channelId?: string;
             name: string;
@@ -20,7 +21,7 @@ export namespace AutoViewInputSubTypes {
             apiVersion: string;
             lastBlockedAt?: number;
             blocked?: boolean;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.WebhookView;
@@ -31,68 +32,89 @@ export type AutoViewInput = AutoViewInputSubTypes.WebhookView;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const webhook = value.webhook;
-  const createdDate = webhook?.createdAt
-    ? new Date(webhook.createdAt).toLocaleString()
-    : "—";
-  const lastBlockedDate = webhook?.lastBlockedAt
-    ? new Date(webhook.lastBlockedAt).toLocaleString()
-    : undefined;
-  const isBlocked = webhook?.blocked ?? false;
+  // Helper to format scope keys like "userChat.opened" ⇒ "UserChat Opened"
+  const formatScope = (s: string) =>
+    s
+      .split('.')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  // If there's no webhook object, render an empty state
+  if (!webhook) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} className="mb-2" aria-label="No data" />
+        <span className="text-lg">No webhook data available</span>
+      </div>
+    );
+  }
+  // Destructure relevant fields
+  const { name, url, apiVersion, scopes, createdAt, blocked, lastBlockedAt } = webhook;
+  // Format dates
+  const formattedCreated = createdAt
+    ? new Date(createdAt).toLocaleString()
+    : 'Unknown';
+  const formattedLastBlocked = lastBlockedAt
+    ? new Date(lastBlockedAt).toLocaleString()
+    : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const content = !webhook ? (
-    <div className="p-4 bg-gray-100 text-gray-500 rounded-lg text-sm text-center">
-      No webhook data available.
-    </div>
-  ) : (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
+  // 3. Return the React element.
+  return (
+    <div className="max-w-md w-full bg-white border border-gray-200 rounded-lg shadow-sm p-4 mx-auto">
+      {/* Header: Name + Status */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900 truncate">
-          {webhook.name}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            isBlocked ? "text-red-700 bg-red-100" : "text-green-700 bg-green-100"
-          }`}
-        >
-          {isBlocked ? "Blocked" : "Active"}
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-gray-700 break-all truncate">
-        {webhook.url}
-      </p>
-      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
-        <div>
-          <span className="font-medium">Created:</span>
-          <span className="ml-1 text-gray-800">{createdDate}</span>
-        </div>
-        <div>
-          <span className="font-medium">API Version:</span>
-          <span className="ml-1 text-gray-800">{webhook.apiVersion}</span>
-        </div>
-        {isBlocked && lastBlockedDate && (
-          <div className="col-span-2">
-            <span className="font-medium">Last Blocked:</span>
-            <span className="ml-1 text-gray-800">{lastBlockedDate}</span>
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+        {blocked ? (
+          <div className="flex items-center text-red-500" title="Blocked">
+            <LucideReact.XCircle size={20} />
+          </div>
+        ) : (
+          <div className="flex items-center text-green-500" title="Active">
+            <LucideReact.CheckCircle size={20} />
           </div>
         )}
       </div>
+
+      {/* URL */}
+      <div className="mt-3 flex items-center text-gray-600 truncate">
+        <LucideReact.Link size={16} className="mr-1 flex-shrink-0" />
+        <span className="truncate">{url}</span>
+      </div>
+
+      {/* API Version */}
+      <div className="mt-2 text-sm text-gray-500">
+        API Version:&nbsp;
+        <span className="font-medium text-gray-700">{apiVersion}</span>
+      </div>
+
+      {/* Scopes */}
       <div className="mt-4">
-        <span className="font-medium text-gray-600">Scopes:</span>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {webhook.scopes.map((scope) => (
+        <div className="text-sm font-medium text-gray-600 mb-1">Event Scopes</div>
+        <div className="flex flex-wrap gap-2">
+          {scopes.map((scope, idx) => (
             <span
-              key={scope}
-              className="px-2 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded-full"
+              key={idx}
+              className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded"
             >
-              {scope}
+              {formatScope(scope)}
             </span>
           ))}
         </div>
       </div>
+
+      {/* Timestamps */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+          <span>Created: {formattedCreated}</span>
+        </div>
+        {formattedLastBlocked && (
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+            <span>Last Blocked: {formattedLastBlocked}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
-
-  // 3. Return the React element.
-  return content;
 }

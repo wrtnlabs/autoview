@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Thread
      *
      * @title Thread
     */
-    export type thread = {
+    export interface thread {
         id: string;
         repository: AutoViewInputSubTypes.minimal_repository;
         subject: {
@@ -21,13 +22,13 @@ export namespace AutoViewInputSubTypes {
         last_read_at: string | null;
         url: string;
         subscription_url: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -130,13 +131,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -159,19 +160,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -209,67 +210,91 @@ export type AutoViewInput = AutoViewInputSubTypes.thread;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    repository,
-    subject,
-    reason,
-    unread,
-    updated_at,
-    last_read_at,
-  } = value;
+  const updatedDate = new Date(value.updated_at);
+  const formattedUpdated = updatedDate.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
-  const formatDateTime = (iso: string) => {
-    const date = new Date(iso);
-    const datePart = date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-    const timePart = date.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-    });
-    return `${datePart} ${timePart}`;
-  };
+  const lastReadDate = value.last_read_at ? new Date(value.last_read_at) : null;
+  const formattedLastRead = lastReadDate
+    ? lastReadDate.toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : null;
 
-  const updatedAtDisplay = formatDateTime(updated_at);
-  const lastReadDisplay = last_read_at
-    ? formatDateTime(last_read_at)
-    : 'Never';
+  const ownerLogin = value.repository.owner.login;
+  const avatarUrl = value.repository.owner.avatar_url;
+  const avatarFallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    ownerLogin,
+  )}&background=random&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center">
-        <span className="text-xs font-semibold text-blue-600 uppercase truncate">
-          {repository.full_name}
-        </span>
-        <span
-          className={`text-xs font-medium ${
-            unread ? 'text-green-600' : 'text-gray-500'
-          }`}
-        >
-          {unread ? 'Unread' : 'Read'}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow flex items-start space-x-3">
+      {/* Unread indicator */}
+      {value.unread ? (
+        <span className="flex-shrink-0 mt-1 w-2 h-2 bg-blue-500 rounded-full" />
+      ) : (
+        <span className="flex-shrink-0 mt-1 w-2 h-2 bg-gray-300 rounded-full" />
+      )}
+
+      {/* Repository owner's avatar */}
+      <div className="flex-shrink-0">
+        <div className="w-8 h-8">
+          <img
+            src={avatarUrl}
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = avatarFallbackUrl;
+            }}
+            alt={`${ownerLogin} avatar`}
+            className="w-full h-full rounded-full object-cover"
+          />
+        </div>
       </div>
 
-      <h2 className="mt-2 text-lg font-semibold text-gray-800 truncate">
-        {subject.title}
-      </h2>
+      {/* Main content */}
+      <div className="flex-1">
+        {/* Repository name and updated time */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center text-sm text-gray-500 space-x-1">
+            <LucideReact.GitBranch size={16} className="text-gray-400" />
+            <span>{value.repository.full_name}</span>
+          </div>
+          <time dateTime={value.updated_at} className="text-xs text-gray-400">
+            {formattedUpdated}
+          </time>
+        </div>
 
-      <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-        {reason}
-      </p>
+        {/* Thread subject title */}
+        <h3 className="mt-1 text-sm font-medium text-gray-900 line-clamp-2">
+          {value.subject.title}
+        </h3>
 
-      <div className="mt-3 flex flex-wrap items-center text-xs text-gray-500 space-x-2">
-        <span>{subject.type}</span>
-        <span>•</span>
-        <span>Updated: {updatedAtDisplay}</span>
-      </div>
-
-      <div className="mt-1 text-xs text-gray-500">
-        Last read: {lastReadDisplay}
+        {/* Metadata: type, reason, last read */}
+        <div className="mt-2 flex flex-wrap items-center text-xs text-gray-500 space-x-3">
+          <div className="flex items-center space-x-1">
+            <LucideReact.MessageCircle size={14} className="text-gray-400" />
+            <span>{value.subject.type}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <LucideReact.Info size={14} className="text-gray-400" />
+            <span>{value.reason}</span>
+          </div>
+          {formattedLastRead && (
+            <div className="flex items-center space-x-1">
+              <LucideReact.Calendar size={14} className="text-gray-400" />
+              <span>Last read: {formattedLastRead}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IPageIShoppingSaleSnapshot {
         /**
@@ -7,7 +8,7 @@ export namespace AutoViewInputSubTypes {
          *
          * Collection of records with pagination indformation.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Page information.
              *
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
              * @title List of records
             */
             data: AutoViewInputSubTypes.IShoppingSaleSnapshot.ISummary[];
-        };
+        }
     }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -53,13 +54,13 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     export namespace IShoppingSaleSnapshot {
         /**
          * Summarized information of the sale snapshot.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Price range of the unit.
              *
@@ -117,16 +118,16 @@ export namespace AutoViewInputSubTypes {
              * @title List of units
             */
             units: AutoViewInputSubTypes.IShoppingSaleUnit.ISummary[];
-        };
+        }
     }
-    export type IShoppingSalePriceRange = {
+    export interface IShoppingSalePriceRange {
         lowest: AutoViewInputSubTypes.IShoppingPrice;
         highest: AutoViewInputSubTypes.IShoppingPrice;
-    };
+    }
     /**
      * Shopping price interface.
     */
-    export type IShoppingPrice = {
+    export interface IShoppingPrice {
         /**
          * Nominal price.
          *
@@ -143,13 +144,13 @@ export namespace AutoViewInputSubTypes {
          * @title Real price to pay
         */
         real: number;
-    };
+    }
     export namespace IShoppingSaleContent {
-        export type IInvert = {
+        export interface IInvert {
             id: string & tags.Format<"uuid">;
             title: string;
             thumbnails: AutoViewInputSubTypes.IAttachmentFile[];
-        };
+        }
     }
     /**
      * Attachment File.
@@ -160,7 +161,7 @@ export namespace AutoViewInputSubTypes {
      * or {@link extension} like `.gitignore` or `README` case, but not
      * possible to omit both of them.
     */
-    export type IAttachmentFile = {
+    export interface IAttachmentFile {
         /**
          * Primary Key.
          *
@@ -195,12 +196,12 @@ export namespace AutoViewInputSubTypes {
          * @title URL path of the real file
         */
         url: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
         /**
          * Invert category information with parent category.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Parent category info with recursive structure.
              *
@@ -208,7 +209,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Parent category info with recursive structure
             */
-            parent: null | any;
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
             /**
              * Primary Key.
              *
@@ -245,10 +246,10 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingSaleUnit {
-        export type ISummary = {
+        export interface ISummary {
             price_range: AutoViewInputSubTypes.IShoppingSalePriceRange;
             /**
              * Primary Key.
@@ -283,7 +284,7 @@ export namespace AutoViewInputSubTypes {
              * @title Whether the unit is required or not
             */
             required: boolean;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSaleSnapshot.ISummary;
@@ -292,108 +293,121 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSaleSnapshot.ISu
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation/transformation
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { pagination, data } = value;
+  const { current, pages, records } = pagination;
 
-  const formatPrice = (amount: number) =>
-    amount.toLocaleString(undefined, {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    });
+  const formatCurrency = (n: number): string => {
+    return `$${n.toFixed(2)}`;
+  };
 
-  // 2. Compose the visual structure
+  const getCategoryPath = (
+    cat: AutoViewInputSubTypes.IShoppingChannelCategory.IInvert
+  ): string => {
+    const names: string[] = [];
+    let cursor: AutoViewInputSubTypes.IShoppingChannelCategory.IInvert | null = cat;
+    while (cursor) {
+      names.unshift(cursor.name);
+      cursor = cursor.parent;
+    }
+    return names.join(" > ");
+  };
+
+  const placeholderImage =
+    "https://placehold.co/400x300/f1f5f9/64748b?text=Image";
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full mx-auto p-4 space-y-6">
+    <div className="p-4 bg-gray-50 rounded-lg">
       {/* Pagination Header */}
-      <div className="flex items-center justify-between">
-        <span className="text-gray-700 font-medium">
-          Page {pagination.current} of {pagination.pages}
-        </span>
-        <span className="text-gray-500 text-sm">
-          Total: {pagination.records}
-        </span>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between">
+        <div className="text-lg font-semibold text-gray-700">
+          Page {current} of {pages}
+        </div>
+        <div className="mt-1 sm:mt-0 text-sm text-gray-500">
+          Total records: {records}
+        </div>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Snapshot Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {data.map((item) => {
-          // Price range text
-          const lowReal = item.price_range.lowest.real;
-          const highReal = item.price_range.highest.real;
-          const priceRangeText = `${formatPrice(lowReal)} – ${formatPrice(
-            highReal,
-          )}`;
-          // Thumbnail fallback
-          const thumbnailUrl = item.content.thumbnails[0]?.url;
+          const realLow = formatCurrency(item.price_range.lowest.real);
+          const realHigh = formatCurrency(item.price_range.highest.real);
+          const categoryPaths = item.categories.map(getCategoryPath);
 
           return (
             <div
               key={item.snapshot_id}
-              className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
+              className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition"
             >
-              {thumbnailUrl ? (
+              <div className="relative">
                 <img
-                  src={thumbnailUrl}
+                  src={item.content.thumbnails[0]?.url || placeholderImage}
                   alt={item.content.title}
-                  className="h-48 w-full object-cover"
+                  className="w-full h-40 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = placeholderImage;
+                  }}
                 />
-              ) : (
-                <div className="h-48 w-full bg-gray-100 flex items-center justify-center text-gray-400">
-                  No Image
-                </div>
-              )}
-
-              <div className="p-4 flex flex-col flex-1">
-                {/* Title & Latest Badge */}
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-800 truncate">
-                    {item.content.title}
-                  </h3>
-                  {item.latest && (
-                    <span className="ml-2 inline-block px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full">
-                      Latest
-                    </span>
-                  )}
-                </div>
-
-                {/* Price Range */}
-                <p className="mt-2 text-gray-900 font-medium">
-                  {priceRangeText}
-                </p>
-
-                {/* Categories */}
-                {item.categories.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {item.categories.map((cat) => (
-                      <span
-                        key={cat.id}
-                        className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded"
-                      >
-                        {cat.name}
-                      </span>
-                    ))}
-                  </div>
+                {item.latest && (
+                  <LucideReact.BadgeCheck
+                    className="absolute top-2 right-2 text-green-500"
+                    size={20}
+                    aria-label="Latest snapshot"
+                  />
                 )}
+              </div>
+              <div className="p-4 flex flex-col h-full">
+                <h3
+                  className="text-md font-semibold text-gray-800 truncate"
+                  title={item.content.title}
+                >
+                  {item.content.title}
+                </h3>
 
-                {/* Tags */}
+                <div className="mt-2 flex items-center text-sm text-gray-600">
+                  <LucideReact.DollarSign
+                    size={16}
+                    className="mr-1 text-gray-500"
+                  />
+                  <span className="font-medium">
+                    {realLow} – {realHigh}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex flex-wrap gap-1">
+                  {categoryPaths.map((path) => (
+                    <span
+                      key={path}
+                      className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded"
+                      title={path}
+                    >
+                      {path}
+                    </span>
+                  ))}
+                </div>
+
                 {item.tags.length > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {item.tags.map((tag, idx) => (
+                    {item.tags.map((tag) => (
                       <span
-                        key={idx}
-                        className="text-xs bg-gray-200 text-gray-800 px-1.5 py-0.5 rounded"
+                        key={tag}
+                        className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded"
                       >
-                        #{tag}
+                        {tag}
                       </span>
                     ))}
                   </div>
                 )}
 
-                {/* Units Count */}
-                <p className="mt-4 text-sm text-gray-600">
-                  {item.units.length} {item.units.length === 1 ? "Unit" : "Units"}
-                </p>
+                <div className="mt-auto pt-3 text-sm text-gray-500 flex items-center">
+                  <LucideReact.Users
+                    size={16}
+                    className="inline-block mr-1 text-gray-500"
+                  />
+                  <span>Units: {item.units.length}</span>
+                </div>
               </div>
             </div>
           );

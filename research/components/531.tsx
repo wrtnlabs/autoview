@@ -1,11 +1,12 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A hosted compute network settings resource.
      *
      * @title Hosted compute network settings resource
     */
-    export type network_settings = {
+    export interface network_settings {
         /**
          * The unique identifier of the network settings resource.
         */
@@ -26,49 +27,78 @@ export namespace AutoViewInputSubTypes {
          * The location of the subnet this network settings resource is configured for.
         */
         region: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.network_settings;
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Determine assignment status based on presence of network_configuration_id
-  const isAssigned = Boolean(value.network_configuration_id);
-  const statusText = isAssigned ? 'Assigned' : 'Unassigned';
-  const statusClasses = isAssigned
-    ? 'bg-green-100 text-green-800'
-    : 'bg-gray-100 text-gray-800';
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const mask = (id: string): string =>
+    id.length > 12 ? `${id.slice(0, 8)}…${id.slice(-4)}` : id;
 
+  const formattedRegion = value.region
+    .split('-')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
+  const maskedSubnet = mask(value.subnet_id);
+  const maskedConfigId = value.network_configuration_id
+    ? mask(value.network_configuration_id)
+    : null;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md">
-      {/* Header: Name and Status */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="max-w-md w-full bg-white p-6 rounded-lg shadow-md">
+      <div className="flex items-center mb-4">
+        <LucideReact.Cloud
+          className="text-indigo-500"
+          size={20}
+          aria-hidden="true"
+        />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800 truncate">
           {value.name}
         </h2>
-        <span className={`px-2 py-1 text-sm font-medium rounded ${statusClasses}`}>
-          {statusText}
-        </span>
       </div>
-
-      {/* Details */}
-      <dl className="space-y-2">
-        <div className="flex">
-          <dt className="w-28 font-medium text-gray-500">Region:</dt>
-          <dd className="text-gray-900">{value.region}</dd>
+      <dl className="space-y-3 text-sm">
+        <div className="flex items-center">
+          <LucideReact.MapPin
+            className="text-gray-400"
+            size={16}
+            aria-hidden="true"
+          />
+          <dt className="ml-2 font-medium text-gray-500">Region:</dt>
+          <dd className="ml-1 text-gray-900">{formattedRegion}</dd>
         </div>
-
-        <div className="flex">
-          <dt className="w-28 font-medium text-gray-500">Subnet ID:</dt>
-          <dd className="text-gray-900 truncate">{value.subnet_id}</dd>
+        <div className="flex items-center">
+          <LucideReact.Hash
+            className="text-gray-400"
+            size={16}
+            aria-hidden="true"
+          />
+          <dt className="ml-2 font-medium text-gray-500">Subnet ID:</dt>
+          <dd
+            className="ml-1 text-gray-900 truncate"
+            title={value.subnet_id}
+          >
+            {maskedSubnet}
+          </dd>
         </div>
-
-        {value.network_configuration_id && (
-          <div className="flex">
-            <dt className="w-28 font-medium text-gray-500">Config ID:</dt>
-            <dd className="text-gray-900 truncate">
-              {value.network_configuration_id}
+        {maskedConfigId && (
+          <div className="flex items-center">
+            <LucideReact.Settings
+              className="text-gray-400"
+              size={16}
+              aria-hidden="true"
+            />
+            <dt className="ml-2 font-medium text-gray-500">Config ID:</dt>
+            <dd
+              className="ml-1 text-gray-900 truncate"
+              title={value.network_configuration_id!}
+            >
+              {maskedConfigId}
             </dd>
           </div>
         )}

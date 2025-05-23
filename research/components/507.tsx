@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Custom property defined on an organization
      *
      * @title Organization Custom Property
     */
-    export type custom_property = {
+    export interface custom_property {
         /**
          * The name of the property
         */
@@ -44,7 +45,7 @@ export namespace AutoViewInputSubTypes {
          * Who can edit the values of the property
         */
         values_editable_by?: "org_actors" | "org_and_repo_actors" | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.custom_property;
 
@@ -53,85 +54,145 @@ export type AutoViewInput = AutoViewInputSubTypes.custom_property;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const typeLabels: Record<AutoViewInput['value_type'], string> = {
-    string: 'String',
-    single_select: 'Single Select',
-    multi_select: 'Multi Select',
-    true_false: 'True/False',
+  type BadgeConfig = { label: string; icon: JSX.Element; color: string };
+
+  const typeConfig: Record<AutoViewInput["value_type"], BadgeConfig> = {
+    string: {
+      label: "String",
+      icon: <LucideReact.Type size={16} className="text-gray-500" />,
+      color: "bg-gray-100 text-gray-800",
+    },
+    single_select: {
+      label: "Single Select",
+      icon: <LucideReact.List size={16} className="text-blue-500" />,
+      color: "bg-blue-100 text-blue-800",
+    },
+    multi_select: {
+      label: "Multi Select",
+      icon: <LucideReact.Layers size={16} className="text-purple-500" />,
+      color: "bg-purple-100 text-purple-800",
+    },
+    true_false: {
+      label: "True / False",
+      icon: <LucideReact.ToggleLeft size={16} className="text-green-500" />,
+      color: "bg-green-100 text-green-800",
+    },
   };
-  const valueTypeLabel = typeLabels[value.value_type];
-  const sourceLabel = value.source_type
-    ? value.source_type.charAt(0).toUpperCase() + value.source_type.slice(1)
-    : 'N/A';
-  const isRequired = value.required ? 'Yes' : 'No';
-  const defaultValue =
-    value.default_value != null
-      ? Array.isArray(value.default_value)
-        ? value.default_value.join(', ')
-        : value.default_value
-      : '—';
-  const description = value.description ?? '—';
+  const selectedType = typeConfig[value.value_type];
+
+  const sourceConfig: Record<NonNullable<AutoViewInput["source_type"]>, BadgeConfig> = {
+    organization: {
+      label: "Organization",
+      icon: <LucideReact.Building size={16} className="text-indigo-500" />,
+      color: "bg-indigo-100 text-indigo-800",
+    },
+    enterprise: {
+      label: "Enterprise",
+      icon: <LucideReact.Briefcase size={16} className="text-yellow-500" />,
+      color: "bg-yellow-100 text-yellow-800",
+    },
+  };
+
+  const isRequired = !!value.required;
+  const requiredText = isRequired ? "Required" : "Optional";
+  const requiredIcon = isRequired
+    ? <LucideReact.CheckCircle size={16} className="text-green-500" />
+    : <LucideReact.MinusCircle size={16} className="text-gray-400" />;
+
+  const defaultDisplay =
+    value.default_value === null || value.default_value === undefined
+      ? "None"
+      : Array.isArray(value.default_value)
+      ? value.default_value.join(", ")
+      : value.default_value;
 
   const allowed = Array.isArray(value.allowed_values) ? value.allowed_values : [];
-  const previewAllowed = allowed.slice(0, 3);
-  const remainingCount = allowed.length - previewAllowed.length;
-
-  const editableByMap: Record<NonNullable<AutoViewInput['values_editable_by']>, string> = {
-    org_actors: 'Organization Actors',
-    org_and_repo_actors: 'Organization & Repository Actors',
-  };
-  const editableBy = value.values_editable_by
-    ? editableByMap[value.values_editable_by]
-    : '—';
+  const maxBadges = 5;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold text-gray-800 mb-3 truncate">
-        {value.property_name}
-      </h3>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700 mb-4">
-        <div>
-          <span className="font-medium">Type:</span> {valueTypeLabel}
-        </div>
-        <div>
-          <span className="font-medium">Source:</span> {sourceLabel}
-        </div>
-        <div>
-          <span className="font-medium">Required:</span> {isRequired}
-        </div>
-        <div>
-          <span className="font-medium">Editable By:</span> {editableBy}
-        </div>
-        <div className="col-span-2">
-          <span className="font-medium">Default Value:</span> {defaultValue}
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center space-x-2">
+        <LucideReact.Settings size={20} className="text-gray-600" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {value.property_name}
+        </h2>
       </div>
-      {value.description != null && (
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 line-clamp-3">{description}</p>
-        </div>
-      )}
-      {allowed.length > 0 && (
-        <div>
-          <span className="font-medium text-gray-700 text-sm">
-            Allowed Values:
+
+      {/* Badges: type, source, required */}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <span
+          className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${selectedType.color}`}
+        >
+          {selectedType.icon}
+          <span className="ml-1">{selectedType.label}</span>
+        </span>
+
+        {value.source_type && (
+          <span
+            className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${
+              sourceConfig[value.source_type].color
+            }`}
+          >
+            {sourceConfig[value.source_type].icon}
+            <span className="ml-1">
+              {sourceConfig[value.source_type].label}
+            </span>
           </span>
-          <div className="flex flex-wrap gap-2 mt-2">
-            {previewAllowed.map((val, idx) => (
+        )}
+
+        <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded bg-gray-100 text-gray-800">
+          {requiredIcon}
+          <span className="ml-1">{requiredText}</span>
+        </span>
+      </div>
+
+      {/* Description */}
+      {value.description && (
+        <p className="mt-3 text-sm text-gray-600 line-clamp-3">
+          {value.description}
+        </p>
+      )}
+
+      {/* Default Value */}
+      <div className="mt-4">
+        <dt className="text-sm font-medium text-gray-500">Default Value</dt>
+        <dd className="mt-1 text-sm text-gray-800">{defaultDisplay}</dd>
+      </div>
+
+      {/* Allowed Values */}
+      {allowed.length > 0 && (
+        <div className="mt-4">
+          <dt className="text-sm font-medium text-gray-500">Allowed Values</dt>
+          <dd className="mt-2 flex flex-wrap gap-1">
+            {allowed.slice(0, maxBadges).map((item, idx) => (
               <span
                 key={idx}
-                className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs truncate"
+                className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded"
               >
-                {val}
+                {item}
               </span>
             ))}
-            {remainingCount > 0 && (
-              <span className="px-2 py-1 bg-gray-200 text-gray-600 rounded-full text-xs">
-                +{remainingCount} more
+            {allowed.length > maxBadges && (
+              <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded">
+                +{allowed.length - maxBadges} more
               </span>
             )}
-          </div>
+          </dd>
+        </div>
+      )}
+
+      {/* Editable By */}
+      {value.values_editable_by && (
+        <div className="mt-4 flex items-center text-sm text-gray-700">
+          <LucideReact.Pencil size={16} className="text-gray-500" />
+          <span className="ml-2">
+            Editable by:{" "}
+            {value.values_editable_by === "org_actors"
+              ? "Organization Actors"
+              : "Organization & Repo Actors"}
+          </span>
         </div>
       )}
     </div>

@@ -4,5 +4,5 @@ import Component from "../components/356";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"name":"Node.js (Sample Gitignore Template)","source":"# Sample Node.js .gitignore\n# Logs\nlogs/\nnpm-debug.log*\nyarn-debug.log*\n# Dependency directories\nnode_modules/\n# Build output\ndist/\nbuild/\n# Environment variables\n.env\n# Coverage directory\ncoverage/\n# macOS files\n.DS_Store\n"};
+  return {"name":"Node.gitignore (Sample)","source":"# Node.js dependencies\nnode_modules/\n\n# Environment variables\n.env\n\n# Build outputs\ndist/\nbuild/\n\n# Logs\nnpm-debug.log*\nyarn-debug.log*\nyarn-error.log*\n\n# Coverage directories\ncoverage/\n\n# Temporary files\n*.tmp\n"};
 }

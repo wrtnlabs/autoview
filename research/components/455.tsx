@@ -1,16 +1,17 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Configuration object of the webhook
      *
      * @title Webhook Configuration
     */
-    export type webhook_config = {
+    export interface webhook_config {
         url?: AutoViewInputSubTypes.webhook_config_url;
         content_type?: AutoViewInputSubTypes.webhook_config_content_type;
         secret?: AutoViewInputSubTypes.webhook_config_secret;
         insecure_ssl?: AutoViewInputSubTypes.webhook_config_insecure_ssl;
-    };
+    }
     /**
      * The URL to which the payloads will be delivered.
     */
@@ -31,65 +32,58 @@ export type AutoViewInput = AutoViewInputSubTypes.webhook_config;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants
-  const { url, content_type, secret, insecure_ssl } = value;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const url = value.url?.trim();
+  const contentType = value.content_type || "form";
+  const hasSecret = Boolean(value.secret);
+  const maskedSecret = hasSecret ? "••••••••" : "Not set";
+  const isInsecure =
+    value.insecure_ssl != null &&
+    (value.insecure_ssl === "1" ||
+      value.insecure_ssl === 1 ||
+      value.insecure_ssl === "true");
 
-  // Prepare display values with sensible defaults and masking
-  const displayUrl = url ?? "Not configured";
-  const displayContentType = content_type ?? "Not configured";
-  const displaySecret = secret
-    ? secret.length > 4
-      ? `••••••${secret.slice(-4)}`
-      : "••••••••"
-    : "Not configured";
-
-  const isInsecureEnabled = insecure_ssl === "1" || insecure_ssl === 1;
-  const isInsecureDisabled = insecure_ssl === "0" || insecure_ssl === 0;
-  const displayInsecureSsl = isInsecureEnabled
-    ? "Enabled"
-    : isInsecureDisabled
-    ? "Disabled"
-    : "Not configured";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-      <div className="px-4 py-5 bg-gray-50">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Webhook Configuration
-        </h2>
-      </div>
-      <div className="px-4 py-5">
-        <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-          <div>
-            <dt className="text-sm font-medium text-gray-500">URL</dt>
-            <dd className="mt-1 text-sm text-gray-900 break-all">
-              {displayUrl}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-gray-500">
-              Content Type
-            </dt>
-            <dd className="mt-1 text-sm text-gray-900">
-              {displayContentType}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Secret</dt>
-            <dd className="mt-1 text-sm text-gray-900 font-mono">
-              {displaySecret}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm font-medium text-gray-500">
-              Insecure SSL
-            </dt>
-            <dd className="mt-1 text-sm text-gray-900">
-              {displayInsecureSsl}
-            </dd>
-          </div>
-        </dl>
+    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
+      <h2 className="flex items-center mb-4 text-lg font-semibold text-gray-900">
+        <LucideReact.Rss className="mr-2 text-gray-600" size={20} />
+        Webhook Configuration
+      </h2>
+      <div className="space-y-3">
+        {/* URL */}
+        <div className="flex items-start gap-2">
+          <LucideReact.Link className="mt-1 text-gray-500" size={18} />
+          {url ? (
+            <p className="text-gray-800 break-all">{url}</p>
+          ) : (
+            <p className="text-gray-400 italic">No URL provided</p>
+          )}
+        </div>
+        {/* Content Type */}
+        <div className="flex items-center gap-2">
+          <LucideReact.Tag className="text-gray-500" size={18} />
+          <span className="text-gray-800">{contentType}</span>
+        </div>
+        {/* Secret */}
+        <div className="flex items-center gap-2">
+          <LucideReact.Key className="text-gray-500" size={18} />
+          <span className="text-gray-800">{maskedSecret}</span>
+        </div>
+        {/* Insecure SSL */}
+        <div className="flex items-center gap-2">
+          {isInsecure ? (
+            <LucideReact.AlertTriangle className="text-red-500" size={18} />
+          ) : (
+            <LucideReact.CheckCircle className="text-green-500" size={18} />
+          )}
+          <span className="text-gray-800">
+            Insecure SSL:&nbsp;
+            <span className={isInsecure ? "text-red-500" : "text-green-500"}>
+              {isInsecure ? "Yes" : "No"}
+            </span>
+          </span>
+        </div>
       </div>
     </div>
   );

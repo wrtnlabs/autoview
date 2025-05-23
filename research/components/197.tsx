@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4PluginsView = {
+                export interface LegacyV4PluginsView {
                     plugins?: AutoViewInputSubTypes.legacy.v4.LegacyV4Plugin[];
                     next?: number;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Plugin = {
+            export interface LegacyV4Plugin {
                 id?: string;
                 key?: string & tags.Format<"uuid">;
                 channelId?: string;
@@ -50,21 +51,21 @@ export namespace AutoViewInputSubTypes {
                  * @deprecated
                 */
                 showPoweredBy?: boolean;
-            };
-            export type LegacyV4TinyFile = {
+            }
+            export interface LegacyV4TinyFile {
                 bucket: string;
                 key: string;
                 width?: number & tags.Type<"int32">;
                 height?: number & tags.Type<"int32">;
-            };
+            }
         }
     }
-    export type I18nText = {
+    export interface I18nText {
         text?: string;
         en?: string;
         ja?: string;
         ko?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4PluginsView;
 
@@ -72,103 +73,109 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Plugins
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation and transformation
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const plugins = value.plugins ?? [];
-  const pluginCount = plugins.length;
-  const hasNextPage = value.next != null;
+  const formatDate = (ts?: number): string =>
+    ts ? new Date(ts).toLocaleString() : "";
 
-  function formatDate(timestamp?: number): string {
-    if (!timestamp) return "—";
-    return new Date(timestamp).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
-
-  // 2. Compose the visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <header className="mb-6 flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Plugins ({pluginCount})
-        </h2>
-        {hasNextPage && (
-          <span className="text-sm text-blue-600">More pages available</span>
-        )}
-      </header>
+    <div className="space-y-4">
+      {plugins.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-4 text-lg">No plugins available</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {plugins.map((plugin) => {
+            const description =
+              plugin.welcomeI18n?.text ??
+              plugin.welcomeI18n?.en ??
+              plugin.welcomeI18n?.ja ??
+              plugin.welcomeI18n?.ko ??
+              "";
+            const profileMessage =
+              plugin.profileBotMessageI18n?.text ??
+              plugin.profileBotMessageI18n?.en ??
+              plugin.profileBotMessageI18n?.ja ??
+              plugin.profileBotMessageI18n?.ko ??
+              "";
+            const key = plugin.key ?? plugin.id ?? plugin.name;
 
-      <div className="space-y-4">
-        {pluginCount === 0 && (
-          <div className="text-center text-gray-500 py-8">
-            No plugins to display.
-          </div>
-        )}
-
-        {plugins.map((plugin, index) => (
-          <div
-            key={plugin.id ?? index}
-            className="flex flex-col md:flex-row md:items-center md:justify-between bg-gray-50 p-4 rounded-lg"
-          >
-            <div className="flex items-center space-x-4">
-              {/* Thumbnail or placeholder */}
-              {plugin.deskImageUrl || plugin.mobileImageUrl ? (
-                <img
-                  src={plugin.deskImageUrl ?? plugin.mobileImageUrl!}
-                  alt={plugin.name}
-                  className="w-12 h-12 rounded-md object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500">
-                    {plugin.name.charAt(0).toUpperCase()}
-                  </span>
+            return (
+              <div
+                key={key}
+                className="p-4 bg-white rounded-lg shadow transition hover:shadow-md"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <LucideReact.Puzzle size={20} color={plugin.color} />
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      {plugin.name}
+                    </h3>
+                  </div>
+                  {plugin.state === "active" ? (
+                    <LucideReact.CheckCircle
+                      size={16}
+                      className="text-green-500"
+                    />
+                  ) : plugin.state === "waiting" ? (
+                    <LucideReact.Clock
+                      size={16}
+                      className="text-amber-500"
+                    />
+                  ) : null}
                 </div>
-              )}
 
-              <div className="min-w-0">
-                <div className="text-lg font-medium text-gray-900 truncate">
-                  {plugin.name}
-                </div>
-                <div className="mt-1 flex items-center space-x-2 text-sm text-gray-600">
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-white ${
-                      plugin.state === "active"
-                        ? "bg-green-500"
-                        : "bg-yellow-500"
-                    }`}
-                  >
-                    {plugin.state === "active" ? "Active" : "Waiting"}
-                  </span>
-                  <span>Created: {formatDate(plugin.createdAt)}</span>
+                {description && (
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                    {description}
+                  </p>
+                )}
+                {plugin.profileBot && profileMessage && (
+                  <p className="mt-1 text-xs italic text-gray-500 line-clamp-1">
+                    {profileMessage}
+                  </p>
+                )}
+
+                <div className="mt-3 flex flex-wrap items-center text-xs text-gray-500 gap-2">
+                  {plugin.createdAt && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Calendar size={14} />
+                      <span>{formatDate(plugin.createdAt)}</span>
+                    </div>
+                  )}
+                  {plugin.runRate !== undefined && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.BarChart2 size={14} />
+                      <span>{Math.round(plugin.runRate * 100)}%</span>
+                    </div>
+                  )}
+                  {plugin.urlWhitelist && plugin.urlWhitelist.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Link size={14} />
+                      <span>{plugin.urlWhitelist.length} URLs</span>
+                    </div>
+                  )}
+                  {plugin.profileBot && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.User size={14} />
+                      <span>Profile Bot</span>
+                    </div>
+                  )}
                 </div>
               </div>
-            </div>
+            );
+          })}
+        </div>
+      )}
 
-            <div className="mt-4 md:mt-0 flex flex-wrap items-center space-x-4 text-sm text-gray-700">
-              {plugin.botName && <span>Bot: {plugin.botName}</span>}
-              {plugin.runRate != null && (
-                <span>
-                  Run Rate: {(plugin.runRate * 100).toFixed(0)}%
-                </span>
-              )}
-              {plugin.urlWhitelist && (
-                <span>URLs: {plugin.urlWhitelist.length}</span>
-              )}
-              {plugin.profileBot && (
-                <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
-                  Profile Bot
-                </span>
-              )}
-              {plugin.bright && (
-                <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full">
-                  Bright
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+      {value.next !== undefined && (
+        <div className="text-sm text-gray-500">
+          Next page index: {value.next}
+        </div>
+      )}
     </div>
   );
 }

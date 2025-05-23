@@ -1,11 +1,13 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * An object without any properties.
      *
      * @title Empty Object
     */
-    export type empty_object = {};
+    export interface empty_object {
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.empty_object;
 
@@ -13,18 +15,25 @@ export type AutoViewInput = AutoViewInputSubTypes.empty_object;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Since AutoViewInput is an empty object, there are no properties to display.
-  // We'll surface a friendly placeholder indicating the absence of data.
+  // Determine if there's any meaningful data to show
+  const hasData = Object.keys(value).length > 0;
 
-  // 1. Define any derived constants (none needed here)
+  // Render fallback for empty data
+  if (!hasData) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
+        <LucideReact.AlertCircle size={48} className="text-gray-300" />
+        <span className="mt-2 text-gray-500 text-sm">No data available</span>
+      </div>
+    );
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Display a centered, styled placeholder message.
+  // If data structure changes in the future, display raw JSON
   return (
-    <div className="w-full p-4 bg-gray-50 rounded-lg shadow-sm flex items-center justify-center">
-      <p className="text-gray-500 italic">No data available.</p>
+    <div className="p-4 bg-white rounded-lg shadow-md overflow-auto">
+      <pre className="text-xs text-gray-700 whitespace-pre-wrap">
+        {JSON.stringify(value, null, 2)}
+      </pre>
     </div>
   );
-
-  // 3. Return the React element.
 }

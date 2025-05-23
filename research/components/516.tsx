@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Response
      *
      * @title Rule Suite
     */
-    export type rule_suite = {
+    export interface rule_suite {
         /**
          * The unique identifier of the rule insight.
         */
@@ -83,7 +84,7 @@ export namespace AutoViewInputSubTypes {
             */
             details?: string | null;
         }[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.rule_suite;
 
@@ -92,133 +93,110 @@ export type AutoViewInput = AutoViewInputSubTypes.rule_suite;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const repoName = value.repository_name ?? "Unknown Repository";
+  const branch = value.ref ? ` @ ${value.ref}` : "";
   const actor =
-    value.actor_name ||
-    (value.actor_id != null ? `#${value.actor_id}` : "Unknown user");
-  const repo =
-    value.repository_name ||
-    (value.repository_id != null ? `#${value.repository_id}` : "Unknown repo");
-  const refName = value.ref || "Unknown ref";
-  const beforeSha = value.before_sha ? value.before_sha.slice(0, 7) : "—";
-  const afterSha = value.after_sha ? value.after_sha.slice(0, 7) : "—";
+    value.actor_name ??
+    (value.actor_id != null ? `User #${value.actor_id}` : "Unknown Actor");
   const pushedAt = value.pushed_at
     ? new Date(value.pushed_at).toLocaleString(undefined, {
         dateStyle: "medium",
         timeStyle: "short",
       })
-    : "Unknown date";
-  const overallStatus = value.result || "unknown";
-  const evalStatus = value.evaluation_result;
+    : "Unknown Date";
 
-  // Badge color mapping
-  const statusColors: Record<string, string> = {
-    pass: "bg-green-100 text-green-800",
-    fail: "bg-red-100 text-red-800",
-    bypass: "bg-yellow-100 text-yellow-800",
-    unknown: "bg-gray-100 text-gray-800",
+  const totalRules = value.rule_evaluations?.length ?? 0;
+  const passedRules =
+    value.rule_evaluations?.filter((r) => r.result === "pass").length ?? 0;
+  const failedRules =
+    value.rule_evaluations?.filter((r) => r.result === "fail").length ?? 0;
+
+  const getStatusIcon = (
+    status?: "pass" | "fail" | "bypass" | null
+  ): JSX.Element => {
+    switch (status) {
+      case "pass":
+        return <LucideReact.CheckCircle className="text-green-500" size={20} />;
+      case "fail":
+        return <LucideReact.XCircle className="text-red-500" size={20} />;
+      case "bypass":
+        return <LucideReact.AlertTriangle className="text-amber-500" size={20} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400" size={20} />;
+    }
   };
-  const enforcementColors: Record<string, string> = {
-    active: "bg-blue-100 text-blue-800",
-    evaluate: "bg-purple-100 text-purple-800",
-    "deleted ruleset": "bg-gray-100 text-gray-800",
-  };
+
+  const capitalize = (s?: string | null): string =>
+    s ? s.charAt(0).toUpperCase() + s.slice(1) : "Unknown";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const element = (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <div className="text-lg font-semibold text-gray-900 truncate">{repo}</div>
-        <div className="flex items-center space-x-2 mt-2 sm:mt-0">
+  return (
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Header: Repository & Result */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LucideReact.GitBranch className="text-gray-500" size={16} />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {repoName}
+            <span className="font-normal">{branch}</span>
+          </h2>
+        </div>
+        <div className="flex items-center gap-1">
+          {getStatusIcon(value.result)}
           <span
-            className={`px-2 py-1 text-xs font-medium rounded ${
-              statusColors[overallStatus]
-            }`}
+            className={
+              "text-sm font-medium " +
+              (value.result === "pass"
+                ? "text-green-600"
+                : value.result === "fail"
+                ? "text-red-600"
+                : "text-amber-600")
+            }
           >
-            {overallStatus.toUpperCase()}
+            {capitalize(value.result)}
           </span>
-          {evalStatus != null && evalStatus !== overallStatus && (
-            <span
-              className={`px-2 py-1 text-xs font-medium rounded ${
-                statusColors[evalStatus]
-              }`}
-            >
-              EVAL: {evalStatus.toUpperCase()}
-            </span>
-          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
-        <div className="space-y-1">
-          <div>
-            <span className="font-medium">Ref:</span> {refName}
-          </div>
-          <div>
-            <span className="font-medium">Commits:</span> {beforeSha} → {afterSha}
-          </div>
+      {/* Subheader: Actor & Date */}
+      <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-500">
+        <div className="flex items-center gap-2">
+          <LucideReact.User size={16} />
+          <span className="truncate">{actor}</span>
         </div>
-        <div className="space-y-1">
-          <div>
-            <span className="font-medium">Pushed by:</span> {actor}
-          </div>
-          <div>
-            <span className="font-medium">Pushed at:</span> {pushedAt}
-          </div>
+        <div className="flex items-center gap-2 mt-1 sm:mt-0">
+          <LucideReact.Calendar size={16} />
+          <span>{pushedAt}</span>
         </div>
       </div>
 
-      {value.rule_evaluations?.length ? (
-        <div>
-          <div className="text-md font-medium text-gray-800 mb-2">
-            Rule Evaluations
-          </div>
-          <ul className="divide-y divide-gray-200">
-            {value.rule_evaluations.map((rule, idx) => {
-              const src = rule.rule_source;
-              const ruleName =
-                src?.name || src?.type || rule.rule_type || "Unknown rule";
-              const enforce = rule.enforcement || "active";
-              const res = rule.result || "pass";
-              return (
-                <li
-                  key={idx}
-                  className="py-2 flex flex-col sm:flex-row sm:justify-between sm:items-center"
-                >
-                  <div className="flex-1 space-y-1">
-                    <div className="text-sm font-medium text-gray-900 truncate">
-                      {ruleName}
-                    </div>
-                    {rule.details && (
-                      <div className="text-xs text-gray-600 line-clamp-2">
-                        {rule.details}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${
-                        enforcementColors[enforce]
-                      }`}
-                    >
-                      {enforce.toUpperCase()}
-                    </span>
-                    <span
-                      className={`px-2 py-1 text-xs font-medium rounded ${
-                        statusColors[res]
-                      }`}
-                    >
-                      {res.toUpperCase()}
-                    </span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+      <hr className="my-4 border-gray-200" />
+
+      {/* Optional Evaluation Result */}
+      {value.evaluation_result != null && (
+        <div className="flex items-center gap-2 mb-3">
+          {getStatusIcon(value.evaluation_result)}
+          <span className="text-sm font-medium text-gray-700">
+            Evaluation: {capitalize(value.evaluation_result)}
+          </span>
         </div>
-      ) : null}
+      )}
+
+      {/* Rule Summary */}
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-1 text-sm text-gray-700">
+          <LucideReact.ListOrdered size={16} className="text-gray-500" />
+          <span>Total: {totalRules}</span>
+        </div>
+        <div className="flex items-center gap-1 text-sm text-green-700">
+          <LucideReact.CheckCircle size={16} className="text-green-500" />
+          <span>Pass: {passedRules}</span>
+        </div>
+        <div className="flex items-center gap-1 text-sm text-red-700">
+          <LucideReact.XCircle size={16} className="text-red-500" />
+          <span>Fail: {failedRules}</span>
+        </div>
+      </div>
     </div>
   );
-
-  // 3. Return the React element.
-  return element;
 }

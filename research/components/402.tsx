@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Authentication Token
      *
      * @title Authentication Token
     */
-    export type authentication_token = {
+    export interface authentication_token {
         /**
          * The token used for authentication
         */
@@ -25,13 +26,13 @@ export namespace AutoViewInputSubTypes {
          * Describe whether all repositories have been selected or there's a selection involved
         */
         repository_selection?: "all" | "selected";
-    };
+    }
     /**
      * A repository on GitHub.
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -235,7 +236,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -254,7 +255,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -277,7 +278,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.authentication_token;
 
@@ -286,76 +287,85 @@ export type AutoViewInput = AutoViewInputSubTypes.authentication_token;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { token, expires_at, permissions, repositories, repository_selection, single_file } = value;
-  const maskedToken: string = token.length > 8 ? `${token.slice(0, 4)}…${token.slice(-4)}` : token;
-  const expiresDate = new Date(expires_at);
-  const formattedExpires: string = expiresDate.toLocaleString(undefined, {
-    year:  'numeric',
-    month: 'short',
-    day:   'numeric',
-    hour:  'numeric',
-    minute:'numeric',
-  });
-  const permissionKeys: string[] = permissions
-    ? Object.entries(permissions)
-        .filter(([, v]) => Boolean(v))
-        .map(([k]) => k)
-    : [];
-  const displayPerms: string = permissionKeys.length > 0 ? permissionKeys.join(', ') : 'None';
-  const isSelected: boolean = repository_selection === 'selected';
-  const repoCount: number = repositories?.length ?? 0;
-  const displayedRepos = isSelected && repositories
-    ? repositories.slice(0, 3)
-    : [];
+  const maskedToken = (() => {
+    const t = value.token;
+    if (t.length <= 12) return t;
+    return `${t.slice(0, 4)}…${t.slice(-4)}`;
+  })();
+
+  const expiresAt = (() => {
+    const d = new Date(value.expires_at);
+    return d.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+    });
+  })();
+
+  const selectionLabel =
+    value.repository_selection === "all"
+      ? "All Repositories"
+      : "Selected Repositories";
+
+  const repos = value.repositories ?? [];
+  const repoCount = repos.length;
+  const previewRepos = repos.slice(0, 3);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const content = (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Authentication Token</h2>
-      <dl className="grid grid-cols-1 gap-y-3">
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Token</dt>
-          <dd className="mt-1 text-sm text-gray-900 font-mono break-all">{maskedToken}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Expires At</dt>
-          <dd className="mt-1 text-sm text-gray-900">{formattedExpires}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Permissions</dt>
-          <dd className="mt-1 text-sm text-gray-900">{displayPerms}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Repository Selection</dt>
-          <dd className="mt-1 text-sm text-gray-900">
-            {repository_selection === 'all' ? 'All Repositories' : 'Selected Repositories'}
-          </dd>
-        </div>
-        {isSelected && repoCount > 0 && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Repositories</dt>
-            <dd className="mt-1 space-y-1">
-              {displayedRepos.map((repo) => (
-                <p key={repo.id} className="text-sm text-gray-700 truncate">
-                  {repo.full_name}
-                </p>
-              ))}
-              {repoCount > displayedRepos.length && (
-                <p className="text-sm text-gray-500">+{repoCount - displayedRepos.length} more</p>
-              )}
-            </dd>
-          </div>
+  return (
+    <div className="w-full max-w-md p-4 bg-white rounded-xl shadow-md flex flex-col gap-4">
+      <div className="flex items-center gap-2 text-gray-700">
+        <LucideReact.Key size={16} className="text-gray-500" />
+        <span className="font-mono text-sm truncate" title={value.token}>
+          {maskedToken}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-2 text-gray-700">
+        <LucideReact.Clock size={16} className="text-gray-500" />
+        <span className="text-sm">Expires: {expiresAt}</span>
+      </div>
+
+      <div className="flex items-center gap-2 text-gray-700">
+        <LucideReact.GitBranch size={16} className="text-gray-500" />
+        <span className="text-sm">{selectionLabel}</span>
+        {repoCount > 0 && (
+          <span className="ml-auto text-sm text-gray-500">
+            {repoCount} repos
+          </span>
         )}
-        {single_file != null && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Single File</dt>
-            <dd className="mt-1 text-sm text-gray-900 truncate">{single_file}</dd>
-          </div>
-        )}
-      </dl>
+      </div>
+
+      {repoCount > 0 && (
+        <ul className="mt-2 space-y-1">
+          {previewRepos.map((repo) => (
+            <li
+              key={repo.id}
+              className="flex items-center gap-2 text-sm text-gray-600 truncate"
+            >
+              <LucideReact.GitBranch size={14} className="text-gray-400" />
+              <span title={repo.full_name}>{repo.full_name}</span>
+            </li>
+          ))}
+          {repoCount > 3 && (
+            <li className="text-sm text-gray-500">+{repoCount - 3} more</li>
+          )}
+        </ul>
+      )}
+
+      {value.single_file != null && (
+        <div className="flex items-center gap-2 text-gray-700 mt-2">
+          <LucideReact.FileText size={16} className="text-gray-500" />
+          <span
+            className="text-sm truncate"
+            title={value.single_file}
+          >
+            {value.single_file}
+          </span>
+        </div>
+      )}
     </div>
   );
-
-  // 3. Return the React element.
-  return content;
 }

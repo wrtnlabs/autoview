@@ -1,16 +1,17 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Configuration object of the webhook
      *
      * @title Webhook Configuration
     */
-    export type webhook_config = {
+    export interface webhook_config {
         url?: AutoViewInputSubTypes.webhook_config_url;
         content_type?: AutoViewInputSubTypes.webhook_config_content_type;
         secret?: AutoViewInputSubTypes.webhook_config_secret;
         insecure_ssl?: AutoViewInputSubTypes.webhook_config_insecure_ssl;
-    };
+    }
     /**
      * The URL to which the payloads will be delivered.
     */
@@ -29,80 +30,76 @@ export type AutoViewInput = AutoViewInputSubTypes.webhook_config;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const url = value.url || '';
-  const contentType = value.content_type || 'form';
-  const insecureSslVal = value.insecure_ssl;
-  const insecureSslEnabled = insecureSslVal === '1' || insecureSslVal === 1;
-  const maskedSecret = value.secret
-    ? `${value.secret.slice(0, 4)}…${value.secret.slice(-4)}`
-    : '—';
-  const hasAny =
-    !!value.url ||
-    !!value.content_type ||
-    !!value.secret ||
-    value.insecure_ssl !== undefined;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!hasAny) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No webhook configuration provided.
-      </div>
-    );
-  }
+  // Derived flags for SSL and secret presence
+  const insecureSSLRaw =
+    value.insecure_ssl !== undefined
+      ? typeof value.insecure_ssl === "string"
+        ? parseInt(value.insecure_ssl, 10)
+        : value.insecure_ssl
+      : 0;
+  const isInsecure = insecureSSLRaw > 0;
+  const isSecretConfigured = Boolean(value.secret);
 
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        Webhook Configuration
-      </h2>
-      <dl className="space-y-3">
-        {/* URL */}
-        <div>
-          <dt className="text-sm font-medium text-gray-500">URL</dt>
-          <dd
-            className="mt-1 text-sm text-blue-600 truncate"
-            title={url}
-          >
-            {url || '—'}
-          </dd>
-        </div>
-        {/* Content Type */}
-        <div className="flex justify-between items-center">
-          <dt className="text-sm font-medium text-gray-500">
-            Content Type
-          </dt>
-          <dd className="mt-1 text-sm text-gray-700 capitalize">
-            {contentType}
-          </dd>
-        </div>
-        {/* Secret */}
-        <div className="flex justify-between items-center">
-          <dt className="text-sm font-medium text-gray-500">Secret</dt>
-          <dd className="mt-1 text-sm text-gray-700 font-mono">
-            {maskedSecret}
-          </dd>
-        </div>
-        {/* Insecure SSL */}
-        <div className="flex justify-between items-center">
-          <dt className="text-sm font-medium text-gray-500">
-            Insecure SSL
-          </dt>
-          <dd>
-            <span
-              className={
-                insecureSslEnabled
-                  ? 'px-2 inline-flex text-xs font-semibold leading-5 rounded-full bg-green-100 text-green-800'
-                  : 'px-2 inline-flex text-xs font-semibold leading-5 rounded-full bg-red-100 text-red-800'
-              }
-            >
-              {insecureSslEnabled ? 'Enabled' : 'Disabled'}
-            </span>
-          </dd>
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <dl className="grid grid-cols-1 gap-y-4">
+        {value.url && (
+          <>
+            <dt className="flex items-center text-sm font-medium text-gray-500 gap-1">
+              <LucideReact.Link size={16} className="text-gray-400" />
+              <span>URL</span>
+            </dt>
+            <dd className="mt-1 text-sm text-blue-600 truncate break-all">
+              {value.url}
+            </dd>
+          </>
+        )}
+        {value.content_type && (
+          <>
+            <dt className="flex items-center text-sm font-medium text-gray-500 gap-1">
+              <LucideReact.Tag size={16} className="text-gray-400" />
+              <span>Content Type</span>
+            </dt>
+            <dd className="mt-1 text-sm text-gray-700">
+              {value.content_type}
+            </dd>
+          </>
+        )}
+        <dt className="flex items-center text-sm font-medium text-gray-500 gap-1">
+          <LucideReact.Lock size={16} className="text-gray-400" />
+          <span>Secret</span>
+        </dt>
+        <dd className="mt-1 flex items-center text-sm text-gray-700">
+          {isSecretConfigured ? (
+            <>
+              <LucideReact.CheckCircle
+                size={16}
+                className="text-green-500"
+              />
+              <span className="ml-1">Configured</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.XCircle size={16} className="text-red-500" />
+              <span className="ml-1">Not Configured</span>
+            </>
+          )}
+        </dd>
+        <dt className="flex items-center text-sm font-medium text-gray-500 gap-1">
+          {isInsecure ? (
+            <LucideReact.AlertTriangle
+              size={16}
+              className="text-yellow-500"
+            />
+          ) : (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          )}
+          <span>SSL Verification</span>
+        </dt>
+        <dd className="mt-1 text-sm text-gray-700">
+          {isInsecure ? "Insecure SSL allowed" : "SSL verification enforced"}
+        </dd>
       </dl>
     </div>
   );

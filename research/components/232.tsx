@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type EventsView = {
+    export interface EventsView {
         prev?: string;
         next?: string;
         events?: AutoViewInputSubTypes.Event[];
-    };
-    export type Event = {
+    }
+    export interface Event {
         userId?: string;
         id?: string;
         channelId?: string;
@@ -21,7 +22,7 @@ export namespace AutoViewInputSubTypes {
         nameI18nMap?: {
             [key: string]: string;
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.EventsView;
 
@@ -30,8 +31,7 @@ export type AutoViewInput = AutoViewInputSubTypes.EventsView;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const events = value.events ?? [];
-
+  const events: AutoViewInputSubTypes.Event[] = value.events ?? [];
   const formatDate = (timestamp?: number): string =>
     timestamp
       ? new Date(timestamp).toLocaleString(undefined, {
@@ -41,62 +41,100 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
           hour: "2-digit",
           minute: "2-digit",
         })
-      : "";
+      : "—";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
-        Events{events.length > 0 ? ` (${events.length})` : ""}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800 mb-4">
+        <LucideReact.List size={20} className="text-gray-500" />
+        <span>Events</span>
       </h2>
+
       {events.length === 0 ? (
-        <p className="text-gray-500">No events to display.</p>
+        <div className="flex flex-col items-center justify-center text-gray-400 py-10">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2">No events available</span>
+        </div>
       ) : (
         <ul className="space-y-4">
-          {events.map((event, idx) => {
-            const created = formatDate(event.createdAt);
-            const expire = formatDate(event.expireAt);
-            const managed = event.managed ?? false;
-            const version = typeof event.version === "number" ? event.version : null;
-            const translations = event.nameI18nMap
-              ? Object.keys(event.nameI18nMap).length
+          {events.map((evt, idx) => {
+            const propCount = evt.property ? Object.keys(evt.property).length : 0;
+            const i18nCount = evt.nameI18nMap
+              ? Object.keys(evt.nameI18nMap).length
               : 0;
 
             return (
-              <li key={idx} className="p-4 bg-white rounded-lg shadow">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-lg font-medium text-gray-900 truncate">
-                    {event.name}
+              <li
+                key={idx}
+                className="p-4 border border-gray-200 rounded-lg hover:shadow-lg transition-shadow"
+              >
+                <div className="flex justify-between items-start">
+                  <h3 className="text-md font-medium text-gray-900 truncate">
+                    {evt.name}
                   </h3>
-                  <div className="flex space-x-2">
-                    {managed && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">
-                        Managed
-                      </span>
-                    )}
-                    {version != null && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                        v{version}
-                      </span>
-                    )}
-                    {translations > 0 && (
-                      <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
-                        {translations} lang
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="mt-2 text-sm text-gray-600 space-y-1">
-                  {created && (
-                    <p>
-                      <span className="font-medium">Created:</span> {created}
-                    </p>
+                  {evt.managed && (
+                    <LucideReact.CheckCircle
+                      size={16}
+                      className="text-green-500"
+                      aria-label="Managed"
+                    />
                   )}
-                  {expire && (
-                    <p>
-                      <span className="font-medium">Expires:</span> {expire}
-                    </p>
+                </div>
+
+                <div className="mt-2 text-sm text-gray-600 space-y-1">
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Calendar
+                      size={16}
+                      className="text-gray-400"
+                    />
+                    <span>Created: {formatDate(evt.createdAt)}</span>
+                  </div>
+
+                  {evt.expireAt && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Calendar
+                        size={16}
+                        className="text-gray-400"
+                      />
+                      <span>Expires: {formatDate(evt.expireAt)}</span>
+                    </div>
+                  )}
+
+                  {evt.version !== undefined && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Hash size={16} className="text-gray-400" />
+                      <span>Version: {evt.version}</span>
+                    </div>
+                  )}
+
+                  {(propCount > 0 || i18nCount > 0) && (
+                    <div className="flex items-center gap-4 mt-1">
+                      {propCount > 0 && (
+                        <div className="flex items-center gap-1">
+                          <LucideReact.Columns
+                            size={16}
+                            className="text-gray-400"
+                          />
+                          <span>
+                            {propCount} propert
+                            {propCount > 1 ? "ies" : "y"}
+                          </span>
+                        </div>
+                      )}
+                      {i18nCount > 0 && (
+                        <div className="flex items-center gap-1">
+                          <LucideReact.Globe
+                            size={16}
+                            className="text-gray-400"
+                          />
+                          <span>
+                            {i18nCount} translation
+                            {i18nCount > 1 ? "s" : ""}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </li>

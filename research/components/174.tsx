@@ -1,13 +1,14 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4CampaignView = {
+                export interface LegacyV4CampaignView {
                     campaign?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign;
                     msgs?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4CampaignMsg[];
-                };
+                }
             }
         }
         export namespace v4 {
@@ -17,7 +18,7 @@ export namespace AutoViewInputSubTypes {
                  *
                  * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
                 */
-                export type LegacyV4Campaign = {
+                export interface LegacyV4Campaign {
                     id?: string;
                     channelId?: string;
                     name: string;
@@ -51,8 +52,8 @@ export namespace AutoViewInputSubTypes {
                     click?: number & tags.Type<"int32">;
                     userChatExpireDuration?: string;
                     managerId?: string;
-                };
-                export type LegacyV4CampaignMsg = {
+                }
+                export interface LegacyV4CampaignMsg {
                     id: string;
                     campaignId?: string;
                     name: string;
@@ -64,35 +65,36 @@ export namespace AutoViewInputSubTypes {
                     view?: number & tags.Type<"int32">;
                     goal?: number & tags.Type<"int32">;
                     click?: number & tags.Type<"int32">;
-                };
+                }
             }
         }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
-    export type TimeRange = {
+    }
+    export interface Operator {
+    }
+    export interface TimeRange {
         dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
         from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
         to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-    };
+    }
     export namespace marketing {
-        export type CampaignDraft = {
+        export interface CampaignDraft {
             campaign: AutoViewInputSubTypes.marketing.Campaign;
             msgs: AutoViewInputSubTypes.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
-        };
+        }
         /**
          * ### 이벤트 기록
          *
          * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
         */
-        export type Campaign = {
+        export interface Campaign {
             id?: string;
             channelId?: string;
             name: string;
@@ -130,16 +132,16 @@ export namespace AutoViewInputSubTypes {
             userChatExpireDuration?: string;
             managerId?: string;
             recipeCaseId?: string;
-        };
-        export type HoldingPropertyConstant = {
+        }
+        export interface HoldingPropertyConstant {
             baseEventName: string;
             baseEventKey: string;
             eventQuery?: AutoViewInputSubTypes.Expression;
             baseEventType: "triggerEvent" | "additionalFilter";
             operator?: AutoViewInputSubTypes.EventSchema;
             values?: {};
-        };
-        export type CampaignMsg = {
+        }
+        export interface CampaignMsg {
             id: string;
             campaignId?: string;
             channelId?: string;
@@ -152,12 +154,12 @@ export namespace AutoViewInputSubTypes {
             view?: number & tags.Type<"int32">;
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
-        };
-        export type SendMediumSettings = {
+        }
+        export interface SendMediumSettings {
             type: string;
-        };
+        }
     }
-    export type EventSchema = {
+    export interface EventSchema {
         id?: string;
         channelId?: string;
         eventName?: string;
@@ -167,7 +169,7 @@ export namespace AutoViewInputSubTypes {
         createdAt?: number;
         updatedAt?: number;
         icon?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4CampaignView;
 
@@ -175,139 +177,163 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Campaig
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  const campaign = value.campaign;
-  const messages = value.msgs ?? [];
-
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const stateMap: Record<string, { label: string; tw: string }> = {
-    draft: { label: 'Draft', tw: 'bg-gray-200 text-gray-800' },
-    active: { label: 'Active', tw: 'bg-green-100 text-green-800' },
-    stopped: { label: 'Stopped', tw: 'bg-yellow-100 text-yellow-800' },
-    removed: { label: 'Removed', tw: 'bg-red-100 text-red-800' },
-  };
-  const mediumMap: Record<string, string> = {
-    appAlimtalk: 'Alimtalk',
-    appLine: 'Line',
-    email: 'Email',
-    inAppChat: 'In-App Chat',
-    xms: 'XMS',
-  };
-  const formatDate = (ts?: number) =>
-    ts
-      ? new Date(ts).toLocaleString([], {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-        })
-      : null;
-  const formatNumber = (num: number) => num.toLocaleString();
-  const totalSent =
-    campaign?.sent ?? messages.reduce((sum, m) => sum + (m.sent ?? 0), 0);
-  const totalViews =
-    campaign?.view ?? messages.reduce((sum, m) => sum + (m.view ?? 0), 0);
-  const totalClicks =
-    campaign?.click ?? messages.reduce((sum, m) => sum + (m.click ?? 0), 0);
-
-  // Handle missing campaign data
+  const campaign = value.campaign;
   if (!campaign) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No campaign data available
+      <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="text-gray-400" />
+        <span className="mt-2 text-sm">No campaign data available</span>
       </div>
     );
   }
 
+  const stateKey = campaign.state ?? "unknown";
+  const stateMap: Record<string, { icon: React.ReactNode; color: string }> = {
+    draft: {
+      icon: <LucideReact.Clock size={16} className="text-gray-500" />,
+      color: "text-gray-500",
+    },
+    active: {
+      icon: <LucideReact.CheckCircle size={16} className="text-green-500" />,
+      color: "text-green-500",
+    },
+    stopped: {
+      icon: <LucideReact.XCircle size={16} className="text-red-500" />,
+      color: "text-red-500",
+    },
+    removed: {
+      icon: <LucideReact.Trash2 size={16} className="text-red-500" />,
+      color: "text-red-500",
+    },
+    unknown: {
+      icon: <LucideReact.HelpCircle size={16} className="text-gray-400" />,
+      color: "text-gray-400",
+    },
+  };
+  const stateInfo = stateMap[stateKey];
+
+  function formatDate(ts?: number): string {
+    return ts ? new Date(ts).toLocaleString() : "N/A";
+  }
+
+  const metrics = [
+    {
+      label: "Sent",
+      value: campaign.sent ?? 0,
+      icon: <LucideReact.Send size={16} className="text-blue-500" />,
+    },
+    {
+      label: "Views",
+      value: campaign.view ?? 0,
+      icon: <LucideReact.Eye size={16} className="text-indigo-500" />,
+    },
+    {
+      label: "Goals",
+      value: campaign.goal ?? 0,
+      icon: <LucideReact.Target size={16} className="text-purple-500" />,
+    },
+    {
+      label: "Clicks",
+      value: campaign.click ?? 0,
+      icon: <LucideReact.MousePointer size={16} className="text-teal-500" />,
+    },
+  ];
+
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
       {/* Header */}
-      <header>
-        <h2 className="text-xl font-semibold text-gray-800 truncate">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
           {campaign.name}
         </h2>
-        <div className="flex items-center space-x-2 mt-2">
-          {campaign.state && stateMap[campaign.state] && (
-            <span
-              className={
-                `px-2 py-1 text-xs font-medium rounded ` +
-                stateMap[campaign.state].tw
-              }
-            >
-              {stateMap[campaign.state].label}
-            </span>
-          )}
-          {campaign.sendMedium && (
-            <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800">
-              {mediumMap[campaign.sendMedium]}
-            </span>
-          )}
+        <div className="flex items-center">
+          {stateInfo.icon}
+          <span className={`ml-1 text-sm font-medium ${stateInfo.color}`}>
+            {stateKey}
+          </span>
         </div>
-        {(campaign.startAt || campaign.endAt) && (
-          <div className="mt-2 text-sm text-gray-600">
-            {campaign.startAt && (
-              <span>Start: {formatDate(campaign.startAt)}</span>
-            )}
-            {campaign.endAt && (
-              <span className="ml-4">End: {formatDate(campaign.endAt)}</span>
-            )}
-          </div>
-        )}
-      </header>
+      </div>
+
+      {/* Key properties */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Mail size={16} className="text-gray-500" />
+          <span className="ml-1 capitalize">{campaign.sendMedium}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Zap size={16} className="text-gray-500" />
+          <span className="ml-1">{campaign.triggerEventName}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Clock size={16} className="text-gray-500" />
+          <span className="ml-1">{campaign.waitingTime}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.SlidersHorizontal size={16} className="text-gray-500" />
+          <span className="ml-1 capitalize">{campaign.sendMode}</span>
+        </div>
+      </div>
 
       {/* Metrics */}
-      <section className="mt-4 grid grid-cols-3 text-center">
-        <div>
-          <div className="text-lg font-bold text-gray-800">
-            {formatNumber(totalSent)}
+      <div className="flex flex-wrap gap-4 text-sm">
+        {metrics.map((m) => (
+          <div key={m.label} className="flex items-center text-gray-700">
+            {m.icon}
+            <span className="ml-1">{m.value}</span>
           </div>
-          <div className="text-xs text-gray-500">Sent</div>
-        </div>
-        <div>
-          <div className="text-lg font-bold text-gray-800">
-            {formatNumber(totalViews)}
-          </div>
-          <div className="text-xs text-gray-500">Views</div>
-        </div>
-        <div>
-          <div className="text-lg font-bold text-gray-800">
-            {formatNumber(totalClicks)}
-          </div>
-          <div className="text-xs text-gray-500">Clicks</div>
-        </div>
-      </section>
+        ))}
+      </div>
 
-      {/* Messages List */}
-      {messages.length > 0 && (
-        <section className="mt-6">
-          <h3 className="text-md font-medium text-gray-700">
-            Messages ({messages.length})
-          </h3>
-          <ul className="mt-2 space-y-2">
-            {messages.map((msg, idx) => (
-              <li
-                key={idx}
-                className="p-3 bg-gray-50 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center"
+      {/* Messages list */}
+      {value.msgs && value.msgs.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-md font-medium text-gray-800">Messages</h3>
+          <div className="space-y-2">
+            {value.msgs.map((msg) => (
+              <div
+                key={msg.id}
+                className="p-2 border border-gray-200 rounded flex items-center justify-between"
               >
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-medium text-gray-800 truncate">
-                    {msg.name}
-                  </h4>
-                  <span className="text-xs text-gray-500">
-                    {mediumMap[msg.sendMedium]}
-                  </span>
+                <span className="text-sm font-medium text-gray-900 truncate">
+                  {msg.name}
+                </span>
+                <div className="flex space-x-3 text-sm text-gray-600">
+                  <div className="flex items-center">
+                    <LucideReact.Send size={14} className="text-blue-500" />
+                    <span className="ml-1">{msg.sent ?? 0}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Eye size={14} className="text-indigo-500" />
+                    <span className="ml-1">{msg.view ?? 0}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Target size={14} className="text-purple-500" />
+                    <span className="ml-1">{msg.goal ?? 0}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.MousePointer size={14} className="text-teal-500" />
+                    <span className="ml-1">{msg.click ?? 0}</span>
+                  </div>
                 </div>
-                <div className="mt-2 sm:mt-0 flex space-x-4 text-xs text-gray-600">
-                  <div>Sent: {formatNumber(msg.sent ?? 0)}</div>
-                  <div>Views: {formatNumber(msg.view ?? 0)}</div>
-                  <div>Clicks: {formatNumber(msg.click ?? 0)}</div>
-                </div>
-              </li>
+              </div>
             ))}
-          </ul>
-        </section>
+          </div>
+        </div>
       )}
-    </article>
+
+      {/* Footer dates */}
+      <div className="flex flex-wrap text-xs text-gray-500">
+        <div className="flex items-center mr-4">
+          <LucideReact.Calendar size={12} />
+          <span className="ml-1">Created: {formatDate(campaign.createdAt)}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={12} />
+          <span className="ml-1">Updated: {formatDate(campaign.updatedAt)}</span>
+        </div>
+      </div>
+    </div>
   );
 }

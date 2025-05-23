@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Authentication Token
      *
      * @title Authentication Token
     */
-    export type authentication_token = {
+    export interface authentication_token {
         /**
          * The token used for authentication
         */
@@ -25,13 +26,13 @@ export namespace AutoViewInputSubTypes {
          * Describe whether all repositories have been selected or there's a selection involved
         */
         repository_selection?: "all" | "selected";
-    };
+    }
     /**
      * A repository on GitHub.
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -235,7 +236,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -254,7 +255,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -277,7 +278,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.authentication_token;
 
@@ -285,100 +286,101 @@ export type AutoViewInput = AutoViewInputSubTypes.authentication_token;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation/transformation
-  const maskedToken =
-    value.token.length > 8
-      ? `${value.token.slice(0, 4)}…${value.token.slice(-4)}`
-      : value.token;
-
-  const expiresAtDate = new Date(value.expires_at);
-  const formattedExpiry = expiresAtDate.toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const maskedToken = `${value.token.slice(0, 4)}…${value.token.slice(-4)}`;
+  const expiresDate = new Date(value.expires_at);
+  const formattedExpiresAt = expiresDate.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
-  const permissions = value.permissions as Record<string, boolean> | undefined;
-  const permissionsList = permissions
-    ? Object.entries(permissions)
-        .filter(([, granted]) => granted)
-        .map(([perm]) => perm)
-    : [];
+  const repoList = value.repositories ?? [];
+  const displayedRepos = repoList.slice(0, 5);
+  const moreCount = repoList.length - displayedRepos.length;
 
-  const repoNames =
-    value.repositories?.map((r) => r.full_name || r.name) ?? [];
-  const repoCount = repoNames.length;
-  const displayedRepos = repoNames.slice(0, 3);
-  const remainingRepoCount = repoCount - displayedRepos.length;
+  const hasCustomPermissions =
+    value.permissions != null && Object.keys(value.permissions).length > 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md border border-gray-200">
-      <h2 className="text-xl font-semibold text-gray-800 mb-3">
-        Authentication Token
-      </h2>
-
-      {/* Token */}
-      <div className="mb-3">
-        <span className="font-medium text-gray-600">Token:</span>
-        <span className="ml-2 font-mono text-gray-800 break-all">
-          {maskedToken}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <div className="flex items-center mb-4">
+        <LucideReact.Key size={20} className="text-gray-500" />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          Authentication Token
+        </h2>
       </div>
 
-      {/* Expiry */}
       <div className="mb-3">
-        <span className="font-medium text-gray-600">Expires At:</span>
-        <span className="ml-2 text-gray-800">{formattedExpiry}</span>
+        <div className="flex items-center text-gray-700">
+          <LucideReact.CornerRightDown size={16} className="text-gray-400" />
+          <span className="ml-2 font-medium">Token:</span>
+          <span className="ml-1 font-mono text-sm">{maskedToken}</span>
+        </div>
       </div>
 
-      {/* Permissions */}
-      {permissionsList.length > 0 && (
-        <div className="mb-3">
-          <span className="font-medium text-gray-600">Permissions:</span>
-          <div className="mt-1 flex flex-wrap gap-2">
-            {permissionsList.map((perm) => (
-              <span
-                key={perm}
-                className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
-              >
-                {perm}
-              </span>
-            ))}
-          </div>
+      <div className="mb-3">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span className="ml-2 font-medium">Expires:</span>
+          <span className="ml-1">{formattedExpiresAt}</span>
+        </div>
+      </div>
+
+      {value.single_file != null && (
+        <div className="mb-3 flex items-center text-gray-700">
+          <LucideReact.FileText size={16} className="text-indigo-500" />
+          <span className="ml-2 font-medium">File:</span>
+          <span className="ml-1 truncate">{value.single_file}</span>
         </div>
       )}
 
-      {/* Repository Selection */}
       <div className="mb-3">
-        <span className="font-medium text-gray-600">Repositories:</span>
-        <div className="mt-1 text-gray-800">
-          {value.repository_selection === "all" ? (
-            <span>All repositories</span>
-          ) : repoCount > 0 ? (
-            <ul className="list-disc list-inside space-y-1">
-              {displayedRepos.map((name) => (
-                <li key={name} className="truncate">
-                  {name}
-                </li>
-              ))}
-              {remainingRepoCount > 0 && (
-                <li className="text-gray-500">
-                  and {remainingRepoCount} more…
-                </li>
-              )}
-            </ul>
+        <div className="flex items-center text-gray-700">
+          {value.repository_selection === 'all' ? (
+            <>
+              <LucideReact.CheckCircle
+                size={16}
+                className="text-green-500"
+              />
+              <span className="ml-2">All Repositories</span>
+            </>
           ) : (
-            <span className="text-gray-500">No repositories selected</span>
+            <>
+              <LucideReact.List size={16} className="text-gray-500" />
+              <span className="ml-2">
+                Selected Repositories ({repoList.length})
+              </span>
+            </>
           )}
         </div>
+
+        {value.repository_selection === 'selected' && repoList.length > 0 && (
+          <ul className="mt-2 list-disc list-inside text-gray-600 text-sm max-h-32 overflow-auto">
+            {displayedRepos.map((repo) => (
+              <li key={repo.id}>{repo.full_name}</li>
+            ))}
+            {moreCount > 0 && (
+              <li className="italic">+{moreCount} more</li>
+            )}
+          </ul>
+        )}
+
+        {value.repository_selection === 'selected' && repoList.length === 0 && (
+          <p className="mt-2 text-gray-500 text-sm italic">
+            No repositories selected.
+          </p>
+        )}
       </div>
 
-      {/* Single File */}
-      {value.single_file != null && (
-        <div>
-          <span className="font-medium text-gray-600">Single File:</span>
-          <span className="ml-2 text-gray-800 truncate">
-            {value.single_file}
+      {hasCustomPermissions && (
+        <div className="mt-2 flex items-center text-gray-700">
+          <LucideReact.Shield size={16} className="text-yellow-500" />
+          <span className="ml-2">
+            Custom Permissions ({Object.keys(value.permissions!).length})
           </span>
         </div>
       )}

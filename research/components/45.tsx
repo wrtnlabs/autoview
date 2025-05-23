@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IPageIShoppingChannel {
         /**
@@ -7,7 +8,7 @@ export namespace AutoViewInputSubTypes {
          *
          * Collection of records with pagination indformation.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * Page information.
              *
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
              * @title List of records
             */
             data: AutoViewInputSubTypes.IShoppingChannel.IHierarchical[];
-        };
+        }
     }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -53,13 +54,13 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     export namespace IShoppingChannel {
         /**
          * Hierarchical channel information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * Children categories with hierarchical structure.
              *
@@ -90,13 +91,13 @@ export namespace AutoViewInputSubTypes {
              * @title Name of the channel
             */
             name: string;
-        };
+        }
     }
     export namespace IShoppingChannelCategory {
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -139,7 +140,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingChannel.IHierarchical;
@@ -148,97 +149,106 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingChannel.IHierarc
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Define data aggregation/transformation functions or derived constants
+  const { pagination, data } = value;
+  const { current, pages, records } = pagination;
 
-  // Format ISO date to a human-readable form.
   const formatDate = (iso: string): string => {
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, {
+    const date = new Date(iso);
+    return date.toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
   };
 
-  // Recursively count total categories in the tree.
-  const countCategories = (
-    cats: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[]
-  ): number => {
-    let count = 0;
-    for (const cat of cats) {
-      count++;
-      if (cat.children.length) {
-        count += countCategories(cat.children);
-      }
-    }
-    return count;
+  // Recursive renderer for hierarchical categories
+  const renderCategories = (
+    categories: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
+    level = 0,
+  ): React.ReactNode => {
+    if (categories.length === 0) return null;
+
+    return (
+      <ul className="mt-2 space-y-1">
+        {categories.map((cat) => (
+          <li
+            key={cat.id}
+            className={`flex items-start space-x-2 ${
+              level > 0 ? `pl-${level * 4}` : ""
+            }`}
+          >
+            <LucideReact.Tag
+              className="text-gray-400 mt-0.5 flex-shrink-0"
+              size={16}
+            />
+            <div className="flex-1">
+              <div className="text-sm font-medium text-gray-800 truncate">
+                {cat.name}
+              </div>
+              <div className="text-xs text-gray-500">
+                Code: {cat.code} · {formatDate(cat.created_at)}
+              </div>
+              {cat.children.length > 0 &&
+                renderCategories(cat.children, level + 1)}
+            </div>
+          </li>
+        ))}
+      </ul>
+    );
   };
 
-  // Recursively render a nested list of categories.
-  const renderCategories = (
-    categories: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[]
-  ): React.ReactNode => (
-    <ul className="list-disc list-inside ml-4 mt-1">
-      {categories.map((cat) => (
-        <li key={cat.id} className="mt-1">
-          <span className="font-medium text-gray-700 truncate">{cat.name}</span>
-          {cat.children.length > 0 && renderCategories(cat.children)}
-        </li>
-      ))}
-    </ul>
-  );
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const { current, pages, records } = value.pagination;
-
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <section className="p-4 bg-gray-50 rounded-lg">
-      {/* Pagination summary */}
-      <div className="mb-4 text-sm text-gray-600">
-        Page{" "}
-        <span className="font-semibold text-gray-800">{current}</span> of{" "}
-        <span className="font-semibold text-gray-800">{pages}</span> (Total{" "}
-        <span className="font-semibold text-gray-800">{records}</span> records)
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header: Title & Pagination */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center space-x-2">
+          <LucideReact.Server className="text-blue-500" size={20} />
+          <span>Shopping Channels</span>
+        </h2>
+        <div className="mt-2 sm:mt-0 flex items-center space-x-4 text-sm text-gray-600">
+          <div className="flex items-center space-x-1">
+            <LucideReact.ListOrdered className="text-gray-400" size={16} />
+            <span>
+              Page {current} of {pages}
+            </span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <LucideReact.Database className="text-gray-400" size={16} />
+            <span>Total: {records}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Channels grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {value.data.map((channel) => {
-          const totalCats = countCategories(channel.categories);
-
-          return (
-            <div
-              key={channel.id}
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <h2 className="text-lg font-semibold text-gray-900 truncate">
-                {channel.name}
-              </h2>
-              <div className="mt-1 text-sm text-gray-600">
-                Code: <span className="font-medium">{channel.code}</span>
-              </div>
-              <div className="mt-1 text-sm text-gray-600">
-                Created:{" "}
-                <span className="font-medium">
-                  {formatDate(channel.created_at)}
+      {/* Channel List */}
+      <ul className="space-y-6">
+        {data.map((channel) => (
+          <li key={channel.id} className="border-t pt-4">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+              {/* Channel Title & Code */}
+              <div className="flex items-center space-x-2">
+                <LucideReact.Layers
+                  className="text-indigo-500 flex-shrink-0"
+                  size={18}
+                />
+                <span className="text-md font-medium text-gray-900">
+                  {channel.name}
                 </span>
+                <span className="text-sm text-gray-500">({channel.code})</span>
               </div>
-              <div className="mt-2 text-sm text-gray-700">
-                Categories: <span className="font-medium">{totalCats}</span>
+              {/* Creation Date */}
+              <div className="mt-1 md:mt-0 flex items-center text-sm text-gray-500 space-x-1">
+                <LucideReact.Calendar size={14} className="text-gray-400" />
+                <span>{formatDate(channel.created_at)}</span>
               </div>
-
-              {channel.categories.length > 0 && (
-                <div className="mt-3">
-                  <div className="text-sm font-medium text-gray-800">
-                    Category Tree:
-                  </div>
-                  {renderCategories(channel.categories)}
-                </div>
-              )}
             </div>
-          );
-        })}
-      </div>
-    </section>
+
+            {/* Nested Categories */}
+            <div className="mt-3">{renderCategories(channel.categories)}</div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

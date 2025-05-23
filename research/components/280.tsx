@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type WebhookView = {
+    export interface WebhookView {
         webhook?: AutoViewInputSubTypes.webhook.Webhook;
-    };
+    }
     export namespace webhook {
-        export type Webhook = {
+        export interface Webhook {
             id?: string;
             channelId?: string;
             name: string;
@@ -20,7 +21,7 @@ export namespace AutoViewInputSubTypes {
             apiVersion: string;
             lastBlockedAt?: number;
             blocked?: boolean;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.WebhookView;
@@ -31,98 +32,109 @@ export type AutoViewInput = AutoViewInputSubTypes.WebhookView;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const webhook = value.webhook;
+  const createdDate = webhook?.createdAt
+    ? new Date(webhook.createdAt).toLocaleString()
+    : "—";
+  const isBlocked = webhook?.blocked ?? false;
+  const blockedDate = webhook?.lastBlockedAt
+    ? new Date(webhook.lastBlockedAt).toLocaleString()
+    : null;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (!webhook) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No webhook data available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <p className="text-sm">No webhook data available</p>
       </div>
     );
   }
 
-  const {
-    name,
-    url,
-    createdAt,
-    apiVersion,
-    scopes,
-    blocked,
-    lastBlockedAt,
-  } = webhook;
-
-  const formattedCreatedAt = createdAt
-    ? new Date(createdAt).toLocaleString()
-    : "—";
-  const formattedLastBlocked = lastBlockedAt
-    ? new Date(lastBlockedAt).toLocaleString()
-    : null;
-
-  const statusLabel = blocked ? "Blocked" : "Active";
-  const statusClasses = blocked
-    ? "bg-red-100 text-red-800"
-    : "bg-green-100 text-green-800";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
-      {/* Header: Name + Status */}
-      <div className="flex items-center justify-between">
-        <h2
-          className="text-lg font-semibold text-gray-800 truncate"
-          title={name}
-        >
-          {name}
+    <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {webhook.name}
         </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${statusClasses}`}
-        >
-          {statusLabel}
-        </span>
+        {isBlocked ? (
+          <div className="flex items-center text-red-500">
+            <LucideReact.XCircle
+              size={20}
+              className="mr-1"
+              aria-label="Blocked"
+            />
+            <span className="text-sm">Blocked</span>
+          </div>
+        ) : (
+          <LucideReact.CheckCircle
+            size={20}
+            className="text-green-500"
+            aria-label="Active"
+          />
+        )}
       </div>
 
-      {/* URL */}
-      <div>
-        <p className="text-sm text-blue-600 break-all truncate" title={url}>
-          {url}
-        </p>
-      </div>
-
-      {/* Metadata: Created At & API Version */}
-      <div className="text-sm text-gray-600 space-y-1">
-        <div>
-          <span className="font-medium text-gray-700">Created:</span>{" "}
-          {formattedCreatedAt}
+      <div className="space-y-3 text-gray-700 text-sm">
+        <div className="flex items-center">
+          <LucideReact.Link size={16} className="text-gray-400 mr-2" />
+          <a
+            href={webhook.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="truncate text-blue-600 hover:underline"
+          >
+            {webhook.url}
+          </a>
         </div>
-        <div>
-          <span className="font-medium text-gray-700">API Version:</span>{" "}
-          {apiVersion}
-        </div>
-      </div>
 
-      {/* Scopes */}
-      {scopes && scopes.length > 0 && (
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400 mr-2" />
+          <span>Created: {createdDate}</span>
+        </div>
+
+        {isBlocked && blockedDate && (
+          <div className="flex items-center text-red-600">
+            <LucideReact.AlertTriangle size={16} className="mr-1" />
+            <span>Last blocked: {blockedDate}</span>
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <span className="font-medium mr-1">API Version:</span>
+          <code className="bg-gray-100 px-1 rounded">{webhook.apiVersion}</code>
+        </div>
+
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-1">Scopes</h3>
-          <div className="flex flex-wrap gap-2">
-            {scopes.map((scope, idx) => (
+          <span className="font-medium">Scopes:</span>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {webhook.scopes.map((scope) => (
               <span
-                key={idx}
-                className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded"
-                title={scope}
+                key={scope}
+                className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded"
               >
                 {scope}
               </span>
             ))}
           </div>
         </div>
-      )}
 
-      {/* Last Blocked At (if applicable) */}
-      {formattedLastBlocked && (
-        <div className="text-sm text-gray-600">
-          <span className="font-medium text-gray-700">Last Blocked:</span>{" "}
-          {formattedLastBlocked}
-        </div>
-      )}
+        {webhook.keywords && webhook.keywords.length > 0 && (
+          <div>
+            <span className="font-medium">Keywords:</span>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {webhook.keywords.map((kw) => (
+                <span
+                  key={kw}
+                  className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded"
+                >
+                  {kw}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

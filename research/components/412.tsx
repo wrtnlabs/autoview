@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Secrets for GitHub Actions for an organization.
      *
      * @title Actions Secret for an Organization
     */
-    export type organization_actions_secret = {
+    export interface organization_actions_secret {
         /**
          * The name of the secret.
         */
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         */
         visibility: "all" | "private" | "selected";
         selected_repositories_url?: string & tags.Format<"uri">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_actions_secret;
 
@@ -27,53 +28,72 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_actions_secret;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
+  const formattedCreatedAt = new Date(value.created_at).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
-  const updatedDate = new Date(value.updated_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
+  const formattedUpdatedAt = new Date(value.updated_at).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
-  const visibilityLabel =
-    value.visibility.charAt(0).toUpperCase() + value.visibility.slice(1);
-  const badgeClasses = {
-    all: "bg-green-100 text-green-700",
-    private: "bg-red-100 text-red-700",
-    selected: "bg-yellow-100 text-yellow-700",
-  }[value.visibility];
+
+  let visibilityIcon: React.ReactNode = null;
+  let visibilityText = '';
+  let visibilityColor = '';
+
+  switch (value.visibility) {
+    case 'all':
+      visibilityIcon = <LucideReact.Globe size={16} className="text-blue-500" />;
+      visibilityText = 'All repositories';
+      visibilityColor = 'text-blue-500';
+      break;
+    case 'private':
+      visibilityIcon = <LucideReact.Lock size={16} className="text-red-500" />;
+      visibilityText = 'Private';
+      visibilityColor = 'text-red-500';
+      break;
+    case 'selected':
+      visibilityIcon = <LucideReact.List size={16} className="text-yellow-500" />;
+      visibilityText = 'Selected repositories';
+      visibilityColor = 'text-yellow-500';
+      break;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm mx-auto">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.name}
-        </h2>
-        <span
-          className={`text-sm font-medium px-2 py-1 rounded ${badgeClasses}`}
-        >
-          {visibilityLabel}
-        </span>
+    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-3">
+        <LucideReact.Key size={20} className="text-gray-600 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
       </div>
-      <dl className="grid grid-cols-1 gap-y-2 text-sm text-gray-600">
-        <div className="flex justify-between">
-          <dt className="font-medium">Created</dt>
-          <dd>{createdDate}</dd>
+      <div className="space-y-2 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created: {formattedCreatedAt}</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="font-medium">Updated</dt>
-          <dd>{updatedDate}</dd>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Updated: {formattedUpdatedAt}</span>
         </div>
-        {value.visibility === "selected" && value.selected_repositories_url && (
-          <div>
-            <dt className="font-medium">Repositories URL</dt>
-            <dd className="mt-1 truncate break-all text-blue-600">
+        <div className="flex items-center gap-1">
+          {visibilityIcon}
+          <span className={`font-medium ${visibilityColor}`}>{visibilityText}</span>
+        </div>
+        {value.visibility === 'selected' && value.selected_repositories_url && (
+          <div className="flex items-start gap-1">
+            <LucideReact.Link size={16} className="text-gray-400 mt-[2px]" />
+            <span className="text-gray-700 text-sm break-all">
               {value.selected_repositories_url}
-            </dd>
+            </span>
           </div>
         )}
-      </dl>
+      </div>
     </div>
   );
 }

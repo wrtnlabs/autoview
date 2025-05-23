@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace open {
-        export type PluginView = {
+        export interface PluginView {
             plugin?: AutoViewInputSubTypes.Plugin;
-        };
+        }
     }
-    export type Plugin = {
+    export interface Plugin {
         id?: string;
         key?: string & tags.Format<"uuid">;
         channelId?: string;
@@ -41,20 +42,20 @@ export namespace AutoViewInputSubTypes {
         mobileImageUrl?: string;
         validLabelButtonText?: boolean;
         validLabelButtonTextI18nMap?: boolean;
-    };
-    export type ImageFile = {
+    }
+    export interface ImageFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
         contentType?: string & tags.Pattern<"^image/.*">;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.open.PluginView;
 
@@ -62,122 +63,216 @@ export type AutoViewInput = AutoViewInputSubTypes.open.PluginView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const plugin = value.plugin;
   if (!plugin) {
-    // 3. Return the React element for empty state.
     return (
-      <div className="p-4 bg-gray-100 rounded-lg text-center text-gray-500">
-        No plugin data available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2">No plugin data available</span>
       </div>
     );
   }
-  const {
-    name,
-    state,
-    appearance,
-    createdAt,
-    buttonType,
-    iconButton,
-    labelButton,
-    labelButtonText,
-    runRate,
-    urlWhitelist,
-    customImageUrl,
-    deskImageUrl,
-    mobileImageUrl,
-  } = plugin;
-  const formattedDate = createdAt
-    ? new Date(createdAt).toLocaleString()
-    : 'N/A';
+
+  // Helper to transform kebab-case to PascalCase for icon lookup
+  function toPascalCase(str: string): string {
+    return str
+      .split(/[-_]/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join("");
+  }
+
+  // State display
+  const stateLabel =
+    plugin.state === "active"
+      ? "Active"
+      : plugin.state === "waiting"
+      ? "Waiting"
+      : "Unknown";
+  const StateIcon =
+    plugin.state === "active"
+      ? LucideReact.CheckCircle
+      : plugin.state === "waiting"
+      ? LucideReact.Clock
+      : LucideReact.AlertCircle;
+  const stateColor =
+    plugin.state === "active"
+      ? "text-green-500"
+      : plugin.state === "waiting"
+      ? "text-amber-500"
+      : "text-gray-400";
+
+  // Created date formatting
+  const createdDate = plugin.createdAt
+    ? new Date(plugin.createdAt).toLocaleString()
+    : "—";
+
+  // Run rate as percentage
   const runRatePercent =
-    typeof runRate === 'number' ? `${Math.round(runRate * 100)}%` : 'N/A';
-  const whitelistCount = Array.isArray(urlWhitelist)
-    ? urlWhitelist.length
-    : 0;
+    plugin.runRate != null
+      ? `${Math.round(plugin.runRate * 100)}%`
+      : "—";
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // URL whitelist items
+  const whitelistItems = plugin.urlWhitelist ?? [];
+
+  // Image source resolver
+  const resolveImage = (
+    file?: AutoViewInputSubTypes.ImageFile | AutoViewInputSubTypes.TinyFile,
+    url?: string
+  ): string | null => {
+    if (url) return url;
+    if (file) {
+      const bucket = (file as any).bucket;
+      const key = (file as any).key;
+      return `https://${bucket}.s3.amazonaws.com/${key}`;
+    }
+    return null;
+  };
+
+  const customImgSrc = resolveImage(
+    plugin.customImage,
+    plugin.customImageUrl
+  );
+  const deskImgSrc = resolveImage(
+    plugin.deskImage,
+    plugin.deskImageUrl
+  );
+  const mobileImgSrc = resolveImage(
+    plugin.mobileImage,
+    plugin.mobileImageUrl
+  );
+
+  // Appearance mapping
+  const appearanceLabels = {
+    light: "Light",
+    dark: "Dark",
+    system: "System",
+  } as const;
+  const appearanceLabel = appearanceLabels[plugin.appearance];
+  const AppearanceIcon =
+    plugin.appearance === "light"
+      ? LucideReact.Sun
+      : plugin.appearance === "dark"
+      ? LucideReact.Moon
+      : LucideReact.Monitor;
+
+  // Button type mapping
+  const buttonTypeLabels = {
+    legacy: "Legacy",
+    customImage: "Custom Image",
+    iconButton: "Icon Button",
+  } as const;
+  const buttonTypeLabel = buttonTypeLabels[plugin.buttonType];
+
+  // Label button text
+  const labelText = plugin.labelButton
+    ? plugin.labelButtonText || "Label"
+    : null;
+
+  // Dynamic icon button component (typed as any to accept Lucide props)
+  const iconKey = toPascalCase(plugin.iconButton) as keyof typeof LucideReact;
+  const IconButtonComponent = LucideReact[
+    iconKey
+  ] as React.ComponentType<any> | undefined;
+
   return (
-    <article className="p-4 bg-white rounded-lg shadow-md space-y-4 max-w-md mx-auto">
-      <header>
-        <h2 className="text-xl font-semibold text-gray-800 truncate">
-          {name}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-lg mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {plugin.name}
         </h2>
-        <p className="mt-1 text-sm text-gray-500">
-          Created: {formattedDate}
-        </p>
-      </header>
+        <div className={`flex items-center ${stateColor}`}>
+          <StateIcon size={16} className="mr-1" />
+          <span className="text-sm">{stateLabel}</span>
+        </div>
+      </div>
 
-      <section className="flex flex-wrap gap-2">
-        <span
-          className={`px-2 py-1 text-sm font-medium rounded ${
-            state === 'active'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-yellow-100 text-yellow-800'
-          }`}
-        >
-          {state ? state.charAt(0).toUpperCase() + state.slice(1) : 'Unknown'}
-        </span>
-        <span className="px-2 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded">
-          Appearance: {appearance.charAt(0).toUpperCase() + appearance.slice(1)}
-        </span>
-        <span className="px-2 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded">
-          Button: {buttonType}
-        </span>
-        <span className="px-2 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded">
-          Icon: {iconButton}
-        </span>
-        <span className="px-2 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded">
-          Run Rate: {runRatePercent}
-        </span>
-        <span className="px-2 py-1 text-sm font-medium bg-gray-100 text-gray-800 rounded">
-          Whitelist: {whitelistCount}
-        </span>
-      </section>
+      {/* Properties Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center truncate">
+          <LucideReact.Calendar size={16} className="mr-1 text-gray-400" />
+          <span>Created:</span>
+          <span className="ml-1">{createdDate}</span>
+        </div>
+        <div className="flex items-center truncate">
+          <AppearanceIcon size={16} className="mr-1 text-gray-400" />
+          <span>Appearance:</span>
+          <span className="ml-1">{appearanceLabel}</span>
+        </div>
+        <div className="flex items-center truncate">
+          <LucideReact.Layers size={16} className="mr-1 text-gray-400" />
+          <span>Button Type:</span>
+          <span className="ml-1">{buttonTypeLabel}</span>
+        </div>
+        {labelText && (
+          <div className="flex items-center truncate">
+            <LucideReact.Tag size={16} className="mr-1 text-gray-400" />
+            <span>Label:</span>
+            <span className="ml-1">{labelText}</span>
+          </div>
+        )}
+        <div className="flex items-center truncate">
+          <LucideReact.BarChart2 size={16} className="mr-1 text-gray-400" />
+          <span>Run Rate:</span>
+          <span className="ml-1">{runRatePercent}</span>
+        </div>
+      </div>
 
-      {labelButton && labelButtonText && (
-        <section>
-          <h3 className="text-sm font-semibold text-gray-700">
-            Button Label
-          </h3>
-          <p className="mt-1 text-gray-800 truncate">
-            {labelButtonText}
-          </p>
-        </section>
+      {/* URL Whitelist */}
+      {whitelistItems.length > 0 && (
+        <div className="space-y-1">
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Link size={16} className="mr-1 text-gray-400" />
+            <span>Allowed URLs:</span>
+          </div>
+          <ul className="list-disc list-inside text-sm text-gray-600 space-y-0.5">
+            {whitelistItems.map((url, idx) => (
+              <li key={idx} className="truncate">
+                {url}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
 
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {customImageUrl && (
-          <div>
-            <h4 className="text-sm text-gray-600">Custom Image</h4>
-            <img
-              src={customImageUrl}
-              alt="Custom"
-              className="mt-1 w-full h-auto rounded border"
-            />
-          </div>
+      {/* Image Previews */}
+      <div className="grid grid-cols-2 gap-4">
+        {[
+          { label: "Custom Image", src: customImgSrc },
+          { label: "Desktop Image", src: deskImgSrc },
+          { label: "Mobile Image", src: mobileImgSrc },
+        ]
+          .filter((item) => item.src)
+          .map((item) => (
+            <div key={item.label} className="flex flex-col">
+              <span className="text-xs text-gray-500 mb-1">
+                {item.label}
+              </span>
+              <div className="aspect-square bg-gray-100 rounded overflow-hidden">
+                <img
+                  src={item.src!}
+                  alt={item.label}
+                  onError={(e) =>
+                    ((e.target as HTMLImageElement).src =
+                      "https://placehold.co/150x150/e2e8f0/1e293b?text=Image")
+                  }
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            </div>
+          ))}
+      </div>
+
+      {/* Icon Button Preview */}
+      <div className="flex items-center text-sm text-gray-600">
+        <span>Icon Button:</span>
+        {IconButtonComponent ? (
+          <IconButtonComponent size={16} className="ml-1 text-gray-500" />
+        ) : (
+          <span className="ml-1 text-gray-400">N/A</span>
         )}
-        {deskImageUrl && (
-          <div>
-            <h4 className="text-sm text-gray-600">Desktop Image</h4>
-            <img
-              src={deskImageUrl}
-              alt="Desktop"
-              className="mt-1 w-full h-auto rounded border"
-            />
-          </div>
-        )}
-        {mobileImageUrl && (
-          <div>
-            <h4 className="text-sm text-gray-600">Mobile Image</h4>
-            <img
-              src={mobileImageUrl}
-              alt="Mobile"
-              className="mt-1 w-full h-auto rounded border"
-            />
-          </div>
-        )}
-      </section>
-    </article>
+      </div>
+    </div>
   );
 }

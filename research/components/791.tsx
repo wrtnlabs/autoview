@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
      *
      * @title Reaction
     */
-    export type reaction = {
+    export interface reaction {
         id: number & tags.Type<"int32">;
         node_id: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -52,84 +53,63 @@ export type AutoViewInput = AutoViewInputSubTypes.reaction[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Define data aggregation/transformation functions or derived constants.
+  type ReactionContent = AutoViewInputSubTypes.reaction["content"];
+  const reactionOrder: ReactionContent[] = [
+    "+1",
+    "-1",
+    "laugh",
+    "confused",
+    "heart",
+    "hooray",
+    "rocket",
+    "eyes",
+  ];
+  const counts = value.reduce((acc, reaction) => {
+    const key = reaction.content as ReactionContent;
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {} as Record<ReactionContent, number>);
 
-  // Map GitHub reaction content values to emoji icons.
-  const contentEmojiMap: Record<AutoViewInputSubTypes.reaction["content"], string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    rocket: "🚀",
-    eyes: "👀",
+  const iconMap: Record<
+    ReactionContent,
+    { Icon: React.FC<React.SVGProps<SVGSVGElement>>; colorClass: string }
+  > = {
+    "+1": { Icon: LucideReact.ThumbsUp, colorClass: "text-green-500" },
+    "-1": { Icon: LucideReact.ThumbsDown, colorClass: "text-red-500" },
+    laugh: { Icon: LucideReact.Smile, colorClass: "text-yellow-400" },
+    confused: { Icon: LucideReact.HelpCircle, colorClass: "text-amber-500" },
+    heart: { Icon: LucideReact.Heart, colorClass: "text-red-500" },
+    hooray: { Icon: LucideReact.Trophy, colorClass: "text-yellow-500" },
+    rocket: { Icon: LucideReact.Rocket, colorClass: "text-indigo-500" },
+    eyes: { Icon: LucideReact.Eye, colorClass: "text-gray-500" },
   };
-
-  // Format an ISO date string to a short, readable date.
-  const formatDate = (iso: string): string => {
-    const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  // Sort reactions by creation time, most recent first.
-  const sortedReactions = [...value].sort(
-    (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // If there are no reactions, display a friendly empty state.
-  if (sortedReactions.length === 0) {
+  if (value.length === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No reactions to display.
+      <div className="flex items-center justify-center p-4 text-gray-500">
+        <LucideReact.AlertCircle width={24} height={24} />
+        <span className="ml-2">No reactions</span>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md divide-y divide-gray-200">
-      {sortedReactions.map((reaction) => {
-        const user = reaction.user;
-        const displayName = user
-          ? user.name?.trim() || user.login
-          : "Unknown user";
-        const avatarUrl = user
-          ? user.avatar_url
-          : "https://via.placeholder.com/40?text=U";
-        const emoji = contentEmojiMap[reaction.content] || reaction.content;
-
-        return (
-          <div
-            key={reaction.id}
-            className="flex items-center p-4 space-x-4 hover:bg-gray-50 transition-colors"
-          >
-            {/* Reaction Emoji */}
-            <span className="text-2xl">{emoji}</span>
-
-            {/* User Avatar */}
-            <img
-              className="w-10 h-10 rounded-full flex-shrink-0"
-              src={avatarUrl}
-              alt={displayName}
-            />
-
-            {/* User Info and Timestamp */}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {displayName}
-              </p>
-              <p className="text-xs text-gray-500">
-                {formatDate(reaction.created_at)}
-              </p>
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex flex-wrap items-center gap-4">
+        {reactionOrder.map((content) => {
+          const count = counts[content];
+          if (!count) return null;
+          const { Icon, colorClass } = iconMap[content];
+          return (
+            <div key={content} className="flex items-center space-x-1">
+              <Icon width={20} height={20} className={colorClass} />
+              <span className="text-sm font-medium text-gray-700">{count}</span>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A codespace.
      *
      * @title Codespace
     */
-    export type codespace_with_full_repository = {
+    export interface codespace_with_full_repository {
         id: number & tags.Type<"int32">;
         /**
          * Automatically generated name of this codespace.
@@ -130,13 +131,13 @@ export namespace AutoViewInputSubTypes {
          * When a codespace will be auto-deleted based on the "retention_period_minutes" and "last_used_at"
         */
         retention_expires_at?: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -159,13 +160,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Full Repository
      *
      * @title Full Repository
     */
-    export type full_repository = {
+    export interface full_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -316,7 +317,7 @@ export namespace AutoViewInputSubTypes {
          * The custom properties that were defined for the repository. The keys are the custom property names, and the values are the corresponding custom property values.
         */
         custom_properties?: {};
-    };
+    }
     /**
      * A repository on GitHub.
      *
@@ -333,7 +334,7 @@ export namespace AutoViewInputSubTypes {
         */
         name: string;
         full_name: string;
-        license: any;
+        license: AutoViewInputSubTypes.nullable_license_simple;
         forks: number & tags.Type<"int32">;
         permissions?: {
             admin: boolean;
@@ -342,7 +343,7 @@ export namespace AutoViewInputSubTypes {
             push: boolean;
             maintain?: boolean;
         };
-        owner: any;
+        owner: AutoViewInputSubTypes.simple_user;
         /**
          * Whether the repository is private or public.
         */
@@ -574,7 +575,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -778,18 +779,18 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * Code of Conduct Simple
      *
      * @title Code Of Conduct Simple
     */
-    export type code_of_conduct_simple = {
+    export interface code_of_conduct_simple {
         url: string & tags.Format<"uri">;
         key: string;
         name: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -862,101 +863,147 @@ export type AutoViewInput = AutoViewInputSubTypes.codespace_with_full_repository
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const displayName: string = value.display_name ?? value.name;
-  const owner = value.owner;
-  const repoName: string = value.repository.full_name;
-  const createdDate: string = new Date(value.created_at).toLocaleString();
-  const lastUsedDate: string = new Date(value.last_used_at).toLocaleString();
-  const machineLabel: string = value.machine?.display_name ?? "Unknown";
-  const idleTimeout: string =
-    value.idle_timeout_minutes != null
-      ? `${value.idle_timeout_minutes} min`
-      : "N/A";
-  const git = value.git_status;
-  const ahead = git.ahead ?? 0;
-  const behind = git.behind ?? 0;
-  const hasUncommitted = git.has_uncommitted_changes;
-  const hasUnpushed = git.has_unpushed_changes;
-  const branchRef = git.ref;
+  const displayName = value.display_name ?? value.name;
+  const repoFullName = value.repository.full_name;
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const lastUsedAt = new Date(value.last_used_at).toLocaleString();
+  const idleTimeout = value.idle_timeout_minutes != null
+    ? `${value.idle_timeout_minutes} min`
+    : 'N/A';
 
-  const stateColors: Record<string, string> = {
-    Available: "bg-green-100 text-green-800",
-    Provisioning: "bg-yellow-100 text-yellow-800",
-    Queued: "bg-blue-100 text-blue-800",
-    Created: "bg-blue-100 text-blue-800",
-    Awaiting: "bg-yellow-100 text-yellow-800",
-    Unavailable: "bg-red-100 text-red-800",
-    Deleted: "bg-red-100 text-red-800",
-    Failed: "bg-red-100 text-red-800",
-    Archived: "bg-gray-100 text-gray-800",
-    Starting: "bg-yellow-100 text-yellow-800",
-    ShuttingDown: "bg-yellow-100 text-yellow-800",
-    Moved: "bg-gray-100 text-gray-800",
-    Exporting: "bg-purple-100 text-purple-800",
-    Updating: "bg-purple-100 text-purple-800",
-    Rebuilding: "bg-purple-100 text-purple-800",
-    Unknown: "bg-gray-100 text-gray-800",
-  };
-  const stateClass = stateColors[value.state] ?? "bg-gray-100 text-gray-800";
+  const git = value.git_status;
+  const gitStatusParts: string[] = [];
+  if (git.ahead) gitStatusParts.push(`${git.ahead}↑`);
+  if (git.behind) gitStatusParts.push(`${git.behind}↓`);
+  if (git.has_unpushed_changes) gitStatusParts.push('unpushed');
+  if (git.has_uncommitted_changes) gitStatusParts.push('uncommitted');
+  const gitStatus = gitStatusParts.length > 0 ? gitStatusParts.join(' · ') : 'Clean';
+
+  const machine = value.machine;
+
+  function getStateBadge(state: AutoViewInput['state']) {
+    switch (state) {
+      case 'Available':
+        return (
+          <span className="inline-flex items-center text-green-600">
+            <LucideReact.CheckCircle size={16} className="mr-1" />
+            Available
+          </span>
+        );
+      case 'Provisioning':
+      case 'Queued':
+      case 'Starting':
+        return (
+          <span className="inline-flex items-center text-blue-600">
+            <LucideReact.Loader size={16} className="mr-1 animate-spin" />
+            {state}
+          </span>
+        );
+      case 'Shutdown':
+      case 'Unavailable':
+        return (
+          <span className="inline-flex items-center text-gray-600">
+            <LucideReact.PowerOff size={16} className="mr-1" />
+            {state}
+          </span>
+        );
+      case 'Deleted':
+      case 'Failed':
+        return (
+          <span className="inline-flex items-center text-red-600">
+            <LucideReact.AlertTriangle size={16} className="mr-1" />
+            {state}
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center text-amber-600">
+            <LucideReact.Clock size={16} className="mr-1" />
+            {state}
+          </span>
+        );
+    }
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white shadow-md rounded-lg p-6 overflow-hidden">
-      <div className="flex items-center space-x-4">
-        <img
-          src={owner.avatar_url}
-          alt={owner.login}
-          className="w-12 h-12 rounded-full flex-shrink-0"
-        />
+    <div className="max-w-md mx-auto bg-white rounded-lg shadow p-4 space-y-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
             {displayName}
-          </h3>
-          <p className="text-sm text-gray-500 truncate">{repoName}</p>
+          </h2>
+          <div className="text-sm text-gray-500 flex items-center truncate">
+            <LucideReact.GitBranch size={14} className="mr-1" />
+            {repoFullName}
+          </div>
         </div>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${stateClass}`}
-        >
-          {value.state}
-        </span>
+        <div className="flex-shrink-0 ml-4">{getStateBadge(value.state)}</div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-gray-600">
-        <div>
-          <div className="font-medium text-gray-800">Created</div>
-          <div className="truncate">{createdDate}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-800">Last Used</div>
-          <div className="truncate">{lastUsedDate}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-800">Machine</div>
-          <div className="truncate">{machineLabel}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-800">Idle Timeout</div>
-          <div className="truncate">{idleTimeout}</div>
-        </div>
-        {branchRef && (hasUncommitted || ahead || behind || hasUnpushed) && (
-          <div className="col-span-2">
-            <div className="font-medium text-gray-800">Git Status</div>
-            <div className="flex flex-wrap items-center space-x-2">
-              <span className="text-xs font-medium text-gray-700 truncate">
-                {branchRef}
-              </span>
-              <span className="text-xs text-gray-500">↑{ahead}</span>
-              <span className="text-xs text-gray-500">↓{behind}</span>
-              {hasUncommitted && (
-                <span className="text-xs text-red-600">Uncommitted</span>
-              )}
-              {hasUnpushed && (
-                <span className="text-xs text-yellow-600">Unpushed</span>
-              )}
+      {/* Owner & Machine */}
+      <div className="flex items-center space-x-4">
+        <img
+          src={value.owner.avatar_url}
+          alt={value.owner.login}
+          className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              value.owner.login
+            )}&background=0D8ABC&color=fff`;
+          }}
+        />
+        <div className="flex-1 min-w-0 space-y-0.5">
+          <div className="text-sm font-medium text-gray-700 truncate">
+            {value.owner.login}
+          </div>
+          {machine && (
+            <div className="text-xs text-gray-500 flex items-center truncate">
+              <LucideReact.Computer size={14} className="mr-1" />
+              {machine.display_name} on {machine.operating_system}
             </div>
+          )}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
+        <div className="flex items-center truncate">
+          <LucideReact.Calendar size={16} className="mr-1 text-gray-400" />
+          <dt>Created</dt>
+          <dd className="ml-auto truncate">{createdAt}</dd>
+        </div>
+        <div className="flex items-center truncate">
+          <LucideReact.Clock size={16} className="mr-1 text-gray-400" />
+          <dt>Last Used</dt>
+          <dd className="ml-auto truncate">{lastUsedAt}</dd>
+        </div>
+        <div className="flex items-center truncate">
+          <LucideReact.Timer size={16} className="mr-1 text-gray-400" />
+          <dt>Idle Timeout</dt>
+          <dd className="ml-auto">{idleTimeout}</dd>
+        </div>
+        <div className="flex items-center truncate">
+          <LucideReact.Folder size={16} className="mr-1 text-gray-400" />
+          <dt>Recent Folders</dt>
+          <dd className="ml-auto">{value.recent_folders.length}</dd>
+        </div>
+        <div className="col-span-2 flex items-center truncate">
+          <LucideReact.GitCommit size={16} className="mr-1 text-gray-400" />
+          <dt>Git Status</dt>
+          <dd className="ml-auto truncate">{gitStatus}</dd>
+        </div>
+        {machine && machine.prebuild_availability != null && (
+          <div className="col-span-2 flex items-center truncate">
+            <LucideReact.Archive size={16} className="mr-1 text-gray-400" />
+            <dt>Prebuild</dt>
+            <dd className="ml-auto capitalize">
+              {machine.prebuild_availability}
+            </dd>
           </div>
         )}
-      </div>
+      </dl>
     </div>
   );
 }

@@ -1,21 +1,22 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposEnvironmentsDeploymentProtectionRules {
-        export type GetResponse = {
+        export interface GetResponse {
             /**
              * The number of enabled custom deployment protection rules for this environment
             */
             total_count?: number & tags.Type<"int32">;
             custom_deployment_protection_rules?: AutoViewInputSubTypes.deployment_protection_rule[];
-        };
+        }
     }
     /**
      * Deployment protection rule
      *
      * @title Deployment protection rule
     */
-    export type deployment_protection_rule = {
+    export interface deployment_protection_rule {
         /**
          * The unique identifier for the deployment protection rule.
         */
@@ -29,13 +30,13 @@ export namespace AutoViewInputSubTypes {
         */
         enabled: boolean;
         app: AutoViewInputSubTypes.custom_deployment_rule_app;
-    };
+    }
     /**
      * A GitHub App that is providing a custom deployment protection rule.
      *
      * @title Custom deployment protection rule app
     */
-    export type custom_deployment_rule_app = {
+    export interface custom_deployment_rule_app {
         /**
          * The unique identifier of the deployment protection rule integration.
         */
@@ -52,7 +53,7 @@ export namespace AutoViewInputSubTypes {
          * The node ID for the deployment protection rule integration.
         */
         node_id: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposEnvironmentsDeploymentProtectionRules.GetResponse;
 
@@ -60,64 +61,70 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposEnvironmentsDeploymen
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Derive the list of rules and total count
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const rules = value.custom_deployment_protection_rules ?? [];
-  const count = value.total_count ?? rules.length;
+  const totalCustom = rules.length;
+  const displayedTotal = value.total_count ?? totalCustom;
+  const enabledCount = rules.filter(rule => rule.enabled).length;
 
-  // Helper to extract host from a URL string
-  const formatHost = (url: string): string => {
-    try {
-      return new URL(url).host;
-    } catch {
-      return url;
-    }
-  };
-
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 w-full">
-      <div className="mb-3">
-        <h2 className="text-xl font-semibold text-gray-900">
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <header className="flex items-center mb-3">
+        <LucideReact.Shield className="text-gray-600 mr-2" size={20} />
+        <h2 className="text-lg font-semibold text-gray-800">
           Deployment Protection Rules
         </h2>
-        <p className="text-sm text-gray-500">
-          {count} rule{count !== 1 ? 's' : ''}
-        </p>
+      </header>
+
+      <div className="text-sm text-gray-600 mb-4">
+        <span>
+          Total custom rules:&nbsp;
+          <span className="font-medium text-gray-800">{displayedTotal}</span>
+        </span>
+        {totalCustom > 0 && (
+          <span className="ml-3">
+            Enabled:&nbsp;
+            <span className="font-medium text-green-600">{enabledCount}</span>
+          </span>
+        )}
       </div>
 
-      {rules.length === 0 ? (
-        <p className="text-gray-500 text-sm">
-          No custom deployment protection rules configured.
-        </p>
+      {totalCustom === 0 ? (
+        <div className="flex flex-col items-center text-gray-400 py-6">
+          <LucideReact.AlertCircle size={24} />
+          <p className="mt-2 text-sm">No custom rules configured.</p>
+        </div>
       ) : (
         <ul className="space-y-2">
-          {rules.map((rule) => {
-            const host = formatHost(rule.app.integration_url);
-            return (
-              <li
-                key={rule.id}
-                className="flex items-center justify-between bg-gray-50 rounded-md px-3 py-2"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-800 font-medium truncate">
-                    {rule.app.slug}
-                  </p>
-                  <p className="text-gray-500 text-sm truncate">
-                    {host}
-                  </p>
-                </div>
-                <span
-                  className={
-                    `ml-3 px-2 py-1 text-xs font-semibold rounded-full ` +
-                    (rule.enabled
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800')
-                  }
-                >
-                  {rule.enabled ? 'Enabled' : 'Disabled'}
+          {rules.map(rule => (
+            <li
+              key={rule.id}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded"
+            >
+              <div className="flex items-center">
+                {rule.enabled ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500 mr-2"
+                    size={16}
+                  />
+                ) : (
+                  <LucideReact.XCircle
+                    className="text-red-500 mr-2"
+                    size={16}
+                  />
+                )}
+                <span className="text-gray-800 font-medium">
+                  {rule.app.slug}
                 </span>
-              </li>
-            );
-          })}
+              </div>
+              <LucideReact.ChevronRight
+                className="text-gray-300"
+                size={16}
+                strokeWidth={2}
+              />
+            </li>
+          ))}
         </ul>
       )}
     </div>

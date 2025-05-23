@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A unique encryption key
      *
      * @title GPG Key
     */
-    export type gpg_key = {
+    export interface gpg_key {
         id: number & tags.Type<"int32">;
         name?: string | null;
         primary_key_id: (number & tags.Type<"int32">) | null;
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
         expires_at: (string & tags.Format<"date-time">) | null;
         revoked: boolean;
         raw_key: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.gpg_key;
 
@@ -64,93 +65,103 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
         day: "numeric",
       })
     : "Never";
-  const statusLabel = value.revoked ? "Revoked" : "Active";
-  const statusClasses = value.revoked
-    ? "bg-red-100 text-red-800"
-    : "bg-green-100 text-green-800";
-  const shortKeyId =
-    value.key_id.length > 16
-      ? value.key_id.slice(-16)
-      : value.key_id;
-  const capabilities = [
-    value.can_sign && "Sign",
-    value.can_encrypt_comms && "Encrypt Comms",
-    value.can_encrypt_storage && "Encrypt Storage",
-    value.can_certify && "Certify",
-  ].filter(Boolean) as string[];
-  const subkeyCount = value.subkeys?.length ?? 0;
+  const isExpired =
+    value.expires_at !== null && new Date(value.expires_at) < new Date();
+  const statusIcon = value.revoked
+    ? <LucideReact.XCircle className="text-red-500" size={20} aria-label="Revoked" />
+    : isExpired
+    ? <LucideReact.AlertTriangle className="text-amber-500" size={20} aria-label="Expired" />
+    : <LucideReact.CheckCircle className="text-green-500" size={20} aria-label="Active" />;
+  const capabilityLabels: string[] = [];
+  if (value.can_sign) capabilityLabels.push("Sign");
+  if (value.can_encrypt_comms) capabilityLabels.push("Encrypt Comms");
+  if (value.can_encrypt_storage) capabilityLabels.push("Encrypt Storage");
+  if (value.can_certify) capabilityLabels.push("Certify");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-      <div className="px-6 py-4 border-b">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-800 truncate">
-            {value.name || "GPG Key"}
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4 max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <LucideReact.Key className="text-gray-700" size={20} />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {value.name ?? value.key_id}
           </h2>
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded ${statusClasses}`}
-          >
-            {statusLabel}
-          </span>
         </div>
-        <p className="mt-1 text-sm text-gray-600">
-          Key ID:&nbsp;
-          <span className="font-mono">{shortKeyId}</span>
-        </p>
+        {statusIcon}
       </div>
-      <div className="px-6 py-4 space-y-4">
-        <div className="flex justify-between">
-          <div>
-            <h3 className="text-sm font-medium text-gray-700">Created</h3>
-            <p className="text-sm text-gray-600">{createdDate}</p>
+
+      {/* Summary Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Hash size={16} />
+          <span className="font-medium">Key ID:</span>
+          <code className="font-mono truncate">{value.key_id}</code>
+        </div>
+        {value.primary_key_id !== null && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Layers size={16} />
+            <span className="font-medium">Primary ID:</span>
+            <span>{value.primary_key_id}</span>
           </div>
-          <div>
-            <h3 className="text-sm font-medium text-gray-700">Expires</h3>
-            <p className="text-sm text-gray-600">{expiresDate}</p>
+        )}
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span className="font-medium">Created:</span>
+          <time dateTime={value.created_at}>{createdDate}</time>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span className="font-medium">Expires:</span>
+          <time dateTime={value.expires_at ?? undefined}>{expiresDate}</time>
+        </div>
+        <div className="flex items-center space-x-1 col-span-full">
+          <LucideReact.Layers size={16} />
+          <span className="font-medium">Subkeys:</span>
+          <span>{value.subkeys.length}</span>
+        </div>
+      </div>
+
+      {/* Capabilities */}
+      {capabilityLabels.length > 0 && (
+        <div>
+          <span className="text-sm font-medium text-gray-700">Capabilities:</span>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {capabilityLabels.map((label) => (
+              <span
+                key={label}
+                className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full"
+              >
+                {label}
+              </span>
+            ))}
           </div>
         </div>
+      )}
+
+      {/* Emails */}
+      {value.emails.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-gray-700">Emails</h3>
-          <ul className="mt-1 list-disc list-inside text-sm text-gray-600 space-y-1 max-h-24 overflow-auto">
-            {value.emails.map((e, idx) => (
-              <li key={idx} className="flex items-center">
-                <span className="truncate">{e.email || "—"}</span>
-                {e.verified ? (
-                  <span className="ml-2 text-green-500">✔</span>
-                ) : (
-                  <span className="ml-2 text-yellow-500">•</span>
+          <span className="text-sm font-medium text-gray-700">Emails:</span>
+          <ul className="mt-2 space-y-1 text-gray-600">
+            {value.emails.map((emailObj, idx) => (
+              <li key={idx} className="flex items-center space-x-1">
+                <LucideReact.Mail size={16} />
+                <span className="truncate">{emailObj.email ?? "—"}</span>
+                {emailObj.verified && (
+                  <LucideReact.CheckCircle
+                    className="text-blue-500 ml-1"
+                    size={16}
+                    aria-label="Verified"
+                  />
                 )}
               </li>
             ))}
           </ul>
         </div>
-        {capabilities.length > 0 && (
-          <div>
-            <h3 className="text-sm font-medium text-gray-700">
-              Capabilities
-            </h3>
-            <div className="mt-1 flex flex-wrap gap-2">
-              {capabilities.map((cap, i) => (
-                <span
-                  key={i}
-                  className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded"
-                >
-                  {cap}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-        {subkeyCount > 0 && (
-          <div>
-            <h3 className="text-sm font-medium text-gray-700">Subkeys</h3>
-            <p className="text-sm text-gray-600">
-              {subkeyCount} subkey{subkeyCount > 1 ? "s" : ""}
-            </p>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

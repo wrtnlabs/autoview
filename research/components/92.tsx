@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingSaleInquiryComment {
         /**
          * Snapshot content of the comment.
         */
-        export type ISnapshot = {
+        export interface ISnapshot {
             /**
              * Primary Key.
              *
@@ -40,10 +41,10 @@ export namespace AutoViewInputSubTypes {
              * @title List of attachment files
             */
             files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
-        };
+        }
     }
     export namespace IAttachmentFile {
-        export type ICreate = {
+        export interface ICreate {
             /**
              * File name, except extension.
              *
@@ -66,7 +67,7 @@ export namespace AutoViewInputSubTypes {
              * @title URL path of the real file
             */
             url: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryComment.ISnapshot;
@@ -77,60 +78,60 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryComment.IS
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    year:   "numeric",
-    month:  "short",
-    day:    "numeric",
-    hour:   "2-digit",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
     minute: "2-digit",
   });
-  const attachmentCount = value.files.length;
+  const isHtml = value.format === "html";
+  const displayBody =
+    value.body.length > 300 ? value.body.slice(0, 300) + "…" : value.body;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilizing semantic HTML and line‐clamp for text overflow control.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-4">
-      {/* Header: Date and Format Badge */}
-      <div className="flex items-center justify-between">
-        <time
-          dateTime={value.created_at}
-          className="text-gray-600 text-sm"
-        >
-          {formattedDate}
-        </time>
-        <span className="px-2 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-          {value.format.toUpperCase()}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Timestamp */}
+      <div className="flex items-center text-sm text-gray-500 mb-3">
+        <LucideReact.Calendar size={16} className="mr-1" />
+        <span>{formattedDate}</span>
       </div>
 
-      {/* Body: Comment text with clamp */}
-      <div className="text-gray-800 text-base whitespace-pre-wrap line-clamp-3 md:line-clamp-5">
-        {value.body}
+      {/* Comment Body */}
+      <div className="mb-4 prose prose-sm max-w-none text-gray-800">
+        {isHtml ? (
+          <div
+            className="prose-sm"
+            dangerouslySetInnerHTML={{ __html: value.body }}
+          />
+        ) : (
+          <pre className="whitespace-pre-wrap break-words bg-gray-100 p-2 rounded">
+            {displayBody}
+          </pre>
+        )}
       </div>
 
-      {/* Attachments: Conditionally render if present */}
-      {attachmentCount > 0 && (
-        <div className="flex flex-col space-y-2">
-          <h4 className="text-gray-700 text-sm font-semibold">
-            Attachments ({attachmentCount})
+      {/* Attachments */}
+      {value.files.length > 0 && (
+        <div>
+          <h4 className="text-sm font-medium text-gray-700 mb-2">
+            Attachments
           </h4>
-          <ul className="flex flex-wrap gap-2">
+          <ul className="space-y-2">
             {value.files.map((file, idx) => {
-              // Build display name: handle empty name with extension (.gitignore)
               const fileName = file.extension
-                ? file.name
-                  ? `${file.name}.${file.extension}`
-                  : `.${file.extension}`
-                : file.name;
+                ? `${file.name}.${file.extension}`
+                : file.name || file.url.split("/").pop() || "attachment";
               return (
-                <li key={idx}>
-                  <a
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm"
-                  >
-                    {fileName || "attachment"}
-                  </a>
+                <li
+                  key={idx}
+                  className="flex items-center text-sm text-gray-600"
+                >
+                  <LucideReact.FileText
+                    size={16}
+                    className="text-indigo-500 mr-2 shrink-0"
+                  />
+                  <span className="truncate">{fileName}</span>
                 </li>
               );
             })}

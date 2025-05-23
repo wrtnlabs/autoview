@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Gist Commit
      *
      * @title Gist Commit
     */
-    export type gist_commit = {
+    export interface gist_commit {
         url: string & tags.Format<"uri">;
         version: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -16,7 +17,7 @@ export namespace AutoViewInputSubTypes {
             deletions?: number & tags.Type<"int32">;
         };
         committed_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -54,77 +55,107 @@ export type AutoViewInput = AutoViewInputSubTypes.gist_commit[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const commitCount = value.length;
-  const sortedCommits = [...value].sort(
-    (a, b) =>
-      new Date(b.committed_at).getTime() -
-      new Date(a.committed_at).getTime(),
-  );
+  const totalCommits = value.length;
+  const totalAdditions = value.reduce((sum, commit) => sum + (commit.change_status.additions ?? 0), 0);
+  const totalDeletions = value.reduce((sum, commit) => sum + (commit.change_status.deletions ?? 0), 0);
+  const commitLabel = totalCommits === 1 ? "Commit" : "Commits";
+
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const placeholderAvatar = (name: string): string =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 space-y-6">
-      <div className="text-sm text-gray-600">
-        Total Commits: {commitCount}
+    <div className="space-y-6">
+      {/* Summary */}
+      <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.GitCommit size={20} className="text-gray-500" />
+          <span className="ml-2 text-lg font-semibold">
+            {totalCommits} {commitLabel}
+          </span>
+        </div>
+        <div className="flex items-center space-x-6 text-sm">
+          <div className="flex items-center text-green-600">
+            <LucideReact.Plus size={16} />
+            <span className="ml-1">{totalAdditions}</span>
+          </div>
+          <div className="flex items-center text-red-600">
+            <LucideReact.Minus size={16} />
+            <span className="ml-1">{totalDeletions}</span>
+          </div>
+        </div>
       </div>
+
+      {/* Commit List */}
       <div className="space-y-4">
-        {sortedCommits.map((commit, idx) => {
-          // Format commit date
-          const date = new Date(commit.committed_at);
-          const formattedDate = date.toLocaleString(undefined, {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          });
-
-          // User display name
+        {value.map((commit, idx) => {
           const user = commit.user;
-          const displayName = user
-            ? user.name?.trim() || user.login
-            : "Unknown";
-
-          // Change status
-          const { additions, deletions, total } = commit.change_status;
-
+          const userName = user ? (user.name ?? user.login) : "Unknown";
+          const avatarSrc = user?.avatar_url ?? placeholderAvatar(userName);
           return (
             <div
-              key={`${commit.version}-${idx}`}
-              className="p-4 bg-white rounded-lg shadow-sm"
+              key={commit.url + idx}
+              className="flex p-4 bg-white rounded-lg shadow-sm"
             >
-              <div className="flex items-center space-x-3">
-                {user && (
-                  <img
-                    src={user.avatar_url}
-                    alt={displayName}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                )}
-                <div className="flex flex-col">
-                  <span className="text-gray-900 font-semibold truncate">
-                    Version {commit.version}
-                  </span>
-                  <span className="text-gray-500 text-sm">
-                    {formattedDate}
-                  </span>
+              <img
+                src={avatarSrc}
+                alt={userName}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src =
+                    placeholderAvatar(userName);
+                }}
+                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              />
+              <div className="flex-1 ml-4 space-y-2">
+                {/* Header: Author and Date */}
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                  <div className="flex items-center text-sm text-gray-600 space-x-1">
+                    <LucideReact.User size={16} />
+                    <span className="font-medium">{userName}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500 mt-1 sm:mt-0">
+                    <LucideReact.Calendar size={16} />
+                    <span className="ml-1">{formatDate(commit.committed_at)}</span>
+                  </div>
                 </div>
-              </div>
-              <div className="mt-3 flex flex-wrap items-center space-x-4 text-sm">
-                {additions !== undefined && (
-                  <span className="text-green-600">+{additions}</span>
-                )}
-                {deletions !== undefined && (
-                  <span className="text-red-600">-{deletions}</span>
-                )}
-                {total !== undefined && (
-                  <span className="text-gray-700">{total} total</span>
-                )}
-              </div>
-              <div className="mt-2">
-                <span className="block text-blue-600 text-sm truncate">
-                  {commit.url}
-                </span>
+
+                {/* URL */}
+                <div className="flex items-center text-sm text-gray-700 space-x-1 truncate">
+                  <LucideReact.Link size={16} className="text-gray-500 flex-shrink-0" />
+                  <a
+                    href={commit.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline truncate"
+                  >
+                    {commit.url}
+                  </a>
+                </div>
+
+                {/* Stats */}
+                <div className="flex items-center space-x-6 text-sm">
+                  <div className="flex items-center text-green-600">
+                    <LucideReact.Plus size={16} />
+                    <span className="ml-1">{commit.change_status.additions ?? 0}</span>
+                  </div>
+                  <div className="flex items-center text-red-600">
+                    <LucideReact.Minus size={16} />
+                    <span className="ml-1">{commit.change_status.deletions ?? 0}</span>
+                  </div>
+                  <div className="flex items-center text-gray-500">
+                    <LucideReact.Hash size={16} />
+                    <span className="ml-1 truncate">{commit.version}</span>
+                  </div>
+                </div>
               </div>
             </div>
           );

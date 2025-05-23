@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
      *
      * @title Reaction
     */
-    export type reaction = {
+    export interface reaction {
         id: number & tags.Type<"int32">;
         node_id: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -53,60 +54,76 @@ export type AutoViewInput = AutoViewInputSubTypes.reaction;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const user = value.user;
-  const username = user
-    ? user.name && user.name.trim()
-      ? user.name
-      : user.login
-    : "Unknown User";
-  const avatarUrl = user?.avatar_url ?? "";
 
-  function formatRelativeTime(date: Date): string {
-    const now = new Date();
-    const diffSeconds = (now.getTime() - date.getTime()) / 1000;
-    if (diffSeconds < 60) return "just now";
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    if (diffMinutes < 60) return `${diffMinutes} minute${diffMinutes !== 1 ? "s" : ""} ago`;
-    const diffHours = Math.floor(diffMinutes / 60);
-    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? "s" : ""} ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 7) return `${diffDays} day${diffDays !== 1 ? "s" : ""} ago`;
-    return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  }
+  // Derive user display name and avatar URL, with fallbacks
+  const userName = value.user?.name || value.user?.login || "Unknown User";
+  const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    userName,
+  )}&background=random&color=fff`;
+  const avatarSrc = value.user?.avatar_url || defaultAvatar;
 
-  const createdDate = new Date(value.created_at);
-  const timeAgo = formatRelativeTime(createdDate);
-
-  const reactionEmojiMap: Record<AutoViewInput["content"], string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    rocket: "🚀",
-    eyes: "👀",
+  // Reaction mapping to emoji, label, and Tailwind text color
+  const reactionMap: Record<
+    AutoViewInput["content"],
+    { emoji: string; label: string; color: string }
+  > = {
+    "+1": { emoji: "👍", label: "Thumbs Up", color: "text-green-500" },
+    "-1": { emoji: "👎", label: "Thumbs Down", color: "text-red-500" },
+    laugh: { emoji: "😄", label: "Laugh", color: "text-yellow-500" },
+    confused: { emoji: "😕", label: "Confused", color: "text-amber-500" },
+    heart: { emoji: "❤️", label: "Heart", color: "text-pink-500" },
+    hooray: { emoji: "🎉", label: "Hooray", color: "text-purple-500" },
+    rocket: { emoji: "🚀", label: "Rocket", color: "text-indigo-500" },
+    eyes: { emoji: "👀", label: "Eyes", color: "text-gray-500" },
   };
-  const reactionEmoji = reactionEmojiMap[value.content];
+  const reaction = reactionMap[value.content];
+
+  // Format created_at as relative time (e.g., "5m ago", "2h ago", "3d ago")
+  function getRelativeTime(date: Date): string {
+    const now = Date.now();
+    const diffSec = (now - date.getTime()) / 1000;
+    if (diffSec < 60) return `${Math.floor(diffSec)}s ago`;
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+    const days = Math.floor(diffSec / 86400);
+    return `${days}d ago`;
+  }
+  const createdAtDate = new Date(value.created_at);
+  const timeAgo = getRelativeTime(createdAtDate);
+
+  // Image error handler to fallback to generated avatar
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = defaultAvatar;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow flex items-center space-x-4">
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt={`${username}'s avatar`}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-      ) : (
-        <div className="w-10 h-10 rounded-full bg-gray-200" />
-      )}
+    <div className="flex items-center space-x-4 p-4 bg-white rounded-lg shadow-md">
+      <img
+        src={avatarSrc}
+        alt={userName}
+        onError={handleImageError}
+        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+      />
       <div className="flex-1 min-w-0">
         <div className="flex items-center space-x-2">
-          <span className="font-medium text-gray-900 truncate">{username}</span>
-          <span className="text-xl">{reactionEmoji}</span>
+          <span className="text-sm font-medium text-gray-900 truncate">
+            {userName}
+          </span>
+          <span
+            className={`${reaction.color} text-sm`}
+            role="img"
+            aria-label={reaction.label}
+          >
+            {reaction.emoji}
+          </span>
         </div>
-        <div className="text-sm text-gray-500">{timeAgo}</div>
+        <div className="flex items-center space-x-1 text-xs text-gray-500 mt-1">
+          <LucideReact.Clock size={12} className="text-gray-400 flex-shrink-0" />
+          <span>{timeAgo}</span>
+        </div>
       </div>
     </div>
   );

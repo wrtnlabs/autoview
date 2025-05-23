@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
@@ -37,65 +38,83 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso?: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
-      : '';
+  // 1. Derived constants and helper values
+  const userCount = value.length;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!Array.isArray(value) || value.length === 0) {
+  // 2. Handle empty state
+  if (userCount === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No users to display.
+      <div className="flex flex-col items-center justify-center p-4 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2">No users available.</span>
       </div>
     );
   }
 
+  // 3. Compose the visual structure
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
-      {value.map((user) => {
-        const displayName = user.name?.trim() || user.login;
-        const starredAt = formatDate(user.starred_at);
-        return (
-          <div
-            key={user.id}
-            className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-          >
-            <img
-              src={user.avatar_url}
-              alt={displayName}
-              className="w-16 h-16 rounded-full object-cover flex-shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold text-gray-900 truncate">
-                {displayName}
-              </h2>
-              <p className="text-gray-500 truncate">@{user.login}</p>
-              {user.email && (
-                <p className="text-gray-500 truncate">{user.email}</p>
-              )}
-              {starredAt && (
-                <p className="text-sm text-gray-400">Starred: {starredAt}</p>
-              )}
-              <div className="mt-2 flex flex-wrap gap-2">
-                <span className="inline-block px-2 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-                  {user.type}
-                </span>
+    <div className="p-4">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        GitHub Users ({userCount})
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {value.map((user) => {
+          // Determine display name
+          const displayName =
+            user.name && user.name.trim() ? user.name : user.login;
+          // Placeholder for avatar fallback
+          const placeholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            displayName,
+          )}&background=random`;
+
+          return (
+            <div
+              key={user.id}
+              className="bg-white rounded-lg shadow p-4 flex flex-col items-center text-center space-y-2"
+            >
+              <div className="relative">
+                <img
+                  src={user.avatar_url}
+                  alt={displayName}
+                  className="w-20 h-20 rounded-full object-cover"
+                  onError={(e: React.SyntheticEvent<HTMLImageElement>) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = placeholder;
+                  }}
+                />
                 {user.site_admin && (
-                  <span className="inline-block px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded">
-                    Admin
-                  </span>
+                  <LucideReact.CheckCircle
+                    className="text-green-500 absolute bottom-0 right-0 bg-white rounded-full"
+                    size={20}
+                    aria-label="Site Admin"
+                  />
                 )}
               </div>
+              <div className="text-lg font-medium text-gray-900 truncate">
+                {displayName}
+              </div>
+              {displayName !== user.login && (
+                <div className="text-sm text-gray-500 truncate">
+                  @{user.login}
+                </div>
+              )}
+              {user.email && (
+                <div className="flex items-center text-sm text-gray-600 truncate">
+                  <LucideReact.Mail
+                    size={16}
+                    className="mr-1 text-gray-400"
+                  />
+                  <span>{user.email}</span>
+                </div>
+              )}
+              <div className="flex items-center text-sm text-gray-600">
+                <LucideReact.Tag size={16} className="mr-1 text-gray-400" />
+                <span>{user.type}</span>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

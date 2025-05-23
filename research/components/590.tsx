@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Authentication Token
      *
      * @title Authentication Token
     */
-    export type authentication_token = {
+    export interface authentication_token {
         /**
          * The token used for authentication
         */
@@ -25,13 +26,13 @@ export namespace AutoViewInputSubTypes {
          * Describe whether all repositories have been selected or there's a selection involved
         */
         repository_selection?: "all" | "selected";
-    };
+    }
     /**
      * A repository on GitHub.
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -235,7 +236,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -254,7 +255,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -277,7 +278,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.authentication_token;
 
@@ -286,100 +287,111 @@ export type AutoViewInput = AutoViewInputSubTypes.authentication_token;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const maskedToken =
-    value.token.length > 12
-      ? `${value.token.slice(0, 6)}…${value.token.slice(-6)}`
-      : value.token;
-
-  const expiresAtDate = new Date(value.expires_at);
-  const formattedExpiresAt = isNaN(expiresAtDate.getTime())
-    ? "Invalid date"
-    : expiresAtDate.toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      });
-
-  const repoList = value.repositories ?? [];
-  const repoCount = repoList.length;
-  const displayRepos = repoList.slice(0, 3).map((r) => r.full_name);
-  const moreCount = repoCount - displayRepos.length;
-
+  const maskedToken = value.token.length > 8
+    ? `${value.token.slice(0, 4)}…${value.token.slice(-4)}`
+    : value.token;
+  const expiresAtFormatted = new Date(value.expires_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const repoCount = value.repositories?.length ?? 0;
+  const displayedRepos = value.repositories?.slice(0, 3) || [];
+  const remainingRepos = repoCount - displayedRepos.length;
+  const hasCustomPermissions = value.permissions !== undefined;
   const selectionLabel =
     value.repository_selection === "all"
       ? "All repositories"
       : value.repository_selection === "selected"
-      ? "Selected repositories"
-      : "Not specified";
+      ? `Selected repositories (${repoCount})`
+      : null;
 
-  const permissions = value.permissions && typeof value.permissions === "object"
-    ? Object.keys(value.permissions)
-    : [];
-  
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-4 space-y-4">
-      <h2 className="text-lg font-semibold text-gray-800">Authentication Token</h2>
-
-      <div className="space-y-2">
-        <div className="flex justify-between">
-          <span className="text-sm font-medium text-gray-600">Token</span>
-          <span className="text-sm font-mono text-gray-800 truncate">{maskedToken}</span>
+    <div className="max-w-md w-full p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-4">
+        <LucideReact.Key className="text-blue-500" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          Authentication Token
+        </h2>
+      </div>
+      <dl className="space-y-4">
+        <div className="flex items-start justify-between">
+          <dt className="flex items-center text-sm font-medium text-gray-600">
+            <LucideReact.Key className="mr-1 text-gray-500" size={16} />
+            Token
+          </dt>
+          <dd className="text-sm text-gray-800 font-mono break-all">
+            {maskedToken}
+          </dd>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-sm font-medium text-gray-600">Expires At</span>
-          <time
-            dateTime={value.expires_at}
-            className="text-sm text-gray-800"
-          >
-            {formattedExpiresAt}
-          </time>
+        <div className="flex items-center justify-between">
+          <dt className="flex items-center text-sm font-medium text-gray-600">
+            <LucideReact.Calendar className="mr-1 text-gray-500" size={16} />
+            Expires At
+          </dt>
+          <dd className="text-sm text-gray-800">{expiresAtFormatted}</dd>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-sm font-medium text-gray-600">Repository Scope</span>
-          <span className="text-sm text-gray-800">{selectionLabel}</span>
-        </div>
+        {hasCustomPermissions && (
+          <div className="flex items-center justify-between">
+            <dt className="flex items-center text-sm font-medium text-gray-600">
+              <LucideReact.Shield
+                className="mr-1 text-gray-500"
+                size={16}
+              />
+              Permissions
+            </dt>
+            <dd className="text-sm text-gray-800">Custom</dd>
+          </div>
+        )}
+
+        {selectionLabel && (
+          <div className="flex flex-col">
+            <div className="flex items-center justify-between">
+              <dt className="flex items-center text-sm font-medium text-gray-600">
+                <LucideReact.GitBranch
+                  className="mr-1 text-gray-500"
+                  size={16}
+                />
+                {selectionLabel}
+              </dt>
+            </div>
+            {displayedRepos.length > 0 && (
+              <dd className="mt-2 flex flex-wrap gap-2">
+                {displayedRepos.map((repo) => (
+                  <span
+                    key={repo.id}
+                    className="px-2 py-1 bg-gray-100 text-sm text-gray-800 rounded-full truncate"
+                  >
+                    {repo.name}
+                  </span>
+                ))}
+                {remainingRepos > 0 && (
+                  <span className="px-2 py-1 bg-gray-100 text-sm text-gray-600 rounded-full">
+                    +{remainingRepos} more
+                  </span>
+                )}
+              </dd>
+            )}
+          </div>
+        )}
 
         {value.single_file != null && (
-          <div className="flex justify-between">
-            <span className="text-sm font-medium text-gray-600">Single File</span>
-            <span className="text-sm text-gray-800 truncate">{value.single_file || "None"}</span>
+          <div className="flex items-center justify-between">
+            <dt className="flex items-center text-sm font-medium text-gray-600">
+              <LucideReact.FileText
+                className="mr-1 text-gray-500"
+                size={16}
+              />
+              File
+            </dt>
+            <dd className="text-sm text-gray-800 truncate">
+              {value.single_file}
+            </dd>
           </div>
         )}
-
-        {permissions.length > 0 && (
-          <div>
-            <span className="text-sm font-medium text-gray-600">Permissions</span>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {permissions.map((perm) => (
-                <span
-                  key={perm}
-                  className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full"
-                >
-                  {perm}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {repoCount > 0 && (
-          <div>
-            <span className="text-sm font-medium text-gray-600">Repositories ({repoCount})</span>
-            <ul className="mt-1 space-y-1">
-              {displayRepos.map((name) => (
-                <li key={name} className="text-sm text-gray-800 truncate">
-                  • {name}
-                </li>
-              ))}
-              {moreCount > 0 && (
-                <li className="text-sm text-gray-600">…and {moreCount} more</li>
-              )}
-            </ul>
-          </div>
-        )}
-      </div>
+      </dl>
     </div>
   );
 }

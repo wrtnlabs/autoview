@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A software package
      *
      * @title Package
     */
-    export type _package = {
+    export interface _package {
         /**
          * Unique identifier of the package.
         */
@@ -27,7 +28,7 @@ export namespace AutoViewInputSubTypes {
         repository?: AutoViewInputSubTypes.nullable_minimal_repository;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -67,7 +68,7 @@ export namespace AutoViewInputSubTypes {
         node_id: string;
         name: string;
         full_name: string;
-        owner: any;
+        owner: AutoViewInputSubTypes.simple_user;
         "private": boolean;
         html_url: string & tags.Format<"uri">;
         description: string | null;
@@ -151,7 +152,7 @@ export namespace AutoViewInputSubTypes {
         delete_branch_on_merge?: boolean;
         subscribers_count?: number & tags.Type<"int32">;
         network_count?: number & tags.Type<"int32">;
-        code_of_conduct?: any;
+        code_of_conduct?: AutoViewInputSubTypes.code_of_conduct;
         license?: {
             key?: string;
             name?: string;
@@ -164,11 +165,78 @@ export namespace AutoViewInputSubTypes {
         watchers?: number & tags.Type<"int32">;
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
-        security_and_analysis?: any;
+        security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
     } | null;
-    export type simple_user = any;
-    export type code_of_conduct = any;
-    export type security_and_analysis = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * Code Of Conduct
+     *
+     * @title Code Of Conduct
+    */
+    export interface code_of_conduct {
+        key: string;
+        name: string;
+        url: string & tags.Format<"uri">;
+        body?: string;
+        html_url: (string & tags.Format<"uri">) | null;
+    }
+    export type security_and_analysis = {
+        advanced_security?: {
+            status?: "enabled" | "disabled";
+        };
+        code_security?: {
+            status?: "enabled" | "disabled";
+        };
+        /**
+         * Enable or disable Dependabot security updates for the repository.
+        */
+        dependabot_security_updates?: {
+            /**
+             * The enablement status of Dependabot security updates for the repository.
+            */
+            status?: "enabled" | "disabled";
+        };
+        secret_scanning?: {
+            status?: "enabled" | "disabled";
+        };
+        secret_scanning_push_protection?: {
+            status?: "enabled" | "disabled";
+        };
+        secret_scanning_non_provider_patterns?: {
+            status?: "enabled" | "disabled";
+        };
+        secret_scanning_ai_detection?: {
+            status?: "enabled" | "disabled";
+        };
+    } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes._package[];
 
@@ -177,59 +245,114 @@ export type AutoViewInput = AutoViewInputSubTypes._package[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const dateOptions: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {value.map((pkg) => {
-        const createdDate = new Date(pkg.created_at).toLocaleDateString(undefined, dateOptions);
-        const updatedDate = new Date(pkg.updated_at).toLocaleDateString(undefined, dateOptions);
-        const visibilityLabel = pkg.visibility.charAt(0).toUpperCase() + pkg.visibility.slice(1);
-
+        const owner = pkg.owner;
+        const repo = pkg.repository;
         return (
-          <div key={pkg.id} className="p-4 bg-white rounded-lg shadow-md flex flex-col">
-            <div className="flex items-start justify-between">
-              <h2 className="text-lg font-semibold text-gray-800 truncate">{pkg.name}</h2>
-              <span
-                className={`ml-2 text-xs font-medium px-2 py-1 rounded-full ${
-                  pkg.visibility === "public"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-800"
-                }`}
-              >
-                {visibilityLabel}
-              </span>
-            </div>
-            <p className="mt-1 text-sm text-gray-500 uppercase">{pkg.package_type}</p>
-            <div className="mt-2 text-sm text-gray-700">
-              <span className="font-medium">Versions:</span> {pkg.version_count}
-            </div>
-            {pkg.repository && pkg.repository.full_name && (
-              <div className="mt-2 text-sm text-gray-700">
-                <span className="font-medium">Repository:</span>{" "}
-                <span className="truncate">{pkg.repository.full_name}</span>
+          <li
+            key={pkg.id}
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition"
+          >
+            {/* Package Name and URL */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
+                {pkg.name}
+              </h3>
+              <div className="flex items-center text-gray-400">
+                <LucideReact.Link size={16} />
+                <span
+                  className="ml-1 text-sm text-blue-600 truncate"
+                  title={pkg.html_url}
+                >
+                  {pkg.html_url}
+                </span>
               </div>
-            )}
-            <div className="mt-2 text-sm text-gray-600">
-              <span className="font-medium">Created:</span> {createdDate}
             </div>
-            <div className="mt-1 text-sm text-gray-600">
-              <span className="font-medium">Updated:</span> {updatedDate}
-            </div>
-            {pkg.owner && (
-              <div className="mt-4 flex items-center">
-                <img
-                  src={pkg.owner.avatar_url}
-                  alt={pkg.owner.login}
-                  className="w-6 h-6 rounded-full flex-shrink-0"
+
+            {/* Package Metadata */}
+            <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 gap-3">
+              <div className="flex items-center">
+                <LucideReact.Package
+                  size={16}
+                  className="mr-1 text-gray-500"
                 />
-                <span className="ml-2 text-sm text-gray-800 truncate">{pkg.owner.login}</span>
+                <span className="capitalize">{pkg.package_type}</span>
+              </div>
+              <div className="flex items-center">
+                {pkg.visibility === "public" ? (
+                  <LucideReact.Globe
+                    size={16}
+                    className="mr-1 text-green-500"
+                  />
+                ) : (
+                  <LucideReact.Lock
+                    size={16}
+                    className="mr-1 text-red-500"
+                  />
+                )}
+                <span className="capitalize">{pkg.visibility}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Tag size={16} className="mr-1 text-gray-500" />
+                <span>{pkg.version_count} versions</span>
+              </div>
+            </div>
+
+            {/* Owner & Repository */}
+            {(owner || repo) && (
+              <div className="mt-3 flex items-center space-x-4 text-sm text-gray-700">
+                {owner && (
+                  <div className="flex items-center">
+                    <img
+                      src={owner.avatar_url}
+                      alt={owner.login}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                    <span className="ml-2 truncate">{owner.login}</span>
+                  </div>
+                )}
+                {repo && (
+                  <div className="flex items-center">
+                    <LucideReact.Code size={16} className="text-gray-500" />
+                    <span
+                      className="ml-1 truncate text-blue-600"
+                      title={repo.full_name}
+                    >
+                      {repo.full_name}
+                    </span>
+                  </div>
+                )}
               </div>
             )}
-          </div>
+
+            {/* Timestamps */}
+            <div className="mt-4 flex items-center text-xs text-gray-500 space-x-4">
+              <div className="flex items-center">
+                <LucideReact.Calendar size={14} className="mr-1" />
+                <span title={pkg.created_at}>
+                  Created: {formatDate(pkg.created_at)}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Calendar size={14} className="mr-1" />
+                <span title={pkg.updated_at}>
+                  Updated: {formatDate(pkg.updated_at)}
+                </span>
+              </div>
+            </div>
+          </li>
         );
       })}
-    </div>
+    </ul>
   );
 }

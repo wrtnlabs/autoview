@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type actions_billing_usage = {
+    export interface actions_billing_usage {
         /**
          * The sum of the free and paid GitHub Actions minutes used.
         */
@@ -76,7 +77,7 @@ export namespace AutoViewInputSubTypes {
             */
             total?: number & tags.Type<"int32">;
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_billing_usage;
 
@@ -85,103 +86,73 @@ export type AutoViewInput = AutoViewInputSubTypes.actions_billing_usage;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    total_minutes_used,
-    included_minutes,
-    total_paid_minutes_used,
-    minutes_used_breakdown,
-  } = value;
+  const freeUsed = value.total_minutes_used - value.total_paid_minutes_used;
+  const included = value.included_minutes;
+  const freeRemaining = Math.max(included - freeUsed, 0);
+  const freePercentage = included > 0 ? Math.min((freeUsed / included) * 100, 100) : 0;
 
-  const used = total_minutes_used;
-  const included = included_minutes;
-  const remaining = Math.max(included - used, 0);
-  const usagePercent = included > 0 ? Math.min(100, (used / included) * 100) : 0;
-  const formattedPercent = usagePercent.toFixed(1);
+  // Prepare breakdown entries excluding the 'total' field and zero/undefined values
+  const breakdownEntries = Object.entries(value.minutes_used_breakdown)
+    .filter(([key, minutes]) => key !== "total" && typeof minutes === "number" && minutes > 0) as [string, number][];
 
-  // Format numbers with thousand separators
-  const fmt = (n: number) => n.toLocaleString();
-  const formattedIncluded = fmt(included);
-  const formattedUsed = fmt(used);
-  const formattedRemaining = fmt(remaining);
-  const formattedPaid = fmt(total_paid_minutes_used);
-
-  // OS-level breakdown
-  type BreakdownKey = keyof typeof minutes_used_breakdown;
-  const osKeys: { key: BreakdownKey; label: string }[] = [
-    { key: 'UBUNTU', label: 'Ubuntu' },
-    { key: 'MACOS', label: 'macOS' },
-    { key: 'WINDOWS', label: 'Windows' },
-  ];
-  const osBreakdown = osKeys
-    .map(({ key, label }) => ({
-      label,
-      value: minutes_used_breakdown[key] ?? 0,
-    }))
-    .filter(item => item.value > 0);
+  // Helper to turn keys like "ubuntu_4_core" into "Ubuntu 4 Core"
+  const formatLabel = (key: string) =>
+    key
+      .toLowerCase()
+      .split("_")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(" ");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <section className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <header>
-        <h2 className="text-xl font-semibold text-gray-800">
-          GitHub Actions Minutes Usage
-        </h2>
-      </header>
+    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Clock className="text-gray-600" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">Actions Minutes Usage</h2>
+      </div>
 
-      {/* Progress Bar */}
-      <div className="mt-4">
-        <div className="flex justify-between text-sm text-gray-600">
-          <span>{formattedUsed} / {formattedIncluded} min</span>
-          <span>{formattedPercent}%</span>
+      {/* Usage Summary */}
+      <div className="mb-2 text-sm text-gray-700">
+        <div className="flex justify-between">
+          <span>Free Used: {freeUsed} / {included} min</span>
+          <span>Paid Used: {value.total_paid_minutes_used} min</span>
         </div>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-4 overflow-hidden mb-4">
         <div
-          role="progressbar"
-          aria-valuenow={usagePercent}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          className="w-full h-2 mt-1 bg-gray-200 rounded-full overflow-hidden"
-        >
-          <div
-            className="h-full bg-blue-500"
-            style={{ width: `${usagePercent}%` }}
-          />
-        </div>
+          className="bg-green-500 h-4"
+          style={{ width: `${freePercentage}%` }}
+        />
+      </div>
+      <div className="mb-4 text-sm">
+        {freeRemaining > 0 ? (
+          <span className="text-gray-700">Free Remaining: {freeRemaining} min</span>
+        ) : (
+          <span className="flex items-center text-red-500">
+            <LucideReact.AlertTriangle className="mr-1" size={16} />
+            Free Quota Exceeded
+          </span>
+        )}
       </div>
 
-      {/* Summary Grid */}
-      <div className="mt-6 grid grid-cols-2 gap-4 text-sm">
+      {/* Detailed Breakdown */}
+      {breakdownEntries.length > 0 && (
         <div>
-          <p className="text-gray-500">Free Minutes</p>
-          <p className="font-medium text-gray-800">{formattedIncluded}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Used Minutes</p>
-          <p className="font-medium text-gray-800">{formattedUsed}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Remaining</p>
-          <p className="font-medium text-gray-800">{formattedRemaining}</p>
-        </div>
-        <div>
-          <p className="text-gray-500">Paid Minutes</p>
-          <p className="font-medium text-gray-800">{formattedPaid}</p>
-        </div>
-      </div>
-
-      {/* OS Breakdown */}
-      {osBreakdown.length > 0 && (
-        <div className="mt-6">
-          <p className="text-sm font-semibold text-gray-700 mb-2">OS Breakdown</p>
-          <ul className="space-y-1 text-sm text-gray-800">
-            {osBreakdown.map(({ label, value }) => (
-              <li key={label} className="flex justify-between">
-                <span>{label}</span>
-                <span>{fmt(value)} min</span>
+          <h3 className="text-sm font-medium text-gray-800 mb-2 flex items-center">
+            <LucideReact.LayoutGrid className="mr-1 text-gray-600" size={18} />
+            Breakdown
+          </h3>
+          <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {breakdownEntries.map(([key, minutes]) => (
+              <li key={key} className="flex items-center text-gray-700 text-sm">
+                <LucideReact.Cpu className="text-gray-400 mr-1" size={16} />
+                <span>{formatLabel(key)}: {minutes} min</span>
               </li>
             ))}
           </ul>
         </div>
       )}
-    </section>
+    </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
      *
      * @title Issue
     */
-    export type issue = {
+    export interface issue {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -52,7 +53,7 @@ export namespace AutoViewInputSubTypes {
             "default"?: boolean;
         })[];
         assignee: AutoViewInputSubTypes.nullable_simple_user;
-        assignees?: any[] | null;
+        assignees?: AutoViewInputSubTypes.simple_user[] | null;
         milestone: AutoViewInputSubTypes.nullable_milestone;
         locked: boolean;
         active_lock_reason?: string | null;
@@ -78,7 +79,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         sub_issues_summary?: AutoViewInputSubTypes.sub_issues_summary;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -113,7 +114,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -136,7 +137,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A collection of related issues and pull requests.
      *
@@ -161,7 +162,7 @@ export namespace AutoViewInputSubTypes {
         */
         title: string;
         description: string | null;
-        creator: any;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
         open_issues: number & tags.Type<"int32">;
         closed_issues: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
@@ -198,11 +199,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -213,7 +214,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -417,7 +418,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -447,7 +448,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -475,7 +476,38 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -485,7 +517,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -496,102 +528,89 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
     /**
      * @title Sub-issues Summary
     */
-    export type sub_issues_summary = {
+    export interface sub_issues_summary {
         total: number & tags.Type<"int32">;
         completed: number & tags.Type<"int32">;
         percent_completed: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue;
 
 
 
-// The component name is always "VisualComponent"
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and derived values
-  const createdDate = new Date(value.created_at);
-  const formattedCreatedAt = createdDate.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  const stateBadgeClasses =
-    value.state === "open"
-      ? "bg-green-100 text-green-800"
-      : "bg-red-100 text-red-800";
-  const stateLabel = value.state === "open" ? "Open" : "Closed";
-
-  // Extract label names (could be strings or objects)
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const updatedAt = new Date(value.updated_at).toLocaleString();
+  const closedAt = value.closed_at ? new Date(value.closed_at).toLocaleString() : null;
+  const isOpen = value.state === "open";
+  const stateLabel = isOpen ? "Open" : "Closed";
+  const stateColor = isOpen ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800";
   const labels: string[] = Array.isArray(value.labels)
-    ? value.labels.map((lbl) =>
-        typeof lbl === "string" ? lbl : lbl.name ?? ""
-      )
+    ? value.labels.map((lbl) => (typeof lbl === "string" ? lbl : lbl.name || ""))
     : [];
+  const user = value.user;
+  const avatarFallback = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    if (user?.login) {
+      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        user.login
+      )}&background=random&color=fff`;
+    }
+  };
 
-  // Author info (nullable)
-  const authorLogin = value.user?.login ?? "Unknown";
-  const authorAvatar = value.user?.avatar_url ?? "";
-
-  // Comments count
-  const commentsCount = value.comments;
-
-  // Sub-issues summary
-  const subIssues = value.sub_issues_summary;
-  const subIssuesText =
-    subIssues != null
-      ? `${subIssues.completed}/${subIssues.total} sub-items (${subIssues.percent_completed}% done)`
-      : null;
-
-  // 2. Visual structure with JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-4">
-      {/* Header: Issue number, title, state badge */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition overflow-hidden">
+      {/* Header: Issue number, title, and state badge */}
+      <div className="flex items-start justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
           #{value.number} {value.title}
         </h2>
         <span
-          className={`px-2 py-0.5 text-xs font-medium rounded ${stateBadgeClasses}`}
+          className={`ml-2 flex-shrink-0 px-2 py-1 text-xs font-medium rounded-full ${stateColor}`}
         >
           {stateLabel}
         </span>
       </div>
 
-      {/* Labels */}
-      {labels.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {labels.map((lbl) => (
-            <span
-              key={lbl}
-              className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded"
-            >
-              {lbl}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Meta: author, created date, comments */}
-      <div className="mt-3 flex items-center text-sm text-gray-500 space-x-3">
-        <div className="flex items-center space-x-1">
-          {authorAvatar && (
+      {/* Metadata: author and dates */}
+      <div className="flex items-center mt-3 text-gray-500 text-sm space-x-3">
+        {/* Author */}
+        <div className="flex items-center gap-1">
+          {user ? (
             <img
-              src={authorAvatar}
-              alt={authorLogin}
-              className="w-5 h-5 rounded-full"
+              src={user.avatar_url}
+              alt={user.login}
+              onError={avatarFallback}
+              className="w-5 h-5 rounded-full object-cover"
             />
+          ) : (
+            <LucideReact.User size={16} className="text-gray-400" />
           )}
-          <span>{authorLogin}</span>
+          <span>{user?.login || "Unknown"}</span>
         </div>
-        <span>•</span>
-        <span>{formattedCreatedAt}</span>
-        <span>•</span>
-        <span>💬 {commentsCount}</span>
+        {/* Created date */}
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created {createdAt}</span>
+        </div>
+        {/* Updated date */}
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Updated {updatedAt}</span>
+        </div>
+        {/* Closed date */}
+        {closedAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span>Closed {closedAt}</span>
+          </div>
+        )}
       </div>
 
       {/* Body snippet */}
@@ -601,12 +620,43 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
         </p>
       )}
 
-      {/* Sub-issues summary */}
-      {subIssuesText && (
-        <div className="mt-3 text-xs text-gray-600 italic">
-          {subIssuesText}
+      {/* Labels */}
+      {labels.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-3">
+          {labels.map((lbl) => (
+            <span
+              key={lbl}
+              className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded"
+            >
+              {lbl}
+            </span>
+          ))}
         </div>
       )}
+
+      {/* Footer: comments and reactions */}
+      <div className="flex items-center justify-between mt-4 text-gray-500 text-sm">
+        <div className="flex items-center gap-1">
+          <LucideReact.MessageCircle size={16} />
+          <span>{value.comments}</span>
+        </div>
+        {value.reactions && (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1">
+              <LucideReact.ThumbsUp size={16} />
+              <span>{value.reactions["+1"]}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.ThumbsDown size={16} />
+              <span>{value.reactions["-1"]}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Heart size={16} className="text-red-500" />
+              <span>{value.reactions.heart}</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

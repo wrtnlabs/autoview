@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Organization Full
      *
      * @title Organization Full
     */
-    export type organization_full = {
+    export interface organization_full {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -139,7 +140,7 @@ export namespace AutoViewInputSubTypes {
          * Controls whether or not deploy keys may be added and used for repositories in the organization.
         */
         deploy_keys_enabled_for_repositories?: boolean;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_full;
 
@@ -148,103 +149,102 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_full;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const displayName = value.name ?? value.login;
-  const formattedCreatedDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const formattedUpdatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const formatNumber = (n: number) => n.toLocaleString();
+  const fullName = value.name ?? value.login;
+  const [avatarError, setAvatarError] = React.useState(false);
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    fullName,
+  )}&background=0D8ABC&color=fff`;
+  const avatarSrc = avatarError ? avatarFallback : value.avatar_url;
+
+  const description = value.description ?? 'No description provided.';
+  const truncatedDescription =
+    description.length > 120 ? `${description.slice(0, 120)}…` : description;
+
+  const formattedCreatedAt = new Date(value.created_at).toLocaleDateString(
+    undefined,
+    { year: 'numeric', month: 'long', day: 'numeric' },
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Header with avatar and name */}
-      <div className="flex items-center p-4">
+    <div className="max-w-md mx-auto bg-white shadow rounded-lg overflow-hidden p-4">
+      {/* Header: Avatar and Basic Info */}
+      <div className="flex items-center">
         <img
-          src={value.avatar_url}
-          alt="Organization Avatar"
-          className="w-16 h-16 rounded-full flex-shrink-0"
+          src={avatarSrc}
+          alt={`${fullName} avatar`}
+          onError={() => setAvatarError(true)}
+          className="w-16 h-16 rounded-full object-cover"
         />
-        <div className="ml-4 flex-1">
-          <h2 className="text-xl font-semibold text-gray-900">{displayName}</h2>
-          <p className="text-gray-600">@{value.login}</p>
-          <div className="flex items-center mt-1 space-x-2">
-            <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded">
-              {value.type}
-            </span>
+        <div className="ml-4">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center">
+            {fullName}
             {value.is_verified && (
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
-                Verified
-              </span>
+              <LucideReact.BadgeCheck
+                className="text-blue-500 ml-2"
+                size={16}
+                aria-label="Verified"
+              />
             )}
-          </div>
+          </h2>
+          <p className="text-sm text-gray-500">@{value.login}</p>
         </div>
       </div>
 
       {/* Description */}
-      {value.description && (
-        <p className="px-4 text-gray-700 text-sm line-clamp-3">
-          {value.description}
-        </p>
-      )}
+      <p className="text-gray-700 text-sm mt-3 line-clamp-2">
+        {truncatedDescription}
+      </p>
 
-      {/* Key Details */}
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 p-4 text-sm text-gray-700">
-        {value.location && (
-          <div>
-            <dt className="font-medium">Location</dt>
-            <dd className="truncate">{value.location}</dd>
+      {/* Key Stats */}
+      <div className="flex flex-wrap justify-between items-center mt-4 text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Archive size={16} />
+          <span className="text-sm">{value.public_repos} Repos</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.BookOpen size={16} />
+          <span className="text-sm">{value.public_gists} Gists</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Users size={16} />
+          <span className="text-sm">{value.followers} Followers</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.User size={16} />
+          <span className="text-sm">{value.following} Following</span>
+        </div>
+      </div>
+
+      {/* Additional Info */}
+      <div className="mt-4 space-y-2 text-gray-600 text-sm">
+        {value.company && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Building size={16} />
+            <span>{value.company}</span>
           </div>
         )}
         {value.blog && (
-          <div>
-            <dt className="font-medium">Website</dt>
-            <dd className="truncate">{value.blog}</dd>
+          <div className="flex items-center gap-1">
+            <LucideReact.Link size={16} />
+            <span className="truncate">{value.blog}</span>
+          </div>
+        )}
+        {value.location && (
+          <div className="flex items-center gap-1">
+            <LucideReact.MapPin size={16} />
+            <span>{value.location}</span>
           </div>
         )}
         {value.email && (
-          <div>
-            <dt className="font-medium">Email</dt>
-            <dd className="truncate">{value.email}</dd>
+          <div className="flex items-center gap-1">
+            <LucideReact.Mail size={16} />
+            <span>{value.email}</span>
           </div>
         )}
-        {value.twitter_username && (
-          <div>
-            <dt className="font-medium">Twitter</dt>
-            <dd className="truncate">@{value.twitter_username}</dd>
-          </div>
-        )}
-        <div>
-          <dt className="font-medium">Joined</dt>
-          <dd>{formattedCreatedDate}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Updated</dt>
-          <dd>{formattedUpdatedDate}</dd>
-        </div>
-      </dl>
-
-      {/* Statistics */}
-      <div className="px-4 pb-4">
-        <div className="flex flex-wrap -m-1">
-          <div className="m-1 px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-            Repos: {formatNumber(value.public_repos)}
-          </div>
-          <div className="m-1 px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-            Gists: {formatNumber(value.public_gists)}
-          </div>
-          <div className="m-1 px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-            Followers: {formatNumber(value.followers)}
-          </div>
-          <div className="m-1 px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-            Following: {formatNumber(value.following)}
-          </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Joined {formattedCreatedAt}</span>
         </div>
       </div>
     </div>

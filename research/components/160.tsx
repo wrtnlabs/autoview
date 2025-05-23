@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Category of channel.
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
      * Furthermore, `IShoppingChannelCategory` is designed to merge between themselves,
      * so there is no burden to edit the category at any time.
     */
-    export type IShoppingChannelCategory = {
+    export interface IShoppingChannelCategory {
         /**
          * Parent category info.
          *
          * @title Parent category info
         */
-        parent: null | any;
+        parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
         /**
          * List of children categories with hierarchical structure.
          *
@@ -79,13 +80,61 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
-        export type IInvert = any;
+        /**
+         * Invert category information with parent category.
+        */
+        export interface IInvert {
+            /**
+             * Parent category info with recursive structure.
+             *
+             * If no parent exists, then be `null`.
+             *
+             * @title Parent category info with recursive structure
+            */
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Identifier code of the category.
+             *
+             * The code must be unique in the channel.
+             *
+             * @title Identifier code of the category
+            */
+            code: string;
+            /**
+             * Parent category's ID.
+             *
+             * @title Parent category's ID
+            */
+            parent_id: null | (string & tags.Format<"uuid">);
+            /**
+             * Representative name of the category.
+             *
+             * The name must be unique within the parent category. If no parent exists,
+             * then the name must be unique within the channel between no parent
+             * categories.
+             *
+             * @title Representative name of the category
+            */
+            name: string;
+            /**
+             * Creation time of record.
+             *
+             * @title Creation time of record
+            */
+            created_at: string;
+        }
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -128,7 +177,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory;
@@ -138,55 +187,90 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const formattedDate = createdDate.toLocaleDateString(undefined, {
+  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
-  const childCount = value.children.length;
-  const displayedChildren = value.children.slice(0, 3);
+
+  // Build parent chain (e.g., "Electronics > Notebook > 15 inches")
+  const parentNames: string[] = [];
+  let parentNode = value.parent as AutoViewInputSubTypes.IShoppingChannelCategory.IInvert | null;
+  while (parentNode) {
+    parentNames.push(parentNode.name);
+    parentNode = parentNode.parent as AutoViewInputSubTypes.IShoppingChannelCategory.IInvert | null;
+  }
+  const breadcrumb = parentNames.length > 0 ? parentNames.reverse().join(" › ") : null;
+
+  // Count all descendants recursively
+  function countDescendants(
+    nodes: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[]
+  ): number {
+    return nodes.reduce(
+      (sum, node) => sum + 1 + countDescendants(node.children),
+      0
+    );
+  }
+  const totalSubcategories = countDescendants(value.children);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm max-w-sm w-full mx-auto">
-      <header className="flex items-baseline justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
-        <time
-          dateTime={value.created_at}
-          className="ml-2 text-sm text-gray-500 whitespace-nowrap"
-        >
-          {formattedDate}
-        </time>
-      </header>
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center space-x-2">
+        <LucideReact.Tag className="text-blue-500" size={20} />
+        <h2 className="text-xl font-semibold text-gray-800 truncate">
+          {value.name}
+        </h2>
+      </div>
 
-      <p className="mt-1 text-sm text-gray-600 truncate">
-        Code: <span className="font-medium">{value.code}</span>
-      </p>
-
-      {childCount > 0 && (
-        <section className="mt-4">
-          <h3 className="text-sm font-medium text-gray-700">Subcategories</h3>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {displayedChildren.map((child) => (
-              <span
-                key={child.id}
-                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-              >
-                {child.name}
-              </span>
-            ))}
-            {childCount > displayedChildren.length && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">
-                +{childCount - displayedChildren.length} more
-              </span>
-            )}
+      <div className="mt-2 space-y-1 text-sm">
+        <p className="text-gray-600">
+          <span className="font-medium">Code:</span> {value.code}
+        </p>
+        <div className="flex items-center text-gray-500">
+          <LucideReact.Calendar size={16} />
+          <span className="ml-1">{formattedDate}</span>
+        </div>
+        {breadcrumb && (
+          <div className="flex items-center text-gray-700">
+            <span className="font-medium">Parent:</span>
+            <span className="ml-1 truncate">{breadcrumb}</span>
           </div>
-        </section>
-      )}
+        )}
+      </div>
+
+      <div className="mt-4">
+        {value.children.length > 0 ? (
+          <>
+            <div className="flex items-center justify-between">
+              <p className="font-medium text-gray-800">
+                Subcategories ({totalSubcategories})
+              </p>
+              <LucideReact.ChevronDown
+                className="text-gray-400"
+                size={16}
+              />
+            </div>
+            <ul className="mt-2 max-h-40 overflow-y-auto list-disc list-inside space-y-1 text-gray-700 text-sm">
+              {value.children.map((child) => (
+                <li key={child.id} className="flex justify-between">
+                  <span className="truncate">{child.name}</span>
+                  {child.children.length > 0 && (
+                    <span className="text-gray-400 text-xs">
+                      +{child.children.length}
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <div className="flex items-center text-gray-400">
+            <LucideReact.AlertCircle size={20} />
+            <span className="ml-2">No subcategories</span>
+          </div>
+        )}
+      </div>
     </div>
   );
-  // 3. Return the React element.
-  //    Ensure all displayed data is appropriately filtered, transformed, and formatted.
 }

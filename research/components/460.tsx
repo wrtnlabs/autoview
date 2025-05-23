@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * API Insights usage summary stats for an organization
      *
      * @title Summary Stats
     */
-    export type api_insights_summary_stats = {
+    export interface api_insights_summary_stats {
         /**
          * The total number of requests within the queried time period
         */
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
          * The total number of requests that were rate limited within the queried time period
         */
         rate_limited_request_count?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.api_insights_summary_stats;
 
@@ -23,52 +24,52 @@ export type AutoViewInput = AutoViewInputSubTypes.api_insights_summary_stats;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const total = typeof value.total_request_count === "number" ? value.total_request_count : null;
-  const rateLimited =
-    typeof value.rate_limited_request_count === "number" ? value.rate_limited_request_count : null;
+  // 1. Derived constants for display and percentage calculation
+  const total = value.total_request_count ?? 0;
+  const rateLimited = value.rate_limited_request_count ?? 0;
+  const rateLimitedPct = total > 0 ? (rateLimited / total) * 100 : 0;
 
-  // Formatter for numeric display
-  const numberFormatter = new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 });
-
-  // Derived percentage of rate‐limited requests
-  const rateLimitPercent =
-    total && rateLimited != null && total > 0
-      ? Math.min((rateLimited / total) * 100, 100)
-      : null;
-
-  // Display strings with fallbacks
-  const totalDisplay = total != null ? numberFormatter.format(total) : "—";
-  const rateLimitedDisplay = rateLimited != null ? numberFormatter.format(rateLimited) : "—";
-  const percentDisplay =
-    rateLimitPercent != null ? `${Math.round(rateLimitPercent)}%` : "—";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="px-5 py-4">
-        <h2 className="text-gray-800 text-lg font-semibold mb-4">API Usage Summary</h2>
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-2 mb-4">
-          <div>
-            <dt className="text-sm text-gray-500">Total Requests</dt>
-            <dd className="mt-1 text-xl font-bold text-gray-900 truncate">{totalDisplay}</dd>
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center text-gray-900 font-semibold">
+        <LucideReact.BarChart2 size={20} className="text-blue-600" />
+        <span className="ml-2">API Insights Summary</span>
+      </div>
+
+      {/* Metrics */}
+      <div className="mt-4 space-y-4">
+        {/* Total Requests */}
+        <div className="flex items-center">
+          <LucideReact.Server size={18} className="text-gray-500" />
+          <div className="ml-3">
+            <p className="text-sm text-gray-500">Total Requests</p>
+            <p className="text-lg font-medium text-gray-800">
+              {total.toLocaleString()}
+            </p>
           </div>
-          <div>
-            <dt className="text-sm text-gray-500">Rate-Limited</dt>
-            <dd className="mt-1 text-xl font-bold text-gray-900 truncate">{rateLimitedDisplay}</dd>
+        </div>
+
+        {/* Rate Limited Requests */}
+        <div className="flex items-start">
+          <LucideReact.AlertTriangle size={18} className="text-red-500 mt-1" />
+          <div className="ml-3 flex-1">
+            <p className="text-sm text-gray-500">Rate Limited</p>
+            <p className="text-lg font-medium text-red-600">
+              {rateLimited.toLocaleString()}
+            </p>
+            {/* Progress Bar */}
+            <div className="w-full bg-gray-200 rounded-full h-2 mt-1 overflow-hidden">
+              <div
+                className="bg-red-500 h-2"
+                style={{ width: `${rateLimitedPct}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              {rateLimitedPct.toFixed(1)}% of all requests
+            </p>
           </div>
-        </dl>
-        <div>
-          <dt className="text-sm text-gray-500 mb-1">Rate-Limit %</dt>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-500 h-2 rounded-full"
-              style={{ width: rateLimitPercent != null ? `${rateLimitPercent}%` : "0%" }}
-            />
-          </div>
-          <span className="text-sm font-medium text-gray-700 mt-1 block">
-            {percentDisplay}
-          </span>
         </div>
       </div>
     </div>

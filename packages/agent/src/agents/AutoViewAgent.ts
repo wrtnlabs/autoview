@@ -1,8 +1,9 @@
 import { IAutoViewCompilerMetadata } from "@autoview/interface";
 import { type ILlmSchema } from "@samchon/openapi";
+import OpenAI from "openai";
 import { type IJsonSchemaUnit } from "typia";
 
-import { LlmUnrecoverableError } from "../core";
+import { ILlmBackoffStrategy, LlmUnrecoverableError } from "../core";
 import { CodeGen, RandomGen } from "../passes";
 import { IAutoViewVendor } from "../structures";
 import { type ConvertedSchema, convertSchema } from "./convert-schema";
@@ -46,10 +47,39 @@ export type IAutoViewInput =
   | IAutoViewParametersInput<"3.0">
   | IAutoViewParametersInput<"3.1">;
 
+export type AutoViewAgentType = "codegen" | "randomgen";
+
+export type AutoViewPreLlmGenerationCallback<M> = (
+  agent: AutoViewAgentType,
+  sessionId: string,
+  api: OpenAI,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+  options: OpenAI.RequestOptions | undefined,
+  backoffStrategy: ILlmBackoffStrategy,
+  metadata: M | undefined,
+) =>
+  | void
+  | AutoViewPostLlmGenerationCallback<M>
+  | Promise<AutoViewPostLlmGenerationCallback<M> | undefined | void>;
+
+export type AutoViewPostLlmGenerationCallback<M> = (
+  agent: AutoViewAgentType,
+  sessionId: string,
+  completion: OpenAI.Chat.Completions.ChatCompletion & {
+    _request_id?: string | null;
+  },
+  metadata: M | undefined,
+) => void | Promise<void>;
+
 /**
  * Configuration of the {@link AutoViewAgent}.
  */
-export interface IAutoViewConfig {
+export interface IAutoViewConfig<M> {
+  /**
+   * The ID of the session.
+   */
+  sessionId?: string;
+
   /**
    * The vendor of the entire agent pipeline.
    */
@@ -66,6 +96,15 @@ export interface IAutoViewConfig {
    * The input schema that will be consumed by the generated React component.
    */
   input: IAutoViewInput;
+
+  /**
+   * An optional callback function that will be called before the LLM generates a response.
+   *
+   * This is useful if you want to track LLM activities.
+   *
+   * To capture the completion callback, return a new callback function from this callback.
+   */
+  onPreLlmGeneration?: AutoViewPreLlmGenerationCallback<M>;
 }
 
 /**
@@ -113,8 +152,8 @@ export interface IAutoViewResultFailure extends IAutoViewResultBase<"failure"> {
  *
  * This is the class that orchestrates the entire agent pipeline.
  */
-export class AutoViewAgent {
-  constructor(private config: IAutoViewConfig) {}
+export class AutoViewAgent<M = undefined> {
+  constructor(private config: IAutoViewConfig<M>) {}
 
   /**
    * Execute the agent pipeline.
@@ -123,7 +162,8 @@ export class AutoViewAgent {
    *
    * @returns The result of the agent pipeline.
    */
-  async generate(): Promise<IAutoViewResult> {
+  async generate(metadata?: M): Promise<IAutoViewResult> {
+    const sessionId = this.config.sessionId ?? crypto.randomUUID();
     const inputSchema = this.getInputSchema();
 
     const codegenAgent = new CodeGen.Agent();
@@ -142,18 +182,78 @@ export class AutoViewAgent {
       const [code, mockData] = await Promise.all([
         codegenAgent
           .execute({
+            sessionId,
             vendor: this.config.vendor,
             inputSchema,
+            onPreLlmGeneration: async (
+              sessionId,
+              api,
+              body,
+              options,
+              backoffStrategy,
+            ) => {
+              if (!this.config.onPreLlmGeneration) {
+                return;
+              }
+
+              const result = await this.config.onPreLlmGeneration(
+                "codegen",
+                sessionId,
+                api,
+                body,
+                options,
+                backoffStrategy,
+                metadata,
+              );
+
+              if (typeof result === "function") {
+                return async (sessionId, completion) => {
+                  await result("codegen", sessionId, completion, metadata);
+                };
+              }
+
+              return;
+            },
           })
           .catch((error) =>
             error instanceof LlmUnrecoverableError
               ? `the LLM failed to generate a compilable React component despite of multiple tries with error feedback:\n\n<error>\n${error.getMessage()}\n</error>`
-              : `[INTERNAL ISSUE] failed to execute code generation agent:\n\n<error>\n${error}\n</error>`,
+              : `failed to execute code generation agent:\n\n<error>\n${error}\n</error>`,
           ),
         randomgenAgent
           .execute({
+            sessionId,
             vendor: this.config.mockDataVendor ?? this.config.vendor,
             inputSchema,
+            onPreLlmGeneration: async (
+              sessionId,
+              api,
+              body,
+              options,
+              backoffStrategy,
+            ) => {
+              if (!this.config.onPreLlmGeneration) {
+                return;
+              }
+
+              const result = await this.config.onPreLlmGeneration(
+                "randomgen",
+                sessionId,
+                api,
+                body,
+                options,
+                backoffStrategy,
+                metadata,
+              );
+
+              if (typeof result === "function") {
+                return async (sessionId, completion) => {
+                  await result("randomgen", sessionId, completion, metadata);
+                };
+              }
+
+              return;
+            },
           })
           .catch((error) =>
             error instanceof LlmUnrecoverableError

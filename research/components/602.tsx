@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposActionsRunsArtifacts {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             artifacts: AutoViewInputSubTypes.artifact[];
-        };
+        }
     }
     /**
      * An artifact
      *
      * @title Artifact
     */
-    export type artifact = {
+    export interface artifact {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
             head_branch?: string;
             head_sha?: string;
         } | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunsArtifacts.GetResponse;
 
@@ -52,63 +53,100 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunsArtifacts.
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedTotal = `${value.total_count} Artifact${value.total_count !== 1 ? 's' : ''}`;
+  const totalCount = value.total_count;
+  const artifacts = value.artifacts;
+
   const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const size = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
-    return `${size} ${sizes[i]}`;
+    if (bytes < 1024) return `${bytes} B`;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(2)} KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(2)} MB`;
+    const gb = mb / 1024;
+    return `${gb.toFixed(2)} GB`;
   };
-  const formatDate = (dateStr: string | null): string => {
-    if (!dateStr) return 'N/A';
+
+  const formatDate = (dateStr: string): string => {
     const date = new Date(dateStr);
-    return date.toLocaleString(undefined, {
+    return date.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      hour: 'numeric',
+      minute: 'numeric',
     });
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">{formattedTotal}</h2>
-      <ul className="space-y-4">
-        {value.artifacts.map((artifact) => {
-          const created = formatDate(artifact.created_at);
-          const expires = formatDate(artifact.expires_at);
-          const statusClasses = artifact.expired
-            ? 'bg-red-100 text-red-800'
-            : 'bg-green-100 text-green-800';
-          const statusText = artifact.expired ? 'Expired' : 'Active';
-          return (
-            <li key={artifact.id}>
-              <div className="flex flex-col sm:flex-row sm:justify-between p-4 bg-gray-50 rounded-lg">
-                <div className="min-w-0">
-                  <p className="text-base font-medium text-gray-900 truncate">
-                    {artifact.name}
-                  </p>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {formatBytes(artifact.size_in_bytes)} • Created: {created}
-                  </p>
+      <div className="flex items-center mb-4">
+        <LucideReact.Archive size={20} className="text-gray-600 mr-2" />
+        <span className="text-lg font-semibold text-gray-800">
+          Artifacts ({totalCount})
+        </span>
+      </div>
+
+      {artifacts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2 text-sm">No artifacts available.</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {artifacts.map((artifact) => (
+            <div
+              key={artifact.id}
+              className="flex flex-col justify-between bg-gray-50 border border-gray-200 rounded-lg p-4"
+            >
+              <div>
+                <h3 className="text-md font-medium text-gray-800 truncate">
+                  {artifact.name}
+                </h3>
+                <div className="mt-2 flex items-center text-sm text-gray-500 gap-1">
+                  <LucideReact.File size={14} />
+                  <span>{formatBytes(artifact.size_in_bytes)}</span>
                 </div>
-                <div className="mt-3 sm:mt-0 flex items-center space-x-4">
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${statusClasses}`}
-                  >
-                    {statusText}
-                  </span>
-                  <p className="text-sm text-gray-500">Expires: {expires}</p>
-                </div>
+                {artifact.created_at && (
+                  <div className="mt-1 flex items-center text-sm text-gray-500 gap-1">
+                    <LucideReact.Calendar size={14} />
+                    <span>{formatDate(artifact.created_at)}</span>
+                  </div>
+                )}
+                {artifact.expires_at && (
+                  <div className="mt-1 flex items-center text-sm text-gray-500 gap-1">
+                    <LucideReact.Clock size={14} />
+                    <span>{formatDate(artifact.expires_at)}</span>
+                  </div>
+                )}
               </div>
-            </li>
-          );
-        })}
-      </ul>
+
+              <div className="mt-4 flex items-center justify-between">
+                {artifact.expired ? (
+                  <div className="flex items-center text-red-500 text-sm gap-1">
+                    <LucideReact.AlertTriangle size={16} />
+                    <span>Expired</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center text-green-500 text-sm gap-1">
+                    <LucideReact.CheckCircle size={16} />
+                    <span>Active</span>
+                  </div>
+                )}
+                <a
+                  href={artifact.archive_download_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center text-blue-500 hover:text-blue-600 text-sm gap-1"
+                >
+                  <LucideReact.Download size={16} />
+                  <span>Download</span>
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

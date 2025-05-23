@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
      *
      * @title Issue
     */
-    export type issue = {
+    export interface issue {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -52,7 +53,7 @@ export namespace AutoViewInputSubTypes {
             "default"?: boolean;
         })[];
         assignee: AutoViewInputSubTypes.nullable_simple_user;
-        assignees?: any[] | null;
+        assignees?: AutoViewInputSubTypes.simple_user[] | null;
         milestone: AutoViewInputSubTypes.nullable_milestone;
         locked: boolean;
         active_lock_reason?: string | null;
@@ -78,7 +79,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         sub_issues_summary?: AutoViewInputSubTypes.sub_issues_summary;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -113,7 +114,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -136,7 +137,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A collection of related issues and pull requests.
      *
@@ -161,7 +162,7 @@ export namespace AutoViewInputSubTypes {
         */
         title: string;
         description: string | null;
-        creator: any;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
         open_issues: number & tags.Type<"int32">;
         closed_issues: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
@@ -198,11 +199,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -213,7 +214,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -417,7 +418,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -447,7 +448,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -475,7 +476,38 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -485,7 +517,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -496,15 +528,15 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
     /**
      * @title Sub-issues Summary
     */
-    export type sub_issues_summary = {
+    export interface sub_issues_summary {
         total: number & tags.Type<"int32">;
         completed: number & tags.Type<"int32">;
         percent_completed: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue;
 
@@ -513,133 +545,122 @@ export type AutoViewInput = AutoViewInputSubTypes.issue;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const created = new Date(value.created_at);
-  const formattedCreatedAt = `${created.toLocaleDateString(undefined, {
+  const authorName = value.user?.login ?? "Unknown";
+  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
-  })} ${created.toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}`;
-
-  const updated = new Date(value.updated_at);
-  const formattedUpdatedAt = `${updated.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })} ${updated.toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  })}`;
-
-  const labels: string[] = (value.labels || [])
-    .map((lbl) => (typeof lbl === "string" ? lbl : lbl.name || ""))
-    .filter((n) => n);
-
-  const bodyText = value.body_text ?? value.body ?? "";
-  const hasBody = bodyText.trim().length > 0;
-
-  const reactions = value.reactions;
-  const subSummary = value.sub_issues_summary;
+  });
+  const snippet = (value.body_text ?? value.body ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
+  const labels = Array.isArray(value.labels)
+    ? value.labels
+        .map((label) => (typeof label === "string" ? label : label.name ?? ""))
+        .filter(Boolean)
+    : [];
+  const isOpen = value.state === "open";
+  const stateColor = isOpen ? "text-green-500" : "text-red-500";
+  const stateIcon = isOpen ? (
+    <LucideReact.Circle size={16} className={stateColor} />
+  ) : (
+    <LucideReact.XCircle size={16} className={stateColor} />
+  );
+  const commentsCount = value.comments;
+  const upvotes = value.reactions?.["+1"] ?? 0;
+  const downvotes = value.reactions?.["-1"] ?? 0;
+  const milestoneTitle = value.milestone?.title;
+  const isLocked = value.locked;
+  const hasPR = Boolean(value.pull_request);
+  const prMerged = Boolean(value.pull_request?.merged_at);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header: user avatar, user login, state badge */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {value.user?.avatar_url && (
-            <img
-              src={value.user.avatar_url}
-              alt={value.user.login}
-              className="w-8 h-8 rounded-full"
-            />
-          )}
-          <span className="text-sm font-medium text-gray-800">
-            {value.user?.login || "Unknown"}
-          </span>
+    <div className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-colors">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 overflow-hidden">
+          {stateIcon}
+          <h2 className="flex-1 text-lg font-semibold text-gray-800 truncate">
+            {value.title}
+          </h2>
+          <span className="text-sm text-gray-500">#{value.number}</span>
         </div>
-        <span
-          className={`px-2 py-1 text-xs font-semibold rounded-full ${
-            value.state === "open"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {value.state.charAt(0).toUpperCase() + value.state.slice(1)}
-        </span>
+        {isLocked && (
+          <LucideReact.Lock
+            size={16}
+            className="text-gray-400"
+            aria-label="Locked"
+          />
+        )}
       </div>
 
-      {/* Title and number */}
-      <h2 className="mt-2 text-lg font-semibold text-gray-900 truncate">
-        #{value.number} {value.title}
-      </h2>
-      {value.state_reason && (
-        <span className="inline-block mt-1 text-xs text-gray-600">
-          Reason: {value.state_reason.replace(/_/g, " ")}
-        </span>
-      )}
+      <div className="flex flex-wrap items-center text-sm text-gray-500 gap-4 mb-3">
+        <div className="flex items-center gap-1">
+          <LucideReact.User size={16} />
+          <span>{authorName}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>{createdDate}</span>
+        </div>
+        {milestoneTitle && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Target size={16} />
+            <span>{milestoneTitle}</span>
+          </div>
+        )}
+      </div>
 
-      {/* Body / description (truncated) */}
-      {hasBody && (
-        <p className="mt-3 text-gray-700 text-sm line-clamp-3">
-          {bodyText}
-        </p>
-      )}
-
-      {/* Labels */}
       {labels.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {labels.map((name) => (
+        <div className="flex flex-wrap gap-2 mb-3">
+          {labels.map((label) => (
             <span
-              key={name}
-              className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded"
+              key={label}
+              className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded"
             >
-              {name}
+              {label}
             </span>
           ))}
         </div>
       )}
 
-      {/* Stats: dates, comments, reactions, sub-issues */}
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-600 text-sm">
-        <div>🕒 Created: {formattedCreatedAt}</div>
-        <div>🔄 Updated: {formattedUpdatedAt}</div>
-        <div>💬 Comments: {value.comments}</div>
-        {reactions && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span>👍{reactions["+1"]}</span>
-            <span>👎{reactions["-1"]}</span>
-            <span>😄{reactions.laugh}</span>
-            <span>🎉{reactions.hooray}</span>
-            <span>😕{reactions.confused}</span>
-            <span>❤️{reactions.heart}</span>
-            <span>🚀{reactions.rocket}</span>
-            <span>👀{reactions.eyes}</span>
+      {snippet && (
+        <p className="text-gray-700 text-sm line-clamp-3 mb-3">{snippet}</p>
+      )}
+
+      <div className="flex flex-wrap items-center text-sm text-gray-500 gap-6">
+        <div className="flex items-center gap-1">
+          <LucideReact.MessageCircle size={16} />
+          <span>{commentsCount}</span>
+        </div>
+
+        {hasPR && (
+          <div className="flex items-center gap-1">
+            <LucideReact.GitPullRequest
+              size={16}
+              className={prMerged ? "text-green-500" : "text-gray-500"}
+            />
+            <span>{prMerged ? "Merged" : "Pull Request"}</span>
           </div>
         )}
-        {subSummary && (
-          <div>
-            📊 Sub-Issues: {subSummary.completed}/{subSummary.total} (
-            {Math.round(subSummary.percent_completed)}%)
+
+        {(upvotes > 0 || downvotes > 0) && (
+          <div className="flex items-center gap-3">
+            {upvotes > 0 && (
+              <div className="flex items-center gap-1 text-gray-500">
+                <LucideReact.ThumbsUp size={16} />
+                <span>{upvotes}</span>
+              </div>
+            )}
+            {downvotes > 0 && (
+              <div className="flex items-center gap-1 text-gray-500">
+                <LucideReact.ThumbsDown size={16} />
+                <span>{downvotes}</span>
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {/* Pull request indicator */}
-      {value.pull_request && (
-        <div className="mt-4 text-sm text-blue-600">
-          🔗 Pull Request available
-        </div>
-      )}
-
-      {/* Repository context */}
-      {value.repository?.full_name && (
-        <div className="mt-3 text-xs text-gray-500">
-          Repo: {value.repository.full_name}
-        </div>
-      )}
     </div>
   );
 }

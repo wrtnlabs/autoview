@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Minimal representation of an organization programmatic access grant request for enumerations
      *
      * @title Simple Organization Programmatic Access Grant Request
     */
-    export type organization_programmatic_access_grant_request = {
+    export interface organization_programmatic_access_grant_request {
         /**
          * Unique identifier of the request for access via fine-grained personal access token. The `pat_request_id` used to review PAT requests.
         */
@@ -62,13 +63,13 @@ export namespace AutoViewInputSubTypes {
          * Date and time when the associated fine-grained personal access token was last used for authentication.
         */
         token_last_used_at: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -91,7 +92,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_programmatic_access_grant_request[];
 
@@ -99,135 +100,124 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_programmatic_acce
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // If there are no requests, show a placeholder message
-  if (!value || value.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No access grant requests available.
-      </div>
-    );
-  }
-
-  // Helper to format ISO date strings into a human‐readable form
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-    });
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formatDate = (iso?: string | null): string => {
+    if (!iso) return "—";
+    const date = new Date(iso);
+    return date.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
   };
 
-  // Simple truncation for long text
-  const truncate = (text: string, max = 100): string =>
-    text.length > max ? text.slice(0, max) + '…' : text;
-
-  // Render a responsive grid of cards
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {value.map((request) => {
+    <div className="space-y-6">
+      {value.map((item) => {
         const {
           id,
           owner,
-          reason,
+          token_name,
+          created_at,
+          token_expires_at,
+          token_expired,
+          token_last_used_at,
           repository_selection,
           repositories_url,
           permissions,
-          created_at,
-          token_name,
-          token_expired,
-          token_expires_at,
-          token_last_used_at,
-        } = request;
+          reason,
+        } = item;
 
-        // Derived values
-        const createdAt = formatDate(created_at);
-        const expiresAt = token_expires_at ? formatDate(token_expires_at) : 'Never';
-        const lastUsedAt = token_last_used_at
-          ? formatDate(token_last_used_at)
-          : 'Never used';
-        const statusLabel = token_expired ? 'Expired' : 'Active';
-        const statusClasses = token_expired
-          ? 'bg-red-100 text-red-800'
-          : 'bg-green-100 text-green-800';
-
-        // Permission counts
-        const orgCount = permissions.organization
-          ? Object.keys(permissions.organization).length
-          : 0;
-        const repoCount = permissions.repository
-          ? Object.keys(permissions.repository).length
-          : 0;
-        const otherCount = permissions.other
-          ? Object.keys(permissions.other).length
-          : 0;
+        const orgCount = permissions.organization ? Object.keys(permissions.organization).length : 0;
+        const repoCount = permissions.repository ? Object.keys(permissions.repository).length : 0;
+        const otherCount = permissions.other ? Object.keys(permissions.other).length : 0;
+        const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          owner.name ?? owner.login
+        )}&background=0D8ABC&color=fff`;
 
         return (
-          <div key={id} className="p-4 bg-white rounded-lg shadow">
-            {/* Header: Owner avatar, name, creation date, status */}
-            <div className="flex items-center space-x-4">
-              <img
-                src={owner.avatar_url}
-                alt={`${owner.login} avatar`}
-                className="w-10 h-10 rounded-full flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900 truncate">
-                  {owner.login}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Requested on{' '}
-                  <time dateTime={created_at}>{createdAt}</time>
-                </p>
+          <div key={id} className="bg-white p-4 rounded-lg shadow">
+            {/* Header: Avatar, Token Name, Owner Login, Status */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <img
+                  src={owner.avatar_url}
+                  alt={owner.login}
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = avatarFallback;
+                  }}
+                />
+                <div>
+                  <div className="text-lg font-semibold text-gray-900">{token_name}</div>
+                  <div className="text-sm text-gray-600">{owner.login}</div>
+                </div>
               </div>
-              <span
-                className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${statusClasses}`}
-              >
-                {statusLabel}
-              </span>
+              <div>
+                {token_expired ? (
+                  <LucideReact.AlertTriangle
+                    aria-label="Expired"
+                    className="text-red-500"
+                    size={20}
+                  />
+                ) : (
+                  <LucideReact.CheckCircle
+                    aria-label="Active"
+                    className="text-green-500"
+                    size={20}
+                  />
+                )}
+              </div>
             </div>
 
-            {/* Reason (if provided) */}
+            {/* Meta Grid */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-700">
+              <div className="flex items-center space-x-2">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span>Created: {formatDate(created_at)}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span>Expires: {formatDate(token_expires_at)}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <LucideReact.Users size={16} className="text-gray-400" />
+                <span>Org Perms: {orgCount}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <LucideReact.Folder size={16} className="text-gray-400" />
+                <span>Repo Perms: {repoCount}</span>
+              </div>
+              {otherCount > 0 && (
+                <div className="flex items-center space-x-2">
+                  <LucideReact.Tag size={16} className="text-gray-400" />
+                  <span>Other Perms: {otherCount}</span>
+                </div>
+              )}
+              <div className="flex items-center space-x-2">
+                <LucideReact.ListOrdered size={16} className="text-gray-400" />
+                <span>Selection: {repository_selection}</span>
+              </div>
+              {repository_selection === "subset" && (
+                <div className="col-span-full flex items-start space-x-2 text-blue-600 break-all">
+                  <LucideReact.Link size={16} className="text-gray-400" />
+                  <span>{repositories_url}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Reason */}
             {reason && (
-              <p className="mt-3 text-sm text-gray-700 italic line-clamp-2">
-                {truncate(reason, 120)}
-              </p>
+              <div className="mt-4">
+                <div className="text-sm text-gray-500 mb-1">Reason</div>
+                <p className="text-gray-700 text-sm line-clamp-2">{reason}</p>
+              </div>
             )}
 
-            {/* Details */}
-            <div className="mt-3 space-y-1 text-sm text-gray-600">
-              <p>
-                <span className="font-medium">Grant:</span>{' '}
-                {repository_selection.charAt(0).toUpperCase() +
-                  repository_selection.slice(1)}
-              </p>
-              {repository_selection === 'subset' && (
-                <p>
-                  <span className="font-medium">Repos URL:</span>{' '}
-                  <span className="break-all">
-                    {truncate(repositories_url, 30)}
-                  </span>
-                </p>
-              )}
-              <p>
-                <span className="font-medium">Permissions:</span> Org({orgCount})
-                &nbsp;Repo({repoCount})&nbsp;Other({otherCount})
-              </p>
-              <p>
-                <span className="font-medium">Expires:</span> {expiresAt}
-              </p>
-              <p>
-                <span className="font-medium">Last Used:</span> {lastUsedAt}
-              </p>
-            </div>
-
-            {/* Token name */}
-            <p className="mt-3 text-sm font-medium text-gray-800 truncate">
-              {token_name}
-            </p>
+            {/* Last Used */}
+            {token_last_used_at && (
+              <div className="mt-4 flex items-center space-x-2 text-sm text-gray-700">
+                <LucideReact.Clock size={16} className="text-gray-400" />
+                <span>Last used: {formatDate(token_last_used_at)}</span>
+              </div>
+            )}
           </div>
         );
       })}

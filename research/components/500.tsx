@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Private registry configuration for an organization
      *
      * @title Organization private registry
     */
-    export type org_private_registry_configuration_with_selected_repositories = {
+    export interface org_private_registry_configuration_with_selected_repositories {
         /**
          * The name of the private registry configuration.
         */
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         selected_repository_ids?: (number & tags.Type<"int32">)[];
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.org_private_registry_configuration_with_selected_repositories;
 
@@ -38,52 +39,80 @@ export type AutoViewInput = AutoViewInputSubTypes.org_private_registry_configura
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const registryTypeMap: Record<AutoViewInput['registry_type'], string> = {
-    maven_repository: 'Maven Repository',
-  };
-  const registryTypeLabel = registryTypeMap[value.registry_type] || value.registry_type;
-  const registryBadgeColor = 'bg-blue-100 text-blue-800';
+  const createdDate = new Date(value.created_at).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const updatedDate = new Date(value.updated_at).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const typeLabel = value.registry_type
+    .split("_")
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join(" ");
 
-  const visibilityMap: Record<AutoViewInput['visibility'], { label: string; color: string }> = {
-    all:    { label: 'All Repositories', color: 'bg-green-100 text-green-800' },
-    private:{ label: 'Private',          color: 'bg-red-100 text-red-800' },
-    selected:{ label: `Selected (${value.selected_repository_ids?.length ?? 0})`, color: 'bg-yellow-100 text-yellow-800' },
-  };
-  const visibilityData = visibilityMap[value.visibility];
-
-  const createdAt = new Date(value.created_at).toLocaleString();
-  const updatedAt = new Date(value.updated_at).toLocaleString();
+  let visibilityLabel: string;
+  let VisibilityIcon: JSX.Element;
+  const count = value.selected_repository_ids?.length ?? 0;
+  switch (value.visibility) {
+    case "all":
+      visibilityLabel = "All repositories";
+      VisibilityIcon = (
+        <LucideReact.Users size={16} className="text-gray-500 mr-1" />
+      );
+      break;
+    case "private":
+      visibilityLabel = "Private";
+      VisibilityIcon = (
+        <LucideReact.Lock size={16} className="text-gray-500 mr-1" />
+      );
+      break;
+    case "selected":
+      visibilityLabel = `Selected (${count})`;
+      VisibilityIcon = (
+        <LucideReact.Tag size={16} className="text-gray-500 mr-1" />
+      );
+      break;
+    default:
+      visibilityLabel = value.visibility;
+      VisibilityIcon = <LucideReact.EyeOff size={16} className="text-gray-500 mr-1" />;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full mx-auto">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h2>
-        <span className={`px-2 py-1 text-xs font-medium rounded ${registryBadgeColor}`}>
-          {registryTypeLabel}
-        </span>
-      </div>
-      <div className="mt-4 space-y-3">
+    <div className="max-w-sm w-full bg-white p-4 rounded-lg shadow-md">
+      <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
+      <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 gap-x-4 gap-y-1">
+        <div className="flex items-center">
+          <LucideReact.Package size={16} className="text-gray-500 mr-1" />
+          <span>{typeLabel}</span>
+        </div>
         {value.username && (
-          <div className="flex">
-            <span className="font-medium text-gray-700 w-24">Username:</span>
-            <span className="text-gray-900">{value.username}</span>
+          <div className="flex items-center">
+            <LucideReact.User size={16} className="text-gray-500 mr-1" />
+            <span>{value.username}</span>
           </div>
         )}
         <div className="flex items-center">
-          <span className="font-medium text-gray-700 w-24">Visibility:</span>
-          <span className={`inline-flex items-center px-2 py-0.5 text-sm font-medium rounded ${visibilityData.color}`}>
-            {visibilityData.label}
-          </span>
+          {VisibilityIcon}
+          <span>{visibilityLabel}</span>
         </div>
-        <div className="flex">
-          <span className="font-medium text-gray-700 w-24">Created:</span>
-          <span className="text-gray-600 text-sm">{createdAt}</span>
+      </div>
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-500 mr-1" />
+          <span>Created: {createdDate}</span>
         </div>
-        <div className="flex">
-          <span className="font-medium text-gray-700 w-24">Updated:</span>
-          <span className="text-gray-600 text-sm">{updatedAt}</span>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-500 mr-1" />
+          <span>Updated: {updatedDate}</span>
         </div>
       </div>
     </div>

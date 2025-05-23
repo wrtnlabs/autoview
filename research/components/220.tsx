@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4WebhookView = {
+                export interface LegacyV4WebhookView {
                     webhook?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Webhook = {
+            export interface LegacyV4Webhook {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -23,7 +24,7 @@ export namespace AutoViewInputSubTypes {
                 apiVersion: string;
                 lastBlockedAt?: number;
                 blocked?: boolean;
-            };
+            }
         }
     }
 }
@@ -37,8 +38,9 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   const webhook = value.webhook;
   if (!webhook) {
     return (
-      <div className="p-4 bg-gray-100 text-gray-600 rounded-lg text-center">
-        No webhook information available
+      <div className="p-6 bg-white rounded-lg shadow-md flex flex-col items-center text-gray-400">
+        <LucideReact.AlertCircle size={48} aria-label="No Data" />
+        <p className="mt-2 text-sm">No webhook configured</p>
       </div>
     );
   }
@@ -50,86 +52,151 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
     createdAt,
     lastBlockedAt,
     blocked,
-    keywords,
     watchUserChats,
     watchGroups,
+    keywords,
   } = webhook;
 
   const formattedCreatedAt = createdAt
-    ? new Date(createdAt).toLocaleString()
-    : '—';
-  const formattedLastBlockedAt = lastBlockedAt
-    ? new Date(lastBlockedAt).toLocaleString()
-    : '—';
+    ? new Date(createdAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      })
+    : undefined;
 
-  const statusText = blocked ? 'Blocked' : 'Active';
-  const statusClasses = blocked
-    ? 'bg-red-100 text-red-800'
-    : 'bg-green-100 text-green-800';
+  const formattedBlockedAt = lastBlockedAt
+    ? new Date(lastBlockedAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      })
+    : undefined;
 
-  const watchFeatures: string[] = [];
-  if (watchUserChats) watchFeatures.push('User Chats');
-  if (watchGroups) watchFeatures.push('Groups');
+  const keywordList = Array.isArray(keywords) ? keywords : [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-medium text-gray-900 truncate">{name}</h2>
-        <span className={`px-2 py-1 text-xs font-semibold rounded ${statusClasses}`}>
-          {statusText}
-        </span>
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+        {blocked ? (
+          <LucideReact.AlertTriangle
+            className="text-red-500"
+            size={20}
+            aria-label="Blocked"
+          />
+        ) : (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={20}
+            aria-label="Active"
+          />
+        )}
       </div>
 
-      <div className="mb-2">
-        <p className="text-sm text-gray-700">
-          <span className="font-semibold">URL:</span>
-        </p>
-        <p className="mt-1 text-xs font-mono text-blue-600 break-all">
-          {url}
-        </p>
+      {/* URL */}
+      <div className="mt-3 flex items-start text-gray-600">
+        <LucideReact.Link
+          className="mt-1 mr-1 text-gray-400"
+          size={16}
+          aria-label="Webhook URL"
+        />
+        <span className="break-all text-blue-600 text-sm">{url}</span>
       </div>
 
-      <div className="flex flex-wrap gap-4 mb-3 text-sm text-gray-700">
-        <div>
-          <span className="font-semibold">API Version:</span>
-          <span className="ml-1">{apiVersion}</span>
+      {/* Details Grid */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+        {/* API Version */}
+        <div className="flex items-center">
+          <LucideReact.Code
+            className="mr-1 text-gray-400"
+            size={16}
+            aria-label="API Version"
+          />
+          <span>v{apiVersion}</span>
         </div>
-        <div>
-          <span className="font-semibold">Created:</span>
-          <span className="ml-1 text-gray-500">{formattedCreatedAt}</span>
+
+        {/* Created At */}
+        {formattedCreatedAt && (
+          <div className="flex items-center">
+            <LucideReact.Calendar
+              className="mr-1 text-gray-400"
+              size={16}
+              aria-label="Created At"
+            />
+            <span>{formattedCreatedAt}</span>
+          </div>
+        )}
+
+        {/* Watch User Chats */}
+        <div className="flex items-center">
+          {watchUserChats ? (
+            <LucideReact.CheckCircle
+              className="mr-1 text-green-500"
+              size={16}
+              aria-label="Watching User Chats"
+            />
+          ) : (
+            <LucideReact.XCircle
+              className="mr-1 text-red-500"
+              size={16}
+              aria-label="Not Watching User Chats"
+            />
+          )}
+          <span>Watch User Chats</span>
         </div>
-        {blocked && lastBlockedAt && (
-          <div>
-            <span className="font-semibold">Blocked At:</span>
-            <span className="ml-1 text-gray-500">{formattedLastBlockedAt}</span>
+
+        {/* Watch Groups */}
+        <div className="flex items-center">
+          {watchGroups ? (
+            <LucideReact.CheckCircle
+              className="mr-1 text-green-500"
+              size={16}
+              aria-label="Watching Groups"
+            />
+          ) : (
+            <LucideReact.XCircle
+              className="mr-1 text-red-500"
+              size={16}
+              aria-label="Not Watching Groups"
+            />
+          )}
+          <span>Watch Groups</span>
+        </div>
+
+        {/* Blocked At */}
+        {blocked && formattedBlockedAt && (
+          <div className="sm:col-span-2 flex items-center text-red-600">
+            <LucideReact.AlertTriangle
+              className="mr-1 text-red-500"
+              size={16}
+              aria-label="Blocked At"
+            />
+            <span>Blocked at {formattedBlockedAt}</span>
           </div>
         )}
       </div>
 
-      {watchFeatures.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-3">
-          {watchFeatures.map((feat) => (
-            <span
-              key={feat}
-              className="px-2 py-1 bg-blue-50 text-blue-800 text-xs rounded"
-            >
-              {feat}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {keywords && keywords.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {keywords.map((kw) => (
-            <span
-              key={kw}
-              className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded"
-            >
-              {kw}
-            </span>
-          ))}
+      {/* Keywords */}
+      {keywordList.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700">Keywords</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {keywordList.map((kw, idx) => (
+              <span
+                key={idx}
+                className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full truncate"
+              >
+                {kw}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

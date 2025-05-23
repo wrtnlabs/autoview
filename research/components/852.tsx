@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A release.
      *
      * @title Release
     */
-    export type release = {
+    export interface release {
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
         assets_url: string & tags.Format<"uri">;
@@ -45,13 +46,13 @@ export namespace AutoViewInputSubTypes {
         */
         discussion_url?: string;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -74,13 +75,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Data related to a release.
      *
      * @title Release Asset
     */
-    export type release_asset = {
+    export interface release_asset {
         url: string & tags.Format<"uri">;
         browser_download_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -100,7 +101,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         uploader: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -133,7 +134,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -144,7 +145,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.release;
 
@@ -153,88 +154,101 @@ export type AutoViewInput = AutoViewInputSubTypes.release;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const title = value.name || value.tag_name;
-  const formattedPublishedAt = value.published_at
-    ? new Date(value.published_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
-    : "Unpublished";
-  const authorLogin = value.author.login;
-  const authorAvatar = value.author.avatar_url;
-  const assetCount = value.assets.length;
-  const totalDownloads = value.assets.reduce((sum, a) => sum + a.download_count, 0);
-  const reactionsCount = value.reactions?.total_count ?? 0;
-  const rawDescription = value.body_text ?? value.body ?? "";
-  const descriptionPreview = rawDescription.trim()
-    ? rawDescription
-    : "No description provided.";
+  const {
+    tag_name,
+    name: releaseName,
+    target_commitish,
+    draft,
+    prerelease,
+    created_at,
+    published_at,
+    author,
+    assets,
+    body_text,
+    body,
+    reactions,
+  } = value;
+
+  const title = releaseName ?? tag_name;
+  const dateSource = published_at ?? created_at;
+  const dateObj = new Date(dateSource);
+  const formattedDate = dateObj.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  const rawDescription = body_text ?? body ?? '';
+  const description =
+    rawDescription.length > 200
+      ? rawDescription.slice(0, 200).trimEnd() + '…'
+      : rawDescription;
+
+  const assetCount = assets.length;
+  const totalDownloads = assets.reduce((sum, asset) => sum + asset.download_count, 0);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="p-6 space-y-4">
-        {/* Header with title and status badges */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <img
-              src={authorAvatar}
-              alt={`${authorLogin}'s avatar`}
-              className="h-10 w-10 rounded-full object-cover"
-            />
-            <h2 className="text-xl font-semibold text-gray-900 truncate">
-              {title}
-            </h2>
-          </div>
-          <div className="flex space-x-2">
-            {value.draft && (
-              <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
-                Draft
-              </span>
-            )}
-            {value.prerelease && (
-              <span className="px-2 py-1 text-xs font-medium text-indigo-800 bg-indigo-100 rounded-full">
-                Prerelease
-              </span>
-            )}
+    <article className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <header className="flex items-start justify-between">
+        <div className="flex-1">
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <div className="flex items-center mt-1 text-sm text-gray-500">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <time dateTime={dateObj.toISOString()}>{formattedDate}</time>
+            <span className="mx-2">•</span>
+            <span className="truncate">Based on {target_commitish}</span>
           </div>
         </div>
-
-        {/* Meta info */}
-        <p className="text-gray-500 text-sm">
-          Published on {formattedPublishedAt} by {authorLogin}
-        </p>
-
-        {/* Description preview */}
-        <p className="text-gray-700 text-sm line-clamp-3">
-          {descriptionPreview}
-        </p>
-
-        {/* Metrics: assets, downloads, reactions */}
-        <div className="flex justify-between text-center border-t pt-4">
-          <div>
-            <span className="block text-lg font-semibold text-gray-900">
-              {assetCount}
-            </span>
-            <span className="text-gray-500 text-xs">Assets</span>
-          </div>
-          <div>
-            <span className="block text-lg font-semibold text-gray-900">
-              {totalDownloads}
-            </span>
-            <span className="text-gray-500 text-xs">Downloads</span>
-          </div>
-          {value.reactions && (
-            <div>
-              <span className="block text-lg font-semibold text-gray-900">
-                {reactionsCount}
-              </span>
-              <span className="text-gray-500 text-xs">Reactions</span>
+        <div className="flex flex-col items-end space-y-1">
+          {draft && (
+            <div className="flex items-center text-gray-500 text-xs uppercase tracking-wide">
+              <LucideReact.Clock size={14} className="mr-1" />
+              Draft
+            </div>
+          )}
+          {prerelease && (
+            <div className="flex items-center text-amber-500 text-xs uppercase tracking-wide">
+              <LucideReact.Tag size={14} className="mr-1" />
+              Prerelease
             </div>
           )}
         </div>
+      </header>
+
+      <div className="mt-4 flex items-center">
+        <img
+          src={author.avatar_url}
+          alt={author.login}
+          className="w-10 h-10 rounded-full object-cover mr-3 bg-gray-200"
+        />
+        <div>
+          <div className="text-gray-900 font-medium truncate">{author.login}</div>
+        </div>
       </div>
-    </div>
+
+      {description && (
+        <p className="mt-4 text-gray-700 text-sm line-clamp-3">{description}</p>
+      )}
+
+      <div className="mt-4 flex flex-wrap gap-4 text-gray-600 text-sm">
+        <div className="flex items-center">
+          <LucideReact.Download size={16} className="mr-1" />
+          <span>
+            {assetCount} asset{assetCount !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.DownloadCloud size={16} className="mr-1" />
+          <span>{totalDownloads.toLocaleString()} downloads</span>
+        </div>
+        {reactions && (
+          <div className="flex items-center">
+            <LucideReact.ThumbsUp size={16} className="mr-1 text-blue-500" />
+            <span>{reactions['+1']}</span>
+          </div>
+        )}
+      </div>
+    </article>
   );
 }

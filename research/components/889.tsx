@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Tag protection
      *
      * @title Tag protection
     */
-    export type tag_protection = {
+    export interface tag_protection {
         id?: number & tags.Type<"int32">;
         created_at?: string;
         updated_at?: string;
         enabled?: boolean;
         pattern: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.tag_protection[];
 
@@ -20,61 +21,83 @@ export type AutoViewInput = AutoViewInputSubTypes.tag_protection[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Prepare the list of items (patterns)
-  const items = Array.isArray(value) ? value : [];
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  //    Here we sort the rules by creation date (newest first).
+  const sortedRules = [...value].sort((a, b) => {
+    const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return timeB - timeA;
+  });
 
-  // 2. Render visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="mx-auto p-4">
-      {items.length === 0 ? (
-        <div className="text-center text-gray-500">No patterns to display.</div>
+    <div className="p-4 space-y-4">
+      {sortedRules.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={24} className="text-gray-400" />
+          <span className="mt-2">No tag protection rules available.</span>
+        </div>
       ) : (
-        <ul role="list" className="space-y-4">
-          {items.map((item, idx) => {
-            const { pattern, enabled, created_at, updated_at } = item;
+        sortedRules.map((rule, idx) => {
+          const isEnabled = rule.enabled ?? false;
+          const created = rule.created_at
+            ? new Date(rule.created_at).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })
+            : 'N/A';
+          const updated = rule.updated_at
+            ? new Date(rule.updated_at).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })
+            : 'N/A';
 
-            // Derive status label and styling
-            const statusLabel = enabled ? "Enabled" : "Disabled";
-            const statusClasses = enabled
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800";
-
-            // Format dates
-            const createdDate = created_at
-              ? new Date(created_at).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A";
-            const updatedDate = updated_at
-              ? new Date(updated_at).toLocaleDateString(undefined, {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })
-              : "N/A";
-
-            return (
-              <li key={idx} className="bg-white p-4 rounded-lg shadow">
-                <div className="flex items-start justify-between">
-                  <code className="text-lg font-medium text-gray-900 break-words">
-                    {pattern}
-                  </code>
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${statusClasses}`}
-                  >
-                    {statusLabel}
-                  </span>
+          return (
+            <div
+              key={rule.id ?? idx}
+              className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex-1">
+                <div className="font-mono text-md break-all">{rule.pattern}</div>
+                <div className="mt-1 text-sm text-gray-500 flex flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <LucideReact.Calendar size={16} className="text-gray-400" />
+                    <span className="ml-1">Created: {created}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Calendar size={16} className="text-gray-400" />
+                    <span className="ml-1">Updated: {updated}</span>
+                  </div>
                 </div>
-                <div className="mt-2 text-sm text-gray-500 flex flex-wrap space-x-4">
-                  <span>Created: {createdDate}</span>
-                  <span>Updated: {updatedDate}</span>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+              </div>
+              <div className="mt-4 sm:mt-0 flex items-center text-sm">
+                {isEnabled ? (
+                  <LucideReact.CheckCircle
+                    size={16}
+                    className="text-green-500"
+                    aria-label="Enabled"
+                  />
+                ) : (
+                  <LucideReact.XCircle
+                    size={16}
+                    className="text-red-500"
+                    aria-label="Disabled"
+                  />
+                )}
+                <span
+                  className={
+                    isEnabled ? 'ml-1 text-green-600' : 'ml-1 text-red-600'
+                  }
+                >
+                  {isEnabled ? 'Enabled' : 'Disabled'}
+                </span>
+              </div>
+            </div>
+          );
+        })
       )}
     </div>
   );

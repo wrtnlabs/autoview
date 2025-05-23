@@ -1,21 +1,22 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposEnvironments {
-        export type GetResponse = {
+        export interface GetResponse {
             /**
              * The number of environments in this repository
             */
             total_count?: number & tags.Type<"int32">;
             environments?: AutoViewInputSubTypes.environment[];
-        };
+        }
     }
     /**
      * Details of a deployment environment
      *
      * @title Environment
     */
-    export type environment = {
+    export interface environment {
         /**
          * The id of the environment.
         */
@@ -42,7 +43,7 @@ export namespace AutoViewInputSubTypes {
             id: number & tags.Type<"int32">;
             node_id: string;
             type: string;
-            wait_timer?: any;
+            wait_timer?: AutoViewInputSubTypes.wait_timer;
         } | {
             id: number & tags.Type<"int32">;
             node_id: string;
@@ -55,8 +56,8 @@ export namespace AutoViewInputSubTypes {
              * The people or teams that may approve jobs that reference the environment. You can list up to six users or teams as reviewers. The reviewers must have at least read access to the repository. Only one of the required reviewers needs to approve the job for it to proceed.
             */
             reviewers?: {
-                type?: any;
-                reviewer?: any | any;
+                type?: AutoViewInputSubTypes.deployment_reviewer_type;
+                reviewer?: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.team;
             }[];
         } | {
             id: number & tags.Type<"int32">;
@@ -64,11 +65,115 @@ export namespace AutoViewInputSubTypes {
             type: string;
         })[];
         deployment_branch_policy?: AutoViewInputSubTypes.deployment_branch_policy_settings;
-    };
-    export type wait_timer = any;
-    export type deployment_reviewer_type = any;
-    export type simple_user = any;
-    export type team = any;
+    }
+    /**
+     * The amount of time to delay a job after the job is initially triggered. The time (in minutes) must be an integer between 0 and 43,200 (30 days).
+    */
+    export type wait_timer = number & tags.Type<"int32">;
+    /**
+     * The type of reviewer.
+    */
+    export type deployment_reviewer_type = "User" | "Team";
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * Groups of organization members that gives permissions on specified repositories.
+     *
+     * @title Team
+    */
+    export interface team {
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        name: string;
+        slug: string;
+        description: string | null;
+        privacy?: string;
+        notification_setting?: string;
+        permission: string;
+        permissions?: {
+            pull: boolean;
+            triage: boolean;
+            push: boolean;
+            maintain: boolean;
+            admin: boolean;
+        };
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        members_url: string;
+        repositories_url: string & tags.Format<"uri">;
+        parent: AutoViewInputSubTypes.nullable_team_simple;
+    }
+    /**
+     * Groups of organization members that gives permissions on specified repositories.
+     *
+     * @title Team Simple
+    */
+    export type nullable_team_simple = {
+        /**
+         * Unique identifier of the team
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * URL for the team
+        */
+        url: string;
+        members_url: string;
+        /**
+         * Name of the team
+        */
+        name: string;
+        /**
+         * Description of the team
+        */
+        description: string | null;
+        /**
+         * Permission that the team will have for its repositories
+        */
+        permission: string;
+        /**
+         * The level of privacy this team should have
+        */
+        privacy?: string;
+        /**
+         * The notification setting the team has set
+        */
+        notification_setting?: string;
+        html_url: string & tags.Format<"uri">;
+        repositories_url: string & tags.Format<"uri">;
+        slug: string;
+        /**
+         * Distinguished Name (DN) that team maps to within LDAP environment
+        */
+        ldap_dn?: string;
+    } | null;
     /**
      * The type of deployment branch policy for this environment. To allow all branches to deploy, set to `null`.
     */
@@ -89,73 +194,89 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposEnvironments.GetRespo
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and derived values
+  // 1. Define data aggregation/transformation functions or derived constants
+  const totalEnvs = value.total_count ?? value.environments?.length ?? 0;
   const environments = value.environments ?? [];
-  const totalEnvironments = value.total_count ?? environments.length;
-
   const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
+    new Date(iso).toLocaleString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
-  const getBranchPolicy = (
-    policy: AutoViewInputSubTypes.deployment_branch_policy_settings | null | undefined,
-  ): string => {
-    if (policy === null || policy === undefined) return "All branches";
-    if (policy.protected_branches) return "Protected branches only";
-    if (policy.custom_branch_policies) return "Custom branch policies";
-    return "All branches";
-  };
-
-  const getProtectionRuleSummary = (
-    rules: NonNullable<AutoViewInputSubTypes.environment["protection_rules"]>,
-  ): string => {
-    const types = Array.from(new Set(rules.map((r) => r.type)));
-    if (types.length <= 3) return types.join(", ");
-    return types.slice(0, 3).join(", ") + ` +${types.length - 3} more`;
-  };
-
-  // 2. Visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
     <div className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-xl font-bold text-gray-800">
-        Environments ({totalEnvironments})
-      </h2>
-      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-        {environments.map((env) => (
-          <div key={env.id} className="p-4 bg-white rounded-lg shadow-md">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {env.name}
-              </h3>
-              <span className="text-sm text-gray-500">
-                {formatDate(env.updated_at)}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600 mt-1">
-              Created: {formatDate(env.created_at)}
-            </p>
-            <div className="flex flex-wrap items-center mt-2 space-x-2">
-              <span className="inline-block bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
-                {getBranchPolicy(env.deployment_branch_policy)}
-              </span>
-              {env.protection_rules && env.protection_rules.length > 0 ? (
-                <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-0.5 rounded-full">
-                  {env.protection_rules.length} rule
-                  {env.protection_rules.length > 1 ? "s" : ""}:{" "}
-                  {getProtectionRuleSummary(env.protection_rules)}
-                </span>
-              ) : (
-                <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full">
-                  No protection rules
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+      {/* Header */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Users className="text-gray-500" size={20} />
+        <span className="ml-2 text-lg font-semibold text-gray-700">
+          Environments ({totalEnvs})
+        </span>
       </div>
+
+      {/* Empty state */}
+      {environments.length === 0 ? (
+        <div className="flex flex-col items-center py-8 text-center">
+          <LucideReact.AlertCircle
+            size={24}
+            className="text-gray-400 mb-2"
+          />
+          <span className="text-gray-500">No environments available</span>
+        </div>
+      ) : (
+        /* Environment cards */
+        <ul className="space-y-4">
+          {environments.map((env) => (
+            <li
+              key={env.node_id}
+              className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="sm:flex sm:justify-between sm:items-start">
+                {/* Name */}
+                <h3 className="text-md font-medium text-gray-800 truncate">
+                  {env.name}
+                </h3>
+                {/* Meta info */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mt-2 sm:mt-0">
+                  {/* Created at */}
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Calendar size={16} />
+                    <span>{formatDate(env.created_at)}</span>
+                  </div>
+                  {/* Updated at */}
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Calendar size={16} />
+                    <span>{formatDate(env.updated_at)}</span>
+                  </div>
+                  {/* Protection rules count */}
+                  {env.protection_rules && env.protection_rules.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Lock size={16} />
+                      <span>{env.protection_rules.length} rule
+                        {env.protection_rules.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                  )}
+                  {/* Branch policy */}
+                  {env.deployment_branch_policy && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.GitBranch size={16} />
+                      <span>
+                        {env.deployment_branch_policy.protected_branches
+                          ? "Protected branches only"
+                          : "Custom branch policies"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

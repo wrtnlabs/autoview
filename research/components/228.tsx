@@ -1,14 +1,15 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type ChannelView = {
+        export interface ChannelView {
             channel?: AutoViewInputSubTypes.Channel;
             manager?: AutoViewInputSubTypes.Manager;
             managerBadge?: AutoViewInputSubTypes.ManagerBadge;
-        };
+        }
     }
-    export type Channel = {
+    export interface Channel {
         id?: string;
         welcomeMessage: AutoViewInputSubTypes.message.NestedMessage;
         welcomeMessageI18nMap?: {
@@ -92,22 +93,22 @@ export namespace AutoViewInputSubTypes {
         coverImageUrl?: string;
         coverImageBright?: boolean;
         dayUntilIndebted?: number & tags.Type<"int32">;
-    };
+    }
     export namespace message {
-        export type NestedMessage = {
+        export interface NestedMessage {
             blocks?: AutoViewInputSubTypes.message.Block[];
             buttons?: AutoViewInputSubTypes.message.Button[] & tags.MinItems<1> & tags.MaxItems<2>;
             files?: AutoViewInputSubTypes.message.File[] & tags.MinItems<1> & tags.MaxItems<30>;
             webPage?: AutoViewInputSubTypes.message.WebPage;
             form?: AutoViewInputSubTypes.message.form.Form;
-        };
-        export type Block = {
+        }
+        export interface Block {
             type: "bullets" | "code" | "text";
             language?: string;
             value?: string;
             blocks?: AutoViewInputSubTypes.message.Block[];
-        };
-        export type Button = {
+        }
+        export interface Button {
             title: string;
             colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
             action: AutoViewInputSubTypes.message.action.Action;
@@ -115,15 +116,16 @@ export namespace AutoViewInputSubTypes {
              * @deprecated
             */
             url?: string;
-        };
+        }
         export namespace action {
-            export type Action = {
+            export interface Action {
                 attributes?: AutoViewInputSubTypes.message.action.Attributes;
                 type: string;
-            };
-            export type Attributes = {};
+            }
+            export interface Attributes {
+            }
         }
-        export type File = {
+        export interface File {
             id: string;
             type?: string;
             name: string;
@@ -140,8 +142,8 @@ export namespace AutoViewInputSubTypes {
             channelId?: string;
             chatType?: string;
             chatId?: string;
-        };
-        export type WebPage = {
+        }
+        export interface WebPage {
             id: string;
             url: string;
             title?: string;
@@ -156,14 +158,14 @@ export namespace AutoViewInputSubTypes {
             previewKey?: string;
             logo?: string;
             name?: string;
-        };
+        }
         export namespace form {
-            export type Form = {
+            export interface Form {
                 submittedAt?: number;
                 inputs?: AutoViewInputSubTypes.message.form.FormInput[];
                 type: string;
-            };
-            export type FormInput = {
+            }
+            export interface FormInput {
                 value?: {};
                 readOnly?: boolean;
                 type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
@@ -172,19 +174,19 @@ export namespace AutoViewInputSubTypes {
                 dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
                 userChatProfileBindingKey?: boolean;
                 userProfileBindingKey?: boolean;
-            };
+            }
         }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TimeRange = {
+    }
+    export interface TimeRange {
         dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
         from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
         to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-    };
-    export type Manager = {
+    }
+    export interface Manager {
         id?: string;
         channelId?: string;
         accountId?: string;
@@ -249,14 +251,14 @@ export namespace AutoViewInputSubTypes {
         meetOperator?: boolean;
         emailForFront?: string;
         mobileNumberForFront?: string & tags.Default<"+18004424000">;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
-    export type ManagerBadge = {
+    }
+    export interface ManagerBadge {
         id?: string;
         teamChatAlert?: number & tags.Type<"int32">;
         teamChatUnread?: number & tags.Type<"int32">;
@@ -269,7 +271,7 @@ export namespace AutoViewInputSubTypes {
         managerId?: string;
         alert?: number & tags.Type<"int32">;
         unread?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.ChannelView;
 
@@ -277,141 +279,131 @@ export type AutoViewInput = AutoViewInputSubTypes.desk.ChannelView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data extraction and transformations
   const channel = value.channel;
-  if (!channel) {
-    return <div className="p-4 text-gray-500">No Channel Data</div>;
-  }
-
-  const {
-    coverImageUrl,
-    coverImageColor,
-    gradientColor,
-    color,
-    name,
-    description = "",
-    createdAt,
-    state,
-    bizGrade = "unknown",
-    staffs
-  } = channel;
-
-  // Header styling
-  const headerBgColor = coverImageUrl
-    ? undefined
-    : gradientColor || coverImageColor || color || "#E5E7EB";
-  const headerStyle: React.CSSProperties = coverImageUrl
-    ? { backgroundImage: `url(${coverImageUrl})`, backgroundSize: "cover", backgroundPosition: "center" }
-    : { backgroundColor: headerBgColor };
-
-  // Date formatting
-  const createdDate = createdAt
-    ? new Date(createdAt).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" })
-    : null;
-
-  // State badge
-  const stateKey = state || "removed";
-  const stateBadgeClasses: Record<string, string> = {
-    active: "bg-green-100 text-green-800",
-    waiting: "bg-yellow-100 text-yellow-800",
-    restricted: "bg-red-100 text-red-800",
-    preIndebted: "bg-orange-100 text-orange-800",
-    indebted: "bg-red-100 text-red-800",
-    banned: "bg-gray-800 text-white",
-    removed: "bg-gray-200 text-gray-600"
-  };
-  const stateLabel = stateKey.charAt(0).toUpperCase() + stateKey.slice(1);
-  const stateBadge = (
-    <span className={`text-xs font-medium px-2 py-1 rounded-full ${stateBadgeClasses[stateKey]}`}>
-      {stateLabel}
-    </span>
-  );
-
-  // Business grade badge
-  const gradeBadgeClasses: Record<string, string> = {
-    AA: "bg-blue-100 text-blue-800",
-    A: "bg-green-100 text-green-800",
-    B: "bg-indigo-100 text-indigo-800",
-    C: "bg-yellow-100 text-yellow-800",
-    D: "bg-orange-100 text-orange-800",
-    F: "bg-red-100 text-red-800",
-    unknown: "bg-gray-200 text-gray-600"
-  };
-  const gradeBadge = (
-    <span className={`text-xs font-medium px-2 py-1 rounded-full ${gradeBadgeClasses[bizGrade]}`}>
-      {bizGrade}
-    </span>
-  );
-
-  // Staff count
-  const staffBadge = typeof staffs === "number" ? (
-    <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded-full">
-      {staffs} Staff{staffs !== 1 ? "s" : ""}
-    </span>
-  ) : null;
-
-  // Manager section
   const manager = value.manager;
   const badge = value.managerBadge;
-  // Manager avatar or initials
-  let managerAvatar: React.ReactNode = null;
-  if (manager) {
-    if (manager.avatarUrl) {
-      managerAvatar = (
-        <img
-          src={manager.avatarUrl}
-          alt={manager.name}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-      );
-    } else {
-      const initials = manager.name
-        .split(" ")
-        .map((s) => s[0] || "")
-        .join("")
-        .toUpperCase()
-        .slice(0, 2);
-      managerAvatar = (
-        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-medium text-gray-700">
-          {initials}
-        </div>
-      );
-    }
-  }
-  // Unread badge
-  const unreadTotal = badge?.unread || 0;
-  const unreadBadge =
-    unreadTotal > 0 ? (
-      <span className="ml-2 text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
-        {unreadTotal}
-      </span>
-    ) : null;
 
-  // 2. Visual structure
+  // Format timestamps into human-readable strings
+  const formatDate = (timestamp?: number): string =>
+    timestamp ? new Date(timestamp).toLocaleString() : '—';
+
+  // Map channel state to a label and icon
+  const stateConfig: Record<string, { label: string; icon: React.ReactNode }> = {
+    waiting: {
+      label: 'Waiting',
+      icon: <LucideReact.Clock className="text-amber-500" size={16} />,
+    },
+    active: {
+      label: 'Active',
+      icon: <LucideReact.CheckCircle className="text-green-500" size={16} />,
+    },
+    restricted: {
+      label: 'Restricted',
+      icon: <LucideReact.AlertTriangle className="text-yellow-600" size={16} />,
+    },
+    preIndebted: {
+      label: 'Pre-indebted',
+      icon: <LucideReact.AlertTriangle className="text-yellow-600" size={16} />,
+    },
+    indebted: {
+      label: 'Indebted',
+      icon: <LucideReact.AlertTriangle className="text-red-600" size={16} />,
+    },
+    banned: {
+      label: 'Banned',
+      icon: <LucideReact.XCircle className="text-red-600" size={16} />,
+    },
+    removed: {
+      label: 'Removed',
+      icon: <LucideReact.Trash2 className="text-gray-500" size={16} />,
+    },
+  };
+
+  const stateKey = channel?.state ?? '';
+  const channelState =
+    stateConfig[stateKey] ?? {
+      label: 'Unknown',
+      icon: <LucideReact.HelpCircle className="text-gray-500" size={16} />,
+    };
+
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="h-32 w-full" style={headerStyle} />
-      <div className="p-4 -mt-8">
-        <h2 className="text-xl font-semibold text-gray-900">{name}</h2>
-        <div className="mt-1">{stateBadge}</div>
-        <div className="mt-2 text-gray-700 text-sm line-clamp-2">{description}</div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {gradeBadge}
-          {staffBadge}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="space-y-4">
+        {/* Channel Header */}
+        <div>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <LucideReact.Hash size={20} />
+            {channel?.name ?? '—'}
+          </h2>
+          {channel?.description && (
+            <p className="text-sm text-gray-500 line-clamp-2">{channel.description}</p>
+          )}
         </div>
-        {createdDate && (
-          <div className="mt-3 text-xs text-gray-500">Created: {createdDate}</div>
-        )}
-        {manager && (
-          <div className="mt-4 flex items-center">
-            {managerAvatar}
-            <div className="ml-3">
-              <div className="text-sm font-medium text-gray-900">{manager.name}</div>
-              {manager.email && (
-                <div className="text-xs text-gray-500">{manager.email}</div>
-              )}
-            </div>
-            {unreadBadge}
+
+        {/* Channel Details Grid */}
+        <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Created: {formatDate(channel?.createdAt)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Updated: {formatDate(channel?.updatedAt)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            {channelState.icon}
+            <span>{channelState.label}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Bot size={16} />
+            <span>Bot: {channel?.botName ?? '—'}</span>
+          </div>
+        </div>
+
+        {/* Manager & Activity Section */}
+        {(manager || badge) && (
+          <div className="pt-4 border-t border-gray-200 space-y-4">
+            {manager && (
+              <div>
+                <h3 className="text-md font-semibold flex items-center gap-2">
+                  <LucideReact.User size={18} />
+                  Manager
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700 mt-2">
+                  {manager.email && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Mail size={16} />
+                      <span>{manager.email}</span>
+                    </div>
+                  )}
+                  {manager.mobileNumber && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Phone size={16} />
+                      <span>{manager.mobileNumber}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {badge && (
+              <div>
+                <h3 className="text-md font-semibold flex items-center gap-2">
+                  <LucideReact.BadgeCheck size={18} />
+                  Activity
+                </h3>
+                <div className="flex items-center gap-4 text-sm text-gray-700 mt-2">
+                  <div className="flex items-center gap-1">
+                    <LucideReact.MessageSquare size={16} />
+                    <span>{badge.unread ?? 0} Unread</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <LucideReact.AlertTriangle size={16} />
+                    <span>{badge.alert ?? 0} Alerts</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

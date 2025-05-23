@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Details of a deployment branch or tag policy.
      *
      * @title Deployment branch policy
     */
-    export type deployment_branch_policy = {
+    export interface deployment_branch_policy {
         /**
          * The unique identifier of the branch or tag policy.
         */
@@ -20,39 +21,37 @@ export namespace AutoViewInputSubTypes {
          * Whether this rule targets a branch or tag.
         */
         type?: "branch" | "tag";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.deployment_branch_policy;
 
 
 
-// The component name must always be "VisualComponent"
+// The component name is always "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const policyName = value.name?.trim() || "Unnamed Policy";
-  const displayType = value.type
-    ? value.type.charAt(0).toUpperCase() + value.type.slice(1)
-    : "Unknown";
+  // 1. Data transformation and derived constants
+  const policyType = value.type ?? "branch";
+  const isBranch = policyType === "branch";
+  const typeLabel = isBranch ? "Branch Policy" : "Tag Policy";
+  const PatternIcon = isBranch ? LucideReact.GitBranch : LucideReact.Tag;
+  const patternText = value.name && value.name.trim() !== "" ? value.name : "—";
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {policyName}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium uppercase rounded ${
-            value.type === "branch"
-              ? "bg-green-100 text-green-800"
-              : value.type === "tag"
-              ? "bg-blue-100 text-blue-800"
-              : "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {displayType}
-        </span>
+    <div className="max-w-sm bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center gap-2">
+        <PatternIcon
+          size={20}
+          className="text-gray-500"
+          aria-label={typeLabel}
+        />
+        <h2 className="text-gray-800 font-semibold">{typeLabel}</h2>
+      </div>
+      <div className="mt-3">
+        <h3 className="text-sm text-gray-500">Pattern</h3>
+        <div className="mt-1 px-2 py-1 bg-gray-50 rounded font-mono text-gray-800 truncate">
+          {patternText}
+        </div>
       </div>
     </div>
   );

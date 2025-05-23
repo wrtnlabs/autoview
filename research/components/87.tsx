@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IPageIShoppingSale {
         /**
@@ -7,7 +8,7 @@ export namespace AutoViewInputSubTypes {
          *
          * Collection of records with pagination indformation.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Page information.
              *
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
              * @title List of records
             */
             data: AutoViewInputSubTypes.IShoppingSale.ISummary[];
-        };
+        }
     }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -53,7 +54,7 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     export namespace IShoppingSale {
         /**
@@ -61,7 +62,7 @@ export namespace AutoViewInputSubTypes {
          *
          * This summarized information being used for pagination.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Belonged section.
              *
@@ -191,7 +192,7 @@ export namespace AutoViewInputSubTypes {
              * @title Closing time of the sale
             */
             closed_at: null | (string & tags.Format<"date-time">);
-        };
+        }
     }
     /**
      * Section information.
@@ -208,7 +209,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -233,12 +234,12 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingSeller {
         /**
          * Summary of seller information.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Discriminant for the type of seller.
              *
@@ -271,7 +272,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation tmie of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingMember {
         /**
@@ -283,7 +284,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -310,7 +311,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Email address of member.
@@ -319,7 +320,7 @@ export namespace AutoViewInputSubTypes {
      * registered for one {@link IShoppingMember member}. If you don't have to
      * plan such multiple email addresses, just use only one.
     */
-    export type IShoppingMemberEmail = {
+    export interface IShoppingMemberEmail {
         /**
          * Primary Key.
          *
@@ -338,7 +339,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     /**
      * Citizen verification information.
      *
@@ -354,7 +355,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, real name and mobile phone authentication information are
      * encrypted and stored.
     */
-    export type IShoppingCitizen = {
+    export interface IShoppingCitizen {
         /**
          * Primary Key.
          *
@@ -379,15 +380,15 @@ export namespace AutoViewInputSubTypes {
          * @title Real name, or equivalent nickname
         */
         name: string;
-    };
-    export type IShoppingSalePriceRange = {
+    }
+    export interface IShoppingSalePriceRange {
         lowest: AutoViewInputSubTypes.IShoppingPrice;
         highest: AutoViewInputSubTypes.IShoppingPrice;
-    };
+    }
     /**
      * Shopping price interface.
     */
-    export type IShoppingPrice = {
+    export interface IShoppingPrice {
         /**
          * Nominal price.
          *
@@ -404,13 +405,13 @@ export namespace AutoViewInputSubTypes {
          * @title Real price to pay
         */
         real: number;
-    };
+    }
     export namespace IShoppingSaleContent {
-        export type IInvert = {
+        export interface IInvert {
             id: string & tags.Format<"uuid">;
             title: string;
             thumbnails: AutoViewInputSubTypes.IAttachmentFile[];
-        };
+        }
     }
     /**
      * Attachment File.
@@ -421,7 +422,7 @@ export namespace AutoViewInputSubTypes {
      * or {@link extension} like `.gitignore` or `README` case, but not
      * possible to omit both of them.
     */
-    export type IAttachmentFile = {
+    export interface IAttachmentFile {
         /**
          * Primary Key.
          *
@@ -456,12 +457,12 @@ export namespace AutoViewInputSubTypes {
          * @title URL path of the real file
         */
         url: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
         /**
          * Invert category information with parent category.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Parent category info with recursive structure.
              *
@@ -469,7 +470,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Parent category info with recursive structure
             */
-            parent: null | any;
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
             /**
              * Primary Key.
              *
@@ -506,10 +507,10 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingSaleUnit {
-        export type ISummary = {
+        export interface ISummary {
             price_range: AutoViewInputSubTypes.IShoppingSalePriceRange;
             /**
              * Primary Key.
@@ -544,7 +545,7 @@ export namespace AutoViewInputSubTypes {
              * @title Whether the unit is required or not
             */
             required: boolean;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSale.ISummary;
@@ -554,82 +555,150 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSale.ISummary;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { current, limit, records } = value.pagination;
-  const start = (current - 1) * limit + 1;
-  const end = Math.min(current * limit, records);
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  const formatCurrency = (amount: number): string =>
+    new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+    }).format(amount);
 
-  const formatPrice = (n: number) =>
-    n.toLocaleString(undefined, { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
-
-  const deriveStatus = (item: typeof value.data[number]) => {
-    if (item.suspended_at) return { label: 'Suspended', color: 'bg-red-100 text-red-800' };
-    if (item.paused_at)    return { label: 'Paused',    color: 'bg-yellow-100 text-yellow-800' };
-    if (item.latest)       return { label: 'Latest',    color: 'bg-green-100 text-green-800' };
-    return { label: 'Archived', color: 'bg-gray-100 text-gray-800' };
-  };
+  const { pagination, data: items } = value;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-gray-50">
-      <div className="mb-4 text-sm text-gray-600">
-        Showing {start}–{end} of {records} sales
+    <div className="space-y-6">
+      {/* Pagination summary */}
+      <div className="flex items-center justify-between text-sm text-gray-600">
+        <span>Page {pagination.current} of {pagination.pages}</span>
+        <span>{pagination.records} items total</span>
       </div>
 
-      <div className="space-y-4">
-        {value.data.map((item) => {
-          const { label, color } = deriveStatus(item);
+      {/* Grid of sale cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((item) => {
+          const thumbnail = item.content.thumbnails[0];
           const minPrice = item.price_range.lowest.real;
           const maxPrice = item.price_range.highest.real;
-          const imgUrl = item.content.thumbnails[0]?.url;
+          const displayDate = item.opened_at || item.created_at;
+
+          // Status icons: Suspended > Paused > Latest
+          const statusIcon = item.suspended_at ? (
+            <LucideReact.AlertTriangle
+              className="text-red-500"
+              size={14}
+              role="img"
+              aria-label="Suspended"
+            />
+          ) : item.paused_at ? (
+            <LucideReact.PauseCircle
+              className="text-amber-500"
+              size={14}
+              role="img"
+              aria-label="Paused"
+            />
+          ) : item.latest ? (
+            <LucideReact.CheckCircle
+              className="text-green-500"
+              size={14}
+              role="img"
+              aria-label="Latest"
+            />
+          ) : null;
 
           return (
-            <div
-              key={item.id}
-              className="flex flex-col sm:flex-row bg-white rounded-lg shadow overflow-hidden"
-            >
-              {imgUrl && (
-                <img
-                  src={imgUrl}
-                  alt={item.content.title}
-                  className="w-full h-48 sm:w-48 sm:h-auto object-cover"
-                />
-              )}
-
-              <div className="p-4 flex-1 flex flex-col justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 truncate">
-                    {item.content.title}
-                  </h2>
-                  <div className="mt-1 text-sm text-gray-500 flex flex-wrap items-center space-x-1">
-                    <span>{item.section.name}</span>
-                    <span>•</span>
-                    <span>Seller: {item.seller.member.nickname}</span>
-                    <span>•</span>
-                    <span>Created: {formatDate(item.created_at)}</span>
+            <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden flex flex-col">
+              {/* Thumbnail */}
+              <div className="aspect-video bg-gray-100">
+                {thumbnail ? (
+                  <img
+                    src={thumbnail.url}
+                    alt={item.content.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://placehold.co/400x300/f1f5f9/64748b?text=Image';
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center w-full h-full bg-gray-200 text-gray-500">
+                    No Image
                   </div>
-                  <div className="mt-2 text-md font-bold text-gray-900">
-                    Price: {formatPrice(minPrice)}
-                    {minPrice !== maxPrice ? `–${formatPrice(maxPrice)}` : ''}
+                )}
+              </div>
+
+              {/* Card content */}
+              <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                {/* Title & meta */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800 truncate">
+                    {item.content.title}
+                  </h3>
+                  <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600 mt-1">
+                    <div className="flex items-center gap-1">
+                      <LucideReact.User
+                        size={16}
+                        role="img"
+                        aria-label="Seller"
+                        className="text-gray-500"
+                      />
+                      <span className="truncate">{item.seller.member.nickname}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <LucideReact.MapPin
+                        size={16}
+                        role="img"
+                        aria-label="Section"
+                        className="text-gray-500"
+                      />
+                      <span className="truncate">{item.section.name}</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-between">
-                  <div className="flex flex-wrap gap-2">
-                    {item.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded"
-                      >
-                        {tag}
-                      </span>
-                    ))}
+                {/* Price & tags/units */}
+                <div>
+                  <div className="text-gray-800 font-medium">
+                    {minPrice === maxPrice
+                      ? formatCurrency(minPrice)
+                      : `${formatCurrency(minPrice)} – ${formatCurrency(maxPrice)}`}
                   </div>
-                  <span className={`${color} text-xs font-medium px-2 py-1 rounded`}>
-                    {label}
-                  </span>
+                  <div className="flex items-center gap-4 text-sm text-gray-500 mt-2">
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Tag
+                        size={16}
+                        role="img"
+                        aria-label="Tags"
+                        className="text-gray-500"
+                      />
+                      <span>{item.tags.length} tags</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Box
+                        size={16}
+                        role="img"
+                        aria-label="Units"
+                        className="text-gray-500"
+                      />
+                      <span>{item.units.length} units</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Date & status */}
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Calendar
+                      size={14}
+                      role="img"
+                      aria-label="Date"
+                      className="text-gray-500"
+                    />
+                    <span>{formatDate(displayDate)}</span>
+                  </div>
+                  <div>{statusIcon}</div>
                 </div>
               </div>
             </div>

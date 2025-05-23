@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Projects are a way to organize columns and cards of work.
      *
      * @title Project
     */
-    export type project = {
+    export interface project {
         owner_url: string & tags.Format<"uri">;
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
@@ -37,7 +38,7 @@ export namespace AutoViewInputSubTypes {
          * Whether or not this project can be seen by everyone. Only present if owner is an organization.
         */
         "private"?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -75,84 +76,97 @@ export type AutoViewInput = AutoViewInputSubTypes.project;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const title = value.name;
-  const projectNumber = `#${value.number}`;
-  const stateLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
-  const stateColor =
-    value.state === "open"
-      ? "bg-green-100 text-green-800"
-      : "bg-red-100 text-red-800";
-  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-  const creatorLogin = value.creator?.login ?? "Unknown";
-  const creatorAvatar = value.creator?.avatar_url;
-  const description = value.body ?? "";
-  const privacyLabel = value.private ? "Private" : "Public";
-  const permissionLabel = value.organization_permission
-    ? value.organization_permission.charAt(0).toUpperCase() +
-      value.organization_permission.slice(1)
-    : null;
+  const formatDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("default", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+  const createdDate = formatDate(value.created_at);
+  const updatedDate = formatDate(value.updated_at);
+
+  const isOpen = value.state === "open";
+  const stateLabel = isOpen ? "Open" : "Closed";
+  const StateIcon = isOpen
+    ? LucideReact.CheckCircle
+    : LucideReact.XCircle;
+  const stateColor = isOpen ? "text-green-500" : "text-red-500";
+
+  const isPrivate = value["private"] === true;
+
+  const creator = value.creator;
+  const creatorName = creator
+    ? creator.name?.trim() || creator.login
+    : "Unknown";
+  const avatarSrc = creator?.avatar_url;
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    creatorName,
+  )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-baseline">
-          <h2 className="text-xl font-semibold text-gray-900 truncate">
-            {title}
-          </h2>
-          <span className="ml-2 text-sm text-gray-500">{projectNumber}</span>
-        </div>
-        <span
-          className={`mt-2 sm:mt-0 inline-block px-2 py-0.5 text-sm font-medium rounded-full ${stateColor}`}
+    <div className="bg-white rounded-lg shadow p-4 max-w-md w-full mx-auto">
+      {/* Header: Project Name & Status */}
+      <div className="flex items-center justify-between mb-3">
+        <h2
+          className="text-lg font-semibold text-gray-900 truncate"
+          title={value.name}
         >
-          {stateLabel}
-        </span>
-      </header>
+          {value.name}
+        </h2>
+        <div className="flex items-center space-x-2">
+          <StateIcon className={`w-5 h-5 ${stateColor}`} />
+          <span className={`text-sm font-medium ${stateColor}`}>
+            {stateLabel}
+          </span>
+          {isPrivate && (
+            <LucideReact.Lock
+              className="w-5 h-5 text-gray-500"
+              aria-label="Private"
+            />
+          )}
+        </div>
+      </div>
 
-      {description && (
-        <p className="text-gray-700 mt-3 text-sm line-clamp-3">
-          {description}
+      {/* Body / Description */}
+      {value.body && (
+        <p className="text-gray-700 text-sm mb-4 line-clamp-3">
+          {value.body}
         </p>
       )}
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
-        <div>
-          <dt className="font-medium">Created</dt>
-          <dd>{createdAt}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Updated</dt>
-          <dd>{updatedAt}</dd>
-        </div>
-        <div className="sm:col-span-2 flex items-center">
-          {creatorAvatar && (
+      {/* Creator & Dates */}
+      <div className="flex flex-wrap items-center mb-4 gap-x-4 gap-y-2 text-sm text-gray-500">
+        {creator && (
+          <div className="flex items-center space-x-2">
             <img
-              src={creatorAvatar}
-              alt={`${creatorLogin} avatar`}
-              className="w-6 h-6 rounded-full mr-2"
+              src={avatarSrc || avatarFallback}
+              alt={creatorName}
+              className="w-8 h-8 rounded-full object-cover"
+              onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                e.currentTarget.src = avatarFallback;
+              }}
             />
-          )}
-          <dt className="font-medium">Creator</dt>
-          <dd className="ml-1">{creatorLogin}</dd>
-        </div>
-        <div>
-          <dt className="font-medium">Visibility</dt>
-          <dd>{privacyLabel}</dd>
-        </div>
-        {permissionLabel && (
-          <div>
-            <dt className="font-medium">Org Permission</dt>
-            <dd>{permissionLabel}</dd>
+            <span className="text-gray-800">{creatorName}</span>
           </div>
         )}
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar className="w-4 h-4" />
+          <span>Created {createdDate}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.RefreshCw className="w-4 h-4" />
+          <span>Updated {updatedDate}</span>
+        </div>
       </div>
-    </article>
+
+      {/* Project Number */}
+      <div className="flex items-center space-x-1 text-sm text-gray-500">
+        <LucideReact.Hash className="w-4 h-4" />
+        <span>#{value.number}</span>
+      </div>
+    </div>
   );
 }

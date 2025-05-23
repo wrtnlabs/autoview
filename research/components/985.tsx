@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Full Team
     */
-    export type team_full = {
+    export interface team_full {
         /**
          * Unique identifier of the team
         */
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
          * Distinguished Name (DN) that team maps to within LDAP environment
         */
         ldap_dn?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -97,7 +98,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Team Organization
     */
-    export type team_organization = {
+    export interface team_organization {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -153,7 +154,7 @@ export namespace AutoViewInputSubTypes {
         web_commit_signoff_required?: boolean;
         updated_at: string & tags.Format<"date-time">;
         archived_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_full[];
 
@@ -162,68 +163,82 @@ export type AutoViewInput = AutoViewInputSubTypes.team_full[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const teamCount = value.length;
-  const formatDate = (s: string): string =>
-    new Date(s).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-4" />
+        <span className="text-lg">No teams available</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Teams ({teamCount})</h2>
-      <div className="space-y-4">
-        {value.map((team) => (
-          <div
-            key={team.id}
-            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <img
-                  src={team.organization.avatar_url}
-                  alt={team.organization.login}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800">
-                    {team.name}
-                  </h3>
-                  <p className="text-sm text-gray-500">@{team.slug}</p>
-                </div>
-              </div>
-              <div className="flex space-x-1">
-                {team.privacy && (
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs uppercase">
-                    {team.privacy}
-                  </span>
-                )}
-                {team.notification_setting && (
-                  <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs">
-                    {team.notification_setting.replace(/_/g, " ")}
-                  </span>
-                )}
-                <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">
-                  {team.permission}
-                </span>
-              </div>
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {value.map((team) => (
+        <div
+          key={team.id}
+          className="flex flex-col justify-between p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+        >
+          <header className="mb-3">
+            <h2 className="text-xl font-semibold text-gray-800 truncate">
+              {team.name}
+            </h2>
+            <div className="flex items-center text-gray-500 text-sm mt-1 space-x-1">
+              <LucideReact.Users size={16} />
+              <span>{team.members_count}</span>
+              <LucideReact.Package size={16} className="ml-3" />
+              <span>{team.repos_count}</span>
             </div>
-            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
-              {team.description ?? "No description available."}
-            </p>
-            <div className="mt-3 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
-              <span>{team.members_count} members</span>
-              <span>{team.repos_count} repos</span>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center text-xs text-gray-400 space-x-4">
-              <span>Created: {formatDate(team.created_at)}</span>
-              <span>Updated: {formatDate(team.updated_at)}</span>
+          </header>
+
+          <div className="mb-3 text-gray-600 text-sm line-clamp-2">
+            {team.description ?? 'No description available.'}
+          </div>
+
+          <div className="flex items-center text-gray-500 text-sm space-x-4 mb-3">
+            {team.privacy && (
+              <div className="flex items-center space-x-1">
+                <LucideReact.Lock size={16} />
+                <span className="capitalize">{team.privacy}</span>
+              </div>
+            )}
+            <div className="flex items-center space-x-1">
+              <LucideReact.Tag size={16} />
+              <span className="truncate">{team.permission}</span>
             </div>
           </div>
-        ))}
-      </div>
+
+          {team.parent && (
+            <div className="mb-3 text-gray-500 text-sm">
+              <span className="font-medium">Parent:</span>{' '}
+              <span>{team.parent.name}</span>
+            </div>
+          )}
+
+          <footer className="flex flex-col text-gray-400 text-xs">
+            <div className="flex items-center space-x-1">
+              <LucideReact.Calendar size={14} />
+              <span>Created: {formatDate(team.created_at)}</span>
+            </div>
+            <div className="flex items-center space-x-1 mt-1">
+              <LucideReact.Calendar size={14} />
+              <span>Updated: {formatDate(team.updated_at)}</span>
+            </div>
+            <div className="flex items-center space-x-1 mt-1 truncate">
+              <LucideReact.User size={14} />
+              <span className="capitalize">{team.organization.login}</span>
+            </div>
+          </footer>
+        </div>
+      ))}
     </div>
   );
 }

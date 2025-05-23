@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A page.
      *
      * Collection of records with pagination indformation.
     */
-    export type IPageIShoppingSection = {
+    export interface IPageIShoppingSection {
         /**
          * Page information.
          *
@@ -19,12 +20,12 @@ export namespace AutoViewInputSubTypes {
          * @title List of records
         */
         data: AutoViewInputSubTypes.IShoppingSection[];
-    };
+    }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -51,7 +52,7 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     /**
      * Section information.
@@ -68,7 +69,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -93,7 +94,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSection;
 
@@ -102,48 +103,71 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSection;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { current, limit, records, pages } = value.pagination;
-  const start = (current - 1) * limit + 1;
-  const end = Math.min(current * limit, records);
+  const {
+    pagination: { current, limit, records, pages },
+    data,
+  } = value;
 
-  const formattedDate = (dateStr: string): string =>
-    new Date(dateStr).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-md">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          Shopping Sections
-        </h2>
-        <p className="text-sm text-gray-600 mt-2 sm:mt-0">
-          Showing {start}&ndash;{end} of {records} | Page {current}/{pages}
-        </p>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header with title and summary */}
+      <div className="flex flex-col md:flex-row justify-between items-start mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">Shopping Sections</h2>
+        <div className="flex flex-col md:flex-row items-start md:items-center text-gray-600 text-sm mt-2 md:mt-0 space-y-1 md:space-y-0 md:space-x-6">
+          <div>
+            Showing <span className="font-medium">{data.length}</span> of{' '}
+            <span className="font-medium">{records}</span> sections
+          </div>
+          <div className="flex items-center">
+            <LucideReact.ChevronLeft size={16} className="text-gray-400" />
+            <span className="mx-1">
+              Page <span className="font-medium">{current}</span> of{' '}
+              <span className="font-medium">{pages}</span>
+            </span>
+            <LucideReact.ChevronRight size={16} className="text-gray-400" />
+          </div>
+        </div>
       </div>
-      <ul role="list" className="space-y-4">
-        {value.data.map((section) => (
-          <li
+
+      {/* List of sections */}
+      <div className="divide-y divide-gray-200">
+        {data.map((section) => (
+          <div
             key={section.id}
-            className="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 transition-colors"
+            className="flex flex-col md:flex-row justify-between py-4"
           >
-            <div className="truncate">
-              <p className="text-lg font-medium text-gray-900 truncate">
+            <div className="md:flex-1">
+              <h3 className="text-md font-medium text-gray-900 truncate">
                 {section.name}
+              </h3>
+              <p className="text-sm text-gray-500 mt-1 truncate">
+                Code: {section.code}
               </p>
-              <span className="inline-block mt-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                {section.code.toUpperCase()}
-              </span>
             </div>
-            <p className="text-sm text-gray-500 mt-3 sm:mt-0">
-              Created on {formattedDate(section.created_at)}
-            </p>
-          </li>
+            <div className="flex items-center text-sm text-gray-500 mt-3 md:mt-0">
+              <LucideReact.Calendar size={16} className="mr-1" />
+              <span>{formatDate(section.created_at)}</span>
+            </div>
+          </div>
         ))}
-      </ul>
+
+        {/* Empty state */}
+        {data.length === 0 && (
+          <div className="flex flex-col items-center py-8 text-gray-500">
+            <LucideReact.AlertCircle size={48} />
+            <span className="mt-2">No sections available.</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

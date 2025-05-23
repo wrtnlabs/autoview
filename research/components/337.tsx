@@ -1,22 +1,23 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repositories associated with a code security configuration and attachment status
     */
-    export type code_security_configuration_repositories = {
+    export interface code_security_configuration_repositories {
         /**
          * The attachment status of the code security configuration on the repository.
         */
         status?: "attached" | "attaching" | "detached" | "removed" | "enforced" | "failed" | "updating" | "removed_by_enterprise";
         repository?: AutoViewInputSubTypes.simple_repository;
-    };
+    }
     /**
      * A GitHub repository.
      *
      * @title Simple Repository
     */
-    export type simple_repository = {
+    export interface simple_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -198,13 +199,13 @@ export namespace AutoViewInputSubTypes {
          * The API URL to list the hooks on the repository.
         */
         hooks_url: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -227,7 +228,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration_repositories[];
 
@@ -236,94 +237,95 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration_re
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const processedRepos = value
-    .filter((item) => item.repository)
-    .map((item) => item.repository!) as AutoViewInputSubTypes.simple_repository[];
-
-  const statusMap: Record<
-    string,
-    { label: string; colorClasses: string }
-  > = {
-    attached: { label: "Attached", colorClasses: "bg-green-100 text-green-800" },
-    enforced: { label: "Enforced", colorClasses: "bg-green-100 text-green-800" },
-    updating: { label: "Updating", colorClasses: "bg-green-100 text-green-800" },
-    attaching: { label: "Attaching", colorClasses: "bg-green-100 text-green-800" },
-    detached: { label: "Detached", colorClasses: "bg-gray-100 text-gray-800" },
-    removed: { label: "Removed", colorClasses: "bg-gray-100 text-gray-800" },
+  const statusMap: Record<string, {
+    Icon: React.ComponentType<any>;
+    label: string;
+    colorClass: string;
+    spin?: boolean;
+  }> = {
+    attached: { Icon: LucideReact.CheckCircle, label: "Attached", colorClass: "text-green-500" },
+    attaching: { Icon: LucideReact.Loader, label: "Attaching", colorClass: "text-blue-500", spin: true },
+    detached: { Icon: LucideReact.XCircle, label: "Detached", colorClass: "text-yellow-500" },
+    removed: { Icon: LucideReact.Trash2, label: "Removed", colorClass: "text-red-500" },
+    enforced: { Icon: LucideReact.ShieldCheck, label: "Enforced", colorClass: "text-green-600" },
+    failed: { Icon: LucideReact.AlertTriangle, label: "Failed", colorClass: "text-red-500" },
+    updating: { Icon: LucideReact.RefreshCw, label: "Updating", colorClass: "text-blue-500", spin: true },
     removed_by_enterprise: {
-      label: "Removed By Enterprise",
-      colorClasses: "bg-gray-100 text-gray-800",
-    },
-    failed: { label: "Failed", colorClasses: "bg-red-100 text-red-800" },
+      Icon: LucideReact.Briefcase,
+      label: "Removed by Enterprise",
+      colorClass: "text-gray-500"
+    }
   };
 
-  function getStatusBadge(status?: string) {
-    if (!status) return null;
-    const info = statusMap[status] || {
-      label: status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      colorClasses: "bg-gray-100 text-gray-800",
-    };
-    return (
-      <span
-        className={`${info.colorClasses} px-2 py-0.5 rounded-full text-xs font-semibold`}
-      >
-        {info.label}
-      </span>
-    );
-  }
-
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (processedRepos.length === 0) {
+  if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No repositories to display.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span className="text-lg">No repository data available</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {processedRepos.map((repo) => (
-        <div
-          key={repo.id}
-          className="p-4 bg-white rounded-lg shadow divide-y divide-gray-200"
-        >
-          <div className="flex items-start space-x-4">
-            <img
-              src={repo.owner.avatar_url}
-              alt={`${repo.owner.login} avatar`}
-              className="w-10 h-10 rounded-full flex-shrink-0"
-            />
-            <div className="flex-1">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900 truncate">
-                  {repo.full_name}
-                </h3>
-                {getStatusBadge(
-                  value.find((i) => i.repository?.id === repo.id)?.status
-                )}
-              </div>
-              <div className="mt-1 flex items-center space-x-2">
-                <span className="text-sm text-gray-600">
-                  {repo.owner.login}
-                </span>
-                <span className="text-xs text-white bg-indigo-600 px-2 py-0.5 rounded">
-                  {repo.private ? "Private" : "Public"}
-                </span>
-              </div>
-              {repo.description ? (
-                <p className="mt-2 text-sm text-gray-700 line-clamp-2">
-                  {repo.description}
-                </p>
-              ) : (
-                <p className="mt-2 text-sm text-gray-500 italic">
-                  No description
-                </p>
-              )}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {value.map((item, index) => {
+        const repo = item.repository;
+        const repoName = repo?.full_name ?? repo?.name ?? "Unknown Repository";
+        const description = repo?.description;
+        const statusKey = item.status ?? "";
+        const meta = statusMap[statusKey] ?? {
+          Icon: LucideReact.HelpCircle,
+          label: "Unknown",
+          colorClass: "text-gray-400"
+        };
+
+        const owner = repo?.owner;
+        const avatarSrc =
+          owner?.avatar_url ??
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(owner?.login ?? "")}&background=random&color=fff`;
+
+        return (
+          <div
+            key={repo?.id ?? index}
+            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow flex flex-col"
+          >
+            <div className="flex justify-between items-start">
+              <h3 className="text-lg font-semibold text-gray-800 truncate">{repoName}</h3>
+              <meta.Icon
+                size={16}
+                className={`${meta.colorClass} ${meta.spin ? "animate-spin" : ""}`}
+                aria-label={meta.label}
+              />
             </div>
+            {owner && (
+              <div className="mt-2 flex items-center text-sm text-gray-600">
+                <img
+                  src={avatarSrc}
+                  alt={owner.login}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      owner.login
+                    )}&background=random&color=fff`;
+                  }}
+                  className="w-6 h-6 rounded-full object-cover mr-2"
+                />
+                <span className="truncate">{owner.login}</span>
+              </div>
+            )}
+            {description != null && (
+              <p className="mt-2 text-gray-600 text-sm line-clamp-2">{description}</p>
+            )}
+            {repo?.html_url && (
+              <div className="mt-3 flex items-center text-sm text-gray-500">
+                <LucideReact.Link size={16} className="mr-1" />
+                <span className="truncate">{repo.html_url}</span>
+              </div>
+            )}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

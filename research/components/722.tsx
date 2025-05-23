@@ -1,11 +1,12 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A schema for the SPDX JSON format returned by the Dependency Graph.
      *
      * @title Dependency Graph SPDX SBOM
     */
-    export type dependency_graph_spdx_sbom = {
+    export interface dependency_graph_spdx_sbom {
         sbom: {
             /**
              * The SPDX identifier for the SPDX document.
@@ -112,7 +113,7 @@ export namespace AutoViewInputSubTypes {
                 relatedSpdxElement?: string;
             }[];
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.dependency_graph_spdx_sbom;
 
@@ -121,97 +122,136 @@ export type AutoViewInput = AutoViewInputSubTypes.dependency_graph_spdx_sbom;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { sbom } = value;
-  const createdDate = new Date(sbom.creationInfo.created).toLocaleString();
-  const creatorsList = sbom.creationInfo.creators.join(", ");
-  const packageCount = sbom.packages.length;
+  const sbom = value.sbom;
+  const createdDate = new Date(sbom.creationInfo.created);
+  const formattedCreated = createdDate.toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+  const creatorsList = sbom.creationInfo.creators.join(', ');
+  const packageCount = sbom.packages?.length ?? 0;
   const relationshipCount = sbom.relationships?.length ?? 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
       {/* Header */}
-      <header className="space-y-1">
-        <h2 className="text-2xl font-semibold text-gray-800">{sbom.name}</h2>
-        <div className="text-sm text-gray-500">
-          SPDX {sbom.spdxVersion} • Created {createdDate}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-2xl font-semibold text-gray-900 truncate">{sbom.name}</h2>
+        <div className="flex items-center text-gray-500 text-sm mt-2 sm:mt-0">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          {formattedCreated}
         </div>
-      </header>
+      </div>
 
-      {/* Summary Details */}
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700">
-        <div>
-          <dt className="font-medium">Document ID</dt>
-          <dd className="truncate">{sbom.SPDXID}</dd>
+      {/* Basic Info */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+        <div className="flex items-center">
+          <LucideReact.Code size={16} className="text-gray-400 mr-1" />
+          <span className="font-medium text-gray-700">SPDX Version:</span>
+          <span className="ml-1 text-gray-900">{sbom.spdxVersion}</span>
         </div>
-        <div>
-          <dt className="font-medium">Data License</dt>
-          <dd>{sbom.dataLicense}</dd>
+        <div className="flex items-center">
+          <LucideReact.FileText size={16} className="text-gray-400 mr-1" />
+          <span className="font-medium text-gray-700">Data License:</span>
+          <span className="ml-1 text-gray-900">{sbom.dataLicense}</span>
         </div>
-        <div className="sm:col-span-2">
-          <dt className="font-medium">Namespace</dt>
-          <dd className="truncate">{sbom.documentNamespace}</dd>
+        <div className="flex items-center">
+          <LucideReact.Hash size={16} className="text-gray-400 mr-1" />
+          <span className="font-medium text-gray-700">Document ID:</span>
+          <span className="ml-1 text-gray-900">{sbom.SPDXID}</span>
         </div>
-        <div className="sm:col-span-2">
-          <dt className="font-medium">Creators</dt>
-          <dd className="truncate">{creatorsList}</dd>
+        <div className="flex items-center">
+          <LucideReact.Globe size={16} className="text-gray-400 mr-1" />
+          <span className="font-medium text-gray-700">Namespace:</span>
+          <span className="ml-1 text-gray-900 truncate">{sbom.documentNamespace}</span>
         </div>
-        {sbom.comment && (
-          <div className="sm:col-span-2">
-            <dt className="font-medium">Comment</dt>
-            <dd className="text-gray-600">{sbom.comment}</dd>
-          </div>
-        )}
-        <div>
-          <dt className="font-medium">Packages</dt>
-          <dd>{packageCount}</dd>
-        </div>
-        {relationshipCount > 0 && (
+      </div>
+
+      {/* Creators */}
+      <div className="text-sm">
+        <div className="flex items-start">
+          <LucideReact.Users size={16} className="text-gray-400 mr-1 mt-1" />
           <div>
-            <dt className="font-medium">Relationships</dt>
-            <dd>{relationshipCount}</dd>
+            <span className="font-medium text-gray-700">Creators:</span>
+            <p className="text-gray-900 mt-0.5">{creatorsList}</p>
           </div>
-        )}
-      </dl>
+        </div>
+      </div>
+
+      {/* Summary */}
+      <div className="flex items-center space-x-4 text-sm">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Package size={16} className="mr-1 text-gray-400" />
+          <span>
+            {packageCount} package{packageCount !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Link size={16} className="mr-1 text-gray-400" />
+          <span>
+            {relationshipCount} relationship{relationshipCount !== 1 ? 's' : ''}
+          </span>
+        </div>
+      </div>
 
       {/* Packages Table */}
-      {packageCount > 0 && (
-        <section>
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Packages</h3>
+      <div>
+        {packageCount > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white divide-y divide-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License (Concluded)</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">License (Declared)</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Files Analyzed</th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Download Location</th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Package
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    License
+                  </th>
+                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Supplier
+                  </th>
+                  <th className="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Files Analyzed
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
-                {sbom.packages.map((pkg, idx) => (
-                  <tr key={idx}>
-                    <td className="px-3 py-2">{pkg.name ?? "-"}</td>
-                    <td className="px-3 py-2">{pkg.versionInfo ?? "-"}</td>
-                    <td className="px-3 py-2">{pkg.licenseConcluded ?? "-"}</td>
-                    <td className="px-3 py-2">{pkg.licenseDeclared ?? "-"}</td>
-                    <td className="px-3 py-2">
-                      {pkg.filesAnalyzed == null
-                        ? "-"
-                        : pkg.filesAnalyzed
-                        ? <span className="px-2 py-0.5 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Yes</span>
-                        : <span className="px-2 py-0.5 text-xs font-semibold text-red-800 bg-red-100 rounded-full">No</span>}
-                    </td>
-                    <td className="px-3 py-2 max-w-xs truncate">{pkg.downloadLocation ?? "-"}</td>
-                  </tr>
-                ))}
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sbom.packages.map((pkg, idx) => {
+                  const filesAnalyzed = pkg.filesAnalyzed;
+                  return (
+                    <tr key={idx}>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
+                        <div className="font-medium">{pkg.name ?? '—'}</div>
+                        <div className="text-gray-500">{pkg.versionInfo ?? ''}</div>
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 flex items-center">
+                        <LucideReact.FileText size={16} className="text-gray-400 mr-1" />
+                        <span>{pkg.licenseConcluded ?? 'NOASSERTION'}</span>
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 truncate">
+                        {pkg.supplier ?? '—'}
+                      </td>
+                      <td className="px-4 py-2 whitespace-nowrap text-center">
+                        {filesAnalyzed ? (
+                          <LucideReact.CheckCircle size={16} className="text-green-500 inline" />
+                        ) : (
+                          <LucideReact.XCircle size={16} className="text-red-500 inline" />
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="flex items-center justify-center text-gray-400 py-6">
+            <LucideReact.AlertCircle size={24} />
+            <span className="ml-2">No packages available</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

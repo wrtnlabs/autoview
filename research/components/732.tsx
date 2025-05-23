@@ -1,21 +1,22 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposEnvironmentsDeploymentBranchPolicies {
-        export type GetResponse = {
+        export interface GetResponse {
             /**
              * The number of deployment branch policies for the environment.
             */
             total_count: number & tags.Type<"int32">;
             branch_policies: AutoViewInputSubTypes.deployment_branch_policy[];
-        };
+        }
     }
     /**
      * Details of a deployment branch or tag policy.
      *
      * @title Deployment branch policy
     */
-    export type deployment_branch_policy = {
+    export interface deployment_branch_policy {
         /**
          * The unique identifier of the branch or tag policy.
         */
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
          * Whether this rule targets a branch or tag.
         */
         type?: "branch" | "tag";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposEnvironmentsDeploymentBranchPolicies.GetResponse;
 
@@ -38,41 +39,80 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposEnvironmentsDeploymen
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { total_count, branch_policies } = value;
-  const policyLabel = total_count === 1 ? "Policy" : "Policies";
-  const headerText = `${total_count} ${policyLabel}`;
+  const policies = value.branch_policies || [];
+  const branchCount = policies.filter((p) => p.type === "branch").length;
+  const tagCount = policies.filter((p) => p.type === "tag").length;
+  const hasPolicies = policies.length > 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">{headerText}</h2>
-      {branch_policies && branch_policies.length > 0 ? (
-        <div className="divide-y divide-gray-200">
-          {branch_policies.map((policy, idx) => {
-            const name = policy.name?.trim() ? policy.name! : "Unnamed Policy";
-            const typeKey = policy.type || "unknown";
-            const typeLabel = typeKey.charAt(0).toUpperCase() + typeKey.slice(1);
-            const badgeClasses =
-              typeKey === "branch"
-                ? "bg-blue-100 text-blue-800"
-                : typeKey === "tag"
-                ? "bg-green-100 text-green-800"
-                : "bg-gray-100 text-gray-800";
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Deployment Policies ({value.total_count})
+        </h2>
+      </div>
 
-            return (
-              <div key={idx} className="flex justify-between items-center py-2">
-                <span className="text-gray-700 truncate">{name}</span>
-                <span
-                  className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${badgeClasses}`}
-                >
-                  {typeLabel}
-                </span>
-              </div>
-            );
-          })}
+      {!hasPolicies ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+          <LucideReact.AlertCircle
+            size={48}
+            className="text-gray-400"
+            aria-hidden="true"
+          />
+          <p className="mt-2">No deployment branch/tag policies available.</p>
         </div>
       ) : (
-        <p className="text-gray-500">No branch or tag policies available.</p>
+        <>
+          <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
+            <div className="flex items-center gap-1">
+              <LucideReact.GitBranch
+                size={16}
+                className="text-teal-500"
+                aria-hidden="true"
+              />
+              <span>
+                {branchCount} {branchCount === 1 ? "Branch" : "Branches"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LucideReact.Tag
+                size={16}
+                className="text-blue-500"
+                aria-hidden="true"
+              />
+              <span>
+                {tagCount} {tagCount === 1 ? "Tag" : "Tags"}
+              </span>
+            </div>
+          </div>
+
+          <ul className="mt-4 space-y-2">
+            {policies.map((policy, idx) => (
+              <li
+                key={policy.id ?? idx}
+                className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded truncate"
+              >
+                {policy.type === "branch" ? (
+                  <LucideReact.GitBranch
+                    size={16}
+                    className="text-teal-500"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <LucideReact.Tag
+                    size={16}
+                    className="text-blue-500"
+                    aria-hidden="true"
+                  />
+                )}
+                <span className="text-sm text-gray-700 truncate">
+                  {policy.name ?? "<Unnamed policy>"}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

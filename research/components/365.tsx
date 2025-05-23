@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Marketplace Purchase
      *
      * @title Marketplace Purchase
     */
-    export type marketplace_purchase = {
+    export interface marketplace_purchase {
         url: string;
         type: string;
         id: number & tags.Type<"int32">;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
             effective_date?: string;
             unit_count?: (number & tags.Type<"int32">) | null;
             id?: number & tags.Type<"int32">;
-            plan?: any;
+            plan?: AutoViewInputSubTypes.marketplace_listing_plan;
         } | null;
         marketplace_purchase: {
             billing_cycle?: string;
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
             updated_at?: string;
             plan?: AutoViewInputSubTypes.marketplace_listing_plan;
         };
-    };
+    }
     /**
      * Marketplace Listing Plan
      *
      * @title Marketplace Listing Plan
     */
-    export type marketplace_listing_plan = {
+    export interface marketplace_listing_plan {
         url: string & tags.Format<"uri">;
         accounts_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
         unit_name: string | null;
         state: string;
         bullets: string[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase[];
 
@@ -58,134 +59,213 @@ export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data aggregation/transformation
   const totalPurchases = value.length;
-  const installedCount = value.filter(item => item.marketplace_purchase.is_installed).length;
-  const trialCount = value.filter(item => item.marketplace_purchase.on_free_trial).length;
   const totalUnits = value.reduce(
     (sum, item) => sum + (item.marketplace_purchase.unit_count ?? 0),
     0,
   );
 
-  const formatDate = (dateStr?: string | null): string =>
-    dateStr
-      ? new Date(dateStr).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "—";
-
-  const formatPrice = (cents?: number | null): string =>
-    cents != null ? `$${(cents / 100).toFixed(2)}` : "—";
+  // Helper: format ISO date to locale string or fallback
+  const formatDate = (iso?: string | null) =>
+    iso ? new Date(iso).toLocaleDateString() : "N/A";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4">
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Marketplace Purchases
-        </h2>
-        <div className="flex flex-wrap space-x-4 text-sm text-gray-600 mt-2 sm:mt-0">
-          <span>Total: {totalPurchases}</span>
-          <span>Installed: {installedCount}</span>
-          <span>On Trial: {trialCount}</span>
-          <span>Units: {totalUnits}</span>
-        </div>
+    <div className="p-4 space-y-6">
+      {/* Summary */}
+      <div className="flex items-center text-gray-700">
+        <LucideReact.ShoppingCart
+          size={20}
+          className="text-gray-600 mr-2"
+          aria-hidden="true"
+        />
+        <span className="font-semibold text-lg">
+          {totalPurchases} Purchase{totalPurchases !== 1 ? "s" : ""}
+        </span>
+        {totalUnits > 0 && (
+          <span className="ml-4 text-sm text-gray-500">
+            Total Units: {totalUnits}
+          </span>
+        )}
       </div>
 
-      {totalPurchases === 0 ? (
-        <div className="text-center text-gray-500">
-          No purchases available.
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {value.map(item => {
-            const purchase = item.marketplace_purchase;
-            const plan = purchase.plan;
+      {/* Purchase List */}
+      <ul className="space-y-4">
+        {value.map((purchase) => {
+          const {
+            id,
+            login,
+            email,
+            organization_billing_email,
+            marketplace_purchase: current,
+            marketplace_pending_change: pending,
+          } = purchase;
+          const {
+            plan,
+            billing_cycle,
+            next_billing_date,
+            unit_count,
+            on_free_trial,
+            free_trial_ends_on,
+            updated_at,
+          } = current;
 
-            return (
-              <div
-                key={item.id}
-                className="p-4 bg-white rounded-lg shadow hover:shadow-md transition"
-              >
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    {plan?.name || "Unnamed Plan"}
+          return (
+            <li
+              key={id}
+              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              {/* Header: Plan name and updated date */}
+              <div className="flex justify-between items-start">
+                <div className="flex items-center space-x-2">
+                  <LucideReact.Package
+                    size={20}
+                    className="text-indigo-500"
+                    aria-hidden="true"
+                  />
+                  <h3 className="text-lg font-medium text-gray-800 truncate">
+                    {plan?.name ?? "Unnamed Plan"}
                   </h3>
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded ${
-                      purchase.is_installed
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {purchase.is_installed ? "Installed" : "Not Installed"}
-                  </span>
                 </div>
-
-                <div className="text-sm text-gray-500 mt-1">
-                  User: {item.login}
-                  {item.email ? ` (${item.email})` : ""}
-                </div>
-
-                <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                  {plan?.description}
-                </p>
-
-                <div className="mt-3 space-y-1 text-sm text-gray-700">
-                  <div>
-                    <span className="font-semibold">Billing:</span>{" "}
-                    {purchase.billing_cycle ?? "—"}
+                {updated_at && (
+                  <div className="flex items-center text-sm text-gray-400">
+                    <LucideReact.RefreshCw
+                      size={16}
+                      className="mr-1"
+                      aria-hidden="true"
+                    />
+                    <span>Updated {formatDate(updated_at)}</span>
                   </div>
-                  <div>
-                    <span className="font-semibold">Next Billing:</span>{" "}
-                    {formatDate(purchase.next_billing_date)}
-                  </div>
-                  {purchase.on_free_trial && (
-                    <div>
-                      <span className="font-semibold">Free Trial Ends:</span>{" "}
-                      {formatDate(purchase.free_trial_ends_on)}
-                    </div>
-                  )}
-                  {purchase.unit_count != null && plan?.unit_name && (
-                    <div>
-                      <span className="font-semibold">Units:</span>{" "}
-                      {purchase.unit_count} {plan.unit_name}
-                    </div>
-                  )}
-                  {plan && (
-                    <div>
-                      <span className="font-semibold">Price:</span>{" "}
-                      {formatPrice(plan.monthly_price_in_cents)}/mo &nbsp;|&nbsp;{" "}
-                      {formatPrice(plan.yearly_price_in_cents)}/yr
-                    </div>
-                  )}
-                </div>
-
-                {plan?.bullets && plan.bullets.length > 0 && (
-                  <ul className="mt-3 list-disc list-inside text-sm text-gray-600 space-y-1 max-h-24 overflow-auto">
-                    {plan.bullets.slice(0, 3).map((b, idx) => (
-                      <li key={idx} className="truncate">
-                        {b}
-                      </li>
-                    ))}
-                    {plan.bullets.length > 3 && (
-                      <li className="italic text-gray-500">
-                        +{plan.bullets.length - 3} more
-                      </li>
-                    )}
-                  </ul>
                 )}
-
-                <div className="mt-3 text-xs text-gray-500">
-                  Last updated: {formatDate(purchase.updated_at)}
-                </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              {/* Details */}
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500">
+                {billing_cycle && (
+                  <div className="flex items-center">
+                    <LucideReact.Calendar
+                      size={16}
+                      className="mr-1"
+                      aria-hidden="true"
+                    />
+                    <span>{billing_cycle}</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <LucideReact.Calendar
+                    size={16}
+                    className="mr-1"
+                    aria-hidden="true"
+                  />
+                  <span>Next: {formatDate(next_billing_date)}</span>
+                </div>
+                {unit_count != null && (
+                  <div className="flex items-center">
+                    <LucideReact.Users
+                      size={16}
+                      className="mr-1"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      {unit_count} Unit{unit_count !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                )}
+                {on_free_trial && free_trial_ends_on && (
+                  <div className="flex items-center text-amber-600">
+                    <LucideReact.Clock
+                      size={16}
+                      className="mr-1"
+                      aria-hidden="true"
+                    />
+                    <span>Trial ends {formatDate(free_trial_ends_on)}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Contact Info */}
+              {(email || organization_billing_email) && (
+                <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-600">
+                  {email && (
+                    <div className="flex items-center">
+                      <LucideReact.Mail
+                        size={16}
+                        className="mr-1"
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">{email}</span>
+                    </div>
+                  )}
+                  {organization_billing_email && (
+                    <div className="flex items-center">
+                      <LucideReact.Mail
+                        size={16}
+                        className="mr-1"
+                        aria-hidden="true"
+                      />
+                      <span className="truncate">
+                        {organization_billing_email}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Pending Change */}
+              {pending && (
+                <div className="mt-4 p-3 bg-amber-50 rounded-md border border-amber-100">
+                  <div className="flex items-center text-amber-700 text-sm font-medium">
+                    <LucideReact.AlertTriangle
+                      size={16}
+                      className="mr-1"
+                      aria-hidden="true"
+                    />
+                    <span>Pending Change</span>
+                  </div>
+                  <div className="mt-2 space-y-1 text-sm text-amber-700">
+                    {pending.plan && (
+                      <div className="flex items-center">
+                        <LucideReact.Package
+                          size={16}
+                          className="mr-1"
+                          aria-hidden="true"
+                        />
+                        <span>{pending.plan.name}</span>
+                      </div>
+                    )}
+                    {pending.unit_count != null && (
+                      <div className="flex items-center">
+                        <LucideReact.Users
+                          size={16}
+                          className="mr-1"
+                          aria-hidden="true"
+                        />
+                        <span>
+                          {pending.unit_count} Unit
+                          {pending.unit_count !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    )}
+                    {pending.effective_date && (
+                      <div className="flex items-center">
+                        <LucideReact.Calendar
+                          size={16}
+                          className="mr-1"
+                          aria-hidden="true"
+                        />
+                        <span>
+                          Effective {formatDate(pending.effective_date)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

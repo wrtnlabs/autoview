@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub Classroom classroom
      *
      * @title Classroom
     */
-    export type classroom = {
+    export interface classroom {
         /**
          * Unique identifier of the classroom.
         */
@@ -24,20 +25,20 @@ export namespace AutoViewInputSubTypes {
          * The URL of the classroom on GitHub Classroom.
         */
         url: string;
-    };
+    }
     /**
      * A GitHub organization.
      *
      * @title Organization Simple for Classroom
     */
-    export type simple_classroom_organization = {
+    export interface simple_classroom_organization {
         id: number & tags.Type<"int32">;
         login: string;
         node_id: string;
         html_url: string & tags.Format<"uri">;
         name: string | null;
         avatar_url: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.classroom;
 
@@ -46,41 +47,69 @@ export type AutoViewInput = AutoViewInputSubTypes.classroom;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const orgDisplayName = value.organization.name ?? value.organization.login;
   const statusLabel = value.archived ? "Archived" : "Active";
-  const statusColor = value.archived
-    ? "bg-red-100 text-red-800"
-    : "bg-green-100 text-green-800";
+  const statusColor = value.archived ? "text-red-600" : "text-green-600";
+  const orgName = value.organization.name ?? value.organization.login;
+  const orgAvatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    orgName,
+  )}&background=0D8ABC&color=fff`;
+
+  // Manage avatar fallback state
+  const [avatarSrc, setAvatarSrc] = React.useState<string>(
+    value.organization.avatar_url,
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white rounded-lg shadow p-4 max-w-md mx-auto">
+    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
       {/* Header: Classroom name and status */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${statusColor}`}
+      <div className="flex items-center justify-between mb-3">
+        <h2
+          className="flex-1 text-lg font-semibold text-gray-800 truncate"
+          title={value.name}
         >
-          {statusLabel}
-        </span>
+          {value.name}
+        </h2>
+        <div className="flex items-center gap-1">
+          {value.archived ? (
+            <LucideReact.XCircle className="text-red-500" size={16} />
+          ) : (
+            <LucideReact.CheckCircle className="text-green-500" size={16} />
+          )}
+          <span className={`text-sm ${statusColor}`}>{statusLabel}</span>
+        </div>
       </div>
 
       {/* Organization info */}
-      <div className="mt-4 flex items-center">
-        <img
-          src={value.organization.avatar_url}
-          alt={`${orgDisplayName} avatar`}
-          className="w-12 h-12 rounded-full object-cover"
-        />
-        <div className="ml-4 flex-1">
-          <p className="text-sm text-gray-600 truncate">{orgDisplayName}</p>
-          <p className="text-xs text-gray-500 truncate">{value.organization.html_url}</p>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+          <img
+            src={avatarSrc}
+            alt={`${orgName} avatar`}
+            className="w-full h-full object-cover"
+            onError={() => setAvatarSrc(orgAvatarFallback)}
+          />
+        </div>
+        <div className="flex-1 overflow-hidden">
+          <p
+            className="text-sm font-medium text-gray-700 truncate"
+            title={orgName}
+          >
+            {orgName}
+          </p>
+          <div className="flex items-center gap-1 text-xs text-gray-500 truncate">
+            <LucideReact.Link size={12} />
+            <span title={value.organization.html_url}>
+              {value.organization.html_url}
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Classroom URL */}
-      <div className="mt-4">
-        <p className="text-xs text-gray-500 truncate">{value.url}</p>
+      <div className="flex items-center gap-2 text-sm text-blue-500 truncate">
+        <LucideReact.Link size={16} />
+        <span title={value.url}>{value.url}</span>
       </div>
     </div>
   );

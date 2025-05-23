@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace open {
         export namespace marketing {
-            export type CampaignView = {
+            export interface CampaignView {
                 campaign?: AutoViewInputSubTypes.marketing.Campaign;
                 msgs?: AutoViewInputSubTypes.marketing.CampaignMsg[];
-            };
+            }
         }
     }
     export namespace marketing {
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
          *
          * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
         */
-        export type Campaign = {
+        export interface Campaign {
             id?: string;
             channelId?: string;
             name: string;
@@ -53,20 +54,20 @@ export namespace AutoViewInputSubTypes {
             userChatExpireDuration?: string;
             managerId?: string;
             recipeCaseId?: string;
-        };
-        export type HoldingPropertyConstant = {
+        }
+        export interface HoldingPropertyConstant {
             baseEventName: string;
             baseEventKey: string;
             eventQuery?: AutoViewInputSubTypes.Expression;
             baseEventType: "triggerEvent" | "additionalFilter";
             operator?: AutoViewInputSubTypes.EventSchema;
             values?: {};
-        };
-        export type CampaignDraft = {
+        }
+        export interface CampaignDraft {
             campaign: AutoViewInputSubTypes.marketing.Campaign;
             msgs: AutoViewInputSubTypes.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
-        };
-        export type CampaignMsg = {
+        }
+        export interface CampaignMsg {
             id: string;
             campaignId?: string;
             channelId?: string;
@@ -79,21 +80,22 @@ export namespace AutoViewInputSubTypes {
             view?: number & tags.Type<"int32">;
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
-        };
-        export type SendMediumSettings = {
+        }
+        export interface SendMediumSettings {
             type: string;
-        };
+        }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
-    export type EventSchema = {
+    }
+    export interface Operator {
+    }
+    export interface EventSchema {
         id?: string;
         channelId?: string;
         eventName?: string;
@@ -103,12 +105,12 @@ export namespace AutoViewInputSubTypes {
         createdAt?: number;
         updatedAt?: number;
         icon?: string;
-    };
-    export type TimeRange = {
+    }
+    export interface TimeRange {
         dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
         from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
         to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.open.marketing.CampaignView;
 
@@ -118,129 +120,197 @@ export type AutoViewInput = AutoViewInputSubTypes.open.marketing.CampaignView;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const campaign = value.campaign;
-  const msgs = value.msgs || [];
+  const msgs = value.msgs ?? [];
 
-  // If there's no campaign data, render a placeholder.
+  // Format timestamp to human‐readable string
+  const formatDate = (ts?: number) =>
+    ts ? new Date(ts).toLocaleString() : "—";
+
+  // Map state to label, color, and icon
+  const stateInfo: Record<
+    string,
+    { label: string; icon: React.ReactNode; color: string }
+  > = {
+    draft: {
+      label: "Draft",
+      icon: <LucideReact.Edit2 size={16} className="text-gray-500" />,
+      color: "bg-gray-100 text-gray-800",
+    },
+    active: {
+      label: "Active",
+      icon: <LucideReact.CheckCircle size={16} className="text-green-500" />,
+      color: "bg-green-100 text-green-800",
+    },
+    stopped: {
+      label: "Stopped",
+      icon: <LucideReact.PauseCircle size={16} className="text-orange-500" />,
+      color: "bg-orange-100 text-orange-800",
+    },
+    removed: {
+      label: "Removed",
+      icon: <LucideReact.Trash2 size={16} className="text-red-500" />,
+      color: "bg-red-100 text-red-800",
+    },
+  };
+
+  // Map medium to label and icon
+  const mediumInfo: Record<
+    string,
+    { label: string; icon: React.ReactNode }
+  > = {
+    appAlimtalk: {
+      label: "Alimtalk",
+      icon: <LucideReact.MessageSquare size={16} className="text-blue-500" />,
+    },
+    appLine: {
+      label: "Line",
+      icon: <LucideReact.MessageCircle size={16} className="text-green-500" />,
+    },
+    email: {
+      label: "Email",
+      icon: <LucideReact.Mail size={16} className="text-indigo-500" />,
+    },
+    inAppChat: {
+      label: "In-App Chat",
+      icon: <LucideReact.MessageSquare size={16} className="text-purple-500" />,
+    },
+    xms: {
+      label: "XMS",
+      icon: <LucideReact.Smartphone size={16} className="text-teal-500" />,
+    },
+  };
+
+  // Safely retrieve numeric metrics
+  const getMetric = (n?: number) => (typeof n === "number" ? n : 0);
+
+  // If no campaign data, show placeholder
   if (!campaign) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No campaign data available.
+      <div className="p-6 bg-white rounded-lg shadow-md text-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mx-auto mb-2" />
+        <p>No campaign data available.</p>
       </div>
     );
   }
 
-  // Mapping for human-readable states
-  const stateMap: Record<string, string> = {
-    draft: "Draft",
-    active: "Active",
-    stopped: "Stopped",
-    removed: "Removed",
-  };
-
-  // Color badges for states
-  const stateColors: Record<string, string> = {
-    draft: "bg-yellow-100 text-yellow-800",
-    active: "bg-green-100 text-green-800",
-    stopped: "bg-red-100 text-red-800",
-    removed: "bg-gray-100 text-gray-800",
-  };
-
-  // Mapping for sendMedium
-  const mediumMap: Record<string, string> = {
-    appAlimtalk: "AlimTalk",
-    appLine: "Line",
-    email: "Email",
-    inAppChat: "In-App Chat",
-    xms: "XMS",
-  };
-
-  // Formatter for timestamps (assumed milliseconds)
-  const formatDateTime = (ms?: number) =>
-    ms ? new Date(ms).toLocaleString() : "-";
-
-  const formattedStart = formatDateTime(campaign.startAt);
-  const formattedEnd = formatDateTime(campaign.endAt);
-
-  // Summary statistics from campaign
-  const stats = [
-    { label: "Sent", value: campaign.sent ?? 0 },
-    { label: "Views", value: campaign.view ?? 0 },
-    { label: "Clicks", value: campaign.click ?? 0 },
-  ];
+  // Determine state display
+  const state = campaign.state ?? "draft";
+  const { label: stateLabel, icon: stateIcon, color: stateColor } =
+    stateInfo[state] || stateInfo.draft;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {/* Header: Campaign title, state badge, medium */}
-      <div className="flex flex-col md:flex-row md:justify-between">
-        <div className="flex-1">
-          <h2 className="text-xl font-semibold text-gray-800 truncate">
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900 truncate">
             {campaign.name}
           </h2>
-          <div className="mt-2 flex flex-wrap items-center space-x-2">
-            <span
-              className={`text-sm font-medium px-2 py-1 rounded ${stateColors[campaign.state ?? ""]} border`}
-            >
-              {stateMap[campaign.state ?? ""] || "Unknown"}
-            </span>
-            <span className="text-sm text-gray-600">
-              {mediumMap[campaign.sendMedium] || campaign.sendMedium}
-            </span>
-          </div>
+          <p className="text-sm text-gray-600">
+            Trigger: {campaign.triggerEventName}
+          </p>
         </div>
-        <div className="mt-4 md:mt-0 flex flex-wrap space-x-4 text-sm text-gray-600">
-          <div>
-            <span className="font-medium">Schedule:</span>{" "}
-            {formattedStart} – {formattedEnd}
-          </div>
-          <div>
-            <span className="font-medium">Messages:</span> {msgs.length}
-          </div>
+        <div
+          className={`inline-flex items-center px-2 py-1 text-sm font-medium rounded ${stateColor}`}
+        >
+          {stateIcon}
+          <span className="ml-1">{stateLabel}</span>
         </div>
       </div>
 
-      {/* Campaign summary stats */}
-      <div className="mt-4 grid grid-cols-3 gap-4 text-center">
-        {stats.map((s) => (
-          <div key={s.label} className="py-2 bg-gray-50 rounded">
-            <div className="text-lg font-semibold text-gray-800">
-              {s.value.toLocaleString()}
-            </div>
-            <div className="text-xs text-gray-500">{s.label}</div>
-          </div>
-        ))}
+      {/* Key Metrics */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Send size={16} className="text-gray-500" />
+          <span>Sent: {getMetric(campaign.sent)}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Eye size={16} className="text-gray-500" />
+          <span>Viewed: {getMetric(campaign.view)}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.MousePointer size={16} className="text-gray-500" />
+          <span>Clicked: {getMetric(campaign.click)}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.CheckCircle size={16} className="text-gray-500" />
+          <span>Goal: {getMetric(campaign.goal)}</span>
+        </div>
       </div>
 
-      {/* Messages list */}
+      {/* Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Clock size={16} />
+          <span>Wait: {campaign.waitingTime}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Activity size={16} />
+          <span>Mode: {campaign.sendMode}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span>Start: {formatDate(campaign.startAt)}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} />
+          <span>End: {formatDate(campaign.endAt)}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          {mediumInfo[campaign.sendMedium]?.icon}
+          <span>{mediumInfo[campaign.sendMedium]?.label}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.User size={16} />
+          <span>Channel: {campaign.channelOperationId ?? "—"}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Clock size={16} />
+          <span>Created: {formatDate(campaign.createdAt)}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Edit3 size={16} />
+          <span>Updated: {formatDate(campaign.updatedAt)}</span>
+        </div>
+      </div>
+
+      {/* Messages Breakdown */}
       {msgs.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Messages</h3>
-          <ul className="space-y-4">
-            {msgs.map((msg) => (
+        <div className="pt-4 border-t">
+          <h3 className="text-lg font-medium text-gray-800 mb-2">
+            Messages ({msgs.length})
+          </h3>
+          <ul className="space-y-3">
+            {msgs.map((m) => (
               <li
-                key={msg.id}
-                className="p-4 border rounded-lg hover:shadow transition-shadow"
+                key={m.id}
+                className="p-3 bg-gray-50 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center"
               >
-                <div className="flex justify-between items-center">
-                  <div className="text-sm font-semibold text-gray-800 truncate">
-                    {msg.name}
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    {mediumMap[msg.sendMedium] || msg.sendMedium}
+                <div className="flex items-center space-x-2 truncate">
+                  <span className="font-medium text-gray-900 truncate">
+                    {m.name}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    ({mediumInfo[m.sendMedium]?.label})
                   </span>
                 </div>
-                <div className="mt-2 flex space-x-6 text-xs text-gray-600">
-                  <div>
-                    <span className="font-medium">Sent:</span>{" "}
-                    {(msg.sent ?? 0).toLocaleString()}
+                <div className="mt-2 sm:mt-0 flex space-x-4 text-sm text-gray-600">
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Send size={14} className="text-gray-500" />
+                    <span>{getMetric(m.sent)}</span>
                   </div>
-                  <div>
-                    <span className="font-medium">Views:</span>{" "}
-                    {(msg.view ?? 0).toLocaleString()}
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Eye size={14} className="text-gray-500" />
+                    <span>{getMetric(m.view)}</span>
                   </div>
-                  <div>
-                    <span className="font-medium">Clicks:</span>{" "}
-                    {(msg.click ?? 0).toLocaleString()}
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.MousePointer size={14} className="text-gray-500" />
+                    <span>{getMetric(m.click)}</span>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.CheckCircle size={14} className="text-gray-500" />
+                    <span>{getMetric(m.goal)}</span>
                   </div>
                 </div>
               </li>

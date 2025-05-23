@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingChannel {
         /**
          * Hierarchical channel information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * Children categories with hierarchical structure.
              *
@@ -36,13 +37,13 @@ export namespace AutoViewInputSubTypes {
              * @title Name of the channel
             */
             name: string;
-        };
+        }
     }
     export namespace IShoppingChannelCategory {
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -85,98 +86,84 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannel.IHierarchical;
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  const formattedCreatedAt = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
-  const countCategories = (
-    cats: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
-  ): number =>
-    cats.reduce(
-      (sum, cat) =>
-        sum +
-        1 +
-        (cat.children?.length
-          ? countCategories(cat.children)
-          : 0),
-      0,
+  // Recursive renderer for hierarchical categories
+  function renderCategory(
+    category: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical,
+    level = 0
+  ): React.ReactNode {
+    return (
+      <li
+        key={category.id}
+        className={`${
+          level > 0 ? "pl-4 border-l border-gray-200" : ""
+        }`}
+      >
+        <div className="flex items-center space-x-2 py-1">
+          <LucideReact.Tag size={16} className="text-gray-500" />
+          <span className="text-gray-700 truncate">{category.name}</span>
+          <span className="text-sm text-gray-400">({category.code})</span>
+        </div>
+        {category.children.length > 0 && (
+          <ul className="mt-1 space-y-1">
+            {category.children.map((child) =>
+              renderCategory(child, level + 1)
+            )}
+          </ul>
+        )}
+      </li>
     );
+  }
 
-  const totalCategories = countCategories(value.categories);
-
-  // Recursive renderer for nested categories
-  const renderCategories = (
-    cats: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
-    level: number = 0,
-  ): React.ReactNode => (
-    <ul
-      className={`${
-        level === 0 ? "list-disc list-inside" : "list-disc list-inside ml-4"
-      } space-y-2`}
-    >
-      {cats.map((cat) => (
-        <li key={cat.id}>
-          <div className="flex flex-col sm:flex-row sm:justify-between">
-            <span className="font-medium text-gray-800">{cat.name}</span>
-            <span className="text-xs text-gray-500">{cat.code}</span>
-          </div>
-          <div className="text-xs text-gray-500 mt-0.5">
-            Created:{" "}
-            <time dateTime={cat.created_at}>
-              {formatDate(cat.created_at)}
-            </time>
-          </div>
-          {cat.children.length > 0 &&
-            renderCategories(cat.children, level + 1)}
-        </li>
-      ))}
-    </ul>
-  );
-
-  // 2 & 3. Compose and return the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md w-full max-w-lg mx-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900">
+    <div className="p-4 bg-white rounded-lg shadow-md md:w-full">
+      {/* Channel Header */}
+      <div className="flex items-center space-x-2">
+        <LucideReact.ShoppingCart size={20} className="text-blue-500" />
+        <h2 className="text-xl font-semibold text-gray-800 truncate">
           {value.name}
         </h2>
-        <div className="flex flex-wrap items-center space-x-2 mt-1 text-sm text-gray-500">
-          <span>
-            Code:{" "}
-            <span className="font-medium text-gray-700">
-              {value.code}
-            </span>
-          </span>
-          <span>
-            · Created:{" "}
-            <time dateTime={value.created_at}>
-              {formatDate(value.created_at)}
-            </time>
-          </span>
-        </div>
+        <span className="text-sm text-gray-500 truncate">
+          ({value.code})
+        </span>
       </div>
-      <div>
-        <h3 className="text-xl font-medium text-gray-800 mb-3">
-          Categories ({totalCategories})
+
+      {/* Creation Date */}
+      <div className="flex items-center text-sm text-gray-500 mt-2">
+        <LucideReact.Calendar size={16} className="mr-1" />
+        <span>Created on {formattedCreatedAt}</span>
+      </div>
+
+      {/* Categories Tree */}
+      <div className="mt-4">
+        <h3 className="text-lg font-medium text-gray-700 mb-2">
+          Categories
         </h3>
         {value.categories.length > 0 ? (
-          renderCategories(value.categories)
+          <ul className="space-y-1 list-none">
+            {value.categories.map((cat) => renderCategory(cat))}
+          </ul>
         ) : (
-          <p className="text-sm text-gray-500">
-            No categories available.
-          </p>
+          <div className="flex items-center text-gray-400">
+            <LucideReact.AlertCircle size={24} className="mr-2" />
+            <span>No categories available</span>
+          </div>
         )}
       </div>
     </div>

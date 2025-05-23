@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A codespace.
      *
      * @title Codespace
     */
-    export type codespace = {
+    export interface codespace {
         id: number & tags.Type<"int32">;
         /**
          * Automatically generated name of this codespace.
@@ -134,13 +135,13 @@ export namespace AutoViewInputSubTypes {
          * The text to display to a user when a codespace has been stopped for a potentially actionable reason.
         */
         last_known_stop_notice?: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -163,13 +164,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -272,19 +273,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -356,146 +357,132 @@ export type AutoViewInput = AutoViewInputSubTypes.codespace;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation/transformation
+  // 1. Data transformations and derived constants
   const displayName = value.display_name ?? value.name;
-  const repoFullName = value.repository.full_name;
-  const ownerLogin = value.owner.login;
-  const machineInfo = value.machine
-    ? `${value.machine.display_name} (${value.machine.operating_system})`
-    : "Default machine";
-  const lastUsed = value.last_used_at
-    ? new Date(value.last_used_at).toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
-    : "N/A";
-  const createdAt = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const retentionExpires = value.retention_expires_at
-    ? new Date(value.retention_expires_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
-  const idleTimeout =
-    value.idle_timeout_minutes != null
-      ? `${value.idle_timeout_minutes} min`
-      : "Default";
-  const git = value.git_status;
-  const gitParts: string[] = [];
-  if (git.ahead) gitParts.push(`Ahead ${git.ahead}`);
-  if (git.behind) gitParts.push(`Behind ${git.behind}`);
-  if (git.has_unpushed_changes) gitParts.push("Unpushed");
-  if (git.has_uncommitted_changes) gitParts.push("Uncommitted");
-  const gitSummary = gitParts.length > 0 ? gitParts.join(", ") : "Clean";
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const lastUsed = new Date(value.last_used_at).toLocaleString();
+  const machineLabel = value.machine?.display_name ?? "Default Machine";
+  const idleTimeoutLabel =
+    value.idle_timeout_minutes != null ? `${value.idle_timeout_minutes} min` : "Default";
+  const recentCount = value.recent_folders?.length ?? 0;
 
-  // Map state to color badge
-  const stateColorMap: Record<string, string> = {
-    Available: "bg-green-100 text-green-800",
-    Created: "bg-blue-100 text-blue-800",
-    Provisioning: "bg-yellow-100 text-yellow-800",
-    Queued: "bg-yellow-100 text-yellow-800",
-    Deleted: "bg-red-100 text-red-800",
-    Failed: "bg-red-100 text-red-800",
-    Shutdown: "bg-gray-100 text-gray-800",
-    Archived: "bg-gray-100 text-gray-800",
-    Starting: "bg-indigo-100 text-indigo-800",
-    ShuttingDown: "bg-indigo-100 text-indigo-800",
-    Unknown: "bg-gray-100 text-gray-800",
-    Awaiting: "bg-yellow-100 text-yellow-800",
-    Unavailable: "bg-red-100 text-red-800",
-    Exporting: "bg-purple-100 text-purple-800",
-    Updating: "bg-purple-100 text-purple-800",
-    Rebuilding: "bg-purple-100 text-purple-800",
-    Moved: "bg-gray-100 text-gray-800",
-  };
-  const stateBadgeClass =
-    stateColorMap[value.state] || "bg-gray-100 text-gray-800";
+  const stateInfo = (() => {
+    switch (value.state) {
+      case "Available":
+      case "Created":
+      case "Starting":
+        return { icon: LucideReact.CheckCircle, color: "text-green-500", label: value.state };
+      case "Provisioning":
+      case "Queued":
+      case "Awaiting":
+      case "Updating":
+      case "Rebuilding":
+      case "Exporting":
+        return { icon: LucideReact.Loader, color: "text-amber-500 animate-spin", label: value.state };
+      case "Deleted":
+      case "Failed":
+      case "Shutdown":
+      case "Archived":
+        return { icon: LucideReact.AlertTriangle, color: "text-red-500", label: value.state };
+      default:
+        return { icon: LucideReact.Clock, color: "text-gray-500", label: value.state };
+    }
+  })();
+  const StateIcon = stateInfo.icon;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. JSX structure with Tailwind CSS
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow-md p-4 flex flex-col space-y-3">
-      {/* Header */}
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header: Avatar, Name, Owner, State */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          {displayName}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${stateBadgeClass}`}
-        >
-          {value.state}
-        </span>
+        <div className="flex items-center space-x-3">
+          <img
+            src={value.owner.avatar_url}
+            alt={value.owner.login}
+            className="w-10 h-10 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                value.owner.login
+              )}&background=0D8ABC&color=fff`;
+            }}
+          />
+          <div className="flex flex-col">
+            <h2 className="text-lg font-semibold text-gray-800 truncate">{displayName}</h2>
+            <span className="text-sm text-gray-500">@{value.owner.login}</span>
+          </div>
+        </div>
+        <div className="flex items-center space-x-1">
+          <StateIcon size={18} className={stateInfo.color} />
+          <span className="text-sm font-medium text-gray-700">{stateInfo.label}</span>
+        </div>
       </div>
 
-      {/* Repository & Owner */}
-      <div className="text-sm text-gray-700 space-y-1">
-        <div>
-          <span className="font-medium">Repo:</span>{" "}
-          <span className="truncate">{repoFullName}</span>
+      {/* Repository & Location */}
+      <div className="grid grid-cols-2 gap-4 text-gray-700 text-sm">
+        <div className="flex items-center space-x-2">
+          <LucideReact.GitBranch size={16} className="text-gray-500" />
+          <span className="truncate">{value.repository.full_name}</span>
         </div>
-        <div>
-          <span className="font-medium">Owner:</span>{" "}
-          <span>{ownerLogin}</span>
-        </div>
-      </div>
-
-      {/* Machine & Location */}
-      <div className="text-sm text-gray-700 space-y-1">
-        <div>
-          <span className="font-medium">Machine:</span>{" "}
-          <span className="truncate">{machineInfo}</span>
-        </div>
-        <div>
-          <span className="font-medium">Region:</span>{" "}
+        <div className="flex items-center space-x-2">
+          <LucideReact.MapPin size={16} className="text-gray-500" />
           <span>{value.location}</span>
         </div>
       </div>
 
-      {/* Activity & Lifecycle */}
-      <div className="text-sm text-gray-700 space-y-1">
-        <div>
-          <span className="font-medium">Last Used:</span> {lastUsed}
+      {/* Machine & Idle Timeout */}
+      <div className="grid grid-cols-2 gap-4 text-gray-700 text-sm">
+        <div className="flex items-center space-x-2">
+          <LucideReact.Cpu size={16} className="text-gray-500" />
+          <span className="truncate">{machineLabel}</span>
         </div>
-        <div>
-          <span className="font-medium">Created:</span> {createdAt}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Clock size={16} className="text-gray-500" />
+          <span>{idleTimeoutLabel}</span>
         </div>
-        {retentionExpires && (
-          <div>
-            <span className="font-medium">Expires:</span> {retentionExpires}
+      </div>
+
+      {/* Timestamps */}
+      <div className="grid grid-cols-2 gap-4 text-gray-600 text-xs">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={14} className="text-gray-400" />
+          <span>Created:</span>
+          <span className="truncate">{createdAt}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Clock size={14} className="text-gray-400" />
+          <span>Last Used:</span>
+          <span className="truncate">{lastUsed}</span>
+        </div>
+      </div>
+
+      {/* Git Status & Recent Folders */}
+      <div className="grid grid-cols-2 gap-4 text-gray-700 text-sm">
+        <div className="flex items-center space-x-2">
+          <LucideReact.ArrowUp size={16} className="text-gray-500" />
+          <span>{value.git_status.ahead ?? 0} ↑</span>
+          <LucideReact.ArrowDown size={16} className="text-gray-500" />
+          <span>{value.git_status.behind ?? 0} ↓</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Folder size={16} className="text-gray-500" />
+          <span>{recentCount} folders</span>
+        </div>
+      </div>
+
+      {/* Web URL & Prebuild Indicator */}
+      <div className="grid grid-cols-2 gap-4 text-gray-700 text-sm">
+        <div className="flex items-center space-x-2 truncate">
+          <LucideReact.Link size={16} className="text-gray-500" />
+          <span className="truncate">{value.web_url}</span>
+        </div>
+        {value.prebuild && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.PackageCheck size={16} className="text-blue-500" />
+            <span>Prebuilt</span>
           </div>
         )}
       </div>
-
-      {/* Git Status & Idle Timeout */}
-      <div className="text-sm text-gray-700 space-y-1">
-        <div>
-          <span className="font-medium">Git:</span> {gitSummary}
-        </div>
-        <div>
-          <span className="font-medium">Auto-stop:</span> {idleTimeout}
-        </div>
-      </div>
-
-      {/* Recent Folders */}
-      {value.recent_folders.length > 0 && (
-        <div className="text-sm text-gray-700">
-          <span className="font-medium">Recent Folders:</span>{" "}
-          <ul className="list-disc list-inside">
-            {value.recent_folders.slice(0, 3).map((f, i) => (
-              <li key={i} className="truncate">
-                {f}
-              </li>
-            ))}
-            {value.recent_folders.length > 3 && (
-              <li>and {value.recent_folders.length - 3} more</li>
-            )}
-          </ul>
-        </div>
-      )}
     </div>
   );
 }

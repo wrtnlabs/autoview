@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingSale {
         /**
          * Creation information of sale.
         */
-        export type ICreate = {
+        export interface ICreate {
             /**
              * Belonged section's {@link IShoppingSection.code}.
              *
@@ -62,19 +63,19 @@ export namespace AutoViewInputSubTypes {
              * @title List of target categories' {@link IShoppingChannelCategory.code}s
             */
             category_codes: string[];
-        };
+        }
     }
     export namespace IShoppingSaleContent {
-        export type ICreate = {
+        export interface ICreate {
             title: string;
             format: "html" | "md" | "txt";
             body: string;
             files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
             thumbnails: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
-        };
+        }
     }
     export namespace IAttachmentFile {
-        export type ICreate = {
+        export interface ICreate {
             /**
              * File name, except extension.
              *
@@ -97,19 +98,19 @@ export namespace AutoViewInputSubTypes {
              * @title URL path of the real file
             */
             url: string;
-        };
+        }
     }
     export namespace IShoppingSaleUnit {
         /**
          * Creation information of sale unit.
         */
-        export type ICreate = {
+        export interface ICreate {
             /**
              * List of options.
              *
              * @title List of options
             */
-            options: (any | any)[];
+            options: (AutoViewInputSubTypes.IShoppingSaleUnitSelectableOption.ICreate | AutoViewInputSubTypes.IShoppingSaleUnitDescriptiveOption.ICreate)[];
             /**
              * List of final stocks.
              *
@@ -143,19 +144,81 @@ export namespace AutoViewInputSubTypes {
              * @title Whether the unit is required or not
             */
             required: boolean;
-        };
+        }
     }
     export namespace IShoppingSaleUnitSelectableOption {
-        export type ICreate = any;
+        /**
+         * Creation information of the selectable option.
+        */
+        export interface ICreate {
+            /**
+             * Discriminant for the type of selectable option.
+             *
+             * @title Discriminant for the type of selectable option
+            */
+            type: "select";
+            /**
+             * Represents the name of the option.
+             *
+             * @title Represents the name of the option
+            */
+            name: string;
+            /**
+             * Whether the option is variable or not.
+             *
+             * When type of current option is "select", this attribute means whether
+             * selecting different candidate value affects the final stock or not.
+             *
+             * @title Whether the option is variable or not
+            */
+            variable: boolean;
+            /**
+             * List of candidate values.
+             *
+             * @title List of candidate values
+            */
+            candidates: AutoViewInputSubTypes.IShoppingSaleUnitOptionCandidate.ICreate[];
+        }
+    }
+    export namespace IShoppingSaleUnitOptionCandidate {
+        /**
+         * Creation information of the candidate value.
+        */
+        export interface ICreate {
+            /**
+             * Represents the name of the candidate value.
+             *
+             * @title Represents the name of the candidate value
+            */
+            name: string;
+        }
     }
     export namespace IShoppingSaleUnitDescriptiveOption {
-        export type ICreate = any;
+        /**
+         * Creation information of the descriptive option.
+        */
+        export interface ICreate {
+            /**
+             * Type of descriptive option.
+             *
+             * Which typed value should be written when purchasing.
+             *
+             * @title Type of descriptive option
+            */
+            type: "string" | "number" | "boolean";
+            /**
+             * Readable name of the option.
+             *
+             * @title Readable name of the option
+            */
+            name: string;
+        }
     }
     export namespace IShoppingSaleUnitStock {
         /**
          * Creation information of the stock.
         */
-        export type ICreate = {
+        export interface ICreate {
             /**
              * Representative name of the stock.
              *
@@ -182,12 +245,12 @@ export namespace AutoViewInputSubTypes {
              * @title List of choices
             */
             choices: AutoViewInputSubTypes.IShoppingSaleUnitStockChoice.ICreate[];
-        };
+        }
     }
     /**
      * Shopping price interface.
     */
-    export type IShoppingPrice = {
+    export interface IShoppingPrice {
         /**
          * Nominal price.
          *
@@ -204,12 +267,12 @@ export namespace AutoViewInputSubTypes {
          * @title Real price to pay
         */
         real: number;
-    };
+    }
     export namespace IShoppingSaleUnitStockChoice {
         /**
          * Creation information of stock choice.
         */
-        export type ICreate = {
+        export interface ICreate {
             /**
              * Target option's index number in
              * {@link IShoppingSaleUnit.ICreate.options}.
@@ -220,7 +283,7 @@ export namespace AutoViewInputSubTypes {
              * {@link IShoppingSaleUnitSelectableOption.ICreate.candidates}.
             */
             candidate_index: number & tags.Type<"int32">;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSale.ICreate;
@@ -230,114 +293,172 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSale.ICreate;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusLabel = value.status === "paused"
-    ? "Paused"
-    : value.status === "suspended"
-      ? "Suspended"
-      : "No Restriction";
-  const statusColor =
-    value.status === "paused"
-      ? "bg-yellow-100 text-yellow-800"
-      : value.status === "suspended"
-        ? "bg-red-100 text-red-800"
-        : "bg-green-100 text-green-800";
-
-  const openedDate = value.opened_at ? new Date(value.opened_at) : null;
-  const closedDate = value.closed_at ? new Date(value.closed_at) : null;
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    year: "numeric", month: "short", day: "numeric",
-    hour: "2-digit", minute: "2-digit"
+  const statusKey = value.status ?? "active";
+  const statusMapping: Record<
+    string,
+    { text: string; icon: JSX.Element; color: string }
+  > = {
+    paused: {
+      text: "Paused",
+      icon: <LucideReact.Clock size={16} />,
+      color: "text-amber-500",
+    },
+    suspended: {
+      text: "Suspended",
+      icon: <LucideReact.AlertTriangle size={16} />,
+      color: "text-red-500",
+    },
+    active: {
+      text: "Active",
+      icon: <LucideReact.CheckCircle size={16} />,
+      color: "text-green-500",
+    },
   };
-  const formattedOpened = openedDate
-    ? openedDate.toLocaleString(undefined, dateOptions)
-    : null;
-  const formattedClosed = closedDate
-    ? closedDate.toLocaleString(undefined, dateOptions)
-    : null;
-
-  const totalUnits = value.units.length;
-  const totalStocks = value.units.reduce(
-    (sum, unit) => sum + (unit.stocks?.length || 0),
-    0
-  );
+  const statusInfo = statusMapping[statusKey] || statusMapping.active;
+  const openedAt = value.opened_at
+    ? new Date(value.opened_at).toLocaleString()
+    : "Not specified";
+  const closedAt = value.closed_at
+    ? new Date(value.closed_at).toLocaleString()
+    : "Never";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <article className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header: Title and Status */}
-      <header className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <h2 className="text-2xl font-semibold text-gray-800">
           {value.content.title}
         </h2>
-        <div className="mt-2 flex items-center space-x-2">
-          <span className={`px-2 py-1 text-sm font-medium rounded ${statusColor}`}>
-            {statusLabel}
-          </span>
-          <span className="text-sm text-gray-500">
-            Section: {value.section_code}
-          </span>
+        <div className={`flex items-center gap-1 ${statusInfo.color}`}>
+          {statusInfo.icon}
+          <span className="text-sm font-medium">{statusInfo.text}</span>
         </div>
-      </header>
-
-      {/* Date Range */}
-      <div className="mb-4 text-sm text-gray-600">
-        {formattedOpened && (
-          <span>Open: {formattedOpened}</span>
-        )}
-        {formattedClosed ? (
-          <span className="ml-4">Close: {formattedClosed}</span>
-        ) : (
-          <span className="ml-4">Close: Never</span>
-        )}
       </div>
 
-      {/* Thumbnails Preview */}
-      {value.content.thumbnails && value.content.thumbnails.length > 0 && (
-        <div className="mb-4 grid grid-cols-3 gap-2">
-          {value.content.thumbnails.slice(0, 3).map((file, idx) => (
+      {/* Metadata */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Opens: {openedAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Closes: {closedAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Tag size={16} className="text-gray-400" />
+          <span>Section: {value.section_code}</span>
+        </div>
+      </div>
+
+      {/* Content Body */}
+      <p className="text-gray-700 line-clamp-3 whitespace-pre-wrap">
+        {value.content.body}
+      </p>
+
+      {/* Thumbnails */}
+      {value.content.thumbnails.length > 0 && (
+        <div className="flex items-center gap-2">
+          {value.content.thumbnails.slice(0, 3).map((thumb, idx) => (
             <img
               key={idx}
-              src={file.url}
-              alt={file.name || `Thumbnail ${idx + 1}`}
-              className="w-full h-24 object-cover rounded"
+              src={thumb.url}
+              alt={`${value.content.title} thumbnail`}
+              className="w-20 h-20 object-cover rounded"
+              onError={(e) =>
+                (e.currentTarget.src =
+                  "https://placehold.co/80x80/f1f5f9/64748b?text=No+Image")
+              }
             />
+          ))}
+          {value.content.thumbnails.length > 3 && (
+            <span className="text-sm text-gray-500">
+              +{value.content.thumbnails.length - 3}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Tags */}
+      {value.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {value.tags.map((tag, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded"
+            >
+              <LucideReact.Tag size={12} className="mr-1" />
+              {tag}
+            </span>
           ))}
         </div>
       )}
 
-      {/* Description (truncated) */}
-      <section className="mb-4 text-gray-700">
-        <p className="line-clamp-3 overflow-hidden whitespace-pre-wrap">
-          {value.content.body}
-        </p>
-      </section>
-
-      {/* Tags and Categories */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        {value.tags.map((tag, idx) => (
-          <span
-            key={idx}
-            className="px-2 py-1 bg-gray-100 text-gray-800 text-sm rounded"
-          >
-            {tag}
-          </span>
-        ))}
-        {value.category_codes.map((cat, idx) => (
-          <span
-            key={`cat-${idx}`}
-            className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded"
-          >
-            {cat}
-          </span>
-        ))}
+      {/* Categories */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium text-gray-700">Categories:</span>
+        {value.category_codes.length > 0 ? (
+          value.category_codes.map((code, idx) => (
+            <span
+              key={idx}
+              className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded"
+            >
+              {code}
+            </span>
+          ))
+        ) : (
+          <span className="text-sm text-gray-500">All Categories</span>
+        )}
       </div>
 
-      {/* Summary Footer */}
-      <footer className="pt-4 border-t border-gray-200 text-sm text-gray-600">
-        <p>Units: {totalUnits}</p>
-        <p>Stocks: {totalStocks}</p>
-      </footer>
-    </article>
+      {/* Units */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold text-gray-800">Units</h3>
+        {value.units.map((unit, uIndex) => {
+          const realPrices = unit.stocks.map((s) => s.price.real);
+          const minPrice = Math.min(...realPrices);
+          const maxPrice = Math.max(...realPrices);
+          const priceDisplay =
+            minPrice === maxPrice
+              ? `$${minPrice.toLocaleString()}`
+              : `$${minPrice.toLocaleString()} - $${maxPrice.toLocaleString()}`;
+
+          return (
+            <div
+              key={uIndex}
+              className="p-4 bg-gray-50 rounded-lg border border-gray-100"
+            >
+              <div className="flex items-center justify-between">
+                <h4 className="text-md font-medium text-gray-800 flex items-center gap-2">
+                  {unit.name}
+                  {unit.primary && (
+                    <LucideReact.Star
+                      className="text-yellow-400"
+                      size={16}
+                      aria-label="Primary"
+                    />
+                  )}
+                  {unit.required && (
+                    <LucideReact.Lock
+                      className="text-red-500"
+                      size={16}
+                      aria-label="Required"
+                    />
+                  )}
+                </h4>
+                <span className="text-sm font-semibold text-gray-900">
+                  {priceDisplay}
+                </span>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+                <div>Options: {unit.options.length}</div>
+                <div>Variants: {unit.stocks.length}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

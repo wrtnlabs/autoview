@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Customer information, but not a person but a connection basis.
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
      * Therefore, identification and tracking of customers can be done very
      * systematically.
     */
-    export type IShoppingCustomer = {
+    export interface IShoppingCustomer {
         /**
          * Discriminant for the type of customer.
          *
@@ -45,7 +46,7 @@ export namespace AutoViewInputSubTypes {
          *
          * @title Membership information
         */
-        member: null | any;
+        member: null | AutoViewInputSubTypes.IShoppingMember;
         /**
          * Citizen information.
          *
@@ -53,7 +54,7 @@ export namespace AutoViewInputSubTypes {
          *
          * @title Citizen information
         */
-        citizen: null | any;
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
         /**
          * Primary Key.
          *
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
          *
          * @title External user information
         */
-        external_user: null | any;
+        external_user: null | AutoViewInputSubTypes.IShoppingExternalUser;
         /**
          * Connection address.
          *
@@ -102,9 +103,196 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of the connection record
         */
         created_at: string;
-    };
-    export type IShoppingMember = any;
-    export type IShoppingCitizen = any;
+    }
+    /**
+     * Member Account.
+     *
+     * `IShoppingMember` is an entity that symbolizes the case when a
+     * {@link IShoppingCustomer} signs up as a member of this shopping mall
+     * system.
+     *
+     * If a `IShoppingMember` has seller or administrator property. it means that
+     * the {@link IShoppingCustomer} has acting as a {@link IShoppingSeller seller}
+     * or {@link IShoppingAdministrator administrator} at the same time.
+    */
+    export interface IShoppingMember {
+        /**
+         * Citizen information.
+         *
+         * Only when has verified as a citizen, with mobile number and real name.
+         *
+         * For reference, if the member has signed up as a seller or administrator,
+         * this citizen information must be.
+         *
+         * @title Citizen information
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Seller information.
+         *
+         * If the member also signed up as a seller.
+         *
+         * @title Seller information
+        */
+        seller: null | AutoViewInputSubTypes.IShoppingSeller;
+        /**
+         * Administrator information.
+         *
+         * If the member also signed up as an administrator.
+         *
+         * @title Administrator information
+        */
+        administrator: null | AutoViewInputSubTypes.IShoppingAdministrator;
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Nickname that uniquely identifies the member.
+         *
+         * @title Nickname that uniquely identifies the member
+        */
+        nickname: string;
+        /**
+         * List of emails.
+         *
+         * @title List of emails
+        */
+        emails: AutoViewInputSubTypes.IShoppingMemberEmail[];
+        /**
+         * Creation time of record.
+         *
+         * Another words, the time when the member has signed up.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    }
+    /**
+     * Citizen verification information.
+     *
+     * `IShoppingCitizen` is an entity that records the user's
+     * {@link name real name} and {@link mobile} input information.
+     *
+     * For reference, in South Korea, real name authentication is required for
+     * e-commerce participants, so the name attribute is important. However, the
+     * situation is different overseas, so in reality, mobile attributes are the
+     * most important, and identification of individual person is also done based
+     * on this mobile.
+     *
+     * Of course, real name and mobile phone authentication information are
+     * encrypted and stored.
+    */
+    export interface IShoppingCitizen {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Mobile number.
+         *
+         * @title Mobile number
+        */
+        mobile: string;
+        /**
+         * Real name, or equivalent nickname.
+         *
+         * @title Real name, or equivalent nickname
+        */
+        name: string;
+    }
+    /**
+     * Seller information.
+     *
+     * `IShoppingSeller` is an entity that embodies a person who registers
+     * {@link IShoppingSale sales} to operate selling activities, with
+     * {@link IShoppingMember membership} joining.
+     *
+     * For reference, unlike {@link IShoppingCustomer customers} which can
+     * participate even without membership joining, seller must join membership
+     * to operate sales. Also, seller must do the
+     * {@link IShoppingCitizen real-name and mobile authentication}, too.
+    */
+    export interface IShoppingSeller {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation tmie of record.
+         *
+         * Another words, the time when the seller has signed up.
+         *
+         * @title Creation tmie of record
+        */
+        created_at: string;
+    }
+    /**
+     * Administrator account.
+     *
+     * `IShoppingAdministrator` is an entity that embodies a person who manages
+     * the shopping mall system, with {@link IShoppingMember membership} joining.
+     *
+     * For reference, unlike {@link IShoppingCustomer customers} which can participate
+     * even without membership joining, administrator must join membership to operate
+     * managements. Also, administrator must perform the
+     * {@link IShoppingCitizen real-name and mobile authentication}, too.
+    */
+    export interface IShoppingAdministrator {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Creation time of record.
+         *
+         * Another words, the time when the administrator has signed up.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    }
+    /**
+     * Email address of member.
+     *
+     * This shopping mall system allows multiple email addresses to be
+     * registered for one {@link IShoppingMember member}. If you don't have to
+     * plan such multiple email addresses, just use only one.
+    */
+    export interface IShoppingMemberEmail {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Email address value.
+         *
+         * @title Email address value
+        */
+        value: string;
+        /**
+         * Creation time of record.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+    }
     /**
      * Channel information.
      *
@@ -115,7 +303,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -140,8 +328,80 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
-    export type IShoppingExternalUser = any;
+    }
+    /**
+     * External user information.
+     *
+     * `IShoppingExternalUser` is an entity dsigned for when this system needs
+     * to connect with external services and welcome their users as
+     * {@link IShoppingCustomer customers} of this service.
+     *
+     * For reference, customers who connect from an external service must have
+     * this record, and the external service user is identified through the two
+     * attributes {@link application} and {@link uid}. If a customer connected
+     * from an external service completes
+     * {@link IShoppingCitizen real-name authentication} from this service, each
+     * time the external service user reconnects to this service and issues a
+     * new customer authentication token, real-name authentication begins with
+     * completed.
+     *
+     * And {@link password} is the password issued to the user by the external
+     * service system (the so-called permanent user authentication token), and
+     * is never the actual user password. However, for customers who entered the
+     * same application and uid as the current external system user, this is to
+     * determine whether to view this as a correct external system user or a
+     * violation.
+     *
+     * In addition, additional information received from external services can
+     * be recorded in the data field in JSON format.
+    */
+    export interface IShoppingExternalUser {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Citizen activation info.
+         *
+         * @title Citizen activation info
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Creation time of record.
+         *
+         * Another word, first time when the external user connected.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier key of external user from the external system.
+         *
+         * @title Identifier key of external user from the external system
+        */
+        uid: string;
+        /**
+         * Identifier code of the external service.
+         *
+         * It can be same with {@link IShoppingChannel.code} in common.
+         *
+         * @title Identifier code of the external service
+        */
+        application: string;
+        /**
+         * Nickname of external user in the external system.
+         *
+         * @title Nickname of external user in the external system
+        */
+        nickname: string;
+        /**
+         * Additional information about external user from the external
+         * system.
+        */
+        data: any;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingCustomer;
 
@@ -150,85 +410,109 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingCustomer;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statuses: string[] = [];
-  if (value.member) statuses.push("Member");
-  if (value.citizen) statuses.push("Verified");
-  if (value.external_user) statuses.push("External");
+  const formattedDate = new Date(value.created_at).toLocaleString();
 
-  const statusBadges = statuses.length > 0
-    ? statuses.map((s) => {
-        const bgColor =
-          s === "Member"
-            ? "bg-green-500"
-            : s === "Verified"
-            ? "bg-blue-500"
-            : "bg-yellow-500";
-        return (
-          <span
-            key={s}
-            className={`${bgColor} text-white text-xs font-medium px-2 py-1 rounded`}
-          >
-            {s}
-          </span>
-        );
-      })
-    : (
-      <span className="bg-gray-200 text-gray-500 text-xs font-medium px-2 py-1 rounded">
-        Guest
-      </span>
-    );
-
-  let landingHost = value.href;
+  let hostnameHref = "";
   try {
-    landingHost = new URL(value.href).hostname;
+    hostnameHref = new URL(value.href).hostname;
   } catch {
-    // fallback to full href
+    hostnameHref = value.href;
   }
 
-  let refHost = "Direct";
+  let hostnameReferrer = "";
   if (value.referrer) {
     try {
-      refHost = new URL(value.referrer as string).hostname;
+      hostnameReferrer = new URL(value.referrer as string).hostname;
     } catch {
-      refHost = value.referrer as string;
+      hostnameReferrer = value.referrer as string;
     }
   }
 
-  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  });
-
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800">Connection Record</h2>
-      <div className="mt-2 flex flex-wrap gap-2">
-        {statusBadges}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center mb-3">
+        <LucideReact.LogIn className="text-gray-500" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          Connection Record
+        </h2>
       </div>
-      <ul className="mt-4 space-y-2 text-sm text-gray-700">
-        <li>
-          <span className="font-medium">Time:</span> {formattedDate}
-        </li>
-        <li>
-          <span className="font-medium">Channel:</span> {value.channel.name}
-        </li>
-        <li>
-          <span className="font-medium">IP:</span> {value.ip}
-        </li>
-        <li>
-          <span className="font-medium">Page:</span>
-          <span className="block truncate w-full">{landingHost}</span>
-        </li>
-        <li>
-          <span className="font-medium">Referrer:</span>
-          <span className="block truncate w-full">{refHost}</span>
-        </li>
-      </ul>
+
+      {/* Data Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+        {/* ID */}
+        <div className="flex items-center">
+          <LucideReact.Hash className="text-gray-400" size={16} />
+          <span className="ml-1 truncate">{value.id}</span>
+        </div>
+
+        {/* Created At */}
+        <div className="flex items-center">
+          <LucideReact.Calendar className="text-gray-400" size={16} />
+          <span className="ml-1">{formattedDate}</span>
+        </div>
+
+        {/* Channel */}
+        <div className="flex items-center">
+          <LucideReact.Layers className="text-gray-400" size={16} />
+          <span className="ml-1">{value.channel.name}</span>
+        </div>
+
+        {/* Origin URL */}
+        <div className="flex items-center">
+          <LucideReact.Globe className="text-gray-400" size={16} />
+          <span className="ml-1 truncate text-blue-600">{hostnameHref}</span>
+        </div>
+
+        {/* Referrer */}
+        {hostnameReferrer && (
+          <div className="flex items-center">
+            <LucideReact.ChevronsLeft className="text-gray-400" size={16} />
+            <span className="ml-1 truncate text-blue-600">
+              {hostnameReferrer}
+            </span>
+          </div>
+        )}
+
+        {/* IP Address */}
+        <div className="flex items-center">
+          <LucideReact.Terminal className="text-gray-400" size={16} />
+          <span className="ml-1">{value.ip}</span>
+        </div>
+
+        {/* Citizen Info */}
+        {value.citizen && (
+          <div className="col-span-1 sm:col-span-2 grid grid-cols-1 gap-1">
+            <div className="flex items-center">
+              <LucideReact.UserCheck className="text-green-500" size={16} />
+              <span className="ml-1">{value.citizen.name}</span>
+            </div>
+            <div className="flex items-center">
+              <LucideReact.Phone className="text-gray-400" size={16} />
+              <span className="ml-1">{value.citizen.mobile}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Member Info */}
+        {value.member && (
+          <div className="flex items-center col-span-1 sm:col-span-2">
+            <LucideReact.Users className="text-gray-400" size={16} />
+            <span className="ml-1">Member: {value.member.nickname}</span>
+          </div>
+        )}
+
+        {/* External User Info */}
+        {value.external_user && (
+          <div className="flex items-center col-span-1 sm:col-span-2">
+            <LucideReact.ExternalLink className="text-purple-500" size={16} />
+            <span className="ml-1">
+              {value.external_user.application} / {value.external_user.uid}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,11 +1,13 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * An object without any properties.
      *
      * @title Empty Object
     */
-    export type empty_object = {};
+    export interface empty_object {
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.empty_object;
 
@@ -13,27 +15,28 @@ export type AutoViewInput = AutoViewInputSubTypes.empty_object;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Determine if the provided object has any enumerable properties
-  const isEmpty = Object.keys(value).length === 0;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  //    Here, since `AutoViewInputSubTypes.empty_object` has no properties, detect absence of data.
+  const hasData = Object.keys(value).length > 0;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
-  if (isEmpty) {
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!hasData) {
     return (
-      <div className="p-6 bg-white rounded-lg shadow-md flex items-center justify-center">
-        <span className="text-gray-500 italic">No data available.</span>
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle
+          size={48}
+          className="text-gray-300"
+          aria-label="No data available"
+        />
+        <p className="mt-3 text-sm font-medium">No data available</p>
       </div>
     );
   }
 
-  // In the unlikely event the object has properties (future schema changes), render a simple key/value list
+  // 3. Fallback rendering if unexpected properties appear in `value`
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-2">
-      {Object.entries(value).map(([key, val]) => (
-        <div key={key} className="flex justify-between">
-          <span className="font-medium text-gray-700">{key}</span>
-          <span className="text-gray-900">{String(val)}</span>
-        </div>
-      ))}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <p className="text-gray-600 text-sm">No displayable data.</p>
     </div>
   );
 }

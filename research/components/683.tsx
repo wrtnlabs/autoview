@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type code_scanning_sarifs_status = {
+    export interface code_scanning_sarifs_status {
         /**
          * `pending` files have not yet been processed, while `complete` means results from the SARIF have been stored. `failed` files have either not been processed at all, or could only be partially processed.
         */
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
          * Any errors that ocurred during processing of the delivery.
         */
         errors?: string[] | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_scanning_sarifs_status;
 
@@ -23,68 +24,67 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_sarifs_status;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusInfo = (() => {
-    switch (value.processing_status) {
-      case "pending":
-        return { label: "Pending", colorClasses: "bg-yellow-100 text-yellow-800" };
-      case "complete":
-        return { label: "Complete", colorClasses: "bg-green-100 text-green-800" };
-      case "failed":
-        return { label: "Failed", colorClasses: "bg-red-100 text-red-800" };
-      default:
-        return { label: "Unknown", colorClasses: "bg-gray-100 text-gray-800" };
-    }
-  })();
+  const status = value.processing_status ?? 'unknown';
+  let statusIcon: JSX.Element;
+  let statusLabel: string;
 
-  const analysesUrl = value.analyses_url ?? "N/A";
-  const errors = value.errors ?? [];
-  const displayErrors = errors.slice(0, 3);
+  switch (status) {
+    case 'pending':
+      statusIcon = <LucideReact.Clock className="text-amber-500" size={16} />;
+      statusLabel = 'Pending';
+      break;
+    case 'complete':
+      statusIcon = <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      statusLabel = 'Complete';
+      break;
+    case 'failed':
+      statusIcon = <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      statusLabel = 'Failed';
+      break;
+    default:
+      statusIcon = <LucideReact.HelpCircle className="text-gray-500" size={16} />;
+      statusLabel = 'Unknown';
+  }
+
+  const hasErrors = Array.isArray(value.errors) && value.errors.length > 0;
+  const analysesUrl = value.analyses_url;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">
-        SARIF Processing Status
-      </h3>
-
-      <div className="mb-4">
-        <span
-          className={`inline-block px-3 py-1 text-xs font-medium rounded-full ${statusInfo.colorClasses}`}
-        >
-          {statusInfo.label}
-        </span>
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md flex flex-col gap-4">
+      {/* Status */}
+      <div className="flex items-center gap-2">
+        {statusIcon}
+        <span className="text-gray-700 font-semibold">{statusLabel}</span>
       </div>
 
-      <dl className="space-y-4">
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Analyses URL</dt>
-          <dd className="mt-1 text-sm text-blue-600 break-all">
-            {analysesUrl}
-          </dd>
+      {/* Analyses URL */}
+      {analysesUrl ? (
+        <div
+          className="flex items-center gap-2 text-blue-600 text-sm truncate"
+          title={analysesUrl}
+        >
+          <LucideReact.Link size={16} className="min-w-[16px]" />
+          <span className="truncate">{analysesUrl}</span>
         </div>
+      ) : null}
 
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Errors</dt>
-          {errors.length > 0 ? (
-            <dd className="mt-1">
-              <ul className="list-disc list-inside text-sm text-red-700 space-y-1 max-h-24 overflow-y-auto">
-                {displayErrors.map((err, idx) => (
-                  <li key={idx} className="truncate">
-                    {err}
-                  </li>
-                ))}
-                {errors.length > 3 && (
-                  <li className="text-gray-500">
-                    +{errors.length - 3} more
-                  </li>
-                )}
-              </ul>
-            </dd>
-          ) : (
-            <dd className="mt-1 text-sm text-gray-600">None</dd>
-          )}
+      {/* Errors List */}
+      {hasErrors ? (
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2 text-red-600 font-medium">
+            <LucideReact.AlertOctagon size={16} />
+            <span>Errors</span>
+          </div>
+          <ul className="list-disc list-inside text-red-600 text-sm space-y-1">
+            {value.errors!.map((err, idx) => (
+              <li key={idx} className="truncate">
+                {err}
+              </li>
+            ))}
+          </ul>
         </div>
-      </dl>
+      ) : null}
     </div>
   );
 }

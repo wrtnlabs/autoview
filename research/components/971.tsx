@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A version of a software package
      *
      * @title Package Version
     */
-    export type package_version = {
+    export interface package_version {
         /**
          * Unique identifier of the package version.
         */
@@ -41,7 +42,7 @@ export namespace AutoViewInputSubTypes {
                 tag?: string[];
             };
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.package_version[];
 
@@ -50,113 +51,108 @@ export type AutoViewInput = AutoViewInputSubTypes.package_version[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  const sortedPkgs = React.useMemo(
+    () =>
+      [...value].sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      ),
+    [value],
+  );
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!value || value.length === 0) {
+  if (sortedPkgs.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500 italic">
-        No versions available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No package versions available</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {value.map((version) => {
-        const { metadata } = version;
-        const packageType = metadata?.package_type;
-        const containerTags = metadata?.container?.tags ?? [];
-        const dockerTags = metadata?.docker?.tag ?? [];
-        const isDeleted = typeof version.deleted_at === "string";
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {sortedPkgs.map((pkg) => {
+        const {
+          id,
+          name,
+          license,
+          description,
+          metadata,
+          created_at,
+          updated_at,
+          url,
+        } = pkg;
+        const pkgType = metadata?.package_type;
+        const tags = metadata?.container?.tags ?? metadata?.docker?.tag;
 
         return (
           <div
-            key={version.id}
-            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow mobile:w-full"
+            key={id}
+            className="flex flex-col bg-white border border-gray-200 rounded-lg shadow-sm p-4"
           >
-            {/* Header: Version Name and Status Badges */}
-            <div className="flex flex-wrap items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-900 truncate">
-                {version.name}
-              </h2>
-              <div className="flex flex-shrink-0 space-x-2 mt-1">
-                {version.license && (
-                  <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded">
-                    {version.license}
-                  </span>
-                )}
-                {packageType && (
-                  <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-                    {packageType.toUpperCase()}
-                  </span>
-                )}
-                {isDeleted && (
-                  <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs font-medium rounded">
-                    Deleted
-                  </span>
-                )}
+            <div className="flex items-center mb-2">
+              <LucideReact.Box size={20} className="text-gray-600 mr-2" />
+              <h3 className="text-lg font-semibold text-gray-800 truncate">
+                {name}
+              </h3>
+            </div>
+            {license && (
+              <div className="flex items-center text-sm text-gray-500 mb-1">
+                <LucideReact.FileText size={16} className="mr-1" />
+                <span>{license}</span>
+              </div>
+            )}
+            {pkgType && (
+              <div className="flex items-center text-sm text-gray-500 mb-1">
+                <LucideReact.Tag size={16} className="mr-1" />
+                <span className="capitalize">{pkgType}</span>
+              </div>
+            )}
+            <div className="text-sm text-gray-500 mb-2 space-y-1">
+              <div className="flex items-center">
+                <LucideReact.Calendar size={16} className="mr-1" />
+                <span>Created: {formatDate(created_at)}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Calendar size={16} className="mr-1" />
+                <span>Updated: {formatDate(updated_at)}</span>
               </div>
             </div>
-
-            {/* Description */}
-            {version.description && (
-              <p className="mt-2 text-gray-600 text-sm line-clamp-3">
-                {version.description}
+            {description && (
+              <p className="text-sm text-gray-700 mb-2 line-clamp-3">
+                {description}
               </p>
             )}
-
-            {/* Metadata Tags */}
-            {(containerTags.length > 0 || dockerTags.length > 0) && (
-              <div className="mt-3 flex flex-wrap">
-                {containerTags.map((tag, idx) => (
-                  <span
-                    key={`ct-${idx}`}
-                    className="mr-2 mb-2 px-2 py-0.5 bg-gray-200 text-gray-800 text-xs rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                {dockerTags.map((tag, idx) => (
-                  <span
-                    key={`dt-${idx}`}
-                    className="mr-2 mb-2 px-2 py-0.5 bg-gray-200 text-gray-800 text-xs rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
+            {url && (
+              <div className="flex items-center text-sm text-blue-600 truncate mb-2">
+                <LucideReact.Link size={16} className="mr-1" />
+                <span className="truncate">{url}</span>
               </div>
             )}
-
-            {/* Dates */}
-            <div className="mt-4 flex flex-wrap text-gray-500 text-sm space-x-4">
-              <div>
-                Created:&nbsp;
-                <time dateTime={version.created_at}>
-                  {formatDate(version.created_at)}
-                </time>
+            {tags && tags.length > 0 && (
+              <div className="mt-auto flex flex-wrap gap-2">
+                {tags.slice(0, 5).map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded"
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {tags.length > 5 && (
+                  <span className="text-gray-500 text-xs">
+                    +{tags.length - 5} more
+                  </span>
+                )}
               </div>
-              {isDeleted ? (
-                <div className="text-red-600">
-                  Deleted:&nbsp;
-                  <time dateTime={version.deleted_at!}>
-                    {formatDate(version.deleted_at!)}
-                  </time>
-                </div>
-              ) : (
-                <div>
-                  Updated:&nbsp;
-                  <time dateTime={version.updated_at}>
-                    {formatDate(version.updated_at)}
-                  </time>
-                </div>
-              )}
-            </div>
+            )}
           </div>
         );
       })}

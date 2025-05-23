@@ -1,13 +1,14 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type IShoppingDeposit = {
+    export interface IShoppingDeposit {
         id: string & tags.Format<"uuid">;
         created_at: string & tags.Format<"date-time">;
         code: string;
         source: string;
         direction: -1 | 1;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeposit;
 
@@ -15,34 +16,69 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeposit;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const date = new Date(value.created_at);
   const formattedDate = date.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
-  const type = value.direction === 1 ? 'Credit' : 'Debit';
-  const typeClass =
-    value.direction === 1
-      ? 'text-green-700 bg-green-100'
-      : 'text-red-700 bg-red-100';
+  const directionLabel = value.direction === 1 ? 'Deposit' : 'Withdrawal';
+  const directionIcon =
+    value.direction === 1 ? (
+      <LucideReact.PlusCircle
+        className="text-green-500"
+        size={16}
+        aria-label="Deposit"
+      />
+    ) : (
+      <LucideReact.MinusCircle
+        className="text-red-500"
+        size={16}
+        aria-label="Withdrawal"
+      />
+    );
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-gray-900 break-words">
-            {value.code}
-          </h2>
-          <p className="mt-1 text-sm text-gray-500">Source: {value.source}</p>
-          <p className="mt-1 text-sm text-gray-500">Date: {formattedDate}</p>
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      {/* Direction */}
+      <div className="flex items-center space-x-2">
+        {directionIcon}
+        <span className="font-semibold text-gray-800">{directionLabel}</span>
+      </div>
+
+      {/* Details */}
+      <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row sm:space-x-6 text-gray-600 text-sm">
+        {/* Code */}
+        <div className="flex items-center truncate">
+          <LucideReact.Hash
+            className="text-gray-400"
+            size={16}
+            aria-hidden="true"
+          />
+          <span className="ml-1">{value.code}</span>
         </div>
-        <span
-          className={`mt-2 sm:mt-0 sm:ml-4 inline-block px-2 py-1 text-xs font-semibold rounded ${typeClass}`}
-        >
-          {type}
-        </span>
+        {/* Date */}
+        <div className="flex items-center mt-2 sm:mt-0">
+          <LucideReact.Calendar
+            className="text-gray-400"
+            size={16}
+            aria-hidden="true"
+          />
+          <span className="ml-1">{formattedDate}</span>
+        </div>
+        {/* Source */}
+        <div className="flex items-center mt-2 sm:mt-0 truncate">
+          <LucideReact.Link
+            className="text-gray-400"
+            size={16}
+            aria-hidden="true"
+          />
+          <span className="ml-1">{value.source}</span>
+        </div>
       </div>
     </div>
   );

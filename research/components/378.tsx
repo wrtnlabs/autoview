@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A Github-hosted hosted runner.
      *
      * @title GitHub-hosted hosted runner
     */
-    export type actions_hosted_runner = {
+    export interface actions_hosted_runner {
         /**
          * The unique identifier of the hosted runner.
         */
@@ -45,7 +46,7 @@ export namespace AutoViewInputSubTypes {
          * The time at which the runner was last used, in ISO 8601 format.
         */
         last_active_on?: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * Provides details of a hosted runner image
      *
@@ -74,7 +75,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Github-owned VM details.
     */
-    export type actions_hosted_runner_machine_spec = {
+    export interface actions_hosted_runner_machine_spec {
         /**
          * The ID used for the `size` parameter when creating a new runner.
         */
@@ -91,13 +92,13 @@ export namespace AutoViewInputSubTypes {
          * The available SSD storage for the machine spec.
         */
         storage_gb: number & tags.Type<"int32">;
-    };
+    }
     /**
      * Provides details of Public IP for a GitHub-hosted larger runners
      *
      * @title Public IP for a GitHub-hosted larger runners.
     */
-    export type public_ip = {
+    export interface public_ip {
         /**
          * Whether public IP is enabled.
         */
@@ -110,7 +111,7 @@ export namespace AutoViewInputSubTypes {
          * The length of the IP prefix.
         */
         length?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_hosted_runner;
 
@@ -119,123 +120,117 @@ export type AutoViewInput = AutoViewInputSubTypes.actions_hosted_runner;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedLastActive =
-    value.last_active_on && !isNaN(Date.parse(value.last_active_on))
-      ? new Date(value.last_active_on).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "Never";
+  const {
+    name,
+    status,
+    platform,
+    image_details,
+    machine_size_details,
+    maximum_runners = 10,
+    public_ip_enabled,
+    public_ips,
+    last_active_on,
+  } = value;
 
-  const maxRunners = value.maximum_runners ?? 10;
+  const statusMap: Record<
+    AutoViewInput["status"],
+    { icon: React.ReactNode; label: string }
+  > = {
+    Ready: {
+      icon: <LucideReact.CheckCircle size={20} className="text-green-500" />,
+      label: "Ready",
+    },
+    Provisioning: {
+      icon: (
+        <LucideReact.Loader
+          size={20}
+          className="animate-spin text-amber-500"
+        />
+      ),
+      label: "Provisioning",
+    },
+    Shutdown: {
+      icon: <LucideReact.Power size={20} className="text-gray-500" />,
+      label: "Shutdown",
+    },
+    Deleting: {
+      icon: <LucideReact.Trash2 size={20} className="text-red-500" />,
+      label: "Deleting",
+    },
+    Stuck: {
+      icon: <LucideReact.AlertTriangle size={20} className="text-red-500" />,
+      label: "Stuck",
+    },
+  };
 
-  const statusStyles = (() => {
-    switch (value.status) {
-      case "Ready":
-        return "bg-green-100 text-green-800";
-      case "Provisioning":
-        return "bg-yellow-100 text-yellow-800";
-      case "Shutdown":
-        return "bg-gray-100 text-gray-800";
-      case "Deleting":
-        return "bg-red-100 text-red-800";
-      case "Stuck":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  })();
+  const { icon: StatusIcon } = statusMap[status];
+  const formattedLastActive = last_active_on
+    ? new Date(last_active_on).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Never active";
+
+  const ipCount = public_ips?.length ?? 0;
+  const imageName = image_details?.display_name ?? "N/A";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-lg mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-semibold text-gray-900 truncate">{value.name}</h2>
-        <span
-          className={`mt-2 sm:mt-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles}`}
-        >
-          {value.status}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      {/* Header: Status and Name */}
+      <div className="flex items-center gap-2">
+        {StatusIcon}
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {name}
+        </h2>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700 text-sm">
-        <div>
-          <h3 className="font-medium text-gray-800 mb-1">Image Details</h3>
-          {value.image_details ? (
-            <ul className="space-y-1">
-              <li>
-                <span className="font-semibold">Name:</span> {value.image_details.display_name}
-              </li>
-              <li>
-                <span className="font-semibold">ID:</span> {value.image_details.id}
-              </li>
-              <li>
-                <span className="font-semibold">Size:</span> {value.image_details.size_gb} GB
-              </li>
-              <li>
-                <span className="font-semibold">Source:</span> {value.image_details.source}
-              </li>
-            </ul>
-          ) : (
-            <p className="text-gray-500">No image information available.</p>
-          )}
-        </div>
+      {/* Platform Badge */}
+      <div className="flex items-center text-sm text-gray-600">
+        <LucideReact.Terminal size={16} className="mr-1" />
+        <span className="capitalize">{platform}</span>
+      </div>
 
-        <div>
-          <h3 className="font-medium text-gray-800 mb-1">Machine Specs</h3>
-          <ul className="space-y-1">
-            <li>
-              <span className="font-semibold">CPU Cores:</span> {value.machine_size_details.cpu_cores}
-            </li>
-            <li>
-              <span className="font-semibold">Memory:</span> {value.machine_size_details.memory_gb} GB
-            </li>
-            <li>
-              <span className="font-semibold">Storage:</span> {value.machine_size_details.storage_gb} GB
-            </li>
-          </ul>
+      {/* Machine Specs */}
+      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Cpu size={16} />
+          <span>{machine_size_details.cpu_cores} CPU</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Server size={16} />
+          <span>{machine_size_details.memory_gb} GB RAM</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.HardDrive size={16} />
+          <span>{machine_size_details.storage_gb} GB Storage</span>
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm">
-        <div>
-          <h4 className="font-medium text-gray-800">Platform</h4>
-          <p className="mt-1 text-gray-700">{value.platform}</p>
+      {/* Additional Details Grid */}
+      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 w-full md:w-auto">
+        <div className="flex items-center gap-1 truncate">
+          <LucideReact.Image size={16} />
+          <span className="truncate">{imageName}</span>
         </div>
-        <div>
-          <h4 className="font-medium text-gray-800">Max Runners</h4>
-          <p className="mt-1 text-gray-700">{maxRunners}</p>
+        <div className="flex items-center gap-1">
+          <LucideReact.Users size={16} />
+          <span>Max runners: {maximum_runners}</span>
         </div>
-        <div>
-          <h4 className="font-medium text-gray-800">Last Active</h4>
-          <p className="mt-1 text-gray-700">{formattedLastActive}</p>
+        <div className="flex items-center gap-1">
+          <LucideReact.Globe size={16} />
+          <span>
+            {public_ip_enabled
+              ? `${ipCount} public IP${ipCount === 1 ? "" : "s"}`
+              : "No public IP"}
+          </span>
         </div>
-        <div>
-          <h4 className="font-medium text-gray-800">Public IP</h4>
-          <div className="mt-1">
-            {value.public_ip_enabled ? (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
-                Enabled
-              </span>
-            ) : (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-xs font-medium">
-                Disabled
-              </span>
-            )}
-            {value.public_ip_enabled && value.public_ips && value.public_ips.length > 0 && (
-              <ul className="mt-2 list-disc list-inside text-gray-600 text-xs">
-                {value.public_ips.map((ip, idx) => (
-                  <li key={idx}>
-                    {ip.prefix}
-                    {ip.length ? `/${ip.length}` : ""}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>{formattedLastActive}</span>
         </div>
       </div>
     </div>

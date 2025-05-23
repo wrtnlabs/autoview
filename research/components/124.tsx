@@ -1,10 +1,11 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingDeliveryPiece {
         /**
          * Creation information of the delivery piece.
         */
-        export type ICreate = {
+        export interface ICreate {
             /**
              * Target order's {@link IShoppingOrderPublish.id}.
              *
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
              * @title Quantity of the stock
             */
             quantity: number;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeliveryPiece.ICreate[];
@@ -40,66 +41,77 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeliveryPiece.ICreate
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalPieces = value.length;
-  const totalQuantity = value.reduce((sum, piece) => sum + piece.quantity, 0);
+  // Group delivery pieces by their target order (publish_id)
+  const piecesByOrder = value.reduce<Record<string, AutoViewInputSubTypes.IShoppingDeliveryPiece.ICreate[]>>(
+    (acc, piece) => {
+      const { publish_id } = piece;
+      if (!acc[publish_id]) acc[publish_id] = [];
+      acc[publish_id].push(piece);
+      return acc;
+    },
+    {}
+  );
 
-  const formatNumber = (num: number): string =>
-    Number.isInteger(num) ? `${num}` : num.toFixed(2);
-
-  const maskId = (id: string): string =>
-    id.length > 12 ? `${id.slice(0, 8)}...${id.slice(-4)}` : id;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Summary */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <div className="text-sm text-gray-500">Total Pieces</div>
-          <div className="mt-1 text-2xl font-semibold text-gray-900">
-            {totalPieces}
-          </div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">Total Quantity</div>
-          <div className="mt-1 text-2xl font-semibold text-gray-900">
-            {formatNumber(totalQuantity)}
-          </div>
-        </div>
+  // If no data is provided, show an empty state
+  if (value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No delivery pieces available</span>
       </div>
+    );
+  }
 
-      {/* List of Delivery Pieces */}
-      <ul className="divide-y divide-gray-200">
-        {value.map((piece, idx) => (
-          <li
-            key={`piece-${idx}`}
-            className="py-4 flex flex-col sm:flex-row sm:justify-between items-start sm:items-center"
-          >
-            {/* Quantity Badge */}
-            <div className="mb-2 sm:mb-0">
-              <span className="inline-block bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
-                Qty: {formatNumber(piece.quantity)}
+  // Compose the UI: a card per order with a simple table of pieces
+  return (
+    <div className="w-full space-y-6 p-4">
+      {Object.entries(piecesByOrder).map(([orderId, pieces]) => {
+        // Calculate total quantity for this order
+        const totalQuantity = pieces.reduce((sum, p) => sum + p.quantity, 0);
+
+        return (
+          <div key={orderId} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            {/* Order header */}
+            <div className="flex items-center bg-gray-50 px-4 py-3 border-b border-gray-200">
+              <LucideReact.Truck size={20} className="text-blue-500" />
+              <h2 className="ml-2 text-lg font-semibold text-gray-800 truncate">
+                Order {orderId}
+              </h2>
+            </div>
+
+            {/* Table header */}
+            <div className="grid grid-cols-3 items-center gap-4 px-4 py-2 text-sm font-medium text-gray-600 border-b border-gray-200">
+              <div>Good ID</div>
+              <div>Stock ID</div>
+              <div className="text-right">Quantity</div>
+            </div>
+
+            {/* Table rows */}
+            <div className="divide-y divide-gray-100">
+              {pieces.map((piece, idx) => (
+                <div
+                  key={`${orderId}-${idx}`}
+                  className="grid grid-cols-3 items-center gap-4 px-4 py-2 text-sm text-gray-700"
+                >
+                  <div className="truncate">{piece.good_id}</div>
+                  <div className="truncate">{piece.stock_id}</div>
+                  <div className="text-right">{piece.quantity}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Order summary */}
+            <div className="flex justify-end px-4 py-3 bg-gray-50">
+              <span className="text-sm font-medium text-gray-700">
+                Total Quantity:
+              </span>
+              <span className="ml-1 text-sm font-semibold text-gray-900">
+                {totalQuantity}
               </span>
             </div>
-            {/* Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-4 text-sm text-gray-700">
-              <div>
-                <div className="text-gray-500">Order ID</div>
-                <div className="mt-0.5 font-medium">{maskId(piece.publish_id)}</div>
-              </div>
-              <div>
-                <div className="text-gray-500">Product ID</div>
-                <div className="mt-0.5 font-medium">{maskId(piece.good_id)}</div>
-              </div>
-              <div>
-                <div className="text-gray-500">Stock ID</div>
-                <div className="mt-0.5 font-medium">{maskId(piece.stock_id)}</div>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        );
+      })}
     </div>
   );
 }

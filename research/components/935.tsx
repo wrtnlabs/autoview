@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiUserCodespacesSecretsRepositories {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             repositories: AutoViewInputSubTypes.minimal_repository[];
-        };
+        }
     }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -115,13 +116,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -144,19 +145,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -194,66 +195,97 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiUserCodespacesSecretsRepos
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalCount = value.total_count;
-  const formatDate = (dateStr?: string | null): string =>
-    dateStr
-      ? new Date(dateStr).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "";
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-gray-50">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
-        Repositories ({totalCount})
-      </h2>
-      <div className="space-y-4">
-        {value.repositories.map((repo) => {
-          const privacyLabel = repo.private ? "Private" : "Public";
-          const updatedLabel = formatDate(repo.updated_at);
-          return (
+    <div className="p-4">
+      {/* Header with total count */}
+      <div className="flex items-center mb-4">
+        <LucideReact.List className="text-gray-500 mr-2" size={20} />
+        <h2 className="text-xl font-semibold text-gray-800">
+          Repositories ({value.total_count})
+        </h2>
+      </div>
+
+      {/* Empty state */}
+      {value.repositories.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={48} className="mb-2" />
+          <span>No repositories available</span>
+        </div>
+      ) : (
+        /* List of repository cards */
+        <div className="space-y-4">
+          {value.repositories.map((repo) => (
             <div
               key={repo.id}
-              className="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-white rounded-lg shadow"
+              className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
             >
-              <img
-                src={repo.owner.avatar_url}
-                alt={`${repo.owner.login} avatar`}
-                className="w-12 h-12 rounded-full mr-4 mb-3 sm:mb-0 flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-blue-600 truncate">
-                    {repo.name}
-                  </h3>
-                  <span
-                    className={`text-xs font-semibold ${
-                      repo.private ? "text-red-600" : "text-green-600"
-                    }`}
-                  >
-                    {privacyLabel}
+              {/* Title and status icons */}
+              <div className="flex items-start justify-between">
+                <h3 className="text-lg font-semibold text-gray-800 truncate">
+                  {repo.name}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  {repo.private && (
+                    <LucideReact.Lock
+                      size={16}
+                      className="text-gray-500"
+                      role="img"
+                      aria-label="Private repository"
+                    />
+                  )}
+                  {repo.fork && (
+                    <LucideReact.GitBranch
+                      size={16}
+                      className="text-gray-500"
+                      role="img"
+                      aria-label="Forked repository"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Description */}
+              <p className="mt-1 text-gray-600 line-clamp-2">
+                {repo.description ?? "No description"}
+              </p>
+
+              {/* Meta info */}
+              <div className="mt-3 flex flex-wrap items-center text-sm text-gray-500 gap-x-4 gap-y-2">
+                <div className="flex items-center">
+                  <LucideReact.User size={14} className="mr-1" />
+                  <span className="truncate max-w-xs">{repo.owner.login}</span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Star size={14} className="mr-1 text-amber-400" />
+                  <span>{repo.stargazers_count ?? 0}</span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Eye size={14} className="mr-1" />
+                  <span>{repo.watchers_count ?? 0}</span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  <span>
+                    {repo.updated_at ? formatDate(repo.updated_at) : "-"}
                   </span>
                 </div>
-                {repo.description && (
-                  <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                    {repo.description}
-                  </p>
-                )}
-                <div className="flex flex-wrap items-center text-xs text-gray-500 mt-2 space-x-4">
-                  {repo.language && <span>{repo.language}</span>}
-                  <span>★ {repo.stargazers_count ?? 0}</span>
-                  <span>🍴 {repo.forks_count ?? 0}</span>
-                  {updatedLabel && <span>Updated: {updatedLabel}</span>}
+                <div className="flex items-center w-full md:w-auto">
+                  <LucideReact.Link size={14} className="mr-1" />
+                  <span className="truncate max-w-xs">{repo.html_url}</span>
                 </div>
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

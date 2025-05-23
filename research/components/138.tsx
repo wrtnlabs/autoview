@@ -1,8 +1,9 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingSaleInquiryAnswer {
-        export type ISnapshot = {
+        export interface ISnapshot {
             /**
              * Primary Key.
              *
@@ -43,10 +44,10 @@ export namespace AutoViewInputSubTypes {
              * @title List of attachment files
             */
             files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
-        };
+        }
     }
     export namespace IAttachmentFile {
-        export type ICreate = {
+        export interface ICreate {
             /**
              * File name, except extension.
              *
@@ -69,7 +70,7 @@ export namespace AutoViewInputSubTypes {
              * @title URL path of the real file
             */
             url: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryAnswer.ISnapshot;
@@ -81,51 +82,70 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
   });
 
-  const maxBodyLength = 200;
-  const truncatedBody =
-    value.body.length > maxBodyLength
-      ? value.body.slice(0, maxBodyLength) + "…"
-      : value.body;
+  function stripHTML(input: string): string {
+    return input.replace(/<[^>]+>/g, "");
+  }
+
+  const plainTextBody =
+    value.format === "html" ? stripHTML(value.body) : value.body;
+  const displayBody =
+    plainTextBody.length > 200
+      ? plainTextBody.slice(0, 200) + "…"
+      : plainTextBody;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex flex-col space-y-3">
+    <article className="p-4 bg-white rounded-lg shadow-sm">
+      <header className="mb-3">
         <h2 className="text-lg font-semibold text-gray-800 truncate">
           {value.title}
         </h2>
-        <time className="text-sm text-gray-500">{formattedDate}</time>
-        <p className="text-gray-700 text-sm whitespace-pre-wrap">{truncatedBody}</p>
-        {value.files.length > 0 && (
-          <div>
-            <h3 className="text-sm font-medium text-gray-800 mb-1">
-              Attachments
-            </h3>
-            <ul className="space-y-1">
-              {value.files.map((file, idx) => {
-                const fileName = file.extension
-                  ? `${file.name}.${file.extension}`
-                  : file.name;
-                return (
-                  <li
-                    key={idx}
-                    className="text-sm text-gray-600 truncate"
-                    title={fileName}
+        <div className="flex items-center text-sm text-gray-500 mt-1">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <time dateTime={value.created_at}>{formattedDate}</time>
+        </div>
+      </header>
+
+      <section className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-3">
+        {displayBody}
+      </section>
+
+      {value.files.length > 0 && (
+        <footer className="border-t pt-3">
+          <h3 className="text-sm font-medium text-gray-600 mb-2">
+            Attachments
+          </h3>
+          <ul className="space-y-1">
+            {value.files.map((file, idx) => {
+              const fileName = file.extension
+                ? `${file.name}.${file.extension}`
+                : file.name;
+              return (
+                <li key={idx}>
+                  <a
+                    href={file.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center text-sm text-blue-600 hover:underline"
                   >
-                    📎 {fileName}
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
-      </div>
-    </div>
+                    <LucideReact.FileText
+                      size={16}
+                      className="mr-1 text-indigo-500"
+                    />
+                    <span className="truncate">{fileName}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </footer>
+      )}
+    </article>
   );
 }

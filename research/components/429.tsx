@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 
@@ -144,152 +145,95 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso?: string) => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, { dateStyle: "medium", timeStyle: "short" });
-  };
+  const name = value.name ?? "Unnamed Configuration";
+  const targetType = value.target_type ?? "not_set";
+  const description = value.description;
+  const createdAt = value.created_at ? new Date(value.created_at).toLocaleString() : undefined;
+  const updatedAt = value.updated_at ? new Date(value.updated_at).toLocaleString() : undefined;
+  const isEnforced = value.enforcement === "enforced";
 
-  const getStateBadge = (
-    state?: "enabled" | "disabled" | "not_set"
-  ): React.ReactNode => {
-    if (!state) return null;
-    const map: Record<string, [string, string, string]> = {
-      enabled: ["Enabled", "bg-green-100", "text-green-800"],
-      disabled: ["Disabled", "bg-red-100", "text-red-800"],
-      not_set: ["Not Set", "bg-gray-100", "text-gray-800"],
-    };
-    const [label, bg, text] = map[state] || map.not_set;
-    return (
-      <span
-        className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${bg} ${text}`}
-      >
-        {label}
-      </span>
-    );
-  };
-
-  // Prepare feature list
+  // Map feature flags to display labels and statuses
   const features: { label: string; status?: "enabled" | "disabled" | "not_set" }[] = [
     { label: "Advanced Security", status: value.advanced_security },
     { label: "Dependency Graph", status: value.dependency_graph },
-    { label: "Autosubmit", status: value.dependency_graph_autosubmit_action },
+    { label: "Dependency Autosubmit", status: value.dependency_graph_autosubmit_action },
     { label: "Dependabot Alerts", status: value.dependabot_alerts },
     { label: "Dependabot Security Updates", status: value.dependabot_security_updates },
     { label: "Code Scanning Setup", status: value.code_scanning_default_setup },
-    { label: "Delegated Scan Dismissal", status: value.code_scanning_delegated_alert_dismissal },
     { label: "Secret Scanning", status: value.secret_scanning },
     { label: "Push Protection", status: value.secret_scanning_push_protection },
-    { label: "Delegated Bypass", status: value.secret_scanning_delegated_bypass },
-    { label: "Validity Checks", status: value.secret_scanning_validity_checks },
-    { label: "Non-Provider Patterns", status: value.secret_scanning_non_provider_patterns },
-    { label: "Copilot Scanning", status: value.secret_scanning_generic_secrets },
-    { label: "Delegated Alert Dismissal", status: value.secret_scanning_delegated_alert_dismissal },
-    { label: "Vulnerability Reporting", status: value.private_vulnerability_reporting },
-  ];
+    { label: "Private Vulnerability Reporting", status: value.private_vulnerability_reporting },
+  ].filter((f) => f.status !== undefined);
+
+  // Helper to render status icon
+  const renderStatusIcon = (status?: string) => {
+    switch (status) {
+      case "enabled":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "disabled":
+        return <LucideReact.XCircle className="text-red-500" size={16} />;
+      case "not_set":
+        return <LucideReact.Clock className="text-amber-500" size={16} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400" size={16} />;
+    }
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <header>
-        <h2 className="text-xl font-semibold text-gray-900 truncate">
-          {value.name || "Unnamed Configuration"}
-        </h2>
-        <div className="mt-1 text-sm text-gray-500">
-          {value.target_type
-            ? value.target_type.charAt(0).toUpperCase() + value.target_type.slice(1)
-            : "Type Unknown"}
-        </div>
-      </header>
-
-      {value.description && (
-        <p className="mt-3 text-gray-700 line-clamp-2">{value.description}</p>
-      )}
-
-      <section className="mt-4 grid grid-cols-2 gap-2">
-        {features.map((feat, i) =>
-          feat.status ? (
-            <div key={i} className="flex items-center space-x-2">
-              <span className="text-gray-700 text-sm">{feat.label}:</span>
-              {getStateBadge(feat.status)}
-            </div>
-          ) : null
-        )}
-      </section>
-
-      {/* Sub-options */}
-      {value.dependency_graph_autosubmit_action_options?.labeled_runners != null && (
-        <div className="mt-3 ml-4 text-sm text-gray-600">
-          <span className="font-medium">Autosubmit Runner:</span>{" "}
-          {value.dependency_graph_autosubmit_action_options.labeled_runners
-            ? "Labeled"
-            : "Standard"}
-        </div>
-      )}
-
-      {value.code_scanning_default_setup_options && (
-        <div className="mt-3 ml-4 space-y-1 text-sm text-gray-600">
-          <div>
-            <span className="font-medium">Scanner Runner:</span>{" "}
-            {value.code_scanning_default_setup_options.runner_type || "Not Set"}
-          </div>
-          {value.code_scanning_default_setup_options.runner_label && (
-            <div>
-              <span className="font-medium">Runner Label:</span>{" "}
-              {value.code_scanning_default_setup_options.runner_label}
-            </div>
-          )}
-        </div>
-      )}
-
-      {value.secret_scanning_delegated_bypass_options?.reviewers && (
-        <div className="mt-3 ml-4">
-          <span className="font-medium text-gray-700 text-sm">
-            Bypass Reviewers:
+    <div className="p-6 bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
+          <span className="capitalize bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
+            {targetType}
           </span>
-          <div className="mt-1 flex flex-wrap gap-1">
-            {value.secret_scanning_delegated_bypass_options.reviewers.map(
-              (r, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-0.5 bg-gray-200 text-gray-800 text-xs rounded"
-                >
-                  {r.reviewer_type}:{r.reviewer_id}
-                </span>
-              )
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Enforcement */}
-      {value.enforcement && (
-        <div className="mt-4 flex items-center space-x-2">
-          <span className="text-gray-700 text-sm">Enforcement:</span>
-          {value.enforcement === "enforced" ? (
-            <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
-              Enforced
-            </span>
-          ) : (
-            <span className="inline-block px-2 py-0.5 text-xs font-medium rounded-full bg-red-100 text-red-800">
-              Unenforced
-            </span>
+          {value.enforcement && (
+            <div className="flex items-center gap-1">
+              {isEnforced ? (
+                <LucideReact.ShieldCheck className="text-green-500" size={16} />
+              ) : (
+                <LucideReact.ShieldOff className="text-red-500" size={16} />
+              )}
+              <span className="text-xs text-gray-700">{isEnforced ? "Enforced" : "Unenforced"}</span>
+            </div>
           )}
         </div>
+      </div>
+
+      {description && (
+        <p className="mt-2 text-gray-600 text-sm line-clamp-3">{description}</p>
       )}
 
-      {/* URLs */}
-      {value.html_url && (
-        <div className="mt-4 text-blue-600 text-sm truncate">{value.html_url}</div>
-      )}
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
+        {features.map((feature, idx) => (
+          <div key={idx} className="flex items-center gap-2">
+            {renderStatusIcon(feature.status)}
+            <span className="text-sm text-gray-700">{feature.label}</span>
+          </div>
+        ))}
+      </div>
 
-      {/* Timestamps */}
-      {(value.created_at || value.updated_at) && (
-        <div className="mt-4 text-xs text-gray-400 space-y-1">
-          {value.created_at && <div>Created: {formatDate(value.created_at)}</div>}
-          {value.updated_at && <div>Updated: {formatDate(value.updated_at)}</div>}
-        </div>
-      )}
-    </article>
+      <div className="mt-4 text-gray-500 text-xs flex flex-wrap gap-4">
+        {createdAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Created: {createdAt}</span>
+          </div>
+        )}
+        {updatedAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Updated: {updatedAt}</span>
+          </div>
+        )}
+        {value.html_url && (
+          <div className="flex items-center gap-1 truncate">
+            <LucideReact.Link size={16} />
+            <span className="truncate">{value.html_url}</span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposActionsWorkflowsRuns {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             workflow_runs: AutoViewInputSubTypes.workflow_run[];
-        };
+        }
     }
     /**
      * An invocation of a workflow
      *
      * @title Workflow Run
     */
-    export type workflow_run = {
+    export interface workflow_run {
         /**
          * The ID of the workflow run.
         */
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
          * Attempt number of the run, 1 for first attempt and higher if the workflow was re-run.
         */
         run_attempt?: number & tags.Type<"int32">;
-        referenced_workflows?: any[] | null;
+        referenced_workflows?: AutoViewInputSubTypes.referenced_workflow[] | null;
         event: string;
         status: string | null;
         conclusion: string | null;
@@ -63,7 +64,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * Pull requests that are open with a `head_sha` or `head_branch` that matches the workflow run. The returned pull requests do not necessarily indicate pull requests that triggered the run.
         */
-        pull_requests: any[] | null;
+        pull_requests: AutoViewInputSubTypes.pull_request_minimal[] | null;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         actor?: AutoViewInputSubTypes.simple_user;
@@ -112,15 +113,49 @@ export namespace AutoViewInputSubTypes {
          * The event-specific title associated with the run or the run-name if set, or the value of `run-name` if it is set in the workflow.
         */
         display_title: string;
-    };
-    export type referenced_workflow = any;
-    export type pull_request_minimal = any;
+    }
+    /**
+     * A workflow referenced/reused by the initial caller workflow
+     *
+     * @title Referenced workflow
+    */
+    export interface referenced_workflow {
+        path: string;
+        sha: string;
+        ref?: string;
+    }
+    /**
+     * @title Pull Request Minimal
+    */
+    export interface pull_request_minimal {
+        id: number & tags.Type<"int32">;
+        number: number & tags.Type<"int32">;
+        url: string;
+        head: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+        base: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -143,7 +178,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A commit.
      *
@@ -165,7 +200,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * Timestamp of the commit
         */
-        timestamp: string & tags.Format<"date-time">;
+        timestamp: string;
         /**
          * Information about the Git author
         */
@@ -177,7 +212,7 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's author
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
         /**
          * Information about the Git committer
@@ -190,7 +225,7 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's committer
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
     } | null;
     /**
@@ -198,7 +233,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -301,19 +336,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -351,81 +386,112 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsWorkflowsRuns.
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { total_count, workflow_runs } = value;
-  const formatDate = (s: string | undefined | null): string =>
-    s ? new Date(s).toLocaleString() : '—';
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
 
-  const statusStyle = (status: string | null): string => {
-    switch (status) {
-      case 'queued':
-        return 'bg-gray-200 text-gray-800';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+  const getStatusIcon = (run: AutoViewInputSubTypes.workflow_run): React.ReactNode => {
+    if (run.status === 'completed') {
+      switch (run.conclusion) {
+        case 'success':
+          return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+        case 'failure':
+        case 'timed_out':
+        case 'action_required':
+        case 'cancelled':
+          return <LucideReact.XCircle className="text-red-500" size={16} />;
+        default:
+          return <LucideReact.HelpCircle className="text-gray-500" size={16} />;
+      }
     }
-  };
-
-  const conclusionStyle = (c: string | null): string => {
-    switch (c) {
-      case 'success':
-        return 'bg-green-100 text-green-800';
-      case 'failure':
-        return 'bg-red-100 text-red-800';
-      case 'cancelled':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+    if (run.status === 'in_progress') {
+      return <LucideReact.Activity className="text-blue-500" size={16} />;
     }
+    if (run.status === 'queued') {
+      return <LucideReact.Clock className="text-amber-500" size={16} />;
+    }
+    return <LucideReact.Circle className="text-gray-400" size={16} />;
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
-        Workflow Runs ({total_count})
-      </h2>
-      <div className="space-y-4">
-        {workflow_runs.map((run) => (
-          <div
-            key={run.id}
-            className="p-4 bg-gray-50 rounded-md flex flex-col sm:flex-row justify-between items-start sm:items-center"
-          >
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-medium text-gray-900 truncate">
-                {run.name ?? `Run #${run.run_number}`}
-              </h3>
-              <p className="mt-1 text-sm text-gray-600 truncate">
-                Run #{run.run_number} &middot;{' '}
-                {run.head_branch ?? run.head_sha.slice(0, 7)} &middot;{' '}
-                {run.event}
-              </p>
+      {/* Summary Header */}
+      <div className="flex items-center text-gray-700 text-sm">
+        <LucideReact.List className="mr-1" size={16} />
+        <span>Total Runs:</span>
+        <span className="font-medium ml-1">{value.total_count}</span>
+      </div>
+
+      {/* Workflow Runs List */}
+      <div className="mt-4 divide-y divide-gray-200">
+        {value.workflow_runs.map((run) => {
+          const title = run.display_title || run.name || `Run #${run.run_number}`;
+          const date = run.run_started_at || run.created_at;
+          const actor = run.actor;
+          return (
+            <div key={run.id} className="flex items-start py-3 space-x-3">
+              {/* Actor Avatar */}
+              {actor ? (
+                <img
+                  src={actor.avatar_url}
+                  alt={actor.login}
+                  className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      actor.login,
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+              ) : (
+                <LucideReact.User className="w-8 h-8 text-gray-300 flex-shrink-0" />
+              )}
+
+              <div className="flex-1 min-w-0">
+                {/* Title and Status */}
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-900 truncate">{title}</p>
+                  <div className="flex-shrink-0">{getStatusIcon(run)}</div>
+                </div>
+
+                {/* Metadata */}
+                <div className="mt-1 flex flex-wrap items-center text-xs text-gray-500 gap-2">
+                  {date && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Calendar size={14} />
+                      <span>{formatDate(date)}</span>
+                    </div>
+                  )}
+                  {run.head_branch && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.GitBranch size={14} />
+                      <span className="truncate">{run.head_branch}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Tag size={14} />
+                    <span>{run.event}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Hash size={14} />
+                    <span>#{run.run_number}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-wrap items-center space-x-2">
-              <span
-                className={`px-2 py-0.5 text-xs font-medium rounded-full ${statusStyle(
-                  run.status,
-                )}`}
-              >
-                {run.status ? run.status.replace('_', ' ') : 'Unknown'}
-              </span>
-              <span
-                className={`px-2 py-0.5 text-xs font-medium rounded-full ${conclusionStyle(
-                  run.conclusion,
-                )}`}
-              >
-                {run.conclusion
-                  ? run.conclusion.replace('_', ' ')
-                  : 'N/A'}
-              </span>
-              <span className="text-sm text-gray-500">
-                {formatDate(run.created_at)}
-              </span>
-            </div>
+          );
+        })}
+        {value.workflow_runs.length === 0 && (
+          <div className="py-6 text-center text-gray-400">
+            <LucideReact.AlertCircle size={24} className="mx-auto mb-2" />
+            <p className="text-sm">No workflow runs available</p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

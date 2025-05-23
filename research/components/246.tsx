@@ -1,13 +1,14 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type ManagerView = {
+        export interface ManagerView {
             manager?: AutoViewInputSubTypes.Manager;
             online?: AutoViewInputSubTypes.Online;
-        };
+        }
     }
-    export type Manager = {
+    export interface Manager {
         id?: string;
         channelId?: string;
         accountId?: string;
@@ -72,95 +73,123 @@ export namespace AutoViewInputSubTypes {
         meetOperator?: boolean;
         emailForFront?: string;
         mobileNumberForFront?: string & tags.Default<"+18004424000">;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
-    export type Online = {
+    }
+    export interface Online {
         channelId?: string;
         personType?: string;
         personId?: string;
         id?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.ManagerView;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
+  // Extract manager info
   const manager = value.manager;
-  if (!manager) return null;
+  if (!manager) {
+    return (
+      <div className="p-4 bg-white rounded-lg shadow flex items-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mr-2" aria-hidden />
+        <span>No manager data available</span>
+      </div>
+    );
+  }
 
-  // 1. Data aggregation and derived constants
-  const name = manager.name;
-  const description = manager.description || "";
-  const email =
-    manager.showEmailToFront && manager.email ? manager.email : undefined;
-  const mobile =
-    manager.showMobileNumberToFront && manager.mobileNumber
-      ? manager.mobileNumber
-      : undefined;
-  const joinedDate = manager.createdAt
-    ? new Date(manager.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
+  // Destructure relevant fields
+  const {
+    name,
+    description,
+    showDescriptionToFront,
+    email,
+    showEmailToFront,
+    mobileNumber,
+    showMobileNumberToFront,
+    avatarUrl,
+    updatedAt,
+  } = manager;
+
+  // Avatar handling
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    name,
+  )}&background=0D8ABC&color=fff`;
+  const avatarSrc = avatarUrl ?? avatarFallback;
+
+  // Format last update date
+  const formattedUpdated = updatedAt
+    ? new Date(updatedAt).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
       })
-    : undefined;
-  const isOnline = Boolean(value.online);
-  const statusText = isOnline ? "Online" : "Offline";
-  const statusBg = isOnline ? "bg-green-100" : "bg-gray-100";
-  const statusTextColor = isOnline ? "text-green-600" : "text-gray-600";
-  const avatarUrl = manager.avatarUrl?.trim() || undefined;
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
+    : null;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // Online status
+  const isOnline = Boolean(value.online && value.online.id);
+
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-      {avatarUrl ? (
+    <div className="p-4 bg-white rounded-lg shadow-md flex items-start space-x-4">
+      <div className="flex-shrink-0">
         <img
-          src={avatarUrl}
+          src={avatarSrc}
           alt={name}
-          className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = avatarFallback;
+          }}
+          className="w-12 h-12 rounded-full object-cover"
         />
-      ) : (
-        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-500 flex-shrink-0">
-          {initials}
-        </div>
-      )}
-      <div className="flex-1 flex flex-col space-y-2 w-full">
-        <div className="flex items-center justify-between w-full">
-          <h2 className="text-lg font-medium text-gray-900 truncate">{name}</h2>
-          <span
-            className={`px-2 py-0.5 text-xs font-medium rounded ${statusBg} ${statusTextColor}`}
-          >
-            {statusText}
-          </span>
-        </div>
-        {description && (
-          <p className="text-sm text-gray-700 line-clamp-2">{description}</p>
+      </div>
+      <div className="flex-1 min-w-0">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
+        {description && showDescriptionToFront && (
+          <p className="mt-1 text-gray-600 text-sm line-clamp-2">{description}</p>
         )}
-        {(email || mobile) && (
-          <div className="flex flex-wrap text-sm text-gray-600 space-x-4">
-            {email && <span className="truncate">✉️ {email}</span>}
-            {mobile && <span className="truncate">📱 {mobile}</span>}
+
+        <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+          {showEmailToFront && email && (
+            <div className="flex items-center">
+              <LucideReact.Mail size={16} className="mr-1 text-gray-400" aria-hidden />
+              <span className="truncate">{email}</span>
+            </div>
+          )}
+          {showMobileNumberToFront && mobileNumber && (
+            <div className="flex items-center">
+              <LucideReact.Phone size={16} className="mr-1 text-gray-400" aria-hidden />
+              <span>{mobileNumber}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-2 flex items-center text-sm">
+          {isOnline ? (
+            <>
+              <LucideReact.Circle className="text-green-500 mr-1" size={10} aria-label="Online" />
+              <span className="text-green-600">Online</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.Circle className="text-gray-400 mr-1" size={10} aria-label="Offline" />
+              <span className="text-gray-500">Offline</span>
+            </>
+          )}
+        </div>
+
+        {formattedUpdated && (
+          <div className="mt-2 flex items-center text-xs text-gray-500">
+            <LucideReact.Calendar size={14} className="mr-1" aria-hidden />
+            <span>Updated: {formattedUpdated}</span>
           </div>
-        )}
-        {joinedDate && (
-          <p className="text-xs text-gray-500">Joined: {joinedDate}</p>
         )}
       </div>
     </div>

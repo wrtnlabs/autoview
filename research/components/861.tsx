@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Response
@@ -57,73 +58,193 @@ export type AutoViewInput = AutoViewInputSubTypes.rule_suites;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  if (!value || value.length === 0) {
-    return <div className="p-4 text-center text-gray-500">No rule suite data available.</div>;
-  }
-  const sorted = [...value].sort(
-    (a, b) =>
-      new Date(b.pushed_at ?? '').getTime() - new Date(a.pushed_at ?? '').getTime(),
-  );
-  const statusStyles: Record<'pass' | 'fail' | 'bypass', { label: string; style: string }> = {
-    pass: { label: 'Passed', style: 'bg-green-100 text-green-800' },
-    fail: { label: 'Failed', style: 'bg-red-100 text-red-800' },
-    bypass: { label: 'Bypassed', style: 'bg-yellow-100 text-yellow-800' },
-  };
-  const formatDate = (dt?: string) =>
-    dt
-      ? new Date(dt).toLocaleString('default', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-        })
-      : '—';
+  const data = value;
+  const totalCount = data.length;
+  const passCount = data.filter(item => item.result === 'pass').length;
+  const failCount = data.filter(item => item.result === 'fail').length;
+  const bypassCount = data.filter(item => item.result === 'bypass').length;
+
+  const formatDate = (dt?: string): string =>
+    dt ? new Date(dt).toLocaleString() : '—';
+
+  const summaryCards = [
+    {
+      label: 'Total Events',
+      count: totalCount,
+      icon: (
+        <LucideReact.List
+          size={20}
+          className="text-gray-500"
+          aria-label="Total Events"
+        />
+      ),
+    },
+    {
+      label: 'Passed',
+      count: passCount,
+      icon: (
+        <LucideReact.CheckCircle
+          size={20}
+          className="text-green-500"
+          aria-label="Passed"
+        />
+      ),
+    },
+    {
+      label: 'Failed',
+      count: failCount,
+      icon: (
+        <LucideReact.XCircle
+          size={20}
+          className="text-red-500"
+          aria-label="Failed"
+        />
+      ),
+    },
+    {
+      label: 'Bypassed',
+      count: bypassCount,
+      icon: (
+        <LucideReact.SkipForward
+          size={20}
+          className="text-yellow-500"
+          aria-label="Bypassed"
+        />
+      ),
+    },
+  ];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {sorted.map((item, index) => {
-        const preSHA = item.before_sha?.slice(0, 7) ?? '—';
-        const postSHA = item.after_sha?.slice(0, 7) ?? '—';
-        const resultKey = item.result ?? 'bypass';
-        const evalKey = item.evaluation_result ?? 'bypass';
-        const result = statusStyles[resultKey];
-        const evaluation = statusStyles[evalKey];
-
-        return (
-          <div key={index} className="p-4 bg-white rounded-lg shadow">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-lg font-semibold text-gray-900">
-                {item.actor_name ?? 'Unknown'}
-              </span>
-              <span className="text-sm text-gray-500">{formatDate(item.pushed_at)}</span>
-            </div>
-            <div className="flex flex-wrap items-center text-sm text-gray-700 space-x-2 mb-2">
-              <span className="font-medium">{item.repository_name ?? 'Repository'}</span>
-              <span className="text-gray-400">·</span>
-              <span>{item.ref ?? 'ref'}</span>
-            </div>
-            <div className="text-sm text-gray-600 mb-3">
-              Commits: <span className="font-mono">{preSHA}</span> →{' '}
-              <span className="font-mono">{postSHA}</span>
-            </div>
-            <div className="flex space-x-2">
-              <span
-                className={`px-2 py-1 rounded text-xs font-medium ${result.style}`}
-              >
-                {result.label}
-              </span>
-              <span
-                className={`px-2 py-1 rounded text-xs font-medium ${evaluation.style}`}
-              >
-                {evaluation.label}
-              </span>
-            </div>
+    <div className="w-full p-4 bg-white rounded-lg shadow-md">
+      <div className="flex flex-wrap gap-4 mb-6">
+        {summaryCards.map((card, idx) => (
+          <div
+            key={idx}
+            className="flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-lg"
+          >
+            {card.icon}
+            <span className="text-sm font-medium text-gray-700">
+              {card.label}: {card.count}
+            </span>
           </div>
-        );
-      })}
+        ))}
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actor
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Repository
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Ref
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Pushed At
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Result
+              </th>
+              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Eval Result
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((item, index) => (
+              <tr key={index} className="hover:bg-gray-50">
+                <td className="px-4 py-2 text-sm text-gray-700">
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.User
+                      size={16}
+                      className="text-gray-500"
+                      aria-label="Actor"
+                    />
+                    <span>{item.actor_name ?? '—'}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-700">
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.GitBranch
+                      size={16}
+                      className="text-gray-500"
+                      aria-label="Repository"
+                    />
+                    <span>{item.repository_name ?? '—'}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-700 truncate max-w-xs">
+                  {item.ref ?? '—'}
+                </td>
+                <td className="px-4 py-2 text-sm text-gray-700">
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Calendar
+                      size={16}
+                      className="text-gray-500"
+                      aria-label="Pushed At"
+                    />
+                    <span>{formatDate(item.pushed_at)}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-2 text-sm">
+                  {item.result === 'pass' && (
+                    <LucideReact.CheckCircle
+                      size={16}
+                      className="text-green-500"
+                      aria-label="Pass"
+                    />
+                  )}
+                  {item.result === 'fail' && (
+                    <LucideReact.XCircle
+                      size={16}
+                      className="text-red-500"
+                      aria-label="Fail"
+                    />
+                  )}
+                  {item.result === 'bypass' && (
+                    <LucideReact.SkipForward
+                      size={16}
+                      className="text-yellow-500"
+                      aria-label="Bypass"
+                    />
+                  )}
+                  {!item.result && <span className="text-gray-400">—</span>}
+                </td>
+                <td className="px-4 py-2 text-sm">
+                  {item.evaluation_result === 'pass' && (
+                    <LucideReact.CheckCircle
+                      size={16}
+                      className="text-green-500"
+                      aria-label="Eval Pass"
+                    />
+                  )}
+                  {item.evaluation_result === 'fail' && (
+                    <LucideReact.XCircle
+                      size={16}
+                      className="text-red-500"
+                      aria-label="Eval Fail"
+                    />
+                  )}
+                  {item.evaluation_result === 'bypass' && (
+                    <LucideReact.SkipForward
+                      size={16}
+                      className="text-yellow-500"
+                      aria-label="Eval Bypass"
+                    />
+                  )}
+                  {!item.evaluation_result && (
+                    <span className="text-gray-400">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-  // 3. Return the React element.
 }

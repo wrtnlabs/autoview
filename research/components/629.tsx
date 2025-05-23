@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Branch With Protection
      *
      * @title Branch With Protection
     */
-    export type branch_with_protection = {
+    export interface branch_with_protection {
         name: string;
         commit: AutoViewInputSubTypes.commit;
         _links: {
@@ -18,13 +19,13 @@ export namespace AutoViewInputSubTypes {
         protection_url: string & tags.Format<"uri">;
         pattern?: string;
         required_approving_review_count?: number & tags.Type<"int32">;
-    };
+    }
     /**
      * Commit
      *
      * @title Commit
     */
-    export type commit = {
+    export interface commit {
         url: string & tags.Format<"uri">;
         sha: string;
         node_id: string;
@@ -42,8 +43,8 @@ export namespace AutoViewInputSubTypes {
             };
             verification?: AutoViewInputSubTypes.verification;
         };
-        author: any | any | null;
-        committer: any | any | null;
+        author: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.empty_object | null;
+        committer: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.empty_object | null;
         parents: {
             sha: string;
             url: string & tags.Format<"uri">;
@@ -55,7 +56,7 @@ export namespace AutoViewInputSubTypes {
             total?: number & tags.Type<"int32">;
         };
         files?: AutoViewInputSubTypes.diff_entry[];
-    };
+    }
     /**
      * Metaproperties for Git author/committer information.
      *
@@ -69,19 +70,19 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Verification
     */
-    export type verification = {
+    export interface verification {
         verified: boolean;
         reason: string;
         payload: string | null;
         signature: string | null;
         verified_at: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -104,14 +105,20 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
-    export type empty_object = any;
+    }
+    /**
+     * An object without any properties.
+     *
+     * @title Empty Object
+    */
+    export interface empty_object {
+    }
     /**
      * Diff Entry
      *
      * @title Diff Entry
     */
-    export type diff_entry = {
+    export interface diff_entry {
         sha: string;
         filename: string;
         status: "added" | "removed" | "modified" | "renamed" | "copied" | "changed" | "unchanged";
@@ -123,13 +130,13 @@ export namespace AutoViewInputSubTypes {
         contents_url: string & tags.Format<"uri">;
         patch?: string;
         previous_filename?: string;
-    };
+    }
     /**
      * Branch Protection
      *
      * @title Branch Protection
     */
-    export type branch_protection = {
+    export interface branch_protection {
         url?: string;
         enabled?: boolean;
         required_status_checks?: AutoViewInputSubTypes.protected_branch_required_status_check;
@@ -169,13 +176,13 @@ export namespace AutoViewInputSubTypes {
         allow_fork_syncing?: {
             enabled?: boolean;
         };
-    };
+    }
     /**
      * Protected Branch Required Status Check
      *
      * @title Protected Branch Required Status Check
     */
-    export type protected_branch_required_status_check = {
+    export interface protected_branch_required_status_check {
         url?: string;
         enforcement_level?: string;
         contexts: string[];
@@ -185,22 +192,22 @@ export namespace AutoViewInputSubTypes {
         }[];
         contexts_url?: string;
         strict?: boolean;
-    };
+    }
     /**
      * Protected Branch Admin Enforced
      *
      * @title Protected Branch Admin Enforced
     */
-    export type protected_branch_admin_enforced = {
+    export interface protected_branch_admin_enforced {
         url: string & tags.Format<"uri">;
         enabled: boolean;
-    };
+    }
     /**
      * Protected Branch Pull Request Review
      *
      * @title Protected Branch Pull Request Review
     */
-    export type protected_branch_pull_request_review = {
+    export interface protected_branch_pull_request_review {
         url?: string & tags.Format<"uri">;
         dismissal_restrictions?: {
             /**
@@ -243,13 +250,13 @@ export namespace AutoViewInputSubTypes {
          * Whether the most recent push must be approved by someone other than the person who pushed it.
         */
         require_last_push_approval?: boolean;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -270,7 +277,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -285,7 +292,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -331,7 +338,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -359,13 +366,44 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * Branch Restriction Policy
      *
      * @title Branch Restriction Policy
     */
-    export type branch_restriction_policy = {
+    export interface branch_restriction_policy {
         url: string & tags.Format<"uri">;
         users_url: string & tags.Format<"uri">;
         teams_url: string & tags.Format<"uri">;
@@ -451,7 +489,7 @@ export namespace AutoViewInputSubTypes {
             };
             events?: string[];
         }[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.branch_with_protection;
 
@@ -460,127 +498,148 @@ export type AutoViewInput = AutoViewInputSubTypes.branch_with_protection;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isProtected = value["protected"];
-  const branchUrl = value._links.html;
-  const protectionUrl = value.protection_url;
-  const pattern = value.pattern ?? "All branches";
-
   const commit = value.commit;
-  const commitSha = commit.sha.slice(0, 7);
-  const commitUrl = commit.html_url;
-  const commitMsg = commit.commit.message;
-  const authorName =
-    commit.commit.author?.name ??
-    commit.commit.committer?.name ??
-    "Unknown author";
-  const dateRaw =
-    commit.commit.author?.date ?? commit.commit.committer?.date;
-  const commitDate = dateRaw
-    ? new Date(dateRaw).toLocaleString()
-    : "Unknown date";
+  const rawMessage = commit.commit.message || "";
+  const message = rawMessage.split("\n")[0];
+  const sha = commit.sha;
+  const shortSha = sha.slice(0, 7);
 
-  const statusChecksCount =
-    value.protection.required_status_checks?.contexts.length ?? 0;
-  const strictChecks =
-    value.protection.required_status_checks?.strict ?? false;
-  const reqReviews =
-    value.protection.required_pull_request_reviews
-      ?.required_approving_review_count ??
-    value.required_approving_review_count ??
-    0;
-  const enforceAdmins = value.protection.enforce_admins?.enabled ?? false;
+  const rawAuthorName =
+    commit.commit.author?.name || commit.commit.committer?.name;
+  const authorLogin =
+    commit.author && typeof commit.author === "object" && "login" in commit.author
+      ? commit.author.login
+      : undefined;
+  const authorName = rawAuthorName || authorLogin || "Unknown";
+
+  const commitDateRaw =
+    commit.commit.author?.date || commit.commit.committer?.date;
+  const commitDate = commitDateRaw
+    ? new Date(commitDateRaw).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
+  const prot = value.protection;
+  const rules: string[] = [];
+  if (prot.required_status_checks) {
+    rules.push(
+      prot.required_status_checks.strict
+        ? "Strict status checks"
+        : "Status checks"
+    );
+  }
+  if (prot.enforce_admins?.enabled) rules.push("Enforce admins");
+  if (prot.required_pull_request_reviews) rules.push("Require PR reviews");
+  if (prot.required_linear_history?.enabled)
+    rules.push("Linear history enforced");
+  if (prot.allow_force_pushes?.enabled) rules.push("Force pushes allowed");
+  if (prot.allow_deletions?.enabled) rules.push("Branch deletions allowed");
+  if (prot.required_signatures?.enabled) rules.push("Signed commits required");
+  if (prot.lock_branch?.enabled) rules.push("Branch locked");
+  if (prot.allow_fork_syncing?.enabled) rules.push("Fork syncing allowed");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="p-4 flex flex-col space-y-4">
-        {/* Header */}
-        <header className="flex justify-between items-center">
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <LucideReact.GitBranch size={20} className="text-gray-600" />
           <h2 className="text-lg font-semibold text-gray-800 truncate">
             {value.name}
           </h2>
+          {value.pattern && (
+            <span className="px-2 py-0.5 bg-gray-100 text-xs text-gray-600 rounded">
+              {value.pattern}
+            </span>
+          )}
+        </div>
+        <div className="mt-2 sm:mt-0 flex items-center space-x-1">
+          {value.protected ? (
+            <LucideReact.Lock className="text-green-500" size={18} />
+          ) : (
+            <LucideReact.Unlock className="text-red-500" size={18} />
+          )}
           <span
-            className={`px-2 py-1 text-xs font-medium rounded-full ${
-              isProtected
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
+            className={`text-sm font-medium ${
+              value.protected ? "text-green-600" : "text-red-600"
             }`}
           >
-            {isProtected ? "Protected" : "Unprotected"}
+            {value.protected ? "Protected" : "Unprotected"}
           </span>
-        </header>
+        </div>
+      </div>
 
-        {/* Branch Link */}
+      {/* Content Grid */}
+      <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Latest Commit */}
         <div>
-          <a
-            href={branchUrl}
-            className="text-blue-600 hover:underline text-sm truncate"
-          >
-            View branch details
-          </a>
+          <h3 className="text-sm font-medium text-gray-700">Latest Commit</h3>
+          <div className="mt-2 flex items-start space-x-3">
+            <LucideReact.GitCommit size={20} className="text-gray-500" />
+            <div className="flex-1 space-y-1">
+              <a
+                href={commit.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium text-blue-600 hover:underline truncate"
+              >
+                {shortSha}
+              </a>
+              <p className="text-sm text-gray-600 truncate">{message}</p>
+              <div className="flex flex-wrap items-center text-xs text-gray-500 space-x-3">
+                <span className="flex items-center">
+                  <LucideReact.User size={12} className="mr-1" />
+                  {authorName}
+                </span>
+                {commitDate && (
+                  <span className="flex items-center">
+                    <LucideReact.Calendar size={12} className="mr-1" />
+                    {commitDate}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Commit Summary */}
-        <section>
-          <h3 className="text-sm font-medium text-gray-700 mb-1">
-            Latest Commit
-          </h3>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p className="flex items-center space-x-2">
-              <a
-                href={commitUrl}
-                className="font-mono text-blue-600 hover:underline truncate"
-              >
-                {commitSha}
-              </a>
-              <span className="line-clamp-2">{commitMsg}</span>
-            </p>
-            <p className="text-xs">
-              By <span className="font-medium">{authorName}</span> on{" "}
-              <span className="font-medium">{commitDate}</span>
-            </p>
-          </div>
-        </section>
-
-        {/* Protection Details */}
-        <section>
-          <h3 className="text-sm font-medium text-gray-700 mb-1">
-            Protection Rules
-          </h3>
-          <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
-            <li>
-              Pattern:{" "}
-              <span className="font-medium truncate">{pattern}</span>
-            </li>
-            <li>
-              Status Checks:{" "}
-              <span className="font-medium">
-                {statusChecksCount} context
-                {statusChecksCount !== 1 && "s"}
-              </span>{" "}
-              {strictChecks && "(Strict)"}
-            </li>
-            <li>
-              Required Reviews:{" "}
-              <span className="font-medium">{reqReviews}</span>
-            </li>
-            <li>
-              Enforce Admins:{" "}
-              <span className="font-medium">
-                {enforceAdmins ? "Yes" : "No"}
-              </span>
-            </li>
-            <li>
-              <a
-                href={protectionUrl}
-                className="text-blue-600 hover:underline"
-              >
-                View full protection settings
-              </a>
-            </li>
+        {/* Protection Rules */}
+        <div>
+          <h3 className="text-sm font-medium text-gray-700">Protection Rules</h3>
+          <ul className="mt-2 list-disc list-inside text-sm text-gray-600 space-y-1">
+            {rules.length > 0 ? (
+              rules.map((rule) => (
+                <li key={rule} className="flex items-center">
+                  <LucideReact.ShieldCheck
+                    size={14}
+                    className="text-green-500 mr-1"
+                  />
+                  {rule}
+                </li>
+              ))
+            ) : (
+              <li className="flex items-center text-gray-400">
+                <LucideReact.AlertTriangle size={14} className="mr-1" />
+                No specific rules
+              </li>
+            )}
           </ul>
-        </section>
+          <div className="mt-3">
+            <a
+              href={value.protection_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-500 hover:text-gray-700 flex items-center"
+            >
+              <LucideReact.Link size={12} className="mr-1" />
+              View full protection
+            </a>
+          </div>
+        </div>
       </div>
-    </article>
+    </div>
   );
 }

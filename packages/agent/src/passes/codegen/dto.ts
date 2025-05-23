@@ -4,8 +4,14 @@ import {
 } from "@autoview/interface";
 
 import { IAutoViewVendor } from "../../structures";
+import { PreGenerationCallback } from "../common";
 
 export interface Input {
+  /**
+   * The ID of the session.
+   */
+  sessionId: string;
+
   /**
    * The vendor of the AutoView.
    */
@@ -15,6 +21,15 @@ export interface Input {
    * The input schema that the generated code will use.
    */
   inputSchema: IAutoViewCompilerMetadata;
+
+  /**
+   * An optional callback function that will be called before the LLM generates a response.
+   *
+   * This is useful if you want to track LLM activities.
+   *
+   * To capture the completion callback, return `PostGenerationCallback` from this callback.
+   */
+  onPreLlmGeneration?: PreGenerationCallback;
 
   /*
    * An optional callback function for handling the compiler error.

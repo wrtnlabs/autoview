@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposCheckSuitesCheckRuns {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             check_runs: AutoViewInputSubTypes.check_run[];
-        };
+        }
     }
     /**
      * A check performed on the code of a given code change
      *
      * @title CheckRun
     */
-    export type check_run = {
+    export interface check_run {
         /**
          * The id of the check.
         */
@@ -53,7 +54,7 @@ export namespace AutoViewInputSubTypes {
         */
         pull_requests: AutoViewInputSubTypes.pull_request_minimal[];
         deployment?: AutoViewInputSubTypes.deployment_simple;
-    };
+    }
     /**
      * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
      *
@@ -70,7 +71,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -98,12 +99,71 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * @title Pull Request Minimal
     */
-    export type pull_request_minimal = {
+    export interface pull_request_minimal {
         id: number & tags.Type<"int32">;
         number: number & tags.Type<"int32">;
         url: string;
@@ -125,13 +185,13 @@ export namespace AutoViewInputSubTypes {
                 name: string;
             };
         };
-    };
+    }
     /**
      * A deployment created as the result of an Actions check run from a workflow that references an environment
      *
      * @title Deployment
     */
-    export type deployment_simple = {
+    export interface deployment_simple {
         url: string & tags.Format<"uri">;
         /**
          * Unique identifier of the deployment
@@ -161,7 +221,7 @@ export namespace AutoViewInputSubTypes {
         */
         production_environment?: boolean;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposCheckSuitesCheckRuns.GetResponse;
 
@@ -170,136 +230,170 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposCheckSuitesCheckRuns.
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { total_count, check_runs } = value;
+  const totalRuns = value.total_count;
+  const runs = value.check_runs;
 
-  // Format date-time strings to a readable format
-  const formatDate = (iso: string | null): string =>
-    iso ? new Date(iso).toLocaleString() : "–";
+  const formatDate = (dateStr?: string | null): string =>
+    dateStr
+      ? new Date(dateStr).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "—";
 
-  // Compute duration between start and completion in minutes/seconds
-  const formatDuration = (start: string | null, end: string | null): string => {
-    if (!start || !end) return "–";
-    const diff = new Date(end).getTime() - new Date(start).getTime();
-    if (diff < 0) return "–";
-    const secs = Math.floor(diff / 1000);
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return m > 0 ? `${m}m ${s}s` : `${s}s`;
-  };
-
-  // Calculate average duration across completed runs
-  const durations = check_runs
-    .map((run) => {
-      if (run.started_at && run.completed_at) {
-        return new Date(run.completed_at).getTime() - new Date(run.started_at).getTime();
-      }
-      return 0;
-    })
-    .filter((ms) => ms > 0);
-  const avgDurationMs = durations.length
-    ? durations.reduce((a, b) => a + b, 0) / durations.length
-    : 0;
-  const avgDuration = (() => {
-    if (!avgDurationMs) return "–";
-    const secs = Math.floor(avgDurationMs / 1000);
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return m > 0 ? `${m}m ${s}s` : `${s}s`;
-  })();
-
-  // Determine badge colors
-  const statusColor = (status: string): string => {
-    switch (status) {
-      case "in_progress":
-        return "bg-blue-100 text-blue-800";
-      case "queued":
-      case "waiting":
-      case "requested":
-      case "pending":
-        return "bg-yellow-100 text-yellow-800";
-      case "completed":
-      default:
-        return "bg-gray-100 text-gray-800";
+  const renderStatusIcon = (
+    run: AutoViewInputSubTypes.check_run
+  ): JSX.Element => {
+    if (run.status !== "completed") {
+      return (
+        <LucideReact.Clock
+          className="text-amber-500"
+          size={16}
+          aria-label={run.status}
+        />
+      );
     }
-  };
-  const conclusionColor = (conc: string | null): string => {
-    switch (conc) {
+    switch (run.conclusion) {
       case "success":
-        return "bg-green-100 text-green-800";
+        return (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={16}
+            aria-label="Success"
+          />
+        );
       case "failure":
-      case "timed_out":
-        return "bg-red-100 text-red-800";
-      case "cancelled":
-      case "action_required":
-        return "bg-yellow-100 text-yellow-800";
+        return (
+          <LucideReact.XCircle
+            className="text-red-500"
+            size={16}
+            aria-label="Failure"
+          />
+        );
       case "neutral":
+        return (
+          <LucideReact.Minus
+            className="text-gray-500"
+            size={16}
+            aria-label="Neutral"
+          />
+        );
+      case "cancelled":
+        return (
+          <LucideReact.XCircle
+            className="text-yellow-500"
+            size={16}
+            aria-label="Cancelled"
+          />
+        );
       case "skipped":
+        return (
+          <LucideReact.SkipForward
+            className="text-gray-400"
+            size={16}
+            aria-label="Skipped"
+          />
+        );
+      case "timed_out":
+        return (
+          <LucideReact.AlertTriangle
+            className="text-red-500"
+            size={16}
+            aria-label="Timed Out"
+          />
+        );
+      case "action_required":
+        return (
+          <LucideReact.AlertOctagon
+            className="text-red-500"
+            size={16}
+            aria-label="Action Required"
+          />
+        );
       default:
-        return "bg-gray-100 text-gray-800";
+        return (
+          <LucideReact.HelpCircle
+            className="text-gray-400"
+            size={16}
+            aria-label="No Conclusion"
+          />
+        );
     }
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full mx-auto p-4 bg-white rounded-xl shadow-md">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">
-          Check Runs Summary
-        </h2>
-        <p className="text-sm text-gray-600">
-          Total Runs: <span className="font-medium">{total_count}</span>{" "}
-          • Avg Duration: <span className="font-medium">{avgDuration}</span>
-        </p>
-      </header>
-      <ul className="space-y-4">
-        {check_runs.map((run) => (
-          <li
-            key={run.id}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border border-gray-200 rounded-lg"
-          >
-            <div className="flex-1">
-              <h3 className="text-lg font-medium text-gray-900 truncate">
-                {run.name}
-              </h3>
-              {run.app && (
-                <p className="text-sm text-gray-500">
-                  App: <span className="font-medium">{run.app.name}</span>
-                </p>
-              )}
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                {run.output.summary ?? run.output.title ?? "No summary available"}
-              </p>
-              <div className="mt-2 text-xs text-gray-500 space-x-2">
-                <span>Started: {formatDate(run.started_at)}</span>
-                <span>Completed: {formatDate(run.completed_at)}</span>
-                <span>
-                  Duration: {formatDuration(run.started_at, run.completed_at)}
-                </span>
+    <div className="w-full overflow-x-auto">
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center mb-4 text-lg font-semibold text-gray-800">
+          <LucideReact.CheckSquare
+            className="mr-2 text-blue-500"
+            size={20}
+            aria-label="Check Runs"
+          />
+          <span>Check Runs ({totalRuns})</span>
+        </div>
+        {runs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+            <LucideReact.AlertCircle size={24} />
+            <span className="mt-2">No check runs available</span>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {runs.map((run) => (
+              <div
+                key={run.id}
+                className="py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2"
+              >
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {run.name}
+                  </div>
+                  <div className="mt-1 text-sm text-gray-600 line-clamp-2">
+                    {run.output.summary ?? run.output.text ?? "No summary"}
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 mt-2 md:mt-0">
+                  <div className="flex items-center gap-1">
+                    {renderStatusIcon(run)}
+                    <span>{run.status.replace(/_/g, " ")}</span>
+                  </div>
+                  {run.status === "completed" && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Calendar size={16} aria-label="Completed At" />
+                      <span>{formatDate(run.completed_at)}</span>
+                    </div>
+                  )}
+                  {run.pull_requests.length > 0 && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.GitPullRequest
+                        size={16}
+                        aria-label="Pull Requests"
+                      />
+                      <span>{run.pull_requests.length}</span>
+                    </div>
+                  )}
+                  {run.app && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.User size={16} aria-label="App Name" />
+                      <span className="truncate max-w-xs">{run.app.name}</span>
+                    </div>
+                  )}
+                  {run.deployment && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Package
+                        size={16}
+                        aria-label="Deployment Environment"
+                      />
+                      <span>{run.deployment.environment}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="mt-1 text-xs text-gray-500">
-                Annotations:{" "}
-                <span className="font-medium">{run.output.annotations_count}</span>
-              </p>
-            </div>
-            <div className="flex-shrink-0 mt-3 sm:mt-0 sm:ml-4 flex space-x-2">
-              <span
-                className={`px-2 py-1 text-xs font-semibold rounded-full ${statusColor(
-                  run.status
-                )}`}
-              >
-                {run.status.replace("_", " ").toUpperCase()}
-              </span>
-              <span
-                className={`px-2 py-1 text-xs font-semibold rounded-full ${conclusionColor(
-                  run.conclusion
-                )}`}
-              >
-                {(run.conclusion ?? "N/A").replace("_", " ").toUpperCase()}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

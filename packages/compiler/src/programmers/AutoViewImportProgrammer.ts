@@ -17,10 +17,12 @@ export class AutoViewImportProgrammer {
   public external(props: AutoViewImportProgrammer.IProps): string {
     const clause: IClause = MapUtil.take(this.external_)(props.library)(() => ({
       default: null,
+      isStarImport: props.type === "star-import",
       instances: new Set(),
     }));
     const name: string = props.name.split(".")[0]!;
-    if (props.type === "default") clause.default = props.name;
+    if (props.type === "default" || props.type === "star-import")
+      clause.default = props.name;
     else clause.instances.add(name);
     return name;
   }
@@ -63,20 +65,24 @@ export class AutoViewImportProgrammer {
           undefined,
           ts.factory.createImportClause(
             false,
-            props.default !== null
+            props.default !== null && !props.isStarImport
               ? ts.factory.createIdentifier(props.default)
               : undefined,
-            props.instances.size
-              ? ts.factory.createNamedImports(
-                  [...props.instances].map((i) =>
-                    ts.factory.createImportSpecifier(
-                      false,
-                      undefined,
-                      ts.factory.createIdentifier(i),
-                    ),
-                  ),
+            props.isStarImport && props.default !== null
+              ? ts.factory.createNamespaceImport(
+                  ts.factory.createIdentifier(props.default),
                 )
-              : undefined,
+              : props.instances.size
+                ? ts.factory.createNamedImports(
+                    [...props.instances].map((i) =>
+                      ts.factory.createImportSpecifier(
+                        false,
+                        undefined,
+                        ts.factory.createIdentifier(i),
+                      ),
+                    ),
+                  )
+                : undefined,
           ),
           ts.factory.createStringLiteral(library),
         ),
@@ -110,12 +116,13 @@ export class AutoViewImportProgrammer {
 }
 export namespace AutoViewImportProgrammer {
   export interface IProps {
-    type: "default" | "instance";
+    type: "default" | "instance" | "star-import";
     library: string;
     name: string;
   }
 }
 interface IClause {
   default: string | null;
+  isStarImport: boolean;
   instances: Set<string>;
 }

@@ -1,21 +1,22 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Review Request
      *
      * @title Pull Request Review Request
     */
-    export type pull_request_review_request = {
+    export interface pull_request_review_request {
         users: AutoViewInputSubTypes.simple_user[];
         teams: AutoViewInputSubTypes.team[];
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -38,13 +39,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -65,7 +66,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -80,7 +81,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -118,95 +119,99 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_review_request;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { users, teams } = value;
+  const users: AutoViewInputSubTypes.simple_user[] = value.users ?? [];
+  const teams: AutoViewInputSubTypes.team[] = value.teams ?? [];
+  const hasUsers = users.length > 0;
+  const hasTeams = teams.length > 0;
 
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-  // Derive display name for users
-  const userItems = users.map((user) => {
-    const displayName = user.name?.trim() ? user.name! : user.login;
-    return { 
-      key: user.id, 
-      avatar: user.avatar_url, 
-      displayName, 
-      login: user.login 
-    };
-  });
-
-  // Derive display properties for teams
-  const teamItems = teams.map((team) => {
-    const description = team.description ?? "No description provided.";
-    const permission = capitalize(team.permission);
-    return {
-      key: team.id,
-      name: team.name,
-      slug: team.slug,
-      description,
-      permission,
-    };
-  });
+  const getAvatarUrl = (user: AutoViewInputSubTypes.simple_user): string => {
+    if (user.avatar_url) return user.avatar_url;
+    const name = encodeURIComponent(user.name ?? user.login);
+    return `https://ui-avatars.com/api/?name=${name}&background=0D8ABC&color=fff`;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Review Requests</h2>
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      {!(hasUsers || hasTeams) ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <p className="mt-2 text-sm">No review requests</p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <LucideReact.Users size={20} className="text-gray-600" />
+            Review Requests
+          </h2>
 
-      {userItems.length > 0 && (
-        <section className="mb-6">
-          <h3 className="text-md font-medium text-gray-700 mb-2">Users</h3>
-          <ul className="flex flex-wrap gap-4">
-            {userItems.map((u) => (
-              <li key={u.key} className="flex items-center space-x-3">
-                <img
-                  src={u.avatar}
-                  alt={u.displayName}
-                  className="w-10 h-10 rounded-full flex-shrink-0"
-                />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {u.displayName}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate">@{u.login}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+          {hasUsers && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                <LucideReact.User size={16} className="text-gray-500" />
+                Individual Reviewers
+              </h3>
+              <ul className="space-y-2">
+                {users.map((user) => {
+                  const displayName = user.name?.trim() ? user.name! : user.login;
+                  return (
+                    <li key={user.id}>
+                      <div className="flex items-center space-x-3">
+                        <img
+                          src={getAvatarUrl(user)}
+                          alt={displayName}
+                          onError={(e) => {
+                            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                              displayName,
+                            )}&background=0D8ABC&color=fff`;
+                          }}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-gray-900">
+                            {displayName}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            @{user.login}
+                          </span>
+                        </div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
 
-      {teamItems.length > 0 && (
-        <section>
-          <h3 className="text-md font-medium text-gray-700 mb-2">Teams</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {teamItems.map((t) => (
-              <div
-                key={t.key}
-                className="p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
-                      {t.name}
-                    </p>
-                    <p className="text-xs text-gray-500 truncate">
-                      {t.slug}
-                    </p>
-                  </div>
-                  <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                    {t.permission}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 line-clamp-2">
-                  {t.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {userItems.length === 0 && teamItems.length === 0 && (
-        <p className="text-gray-500">No review requests.</p>
+          {hasTeams && (
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                <LucideReact.Users size={16} className="text-gray-500" />
+                Team Reviewers
+              </h3>
+              <ul className="space-y-2">
+                {teams.map((team) => (
+                  <li key={team.id}>
+                    <div className="flex items-start space-x-3">
+                      <LucideReact.Users size={32} className="text-gray-500 mt-1" />
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          {team.name}
+                        </span>
+                        <span className="text-xs text-gray-500">{team.slug}</span>
+                        {team.description && (
+                          <span className="text-xs text-gray-500 italic line-clamp-2">
+                            {team.description}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       )}
     </div>
   );

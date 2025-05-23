@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
      *
      * @title Reaction
     */
-    export type reaction = {
+    export interface reaction {
         id: number & tags.Type<"int32">;
         node_id: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -53,76 +54,99 @@ export type AutoViewInput = AutoViewInputSubTypes.reaction;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { content, user, created_at } = value;
+  const date = new Date(value.created_at);
+  const formattedDate = date.toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
 
-  // Map reaction content to emoji and human-readable label
-  const contentMap: Record<
-    AutoViewInput["content"],
-    { emoji: string; label: string }
-  > = {
-    "+1": { emoji: "👍", label: "Thumbs Up" },
-    "-1": { emoji: "👎", label: "Thumbs Down" },
-    laugh: { emoji: "😄", label: "Laugh" },
-    confused: { emoji: "😕", label: "Confused" },
-    heart: { emoji: "❤️", label: "Heart" },
-    hooray: { emoji: "🎉", label: "Hooray" },
-    rocket: { emoji: "🚀", label: "Rocket" },
-    eyes: { emoji: "👀", label: "Eyes" },
-  };
-  const { emoji, label } = contentMap[content];
+  const content = value.content;
+  // Map each reaction content to an appropriate Lucide icon and color
+  const reactionIcon = (() => {
+    switch (content) {
+      case "+1":
+        return <LucideReact.ThumbsUp className="text-blue-500" size={20} />;
+      case "-1":
+        return <LucideReact.ThumbsDown className="text-red-500" size={20} />;
+      case "laugh":
+        return <LucideReact.Smile className="text-yellow-500" size={20} />;
+      case "confused":
+        return <LucideReact.Frown className="text-amber-500" size={20} />;
+      case "heart":
+        return <LucideReact.Heart className="text-pink-500" size={20} />;
+      case "hooray":
+        return <LucideReact.Star className="text-green-500" size={20} />;
+      case "rocket":
+        return <LucideReact.Rocket className="text-gray-700" size={20} />;
+      case "eyes":
+        return <LucideReact.Eye className="text-indigo-500" size={20} />;
+      default:
+        return null;
+    }
+  })();
 
-  // Parse and format creation date as relative time or fallback to localized date
-  const reactionDate = new Date(created_at);
-  function formatRelativeTime(date: Date): string {
-    const now = new Date();
-    const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  // Derive a user-friendly label for the reaction
+  const reactionLabel = (() => {
+    switch (content) {
+      case "+1":
+        return "Thumbs Up";
+      case "-1":
+        return "Thumbs Down";
+      case "laugh":
+        return "Laugh";
+      case "confused":
+        return "Confused";
+      case "heart":
+        return "Heart";
+      case "hooray":
+        return "Hooray";
+      case "rocket":
+        return "Rocket";
+      case "eyes":
+        return "Eyes";
+      default:
+        return content;
+    }
+  })();
 
-    if (diffSeconds < 60) return "just now";
-    if (diffSeconds < 3600) return `${Math.floor(diffSeconds / 60)}m ago`;
-    if (diffSeconds < 86400) return `${Math.floor(diffSeconds / 3600)}h ago`;
-
-    return date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  }
-  const formattedDate = formatRelativeTime(reactionDate);
+  // Prepare user display values, with fallbacks
+  const userName = value.user?.name || value.user?.login || "Unknown";
+  const avatarSrc =
+    value.user?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(userName)}`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="flex items-center p-4 bg-white rounded-lg shadow-md space-x-3">
-      {/* Reaction Emoji */}
-      <span
-        className="text-2xl flex-shrink-0"
-        role="img"
-        aria-label={label}
-      >
-        {emoji}
-      </span>
-
-      {/* User Info and Timestamp */}
-      <div className="flex-1 min-w-0">
+    <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+      <div className="flex-shrink-0">
+        <img
+          src={avatarSrc}
+          alt={userName}
+          className="w-12 h-12 rounded-full object-cover bg-gray-100"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              userName
+            )}&background=0D8ABC&color=fff`;
+          }}
+        />
+      </div>
+      <div className="flex-1 flex flex-col space-y-1">
         <div className="flex items-center space-x-2">
-          {user ? (
-            <>
-              <img
-                src={user.avatar_url}
-                alt={user.login}
-                className="w-6 h-6 rounded-full flex-shrink-0"
-              />
-              <span className="text-sm font-medium text-gray-900 truncate">
-                {user.name ? `${user.name} (${user.login})` : user.login}
-              </span>
-            </>
-          ) : (
-            <span className="text-sm font-medium text-gray-900">
-              Unknown User
-            </span>
-          )}
+          <span className="text-gray-900 font-semibold">{userName}</span>
+          <span className="text-gray-500 text-sm">reacted</span>
         </div>
-        <div className="text-xs text-gray-500">{formattedDate}</div>
+        <div className="flex items-center space-x-2">
+          {reactionIcon}
+          <span className="text-gray-700 font-medium">{reactionLabel}</span>
+        </div>
+        <div className="flex items-center text-gray-400 text-sm">
+          <LucideReact.Calendar className="mr-1" size={16} />
+          <span>{formattedDate}</span>
+        </div>
       </div>
     </div>
   );

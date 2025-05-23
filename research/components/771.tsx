@@ -1,9 +1,24 @@
-import React from "react";
+import { tags } from "typia";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposInteractionLimits {
-        export type GetResponse = any | {};
+        export type GetResponse = AutoViewInputSubTypes.interaction_limit_response | {};
     }
-    export type interaction_limit_response = any;
+    /**
+     * Interaction limit settings.
+     *
+     * @title Interaction Limits
+    */
+    export interface interaction_limit_response {
+        limit: AutoViewInputSubTypes.interaction_group;
+        origin: string;
+        expires_at: string & tags.Format<"date-time">;
+    }
+    /**
+     * The type of GitHub user that can comment, open issues, or create pull requests while the interaction limit is in effect.
+    */
+    export type interaction_group = "existing_users" | "contributors_only" | "collaborators_only";
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposInteractionLimits.GetResponse;
 
@@ -12,104 +27,58 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposInteractionLimits.Get
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const data = value as AutoViewInputSubTypes.interaction_limit_response;
+  const hasData = typeof data.limit === 'string';
 
-  // Humanize keys: camelCase or snake_case to Title Case
-  const humanizeKey = (key: string): string =>
-    key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/[_\-]+/g, ' ')
-      .split(' ')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ')
-      .trim();
-
-  // Abbreviate large numbers (e.g., 1500 -> 1.5K)
-  const abbreviateNumber = (num: number): string => {
-    if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'K';
-    return num.toString();
+  // Map raw enum to human-readable label
+  const groupLabels: Record<AutoViewInputSubTypes.interaction_group, string> = {
+    existing_users: 'Existing Users',
+    contributors_only: 'Contributors Only',
+    collaborators_only: 'Collaborators Only',
   };
 
-  // Format values based on key and type
-  const formatValue = (key: string, raw: any): string => {
-    if (raw === null || raw === undefined) {
-      return '—';
-    }
-    // Dates or timestamps
-    const lowerKey = key.toLowerCase();
-    if (
-      (lowerKey.includes('date') ||
-        lowerKey.includes('time') ||
-        lowerKey.includes('reset')) &&
-      (typeof raw === 'number' || /^\d+$/.test(String(raw)))
-    ) {
-      // GitHub often returns seconds since epoch
-      const n = Number(raw);
-      const ms = n < 1e12 ? n * 1000 : n;
-      const d = new Date(ms);
-      return d.toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    }
-    if (typeof raw === 'number') {
-      return abbreviateNumber(raw);
-    }
-    if (typeof raw === 'boolean') {
-      return raw ? 'Yes' : 'No';
-    }
-    if (Array.isArray(raw)) {
-      if (raw.length === 0) return '—';
-      return raw.join(', ');
-    }
-    // Fallback to string
-    return String(raw);
-  };
-
-  // Prepare entries for display
-  const entries: [string, any][] =
-    typeof value === 'object' && value !== null
-      ? Object.entries(value)
-          // filter out deeply nested empty objects or functions
-          .filter(
-            ([, v]) =>
-              v !== null &&
-              v !== undefined &&
-              typeof v !== 'function' &&
-              // skip empty objects
-              !(typeof v === 'object' && !Array.isArray(v) && Object.keys(v).length === 0)
-          )
-      : [];
+  // Format the expiration date if available
+  const formattedExpires = hasData
+    ? new Date(data.expires_at).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : '';
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (entries.length === 0) {
+  if (!hasData) {
+    // Visual for empty state
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No data available
+      <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center justify-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mb-2" />
+        <span className="text-sm">No interaction limits set.</span>
       </div>
     );
   }
 
+  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Interaction Limits Overview
-      </h2>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-        {entries.map(([key, val]) => (
-          <div key={key} className="flex">
-            <dt className="w-1/2 font-medium text-gray-700 truncate">
-              {humanizeKey(key)}
-            </dt>
-            <dd className="w-1/2 text-gray-900 truncate">
-              {formatValue(key, val)}
-            </dd>
-          </div>
-        ))}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md w-full mx-auto">
+      <div className="flex items-center mb-4">
+        <LucideReact.Users className="text-gray-600" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">Interaction Limits</h2>
+      </div>
+      <dl className="space-y-3 text-gray-700">
+        <div className="flex items-center">
+          <LucideReact.Users className="text-blue-500" size={16} />
+          <span className="ml-2 font-medium">Allowed Group:</span>
+          <span className="ml-1 truncate">{groupLabels[data.limit]}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Globe className="text-green-500" size={16} />
+          <span className="ml-2 font-medium">Origin:</span>
+          <span className="ml-1 truncate">{data.origin}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar className="text-gray-500" size={16} />
+          <span className="ml-2 font-medium">Expires At:</span>
+          <span className="ml-1">{formattedExpires}</span>
+        </div>
       </dl>
     </div>
   );

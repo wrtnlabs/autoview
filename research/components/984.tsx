@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,19 +139,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -188,86 +189,92 @@ export type AutoViewInput = AutoViewInputSubTypes.minimal_repository[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatCount = (n: number): string => {
-    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-    if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-    return n.toString();
-  };
-
-  const formatDate = (iso?: string | null): string => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return d.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  //    Here, we’ll format dates and provide fallbacks inline.
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!value || value.length === 0) {
-    return (
-      <p className="text-center text-gray-500 py-8">
-        No repositories to display.
-      </p>
-    );
-  }
-
   return (
-    <div className="space-y-6">
+    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {value.map((repo) => {
-        const {
-          id,
-          name,
-          owner,
-          description,
-          language,
-          stargazers_count,
-          forks_count,
-          updated_at,
-        } = repo;
-        const stars = formatCount(stargazers_count ?? 0);
-        const forks = formatCount(forks_count ?? 0);
-        const updated = formatDate(updated_at);
+        const updatedOrCreated = repo.updated_at ?? repo.created_at;
+        const formattedDate =
+          updatedOrCreated
+            ? new Date(updatedOrCreated).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            : null;
 
         return (
-          <div
-            key={id}
-            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center space-x-3">
-              <img
-                src={owner.avatar_url}
-                alt={owner.login}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <div className="min-w-0">
-                <h3 className="text-gray-900 font-semibold text-lg truncate">
-                  {name}
-                </h3>
-                <p className="text-gray-500 text-sm truncate">
-                  {owner.login}
-                </p>
+          <div key={repo.id} className="p-4 bg-white rounded-lg shadow">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
+                {repo.name}
+              </h3>
+              {repo.private ? (
+                <LucideReact.Lock className="text-red-500" size={16} />
+              ) : (
+                <LucideReact.Unlock className="text-green-500" size={16} />
+              )}
+            </div>
+
+            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+              {repo.description ?? "No description"}
+            </p>
+
+            <div className="flex flex-wrap items-center mt-3 text-sm text-gray-500 space-x-4">
+              {repo.language && (
+                <div className="flex items-center">
+                  <LucideReact.Tag size={16} className="text-gray-400" />
+                  <span className="ml-1">{repo.language}</span>
+                </div>
+              )}
+              <div className="flex items-center">
+                <LucideReact.Star size={16} className="text-gray-400" />
+                <span className="ml-1">{repo.stargazers_count ?? 0}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.GitBranch size={16} className="text-gray-400" />
+                <span className="ml-1">{repo.forks_count ?? 0}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.AlertCircle size={16} className="text-gray-400" />
+                <span className="ml-1">{repo.open_issues_count ?? 0}</span>
               </div>
             </div>
-            {description && (
-              <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-                {description}
-              </p>
-            )}
-            <div className="mt-3 flex flex-wrap items-center text-xs text-gray-600 space-x-4">
-              {language && (
-                <span className="px-2 py-0.5 bg-gray-200 rounded">
-                  {language}
+
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center">
+                <img
+                  src={repo.owner.avatar_url}
+                  alt={repo.owner.login}
+                  loading="lazy"
+                  className="w-6 h-6 rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      repo.owner.login,
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+                <span className="ml-2 text-gray-700 text-sm truncate">
+                  {repo.owner.login}
                 </span>
+              </div>
+
+              {formattedDate && (
+                <div className="flex items-center text-xs text-gray-400">
+                  <LucideReact.Calendar size={14} className="text-gray-400" />
+                  <span className="ml-1">{formattedDate}</span>
+                </div>
               )}
-              <span>★ {stars}</span>
-              <span>⑂ {forks}</span>
-              {updated && <span>Updated {updated}</span>}
             </div>
           </div>
         );
       })}
     </div>
   );
+
+  // 3. Return the React element.
+  //    All displayed data is filtered, transformed, and formatted as specified.
 }

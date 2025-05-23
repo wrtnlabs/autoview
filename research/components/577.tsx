@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Information of a job execution in a workflow run
      *
      * @title Job
     */
-    export type job = {
+    export interface job {
         /**
          * The id of the job.
         */
@@ -106,7 +107,7 @@ export namespace AutoViewInputSubTypes {
          * The name of the current branch.
         */
         head_branch: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.job;
 
@@ -115,132 +116,153 @@ export type AutoViewInput = AutoViewInputSubTypes.job;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso?: string | null) =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "—";
+  const formatLabel = (s: string): string =>
+    s.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-  const createdAt = formatDate(value.created_at);
-  const startedAt = formatDate(value.started_at);
-  const completedAt = formatDate(value.completed_at);
+  const formattedDate = (iso: string): string =>
+    new Date(iso).toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
 
-  const duration =
-    value.started_at && value.completed_at
-      ? (() => {
-          const diff =
-            new Date(value.completed_at!).getTime() -
-            new Date(value.started_at).getTime();
-          const secTotal = Math.floor(diff / 1000);
-          const mins = Math.floor(secTotal / 60);
-          const secs = secTotal % 60;
-          return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-        })()
-      : "—";
+  const shortSha = value.head_sha.slice(0, 7);
 
-  const statusMap: Record<AutoViewInput["status"], string> = {
-    queued: "bg-gray-100 text-gray-800",
-    in_progress: "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
-    waiting: "bg-indigo-100 text-indigo-800",
-    requested: "bg-purple-100 text-purple-800",
-    pending: "bg-yellow-100 text-yellow-800",
+  const getStatusIcon = (): JSX.Element => {
+    const commonProps = { size: 16, className: 'flex-shrink-0' };
+    if (value.status !== 'completed') {
+      switch (value.status) {
+        case 'in_progress':
+          return <LucideReact.Loader {...commonProps} className="animate-spin text-blue-500" />;
+        case 'queued':
+        case 'waiting':
+        case 'requested':
+        case 'pending':
+          return <LucideReact.Clock {...commonProps} className="text-amber-500" />;
+        default:
+          return <LucideReact.HelpCircle {...commonProps} className="text-gray-400" />;
+      }
+    } else {
+      switch (value.conclusion) {
+        case 'success':
+          return <LucideReact.CheckCircle {...commonProps} className="text-green-500" />;
+        case 'failure':
+          return <LucideReact.XCircle {...commonProps} className="text-red-500" />;
+        case 'neutral':
+          return <LucideReact.MinusCircle {...commonProps} className="text-gray-500" />;
+        case 'cancelled':
+          return <LucideReact.XOctagon {...commonProps} className="text-gray-500" />;
+        case 'skipped':
+          return <LucideReact.SkipForward {...commonProps} className="text-gray-500" />;
+        case 'timed_out':
+          return <LucideReact.Clock {...commonProps} className="text-orange-500" />;
+        case 'action_required':
+          return <LucideReact.AlertTriangle {...commonProps} className="text-red-500" />;
+        default:
+          return <LucideReact.HelpCircle {...commonProps} className="text-gray-400" />;
+      }
+    }
   };
-  const conclusionMap: Record<NonNullable<AutoViewInput["conclusion"]>, string> = {
-    success: "bg-green-100 text-green-800",
-    failure: "bg-red-100 text-red-800",
-    neutral: "bg-gray-100 text-gray-800",
-    cancelled: "bg-yellow-100 text-yellow-800",
-    skipped: "bg-gray-100 text-gray-800",
-    timed_out: "bg-red-100 text-red-800",
-    action_required: "bg-orange-100 text-orange-800",
-  };
 
-  const statusClass = statusMap[value.status] ?? "bg-gray-100 text-gray-800";
-  const conclusionClass =
-    value.conclusion != null
-      ? conclusionMap[value.conclusion] ?? "bg-gray-100 text-gray-800"
-      : "";
+  const statusText =
+    value.status !== 'completed'
+      ? formatLabel(value.status)
+      : formatLabel(value.conclusion ?? 'unknown');
 
-  const workflow = value.workflow_name ?? "—";
-  const branch = value.head_branch ?? "—";
-  const runner = value.runner_name ?? "—";
-  const stepCount = value.steps?.length ?? 0;
-  const labels = value.labels ?? [];
+  let durationText: string | null = null;
+  if (value.started_at && value.completed_at) {
+    const start = new Date(value.started_at).getTime();
+    const end = new Date(value.completed_at).getTime();
+    const diff = Math.max(0, end - start);
+    const secs = Math.floor(diff / 1000);
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
+    const rem = secs % 60;
+    durationText = hrs > 0
+      ? `${hrs}h ${mins}m`
+      : mins > 0
+        ? `${mins}m ${rem}s`
+        : `${rem}s`;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
+        <h2
+          className="text-lg font-semibold text-gray-800 truncate"
+          title={value.name}
+        >
           {value.name}
         </h2>
-        <span
-          className={`px-2 py-1 text-sm font-medium rounded ${statusClass}`}
-        >
-          {value.status.replace(/_/g, " ")}
-        </span>
+        <div className="flex items-center space-x-1">
+          {getStatusIcon()}
+          <span className="text-sm font-medium text-gray-600">{statusText}</span>
+        </div>
       </div>
 
-      {value.conclusion && (
-        <div className="flex justify-end">
-          <span
-            className={`px-2 py-1 text-sm font-medium rounded ${conclusionClass}`}
-          >
-            {value.conclusion.replace(/_/g, " ")}
-          </span>
+      <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-500">
+        {value.workflow_name && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.GitBranch size={16} className="text-gray-400 flex-shrink-0" />
+            <span>{value.workflow_name}</span>
+          </div>
+        )}
+        {value.head_branch && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.GitBranch size={16} className="text-gray-400 flex-shrink-0" />
+            <span>{value.head_branch}</span>
+          </div>
+        )}
+        <div className="flex items-center space-x-1">
+          <LucideReact.Hash size={16} className="text-gray-400 flex-shrink-0" />
+          <span>{shortSha}</span>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} className="text-gray-400 flex-shrink-0" />
+          <span>Created:</span>
+          <span className="font-medium">{formattedDate(value.created_at)}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Play size={16} className="text-gray-400 flex-shrink-0" />
+          <span>Started:</span>
+          <span className="font-medium">{formattedDate(value.started_at)}</span>
+        </div>
+        {value.completed_at && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.CheckSquare size={16} className="text-gray-400 flex-shrink-0" />
+            <span>Completed:</span>
+            <span className="font-medium">{formattedDate(value.completed_at)}</span>
+          </div>
+        )}
+        {durationText && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Clock size={16} className="text-gray-400 flex-shrink-0" />
+            <span>Duration:</span>
+            <span className="font-medium">{durationText}</span>
+          </div>
+        )}
+      </div>
+
+      {value.runner_name && (
+        <div className="mt-4 flex items-center text-sm text-gray-600">
+          <LucideReact.User size={16} className="text-gray-400 flex-shrink-0" />
+          <span className="ml-1">{value.runner_name}</span>
         </div>
       )}
 
-      <div className="text-sm text-gray-600 space-y-1">
-        <div>
-          <span className="font-medium">Workflow:</span> {workflow}
-        </div>
-        <div>
-          <span className="font-medium">Branch:</span> {branch}
-        </div>
-        <div>
-          <span className="font-medium">Runner:</span> {runner}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-        <div>
-          <span className="font-medium">Created:</span> {createdAt}
-        </div>
-        <div>
-          <span className="font-medium">Started:</span> {startedAt}
-        </div>
-        <div>
-          <span className="font-medium">Completed:</span> {completedAt}
-        </div>
-        <div>
-          <span className="font-medium">Duration:</span> {duration}
-        </div>
-      </div>
-
-      {labels.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {labels.map((label) => (
+      {value.labels && value.labels.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {value.labels.map(label => (
             <span
               key={label}
-              className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded"
+              className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
             >
               {label}
             </span>
           ))}
-        </div>
-      )}
-
-      {stepCount > 0 && (
-        <div className="text-sm text-gray-600">
-          <span className="font-medium">Steps:</span> {stepCount}
         </div>
       )}
     </div>

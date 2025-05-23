@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repository actions caches
      *
      * @title Repository actions caches
     */
-    export type actions_cache_list = {
+    export interface actions_cache_list {
         /**
          * Total number of caches
         */
@@ -23,7 +24,7 @@ export namespace AutoViewInputSubTypes {
             created_at?: string & tags.Format<"date-time">;
             size_in_bytes?: number & tags.Type<"int32">;
         }[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_cache_list;
 
@@ -32,70 +33,78 @@ export type AutoViewInput = AutoViewInputSubTypes.actions_cache_list;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso?: string): string =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "-";
+  const caches = value.actions_caches ?? [];
+  const hasCaches = caches.length > 0;
 
-  const formatBytes = (bytes?: number): string => {
-    if (bytes === undefined) return "-";
-    if (bytes === 0) return "0 Bytes";
+  function formatDate(dateStr?: string): string {
+    if (!dateStr) return '—';
+    const date = new Date(dateStr);
+    return date.toLocaleString();
+  }
+
+  function formatBytes(bytes?: number): string {
+    if (bytes == null) return '—';
+    if (bytes < 1024) return `${bytes} B`;
     const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
-  const { total_count, actions_caches } = value;
+    const sizes = ['KB', 'MB', 'GB', 'TB'];
+    let i = 0;
+    let dbl = bytes;
+    while (dbl >= k && i < sizes.length - 1) {
+      dbl /= k;
+      i++;
+    }
+    return `${dbl.toFixed(1)} ${sizes[i]}`;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        Repository Actions Caches ({total_count})
-      </h2>
-      {actions_caches.length === 0 ? (
-        <p className="text-sm text-gray-500">No caches available.</p>
+      <div className="flex items-center mb-4 text-gray-700">
+        <LucideReact.ListOrdered className="mr-2 text-gray-600" size={20} />
+        <h2 className="text-lg font-semibold">Actions Caches ({value.total_count})</h2>
+      </div>
+
+      { !hasCaches ? (
+        <div className="flex flex-col items-center py-8 text-gray-500">
+          <LucideReact.AlertCircle className="mb-2" size={48} />
+          <span>No caches available.</span>
+        </div>
       ) : (
         <ul className="space-y-4">
-          {actions_caches.map((cache, idx) => (
+          {caches.map((cache, idx) => (
             <li
               key={cache.id ?? idx}
-              className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm"
+              className="p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
             >
-              <div className="flex justify-between items-start sm:items-center mb-2">
-                <p className="text-gray-900 font-medium truncate">
-                  {cache.key ?? `#${cache.id ?? idx}`}
-                </p>
-                {cache.version && (
-                  <span className="text-sm text-gray-500">v{cache.version}</span>
-                )}
+              <div className="flex items-center justify-between">
+                <div className="text-sm font-medium text-gray-800 truncate" title={cache.key}>
+                  <LucideReact.Tag className="inline-block mr-1 text-gray-500" size={16} />
+                  {cache.key ?? '—'}
+                </div>
+                <span className="text-sm text-gray-500">{cache.version ? `v${cache.version}` : '—'}</span>
               </div>
-              <div className="text-sm text-gray-600 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                {cache.ref && (
-                  <p className="truncate">
-                    <span className="font-semibold text-gray-700">Ref: </span>
-                    {cache.ref}
-                  </p>
-                )}
-                <p>
-                  <span className="font-semibold text-gray-700">Size: </span>
-                  {formatBytes(cache.size_in_bytes)}
-                </p>
-                <p>
-                  <span className="font-semibold text-gray-700">Created: </span>
-                  {formatDate(cache.created_at)}
-                </p>
-                <p>
-                  <span className="font-semibold text-gray-700">Last Accessed: </span>
-                  {formatDate(cache.last_accessed_at)}
-                </p>
+
+              <div className="mt-2 grid grid-cols-2 gap-4 text-sm text-gray-600">
+                <div className="flex items-center">
+                  <LucideReact.Calendar className="mr-1 text-gray-500" size={16} />
+                  <span title={formatDate(cache.created_at)}>
+                    Created: {formatDate(cache.created_at)}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Clock className="mr-1 text-gray-500" size={16} />
+                  <span title={formatDate(cache.last_accessed_at)}>
+                    Last Accessed: {formatDate(cache.last_accessed_at)}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Database className="mr-1 text-gray-500" size={16} />
+                  <span>Size: {formatBytes(cache.size_in_bytes)}</span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.GitBranch className="mr-1 text-gray-500" size={16} />
+                  <span>{cache.ref ?? '—'}</span>
+                </div>
               </div>
             </li>
           ))}

@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type secret_scanning_push_protection_bypass = {
+    export interface secret_scanning_push_protection_bypass {
         reason?: AutoViewInputSubTypes.secret_scanning_push_protection_bypass_reason;
         /**
          * The time that the bypass will expire in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.
@@ -11,7 +12,7 @@ export namespace AutoViewInputSubTypes {
          * The token type this bypass is for.
         */
         token_type?: string;
-    };
+    }
     /**
      * The reason for bypassing push protection.
     */
@@ -21,56 +22,95 @@ export type AutoViewInput = AutoViewInputSubTypes.secret_scanning_push_protectio
 
 
 
-// The component name is always "VisualComponent"
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const reasonLabels: Record<AutoViewInputSubTypes.secret_scanning_push_protection_bypass_reason, string> = {
-    false_positive: "False Positive",
-    used_in_tests: "Used in Tests",
-    will_fix_later: "Will Fix Later",
+  // Map each bypass reason to a user-friendly label and an icon
+  const reasonDetails: Record<
+    AutoViewInputSubTypes.secret_scanning_push_protection_bypass_reason,
+    { label: string; icon: JSX.Element }
+  > = {
+    false_positive: {
+      label: "False Positive",
+      icon: (
+        <LucideReact.ShieldOff
+          size={20}
+          className="text-yellow-500"
+          aria-label="False positive"
+        />
+      ),
+    },
+    used_in_tests: {
+      label: "Used in Tests",
+      icon: (
+        <LucideReact.TestTube2
+          size={20}
+          className="text-blue-500"
+          aria-label="Used in tests"
+        />
+      ),
+    },
+    will_fix_later: {
+      label: "Will Fix Later",
+      icon: (
+        <LucideReact.Clock
+          size={20}
+          className="text-gray-500"
+          aria-label="Will fix later"
+        />
+      ),
+    },
   };
 
-  const reasonLabel = value.reason ? reasonLabels[value.reason] : "Not specified";
+  // Derive the selected reason detail if present
+  const reasonDetail = value.reason ? reasonDetails[value.reason] : undefined;
 
-  let expirationLabel: string;
-  if (value.expire_at === null) {
-    expirationLabel = "No expiration";
-  } else if (value.expire_at) {
-    const date = new Date(value.expire_at);
-    expirationLabel = date.toLocaleString("default", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      timeZoneName: "short",
-    });
-  } else {
-    expirationLabel = "Not specified";
-  }
-
-  const tokenTypeLabel = value.token_type?.trim() ? value.token_type : "Not specified";
+  // Format the expiration timestamp, if provided
+  const formattedExpire =
+    value.expire_at != null
+      ? new Date(value.expire_at).toLocaleString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Handling the "no data" state
+  if (!reasonDetail && !formattedExpire && !value.token_type) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow text-gray-400">
+        <LucideReact.AlertCircle size={24} />
+        <p className="mt-2 text-sm">No bypass details available</p>
+      </div>
+    );
+  }
+
+  // Main display card
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200 max-w-sm mx-auto">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Push Protection Bypass Details
-      </h2>
-      <dl className="space-y-3">
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Reason</dt>
-          <dd className="text-sm text-gray-900">{reasonLabel}</dd>
+    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
+      {reasonDetail && (
+        <div className="flex items-center space-x-2">
+          {reasonDetail.icon}
+          <span className="text-sm font-medium text-gray-700">
+            {reasonDetail.label}
+          </span>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Expires At</dt>
-          <dd className="text-sm text-gray-900">{expirationLabel}</dd>
+      )}
+      {formattedExpire && (
+        <div className="flex items-center mt-2 text-sm text-gray-500">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>Expires: {formattedExpire}</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Token Type</dt>
-          <dd className="text-sm text-gray-900">{tokenTypeLabel}</dd>
+      )}
+      {value.token_type && (
+        <div className="flex items-center mt-2 text-sm text-gray-500">
+          <LucideReact.Key size={16} className="mr-1" />
+          <span>Token Type: {value.token_type}</span>
         </div>
-      </dl>
+      )}
     </div>
   );
 }

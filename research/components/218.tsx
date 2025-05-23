@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4WebhookView = {
+                export interface LegacyV4WebhookView {
                     webhook?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Webhook = {
+            export interface LegacyV4Webhook {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -23,7 +24,7 @@ export namespace AutoViewInputSubTypes {
                 apiVersion: string;
                 lastBlockedAt?: number;
                 blocked?: boolean;
-            };
+            }
         }
     }
 }
@@ -35,10 +36,15 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Webhook
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const webhook = value.webhook;
+  const formattedDate = (ts?: number) =>
+    ts ? new Date(ts).toLocaleString() : "—";
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (!webhook) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-gray-500 text-center">
-        No webhook data available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={32} />
+        <span className="mt-2 text-sm">No webhook data available</span>
       </div>
     );
   }
@@ -47,99 +53,96 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
     name,
     url,
     apiVersion,
+    keywords,
     createdAt,
-    lastBlockedAt,
     watchUserChats,
     watchGroups,
     blocked,
-    keywords,
+    lastBlockedAt,
   } = webhook;
 
-  const formattedCreatedAt = createdAt
-    ? new Date(createdAt).toLocaleString("default", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "—";
-
-  const formattedLastBlockedAt = lastBlockedAt
-    ? new Date(lastBlockedAt).toLocaleString("default", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : null;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       {/* Header */}
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
-        <p className="mt-1 text-sm text-gray-500 truncate">{url}</p>
-      </div>
-
-      {/* Status & Badges */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${
-            blocked ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
-          }`}
-        >
-          {blocked ? "Blocked" : "Active"}
-        </span>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${
-            watchUserChats ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600"
-          }`}
-        >
-          {watchUserChats ? "Watching Chats" : "Not Watching Chats"}
-        </span>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${
-            watchGroups ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-600"
-          }`}
-        >
-          {watchGroups ? "Watching Groups" : "Not Watching Groups"}
-        </span>
-        <span className="px-2 py-1 text-xs font-medium rounded bg-indigo-100 text-indigo-800">
-          API {apiVersion}
-        </span>
-      </div>
-
-      {/* Details List */}
-      <dl className="grid grid-cols-1 gap-y-2 text-sm text-gray-600">
-        <div className="flex">
-          <dt className="w-24 font-medium">Created</dt>
-          <dd className="flex-1">{formattedCreatedAt}</dd>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <LucideReact.Rss size={20} className="text-blue-500" />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {name}
+          </h2>
         </div>
-        {formattedLastBlockedAt && (
-          <div className="flex">
-            <dt className="w-24 font-medium">Last Blocked</dt>
-            <dd className="flex-1">{formattedLastBlockedAt}</dd>
-          </div>
+        {blocked ? (
+          <LucideReact.ShieldOff
+            size={18}
+            className="text-red-500"
+            aria-label="Blocked"
+          />
+        ) : (
+          <LucideReact.ShieldCheck
+            size={18}
+            className="text-green-500"
+            aria-label="Active"
+          />
         )}
+      </div>
+
+      {/* Details */}
+      <div className="mt-4 space-y-3 text-sm text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Link size={16} className="text-gray-400" />
+          <span className="ml-2 break-all truncate">{url}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Tag size={16} className="text-gray-400" />
+          <span className="ml-2">{apiVersion}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span className="ml-2">{formattedDate(createdAt)}</span>
+        </div>
+
         {keywords && keywords.length > 0 && (
-          <div className="flex">
-            <dt className="w-24 font-medium">Keywords</dt>
-            <dd className="flex flex-wrap gap-1 flex-1">
-              {keywords.map((kw, idx) => (
+          <div className="flex items-start">
+            <LucideReact.Hash size={16} className="text-gray-400 mt-1" />
+            <div className="ml-2 flex flex-wrap gap-1">
+              {keywords.map((kw) => (
                 <span
-                  key={idx}
-                  className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded"
+                  key={kw}
+                  className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full"
                 >
                   {kw}
                 </span>
               ))}
-            </dd>
+            </div>
           </div>
         )}
-      </dl>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-center">
+            <LucideReact.MessageCircle size={16} className="text-gray-400" />
+            <span className="ml-2">
+              {watchUserChats
+                ? "Watching User Chats"
+                : "Not Watching User Chats"}
+            </span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.Users size={16} className="text-gray-400" />
+            <span className="ml-2">
+              {watchGroups ? "Watching Groups" : "Not Watching Groups"}
+            </span>
+          </div>
+        </div>
+
+        {blocked && (
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span className="ml-2">
+              Last Blocked: {formattedDate(lastBlockedAt)}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

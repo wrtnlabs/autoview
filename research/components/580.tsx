@@ -1,26 +1,29 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * An object without any properties.
      *
      * @title Empty Object
     */
-    export type empty_object = {};
+    export interface empty_object {
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.empty_object;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Since AutoViewInput is an empty object, there's no data to display.
-  // Render a clean empty state indicating no available content.
-
+  // Since AutoViewInputSubTypes.empty_object has no displayable properties,
+  // we render a friendly "no data" placeholder.
   return (
-    <div className="flex items-center justify-center p-6 bg-white rounded-lg shadow-md">
-      <p className="text-center text-gray-500 text-sm">
-        No data available.
-      </p>
+    <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-sm">
+      <LucideReact.AlertCircle
+        size={48}
+        className="mb-3 text-gray-300"
+        aria-hidden="true"
+      />
+      <span className="text-gray-500 text-sm">No data available</span>
     </div>
   );
 }

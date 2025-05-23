@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type ruleset_version_with_state = {
+    export interface ruleset_version_with_state {
         /**
          * The ID of the previous version of the ruleset
         */
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
          * The state of the ruleset version
         */
         state: {};
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ruleset_version_with_state;
 
@@ -27,49 +28,46 @@ export type AutoViewInput = AutoViewInputSubTypes.ruleset_version_with_state;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Format the update timestamp to a human-readable string.
   const formattedDate = new Date(value.updated_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    dateStyle: "medium",
+    timeStyle: "short",
   });
-
-  //    Build a display string for the actor (type and/or ID).
-  const actorParts: string[] = [];
-  if (value.actor.type) actorParts.push(value.actor.type);
-  if (value.actor.id !== undefined) actorParts.push(`#${value.actor.id}`);
-  const actorDisplay = actorParts.length > 0 ? actorParts.join(" ") : "Unknown";
-
-  //    Serialize the state object to JSON and truncate if too long for layout.
-  const rawStateJson = JSON.stringify(value.state, null, 2);
-  const maxPreviewLength = 200;
-  const displayStateJson =
-    rawStateJson.length > maxPreviewLength
-      ? rawStateJson.slice(0, maxPreviewLength) + "..."
-      : rawStateJson;
+  const actorDisplay = value.actor.type
+    ? `${value.actor.type}${value.actor.id ? ` (#${value.actor.id})` : ""}`
+    : value.actor.id
+    ? `Actor (#${value.actor.id})`
+    : "Unknown actor";
+  const stateKeys = value.state && typeof value.state === "object"
+    ? Object.keys(value.state)
+    : [];
+  const hasState = stateKeys.length > 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Use a card layout to present version info and state snapshot.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <header className="mb-3">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          Ruleset Version #{value.version_id}
-        </h2>
-        <p className="text-sm text-gray-600">
-          Updated by <span className="font-medium text-gray-700">{actorDisplay}</span>{" "}
-          on <time dateTime={value.updated_at}>{formattedDate}</time>
-        </p>
-      </header>
-
-      <section>
-        <h3 className="text-sm font-medium text-gray-700 mb-1">State Snapshot</h3>
-        <pre className="bg-gray-50 text-xs text-gray-800 p-2 rounded overflow-auto max-h-32">
-          {displayStateJson}
-        </pre>
-      </section>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md text-gray-700">
+      <div className="flex items-center mb-2">
+        <LucideReact.Hash className="text-gray-500" size={20} />
+        <span className="ml-2 font-semibold text-lg">Version {value.version_id}</span>
+      </div>
+      <div className="flex items-center text-sm mb-1">
+        <LucideReact.User className="text-gray-400" size={16} />
+        <span className="ml-1">Actor: {actorDisplay}</span>
+      </div>
+      <div className="flex items-center text-sm mb-4">
+        <LucideReact.Calendar className="text-gray-400" size={16} />
+        <span className="ml-1">Updated: {formattedDate}</span>
+      </div>
+      {hasState && (
+        <details className="text-sm">
+          <summary className="flex items-center cursor-pointer text-gray-600">
+            <LucideReact.Box className="text-gray-400" size={16} />
+            <span className="ml-1">State ({stateKeys.length} properties)</span>
+          </summary>
+          <pre className="mt-2 p-2 bg-gray-100 rounded text-xs max-h-40 overflow-auto">
+            {JSON.stringify(value.state, null, 2)}
+          </pre>
+        </details>
+      )}
     </div>
   );
 }

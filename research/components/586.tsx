@@ -1,9 +1,10 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type actions_get_default_workflow_permissions = {
+    export interface actions_get_default_workflow_permissions {
         default_workflow_permissions: AutoViewInputSubTypes.actions_default_workflow_permissions;
         can_approve_pull_request_reviews: AutoViewInputSubTypes.actions_can_approve_pull_request_reviews;
-    };
+    }
     /**
      * The default workflow permissions granted to the GITHUB_TOKEN when running workflows.
     */
@@ -19,46 +20,60 @@ export type AutoViewInput = AutoViewInputSubTypes.actions_get_default_workflow_p
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const defaultPermLabel = value.default_workflow_permissions === 'write' ? 'Write' : 'Read';
-  const defaultPermClasses = value.default_workflow_permissions === 'write'
-    ? 'bg-blue-100 text-blue-800'
-    : 'bg-gray-100 text-gray-800';
+  // 1. Data transformation: derive labels and select appropriate icons/colors
+  const {
+    default_workflow_permissions,
+    can_approve_pull_request_reviews,
+  } = value;
 
-  const canApproveLabel = value.can_approve_pull_request_reviews ? 'Enabled' : 'Disabled';
-  const canApproveClasses = value.can_approve_pull_request_reviews
-    ? 'bg-red-100 text-red-800'
-    : 'bg-green-100 text-green-800';
+  const permissionLabel =
+    default_workflow_permissions === "read" ? "Read" : "Write";
+  const PermissionIcon =
+    default_workflow_permissions === "read"
+      ? LucideReact.Eye
+      : LucideReact.Edit2;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  const approvalLabel = can_approve_pull_request_reviews
+    ? "Can approve pull request reviews"
+    : "Cannot approve pull request reviews";
+  const ApprovalIcon = can_approve_pull_request_reviews
+    ? LucideReact.CheckCircle
+    : LucideReact.XCircle;
+  const approvalColor = can_approve_pull_request_reviews
+    ? "text-green-500"
+    : "text-red-500";
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm max-w-sm mx-auto">
-      <h2 className="text-lg font-semibold text-gray-900">
-        GitHub Actions Permissions
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      <h2 className="flex items-center text-xl font-semibold text-gray-800 mb-4">
+        <LucideReact.GitPullRequest
+          aria-hidden="true"
+          className="text-indigo-500 mr-2"
+          size={20}
+        />
+        Workflow Permissions
       </h2>
-      <dl className="mt-4 space-y-4">
-        <div className="flex items-center justify-between">
-          <dt className="text-sm text-gray-600">Default Workflow Permissions</dt>
-          <dd>
-            <span
-              className={`inline-block px-2 py-1 text-xs font-semibold rounded ${defaultPermClasses}`}
-            >
-              {defaultPermLabel}
-            </span>
-          </dd>
-        </div>
-        <div className="flex items-center justify-between">
-          <dt className="text-sm text-gray-600">PR Review Approval</dt>
-          <dd>
-            <span
-              className={`inline-block px-2 py-1 text-xs font-semibold rounded ${canApproveClasses}`}
-            >
-              {canApproveLabel}
-            </span>
-          </dd>
-        </div>
-      </dl>
+      <ul className="space-y-3">
+        <li className="flex items-center">
+          <PermissionIcon
+            aria-hidden="true"
+            className="text-blue-500 mr-2"
+            size={16}
+          />
+          <span className="text-gray-700">
+            {permissionLabel} permission to GITHUB_TOKEN
+          </span>
+        </li>
+        <li className="flex items-center">
+          <ApprovalIcon
+            aria-hidden="true"
+            className={`${approvalColor} mr-2`}
+            size={16}
+          />
+          <span className="text-gray-700">{approvalLabel}</span>
+        </li>
+      </ul>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -27,7 +28,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -42,7 +43,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -79,66 +80,93 @@ export type AutoViewInput = AutoViewInputSubTypes.team[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const teams = value;
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-  const formatActivePermissions = (perms?: AutoViewInputSubTypes.team["permissions"]) => {
-    if (!perms) return [];
-    return (Object.entries(perms) as [keyof typeof perms, boolean][])
-      .filter(([, enabled]) => enabled)
-      .map(([key]) => capitalize(key));
-  };
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Map through each team and prepare display badges for granted permissions
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-4">
-      {teams.map((team) => {
-        const description = team.description ?? "No description provided.";
-        const badges = [
-          { label: team.permission, bg: "bg-green-100", text: "text-green-800" },
-          team.privacy && { label: capitalize(team.privacy), bg: "bg-blue-100", text: "text-blue-800" },
-          team.notification_setting && { label: capitalize(team.notification_setting), bg: "bg-indigo-100", text: "text-indigo-800" },
-        ].filter(Boolean) as { label: string; bg: string; text: string }[];
+    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {value.map((team) => {
+        const {
+          id,
+          name,
+          description,
+          permission,
+          privacy,
+          html_url,
+          url,
+          permissions,
+          parent,
+        } = team;
 
-        const activePerms = formatActivePermissions(team.permissions);
+        // Derive a list of permission keys that are true
+        const granted: string[] = permissions
+          ? Object.entries(permissions)
+              .filter(([, grantedFlag]) => grantedFlag)
+              .map(([permKey]) => permKey)
+          : [];
 
         return (
           <div
-            key={team.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col"
+            key={id}
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-colors"
           >
-            <div className="p-4 flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {team.name}
-              </h3>
-              <p className="text-sm text-gray-500 mb-2 truncate">
-                @{team.slug}
-              </p>
-              <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-900 truncate">{name}</h3>
+              {privacy && (
+                <span className="px-2 py-0.5 text-xs font-medium text-blue-700 bg-blue-100 rounded">
+                  {privacy}
+                </span>
+              )}
+            </div>
+
+            {description && (
+              <p className="text-gray-700 text-sm mb-2 line-clamp-2">
                 {description}
               </p>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {badges.map((b, i) => (
+            )}
+
+            <div className="flex items-center gap-2 mb-2">
+              <LucideReact.Key size={16} className="text-gray-500" />
+              <span className="text-sm text-gray-600 capitalize">{permission}</span>
+            </div>
+
+            {granted.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {granted.map((perm) => (
                   <span
-                    key={i}
-                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${b.bg} ${b.text}`}
+                    key={perm}
+                    className="px-1.5 py-0.5 bg-green-100 text-green-800 text-xs rounded"
                   >
-                    {b.label}
+                    {perm}
                   </span>
                 ))}
               </div>
-              {activePerms.length > 0 && (
-                <div className="text-sm text-gray-700">
-                  <span className="font-medium">Permissions:</span>{" "}
-                  {activePerms.join(", ")}
-                </div>
-              )}
-              {team.parent && (
-                <div className="mt-3 text-sm text-gray-600">
-                  <span className="font-medium">Parent Team:</span>{" "}
-                  {team.parent.name}
-                </div>
-              )}
+            )}
+
+            {parent && (
+              <div className="flex items-center gap-1 mb-2">
+                <LucideReact.ChevronRight size={16} className="text-gray-400" />
+                <span className="text-sm text-gray-600 truncate">{parent.name}</span>
+              </div>
+            )}
+
+            <div className="flex items-center gap-4">
+              <a
+                href={html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-500 hover:underline text-sm"
+              >
+                <LucideReact.Link size={16} className="mr-1" />
+                Repo
+              </a>
+              <a
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-gray-500 hover:text-gray-700 text-sm"
+              >
+                <LucideReact.Globe size={16} className="mr-1" />
+                API
+              </a>
             </div>
           </div>
         );

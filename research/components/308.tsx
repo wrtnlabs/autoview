@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub Security Advisory.
     */
-    export type global_advisory = {
+    export interface global_advisory {
         /**
          * The GitHub Security Advisory ID.
         */
@@ -80,7 +81,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * The products and respective version ranges affected by the advisory.
         */
-        vulnerabilities: any[] | null;
+        vulnerabilities: AutoViewInputSubTypes.vulnerability[] | null;
         cvss: {
             /**
              * The CVSS vector.
@@ -107,11 +108,41 @@ export namespace AutoViewInputSubTypes {
          * The users who contributed to the advisory.
         */
         credits: {
-            user: any;
-            type: any;
+            user: AutoViewInputSubTypes.simple_user;
+            type: AutoViewInputSubTypes.security_advisory_credit_types;
         }[] | null;
-    };
-    export type vulnerability = any;
+    }
+    /**
+     * A vulnerability describing the product and its affected versions within a GitHub Security Advisory.
+    */
+    export interface vulnerability {
+        /**
+         * The name of the package affected by the vulnerability.
+        */
+        "package": {
+            ecosystem: AutoViewInputSubTypes.security_advisory_ecosystems;
+            /**
+             * The unique package name within its ecosystem.
+            */
+            name: string | null;
+        } | null;
+        /**
+         * The range of the package versions affected by the vulnerability.
+        */
+        vulnerable_version_range: string | null;
+        /**
+         * The package version that resolves the vulnerability.
+        */
+        first_patched_version: string | null;
+        /**
+         * The functions in the package that are affected by the vulnerability.
+        */
+        vulnerable_functions: string[] | null;
+    }
+    /**
+     * The package's language or package management ecosystem.
+    */
+    export type security_advisory_ecosystems = "rubygems" | "npm" | "pip" | "maven" | "nuget" | "composer" | "go" | "rust" | "erlang" | "actions" | "pub" | "other" | "swift";
     export type cvss_severities = {
         cvss_v3?: {
             /**
@@ -141,8 +172,39 @@ export namespace AutoViewInputSubTypes {
         percentage?: number & tags.Minimum<0> & tags.Maximum<100>;
         percentile?: number & tags.Minimum<0> & tags.Maximum<100>;
     } | null;
-    export type simple_user = any;
-    export type security_advisory_credit_types = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * The type of credit the user is receiving.
+    */
+    export type security_advisory_credit_types = "analyst" | "finder" | "reporter" | "coordinator" | "remediation_developer" | "remediation_reviewer" | "remediation_verifier" | "tool" | "sponsor" | "other";
 }
 export type AutoViewInput = AutoViewInputSubTypes.global_advisory[];
 
@@ -151,89 +213,138 @@ export type AutoViewInput = AutoViewInputSubTypes.global_advisory[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const advisories = value ?? [];
-  const formatDate = (iso: string): string => {
-    try {
-      return new Date(iso).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch {
-      return iso;
-    }
-  };
-  const severityColors: Record<AutoViewInputSubTypes.global_advisory["severity"], string> = {
-    critical: "bg-red-100 text-red-800",
-    high: "bg-orange-100 text-orange-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    low: "bg-green-100 text-green-800",
-    unknown: "bg-gray-100 text-gray-800",
-  };
-  const typeColors: Record<AutoViewInputSubTypes.global_advisory["type"], string> = {
-    reviewed: "bg-blue-100 text-blue-800",
-    unreviewed: "bg-gray-100 text-gray-800",
-    malware: "bg-red-200 text-red-900",
+  const advisories = value;
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+  const severityMap: Record<
+    AutoViewInputSubTypes.global_advisory["severity"],
+    { label: string; icon: React.ComponentType<any>; color: string }
+  > = {
+    critical: {
+      label: "Critical",
+      icon: LucideReact.XCircle,
+      color: "text-red-600",
+    },
+    high: {
+      label: "High",
+      icon: LucideReact.AlertTriangle,
+      color: "text-red-500",
+    },
+    medium: {
+      label: "Medium",
+      icon: LucideReact.AlertTriangle,
+      color: "text-amber-500",
+    },
+    low: {
+      label: "Low",
+      icon: LucideReact.AlertTriangle,
+      color: "text-yellow-500",
+    },
+    unknown: {
+      label: "Unknown",
+      icon: LucideReact.HelpCircle,
+      color: "text-gray-500",
+    },
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (advisories.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No security advisories to display.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={32} className="mb-2" aria-hidden />
+        <span>No security advisories available.</span>
       </div>
     );
   }
 
-  // 3. Return the React element.
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {advisories.map((item) => (
-        <div
-          key={item.ghsa_id}
-          className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold text-gray-900 truncate">
-                {item.ghsa_id}
-                {item.cve_id ? ` • ${item.cve_id}` : ""}
-              </h2>
-            </div>
-            <div className="flex space-x-2 ml-4">
-              <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${severityColors[item.severity]}`}
-              >
-                {item.severity.charAt(0).toUpperCase() + item.severity.slice(1)}
-              </span>
-              <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${typeColors[item.type]}`}
-              >
-                {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
-              </span>
-            </div>
-          </div>
-
-          <p className="mt-2 text-gray-700 text-sm line-clamp-3">
-            {item.summary}
-          </p>
-
-          <div className="mt-3 text-sm text-gray-500 space-y-1">
-            <div>Published: {formatDate(item.published_at)}</div>
-            {item.updated_at !== item.published_at && (
-              <div>Updated: {formatDate(item.updated_at)}</div>
-            )}
-            {item.cvss?.score != null && (
-              <div>
-                CVSS Score:{" "}
-                <span className="font-medium text-gray-900">
-                  {item.cvss.score.toFixed(1)}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {advisories.map((adv) => {
+        const {
+          ghsa_id,
+          cve_id,
+          summary,
+          severity,
+          published_at,
+          html_url,
+          cvss,
+          epss,
+          vulnerabilities,
+          cwes,
+        } = adv;
+        const { label: sevLabel, icon: SevIcon, color: sevColor } =
+          severityMap[severity];
+        return (
+          <div
+            key={ghsa_id}
+            className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden"
+          >
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-50">
+              <div className="flex items-center gap-2">
+                <SevIcon
+                  size={20}
+                  className={`${sevColor} flex-shrink-0`}
+                  aria-label={sevLabel}
+                />
+                <span className={`text-sm font-medium ${sevColor}`}>
+                  {sevLabel}
                 </span>
               </div>
-            )}
+              <span className="text-xs text-gray-500">
+                {ghsa_id}
+                {cve_id ? ` / ${cve_id}` : ""}
+              </span>
+            </div>
+            <div className="p-4 flex flex-col flex-1">
+              <h3 className="text-lg font-semibold text-gray-800">{summary}</h3>
+              <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+                {adv.description ?? adv.summary}
+              </p>
+              <div className="mt-auto pt-4 flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={16} aria-hidden />
+                  <span>{formatDate(published_at)}</span>
+                </div>
+                {cvss?.score != null && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.BarChart2 size={16} aria-hidden />
+                    <span>{cvss.score.toFixed(1)}</span>
+                  </div>
+                )}
+                {epss?.percentage != null && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.TrendingUp size={16} aria-hidden />
+                    <span>{epss.percentage.toFixed(1)}%</span>
+                  </div>
+                )}
+                {vulnerabilities && vulnerabilities.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Package size={16} aria-hidden />
+                    <span>{vulnerabilities.length} affected</span>
+                  </div>
+                )}
+                {cwes && cwes.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Shield size={16} aria-hidden />
+                    <span>{cwes.length} CWEs</span>
+                  </div>
+                )}
+                {html_url && (
+                  <div className="flex items-center gap-1 truncate">
+                    <LucideReact.Link size={16} aria-hidden />
+                    <span className="truncate">{html_url}</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

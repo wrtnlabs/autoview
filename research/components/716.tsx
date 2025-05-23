@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A Dependabot alert.
     */
-    export type dependabot_alert = {
+    export interface dependabot_alert {
         number: AutoViewInputSubTypes.alert_number;
         /**
          * The state of the Dependabot alert.
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
         dismissed_comment: (string & tags.MaxLength<280>) | null;
         fixed_at: AutoViewInputSubTypes.alert_fixed_at;
         auto_dismissed_at?: AutoViewInputSubTypes.alert_auto_dismissed_at;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -58,7 +59,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * Details for the vulnerable package.
     */
-    export type dependabot_alert_package = {
+    export interface dependabot_alert_package {
         /**
          * The package's language or package management ecosystem.
         */
@@ -67,11 +68,11 @@ export namespace AutoViewInputSubTypes {
          * The unique package name within its ecosystem.
         */
         name: string;
-    };
+    }
     /**
      * Details for the GitHub Security Advisory.
     */
-    export type dependabot_alert_security_advisory = {
+    export interface dependabot_alert_security_advisory {
         /**
          * The unique GitHub Security Advisory ID assigned to the advisory.
         */
@@ -158,11 +159,11 @@ export namespace AutoViewInputSubTypes {
          * The time that the advisory was withdrawn in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.
         */
         withdrawn_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * Details pertaining to one vulnerable version range for the advisory.
     */
-    export type dependabot_alert_security_vulnerability = {
+    export interface dependabot_alert_security_vulnerability {
         "package": AutoViewInputSubTypes.dependabot_alert_package;
         /**
          * The severity of the vulnerability.
@@ -181,7 +182,7 @@ export namespace AutoViewInputSubTypes {
             */
             identifier: string;
         } | null;
-    };
+    }
     export type cvss_severities = {
         cvss_v3?: {
             /**
@@ -276,114 +277,206 @@ export type AutoViewInput = AutoViewInputSubTypes.dependabot_alert;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string | null | undefined): string =>
-    iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+  type StateKey = AutoViewInputSubTypes.dependabot_alert["state"];
+  const stateConfig: Record<
+    StateKey,
+    {
+      label: string;
+      Icon: React.ComponentType<any>;
+      iconColor: string;
+      badgeBg: string;
+      badgeText: string;
+    }
+  > = {
+    open: {
+      label: "Open",
+      Icon: LucideReact.AlertCircle,
+      iconColor: "text-amber-500",
+      badgeBg: "bg-amber-100",
+      badgeText: "text-amber-800",
+    },
+    fixed: {
+      label: "Fixed",
+      Icon: LucideReact.CheckCircle,
+      iconColor: "text-green-500",
+      badgeBg: "bg-green-100",
+      badgeText: "text-green-800",
+    },
+    dismissed: {
+      label: "Dismissed",
+      Icon: LucideReact.XCircle,
+      iconColor: "text-red-500",
+      badgeBg: "bg-red-100",
+      badgeText: "text-red-800",
+    },
+    auto_dismissed: {
+      label: "Auto Dismissed",
+      Icon: LucideReact.Clock,
+      iconColor: "text-gray-500",
+      badgeBg: "bg-gray-100",
+      badgeText: "text-gray-800",
+    },
+  };
+  const config = stateConfig[value.state];
 
-  const stateMap: Record<AutoViewInputSubTypes.dependabot_alert['state'], { label: string; bg: string; text: string }> = {
-    open:         { label: 'Open',          bg: 'bg-blue-100',    text: 'text-blue-800' },
-    fixed:        { label: 'Fixed',         bg: 'bg-green-100',   text: 'text-green-800' },
-    dismissed:    { label: 'Dismissed',     bg: 'bg-gray-100',    text: 'text-gray-800' },
-    auto_dismissed: { label: 'Auto-Dismissed', bg: 'bg-purple-100', text: 'text-purple-800' },
+  const formatDate = (dateStr: string | null): string => {
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
-  const severityMap: Record<AutoViewInputSubTypes.dependabot_alert_security_advisory['severity'], { bg: string; text: string }> = {
-    low:      { bg: 'bg-green-100',  text: 'text-green-800' },
-    medium:   { bg: 'bg-yellow-100', text: 'text-yellow-800' },
-    high:     { bg: 'bg-red-100',    text: 'text-red-800' },
-    critical: { bg: 'bg-red-200',    text: 'text-red-900' },
-  };
-
-  const {
-    number,
-    state,
-    dependency,
-    security_advisory: adv,
-    created_at,
-    updated_at,
-    dismissed_at,
-    dismissed_reason,
-    dismissed_by,
-    fixed_at,
-  } = value;
-
-  const stateInfo = stateMap[state];
-  const primaryPkg = dependency['package'];
-  const pkgLabel = primaryPkg
-    ? `${primaryPkg.name} (${primaryPkg.ecosystem})`
-    : 'Unknown package';
-  const scopeRel = [
-    dependency.scope ?? null,
-    dependency.relationship ?? null
-  ].filter(Boolean).join(' / ');
-
-  const vulnCount = adv.vulnerabilities.length;
-  const pubDate = formatDate(adv.published_at);
-  const createdDate = formatDate(created_at);
-  const updatedDate = formatDate(updated_at);
-  const fixedDate = formatDate(fixed_at);
-  const dismissedDate = formatDate(dismissed_at);
+  const severityConfig: { bg: string; text: string } = {
+    low: { bg: "bg-green-100", text: "text-green-800" },
+    medium: { bg: "bg-yellow-100", text: "text-yellow-800" },
+    high: { bg: "bg-orange-100", text: "text-orange-800" },
+    critical: { bg: "bg-red-100", text: "text-red-800" },
+  }[value.security_advisory.severity];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-4 space-y-4">
-      {/* Header: Alert ID & State */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900">Alert #{number}</h2>
-        <span className={`px-2 py-1 text-xs font-medium rounded ${stateInfo.bg} ${stateInfo.text}`}>
-          {stateInfo.label}
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header: Alert number and state */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <config.Icon className={config.iconColor} size={20} />
+          <h2 className="text-lg font-semibold">
+            Alert #{value.number} – {config.label}
+          </h2>
+        </div>
+        <span
+          className={`px-2 py-1 text-sm font-medium rounded ${config.badgeBg} ${config.badgeText}`}
+        >
+          {config.label}
         </span>
       </div>
 
-      {/* Dependency Info */}
-      <div className="text-sm text-gray-700 space-y-1">
-        <p>
-          <span className="font-medium">Dependency:</span>{' '}
-          <span className="truncate inline-block max-w-xs">{pkgLabel}</span>
-        </p>
-        {dependency.manifest_path && (
-          <p>
-            <span className="font-medium">Manifest:</span>{' '}
-            <span className="truncate inline-block max-w-xs">{dependency.manifest_path}</span>
-          </p>
+      {/* Dependency details */}
+      <div className="space-y-2">
+        {value.dependency.package && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <LucideReact.Tag size={16} className="text-gray-400" />
+            <span>
+              {value.dependency.package.name} (
+              {value.dependency.package.ecosystem})
+            </span>
+          </div>
         )}
-        {scopeRel && (
-          <p>
-            <span className="font-medium">Scope/Relation:</span> {scopeRel}
-          </p>
+        {value.dependency.manifest_path && (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <LucideReact.FileText size={16} className="text-gray-400" />
+            <span>{value.dependency.manifest_path}</span>
+          </div>
+        )}
+        {(value.dependency.scope || value.dependency.relationship) && (
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+            {value.dependency.scope && (
+              <span>Scope: {value.dependency.scope}</span>
+            )}
+            {value.dependency.relationship && (
+              <span>
+                Relationship: {value.dependency.relationship}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
-      {/* Advisory Summary */}
+      {/* Advisory summary */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <h3 className="text-md font-medium text-gray-900">
-            {adv.ghsa_id}
-            {adv.cve_id ? ` (${adv.cve_id})` : ''}
-          </h3>
-          <span className={`px-2 py-1 text-xs font-semibold rounded ${severityMap[adv.severity].bg} ${severityMap[adv.severity].text}`}>
-            {adv.severity.toUpperCase()}
+        <h3 className="text-md font-semibold line-clamp-2">
+          {value.security_advisory.summary}
+        </h3>
+        <div className="flex items-center gap-4 text-sm text-gray-500">
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>
+              Published:{" "}
+              {formatDate(value.security_advisory.published_at)}
+            </span>
+          </div>
+          <span
+            className={`px-2 py-0.5 text-xs font-medium uppercase rounded ${severityConfig.bg} ${severityConfig.text}`}
+          >
+            {value.security_advisory.severity}
           </span>
         </div>
-        <p className="text-gray-800 text-sm line-clamp-3">{adv.summary}</p>
-        <p className="text-xs text-gray-500">
-          Affected versions: {vulnCount}
-        </p>
-      </div>
-
-      {/* Dates & Status Details */}
-      <div className="text-xs text-gray-500 space-y-0.5">
-        <p>Published: {pubDate}</p>
-        <p>Created: {createdDate}</p>
-        <p>Updated: {updatedDate}</p>
-        {fixed_at && <p>Fixed: {fixedDate}</p>}
-        {dismissed_at && (
-          <p>
-            Dismissed: {dismissedDate}
-            {dismissed_reason && ` — ${dismissed_reason.replace('_', ' ')}`}
-            {dismissed_by && ` by ${dismissed_by.login}`}
-          </p>
+        {value.security_advisory.vulnerabilities.length > 0 && (
+          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
+            {value.security_advisory.vulnerabilities.map((v, idx) => (
+              <li key={idx}>
+                {v["package"].name}: {v.vulnerable_version_range}
+                {v.first_patched_version?.identifier && (
+                  <> (Patched in {v.first_patched_version.identifier})</>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
       </div>
+
+      {/* Link to GitHub alert */}
+      <div className="flex items-center gap-2 text-sm text-gray-500">
+        <LucideReact.Link size={16} />
+        <a
+          href={value.html_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline hover:text-blue-600 truncate"
+        >
+          View on GitHub
+        </a>
+      </div>
+
+      {/* Timing details */}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Created: {formatDate(value.created_at)}</span>
+        </div>
+        {value.fixed_at && (
+          <div className="flex items-center gap-1">
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500"
+            />
+            <span>Fixed: {formatDate(value.fixed_at)}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Dismissal details (if applicable) */}
+      {(value.state === "dismissed" ||
+        value.state === "auto_dismissed") &&
+        value.dismissed_at && (
+          <div className="space-y-1 text-sm text-gray-500">
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar size={16} />
+              <span>Dismissed: {formatDate(value.dismissed_at)}</span>
+            </div>
+            {value.dismissed_by && (
+              <div className="flex items-center gap-1">
+                <LucideReact.User size={16} />
+                <span>{value.dismissed_by.login}</span>
+              </div>
+            )}
+            {value.dismissed_reason && (
+              <div>
+                Reason: {value.dismissed_reason.replace("_", " ")}
+              </div>
+            )}
+            {value.dismissed_comment && (
+              <div className="italic">
+                "{value.dismissed_comment}"
+              </div>
+            )}
+          </div>
+        )}
     </div>
   );
 }

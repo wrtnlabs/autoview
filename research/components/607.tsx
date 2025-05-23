@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A request for a specific ref(branch,sha,tag) to be deployed
      *
      * @title Deployment
     */
-    export type deployment = {
+    export interface deployment {
         url: string & tags.Format<"uri">;
         /**
          * Unique identifier of the deployment
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
         */
         production_environment?: boolean;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -89,7 +90,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -117,8 +118,67 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.deployment[];
 
@@ -127,97 +187,127 @@ export type AutoViewInput = AutoViewInputSubTypes.deployment[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
+  const formatDate = (iso: string): string => {
+    const date = new Date(iso);
+    return isNaN(date.getTime())
+      ? iso
+      : date.toLocaleString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+        });
   };
-  const abbreviate = (str: string, length = 7): string =>
-    str.length > length ? `${str.slice(0, length)}…` : str;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Render a list of deployment cards with key details.
   return (
-    <div className="space-y-4">
-      {value.map((dep) => {
-        const created = formatDate(dep.created_at);
-        const updated = formatDate(dep.updated_at);
-        const sha = abbreviate(dep.sha, 7);
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {value.length === 0 ? (
+        <div className="flex items-center justify-center p-6 text-gray-500">
+          <LucideReact.AlertCircle size={24} className="mr-2" />
+          <span>No deployments available</span>
+        </div>
+      ) : (
+        value.map((deploy) => {
+          const shortSha = deploy.sha.slice(0, 7);
+          const createdAt = formatDate(deploy.created_at);
+          const isProd = deploy.production_environment === true;
+          const isTransient = deploy.transient_environment === true;
 
-        return (
-          <div key={dep.id} className="p-4 bg-white rounded-lg shadow-md">
-            {/* Header: environment name, task, status badges */}
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {dep.environment}
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Task: {dep.task}
+          return (
+            <div
+              key={deploy.id}
+              className="flex flex-col bg-white rounded-lg shadow-sm overflow-hidden"
+            >
+              {/* Header: Environment and Flags */}
+              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <LucideReact.Tag size={16} className="text-gray-500" />
+                  <span className="font-semibold text-gray-800 truncate">
+                    {deploy.environment}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {isProd && (
+                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                      <LucideReact.CheckCircle
+                        size={12}
+                        className="mr-1"
+                      />
+                      Prod
+                    </span>
+                  )}
+                  {!isProd && isTransient && (
+                    <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-800">
+                      <LucideReact.Clock size={12} className="mr-1" />
+                      Transient
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Body: Ref, SHA, Date, Description */}
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-gray-600 space-x-2">
+                    <LucideReact.GitBranch size={16} />
+                    <span className="truncate">{deploy.ref}</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 space-x-2">
+                    <LucideReact.GitCommit size={16} />
+                    <code className="font-mono text-gray-700">{shortSha}</code>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 space-x-2">
+                    <LucideReact.Calendar size={16} />
+                    <time dateTime={deploy.created_at}>{createdAt}</time>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-gray-700 line-clamp-2">
+                  {deploy.description ?? "No description provided."}
                 </p>
               </div>
-              <div className="flex space-x-2">
-                {dep.production_environment && (
-                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-                    Production
-                  </span>
-                )}
-                {dep.transient_environment && (
-                  <span className="inline-block px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-                    Transient
-                  </span>
+
+              {/* Footer: Creator and Integration */}
+              <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {deploy.creator ? (
+                    <>
+                      <img
+                        src={deploy.creator.avatar_url}
+                        alt={deploy.creator.login}
+                        className="w-6 h-6 rounded-full object-cover"
+                        onError={({ currentTarget }) => {
+                          currentTarget.onerror = null;
+                          currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            deploy.creator?.login || "User"
+                          )}&background=random`;
+                        }}
+                      />
+                      <span className="text-sm text-gray-800 truncate">
+                        {deploy.creator.login}
+                      </span>
+                    </>
+                  ) : (
+                    <div className="flex items-center text-sm text-gray-500">
+                      <LucideReact.User size={16} className="mr-1" />
+                      <span>Unknown</span>
+                    </div>
+                  )}
+                </div>
+                {deploy.performed_via_github_app && (
+                  <div className="flex items-center text-sm text-gray-600 space-x-1">
+                    <LucideReact.Box size={16} />
+                    <span className="truncate">
+                      {deploy.performed_via_github_app.name}
+                    </span>
+                  </div>
                 )}
               </div>
             </div>
-
-            {/* Deployment details: ref, sha, original environment */}
-            <div className="mt-3 text-sm text-gray-700 space-y-1">
-              <p>
-                <span className="font-medium">Ref:</span> {dep.ref}
-              </p>
-              <p>
-                <span className="font-medium">SHA:</span> {sha}
-              </p>
-              {dep.original_environment && (
-                <p>
-                  <span className="font-medium">Original Env:</span>{" "}
-                  {dep.original_environment}
-                </p>
-              )}
-            </div>
-
-            {/* Optional description, truncated */}
-            {dep.description && (
-              <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-                {dep.description}
-              </p>
-            )}
-
-            {/* Footer: creator info and timestamps */}
-            <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
-              <div className="flex items-center space-x-2">
-                {dep.creator?.avatar_url && dep.creator.login && (
-                  <img
-                    src={dep.creator.avatar_url}
-                    alt={dep.creator.login}
-                    className="w-6 h-6 rounded-full"
-                  />
-                )}
-                {dep.creator?.login && <span>{dep.creator.login}</span>}
-              </div>
-              <div className="text-right space-y-0.5">
-                <p>Created: {created}</p>
-                <p>Updated: {updated}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
     </div>
   );
 }

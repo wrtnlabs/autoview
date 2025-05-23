@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
      *
      * @title Issue
     */
-    export type issue = {
+    export interface issue {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -52,7 +53,7 @@ export namespace AutoViewInputSubTypes {
             "default"?: boolean;
         })[];
         assignee: AutoViewInputSubTypes.nullable_simple_user;
-        assignees?: any[] | null;
+        assignees?: AutoViewInputSubTypes.simple_user[] | null;
         milestone: AutoViewInputSubTypes.nullable_milestone;
         locked: boolean;
         active_lock_reason?: string | null;
@@ -78,7 +79,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         sub_issues_summary?: AutoViewInputSubTypes.sub_issues_summary;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -113,7 +114,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -136,7 +137,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A collection of related issues and pull requests.
      *
@@ -161,7 +162,7 @@ export namespace AutoViewInputSubTypes {
         */
         title: string;
         description: string | null;
-        creator: any;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
         open_issues: number & tags.Type<"int32">;
         closed_issues: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
@@ -198,11 +199,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -213,7 +214,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -417,7 +418,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -447,7 +448,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -475,7 +476,38 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -485,7 +517,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -496,15 +528,15 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
     /**
      * @title Sub-issues Summary
     */
-    export type sub_issues_summary = {
+    export interface sub_issues_summary {
         total: number & tags.Type<"int32">;
         completed: number & tags.Type<"int32">;
         percent_completed: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue[];
 
@@ -512,90 +544,153 @@ export type AutoViewInput = AutoViewInputSubTypes.issue[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateString: string): string =>
-    new Date(dateString).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+  // 1. Data aggregation and transformation
+  const issues = value;
+  const totalIssues = issues.length;
+  const openCount = issues.filter((issue) => issue.state === "open").length;
+  const closedCount = totalIssues - openCount;
+
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Render empty state
+  if (totalIssues === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} className="mb-4" />
+        <p className="text-lg">No issues available</p>
+      </div>
+    );
+  }
+
+  // 3. Compose visual structure
   return (
-    <div className="space-y-4">
-      {value.map((issue) => {
-        const authorName = issue.user?.login ?? 'Unknown';
-        const avatarUrl = issue.user?.avatar_url;
-        const stateStyles =
-          issue.state === 'open'
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800';
+    <div className="space-y-6">
+      {/* Summary */}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-700">
+        <div className="flex items-center gap-1">
+          <LucideReact.Circle size={16} className="text-green-500" />
+          <span>Open: {openCount}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.XCircle size={16} className="text-red-500" />
+          <span>Closed: {closedCount}</span>
+        </div>
+        <div>
+          <span>Total: {totalIssues}</span>
+        </div>
+      </div>
 
-        return (
-          <article
-            key={issue.id}
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-          >
-            <header className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-gray-900 truncate">
-                  {issue.title}
-                </h2>
-                <p className="mt-1 text-sm text-gray-500">
-                  #{issue.number} opened • {formatDate(issue.created_at)}
+      {/* Issue List */}
+      <ul className="space-y-4">
+        {issues.map((issue) => {
+          // snippet for body
+          const bodyText = issue.body ?? "";
+          const snippet =
+            bodyText.length > 120
+              ? bodyText.slice(0, 120).trim() + "…"
+              : bodyText;
+
+          return (
+            <li
+              key={issue.id}
+              className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                {/* Title & State */}
+                <div className="flex items-center gap-2">
+                  {issue.state === "open" ? (
+                    <LucideReact.Circle
+                      size={16}
+                      className="text-green-500"
+                    />
+                  ) : (
+                    <LucideReact.XCircle
+                      size={16}
+                      className="text-red-500"
+                    />
+                  )}
+                  <h3 className="text-base font-semibold text-gray-800 truncate">
+                    #{issue.number} {issue.title}
+                  </h3>
+                </div>
+
+                {/* Meta Info */}
+                <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                  {/* Author */}
+                  <div className="flex items-center gap-1">
+                    <img
+                      src={
+                        issue.user?.avatar_url ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          issue.user?.login ?? ""
+                        )}&background=0D8ABC&color=fff`
+                      }
+                      alt={issue.user?.login ?? "Unknown"}
+                      className="w-6 h-6 rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          issue.user?.login ?? ""
+                        )}&background=0D8ABC&color=fff`;
+                      }}
+                    />
+                    <span className="truncate">{issue.user?.login}</span>
+                  </div>
+
+                  {/* Created Date */}
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Calendar size={16} />
+                    <time>{formatDate(issue.created_at)}</time>
+                  </div>
+
+                  {/* Comments */}
+                  <div className="flex items-center gap-1">
+                    <LucideReact.MessageSquare size={16} />
+                    <span>{issue.comments}</span>
+                  </div>
+
+                  {/* Reactions (heart only) */}
+                  {issue.reactions && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Heart size={16} className="text-pink-500" />
+                      <span>{issue.reactions.heart}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Labels */}
+              {issue.labels && issue.labels.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {issue.labels.map((lbl, idx) => {
+                    const name = typeof lbl === "string" ? lbl : lbl.name;
+                    return (
+                      <span
+                        key={idx}
+                        className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded"
+                      >
+                        {name}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Body Snippet */}
+              {bodyText && (
+                <p className="mt-3 text-gray-600 text-sm line-clamp-3">
+                  {snippet}
                 </p>
-              </div>
-              <span
-                className={`ml-4 px-2 py-0.5 text-xs font-medium rounded ${stateStyles}`}
-              >
-                {issue.state.toUpperCase()}
-              </span>
-            </header>
-
-            {issue.labels.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-2">
-                {issue.labels.map((lbl, idx) => {
-                  const name =
-                    typeof lbl === 'string' ? lbl : lbl.name ?? '';
-                  return (
-                    <span
-                      key={idx}
-                      className="inline-block bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded"
-                    >
-                      {name}
-                    </span>
-                  );
-                })}
-              </div>
-            )}
-
-            {issue.body && (
-              <p className="mt-3 text-sm text-gray-700 line-clamp-2 overflow-hidden">
-                {issue.body}
-              </p>
-            )}
-
-            <footer className="mt-4 flex items-center justify-between text-sm text-gray-500">
-              <div className="flex items-center space-x-2">
-                {avatarUrl && (
-                  <img
-                    src={avatarUrl}
-                    alt={authorName}
-                    className="w-5 h-5 rounded-full"
-                  />
-                )}
-                <span>{authorName}</span>
-              </div>
-              <div className="flex items-center space-x-4">
-                <span>💬 {issue.comments}</span>
-                {issue.reactions && (
-                  <span>😊 {issue.reactions.total_count}</span>
-                )}
-              </div>
-            </footer>
-          </article>
-        );
-      })}
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

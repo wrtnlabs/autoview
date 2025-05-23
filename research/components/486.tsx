@@ -1,8 +1,9 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsOrganizationRoles {
-        export type GetResponse = {
+        export interface GetResponse {
             /**
              * The total number of organization roles available to the organization.
             */
@@ -11,14 +12,14 @@ export namespace AutoViewInputSubTypes {
              * The list of organization roles available to the organization.
             */
             roles?: AutoViewInputSubTypes.organization_role[];
-        };
+        }
     }
     /**
      * Organization roles
      *
      * @title Organization Role
     */
-    export type organization_role = {
+    export interface organization_role {
         /**
          * The unique identifier of the role.
         */
@@ -52,7 +53,7 @@ export namespace AutoViewInputSubTypes {
          * The date and time the role was last updated.
         */
         updated_at: string;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -90,83 +91,117 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsOrganizationRoles.GetR
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const totalCount = value.total_count ?? (value.roles?.length ?? 0);
   const roles = value.roles ?? [];
-  const totalRoles = value.total_count ?? roles.length;
 
-  const formatDate = (iso: string): string => {
-    const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Organization Roles{" "}
-        <span className="text-gray-600">({totalRoles})</span>
-      </h2>
-      {roles.length === 0 ? (
-        <p className="text-gray-500">No roles available.</p>
-      ) : (
-        <ul className="divide-y divide-gray-200">
-          {roles.map((role) => {
-            const baseRole = role.base_role
-              ? role.base_role.charAt(0).toUpperCase() + role.base_role.slice(1)
-              : "None";
-            const source = role.source ?? "Unknown";
-            const permissionsCount = role.permissions?.length ?? 0;
-            const org = role.organization;
+    <div className="p-4 space-y-6">
+      {/* Total roles header */}
+      <div className="flex items-center text-gray-700">
+        <LucideReact.Users className="mr-2" size={20} />
+        <span className="text-lg font-semibold">
+          {totalCount} Role{totalCount !== 1 ? "s" : ""}
+        </span>
+      </div>
 
-            return (
-              <li key={role.id} className="py-4">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex-1">
-                    <h3 className="text-md font-medium text-gray-900">
-                      {role.name}
-                    </h3>
-                    {role.description && (
-                      <p className="mt-1 text-gray-600 line-clamp-2">
-                        {role.description}
-                      </p>
-                    )}
-                    <div className="mt-2 flex flex-wrap items-center space-x-2 text-sm">
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded">
-                        {baseRole}
-                      </span>
-                      <span className="px-2 py-0.5 bg-green-100 text-green-800 rounded">
-                        {source}
-                      </span>
-                      <span className="px-2 py-0.5 bg-gray-100 text-gray-800 rounded">
-                        {permissionsCount} permissions
-                      </span>
-                    </div>
-                  </div>
-                  {org && (
-                    <div className="mt-3 sm:mt-0 flex items-center space-x-2">
-                      <img
-                        src={org.avatar_url}
-                        alt={org.login}
-                        className="w-8 h-8 rounded-full"
-                      />
-                      <span className="text-sm text-gray-700">
-                        {org.login}
-                      </span>
-                    </div>
-                  )}
+      {/* Empty state */}
+      {roles.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={48} className="mb-2" />
+          <p>No roles available.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {roles.map((role) => (
+            <div
+              key={role.id}
+              className="bg-white rounded-lg shadow p-4 flex flex-col"
+            >
+              {/* Role name */}
+              <h3 className="text-gray-800 font-semibold">{role.name}</h3>
+
+              {/* Description */}
+              {role.description && (
+                <p className="text-gray-600 text-sm mt-1 line-clamp-2">
+                  {role.description}
+                </p>
+              )}
+
+              {/* Base role & source badges */}
+              <div className="mt-3 flex flex-wrap gap-2">
+                {role.base_role && (
+                  <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                    {role.base_role}
+                  </span>
+                )}
+                {role.source && (
+                  <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
+                    {role.source}
+                  </span>
+                )}
+              </div>
+
+              {/* Permissions count */}
+              <div className="mt-3 flex items-center text-gray-500 text-sm">
+                <LucideReact.Lock size={14} className="mr-1" />
+                <span>
+                  {role.permissions.length} permission
+                  {role.permissions.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {/* Organization avatar & login */}
+              <div className="mt-4 flex items-center">
+                <img
+                  src={
+                    role.organization?.avatar_url ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      role.organization?.login ?? ""
+                    )}&background=random`
+                  }
+                  alt={role.organization?.login ?? "avatar"}
+                  className="w-8 h-8 rounded-full object-cover mr-2"
+                  onError={(
+                    e: React.SyntheticEvent<HTMLImageElement, Event>
+                  ) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      role.organization?.login ?? ""
+                    )}&background=random`;
+                  }}
+                />
+                <span className="text-gray-700 text-sm">
+                  {role.organization?.login}
+                </span>
+              </div>
+
+              {/* Created & updated dates */}
+              <div className="mt-3 text-gray-500 text-xs flex flex-col gap-1">
+                <div className="flex items-center">
+                  <LucideReact.Calendar size={12} className="mr-1" />
+                  <span>
+                    Created:{" "}
+                    {role.created_at ? formatDate(role.created_at) : "—"}
+                  </span>
                 </div>
-                <div className="mt-3 text-sm text-gray-500 flex flex-wrap space-x-4">
-                  <span>Created: {formatDate(role.created_at)}</span>
-                  <span>Updated: {formatDate(role.updated_at)}</span>
+                <div className="flex items-center">
+                  <LucideReact.RefreshCw size={12} className="mr-1" />
+                  <span>
+                    Updated:{" "}
+                    {role.updated_at ? formatDate(role.updated_at) : "—"}
+                  </span>
                 </div>
-              </li>
-            );
-          })}
-        </ul>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
     </div>
   );

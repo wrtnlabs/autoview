@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Marketplace Purchase
      *
      * @title Marketplace Purchase
     */
-    export type marketplace_purchase = {
+    export interface marketplace_purchase {
         url: string;
         type: string;
         id: number & tags.Type<"int32">;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
             effective_date?: string;
             unit_count?: (number & tags.Type<"int32">) | null;
             id?: number & tags.Type<"int32">;
-            plan?: any;
+            plan?: AutoViewInputSubTypes.marketplace_listing_plan;
         } | null;
         marketplace_purchase: {
             billing_cycle?: string;
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
             updated_at?: string;
             plan?: AutoViewInputSubTypes.marketplace_listing_plan;
         };
-    };
+    }
     /**
      * Marketplace Listing Plan
      *
      * @title Marketplace Listing Plan
     */
-    export type marketplace_listing_plan = {
+    export interface marketplace_listing_plan {
         url: string & tags.Format<"uri">;
         accounts_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
         unit_name: string | null;
         state: string;
         bullets: string[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase;
 
@@ -59,118 +60,136 @@ export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const contactEmail: string | null = value.organization_billing_email ?? value.email ?? null;
   const purchase = value.marketplace_purchase;
-  const plan = purchase.plan;
-  const planName = plan?.name ?? "Unknown Plan";
-  const description = plan?.description ?? "";
-  const monthlyPrice =
-    plan?.monthly_price_in_cents != null
-      ? (plan.monthly_price_in_cents / 100).toFixed(2)
-      : null;
-  const yearlyPrice =
-    plan?.yearly_price_in_cents != null
-      ? (plan.yearly_price_in_cents / 100).toFixed(2)
-      : null;
-  const priceModel = plan?.price_model;
-  const unitName = plan?.unit_name;
-  const unitCount = purchase.unit_count;
-  const billingCycle = purchase.billing_cycle;
-  const isInstalled = purchase.is_installed;
-  const onFreeTrial = purchase.on_free_trial;
-  const freeTrialEndsOn = purchase.free_trial_ends_on;
-  const nextBillingDate = purchase.next_billing_date;
-  const updatedAt = purchase.updated_at;
-  const pending = value.marketplace_pending_change;
-
-  // Date formatting helper
-  const formatDate = (dateString?: string | null): string =>
-    dateString
-      ? new Date(dateString).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "-";
+  const plan = purchase.plan ?? null;
+  const seats: number = purchase.unit_count ?? 0;
+  const monthlyPrice = plan ? plan.monthly_price_in_cents / 100 : 0;
+  const yearlyPrice = plan ? plan.yearly_price_in_cents / 100 : 0;
+  const priceModel: 'FREE' | 'FLAT_RATE' | 'PER_UNIT' = plan?.price_model ?? 'FREE';
+  const billingCycle = purchase.billing_cycle ?? 'monthly';
+  let displayedPrice: string;
+  if (priceModel === 'FREE') {
+    displayedPrice = 'Free';
+  } else if (priceModel === 'FLAT_RATE') {
+    const price = billingCycle === 'yearly' ? yearlyPrice : monthlyPrice;
+    const suffix = billingCycle === 'yearly' ? '/yr' : '/mo';
+    displayedPrice = `$${price.toFixed(2)}${suffix}`;
+  } else {
+    displayedPrice = `$${monthlyPrice.toFixed(2)}/unit`;
+  }
+  const formattedNextBilling: string = purchase.next_billing_date
+    ? new Date(purchase.next_billing_date).toLocaleDateString()
+    : '—';
+  const onFreeTrial: boolean = purchase.on_free_trial ?? false;
+  const freeTrialEnds: string | null = purchase.free_trial_ends_on
+    ? new Date(purchase.free_trial_ends_on).toLocaleDateString()
+    : null;
+  const lastUpdated: string | null = purchase.updated_at
+    ? new Date(purchase.updated_at).toLocaleDateString()
+    : null;
+  const pending = value.marketplace_pending_change ?? null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">{planName}</h2>
-        {billingCycle && (
-          <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-            {billingCycle.charAt(0).toUpperCase() +
-              billingCycle.slice(1).toLowerCase()}
-          </span>
-        )}
-      </div>
-
-      {description && (
-        <p className="mt-2 text-gray-600 text-sm line-clamp-2">{description}</p>
-      )}
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 text-sm text-gray-700">
-        {monthlyPrice && (
-          <div>
-            <span className="font-medium">Monthly Price:</span> ${monthlyPrice}
-          </div>
-        )}
-        {yearlyPrice && (
-          <div>
-            <span className="font-medium">Yearly Price:</span> ${yearlyPrice}
-          </div>
-        )}
-        {priceModel === "PER_UNIT" && unitCount != null && unitName && (
-          <div>
-            <span className="font-medium">Capacity:</span> {unitCount} {unitName}
-          </div>
-        )}
-        <div>
-          <span className="font-medium">Status:</span>{" "}
-          {onFreeTrial ? (
-            <span className="px-2 py-0.5 rounded text-xs bg-yellow-100 text-yellow-800">
-              Free trial until {formatDate(freeTrialEndsOn)}
-            </span>
-          ) : isInstalled ? (
-            <span className="px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
-              Active
-            </span>
-          ) : (
-            <span className="px-2 py-0.5 rounded text-xs bg-red-100 text-red-800">
-              Inactive
-            </span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Header: Buyer and Install Status */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex-1 overflow-hidden">
+          <h2 className="text-lg font-semibold text-gray-800 truncate">{value.login}</h2>
+          {contactEmail && (
+            <div className="flex items-center text-sm text-gray-500 mt-1 truncate">
+              <LucideReact.Mail size={16} className="mr-1 flex-shrink-0" />
+              <span className="truncate">{contactEmail}</span>
+            </div>
           )}
         </div>
-        {nextBillingDate && (
-          <div>
-            <span className="font-medium">Next Billing:</span>{" "}
-            {formatDate(nextBillingDate)}
-          </div>
-        )}
-        {updatedAt && (
-          <div>
-            <span className="font-medium">Last Updated:</span>{" "}
-            {formatDate(updatedAt)}
-          </div>
-        )}
-        {pending && (
-          <div className="sm:col-span-2">
-            <span className="font-medium">Pending Change Effective:</span>{" "}
-            {formatDate(pending.effective_date)}
-          </div>
-        )}
+        <div className="flex-shrink-0">
+          {purchase.is_installed ? (
+            <LucideReact.CheckCircle
+              size={20}
+              className="text-green-500"
+              role="img"
+              aria-label="Installed"
+            />
+          ) : (
+            <LucideReact.XCircle
+              size={20}
+              className="text-red-500"
+              role="img"
+              aria-label="Not installed"
+            />
+          )}
+        </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-200 text-sm text-gray-600">
-        <div>
-          <span className="font-medium">Purchased by:</span> {value.login}
-        </div>
-        {value.email && (
-          <div>
-            <span className="font-medium">Email:</span> {value.email}
+      {/* Plan Details */}
+      {plan ? (
+        <>
+          <div className="mb-4">
+            <h3 className="text-sm font-medium text-gray-700 truncate">{plan.name}</h3>
+            {plan.description && (
+              <p className="text-sm text-gray-600 line-clamp-2">{plan.description}</p>
+            )}
           </div>
-        )}
-      </div>
+          <div className="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-700">
+            <div className="flex items-center">
+              <LucideReact.Tag size={16} className="mr-1 text-gray-400 flex-shrink-0" />
+              <span>{displayedPrice}</span>
+            </div>
+            <div className="flex items-center">
+              <LucideReact.Users size={16} className="mr-1 text-gray-400 flex-shrink-0" />
+              <span>
+                {seats} {seats === 1 ? 'seat' : 'seats'}
+              </span>
+            </div>
+            <div className="flex items-center col-span-2">
+              <LucideReact.Calendar size={16} className="mr-1 text-gray-400 flex-shrink-0" />
+              <span>Next Billing: {formattedNextBilling}</span>
+            </div>
+          </div>
+          {onFreeTrial && freeTrialEnds && (
+            <div className="mb-4 inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+              <LucideReact.Clock size={14} className="mr-1 flex-shrink-0" />
+              <span>Free trial until {freeTrialEnds}</span>
+            </div>
+          )}
+          {lastUpdated && (
+            <div className="text-xs text-gray-500 mb-4 flex items-center">
+              <LucideReact.Calendar size={14} className="mr-1 flex-shrink-0" />
+              <span>Last updated: {lastUpdated}</span>
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-sm text-gray-500 mb-4">Plan information unavailable.</div>
+      )}
+
+      {/* Pending Change */}
+      {pending && (
+        <div className="p-3 bg-yellow-50 border-l-4 border-yellow-400 text-sm text-yellow-800 rounded">
+          <div className="flex items-center mb-1">
+            <LucideReact.AlertTriangle size={16} className="mr-1 flex-shrink-0" />
+            <span className="font-medium">Pending Change</span>
+          </div>
+          {pending.plan && (
+            <div>
+              <span className="font-medium">New Plan:</span> {pending.plan.name}
+            </div>
+          )}
+          {pending.unit_count != null && (
+            <div>
+              <span className="font-medium">Seats:</span> {pending.unit_count}
+            </div>
+          )}
+          {pending.effective_date && (
+            <div className="flex items-center">
+              <LucideReact.Calendar size={14} className="mr-1 text-gray-500 flex-shrink-0" />
+              <span>Effective: {new Date(pending.effective_date).toLocaleDateString()}</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingSaleInquiryComment {
         /**
          * Snapshot content of the comment.
         */
-        export type ISnapshot = {
+        export interface ISnapshot {
             /**
              * Primary Key.
              *
@@ -40,10 +41,10 @@ export namespace AutoViewInputSubTypes {
              * @title List of attachment files
             */
             files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
-        };
+        }
     }
     export namespace IAttachmentFile {
-        export type ICreate = {
+        export interface ICreate {
             /**
              * File name, except extension.
              *
@@ -66,7 +67,7 @@ export namespace AutoViewInputSubTypes {
              * @title URL path of the real file
             */
             url: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryComment.ISnapshot;
@@ -76,72 +77,49 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryComment.IS
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const formatLabel =
-    value.format === 'html'
-      ? 'HTML'
-      : value.format === 'md'
-      ? 'Markdown'
-      : 'Text';
+  //    Format the creation timestamp into a human-readable string.
+  const formattedDate = new Date(value.created_at).toLocaleString();
 
-  // 2. Helper to render the comment body with truncation for mobile-friendly display
-  const renderBody = () => {
-    const baseClass = 'mt-2 text-gray-800 text-sm leading-relaxed overflow-hidden';
-    if (value.format === 'html') {
-      return (
-        <div
-          className={`${baseClass} line-clamp-3`}
-          dangerouslySetInnerHTML={{ __html: value.body }}
-        />
-      );
-    }
-    return (
-      <p className={`${baseClass} line-clamp-3`}>
-        {value.body}
-      </p>
-    );
-  };
-
-  // 3. Return the React element composing the visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements for date, body, and attachments.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 text-xs">{formattedDate}</span>
-        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-semibold rounded">
-          {formatLabel}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
+      {/* Creation Time */}
+      <div className="flex items-center text-gray-500 text-sm">
+        <LucideReact.Calendar size={16} className="mr-1" />
+        <span>{formattedDate}</span>
       </div>
 
-      {renderBody()}
+      {/* Comment Body */}
+      {value.format === "html" ? (
+        <div
+          className="mt-2 prose prose-sm max-w-none overflow-hidden line-clamp-3 text-gray-800"
+          dangerouslySetInnerHTML={{ __html: value.body }}
+        />
+      ) : (
+        <div className="mt-2 text-gray-800 text-sm whitespace-pre-wrap overflow-hidden line-clamp-3">
+          {value.body}
+        </div>
+      )}
 
+      {/* Attachments */}
       {value.files.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-gray-700 text-sm font-medium">Attachments</h3>
-          <ul className="mt-2 space-y-1">
+          <div className="flex items-center text-gray-600 font-medium text-sm">
+            <LucideReact.Paperclip size={16} className="mr-1" />
+            <span>Attachments</span>
+          </div>
+          <div className="mt-2 space-y-1">
             {value.files.map((file, idx) => {
-              const fileName = file.extension
-                ? `${file.name}.${file.extension}`
-                : file.name;
+              const fullName = `${file.name}${file.extension ? `.${file.extension}` : ""}`;
               return (
-                <li key={idx}>
-                  <a
-                    href={file.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:underline text-sm"
-                  >
-                    {fileName}
-                  </a>
-                </li>
+                <div key={idx} className="flex items-center text-gray-700 text-sm">
+                  <LucideReact.FileText size={16} className="mr-2 text-indigo-500" />
+                  <span className="truncate">{fullName}</span>
+                </div>
               );
             })}
-          </ul>
+          </div>
         </div>
       )}
     </div>

@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingChannel {
         /**
          * Hierarchical channel information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * Children categories with hierarchical structure.
              *
@@ -36,13 +37,13 @@ export namespace AutoViewInputSubTypes {
              * @title Name of the channel
             */
             name: string;
-        };
+        }
     }
     export namespace IShoppingChannelCategory {
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -85,7 +86,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannel.IHierarchical;
@@ -94,62 +95,74 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannel.IHierarchical
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Format the channel creation date for display.
-  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
+  // 1. Define data aggregation/transformation functions or derived constants
+  const formattedCreatedAt = new Date(value.created_at).toLocaleString(undefined, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
-  // 2. Recursive renderer for category hierarchy.
-  const renderCategory = (
-    category: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical,
-    level: number,
-  ): React.ReactNode => {
-    const hasChildren = category.children.length > 0;
-    return (
-      <li key={category.id}>
-        <div className={`flex items-center ${level > 0 ? 'ml-4' : ''}`}>
-          <span className="font-medium text-gray-800 truncate">{category.name}</span>
-          <span className="ml-2 text-xs text-gray-500">({category.code})</span>
-          {hasChildren && (
-            <span className="ml-2 flex-shrink-0 text-gray-400 text-xs">
-              {category.children.length} sub-categories
-            </span>
-          )}
-        </div>
-        {hasChildren && (
-          <ul className="mt-1 border-l border-gray-200 pl-4 space-y-1">
-            {category.children.map(child => renderCategory(child, level + 1))}
+  // Recursively count total categories (including nested)
+  const countCategories = (
+    cats: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
+  ): number =>
+    cats.reduce(
+      (sum, cat) => sum + 1 + countCategories(cat.children),
+      0,
+    );
+
+  const totalCategories = countCategories(value.categories);
+
+  // Recursively render category items
+  const renderCategoryItems = (
+    cats: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
+  ): React.ReactNode[] =>
+    cats.map((cat) => (
+      <li key={cat.id} className="flex items-start">
+        <LucideReact.Folder
+          size={16}
+          className="text-gray-400 mt-[3px] flex-shrink-0"
+        />
+        <span className="ml-2 text-gray-700">{cat.name}</span>
+        {cat.children.length > 0 && (
+          <ul className="ml-6 mt-1 space-y-1">
+            {renderCategoryItems(cat.children)}
           </ul>
         )}
       </li>
-    );
-  };
+    ));
 
-  // 3. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white rounded-lg shadow p-4 max-w-full">
-      <h2 className="text-xl font-semibold text-gray-800 truncate">{value.name}</h2>
-      <div className="mt-1 text-sm text-gray-500 flex flex-wrap space-x-4">
-        <span>
-          Code:
-          <span className="ml-1 font-medium text-gray-700">{value.code}</span>
-        </span>
-        <span>
-          Created:
-          <time dateTime={value.created_at} className="ml-1 font-medium text-gray-700">
-            {formattedDate}
-          </time>
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Channel Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {value.name}
+        </h2>
+        <span className="text-sm text-gray-500">Code: {value.code}</span>
       </div>
+
+      {/* Creation Date */}
+      <div className="mt-1 flex items-center text-sm text-gray-500 space-x-2">
+        <LucideReact.Calendar size={16} className="text-gray-400" />
+        <span>Created on {formattedCreatedAt}</span>
+      </div>
+
+      {/* Categories Tree */}
       {value.categories.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Categories</h3>
-          <ul className="space-y-2">
-            {value.categories.map(cat => renderCategory(cat, 0))}
-          </ul>
+          <h3 className="text-sm font-medium text-gray-700 flex items-center gap-1">
+            <LucideReact.List size={16} className="text-gray-500" />
+            Categories ({totalCategories})
+          </h3>
+          <div className="mt-2 text-gray-700">
+            <ul className="space-y-1">
+              {renderCategoryItems(value.categories)}
+            </ul>
+          </div>
         </div>
       )}
     </div>

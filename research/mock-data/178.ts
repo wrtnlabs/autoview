@@ -4,5 +4,5 @@ import Component from "../components/178";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"chatTag":{"id":"tag-001-sample","channelId":"channel-123-sample","colorVariant":"olive","name":"Sample Chat Tag (Test)","key":"sample_chat_tag","description":"A sample chat tag for UI testing purposes. This is dummy data only.","followerIds":["user_001","user_002","user_003"],"createdAt":1747665000000}};
+  return {"chatTag":{"id":"chatTag_001_test","channelId":"channel_xyz_test","colorVariant":"purple","name":"Sample Chat Tag (Test)","key":"sampleChatTagKey123","description":"This is a sample description for a chat tag used in UI testing. All content is fictional.","followerIds":["followerA_test","followerB_test"],"createdAt":1747756200000}};
 }

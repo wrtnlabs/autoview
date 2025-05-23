@@ -1,15 +1,16 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace Try_lt_UserType {
-        export type Retuation_gt_ = {
+        export interface Retuation_gt_ {
             result: true;
             code: 1000;
             requestToResponse?: string;
             data: AutoViewInputSubTypes.UserType.Retuation;
-        };
+        }
     }
     export namespace UserType {
-        export type Retuation = {
+        export interface Retuation {
             /**
              * 지금까지 질문을 한 횟수로, 게시글과 무관하게 질문 횟수는 한 번 더 카운트해준다.
             */
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
             */
             likes: number;
             id: number;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.Try_lt_UserType.Retuation_gt_;
@@ -42,57 +43,58 @@ export type AutoViewInput = AutoViewInputSubTypes.Try_lt_UserType.Retuation_gt_;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { question, answer, adopted, writing, likes } = value.data;
-
-  // Helper to abbreviate large numbers (e.g., 1500 -> "1.5K")
-  const formatNumber = (num: number): string =>
-    num >= 1000 ? `${(num / 1000).toFixed(1).replace(/\.0$/, '')}K` : num.toString();
-
-  // Total contributions (questions + answers + writings)
-  const totalContributions = question + answer + writing;
-
-  // Acceptance rate of answers (adopted/answer * 100)
-  const acceptanceRate =
-    answer > 0 ? `${((adopted / answer) * 100).toFixed(1)}%` : 'N/A';
+  const acceptanceRate = answer > 0 ? (adopted / answer) * 100 : 0;
+  const formattedAcceptanceRate = acceptanceRate.toFixed(1);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">User Statistics</h2>
-      <div className="grid grid-cols-2 gap-4 text-center">
-        <div>
-          <div className="text-2xl font-bold text-indigo-600">
-            {formatNumber(question)}
+    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">User Activity Summary</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded">
+          <LucideReact.HelpCircle className="text-blue-500" size={20} aria-hidden="true" />
+          <div>
+            <span className="block text-sm text-gray-500">Questions</span>
+            <span className="block text-lg font-bold text-gray-900">{question}</span>
           </div>
-          <div className="text-sm text-gray-500">Questions</div>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-indigo-600">
-            {formatNumber(answer)}
+        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded">
+          <LucideReact.MessageSquare className="text-green-500" size={20} aria-hidden="true" />
+          <div>
+            <span className="block text-sm text-gray-500">Answers</span>
+            <span className="block text-lg font-bold text-gray-900">{answer}</span>
           </div>
-          <div className="text-sm text-gray-500">Answers</div>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-indigo-600">
-            {formatNumber(writing)}
+        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded">
+          <LucideReact.CheckCircle className="text-purple-500" size={20} aria-hidden="true" />
+          <div>
+            <span className="block text-sm text-gray-500">Accepted</span>
+            <span className="block text-lg font-bold text-gray-900">{adopted}</span>
           </div>
-          <div className="text-sm text-gray-500">Writings</div>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-indigo-600">
-            {formatNumber(likes)}
+        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded">
+          <LucideReact.Edit2 className="text-yellow-500" size={20} aria-hidden="true" />
+          <div>
+            <span className="block text-sm text-gray-500">Posts</span>
+            <span className="block text-lg font-bold text-gray-900">{writing}</span>
           </div>
-          <div className="text-sm text-gray-500">Likes</div>
         </div>
-      </div>
-      <div className="mt-4 border-t pt-4 flex justify-between items-center">
-        <div className="text-sm text-gray-600">Total Contributions</div>
-        <div className="text-lg font-medium text-gray-800">
-          {formatNumber(totalContributions)}
+        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded">
+          <LucideReact.Heart className="text-red-500" size={20} aria-hidden="true" />
+          <div>
+            <span className="block text-sm text-gray-500">Likes</span>
+            <span className="block text-lg font-bold text-gray-900">{likes}</span>
+          </div>
         </div>
-      </div>
-      <div className="mt-2 border-t pt-4 flex justify-between items-center">
-        <div className="text-sm text-gray-600">Acceptance Rate</div>
-        <div className="text-lg font-medium text-gray-800">{acceptanceRate}</div>
+        <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded">
+          <LucideReact.Percent className="text-indigo-500" size={20} aria-hidden="true" />
+          <div>
+            <span className="block text-sm text-gray-500">Accept Rate</span>
+            <span className="block text-lg font-bold text-gray-900">
+              {formattedAcceptanceRate}%
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );

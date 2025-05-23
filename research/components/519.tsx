@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The historical version of a ruleset
      *
      * @title Ruleset version
     */
-    export type ruleset_version = {
+    export interface ruleset_version {
         /**
          * The ID of the previous version of the ruleset
         */
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
             type?: string;
         };
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ruleset_version[];
 
@@ -27,61 +28,52 @@ export type AutoViewInput = AutoViewInputSubTypes.ruleset_version[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const versions = React.useMemo(
-    () =>
-      [...value].sort(
-        (a, b) =>
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
-      ),
-    [value],
+  // 1. Data transformation: sort versions by most recent update
+  const sortedVersions = [...value].sort(
+    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   );
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-
-  const getActorName = (
-    actor: AutoViewInputSubTypes.ruleset_version['actor'],
-  ): string =>
-    actor.type
-      ? actor.type
-      : actor.id !== undefined
-      ? `Actor #${actor.id}`
-      : 'Unknown Actor';
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Render structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-baseline">
-        Version History
-        <span className="ml-2 text-sm text-gray-500">({versions.length})</span>
-      </h2>
-      <ul className="divide-y divide-gray-200">
-        {versions.map((ver) => (
-          <li
-            key={ver.version_id}
-            className="py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center"
-          >
-            <div className="flex items-center space-x-2">
-              <span className="inline-block px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded">
-                v{ver.version_id}
-              </span>
-              <span className="text-sm text-gray-600 truncate">
-                {getActorName(ver.actor)}
-              </span>
+    <div className="w-full max-w-md mx-auto space-y-4">
+      {sortedVersions.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-500 py-8">
+          <LucideReact.AlertCircle size={24} className="text-gray-400" />
+          <span className="mt-2 text-sm">No version history available</span>
+        </div>
+      ) : (
+        sortedVersions.map((item, idx) => {
+          // Derive actor label
+          const actorLabel = item.actor.type
+            ? `${item.actor.type}${item.actor.id ? ` (#${item.actor.id})` : ""}`
+            : "Unknown actor";
+          // Format update date
+          const formattedDate = new Date(item.updated_at).toLocaleString(undefined, {
+            dateStyle: "medium",
+            timeStyle: "short",
+          });
+
+          return (
+            <div
+              key={idx}
+              className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="flex items-center space-x-2 overflow-hidden">
+                <LucideReact.Archive size={16} className="text-gray-400" />
+                <span className="font-medium text-gray-800 truncate">
+                  Version {item.version_id}
+                </span>
+                <LucideReact.User size={16} className="text-gray-400" />
+                <span className="text-sm text-gray-600 truncate">{actorLabel}</span>
+              </div>
+              <div className="flex items-center space-x-1 mt-2 sm:mt-0">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span className="text-sm text-gray-600">{formattedDate}</span>
+              </div>
             </div>
-            <time className="mt-1 sm:mt-0 text-sm text-gray-500">
-              {formatDate(ver.updated_at)}
-            </time>
-          </li>
-        ))}
-      </ul>
+          );
+        })
+      )}
     </div>
   );
 }

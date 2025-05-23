@@ -1,6 +1,7 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type selected_actions = {
+    export interface selected_actions {
         /**
          * Whether GitHub-owned actions are allowed. For example, this includes the actions in the `actions` organization.
         */
@@ -16,67 +17,71 @@ export namespace AutoViewInputSubTypes {
          * > The `patterns_allowed` setting only applies to public repositories.
         */
         patterns_allowed?: string[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.selected_actions;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const githubAllowed = Boolean(value.github_owned_allowed);
-  const verifiedAllowed = Boolean(value.verified_allowed);
+  // 1. Derive normalized values
+  const githubOwnedAllowed = value.github_owned_allowed ?? false;
+  const verifiedAllowed = value.verified_allowed ?? false;
   const patterns = value.patterns_allowed ?? [];
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
+  // 2. Compose visual structure
   return (
-    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm max-w-md mx-auto">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Actions Permissions</h2>
-      <ul className="space-y-4">
-        <li className="flex justify-between items-center">
-          <span className="text-sm text-gray-700">GitHub-owned Actions</span>
-          <span
-            className={
-              githubAllowed
-                ? 'px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800'
-                : 'px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800'
-            }
-          >
-            {githubAllowed ? 'Allowed' : 'Not allowed'}
+    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">Selected Actions</h2>
+      <div className="space-y-4">
+        {/* GitHub-owned actions status */}
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-gray-700">
+            <LucideReact.Github size={16} className="text-gray-500" />
+            GitHub-owned actions
           </span>
-        </li>
-        <li className="flex justify-between items-center">
-          <span className="text-sm text-gray-700">Verified Marketplace Actions</span>
-          <span
-            className={
-              verifiedAllowed
-                ? 'px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800'
-                : 'px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800'
-            }
-          >
-            {verifiedAllowed ? 'Allowed' : 'Not allowed'}
+          {githubOwnedAllowed ? (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          ) : (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          )}
+        </div>
+
+        {/* Verified marketplace actions status */}
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-gray-700">
+            <LucideReact.ShieldCheck size={16} className="text-gray-500" />
+            Verified marketplace actions
           </span>
-        </li>
-        <li>
-          <span className="text-sm text-gray-700">Allowed Patterns</span>
+          {verifiedAllowed ? (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          ) : (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          )}
+        </div>
+
+        {/* Allowed patterns list */}
+        <div>
+          <span className="flex items-center gap-2 text-gray-700">
+            <LucideReact.Tag size={16} className="text-gray-500" />
+            Allowed patterns
+          </span>
           {patterns.length > 0 ? (
             <div className="mt-2 flex flex-wrap gap-2">
-              {patterns.map((pattern: string, idx: number) => (
+              {patterns.map((pattern, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-md truncate max-w-[200px]"
+                  className="bg-gray-100 text-gray-800 px-2 py-1 text-sm rounded"
                 >
                   {pattern}
                 </span>
               ))}
             </div>
           ) : (
-            <span className="block mt-1 text-sm text-gray-500">No patterns specified</span>
+            <p className="mt-2 text-sm text-gray-500">No specific patterns allowed.</p>
           )}
-        </li>
-      </ul>
+        </div>
+      </div>
     </div>
   );
 }

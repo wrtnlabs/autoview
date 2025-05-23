@@ -1,4 +1,5 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes { }
 export type AutoViewInput = string;
 
@@ -6,20 +7,27 @@ export type AutoViewInput = string;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Here, the input is a simple string – we'll trim whitespace and prepare for display.
-  const textContent: string = (value ?? "").trim();
+  // Truncate very long text for better mobile presentation
+  const maxLength = 200;
+  const isLong = typeof value === "string" && value.length > maxLength;
+  const displayText = isLong
+    ? value.slice(0, maxLength).trimEnd() + "…"
+    : value;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    We wrap the text in a styled card with responsive typography and line clamping for long text.
-  const content = (
-    <div className="max-w-full p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <p className="text-gray-800 text-base md:text-lg leading-relaxed whitespace-pre-line line-clamp-3">
-        {textContent}
+  // Compose the visual structure using JSX and Tailwind CSS
+  return (
+    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex items-center mb-2">
+        <LucideReact.FileText
+          size={20}
+          className="text-gray-400"
+          aria-hidden="true"
+        />
+        <span className="ml-2 text-gray-700 font-medium">Content</span>
+      </div>
+      <p className="text-gray-800 text-sm whitespace-pre-wrap break-words leading-relaxed line-clamp-3">
+        {displayText}
       </p>
     </div>
   );
-
-  // 3. Return the React element.
-  return content;
 }

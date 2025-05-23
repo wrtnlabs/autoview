@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Team Membership
      *
      * @title Team Membership
     */
-    export type team_membership = {
+    export interface team_membership {
         url: string & tags.Format<"uri">;
         /**
          * The role of the user in the team.
@@ -16,7 +17,7 @@ export namespace AutoViewInputSubTypes {
          * The state of the user's membership in the team.
         */
         state: "active" | "pending";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_membership;
 
@@ -25,56 +26,54 @@ export type AutoViewInput = AutoViewInputSubTypes.team_membership;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Derive a display-friendly team name from the URL:
-  const teamName: string = (() => {
-    try {
-      const urlObj = new URL(value.url);
-      const segments = urlObj.pathname.split('/').filter(Boolean);
-      const last = segments[segments.length - 1] || "";
-      return last ? last.charAt(0).toUpperCase() + last.slice(1) : urlObj.hostname;
-    } catch {
-      return value.url;
-    }
-  })();
+  //    Extract a friendly team name from the URL
+  let teamName: string;
+  try {
+    const urlObj = new URL(value.url);
+    const segments = urlObj.pathname.split("/").filter(Boolean);
+    teamName = decodeURIComponent(segments.pop() || urlObj.hostname);
+  } catch {
+    teamName = value.url;
+  }
+  // Capitalize role and state for display
+  const displayRole = value.role.charAt(0).toUpperCase() + value.role.slice(1);
+  const displayState = value.state.charAt(0).toUpperCase() + value.state.slice(1);
 
-  // Format state and role labels
-  const stateLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
-  const roleLabel = value.role.charAt(0).toUpperCase() + value.role.slice(1);
-
-  // Badge styles based on state and role
-  const stateBadgeClasses =
-    value.state === "active"
-      ? "bg-green-100 text-green-800"
-      : "bg-yellow-100 text-yellow-800";
-  const roleBadgeClasses =
-    value.role === "maintainer"
-      ? "bg-blue-100 text-blue-800"
-      : "bg-gray-100 text-gray-800";
+  // Choose icons based on role and state
+  const RoleIcon = value.role === "maintainer"
+    ? LucideReact.Shield
+    : LucideReact.User;
+  const StateIcon = value.state === "active"
+    ? LucideReact.CheckCircle
+    : LucideReact.Clock;
+  const stateColor = value.state === "active" ? "text-green-500" : "text-amber-500";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow-md p-4 text-gray-900 mobile-first">
-      {/* Header: Team Name */}
-      <h2 className="text-xl font-semibold truncate">{teamName}</h2>
+    <div className="max-w-md w-full bg-white p-4 rounded-lg shadow-md space-y-3">
+      {/* Team Name Header */}
+      <div className="flex items-center gap-2">
+        <LucideReact.Users size={20} className="text-blue-500" />
+        <h2 className="text-lg font-semibold truncate">{teamName}</h2>
+      </div>
 
-      {/* Badges */}
-      <div className="mt-2 flex flex-wrap gap-2">
-        <span
-          className={`inline-block px-2 py-1 text-xs font-medium rounded ${stateBadgeClasses}`}
-        >
-          {stateLabel}
-        </span>
-        <span
-          className={`inline-block px-2 py-1 text-xs font-medium rounded ${roleBadgeClasses}`}
-        >
-          {roleLabel}
-        </span>
+      {/* Role and State Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex items-center gap-1">
+          <RoleIcon size={16} className="text-gray-600" />
+          <span className="text-gray-700">{displayRole}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <StateIcon size={16} className={`${stateColor}`} />
+          <span className="text-gray-700">{displayState}</span>
+        </div>
       </div>
 
       {/* URL Display */}
-      <p className="mt-3 text-sm text-gray-500 font-mono overflow-x-auto break-all">
-        {value.url}
-      </p>
+      <div className="flex items-center gap-1">
+        <LucideReact.Link size={16} className="text-gray-400" />
+        <span className="text-sm text-gray-500 truncate">{value.url}</span>
+      </div>
     </div>
   );
 }

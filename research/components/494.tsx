@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A version of a software package
      *
      * @title Package Version
     */
-    export type package_version = {
+    export interface package_version {
         /**
          * Unique identifier of the package version.
         */
@@ -41,7 +42,7 @@ export namespace AutoViewInputSubTypes {
                 tag?: string[];
             };
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.package_version;
 
@@ -50,113 +51,103 @@ export type AutoViewInput = AutoViewInputSubTypes.package_version;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdAt = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-  const updatedAt = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-  const isDeleted = typeof value.deleted_at === 'string';
-  const deletedAt = isDeleted
-    ? new Date(value.deleted_at!).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    : null;
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+  const packageUrl = value.html_url || value.package_html_url;
+  const hasMetadata = !!value.metadata;
+  const containerTags = value.metadata?.container?.tags || [];
+  const dockerTags = value.metadata?.docker?.tag || [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Version {value.name}
-        </h2>
-        <span
-          className={`mt-2 sm:mt-0 inline-block px-2 py-1 text-xs font-medium rounded-full ${
-            isDeleted
-              ? 'bg-red-100 text-red-800'
-              : 'bg-green-100 text-green-800'
-          }`}
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col gap-4 max-w-md mx-auto">
+      {/* Header: Name and Link */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h2>
+        <a
+          href={packageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800"
+          aria-label="View package"
         >
-          {isDeleted ? 'Deleted' : 'Active'}
-        </span>
+          <LucideReact.Link size={20} strokeWidth={1.5} />
+        </a>
       </div>
-
-      {/* License */}
-      {value.license && (
-        <div className="mt-3">
-          <span className="inline-block bg-gray-200 text-gray-700 text-xs font-medium px-2 py-1 rounded-full">
-            {value.license}
-          </span>
-        </div>
-      )}
 
       {/* Description */}
-      {value.description && (
-        <p className="mt-3 text-gray-700 text-sm line-clamp-3">
-          {value.description}
-        </p>
-      )}
+      <p className="text-sm text-gray-600 line-clamp-3">
+        {value.description ?? (
+          <span className="italic text-gray-400">No description available.</span>
+        )}
+      </p>
 
       {/* Metadata Badges */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className="text-gray-600 text-sm font-medium mr-2">Type:</span>
-        <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded-full">
-          {value.metadata?.package_type}
-        </span>
-        {(value.metadata?.container?.tags ?? []).map((tag) => (
-          <span
-            key={`container-${tag}`}
-            className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-          >
-            {tag}
+      <div className="flex flex-wrap gap-2">
+        {/* Package Type */}
+        {hasMetadata && (
+          <span className="px-2 py-1 text-xs font-medium uppercase bg-indigo-100 text-indigo-800">
+            {value.metadata!.package_type}
           </span>
-        ))}
-        {(value.metadata?.docker?.tag ?? []).map((tag) => (
-          <span
-            key={`docker-${tag}`}
-            className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      {/* Dates */}
-      <div className="mt-4 space-y-1 text-sm text-gray-600">
-        <div>
-          <span className="font-medium">Created:</span> {createdAt}
-        </div>
-        <div>
-          <span className="font-medium">Updated:</span> {updatedAt}
-        </div>
-        {isDeleted && deletedAt && (
-          <div>
-            <span className="font-medium">Deleted:</span> {deletedAt}
+        )}
+        {/* Container Tags */}
+        {containerTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {containerTags.map((tag, idx) => (
+              <span
+                key={`ct-${idx}`}
+                className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+        {/* Docker Tags */}
+        {dockerTags.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {dockerTags.map((tag, idx) => (
+              <span
+                key={`dt-${idx}`}
+                className="px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
         )}
       </div>
 
-      {/* URLs */}
-      <div className="mt-4 text-sm">
-        <div className="text-gray-600 font-medium">URLs:</div>
-        <div className="mt-1 space-y-1">
-          <div className="truncate text-blue-600">
-            <code>{value.package_html_url}</code>
-          </div>
-          {value.html_url && (
-            <div className="truncate text-blue-600">
-              <code>{value.html_url}</code>
-            </div>
-          )}
+      {/* Dates & Status */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created: {formatDate(value.created_at)}</span>
         </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.RefreshCw size={16} className="text-gray-400" />
+          <span>Updated: {formatDate(value.updated_at)}</span>
+        </div>
+        {value.deleted_at && (
+          <div className="flex items-center gap-1">
+            <LucideReact.XCircle size={16} className="text-red-500" />
+            <span>Deleted: {formatDate(value.deleted_at)}</span>
+          </div>
+        )}
       </div>
+
+      {/* License */}
+      {value.license && (
+        <div className="flex items-center gap-1 text-sm text-gray-700">
+          <LucideReact.FileText size={16} className="text-gray-400" />
+          <span className="font-medium">{value.license}</span>
+        </div>
+      )}
     </div>
   );
 }

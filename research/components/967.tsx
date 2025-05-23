@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,19 +139,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -188,70 +189,124 @@ export type AutoViewInput = AutoViewInputSubTypes.minimal_repository[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const repositories = Array.isArray(value) ? value : [];
-
-  const formatDate = (dateString?: string | null): string => {
-    if (!dateString) return '—';
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
+  const repos = value;
+  if (!repos || repos.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2">No repositories available</span>
+      </div>
+    );
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {repositories.map((repo) => (
-        <div
-          key={repo.id}
-          className="flex flex-col bg-white rounded-lg shadow p-4 hover:shadow-lg transition-shadow"
-        >
-          <div className="flex items-center">
-            <img
-              src={repo.owner.avatar_url}
-              alt={`${repo.owner.login} avatar`}
-              className="w-10 h-10 rounded-full flex-shrink-0"
-            />
-            <h3 className="ml-3 text-lg font-semibold text-gray-800 truncate">
-              {repo.full_name}
-            </h3>
-          </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {repos.map((repo) => {
+        const {
+          id,
+          name,
+          full_name,
+          html_url,
+          private: isPrivate,
+          owner,
+          description,
+          language,
+          stargazers_count,
+          forks_count,
+          watchers_count,
+          open_issues_count,
+          license,
+        } = repo;
 
-          <p className="mt-2 text-sm text-gray-600 line-clamp-2 overflow-hidden">
-            {repo.description || 'No description provided.'}
-          </p>
+        const starCount = stargazers_count ?? 0;
+        const forkCount = forks_count ?? 0;
+        const watcherCount = watchers_count ?? 0;
+        const issueCount = open_issues_count ?? 0;
+        const licenseName = license?.name;
 
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <span
-              className={`text-xs font-medium px-2 py-1 rounded ${
-                repo.private
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-green-100 text-green-800'
-              }`}
-            >
-              {repo.private ? 'Private' : 'Public'}
-            </span>
-            {repo.language && (
-              <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                {repo.language}
-              </span>
+        return (
+          <div
+            key={id}
+            className="bg-white rounded-lg shadow p-4 hover:shadow-md transition-shadow duration-150"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={owner.avatar_url}
+                  alt={owner.login}
+                  className="w-8 h-8 rounded-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      owner.login,
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+                <div className="min-w-0">
+                  <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+                  <p className="text-sm text-gray-500 truncate">{owner.login}</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {isPrivate && (
+                  <LucideReact.Lock
+                    size={16}
+                    className="text-red-500"
+                    aria-label="Private repository"
+                  />
+                )}
+                <a
+                  href={html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-600"
+                  aria-label={`Visit ${full_name}`}
+                >
+                  <LucideReact.Link size={16} />
+                </a>
+              </div>
+            </div>
+
+            {description && (
+              <p className="text-sm text-gray-600 mt-2 line-clamp-2 overflow-hidden">
+                {description}
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center text-gray-500 text-sm mt-4 space-x-4">
+              {language && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Tag size={16} className="text-blue-500" />
+                  <span>{language}</span>
+                </div>
+              )}
+              <div className="flex items-center space-x-1">
+                <LucideReact.Star size={16} className="text-yellow-500" />
+                <span>{starCount.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.GitBranch size={16} className="text-gray-500" />
+                <span>{forkCount.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.Eye size={16} className="text-gray-500" />
+                <span>{watcherCount.toLocaleString()}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.AlertCircle size={16} className="text-red-400" />
+                <span>{issueCount.toLocaleString()}</span>
+              </div>
+            </div>
+
+            {licenseName && (
+              <div className="flex items-center text-gray-500 text-sm mt-3">
+                <LucideReact.FileText size={16} className="text-gray-400" />
+                <span className="ml-1 truncate">{licenseName}</span>
+              </div>
             )}
           </div>
-
-          <div className="mt-auto pt-4 flex flex-wrap items-center justify-between text-gray-500 text-xs">
-            <div className="flex items-center space-x-4">
-              <span>{(repo.stargazers_count ?? 0).toLocaleString()} ★</span>
-              <span>{(repo.forks_count ?? 0).toLocaleString()} Forks</span>
-              <span>{(repo.watchers_count ?? 0).toLocaleString()} Watchers</span>
-            </div>
-            <span className="whitespace-nowrap">
-              Updated {formatDate(repo.updated_at)}
-            </span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

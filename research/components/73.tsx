@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Item in a shopping cart.
@@ -21,7 +22,7 @@ export namespace AutoViewInputSubTypes {
      * {@link IShoppingSaleUnitStock.IInvert.quantity}, the quantity for each
      * component.
     */
-    export type IShoppingCartCommodity = {
+    export interface IShoppingCartCommodity {
         /**
          * Primary Key.
          *
@@ -80,7 +81,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of the record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingSaleSnapshot {
         /**
          * Invert information of the sale snapshot, in the perspective of commodity.
@@ -94,7 +95,7 @@ export namespace AutoViewInputSubTypes {
          * of the snapshot records, but only some of the records which are put
          * into the {@link IShoppingCartCommodity shopping cart}.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Belonged section's information.
              *
@@ -218,7 +219,7 @@ export namespace AutoViewInputSubTypes {
              * @title Closing time of the sale
             */
             closed_at: null | (string & tags.Format<"date-time">);
-        };
+        }
     }
     /**
      * Section information.
@@ -235,7 +236,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -260,7 +261,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingSeller {
         /**
          * Invert information starting from seller info.
@@ -271,7 +272,7 @@ export namespace AutoViewInputSubTypes {
          * and access to the customer, member and {@link IShoppingCitizen citizen}
          * information inversely.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Discriminant for the type of seller.
              *
@@ -310,7 +311,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation tmie of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingMember {
         /**
@@ -322,7 +323,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -349,7 +350,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Email address of member.
@@ -358,7 +359,7 @@ export namespace AutoViewInputSubTypes {
      * registered for one {@link IShoppingMember member}. If you don't have to
      * plan such multiple email addresses, just use only one.
     */
-    export type IShoppingMemberEmail = {
+    export interface IShoppingMemberEmail {
         /**
          * Primary Key.
          *
@@ -377,7 +378,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingCustomer {
         /**
          * Inverted customer information.
@@ -388,7 +389,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -408,7 +409,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title External user information
             */
-            external_user: null | any;
+            external_user: null | AutoViewInputSubTypes.IShoppingExternalUser;
             /**
              * Connection address.
              *
@@ -437,7 +438,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of the connection record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Channel information.
@@ -449,7 +450,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -474,8 +475,80 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
-    export type IShoppingExternalUser = any;
+    }
+    /**
+     * External user information.
+     *
+     * `IShoppingExternalUser` is an entity dsigned for when this system needs
+     * to connect with external services and welcome their users as
+     * {@link IShoppingCustomer customers} of this service.
+     *
+     * For reference, customers who connect from an external service must have
+     * this record, and the external service user is identified through the two
+     * attributes {@link application} and {@link uid}. If a customer connected
+     * from an external service completes
+     * {@link IShoppingCitizen real-name authentication} from this service, each
+     * time the external service user reconnects to this service and issues a
+     * new customer authentication token, real-name authentication begins with
+     * completed.
+     *
+     * And {@link password} is the password issued to the user by the external
+     * service system (the so-called permanent user authentication token), and
+     * is never the actual user password. However, for customers who entered the
+     * same application and uid as the current external system user, this is to
+     * determine whether to view this as a correct external system user or a
+     * violation.
+     *
+     * In addition, additional information received from external services can
+     * be recorded in the data field in JSON format.
+    */
+    export interface IShoppingExternalUser {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Citizen activation info.
+         *
+         * @title Citizen activation info
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Creation time of record.
+         *
+         * Another word, first time when the external user connected.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier key of external user from the external system.
+         *
+         * @title Identifier key of external user from the external system
+        */
+        uid: string;
+        /**
+         * Identifier code of the external service.
+         *
+         * It can be same with {@link IShoppingChannel.code} in common.
+         *
+         * @title Identifier code of the external service
+        */
+        application: string;
+        /**
+         * Nickname of external user in the external system.
+         *
+         * @title Nickname of external user in the external system
+        */
+        nickname: string;
+        /**
+         * Additional information about external user from the external
+         * system.
+        */
+        data: any;
+    }
     /**
      * Citizen verification information.
      *
@@ -491,7 +564,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, real name and mobile phone authentication information are
      * encrypted and stored.
     */
-    export type IShoppingCitizen = {
+    export interface IShoppingCitizen {
         /**
          * Primary Key.
          *
@@ -516,13 +589,13 @@ export namespace AutoViewInputSubTypes {
          * @title Real name, or equivalent nickname
         */
         name: string;
-    };
+    }
     export namespace IShoppingSaleContent {
-        export type IInvert = {
+        export interface IInvert {
             id: string & tags.Format<"uuid">;
             title: string;
             thumbnails: AutoViewInputSubTypes.IAttachmentFile[];
-        };
+        }
     }
     /**
      * Attachment File.
@@ -533,7 +606,7 @@ export namespace AutoViewInputSubTypes {
      * or {@link extension} like `.gitignore` or `README` case, but not
      * possible to omit both of them.
     */
-    export type IAttachmentFile = {
+    export interface IAttachmentFile {
         /**
          * Primary Key.
          *
@@ -568,12 +641,12 @@ export namespace AutoViewInputSubTypes {
          * @title URL path of the real file
         */
         url: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
         /**
          * Invert category information with parent category.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Parent category info with recursive structure.
              *
@@ -581,7 +654,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Parent category info with recursive structure
             */
-            parent: null | any;
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
             /**
              * Primary Key.
              *
@@ -618,10 +691,10 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingSaleUnit {
-        export type IInvert = {
+        export interface IInvert {
             /**
              * List of final stocks.
              *
@@ -661,13 +734,13 @@ export namespace AutoViewInputSubTypes {
              * @title Whether the unit is required or not
             */
             required: boolean;
-        };
+        }
     }
     export namespace IShoppingSaleUnitStock {
         /**
          * Invert information from the cart.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -706,12 +779,12 @@ export namespace AutoViewInputSubTypes {
              * @title List of choices
             */
             choices: AutoViewInputSubTypes.IShoppingSaleUnitStockChoice.IInvert[];
-        };
+        }
     }
     /**
      * Shopping price interface.
     */
-    export type IShoppingPrice = {
+    export interface IShoppingPrice {
         /**
          * Nominal price.
          *
@@ -728,11 +801,11 @@ export namespace AutoViewInputSubTypes {
          * @title Real price to pay
         */
         real: number;
-    };
+    }
     /**
      * Inventory information of a final stock.
     */
-    export type IShoppingSaleUnitStockInventory = {
+    export interface IShoppingSaleUnitStockInventory {
         /**
          * Total income quantity.
          *
@@ -745,12 +818,12 @@ export namespace AutoViewInputSubTypes {
          * @title Total outcome quantity
         */
         outcome: number & tags.Type<"int32">;
-    };
+    }
     export namespace IShoppingSaleUnitStockChoice {
         /**
          * Invert information from the cart.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -762,26 +835,113 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Target option
             */
-            option: any | any;
+            option: AutoViewInputSubTypes.IShoppingSaleUnitSelectableOption.IInvert | AutoViewInputSubTypes.IShoppingSaleUnitDescriptiveOption;
             /**
              * Selected candidate value.
              *
              * @title Selected candidate value
             */
-            candidate: null | any;
+            candidate: null | AutoViewInputSubTypes.IShoppingSaleUnitOptionCandidate;
             /**
              * Written value.
              *
              * @title Written value
             */
             value: null | string | number | boolean;
-        };
+        }
     }
     export namespace IShoppingSaleUnitSelectableOption {
-        export type IInvert = any;
+        export interface IInvert {
+            /**
+             * Primary Key.
+             *
+             * @title Primary Key
+            */
+            id: string;
+            /**
+             * Discriminant for the type of selectable option.
+             *
+             * @title Discriminant for the type of selectable option
+            */
+            type: "select";
+            /**
+             * Represents the name of the option.
+             *
+             * @title Represents the name of the option
+            */
+            name: string;
+            /**
+             * Whether the option is variable or not.
+             *
+             * When type of current option is "select", this attribute means whether
+             * selecting different candidate value affects the final stock or not.
+             *
+             * @title Whether the option is variable or not
+            */
+            variable: boolean;
+        }
     }
-    export type IShoppingSaleUnitDescriptiveOption = any;
-    export type IShoppingSaleUnitOptionCandidate = any;
+    /**
+     * Descriptive option.
+     *
+     * When type of the option not `"select"`, it means the option is descriptive
+     * that requiring {@link IShoppingCustomer customers} to write some value to
+     * {@link IShoppingOrder purchase}. Also, whatever customer writes about the
+     * option, it does not affect the {@link IShoppingSaleUnitStock final stock}.
+     *
+     * Another words, the descriptive option is just for information transfer.
+    */
+    export interface IShoppingSaleUnitDescriptiveOption {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Type of descriptive option.
+         *
+         * Which typed value should be written when purchasing.
+         *
+         * @title Type of descriptive option
+        */
+        type: "string" | "number" | "boolean";
+        /**
+         * Readable name of the option.
+         *
+         * @title Readable name of the option
+        */
+        name: string;
+    }
+    /**
+     * Selectable candidate values within an option.
+     *
+     * `IShoppingSaleUnitOptionCandidate` is an entity that represents individual
+     * candidate values that can be selected from
+     * {@link IShoppingSaleUnitSelectableOption options of the "select" type}.
+     *
+     * - Example
+     *   - RAM: 8GB, 16GB, 32GB
+     *   - GPU: RTX 3060, RTX 4080, TESLA
+     *   - License: Private, Commercial, Educatiion
+     *
+     * By the way, if belonged option is not "select" type, this entity never
+     * being used.
+    */
+    export interface IShoppingSaleUnitOptionCandidate {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Represents the name of the candidate value.
+         *
+         * @title Represents the name of the candidate value
+        */
+        name: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingCartCommodity;
 
@@ -790,101 +950,123 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingCartCommodity;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { sale, volume, price, orderable, pseudo, created_at } = value;
-  const title = sale.content.title;
-  const imageUrl = sale.content.thumbnails?.[0]?.url || "";
-  const sellerName = sale.seller.member.nickname;
-  const sectionName = sale.section.name;
-  const unitReal = price.real;
-  const unitNominal = price.nominal;
-  const totalReal = unitReal * volume;
-  const totalNominal = unitNominal * volume;
-  const formattedDate = new Date(created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric"
-  });
-  const displayTags = sale.tags || [];
-  const maxTags = 3;
-  const visibleTags = displayTags.slice(0, maxTags);
-  const moreTagCount = displayTags.length - maxTags;
-
-  const formatMoney = (amount: number) =>
-    amount.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+  const content = value.sale.content;
+  const contentTitle = content.title;
+  const thumbnailUrl =
+    content.thumbnails[0]?.url ??
+    'https://placehold.co/400x225/f1f5f9/64748b?text=Image';
+  const sellerName = value.sale.seller.member.nickname;
+  const sectionName = value.sale.section.name;
+  const categories = value.sale.categories;
+  const tags = value.sale.tags;
+  const volume = value.volume;
+  const { nominal, real } = value.price;
+  const totalReal = real * volume;
+  const totalNominal = nominal * volume;
+  const formatPrice = (amt: number) => `$${amt.toLocaleString()}`;
+  const formattedDate = new Date(value.created_at).toLocaleDateString();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col md:flex-row">
-      <div className="w-full h-48 md:w-32 md:h-auto flex-shrink-0">
+    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="aspect-video w-full mb-4 bg-gray-100 rounded overflow-hidden">
         <img
-          src={imageUrl}
-          alt={title}
+          src={thumbnailUrl}
+          alt={contentTitle}
           className="object-cover w-full h-full"
+          onError={e => {
+            (e.currentTarget as HTMLImageElement).src =
+              'https://placehold.co/400x225/f1f5f9/64748b?text=Image';
+          }}
         />
       </div>
-      <div className="p-4 flex flex-col justify-between flex-1">
-        <header>
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
-            {title}
-          </h3>
-          <div className="flex flex-wrap gap-2 mt-1">
-            {!orderable && (
-              <span className="px-2 py-0.5 bg-red-100 text-red-800 text-xs rounded">
-                Ordered
-              </span>
-            )}
-            {pseudo && (
-              <span className="px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded">
-                Promo
-              </span>
-            )}
-          </div>
-          <p className="text-sm text-gray-500 mt-2 truncate">
-            {sellerName} · {sectionName}
-          </p>
-          {displayTags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-2">
-              {visibleTags.map((tag, i) => (
-                <span
-                  key={i}
-                  className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded"
-                >
-                  {tag}
-                </span>
-              ))}
-              {moreTagCount > 0 && (
-                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                  +{moreTagCount}
-                </span>
-              )}
-            </div>
-          )}
-        </header>
 
-        <dl className="mt-4 grid grid-cols-2 gap-y-2 text-sm text-gray-700">
-          <dt className="font-medium">Unit Price</dt>
-          <dd className="flex items-baseline">
-            <span className="font-semibold">${formatMoney(unitReal)}</span>
-            {unitNominal > unitReal && (
-              <span className="ml-2 text-gray-500 line-through">
-                ${formatMoney(unitNominal)}
-              </span>
-            )}
-          </dd>
+      <h2 className="text-lg font-semibold text-gray-900 truncate mb-1">
+        {contentTitle}
+      </h2>
 
-          <dt className="font-medium">Quantity</dt>
-          <dd>{volume}</dd>
-
-          <dt className="font-medium">Total</dt>
-          <dd className="font-semibold">${formatMoney(totalReal)}</dd>
-
-          <dt className="font-medium">Added</dt>
-          <dd>{formattedDate}</dd>
-        </dl>
+      <div className="flex items-center text-sm text-gray-500 space-x-4 mb-2">
+        <div className="flex items-center gap-1">
+          <LucideReact.User size={16} className="text-gray-400" />
+          <span>{sellerName}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Tag size={16} className="text-gray-400" />
+          <span>{sectionName}</span>
+        </div>
       </div>
-    </article>
+
+      {categories.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {categories.map(cat => (
+            <span
+              key={cat.id}
+              className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded"
+            >
+              {cat.name}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {tags.map((tag, idx) => (
+            <span
+              key={idx}
+              className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <span className="text-sm text-gray-500">Qty:</span>
+          <span className="font-medium text-gray-900 ml-1">{volume}</span>
+        </div>
+        <div className="text-right">
+          {totalNominal > totalReal && (
+            <span className="text-sm text-gray-500 line-through">
+              {formatPrice(totalNominal)}
+            </span>
+          )}
+          <span className="ml-1 text-lg font-semibold text-gray-900">
+            {formatPrice(totalReal)}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>{formattedDate}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span>Status:</span>
+          {value.orderable ? (
+            <LucideReact.CheckCircle
+              size={16}
+              className="ml-1 text-green-500"
+              aria-label="Orderable"
+            />
+          ) : (
+            <LucideReact.XCircle
+              size={16}
+              className="ml-1 text-red-500"
+              aria-label="Not Orderable"
+            />
+          )}
+        </div>
+      </div>
+
+      {value.pseudo && (
+        <div className="mt-4 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded inline-block">
+          Pseudo Item
+        </div>
+      )}
+    </div>
   );
 }

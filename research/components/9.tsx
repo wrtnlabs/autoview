@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A page.
      *
      * Collection of records with pagination indformation.
     */
-    export type IPageIShoppingDeposit = {
+    export interface IPageIShoppingDeposit {
         /**
          * Page information.
          *
@@ -19,12 +20,12 @@ export namespace AutoViewInputSubTypes {
          * @title List of records
         */
         data: AutoViewInputSubTypes.IShoppingDeposit[];
-    };
+    }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -51,15 +52,15 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
-    export type IShoppingDeposit = {
+    export interface IShoppingDeposit {
         id: string & tags.Format<"uuid">;
         created_at: string & tags.Format<"date-time">;
         code: string;
         source: string;
         direction: -1 | 1;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingDeposit;
 
@@ -69,55 +70,87 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingDeposit;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { pagination, data } = value;
-  const { current, pages, records } = pagination;
-
-  const formatDate = (dateStr: string): string => {
-    const d = new Date(dateStr);
-    return (
-      d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) +
-      ', ' +
-      d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-    );
-  };
-
-  const getDirectionLabel = (dir: -1 | 1): string => (dir === 1 ? 'Deposit' : 'Withdrawal');
+  const { current, limit, records, pages } = pagination;
+  const countIncoming = data.filter(item => item.direction === 1).length;
+  const countOutgoing = data.length - countIncoming;
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-full p-4 bg-white rounded-lg shadow-md">
-      <div className="mb-4 text-sm text-gray-600">
-        Page {current} of {pages} · {records} record{records !== 1 ? 's' : ''}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Summary */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 space-y-2 md:space-y-0">
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>
+            Page {current} of {pages} (showing {Math.min(limit, data.length)} of {records})
+          </span>
+        </div>
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.ArrowUpCircle size={16} className="text-green-500 mr-1" />
+          <span>{countIncoming} incoming</span>
+          <LucideReact.ArrowDownCircle size={16} className="text-red-500 ml-4 mr-1" />
+          <span>{countOutgoing} outgoing</span>
+        </div>
       </div>
 
-      {data.length === 0 ? (
-        <div className="py-6 text-center text-gray-500">No records found.</div>
-      ) : (
-        <ul className="divide-y divide-gray-200">
-          {data.map((item) => (
-            <li
-              key={item.id}
-              className="py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">{item.code}</div>
-                <div className="mt-1 flex items-center text-xs text-gray-500 space-x-2">
-                  <time dateTime={item.created_at}>{formatDate(item.created_at)}</time>
-                  <span className="truncate">{item.source}</span>
-                </div>
-              </div>
-              <span
-                className={`mt-2 sm:mt-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  item.direction === 1
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
-              >
-                {getDirectionLabel(item.direction)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Data Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full table-auto divide-y divide-gray-200">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Date
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Code
+              </th>
+              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Source
+              </th>
+              <th className="px-3 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wide">
+                Direction
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {data.map((item, idx) => (
+              <tr key={item.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <td className="px-3 py-2 whitespace-nowrap">
+                  <div className="flex items-center text-sm text-gray-700">
+                    <LucideReact.Calendar size={16} className="text-gray-400 mr-1" />
+                    <span>{formatDate(item.created_at)}</span>
+                  </div>
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap">
+                  <span className="text-sm text-gray-800 font-medium">{item.code}</span>
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap">
+                  <span className="text-sm text-gray-700">{item.source}</span>
+                </td>
+                <td className="px-3 py-2 whitespace-nowrap text-center">
+                  {item.direction === 1 ? (
+                    <LucideReact.ArrowUpCircle
+                      size={18}
+                      className="text-green-500 inline-block"
+                    />
+                  ) : (
+                    <LucideReact.ArrowDownCircle
+                      size={18}
+                      className="text-red-500 inline-block"
+                    />
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

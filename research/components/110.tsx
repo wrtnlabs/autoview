@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingChannelCategory {
         /**
          * Invert category information with parent category.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Parent category info with recursive structure.
              *
@@ -13,7 +14,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Parent category info with recursive structure
             */
-            parent: null | any;
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
             /**
              * Primary Key.
              *
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
@@ -60,45 +61,50 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory.IInve
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-
-  // Build an ordered list of category names from root to the current category.
-  const hierarchy: string[] = [];
-  let node: any = value;
-  while (node) {
-    hierarchy.unshift(node.name);
-    node = node.parent;
+  //    Build the full category path from root to the current category.
+  const pathSegments: string[] = [];
+  let current: AutoViewInput | null = value;
+  while (current) {
+    pathSegments.push(current.name);
+    current = current.parent;
   }
-
-  // Format the creation date into a human-readable form.
-  const createdDate = new Date(value.created_at);
-  const formattedDate = createdDate.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  pathSegments.reverse();
+  const fullPath = pathSegments.join(" / ");
+  //    Format the creation date into a human-friendly string.
+  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Breadcrumb / Hierarchy */}
-      <div className="text-gray-500 text-sm mb-2 truncate">
-        {hierarchy.join(' / ')}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {/* Category Title */}
+      <div className="text-gray-900 font-semibold text-lg mb-3">
+        {value.name}
       </div>
 
-      {/* Category Name */}
-      <h2 className="text-xl font-semibold text-gray-900 truncate">
-        {value.name}
-      </h2>
+      {/* Details */}
+      <div className="flex flex-col space-y-2 text-gray-700 text-sm">
+        {/* Category Path (only if there is a parent) */}
+        {value.parent && (
+          <div className="flex items-center">
+            <LucideReact.Folder size={16} className="text-gray-400 mr-1" aria-label="Category path" />
+            <span className="truncate">{fullPath}</span>
+          </div>
+        )}
 
-      {/* Metadata: Code & Creation Date */}
-      <div className="mt-3 flex flex-wrap text-gray-600 text-sm space-x-4">
+        {/* Category Code */}
         <div className="flex items-center">
-          <span className="font-medium">Code:</span>
-          <span className="ml-1 truncate">{value.code}</span>
+          <LucideReact.Tag size={16} className="text-blue-500 mr-1" aria-label="Category code" />
+          <span className="font-mono text-gray-800">{value.code}</span>
         </div>
+
+        {/* Creation Date */}
         <div className="flex items-center">
-          <span className="font-medium">Created:</span>
-          <span className="ml-1">{formattedDate}</span>
+          <LucideReact.Calendar size={16} className="text-gray-400 mr-1" aria-label="Created at" />
+          <time dateTime={value.created_at}>{formattedDate}</time>
         </div>
       </div>
     </div>

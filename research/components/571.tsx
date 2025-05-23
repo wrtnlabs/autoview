@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Full Repository
      *
      * @title Full Repository
     */
-    export type full_repository = {
+    export interface full_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -157,13 +158,13 @@ export namespace AutoViewInputSubTypes {
          * The custom properties that were defined for the repository. The keys are the custom property names, and the values are the corresponding custom property values.
         */
         custom_properties?: {};
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -186,7 +187,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A repository on GitHub.
      *
@@ -203,7 +204,7 @@ export namespace AutoViewInputSubTypes {
         */
         name: string;
         full_name: string;
-        license: any;
+        license: AutoViewInputSubTypes.nullable_license_simple;
         forks: number & tags.Type<"int32">;
         permissions?: {
             admin: boolean;
@@ -212,7 +213,7 @@ export namespace AutoViewInputSubTypes {
             push: boolean;
             maintain?: boolean;
         };
-        owner: any;
+        owner: AutoViewInputSubTypes.simple_user;
         /**
          * Whether the repository is private or public.
         */
@@ -444,7 +445,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -648,18 +649,18 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * Code of Conduct Simple
      *
      * @title Code Of Conduct Simple
     */
-    export type code_of_conduct_simple = {
+    export interface code_of_conduct_simple {
         url: string & tags.Format<"uri">;
         key: string;
         name: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -697,118 +698,95 @@ export type AutoViewInput = AutoViewInputSubTypes.full_repository;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  const ownerName = value.owner.name || value.owner.login;
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    ownerName,
+  )}&background=random&color=fff`;
+  const createdAtDate = new Date(value.created_at).toLocaleDateString('default', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
-  const description =
-    value.description && value.description.length > 0
-      ? value.description
-      : "No description provided.";
-  const isPrivate = value["private"];
-  const isArchived = value.archived;
-  const isDisabled = value.disabled;
-  const language = value.language;
-  const licenseName = value.license?.name ?? null;
-  const topics = Array.isArray(value.topics) ? value.topics : [];
+  const updatedAtDate = new Date(value.updated_at).toLocaleDateString('default', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
     <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center">
         <img
           src={value.owner.avatar_url}
-          alt={value.owner.login}
-          className="w-10 h-10 rounded-full"
+          onError={({ currentTarget }) => {
+            currentTarget.onerror = null;
+            currentTarget.src = avatarFallback;
+          }}
+          alt={`${ownerName} avatar`}
+          className="w-8 h-8 rounded-full object-cover"
         />
-        <div className="flex-1">
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-semibold text-gray-900 truncate">
-              {value.full_name}
-            </span>
-            {isPrivate && (
-              <span className="px-2 py-0.5 text-xs font-medium text-gray-700 bg-gray-200 rounded">
-                Private
-              </span>
-            )}
-            {isArchived && (
-              <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded">
-                Archived
-              </span>
-            )}
-            {isDisabled && (
-              <span className="px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded">
-                Disabled
-              </span>
-            )}
-          </div>
-          <div className="mt-1 text-sm text-gray-500">
-            Updated {updatedDate}
-          </div>
-        </div>
+        <span className="ml-2 text-sm text-gray-600">{ownerName}</span>
       </div>
 
-      {description && (
-        <p className="mt-3 text-gray-700 line-clamp-3">{description}</p>
+      <h2 className="mt-3 text-lg font-semibold text-gray-800 truncate">
+        {value.full_name}
+      </h2>
+
+      {value.description && (
+        <p className="mt-2 text-gray-700 text-sm line-clamp-2">
+          {value.description}
+        </p>
       )}
 
-      <div className="mt-4 flex flex-wrap items-center text-sm text-gray-600 gap-x-4 gap-y-2">
-        {language && (
-          <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded">
-            {language}
-          </span>
-        )}
-        <span className="flex items-center space-x-1">
-          <svg
-            className="w-4 h-4 text-yellow-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.287 3.947a1 1 0 00.95.69h4.154c.969 0 1.371 1.24.588 1.81l-3.367 2.447a1 1 0 00-.364 1.118l1.287 3.947c.3.921-.755 1.688-1.538 1.118l-3.367-2.447a1 1 0 00-1.176 0l-3.367 2.447c-.783.57-1.838-.197-1.538-1.118l1.287-3.947a1 1 0 00-.364-1.118L2.07 9.374c-.783-.57-.38-1.81.588-1.81h4.154a1 1 0 00.95-.69l1.287-3.947z" />
-          </svg>
-          <span>{value.stargazers_count}</span>
-        </span>
-        <span className="flex items-center space-x-1">
-          <svg
-            className="w-4 h-4 text-gray-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M10 2a6 6 0 00-6 6v3a3 3 0 003 3h1v2h4v-2h1a3 3 0 003-3V8a6 6 0 00-6-6z" />
-          </svg>
-          <span>{value.forks_count}</span>
-        </span>
-        <span className="flex items-center space-x-1">
-          <svg
-            className="w-4 h-4 text-red-500"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M8 9a3 3 0 116 0v1h1a2 2 0 012 2v3H5v-3a2 2 0 012-2h1V9z" />
-          </svg>
-          <span>{value.open_issues_count} issues</span>
-        </span>
-        {licenseName && (
-          <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
-            {licenseName}
-          </span>
+      <div className="mt-4 flex flex-wrap items-center text-gray-500 text-sm gap-4">
+        <div className="flex items-center">
+          <LucideReact.Star size={16} className="text-yellow-500" />
+          <span className="ml-1">{value.stargazers_count}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.GitBranch size={16} className="text-gray-500" />
+          <span className="ml-1">{value.forks_count}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Eye size={16} className="text-gray-500" />
+          <span className="ml-1">{value.watchers_count}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.AlertCircle size={16} className="text-red-500" />
+          <span className="ml-1">{value.open_issues_count}</span>
+        </div>
+        {value.language && (
+          <div className="flex items-center">
+            <span className="w-2 h-2 bg-gray-500 rounded-full" />
+            <span className="ml-1">{value.language}</span>
+          </div>
         )}
       </div>
 
-      {topics.length > 0 && (
+      {value.topics && value.topics.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
-          {topics.slice(0, 6).map((topic) => (
+          {value.topics.map((topic) => (
             <span
               key={topic}
-              className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
+              className="px-2 py-0.5 bg-gray-200 text-gray-800 text-xs rounded-full"
             >
               {topic}
             </span>
           ))}
         </div>
       )}
+
+      <div className="mt-4 flex items-center text-gray-500 text-xs gap-4">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={14} />
+          <span className="ml-1">Created {createdAtDate}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={14} />
+          <span className="ml-1">Updated {updatedAtDate}</span>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
      *
      * @title Reaction
     */
-    export type reaction = {
+    export interface reaction {
         id: number & tags.Type<"int32">;
         node_id: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -52,106 +53,92 @@ export type AutoViewInput = AutoViewInputSubTypes.reaction[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Type aliases for clarity
-  type Reaction = AutoViewInputSubTypes.reaction;
-  type ReactionContent = Reaction["content"];
-
-  // 1. Data aggregation: count reactions by type
-  const counts = value.reduce((acc, reaction) => {
-    const key = reaction.content as ReactionContent;
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {} as Record<ReactionContent, number>);
-
-  // Emoji mapping for each reaction type
-  const emojiMap: Record<ReactionContent, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    rocket: "🚀",
-    eyes: "👀",
-  };
-
-  // Sort reaction types by descending count for summary display
-  const sortedContents = (Object.keys(counts) as ReactionContent[]).sort(
-    (a, b) => counts[b] - counts[a]
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  //    Group reactions by content type to show counts
+  const counts: Record<AutoViewInputSubTypes.reaction["content"], number> = value.reduce(
+    (acc, reaction) => {
+      acc[reaction.content] = (acc[reaction.content] ?? 0) + 1;
+      return acc;
+    },
+    {} as Record<AutoViewInputSubTypes.reaction["content"], number>
   );
 
-  // Utility: format ISO date-time into a readable string
-  const formatDate = (iso: string): string => {
-    const date = new Date(iso);
-    const dateStr = date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-    const timeStr = date.toLocaleTimeString(undefined, {
-      hour: "numeric",
-      minute: "2-digit",
-    });
-    return `${dateStr}, ${timeStr}`;
+  //    Map each reaction content to a semantically appropriate icon
+  const contentIcons: Record<AutoViewInputSubTypes.reaction["content"], JSX.Element> = {
+    "+1": <LucideReact.ThumbsUp size={16} className="text-blue-500" />,
+    "-1": <LucideReact.ThumbsDown size={16} className="text-red-500" />,
+    laugh: <LucideReact.Laugh size={16} className="text-yellow-500" />,
+    confused: <LucideReact.HelpCircle size={16} className="text-amber-500" />,
+    heart: <LucideReact.Heart size={16} className="text-pink-500" />,
+    hooray: <LucideReact.Star size={16} className="text-purple-500" />,
+    rocket: <LucideReact.Rocket size={16} className="text-gray-700" />,
+    eyes: <LucideReact.Eye size={16} className="text-gray-600" />
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <section className="p-4 bg-white rounded-lg shadow-md">
-      {value.length === 0 ? (
-        <p className="text-gray-500 text-center">No reactions yet.</p>
-      ) : (
-        <>
-          {/* Summary of reaction counts */}
-          <div className="flex flex-wrap gap-2 mb-4">
-            {sortedContents.map((type) => (
-              <span
-                key={type}
-                className="inline-flex items-center bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-sm font-medium"
-              >
-                <span className="mr-1">{emojiMap[type]}</span>
-                <span>{counts[type]}</span>
-              </span>
-            ))}
-          </div>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <header className="flex items-center justify-between mb-4">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+          <LucideReact.Activity size={20} className="text-gray-600" />
+          Reactions ({value.length})
+        </h2>
+      </header>
 
-          {/* Detailed reaction list */}
-          <ul className="space-y-4">
-            {value.map((reaction) => {
-              const user = reaction.user;
-              const username = user?.name ?? user?.login ?? "Unknown";
-              const avatarUrl = user?.avatar_url ?? "";
-              const emoji = emojiMap[reaction.content];
-              const date = formatDate(reaction.created_at);
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        {(Object.keys(counts) as Array<AutoViewInputSubTypes.reaction["content"]>).map(
+          (content) => (
+            <div key={content} className="flex items-center gap-1 text-gray-700">
+              {contentIcons[content]}
+              <span className="font-medium">{counts[content]}</span>
+            </div>
+          )
+        )}
+      </div>
 
-              return (
-                <li key={reaction.id} className="flex items-start space-x-3">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={username}
-                      className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                      <span className="text-gray-500 text-sm">{emoji}</span>
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-lg">{emoji}</span>
-                      <span className="font-medium text-gray-900 truncate">
-                        {username}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-500 mt-0.5">{date}</div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </>
-      )}
-    </section>
+      <ul className="divide-y divide-gray-100 max-h-60 overflow-y-auto">
+        {value.map((reaction) => {
+          // Format date for readability
+          const formattedDate = new Date(reaction.created_at).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          });
+
+          // Determine user display and avatar
+          const user = reaction.user;
+          const login = user?.login ?? "Unknown";
+          const avatarSrc =
+            user?.avatar_url ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(login)}&background=0D8ABC&color=fff`;
+
+          return (
+            <li key={reaction.id} className="flex items-center py-2">
+              <div className="w-8 h-8 flex-shrink-0 rounded-full overflow-hidden mr-3">
+                <img
+                  src={avatarSrc}
+                  alt={login}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    img.onerror = null;
+                    img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      login
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+              </div>
+              <div className="flex-1 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {contentIcons[reaction.content]}
+                  <span className="truncate text-gray-800 font-medium">{login}</span>
+                </div>
+                <time className="text-gray-500 text-sm">{formattedDate}</time>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }

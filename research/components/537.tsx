@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A team discussion is a persistent record of a free-form conversation within a team.
      *
      * @title Team Discussion
     */
-    export type team_discussion = {
+    export interface team_discussion {
         author: AutoViewInputSubTypes.nullable_simple_user;
         /**
          * The main text of the discussion.
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         url: string & tags.Format<"uri">;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -76,7 +77,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -87,7 +88,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_discussion;
 
@@ -96,95 +97,110 @@ export type AutoViewInput = AutoViewInputSubTypes.team_discussion;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const author = value.author;
-  const authorName = author?.name ?? author?.login ?? "Unknown";
-  const authorAvatar = author?.avatar_url;
-
-  const createdDate = new Date(value.created_at);
-  const formattedCreated = createdDate.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }) + " · " + createdDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-  const updatedDate = value.updated_at !== value.created_at
-    ? new Date(value.updated_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
+  const authorName = value.author?.name ?? value.author?.login ?? "Unknown";
+  const avatarSrc =
+    value.author?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      authorName,
+    )}&background=random`;
+  const createdDate = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const editedDate = value.last_edited_at
+    ? new Date(value.last_edited_at).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
       })
     : null;
-
-  const snippet = value.body.length > 200 ? `${value.body.slice(0, 200)}...` : value.body;
-
-  const badges: { label: string; color: string }[] = [];
-  if (value.pinned) badges.push({ label: "Pinned", color: "bg-blue-100 text-blue-800" });
-  if (value["private"]) badges.push({ label: "Private", color: "bg-red-100 text-red-800" });
-
-  const reactionEmojis: Record<string, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    eyes: "👀",
-    rocket: "🚀",
-  };
-
-  const reactionList = value.reactions
-    ? (Object.entries(value.reactions) as [keyof typeof reactionEmojis, number][])
-        .filter(([, count]) => count > 0)
-        .map(([key, count]) => ({ emoji: reactionEmojis[key], count }))
-    : [];
+  const isPrivate = value["private"];
+  const isPinned = value.pinned;
+  const reactions = value.reactions;
+  const plusOneCount = reactions?.["+1"] ?? 0;
+  const heartCount = reactions?.heart ?? 0;
+  const laughCount = reactions?.laugh ?? 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          {authorAvatar && (
-            <img
-              src={authorAvatar}
-              alt={authorName}
-              className="w-10 h-10 rounded-full object-cover"
+    <div className="max-w-md w-full bg-white p-4 rounded-lg shadow flex flex-col space-y-4">
+      {/* Header: Author, Date, Pins/Privacy */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <img
+            src={avatarSrc}
+            alt={authorName}
+            className="w-8 h-8 rounded-full object-cover bg-gray-100"
+            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                authorName,
+              )}&background=0D8ABC&color=fff`;
+            }}
+          />
+          <div className="text-sm">
+            <p className="font-medium text-gray-900 truncate">{authorName}</p>
+            <p className="text-gray-500">{createdDate}</p>
+          </div>
+        </div>
+        <div className="flex items-center space-x-1">
+          {isPinned && (
+            <LucideReact.Pin
+              size={16}
+              className="text-gray-500"
+              aria-label="Pinned"
             />
           )}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">{value.title}</h2>
-            <div className="text-sm text-gray-600">
-              by <span className="font-medium">{authorName}</span> · {formattedCreated}
-            </div>
-            {updatedDate && (
-              <div className="text-xs text-gray-500">Updated on {updatedDate}</div>
-            )}
-          </div>
-        </div>
-        <div className="flex space-x-2">
-          {badges.map((badge) => (
-            <span
-              key={badge.label}
-              className={`px-2 py-0.5 text-xs font-medium rounded ${badge.color}`}
-            >
-              {badge.label}
-            </span>
-          ))}
+          {isPrivate ? (
+            <LucideReact.Lock
+              size={16}
+              className="text-gray-500"
+              aria-label="Private"
+            />
+          ) : (
+            <LucideReact.Unlock
+              size={16}
+              className="text-gray-500"
+              aria-label="Public"
+            />
+          )}
         </div>
       </div>
-      <p className="text-gray-700 mb-4 line-clamp-3">{snippet}</p>
+
+      {/* Title */}
+      <h2 className="text-lg font-semibold text-gray-800 truncate">
+        {`#${value.number} ${value.title}`}
+      </h2>
+
+      {/* Body Preview (HTML) */}
+      <div
+        className="prose prose-sm text-gray-700 line-clamp-3"
+        dangerouslySetInnerHTML={{ __html: value.body_html }}
+      />
+
+      {/* Footer: Comments and Reactions */}
       <div className="flex items-center justify-between text-sm text-gray-500">
-        <span>{value.comments_count} comments</span>
-        {reactionList.length > 0 && (
-          <div className="flex items-center space-x-3">
-            {reactionList.map((r, i) => (
-              <span key={i} className="flex items-center space-x-1">
-                <span>{r.emoji}</span>
-                <span>{r.count}</span>
-              </span>
-            ))}
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <LucideReact.MessageCircle size={16} />
+            <span>{value.comments_count}</span>
           </div>
-        )}
+          <div className="flex items-center space-x-1">
+            <LucideReact.ThumbsUp size={16} />
+            <span>{plusOneCount}</span>
+          </div>
+          {heartCount > 0 && (
+            <div className="flex items-center space-x-1">
+              <LucideReact.Heart size={16} className="text-red-500" />
+              <span>{heartCount}</span>
+            </div>
+          )}
+          {laughCount > 0 && (
+            <div className="flex items-center space-x-1">
+              <LucideReact.Laugh size={16} />
+              <span>{laughCount}</span>
+            </div>
+          )}
+        </div>
+        {editedDate && <span className="italic">Edited: {editedDate}</span>}
       </div>
     </div>
   );

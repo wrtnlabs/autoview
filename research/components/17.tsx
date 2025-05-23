@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A page.
      *
      * Collection of records with pagination indformation.
     */
-    export type IPageIShoppingMileageDonation = {
+    export interface IPageIShoppingMileageDonation {
         /**
          * Page information.
          *
@@ -19,12 +20,12 @@ export namespace AutoViewInputSubTypes {
          * @title List of records
         */
         data: AutoViewInputSubTypes.IShoppingMileageDonation[];
-    };
+    }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -51,16 +52,16 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
-    export type IShoppingMileageDonation = {
+    export interface IShoppingMileageDonation {
         id: string & tags.Format<"uuid">;
         administrator: AutoViewInputSubTypes.IShoppingAdministrator.IInvert;
         citizen: AutoViewInputSubTypes.IShoppingCitizen;
         value: number;
         reason: string;
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     export namespace IShoppingAdministrator {
         /**
          * Invert information starting from administrator info.
@@ -71,7 +72,7 @@ export namespace AutoViewInputSubTypes {
          * and access to the customer, member and {@link IShoppingCitizen citizen}
          * information inversely.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Discriminant for the type of customer.
              *
@@ -110,7 +111,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingMember {
         /**
@@ -122,7 +123,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -149,7 +150,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Email address of member.
@@ -158,7 +159,7 @@ export namespace AutoViewInputSubTypes {
      * registered for one {@link IShoppingMember member}. If you don't have to
      * plan such multiple email addresses, just use only one.
     */
-    export type IShoppingMemberEmail = {
+    export interface IShoppingMemberEmail {
         /**
          * Primary Key.
          *
@@ -177,7 +178,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingCustomer {
         /**
          * Inverted customer information.
@@ -188,7 +189,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -208,7 +209,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title External user information
             */
-            external_user: null | any;
+            external_user: null | AutoViewInputSubTypes.IShoppingExternalUser;
             /**
              * Connection address.
              *
@@ -237,7 +238,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of the connection record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Channel information.
@@ -249,7 +250,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -274,8 +275,80 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
-    export type IShoppingExternalUser = any;
+    }
+    /**
+     * External user information.
+     *
+     * `IShoppingExternalUser` is an entity dsigned for when this system needs
+     * to connect with external services and welcome their users as
+     * {@link IShoppingCustomer customers} of this service.
+     *
+     * For reference, customers who connect from an external service must have
+     * this record, and the external service user is identified through the two
+     * attributes {@link application} and {@link uid}. If a customer connected
+     * from an external service completes
+     * {@link IShoppingCitizen real-name authentication} from this service, each
+     * time the external service user reconnects to this service and issues a
+     * new customer authentication token, real-name authentication begins with
+     * completed.
+     *
+     * And {@link password} is the password issued to the user by the external
+     * service system (the so-called permanent user authentication token), and
+     * is never the actual user password. However, for customers who entered the
+     * same application and uid as the current external system user, this is to
+     * determine whether to view this as a correct external system user or a
+     * violation.
+     *
+     * In addition, additional information received from external services can
+     * be recorded in the data field in JSON format.
+    */
+    export interface IShoppingExternalUser {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Citizen activation info.
+         *
+         * @title Citizen activation info
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Creation time of record.
+         *
+         * Another word, first time when the external user connected.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier key of external user from the external system.
+         *
+         * @title Identifier key of external user from the external system
+        */
+        uid: string;
+        /**
+         * Identifier code of the external service.
+         *
+         * It can be same with {@link IShoppingChannel.code} in common.
+         *
+         * @title Identifier code of the external service
+        */
+        application: string;
+        /**
+         * Nickname of external user in the external system.
+         *
+         * @title Nickname of external user in the external system
+        */
+        nickname: string;
+        /**
+         * Additional information about external user from the external
+         * system.
+        */
+        data: any;
+    }
     /**
      * Citizen verification information.
      *
@@ -291,7 +364,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, real name and mobile phone authentication information are
      * encrypted and stored.
     */
-    export type IShoppingCitizen = {
+    export interface IShoppingCitizen {
         /**
          * Primary Key.
          *
@@ -316,7 +389,7 @@ export namespace AutoViewInputSubTypes {
          * @title Real name, or equivalent nickname
         */
         name: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingMileageDonation;
 
@@ -328,11 +401,8 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   const { pagination, data } = value;
   const { current, pages, records } = pagination;
 
-  const formatNumber = (num: number): string =>
-    new Intl.NumberFormat(undefined).format(num);
-
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleString(undefined, {
+  const formattedDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -340,40 +410,119 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
       minute: "2-digit",
     });
 
+  const formattedValue = (amount: number): string =>
+    `${amount.toLocaleString()} pt`;
+
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 space-y-4">
-      {/* Pagination summary */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-sm text-gray-600">
-        <span>Page {current} of {pages}</span>
-        <span>{formatNumber(records)} records</span>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Mileage Donations
+        </h2>
+        <div className="mt-2 sm:mt-0 flex items-center text-sm text-gray-600">
+          <LucideReact.ListOrdered
+            className="text-gray-400 mr-1"
+            size={16}
+          />
+          <span>
+            Page {current} of {pages} &bull; {records} record
+            {records !== 1 && "s"}
+          </span>
+        </div>
       </div>
 
-      {/* Donation list */}
-      <ul className="space-y-3">
-        {data.map((donation) => {
-          const miles = formatNumber(donation.value);
-          const date = formatDate(donation.created_at);
-          const donorName = donation.citizen.name;
-          const adminName = donation.administrator.citizen.name;
+      {data.length === 0 ? (
+        <div className="text-center text-gray-500 py-8">
+          <LucideReact.AlertCircle
+            className="mx-auto"
+            size={48}
+          />
+          <p className="mt-2">No donations found.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Admin
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Citizen
+                </th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
+                  Reason
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.map((donation) => {
+                const date = formattedDate(donation.created_at);
+                const amount = formattedValue(donation.value);
+                const admin = donation.administrator.member.nickname;
+                const citizen = donation.citizen.name;
+                const reason = donation.reason;
 
-          return (
-            <li key={donation.id} className="p-4 bg-white rounded-lg shadow">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-lg font-semibold text-gray-800">
-                  {miles} miles
-                </span>
-                <span className="text-sm text-gray-500">{date}</span>
-              </div>
-              <p className="text-gray-700 line-clamp-2 mb-2">{donation.reason}</p>
-              <div className="flex flex-col sm:flex-row sm:space-x-4 text-sm text-gray-600">
-                <span>Donor: {donorName}</span>
-                <span>Admin: {adminName}</span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                return (
+                  <tr key={donation.id}>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                      <div className="flex items-center">
+                        <LucideReact.Calendar
+                          className="text-gray-400 mr-1"
+                          size={16}
+                        />
+                        <span>{date}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                      <div className="flex items-center">
+                        <LucideReact.Award
+                          className="text-gray-400 mr-1"
+                          size={16}
+                        />
+                        <span className="font-medium text-gray-900">
+                          {amount}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                      <div className="flex items-center">
+                        <LucideReact.User
+                          className="text-gray-400 mr-1"
+                          size={16}
+                        />
+                        <span>{admin}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
+                      <div className="flex items-center">
+                        <LucideReact.User
+                          className="text-gray-400 mr-1"
+                          size={16}
+                        />
+                        <span>{citizen}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-700 hidden md:table-cell">
+                      <span className="block max-w-xs truncate">
+                        {reason}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

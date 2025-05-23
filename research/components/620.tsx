@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Activity
      *
      * @title Activity
     */
-    export type activity = {
+    export interface activity {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -30,7 +31,7 @@ export namespace AutoViewInputSubTypes {
         */
         activity_type: "push" | "force_push" | "branch_deletion" | "branch_creation" | "pr_merge" | "merge_queue_merge";
         actor: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -65,88 +66,91 @@ export type AutoViewInput = AutoViewInputSubTypes.activity[];
 
 
 
-// The component name is always "VisualComponent"
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Map raw activity_type values to human-readable labels
-  const activityTypeMap: Record<AutoViewInputSubTypes.activity["activity_type"], string> = {
-    push: "Push",
-    force_push: "Force Push",
-    branch_deletion: "Branch Deletion",
-    branch_creation: "Branch Creation",
-    pr_merge: "Pull Request Merge",
-    merge_queue_merge: "Merge Queue Merge",
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+  const activityMap: Record<
+    AutoViewInputSubTypes.activity['activity_type'],
+    { label: string; icon: JSX.Element; color: string }
+  > = {
+    push: { label: 'Pushed commits to', icon: <LucideReact.GitCommit size={16} />, color: 'text-blue-500' },
+    force_push: { label: 'Force pushed to', icon: <LucideReact.Zap size={16} />, color: 'text-yellow-500' },
+    branch_creation: { label: 'Created branch', icon: <LucideReact.GitBranch size={16} />, color: 'text-green-500' },
+    branch_deletion: { label: 'Deleted branch', icon: <LucideReact.GitBranch size={16} />, color: 'text-red-500' },
+    pr_merge: { label: 'Merged pull request into', icon: <LucideReact.GitMerge size={16} />, color: 'text-purple-500' },
+    merge_queue_merge: {
+      label: 'Merge queue merged into',
+      icon: <LucideReact.GitMerge size={16} />,
+      color: 'text-indigo-500',
+    },
   };
 
-  // Simple "time ago" formatter for recent timestamps
-  function formatTimeAgo(dateString: string): string {
-    const now = Date.now();
-    const then = new Date(dateString).getTime();
-    const diffSec = Math.floor((now - then) / 1000);
-    if (diffSec < 60) return `${diffSec}s ago`;
-    const diffMin = Math.floor(diffSec / 60);
-    if (diffMin < 60) return `${diffMin}m ago`;
-    const diffHr = Math.floor(diffMin / 60);
-    if (diffHr < 24) return `${diffHr}h ago`;
-    const diffDay = Math.floor(diffHr / 24);
-    if (diffDay < 30) return `${diffDay}d ago`;
-    const diffMo = Math.floor(diffDay / 30);
-    if (diffMo < 12) return `${diffMo}mo ago`;
-    const diffYr = Math.floor(diffMo / 12);
-    return `${diffYr}y ago`;
-  }
-
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // Handle empty state
   if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500 italic">
-        No activities to display.
+      <div className="flex flex-col items-center py-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-4 text-lg">No activity available</span>
       </div>
     );
   }
 
-  // 3. Return the React element.
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <ul className="divide-y divide-gray-200">
-        {value.map((act) => {
-          const actor = act.actor;
-          const displayName = actor?.login ?? "Unknown";
-          const avatarUrl = actor?.avatar_url ?? "";
-          const actionLabel = activityTypeMap[act.activity_type] ?? act.activity_type;
-          const branchName = act.ref.replace(/^refs\/heads\//, "");
-          const beforeSHA = act.before.slice(0, 7);
-          const afterSHA = act.after.slice(0, 7);
-          const timeAgo = formatTimeAgo(act.timestamp);
+    <div className="space-y-4">
+      {value.map((activity) => {
+        const { id, actor, ref, before, after, timestamp, activity_type } = activity;
+        const config = activityMap[activity_type];
+        const branch = ref.split('/').pop() || ref;
+        const shortBefore = before.slice(0, 7);
+        const shortAfter = after.slice(0, 7);
+        const displayName = actor?.name || actor?.login || 'Unknown User';
+        const avatarUrl = actor?.avatar_url || '';
+        const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          displayName,
+        )}&background=0D8ABC&color=fff`;
 
-          return (
-            <li key={act.id} className="flex items-start p-4">
+        return (
+          <div key={id} className="flex items-start gap-4 p-4 bg-white rounded-lg shadow-sm">
+            <div className="flex-shrink-0">
               {avatarUrl ? (
                 <img
                   src={avatarUrl}
                   alt={displayName}
-                  className="w-8 h-8 rounded-full flex-shrink-0"
+                  className="w-10 h-10 rounded-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = placeholderAvatar;
+                  }}
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0" />
+                <LucideReact.User size={40} className="text-gray-300" />
               )}
-              <div className="ml-4 flex-1 min-w-0">
-                <p className="text-sm text-gray-900 truncate">
-                  <span className="font-semibold">{displayName}</span>{" "}
-                  <span>performed</span>{" "}
-                  <span className="font-semibold">{actionLabel}</span>{" "}
-                  <span>on</span>{" "}
-                  <span className="font-semibold">{branchName}</span>
-                </p>
-                <p className="text-xs text-gray-500 mt-1 truncate">
-                  {beforeSHA} → {afterSHA} · {timeAgo}
-                </p>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-800">{displayName}</span>
+                <div className="flex items-center text-gray-500 text-sm">
+                  <LucideReact.Clock size={14} className="mr-1" />
+                  <span>{formatDate(timestamp)}</span>
+                </div>
               </div>
-            </li>
-          );
-        })}
-      </ul>
+              <div className="mt-2 flex items-center text-sm">
+                <div className={`${config.color} flex-shrink-0`}>{config.icon}</div>
+                <span className="ml-2 text-gray-700">
+                  {config.label} <span className="font-medium">{branch}</span>
+                </span>
+              </div>
+              <div className="mt-1 text-gray-500 font-mono text-xs">
+                <span>{shortBefore}</span>
+                <LucideReact.ArrowRight size={12} className="inline text-gray-400 mx-1" />
+                <span>{shortAfter}</span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

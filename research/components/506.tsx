@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Custom property defined on an organization
      *
      * @title Organization Custom Property
     */
-    export type custom_property = {
+    export interface custom_property {
         /**
          * The name of the property
         */
@@ -44,7 +45,7 @@ export namespace AutoViewInputSubTypes {
          * Who can edit the values of the property
         */
         values_editable_by?: "org_actors" | "org_and_repo_actors" | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.custom_property[];
 
@@ -52,93 +53,122 @@ export type AutoViewInput = AutoViewInputSubTypes.custom_property[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const typeLabels: Record<AutoViewInputSubTypes.custom_property["value_type"], string> = {
-    string: "Text",
-    single_select: "Single Select",
-    multi_select: "Multi Select",
-    true_false: "True / False",
-  };
-  const sourceLabels: Record<NonNullable<AutoViewInputSubTypes.custom_property["source_type"]>, string> = {
-    organization: "Organization",
-    enterprise: "Enterprise",
-  };
-  const editableByLabels: Record<NonNullable<AutoViewInputSubTypes.custom_property["values_editable_by"]>, string> = {
-    org_actors: "Organization Actors",
-    org_and_repo_actors: "Organization & Repository Actors",
-  };
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {value.map((prop) => (
-        <div key={prop.property_name} className="bg-white rounded-lg shadow p-4 flex flex-col">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
-            {prop.property_name}
-          </h3>
-          {prop.description && (
-            <p className="text-sm text-gray-600 mt-1 line-clamp-3">
-              {prop.description}
-            </p>
-          )}
-          <div className="flex flex-wrap mt-3 gap-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-              {typeLabels[prop.value_type]}
-            </span>
-            <span
-              className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                prop.required
-                  ? "bg-red-100 text-red-800"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {prop.required ? "Required" : "Optional"}
-            </span>
-            {prop.source_type && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                {sourceLabels[prop.source_type]} Level
-              </span>
-            )}
-            {prop.values_editable_by && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
-                {editableByLabels[prop.values_editable_by]}
-              </span>
-            )}
-          </div>
-          {prop.default_value != null && (
-            <div className="mt-3 text-sm">
-              <span className="font-medium text-gray-700">Default:</span>{" "}
-              <span className="text-gray-800">
-                {Array.isArray(prop.default_value)
-                  ? prop.default_value.join(", ")
-                  : prop.default_value || "None"}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {value.map((prop) => {
+        // Derive display values
+        const defaultVal =
+          prop.default_value == null
+            ? "None"
+            : Array.isArray(prop.default_value)
+            ? prop.default_value.join(", ")
+            : prop.default_value;
+        const editableBy = prop.values_editable_by
+          ? prop.values_editable_by === "org_actors"
+            ? "Org Actors"
+            : "Org & Repo Actors"
+          : "Not Specified";
+        const source = prop.source_type
+          ? prop.source_type.charAt(0).toUpperCase() + prop.source_type.slice(1)
+          : "Not Specified";
+
+        return (
+          <div
+            key={prop.property_name}
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
+                {prop.property_name}
+              </h3>
+              <span className="text-xs font-medium uppercase px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                {prop.value_type.replace("_", " ")}
               </span>
             </div>
-          )}
-          {prop.allowed_values && prop.allowed_values.length > 0 && (
-            <div className="mt-3">
-              <span className="text-sm font-medium text-gray-700">
-                Allowed Values:
-              </span>
-              <div className="flex flex-wrap mt-1 gap-2">
-                {prop.allowed_values.slice(0, 5).map((val) => (
-                  <span
-                    key={val}
-                    className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-800"
-                  >
-                    {val}
-                  </span>
-                ))}
-                {prop.allowed_values.length > 5 && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-800">
-                    +{prop.allowed_values.length - 5} more
-                  </span>
+
+            {prop.description && (
+              <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                {prop.description}
+              </p>
+            )}
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-700">
+              <div className="flex items-center gap-1">
+                {prop.required ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={16}
+                    aria-label="Required"
+                  />
+                ) : (
+                  <LucideReact.XCircle
+                    className="text-red-500"
+                    size={16}
+                    aria-label="Optional"
+                  />
                 )}
+                <span>{prop.required ? "Required" : "Optional"}</span>
               </div>
+
+              <div className="flex items-center gap-1">
+                <LucideReact.Info
+                  className="text-gray-400"
+                  size={16}
+                  aria-label="Default Value"
+                />
+                <span>Default: {defaultVal}</span>
+              </div>
+
+              {prop.allowed_values && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Tag
+                    className="text-gray-400"
+                    size={16}
+                    aria-label="Allowed Values"
+                  />
+                  <span>Allowed: {prop.allowed_values.length}</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-1">
+                <LucideReact.Layers
+                  className="text-gray-400"
+                  size={16}
+                  aria-label="Source Type"
+                />
+                <span>Source: {source}</span>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <LucideReact.Edit3
+                  className="text-gray-400"
+                  size={16}
+                  aria-label="Editable By"
+                />
+                <span>Editable: {editableBy}</span>
+              </div>
+
+              {prop.url && (
+                <div className="flex items-center gap-1 w-full">
+                  <LucideReact.Link
+                    className="text-gray-400"
+                    size={16}
+                    aria-label="API URL"
+                  />
+                  <a
+                    href={prop.url}
+                    className="truncate hover:underline text-blue-600 text-sm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {prop.url}
+                  </a>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }

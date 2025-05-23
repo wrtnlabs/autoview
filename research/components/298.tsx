@@ -1,195 +1,143 @@
-import React from "react";
+import { tags } from "typia";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type CANNOT_FIND_DESIGNER_PROFILE = any;
+    export interface CANNOT_FIND_DESIGNER_PROFILE {
+        type: "business";
+        result: false;
+        code: 4018;
+        data: "\uB514\uC790\uC774\uB108\uC758 \uD504\uB85C\uD544\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC5B4\uC694.";
+    }
     export namespace ResponseForm_lt_UserType {
-        export type DetailProfile_gt_ = any;
+        export interface DetailProfile_gt_ {
+            result: true;
+            code: 1000;
+            requestToResponse?: string;
+            data: AutoViewInputSubTypes.UserType.DetailProfile;
+        }
+    }
+    export namespace UserType {
+        export interface DetailProfile {
+            /**
+             * 나 자신의 프로필인 경우에는 true, 아닌 경우에는 false로 나온다.
+            */
+            myself?: boolean;
+            /**
+             * 이름 칼럼으로 사용자의 이름을 의미
+            */
+            name: string;
+            /**
+             * 사용자의 별칭, 설정하지 않는 경우도 있다.
+            */
+            nickname: string;
+            /**
+             * 사용자의 이메일 주소로 로그인 시 필요
+            */
+            email: string;
+            /**
+             * 사용자의 생일을 의미하는 값
+            */
+            birth?: string | null;
+            id: number;
+            /**
+             * 사용자의 프로필 이미지
+            */
+            profileImage?: string | null;
+            /**
+             * 사용자의 커버 이미지
+            */
+            coverImage?: string | null;
+            introduce?: (string & tags.MaxLength<2000>) | null;
+        }
     }
 }
-export type AutoViewInput = any | any;
+export type AutoViewInput = AutoViewInputSubTypes.CANNOT_FIND_DESIGNER_PROFILE | AutoViewInputSubTypes.ResponseForm_lt_UserType.DetailProfile_gt_;
 
 
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // Determine if the response is an error
+  const isError = value.result === false;
 
-  // ISO 8601 detection
-  const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-
-  // Format a single value based on its type
-  function formatValue(val: any): React.ReactNode {
-    if (val == null) {
-      return <span className="text-gray-500 italic">—</span>;
-    }
-    // String: check date or truncate
-    if (typeof val === "string") {
-      if (isoDateRegex.test(val) && !isNaN(Date.parse(val))) {
-        const dt = new Date(val);
-        return (
-          <time dateTime={val} className="text-gray-700">
-            {dt.toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })}{" "}
-            {dt.toLocaleTimeString(undefined, {
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
-          </time>
-        );
-      }
-      const trimmed = val.length > 100 ? val.slice(0, 100) + "…" : val;
-      return (
-        <span
-          className="text-gray-800"
-          title={val.length > 100 ? val : undefined}
-        >
-          {trimmed}
-        </span>
-      );
-    }
-    // Number: localized
-    if (typeof val === "number") {
-      return (
-        <span className="text-gray-800">
-          {val.toLocaleString(undefined)}
-        </span>
-      );
-    }
-    // Boolean: badge
-    if (typeof val === "boolean") {
-      return (
-        <span
-          className={
-            "inline-block px-2 py-1 text-xs font-semibold rounded " +
-            (val
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800")
-          }
-        >
-          {val ? "Yes" : "No"}
-        </span>
-      );
-    }
-    // Array: badges or list
-    if (Array.isArray(val)) {
-      if (val.length === 0) {
-        return <span className="text-gray-500 italic">None</span>;
-      }
-      return (
-        <div className="flex flex-wrap gap-2">
-          {val.map((item, idx) => {
-            const primitive =
-              item == null ||
-              ["string", "number", "boolean"].includes(typeof item);
-            const content = primitive
-              ? String(item)
-              : JSON.stringify(item);
-            return (
-              <span
-                key={idx}
-                className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-                title={!primitive ? content : undefined}
-              >
-                {content.length > 20 ? content.slice(0, 20) + "…" : content}
-              </span>
-            );
-          })}
+  if (isError) {
+    // CANNOT_FIND_DESIGNER_PROFILE case
+    const { code, data: message } = value as AutoViewInputSubTypes.CANNOT_FIND_DESIGNER_PROFILE;
+    return (
+      <div className="max-w-sm mx-auto p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+        <LucideReact.AlertTriangle className="text-red-500" size={24} />
+        <div>
+          <h3 className="text-red-700 font-semibold">Error {code}</h3>
+          <p className="text-red-600 text-sm">{message}</p>
         </div>
-      );
-    }
-    // Object: nested JSON (truncated)
-    if (typeof val === "object") {
-      const json = JSON.stringify(val, null, 2);
-      const short = json.length > 200 ? json.slice(0, 200) + "\n…" : json;
-      return (
-        <pre
-          className="bg-gray-50 text-xs text-gray-800 p-2 rounded overflow-auto"
-          title={json.length > 200 ? json : undefined}
-        >
-          {short}
-        </pre>
-      );
-    }
-    // Fallback
-    return <span className="text-gray-800">{String(val)}</span>;
-  }
-
-  // Extract entries for object values, filtering out internal or private keys
-  const entries: [string, any][] =
-    value && typeof value === "object" && !Array.isArray(value)
-      ? Object.entries(value).filter(
-          ([key]) => !key.startsWith("_") && !/internal/i.test(key)
-        )
-      : [];
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
-  if (value == null) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No data available.
       </div>
     );
   }
 
-  // If the root is an array, display as list
-  if (Array.isArray(value)) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-800 mb-2">
-          List ({value.length} items)
-        </h2>
-        <ul className="divide-y divide-gray-200">
-          {value.map((item, idx) => (
-            <li
-              key={idx}
-              className="py-2 flex items-start space-x-2 text-gray-800"
-            >
-              <span className="font-mono text-sm text-gray-500">
-                {idx + 1}.
-              </span>
-              <div className="flex-1">{formatValue(item)}</div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    );
-  }
+  // Successful DetailProfile case
+  const profile = (value as AutoViewInputSubTypes.ResponseForm_lt_UserType.DetailProfile_gt_).data;
 
-  // If the root is a primitive, just format it
-  if (entries.length === 0) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md">
-        {formatValue(value)}
-      </div>
-    );
-  }
+  // Derived/fallback URLs
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    profile.name
+  )}&background=0D8ABC&color=fff`;
+  const coverFallback = `https://placehold.co/600x200/e2e8f0/1e293b?text=Cover`;
 
-  // Otherwise, render a key-value list
+  // Format birth date if available
+  const birthDate = profile.birth ? new Date(profile.birth).toLocaleDateString() : null;
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <dl className="space-y-3">
-        {entries.map(([key, val]) => {
-          // Convert camelCase or snake_case to Title Case
-          const label = key
-            .replace(/[_\-]/g, " ")
-            .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-            .replace(/\b\w/g, (c) => c.toUpperCase());
-          return (
-            <div
-              key={key}
-              className="flex flex-col sm:flex-row sm:justify-between sm:items-start"
-            >
-              <dt className="text-gray-600 font-medium">{label}</dt>
-              <dd className="mt-1 sm:mt-0 sm:ml-4 flex-1">
-                {formatValue(val)}
-              </dd>
-            </div>
-          );
-        })}
-      </dl>
+    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Cover image (hidden on small screens) */}
+      <div className="hidden md:block w-full h-32 bg-gray-200">
+        <img
+          src={profile.coverImage || coverFallback}
+          alt="Cover"
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = coverFallback;
+          }}
+        />
+      </div>
+
+      {/* Avatar and basic info */}
+      <div className="p-4 flex flex-col items-center">
+        <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
+          <img
+            src={profile.profileImage || avatarFallback}
+            alt="Avatar"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = avatarFallback;
+            }}
+          />
+        </div>
+        <h2 className="mt-2 text-xl font-semibold text-gray-800">{profile.name}</h2>
+        {profile.nickname && <p className="text-sm text-gray-500">@{profile.nickname}</p>}
+        {profile.myself && (
+          <span className="mt-1 inline-flex items-center text-sm text-green-600">
+            <LucideReact.CheckCircle size={16} className="mr-1" />
+            You
+          </span>
+        )}
+      </div>
+
+      {/* Contact & additional details */}
+      <div className="px-4 pb-4 space-y-2">
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Mail size={16} />
+          <span className="ml-1 truncate">{profile.email}</span>
+        </div>
+        {birthDate && (
+          <div className="flex items-center text-gray-600 text-sm">
+            <LucideReact.Calendar size={16} />
+            <span className="ml-1">{birthDate}</span>
+          </div>
+        )}
+        {profile.introduce && (
+          <p className="text-sm text-gray-700 line-clamp-3">{profile.introduce}</p>
+        )}
+      </div>
     </div>
   );
 }

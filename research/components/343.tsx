@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Base Gist
      *
      * @title Base Gist
     */
-    export type base_gist = {
+    export interface base_gist {
         url: string & tags.Format<"uri">;
         forks_url: string & tags.Format<"uri">;
         commits_url: string & tags.Format<"uri">;
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
         truncated?: boolean;
         forks?: any[];
         history?: any[];
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -75,7 +76,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -98,7 +99,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.base_gist[];
 
@@ -106,72 +107,112 @@ export type AutoViewInput = AutoViewInputSubTypes.base_gist[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string): string => {
-    const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  // Helper: format ISO date to "MMM dd, yyyy"
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
-  };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Visual structure: a responsive grid of gist cards
   return (
-    <div className="space-y-4">
+    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {value.map((gist) => {
-        // Determine the gist owner (fallback to user)
-        const owner = gist.owner ?? gist.user;
-        const ownerName = owner?.login ?? "Unknown";
-        const ownerAvatar = owner?.avatar_url;
+        // Choose display user: owner if present, else user
+        const user = gist.owner ?? gist.user;
+        const displayName = user
+          ? user.name?.trim() || user.login
+          : 'Unknown User';
+        const avatarUrl = user?.avatar_url;
 
-        // Files and forks counts
-        const fileCount = Object.keys(gist.files).length;
-        const forkCount = Array.isArray(gist.forks) ? gist.forks.length : 0;
-
-        // Description handling
-        const rawDesc = gist.description?.trim() || "No description";
-        const description =
-          rawDesc.length > 120 ? rawDesc.slice(0, 120) + "…" : rawDesc;
-
-        // Formatted creation date
-        const createdAt = formatDate(gist.created_at);
+        // File summary
+        const fileNames = Object.keys(gist.files);
+        const fileCount = fileNames.length;
 
         return (
           <div
             key={gist.id}
-            className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:space-x-4"
+            className="flex flex-col justify-between p-4 bg-white rounded-lg shadow hover:shadow-lg transition"
           >
-            {ownerAvatar && (
-              <img
-                src={ownerAvatar}
-                alt={`${ownerName}'s avatar`}
-                className="w-12 h-12 rounded-full object-cover mb-3 sm:mb-0"
-              />
-            )}
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-gray-900 font-semibold text-lg truncate">
-                  {ownerName}
-                </h3>
-                <span
-                  className={
-                    "text-sm font-medium " +
-                    (gist.public ? "text-green-600" : "text-red-600")
-                  }
-                >
-                  {gist.public ? "Public" : "Private"}
+            {/* Header: Avatar and Username */}
+            <div className="flex items-center mb-3">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt={displayName}
+                  onError={({ currentTarget }) => {
+                    currentTarget.onerror = null;
+                    currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      displayName,
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                  className="w-10 h-10 rounded-full object-cover mr-3"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                  <LucideReact.User className="text-gray-400" size={20} />
+                </div>
+              )}
+              <div className="text-lg font-semibold text-gray-800 truncate">
+                {displayName}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="mb-4">
+              <p className="text-gray-900 font-medium line-clamp-2">
+                {gist.description ?? 'No description'}
+              </p>
+            </div>
+
+            {/* Metadata: dates and visibility */}
+            <div className="flex flex-wrap items-center text-sm text-gray-500 gap-3 mb-4">
+              <div className="flex items-center">
+                <LucideReact.Calendar className="mr-1" size={16} />
+                <span title={gist.created_at}>
+                  {formatDate(gist.created_at)}
                 </span>
               </div>
-              <p className="text-gray-700 text-sm mb-3 line-clamp-2">
-                {description}
-              </p>
-              <div className="flex flex-wrap items-center text-gray-500 text-xs space-x-4">
-                <span>Files: {fileCount}</span>
-                <span>Comments: {gist.comments}</span>
-                <span>Forks: {forkCount}</span>
-                <span>Created: {createdAt}</span>
+              <div className="flex items-center">
+                <LucideReact.RefreshCcw className="mr-1" size={16} />
+                <span title={gist.updated_at}>
+                  {formatDate(gist.updated_at)}
+                </span>
               </div>
+              <div className="flex items-center">
+                {gist.public ? (
+                  <LucideReact.Unlock
+                    className="mr-1 text-green-500"
+                    size={16}
+                  />
+                ) : (
+                  <LucideReact.Lock className="mr-1 text-red-500" size={16} />
+                )}
+                <span>{gist.public ? 'Public' : 'Private'}</span>
+              </div>
+            </div>
+
+            {/* File count and comments */}
+            <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+              <div className="flex items-center">
+                <LucideReact.FileText className="mr-1" size={16} />
+                <span>
+                  {fileCount} file{fileCount !== 1 ? 's' : ''}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.MessageCircle className="mr-1" size={16} />
+                <span>
+                  {gist.comments} comment{gist.comments !== 1 ? 's' : ''}
+                </span>
+              </div>
+            </div>
+
+            {/* URL (non-clickable) */}
+            <div className="mt-auto text-xs text-gray-400 flex items-center">
+              <LucideReact.Link className="mr-1" size={14} />
+              <span className="truncate">{gist.html_url}</span>
             </div>
           </div>
         );

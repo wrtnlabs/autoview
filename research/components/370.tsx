@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Thread Subscription
      *
      * @title Thread Subscription
     */
-    export type thread_subscription = {
+    export interface thread_subscription {
         subscribed: boolean;
         ignored: boolean;
         reason: string | null;
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
         url: string & tags.Format<"uri">;
         thread_url?: string & tags.Format<"uri">;
         repository_url?: string & tags.Format<"uri">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.thread_subscription;
 
@@ -23,88 +24,95 @@ export type AutoViewInput = AutoViewInputSubTypes.thread_subscription;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDate =
-    value.created_at
-      ? new Date(value.created_at).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "numeric",
-          minute: "numeric",
-        })
-      : "N/A";
+  const status = value.ignored
+    ? { label: "Ignored", Icon: LucideReact.EyeOff, color: "text-amber-500" }
+    : value.subscribed
+    ? { label: "Subscribed", Icon: LucideReact.CheckCircle, color: "text-green-500" }
+    : { label: "Unsubscribed", Icon: LucideReact.XCircle, color: "text-red-500" };
 
-  const statusBadge = value.subscribed ? (
-    <span className="bg-green-100 text-green-800 px-2 py-0.5 rounded-full text-sm">
-      Subscribed
-    </span>
-  ) : (
-    <span className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-sm">
-      Unsubscribed
-    </span>
-  );
+  const { label: statusLabel, Icon: StatusIcon, color: statusColor } = status;
 
-  const ignoredBadge = value.ignored ? (
-    <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-sm">
-      Ignored
-    </span>
-  ) : null;
+  const formattedDate = value.created_at
+    ? new Date(value.created_at).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {/* Header with status badges */}
-      <div className="flex flex-wrap items-center space-x-2 mb-4">
-        {statusBadge}
-        {ignoredBadge}
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow border border-gray-200 space-y-4 text-gray-800">
+      {/* Status */}
+      <div className="flex items-center space-x-2">
+        <StatusIcon className={`w-5 h-5 ${statusColor}`} />
+        <span className="font-semibold">{statusLabel}</span>
       </div>
 
-      {/* Details grid */}
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-        {/* Created At */}
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Created At</dt>
-          <dd className="mt-1 text-sm text-gray-900">{formattedDate}</dd>
+      {/* Created At */}
+      {formattedDate && (
+        <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <LucideReact.Calendar className="w-4 h-4" />
+          <time dateTime={value.created_at ?? undefined}>{formattedDate}</time>
         </div>
+      )}
 
-        {/* Reason, if provided */}
-        {value.reason !== null && value.reason !== "" && (
-          <div className="sm:col-span-2">
-            <dt className="text-sm font-medium text-gray-500">Reason</dt>
-            <dd className="mt-1 text-sm text-gray-900 line-clamp-2 break-words">
-              {value.reason}
-            </dd>
-          </div>
-        )}
+      {/* Reason */}
+      {value.reason && (
+        <div className="flex items-start space-x-2 bg-yellow-50 p-2 rounded text-yellow-900 text-sm">
+          <LucideReact.AlertTriangle className="w-4 h-4 mt-0.5" />
+          <p className="line-clamp-3">{value.reason}</p>
+        </div>
+      )}
 
+      {/* Links */}
+      <div className="space-y-2">
         {/* Subscription URL */}
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Subscription URL</dt>
-          <dd className="mt-1 text-sm text-blue-600 font-mono break-all">
-            {value.url}
-          </dd>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Link className="w-4 h-4 text-gray-400" />
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline truncate"
+            title={value.url}
+          >
+            Subscription
+          </a>
         </div>
-
-        {/* Thread URL, if available */}
+        {/* Thread URL */}
         {value.thread_url && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Thread URL</dt>
-            <dd className="mt-1 text-sm text-blue-600 font-mono break-all">
-              {value.thread_url}
-            </dd>
+          <div className="flex items-center space-x-2">
+            <LucideReact.MessageCircle className="w-4 h-4 text-gray-400" />
+            <a
+              href={value.thread_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline truncate"
+              title={value.thread_url}
+            >
+              Thread
+            </a>
           </div>
         )}
-
-        {/* Repository URL, if available */}
+        {/* Repository URL */}
         {value.repository_url && (
-          <div>
-            <dt className="text-sm font-medium text-gray-500">Repository URL</dt>
-            <dd className="mt-1 text-sm text-blue-600 font-mono break-all">
-              {value.repository_url}
-            </dd>
+          <div className="flex items-center space-x-2">
+            <LucideReact.GitBranch className="w-4 h-4 text-gray-400" />
+            <a
+              href={value.repository_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline truncate"
+              title={value.repository_url}
+            >
+              Repository
+            </a>
           </div>
         )}
-      </dl>
+      </div>
     </div>
   );
 }

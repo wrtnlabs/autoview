@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The public key used for setting Codespaces secrets.
      *
      * @title CodespacesPublicKey
     */
-    export type codespaces_public_key = {
+    export interface codespaces_public_key {
         /**
          * The identifier for the key.
         */
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
         url?: string;
         title?: string;
         created_at?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.codespaces_public_key;
 
@@ -28,7 +29,8 @@ export type AutoViewInput = AutoViewInputSubTypes.codespaces_public_key;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const displayTitle = value.title ?? "Codespaces Public Key";
+  const title = value.title ?? "Codespaces Public Key";
+  const keyId = value.key_id;
   const formattedDate = value.created_at
     ? new Date(value.created_at).toLocaleString(undefined, {
         year: "numeric",
@@ -37,41 +39,35 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
         hour: "2-digit",
         minute: "2-digit",
       })
-    : undefined;
-  const truncatedKey =
-    value.key.length > 40
-      ? `${value.key.slice(0, 20)}…${value.key.slice(-20)}`
-      : value.key;
+    : null;
+  const truncateKey = (raw: string): string => {
+    const max = 20;
+    if (raw.length <= max * 2 + 3) return raw;
+    return `${raw.slice(0, max)}...${raw.slice(-max)}`;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md max-w-md w-full mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">{displayTitle}</h2>
-        {formattedDate && (
-          <time className="text-sm text-gray-500 mt-1 sm:mt-0">
-            {formattedDate}
-          </time>
-        )}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full mx-auto">
+      <div className="flex flex-col space-y-1">
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <p className="text-sm text-gray-500 truncate">ID: {keyId}</p>
       </div>
-      <dl className="space-y-3 text-gray-700">
-        <div className="flex justify-between">
-          <dt className="font-medium">Key ID</dt>
-          <dd className="ml-2 truncate">{value.key_id}</dd>
+
+      <pre className="mt-4 bg-gray-100 p-2 rounded-md overflow-x-auto text-xs font-mono text-gray-800">
+        {truncateKey(value.key)}
+      </pre>
+
+      {formattedDate && (
+        <div className="mt-3 flex items-center text-sm text-gray-600">
+          <LucideReact.Calendar
+            size={16}
+            className="mr-1 text-gray-500"
+            aria-hidden="true"
+          />
+          <span>{formattedDate}</span>
         </div>
-        {value.url && (
-          <div className="flex justify-between">
-            <dt className="font-medium">URL</dt>
-            <dd className="ml-2 truncate">{value.url}</dd>
-          </div>
-        )}
-        <div>
-          <dt className="font-medium">Public Key</dt>
-          <dd className="mt-1 font-mono text-sm break-all truncate">
-            {truncatedKey}
-          </dd>
-        </div>
-      </dl>
+      )}
     </div>
   );
 }

@@ -1,7 +1,9 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiProjectsColumnsMoves {
-        export type PostResponse = {};
+        export interface PostResponse {
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiProjectsColumnsMoves.PostResponse;
@@ -10,24 +12,23 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiProjectsColumnsMoves.PostR
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Since AutoViewInput is an empty object, we simply check for the presence of any keys.
+  // Determine if the input object has any keys to display
   const hasData = value && Object.keys(value).length > 0;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    We render a centered card with a message indicating whether data is available.
+  // If there's no meaningful data, render an empty state placeholder
+  if (!hasData) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span className="text-sm">No data available</span>
+      </div>
+    );
+  }
+
+  // Fallback: Render the raw JSON in a code block for any unexpected data
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      {hasData ? (
-        <div className="text-gray-700 text-center">
-          {/* In a future schema update, render structured data here */}
-          Data is available but no displayable fields are defined.
-        </div>
-      ) : (
-        <div className="text-gray-500 italic text-center">
-          No data to display
-        </div>
-      )}
-    </div>
+    <pre className="p-4 bg-gray-50 rounded-lg text-sm text-gray-700 overflow-auto">
+      {JSON.stringify(value, null, 2)}
+    </pre>
   );
 }

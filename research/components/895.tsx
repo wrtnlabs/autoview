@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Content Traffic
      *
      * @title Content Traffic
     */
-    export type content_traffic = {
+    export interface content_traffic {
         path: string;
         title: string;
         count: number & tags.Type<"int32">;
         uniques: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.content_traffic[];
 
@@ -19,51 +20,76 @@ export type AutoViewInput = AutoViewInputSubTypes.content_traffic[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Data aggregation
   const totalCount = value.reduce((sum, item) => sum + item.count, 0);
   const totalUniques = value.reduce((sum, item) => sum + item.uniques, 0);
 
-  function formatNumber(n: number): string {
-    if (n >= 1e9) return (n / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
-    if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.0$/, "") + "K";
-    return n.toString();
+  // 2. Empty-state handling
+  if (value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mb-2" />
+        <span className="text-sm">No traffic data available</span>
+      </div>
+    );
   }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  // 3. Sort items by descending view count
+  const sorted = [...value].sort((a, b) => b.count - a.count);
+
+  // 4. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <header className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Content Traffic Summary</h2>
-        <div className="mt-2 flex flex-wrap gap-x-4 text-sm text-gray-600">
-          <div>
-            <span className="font-medium text-gray-900">{formatNumber(totalCount)}</span> views
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="flex items-center text-lg font-semibold text-gray-800">
+          <LucideReact.BarChart2
+            size={20}
+            strokeWidth={1.5}
+            className="mr-2 text-gray-500"
+          />
+          Content Traffic
+        </h2>
+        <div className="flex space-x-4 text-sm text-gray-600">
+          <div className="flex items-center">
+            <LucideReact.Eye size={16} className="mr-1 text-gray-500" />
+            <span>{totalCount.toLocaleString()}</span>
           </div>
-          <div>
-            <span className="font-medium text-gray-900">{formatNumber(totalUniques)}</span> uniques
+          <div className="flex items-center">
+            <LucideReact.Users size={16} className="mr-1 text-gray-500" />
+            <span>{totalUniques.toLocaleString()}</span>
           </div>
         </div>
-      </header>
+      </div>
+
       <ul className="divide-y divide-gray-200">
-        {value.map((item, idx) => (
-          <li key={idx} className="py-3">
-            <div className="flex flex-col sm:flex-row sm:justify-between">
+        {sorted.map((item) => {
+          const percent =
+            totalCount > 0 ? Math.round((item.count / totalCount) * 100) : 0;
+          return (
+            <li
+              key={item.path}
+              className="py-3 flex flex-col md:flex-row md:items-center md:justify-between"
+            >
               <div className="flex-1 min-w-0">
-                <p className="truncate text-blue-600 font-medium">{item.title}</p>
+                <p className="truncate text-sm font-medium text-gray-900">
+                  {item.title}
+                </p>
                 <p className="truncate text-xs text-gray-500">{item.path}</p>
               </div>
-              <div className="mt-2 sm:mt-0 flex space-x-4 text-sm text-gray-700">
-                <span>
-                  <span className="font-semibold">{formatNumber(item.count)}</span> views
-                </span>
-                <span>
-                  <span className="font-semibold">{formatNumber(item.uniques)}</span> uniques
-                </span>
+              <div className="mt-2 md:mt-0 flex items-center space-x-4 text-sm text-gray-600">
+                <div className="flex items-center">
+                  <LucideReact.Eye size={16} className="mr-1 text-gray-500" />
+                  <span>{item.count.toLocaleString()}</span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Users size={16} className="mr-1 text-gray-500" />
+                  <span>{item.uniques.toLocaleString()}</span>
+                </div>
+                <div className="text-xs text-gray-500">{percent}%</div>
               </div>
-            </div>
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

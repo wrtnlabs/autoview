@@ -4,5 +4,5 @@ import Component from "../components/26";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"id":"snapshot_00123_test","created_at":"2025-06-01T09:15:30Z","format":"html","body":"<p>Thank you for your inquiry regarding our summer sale. Please review the attached files for details. This is a <strong>sample</strong> comment body for UI testing purposes.</p>","files":[{"name":"sample-discount","extension":"pdf","url":"https://www.example.com/files/sample-discount-test.pdf"},{"name":"README","extension":null,"url":"https://www.example.com/files/README-sample"}]};
+  return {"id":"snapshot_001_test","created_at":"2025-05-19T14:30:00Z","format":"md","body":"## Sample Inquiry Comment\n\nThis is a *mock* customer inquiry snapshot for UI testing. It demonstrates markdown formatting and ensures no real data is exposed. Please ignore.","files":[{"name":"invoice_sample","extension":"pdf","url":"https://www.example.com/files/invoice_sample.pdf"},{"name":"screenshot_order","extension":"png","url":"https://www.example.com/files/screenshot_order.png"},{"name":"","extension":null,"url":"https://www.example.com/files/.gitignore"}]};
 }

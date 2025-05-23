@@ -1,14 +1,15 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Social media account
      *
      * @title Social account
     */
-    export type social_account = {
+    export interface social_account {
         provider: string;
         url: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.social_account[];
 
@@ -17,48 +18,42 @@ export type AutoViewInput = AutoViewInputSubTypes.social_account[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const accounts = Array.isArray(value) ? value : [];
-
-  // Helper to format provider name (capitalize) and display URL without protocol
-  const formatProvider = (provider: string) =>
-    provider.charAt(0).toUpperCase() + provider.slice(1);
-  const formatUrl = (url: string) =>
-    url.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+  const accounts = value;
+  const totalAccounts = accounts.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (accounts.length === 0) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No social accounts available.
-      </div>
-    );
-  }
-
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <ul className="divide-y divide-gray-200">
-        {accounts.map((account, idx) => {
-          const displayProvider = formatProvider(account.provider);
-          const displayUrl = formatUrl(account.url);
-          const avatarInitial = account.provider.charAt(0).toUpperCase();
+    <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Social Accounts</h2>
+        <span className="text-sm text-gray-500">
+          {totalAccounts} {totalAccounts === 1 ? "account" : "accounts"}
+        </span>
+      </div>
 
-          return (
-            <li key={idx} className="flex items-start space-x-4 py-3">
-              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 uppercase font-medium">
-                {avatarInitial}
-              </div>
+      {totalAccounts === 0 ? (
+        <div className="flex flex-col items-center text-gray-400 py-8">
+          <LucideReact.AlertCircle size={32} className="mb-2" />
+          <span>No social accounts available</span>
+        </div>
+      ) : (
+        <ul className="divide-y divide-gray-200">
+          {accounts.map((account, idx) => (
+            <li key={idx} className="py-3 flex items-center space-x-3">
+              <LucideReact.Link size={20} className="text-blue-500 flex-shrink-0" />
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-gray-900">
-                  {displayProvider}
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {account.provider}
                 </p>
-                <p className="mt-1 text-sm text-gray-500 truncate break-all">
-                  {displayUrl}
+                <p className="text-sm text-gray-500 truncate">
+                  {account.url}
                 </p>
               </div>
             </li>
-          );
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

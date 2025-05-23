@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration[];
 
@@ -144,91 +145,137 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const configs: AutoViewInput = value || [];
+  const hasData = Array.isArray(value) && value.length > 0;
 
   const formatDate = (dateStr?: string): string =>
     dateStr
       ? new Date(dateStr).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
+          year: "numeric",
+          month: "short",
+          day: "numeric",
         })
-      : '—';
+      : "—";
 
-  const featureList: { key: keyof AutoViewInputSubTypes.code_security_configuration; label: string }[] = [
-    { key: 'advanced_security', label: 'Advanced Security' },
-    { key: 'dependency_graph', label: 'Dependency Graph' },
-    { key: 'dependabot_alerts', label: 'Dependabot Alerts' },
-    { key: 'dependabot_security_updates', label: 'Security Updates' },
-    { key: 'code_scanning_default_setup', label: 'Code Scanning' },
-    { key: 'secret_scanning', label: 'Secret Scanning' },
-  ];
+  const renderStatusIcon = (status?: "enabled" | "disabled" | "not_set") => {
+    switch (status) {
+      case "enabled":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "disabled":
+        return <LucideReact.XCircle className="text-red-500" size={16} />;
+      case "not_set":
+        return <LucideReact.Clock className="text-amber-500" size={16} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400" size={16} />;
+    }
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (configs.length === 0) {
+  if (!hasData) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No configurations available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No configurations available</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {configs.map((cfg, idx) => {
-        const keyId = cfg.id != null ? cfg.id : idx;
-        return (
-          <div key={keyId} className="p-4 bg-white rounded-lg shadow-md">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800 truncate">
-                {cfg.name || 'Unnamed Configuration'}
-              </h3>
+      {value.map((config, idx) => (
+        <div
+          key={config.id ?? idx}
+          className="p-4 bg-white rounded-lg shadow-sm border border-gray-200"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-800 truncate">
+              {config.name ?? "Unnamed Configuration"}
+            </h2>
+            {config.target_type && (
               <span
-                className={`px-2 py-1 text-xs font-medium rounded-full ${
-                  cfg.enforcement === 'enforced'
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}
+                className={
+                  "px-2 py-0.5 text-xs font-medium uppercase rounded " +
+                  {
+                    global: "bg-blue-100 text-blue-800",
+                    organization: "bg-indigo-100 text-indigo-800",
+                    enterprise: "bg-purple-100 text-purple-800",
+                  }[config.target_type]
+                }
               >
-                {cfg.enforcement === 'enforced' ? 'Enforced' : 'Unenforced'}
+                {config.target_type}
               </span>
-            </div>
-            <div className="mt-1 text-sm text-gray-500">
-              Type: {cfg.target_type || '—'} &middot; Updated:{' '}
-              {formatDate(cfg.updated_at)}
-            </div>
-            {cfg.description && (
-              <p className="mt-2 text-gray-600 text-sm line-clamp-2">
-                {cfg.description}
-              </p>
             )}
-            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {featureList.map(({ key, label }) => {
-                const val = cfg[key];
-                const status =
-                  val === 'enabled'
-                    ? 'Enabled'
-                    : val === 'disabled'
-                    ? 'Disabled'
-                    : 'Not set';
-                const isEnabled = val === 'enabled';
-                return (
-                  <span
-                    key={key}
-                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${
-                      isEnabled
-                        ? 'bg-green-50 text-green-700'
-                        : 'bg-gray-50 text-gray-700'
-                    }`}
-                  >
-                    {label}: {status}
-                  </span>
-                );
-              })}
+          </div>
+
+          {/* Description */}
+          {config.description && (
+            <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+              {config.description}
+            </p>
+          )}
+
+          {/* Feature Status Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4 text-sm text-gray-700">
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.advanced_security)}
+              <span>Advanced Security</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.dependency_graph)}
+              <span>Dependency Graph</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.dependency_graph_autosubmit_action)}
+              <span>Auto-Submit</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.dependabot_alerts)}
+              <span>Dependabot Alerts</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.dependabot_security_updates)}
+              <span>Security Updates</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.code_scanning_default_setup)}
+              <span>Code Scanning</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.secret_scanning)}
+              <span>Secret Scanning</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {renderStatusIcon(config.secret_scanning_push_protection)}
+              <span>Push Protection</span>
+            </div>
+            {config.enforcement && (
+              <div className="flex items-center gap-1">
+                {config.enforcement === "enforced" ? (
+                  <LucideReact.Lock className="text-green-500" size={16} />
+                ) : (
+                  <LucideReact.Unlock className="text-gray-500" size={16} />
+                )}
+                <span>Enforcement</span>
+              </div>
+            )}
+          </div>
+
+          {/* Footer: Dates */}
+          <div className="flex flex-col sm:flex-row sm:justify-between mt-4 text-xs text-gray-500">
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar size={14} />
+              <span>Created: {formatDate(config.created_at)}</span>
+            </div>
+            <div className="flex items-center gap-1 mt-1 sm:mt-0">
+              <LucideReact.Calendar size={14} />
+              <span>Updated: {formatDate(config.updated_at)}</span>
             </div>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
+
+  // 3. Return the React element.
+  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

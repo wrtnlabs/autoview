@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
@@ -37,54 +38,73 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and derived constants
-  const users = Array.isArray(value) ? value : [];
+  // Derived constant: total number of users
+  const userCount = value.length;
 
-  // 2. Handle empty state
-  if (users.length === 0) {
-    return (
-      <p className="p-4 text-center text-gray-500">
-        No users to display.
-      </p>
-    );
-  }
-
-  // 3. Compose the visual structure using JSX and Tailwind CSS
+  // Return the composed visual structure
   return (
-    <div className="space-y-4">
-      {users.map((user) => {
-        const displayName = user.name?.trim() || user.login;
-        return (
-          <div
-            key={user.id}
-            className="flex items-center p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-          >
-            <img
-              src={user.avatar_url}
-              alt={`${displayName} avatar`}
-              className="w-12 h-12 rounded-full mr-4 flex-shrink-0"
-            />
-            <div className="flex flex-col flex-grow min-w-0">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 truncate">
-                  {displayName}
-                </h2>
-                {user.site_admin && (
-                  <span className="ml-2 px-2 py-0.5 text-xs font-medium text-white bg-red-600 rounded">
-                    Admin
-                  </span>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-4">
+        <LucideReact.Users className="text-gray-600" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          GitHub Users ({userCount})
+        </h2>
+      </div>
+
+      {userCount === 0 ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2">No users available</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {value.map((user: AutoViewInputSubTypes.simple_user) => (
+            <div
+              key={user.id}
+              className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow-sm"
+            >
+              <img
+                src={user.avatar_url}
+                alt={user.login}
+                onError={(e) => {
+                  const img = e.currentTarget;
+                  img.onerror = null;
+                  img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    user.login,
+                  )}&background=0D8ABC&color=fff`;
+                }}
+                className="w-24 h-24 rounded-full object-cover mb-3"
+              />
+
+              <div className="text-center w-full">
+                <div className="flex items-center justify-center text-gray-900 font-medium truncate">
+                  <span>{user.login}</span>
+                  {user.site_admin && (
+                    <LucideReact.ShieldCheck
+                      className="ml-1 text-blue-500"
+                      size={16}
+                      aria-label="Site Admin"
+                    />
+                  )}
+                </div>
+
+                {user.name && (
+                  <div className="mt-1 text-sm text-gray-600 truncate">
+                    {user.name}
+                  </div>
+                )}
+
+                {user.email && (
+                  <div className="flex items-center mt-2 text-sm text-gray-500 truncate">
+                    <LucideReact.Mail size={16} aria-label="Email" />
+                    <span className="ml-1">{user.email}</span>
+                  </div>
                 )}
               </div>
-              <p className="text-sm text-gray-600 truncate">{user.login}</p>
-              {user.email && (
-                <p className="text-sm text-blue-600 truncate">
-                  {user.email}
-                </p>
-              )}
             </div>
-          </div>
-        );
-      })}
+          ))}
+        </div>
+      )}
     </div>
   );
 }

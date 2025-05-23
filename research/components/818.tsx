@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Page Build
      *
      * @title Page Build
     */
-    export type page_build = {
+    export interface page_build {
         url: string & tags.Format<"uri">;
         status: string;
         error: {
@@ -17,7 +18,7 @@ export namespace AutoViewInputSubTypes {
         duration: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -55,88 +56,84 @@ export type AutoViewInput = AutoViewInputSubTypes.page_build;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { status, commit, duration, created_at, error, pusher } = value;
+  const statusKey = value.status.toLowerCase();
+  let StatusIcon = LucideReact.Circle;
+  let statusColor = "text-gray-500";
+  if (statusKey.includes("success") || statusKey.includes("passed") || statusKey.includes("complete")) {
+    StatusIcon = LucideReact.CheckCircle;
+    statusColor = "text-green-500";
+  } else if (statusKey.includes("fail") || statusKey.includes("error")) {
+    StatusIcon = LucideReact.AlertTriangle;
+    statusColor = "text-red-500";
+  } else if (statusKey.includes("pending") || statusKey.includes("in_progress") || statusKey.includes("queued")) {
+    StatusIcon = LucideReact.Clock;
+    statusColor = "text-amber-500";
+  }
 
-  // Format created date
-  const formattedDate = new Date(created_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-  });
+  const shortCommit = value.commit.slice(0, 7);
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const updatedAt = new Date(value.updated_at).toLocaleString();
 
-  // Format duration into minutes and seconds
-  const minutes = Math.floor(duration / 60);
-  const seconds = duration % 60;
-  const formattedDuration = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  const totalSeconds = value.duration;
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  const formattedDuration = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 
-  // Shorten commit hash
-  const shortCommit = commit.slice(0, 7);
-
-  // Capitalize status text
-  const statusText = status.charAt(0).toUpperCase() + status.slice(1);
-
-  // Determine badge colors based on status
-  const statusStyles = (() => {
-    const lower = status.toLowerCase();
-    if (lower.includes('success') || lower.includes('passed'))
-      return 'bg-green-100 text-green-800 ring-green-500';
-    if (lower.includes('fail') || lower.includes('error'))
-      return 'bg-red-100 text-red-800 ring-red-500';
-    return 'bg-yellow-100 text-yellow-800 ring-yellow-500';
-  })();
+  const pusher = value.pusher;
+  const pusherName = pusher ? (pusher.name ?? pusher.login) : "Unknown";
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    pusherName
+  )}&background=0D8ABC&color=fff`;
+  const avatarSrc = pusher?.avatar_url || avatarFallback;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md ring-1 ring-gray-200 space-y-4">
-      {/* Header: Commit & Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-        <div className="text-lg font-semibold text-gray-900 truncate">
-          Build {shortCommit}
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <StatusIcon size={20} className={statusColor} aria-label={value.status} />
+          <span className="font-semibold text-gray-700 truncate">{shortCommit}</span>
         </div>
-        <span
-          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ring-1 ${statusStyles}`}
-        >
-          {statusText}
-        </span>
+        <span className="text-sm text-gray-500">{createdAt}</span>
       </div>
 
-      {/* Error Message (if any) */}
-      {error.message && (
-        <div className="text-sm text-red-600">
-          Error: {error.message}
+      {value.error?.message && (
+        <div className="flex items-center gap-1 bg-red-50 text-red-700 text-sm p-2 rounded">
+          <LucideReact.AlertTriangle size={16} />
+          <span>{value.error.message}</span>
         </div>
       )}
 
-      {/* Build Info: Duration & Created Date */}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-        <div>
-          <span className="font-medium text-gray-800">Duration:</span>{' '}
-          {formattedDuration}
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+          <img
+            src={avatarSrc}
+            alt={pusherName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = avatarFallback;
+            }}
+          />
         </div>
         <div>
-          <span className="font-medium text-gray-800">Created:</span>{' '}
-          {formattedDate}
+          <div className="text-sm font-medium text-gray-800">{pusherName}</div>
+          <div className="text-xs text-gray-500">Pusher</div>
         </div>
       </div>
 
-      {/* Pusher Information */}
-      <div className="flex items-center space-x-3">
-        {pusher ? (
-          <>
-            <img
-              src={pusher.avatar_url}
-              alt={pusher.login}
-              className="w-8 h-8 rounded-full object-cover"
-            />
-            <div className="text-sm text-gray-700 truncate">
-              {pusher.name ?? pusher.login}
-            </div>
-          </>
-        ) : (
-          <div className="text-sm text-gray-700">Unknown Pusher</div>
-        )}
+      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Clock size={16} className="text-gray-400" />
+          <span>{formattedDuration}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>{updatedAt}</span>
+        </div>
+        <div className="col-span-2 flex items-center gap-1 break-all">
+          <LucideReact.Link size={16} className="text-gray-400" />
+          <span>{value.url}</span>
+        </div>
       </div>
     </div>
   );

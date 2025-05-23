@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsMembersCodespaces {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             codespaces: AutoViewInputSubTypes.codespace[];
-        };
+        }
     }
     /**
      * A codespace.
      *
      * @title Codespace
     */
-    export type codespace = {
+    export interface codespace {
         id: number & tags.Type<"int32">;
         /**
          * Automatically generated name of this codespace.
@@ -140,13 +141,13 @@ export namespace AutoViewInputSubTypes {
          * The text to display to a user when a codespace has been stopped for a potentially actionable reason.
         */
         last_known_stop_notice?: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -169,13 +170,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -278,19 +279,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -363,119 +364,92 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsMembersCodespaces.GetR
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const getBadgeClass = (state: string): string => {
-    const map: Record<string, string> = {
-      Available: 'bg-green-100 text-green-800',
-      Provisioning: 'bg-yellow-100 text-yellow-800',
-      Queued: 'bg-indigo-100 text-indigo-800',
-      Starting: 'bg-blue-100 text-blue-800',
-      Shutdown: 'bg-gray-100 text-gray-800',
-      Deleted: 'bg-gray-100 text-gray-800',
-      Failed: 'bg-red-100 text-red-800',
-      Archived: 'bg-purple-100 text-purple-800'
-    };
-    return map[state] ?? 'bg-gray-100 text-gray-800';
+  const totalCount = value.total_count;
+  const codespaces = value.codespaces;
+
+  const formatDate = (iso: string): string => {
+    const date = new Date(iso);
+    return isNaN(date.getTime())
+      ? iso
+      : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
   };
 
-  const formatDateTime = (iso: string | null): string =>
-    iso ? new Date(iso).toLocaleString() : '–';
+  const getStateClasses = (state: AutoViewInputSubTypes.codespace['state']) => {
+    switch (state) {
+      case 'Available':
+        return { dot: 'text-green-500', text: 'text-green-600' };
+      case 'Provisioning':
+      case 'Queued':
+      case 'Awaiting':
+      case 'Starting':
+        return { dot: 'text-amber-500', text: 'text-amber-600' };
+      case 'Failed':
+      case 'Deleted':
+        return { dot: 'text-red-500', text: 'text-red-600' };
+      default:
+        return { dot: 'text-gray-400', text: 'text-gray-600' };
+    }
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const cards = value.codespaces.map((cs) => {
-    const displayName = cs.display_name ?? cs.name;
-    const machineName = cs.machine?.display_name ?? 'Standard';
-    const idleTimeout =
-      cs.idle_timeout_minutes != null
-        ? `${cs.idle_timeout_minutes} min`
-        : 'Default';
-    const gitStats = [
-      cs.git_status.ahead ? `↑${cs.git_status.ahead}` : null,
-      cs.git_status.behind ? `↓${cs.git_status.behind}` : null,
-      cs.git_status.has_unpushed_changes ? 'Unpushed' : null,
-      cs.git_status.has_uncommitted_changes ? 'Uncommitted' : null
-    ]
-      .filter(Boolean)
-      .join(' • ');
-
-    return (
-      <li key={cs.id} className="bg-white rounded-lg shadow p-4 mb-4 flex flex-col">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-semibold text-gray-800 truncate">
-            {displayName}
-          </h3>
-          <span
-            className={`px-2 py-0.5 rounded-full text-xs ${getBadgeClass(
-              cs.state
-            )}`}
-          >
-            {cs.state}
-          </span>
-        </div>
-        <div className="text-sm text-gray-600 space-y-1">
-          <p>
-            <span className="font-medium text-gray-700">Repo:</span>{' '}
-            <span className="truncate">{cs.repository.full_name}</span>
-          </p>
-          <p>
-            <span className="font-medium text-gray-700">Owner:</span>{' '}
-            {cs.owner.login}
-          </p>
-          <p>
-            <span className="font-medium text-gray-700">Machine:</span>{' '}
-            {machineName}
-          </p>
-          <p>
-            <span className="font-medium text-gray-700">Created:</span>{' '}
-            {formatDateTime(cs.created_at)}
-          </p>
-          <p>
-            <span className="font-medium text-gray-700">Last Used:</span>{' '}
-            {formatDateTime(cs.last_used_at)}
-          </p>
-          {cs.retention_expires_at && (
-            <p>
-              <span className="font-medium text-gray-700">
-                Expires At:
-              </span>{' '}
-              {formatDateTime(cs.retention_expires_at)}
-            </p>
-          )}
-          <p>
-            <span className="font-medium text-gray-700">Idle Timeout:</span>{' '}
-            {idleTimeout}
-          </p>
-          {gitStats && (
-            <p>
-              <span className="font-medium text-gray-700">Git Status:</span>{' '}
-              {gitStats}
-            </p>
-          )}
-          {cs.pending_operation && (
-            <p className="text-red-600">
-              <span className="font-medium">Pending:</span>{' '}
-              {cs.pending_operation_disabled_reason ?? 'Operation in progress'}
-            </p>
-          )}
-        </div>
-      </li>
-    );
-  });
-
-  // 3. Return the React element.
   return (
-    <section className="container mx-auto p-4">
-      <header className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Codespaces ({value.total_count})
-        </h2>
-      </header>
-      {value.codespaces.length > 0 ? (
-        <ul className="divide-y divide-gray-200">{cards}</ul>
+    <div className="p-4 space-y-6">
+      <div className="flex items-center text-lg font-semibold text-gray-700">
+        <LucideReact.Users size={20} className="mr-2 text-gray-500" />
+        <span>Codespaces ({totalCount})</span>
+      </div>
+
+      {codespaces.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-500">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2">No codespaces available</span>
+        </div>
       ) : (
-        <p className="text-center text-gray-500">
-          No codespaces available.
-        </p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {codespaces.map((cs) => {
+            const displayName = cs.display_name ?? cs.name;
+            const stateCls = getStateClasses(cs.state);
+
+            return (
+              <div key={cs.id} className="p-4 bg-white rounded-lg shadow">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="text-md font-semibold text-gray-800 truncate">
+                    {displayName}
+                  </h3>
+                  <div className="flex items-center">
+                    <LucideReact.Circle size={12} className={stateCls.dot} />
+                    <span className={`ml-1 text-sm ${stateCls.text}`}>{cs.state}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-sm text-gray-600">
+                  <div className="flex items-center">
+                    <LucideReact.User size={16} className="mr-1 text-gray-400" />
+                    <span>Owner: {cs.owner.login}</span>
+                  </div>
+
+                  <div className="flex items-center">
+                    <LucideReact.GitBranch size={16} className="mr-1 text-gray-400" />
+                    <span>Repo: {cs.repository.full_name}</span>
+                  </div>
+
+                  {cs.machine && (
+                    <div className="flex items-center">
+                      <LucideReact.Cpu size={16} className="mr-1 text-gray-400" />
+                      <span>{cs.machine.display_name}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center">
+                    <LucideReact.Calendar size={16} className="mr-1 text-gray-400" />
+                    <span>Last used: {formatDate(cs.last_used_at)}</span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       )}
-    </section>
+    </div>
   );
 }

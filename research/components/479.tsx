@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A codespace.
      *
      * @title Codespace
     */
-    export type codespace = {
+    export interface codespace {
         id: number & tags.Type<"int32">;
         /**
          * Automatically generated name of this codespace.
@@ -134,13 +135,13 @@ export namespace AutoViewInputSubTypes {
          * The text to display to a user when a codespace has been stopped for a potentially actionable reason.
         */
         last_known_stop_notice?: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -163,13 +164,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -272,19 +273,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -357,142 +358,129 @@ export type AutoViewInput = AutoViewInputSubTypes.codespace;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const lastUsedDate = new Date(value.last_used_at);
-  const formattedLastUsed = lastUsedDate.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric'
+  const displayName = value.display_name ?? value.name;
+  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric", month: "short", day: "numeric",
   });
+  const lastUsed = new Date(value.last_used_at).toLocaleString(undefined, {
+    year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+  const idleTimeout = value.idle_timeout_minutes !== null
+    ? `${value.idle_timeout_minutes} min`
+    : "Default";
+  const retentionExpiry = value.retention_expires_at
+    ? new Date(value.retention_expires_at).toLocaleDateString()
+    : null;
 
-  const stateMap: Record<AutoViewInput['state'], string> = {
-    Unknown: 'Unknown',
-    Created: 'Created',
-    Queued: 'Queued',
-    Provisioning: 'Provisioning',
-    Available: 'Available',
-    Awaiting: 'Awaiting',
-    Unavailable: 'Unavailable',
-    Deleted: 'Deleted',
-    Moved: 'Moved',
-    Shutdown: 'Shutdown',
-    Archived: 'Archived',
-    Starting: 'Starting',
-    ShuttingDown: 'Shutting Down',
-    Failed: 'Failed',
-    Exporting: 'Exporting',
-    Updating: 'Updating',
-    Rebuilding: 'Rebuilding'
+  // State icon mapping
+  type IconComp = React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  const stateMap: Record<string, { icon: IconComp; color: string }> = {
+    Available: { icon: LucideReact.CheckCircle, color: "text-green-500" },
+    Provisioning: { icon: LucideReact.Loader, color: "text-blue-500 animate-spin" },
+    Queued: { icon: LucideReact.Clock, color: "text-amber-500" },
+    Deleted: { icon: LucideReact.Trash2, color: "text-red-500" },
+    Failed: { icon: LucideReact.AlertTriangle, color: "text-red-500" },
   };
-  const displayState = stateMap[value.state] || value.state;
+  const { icon: StateIcon, color: stateColor } =
+    stateMap[value.state] ?? { icon: LucideReact.Info, color: "text-gray-500" };
 
-  const machineLabel = value.machine?.display_name || 'N/A';
-  const gitDetails: string[] = [];
-  if (typeof value.git_status.ahead === 'number') gitDetails.push(`${value.git_status.ahead}↑`);
-  if (typeof value.git_status.behind === 'number') gitDetails.push(`${value.git_status.behind}↓`);
-  if (value.git_status.has_uncommitted_changes) gitDetails.push('Uncommitted');
-  if (value.git_status.has_unpushed_changes) gitDetails.push('Unpushed');
-  const gitSummary = gitDetails.length > 0 ? gitDetails.join(' · ') : 'Clean';
-
-  const recentFolders = value.recent_folders.slice(0, 3);
-  const idleTimeout =
-    value.idle_timeout_minutes !== null && value.idle_timeout_minutes !== undefined
-      ? `${value.idle_timeout_minutes} min`
-      : 'Default';
+  // Git status summary
+  const git = value.git_status;
+  const branch = git.ref ?? "detached";
+  const ahead = git.ahead ?? 0;
+  const behind = git.behind ?? 0;
+  const hasUncommitted = git.has_uncommitted_changes;
+  const hasUnpushed = git.has_unpushed_changes;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden mobile-first:p-4 p-6 space-y-4">
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4 max-w-md mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
-          {value.display_name && (
-            <p className="text-sm text-gray-500 truncate">{value.display_name}</p>
+        <div className="flex items-center gap-2">
+          <StateIcon width={20} height={20} className={stateColor} />
+          <h2 className="text-lg font-semibold truncate">{displayName}</h2>
+        </div>
+        <span className="text-sm text-gray-500">{createdDate}</span>
+      </div>
+
+      {/* Owner & Repo */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex items-center gap-2">
+          <LucideReact.User width={16} height={16} className="text-gray-500" />
+          <img
+            src={value.owner.avatar_url}
+            alt={`${value.owner.login} avatar`}
+            className="w-6 h-6 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                value.owner.login,
+              )}&background=ccc&color=fff`;
+            }}
+          />
+          <span className="text-sm text-gray-700 truncate">{value.owner.login}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <LucideReact.GitBranch width={16} height={16} className="text-gray-500" />
+          <span className="text-sm text-gray-700 truncate">{value.repository.full_name}</span>
+        </div>
+        {value.machine && (
+          <div className="flex items-center gap-2">
+            <LucideReact.Cpu width={16} height={16} className="text-gray-500" />
+            <span className="text-sm text-gray-700 truncate">{value.machine.display_name}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <LucideReact.MapPin width={16} height={16} className="text-gray-500" />
+          <span className="text-sm text-gray-700">{value.location}</span>
+        </div>
+      </div>
+
+      {/* Activity & Limits */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-2">
+          <LucideReact.Calendar width={16} height={16} className="text-gray-500" />
+          <span>Last used: {lastUsed}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <LucideReact.Timer width={16} height={16} className="text-gray-500" />
+          <span>Idle timeout: {idleTimeout}</span>
+        </div>
+        {retentionExpiry && (
+          <div className="flex items-center gap-2">
+            <LucideReact.Clock width={16} height={16} className="text-gray-500" />
+            <span>Retention until: {retentionExpiry}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Git Status */}
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium text-gray-800">Git Status</h3>
+        <div className="flex items-center flex-wrap gap-3 text-sm">
+          <div className="flex items-center gap-1 text-gray-700">
+            <LucideReact.Code2 width={14} height={14} className="text-gray-500" />
+            <span className="truncate">{branch}</span>
+          </div>
+          {ahead > 0 && (
+            <div className="flex items-center gap-1 text-green-500">
+              <LucideReact.ArrowUp width={14} height={14} />
+              <span>{ahead}</span>
+            </div>
+          )}
+          {behind > 0 && (
+            <div className="flex items-center gap-1 text-red-500">
+              <LucideReact.ArrowDown width={14} height={14} />
+              <span>{behind}</span>
+            </div>
+          )}
+          {hasUncommitted && (
+            <LucideReact.Edit2 width={14} height={14} className="text-amber-500" aria-label="Uncommitted" />
+          )}
+          {hasUnpushed && (
+            <LucideReact.UploadCloud width={14} height={14} className="text-blue-500" aria-label="Unpushed" />
           )}
         </div>
-        <span
-          className={`ml-4 px-2 py-1 text-xs font-medium rounded ${
-            value.state === 'Available'
-              ? 'bg-green-100 text-green-800'
-              : value.state === 'Failed' || value.state === 'Unavailable'
-              ? 'bg-red-100 text-red-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}
-        >
-          {displayState}
-        </span>
-      </div>
-
-      {/* Owner & Repository */}
-      <div className="flex items-center space-x-3">
-        <img
-          src={value.owner.avatar_url}
-          alt={value.owner.login}
-          className="w-8 h-8 rounded-full flex-shrink-0"
-        />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-700 truncate">{value.owner.login}</p>
-          <p className="text-sm text-gray-500 truncate">{value.repository.full_name}</p>
-        </div>
-      </div>
-
-      {/* Details Grid */}
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
-        <dt className="font-medium">Last Used</dt>
-        <dd className="truncate">{formattedLastUsed}</dd>
-
-        <dt className="font-medium">Location</dt>
-        <dd className="truncate">{value.location}</dd>
-
-        <dt className="font-medium">Machine</dt>
-        <dd className="truncate">{machineLabel}</dd>
-
-        <dt className="font-medium">Git Status</dt>
-        <dd className="truncate">{gitSummary}</dd>
-
-        <dt className="font-medium">Idle Timeout</dt>
-        <dd className="truncate">{idleTimeout}</dd>
-
-        {value.retention_expires_at && (
-          <>
-            <dt className="font-medium">Expires</dt>
-            <dd className="truncate">
-              {new Date(value.retention_expires_at).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
-            </dd>
-          </>
-        )}
-      </dl>
-
-      {/* Recent Folders */}
-      {recentFolders.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-1">Recent Folders</h3>
-          <div className="flex flex-wrap gap-2">
-            {recentFolders.map((folder, idx) => (
-              <span
-                key={idx}
-                className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded truncate"
-              >
-                {folder}
-              </span>
-            ))}
-            {value.recent_folders.length > recentFolders.length && (
-              <span className="text-xs text-gray-500">+{value.recent_folders.length - recentFolders.length} more</span>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Web URL */}
-      <div>
-        <h3 className="text-sm font-medium text-gray-700 mb-1">Web URL</h3>
-        <p className="text-xs text-blue-600 truncate">{value.web_url}</p>
       </div>
     </div>
   );

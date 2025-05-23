@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A team's access to a repository.
      *
      * @title Team Repository
     */
-    export type team_repository = {
+    export interface team_repository {
         /**
          * Unique identifier of the repository
         */
@@ -159,7 +160,7 @@ export namespace AutoViewInputSubTypes {
         open_issues: number & tags.Type<"int32">;
         watchers: number & tags.Type<"int32">;
         master_branch?: string;
-    };
+    }
     /**
      * License Simple
      *
@@ -210,79 +211,110 @@ export type AutoViewInput = AutoViewInputSubTypes.team_repository;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatCount = (num: number): string =>
-    num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num.toString();
-
-  const updatedDate: string = value.updated_at
-    ? new Date(value.updated_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "N/A";
-
-  const licenseName: string = value.license?.name ?? "No license";
+  const licenseName = value.license?.name ?? 'No license';
+  const createdAt = value.created_at
+    ? new Date(value.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+    : '';
+  const updatedAt = value.updated_at
+    ? new Date(value.updated_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+    : '';
+  const isPrivate = value.private;
+  const status = value.archived
+    ? 'Archived'
+    : value.disabled
+    ? 'Disabled'
+    : isPrivate
+    ? 'Private'
+    : 'Public';
+  const statusIcon =
+    value.archived ? (
+      <LucideReact.Archive className="text-gray-500 inline-block" size={16} />
+    ) : value.disabled ? (
+      <LucideReact.AlertTriangle className="text-red-500 inline-block" size={16} />
+    ) : isPrivate ? (
+      <LucideReact.Lock className="text-yellow-500 inline-block" size={16} />
+    ) : (
+      <LucideReact.Globe className="text-green-500 inline-block" size={16} />
+    );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex items-center space-x-3">
-        {value.owner?.avatar_url && (
-          <img
-            src={value.owner.avatar_url}
-            alt={`${value.owner.login ?? "owner"} avatar`}
-            className="w-10 h-10 rounded-full flex-shrink-0"
-          />
-        )}
-        <div className="flex-1 min-w-0">
-          <h2 className="flex items-center space-x-2 text-lg font-semibold text-gray-900">
-            <span className="truncate">{value.name}</span>
-            <span
-              className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                value.private
-                  ? "bg-red-100 text-red-800"
-                  : "bg-green-100 text-green-800"
-              }`}
-            >
-              {value.private ? "Private" : "Public"}
+    <div className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow max-w-md mx-auto">
+      {/* Header: Name & Status */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 truncate">
+          <LucideReact.Code className="text-gray-700" size={20} />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">{value.full_name}</h2>
+        </div>
+        <div className="flex items-center space-x-1 text-sm font-medium text-gray-600">
+          {statusIcon}
+          <span>{status}</span>
+        </div>
+      </div>
+
+      {/* Description */}
+      <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+        {value.description ?? 'No description available.'}
+      </p>
+
+      {/* Stats */}
+      <div className="mt-4 flex flex-wrap items-center text-sm text-gray-600 space-x-4">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Star className="text-yellow-500" size={16} />
+          <span>{value.stargazers_count}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.GitBranch className="text-gray-500" size={16} />
+          <span>{value.forks_count}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Eye className="text-gray-500" size={16} />
+          <span>{value.watchers_count}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <span className="text-gray-500">·</span>
+          <span>{value.language ?? '—'}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.FileSignature className="text-gray-500" size={16} />
+          <span>{licenseName}</span>
+        </div>
+      </div>
+
+      {/* Footer: Owner & Dates */}
+      <div className="mt-4 border-t pt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {value.owner?.avatar_url ? (
+            <img
+              src={value.owner.avatar_url}
+              alt={value.owner.login}
+              className="h-8 w-8 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  value.owner?.login ?? ''
+                )}&background=0D8ABC&color=fff`;
+              }}
+            />
+          ) : (
+            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+              <LucideReact.User size={16} />
+            </div>
+          )}
+          <span className="text-gray-700 text-sm truncate">{value.owner?.login ?? 'Unknown'}</span>
+        </div>
+        <div className="text-xs text-gray-500 flex flex-col items-end">
+          {createdAt && (
+            <span className="flex items-center space-x-1">
+              <LucideReact.Calendar size={12} />
+              <span>Created: {createdAt}</span>
             </span>
-          </h2>
-          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-            {value.description ?? "No description provided."}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 gap-y-1 text-sm text-gray-700">
-        <div>
-          <span className="font-medium">License:</span> {licenseName}
-        </div>
-        {value.language && (
-          <div>
-            <span className="font-medium">Language:</span> {value.language}
-          </div>
-        )}
-        <div>
-          <span className="font-medium">Default branch:</span>{" "}
-          {value.default_branch}
-        </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center text-xs text-gray-500 space-x-4">
-        <div className="flex items-center space-x-1">
-          <span>⭐</span>
-          <span>{formatCount(value.stargazers_count)}</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <span>🍴</span>
-          <span>{formatCount(value.forks_count)}</span>
-        </div>
-        <div className="flex items-center space-x-1">
-          <span>👀</span>
-          <span>{formatCount(value.watchers_count)}</span>
-        </div>
-        <div>
-          <span className="font-medium">Updated:</span> {updatedDate}
+          )}
+          {updatedAt && (
+            <span className="flex items-center space-x-1 mt-1">
+              <LucideReact.RefreshCw size={12} />
+              <span>Updated: {updatedAt}</span>
+            </span>
+          )}
         </div>
       </div>
     </div>

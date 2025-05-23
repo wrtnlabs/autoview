@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration[];
 
@@ -143,116 +144,137 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  const configs = Array.isArray(value) ? value : [];
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const configs = value;
+  const formatDate = (iso?: string): string =>
+    iso
+      ? new Date(iso).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "—";
 
-  // Format ISO date into a short, readable string.
-  function formatDate(dateStr?: string): string {
-    if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
+  // Define which feature flags to display and their styling
+  const featureDefinitions: {
+    key: keyof AutoViewInputSubTypes.code_security_configuration;
+    label: string;
+    color: string;
+  }[] = [
+    { key: "advanced_security", label: "Advanced Sec", color: "blue" },
+    { key: "dependency_graph", label: "Dep. Graph", color: "purple" },
+    { key: "dependabot_alerts", label: "Dependabot Alerts", color: "indigo" },
+    {
+      key: "dependabot_security_updates",
+      label: "Sec Updates",
+      color: "teal",
+    },
+    {
+      key: "code_scanning_default_setup",
+      label: "Code Scan",
+      color: "yellow",
+    },
+    { key: "secret_scanning", label: "Secret Scan", color: "pink" },
+  ];
 
-  // Render a status badge with color coding for "enabled", "disabled", "not_set", "enforced", "unenforced".
-  function renderBadge(status?: string): React.ReactNode {
-    let colorClasses = "bg-gray-200 text-gray-700";
-    if (status === "enabled" || status === "enforced") {
-      colorClasses = "bg-green-100 text-green-800";
-    } else if (status === "disabled" || status === "unenforced") {
-      colorClasses = "bg-red-100 text-red-800";
-    } else if (status === "not_set") {
-      colorClasses = "bg-yellow-100 text-yellow-800";
-    }
-    return (
-      <span
-        className={`inline-block px-2 py-0.5 text-xs font-semibold rounded ${colorClasses}`}
-      >
-        {status ?? "-"}
-      </span>
-    );
-  }
-
-  // Main render
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="space-y-6">
       {configs.length === 0 ? (
-        <div className="py-8 text-center text-gray-500">
-          No configurations available.
+        <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-3 text-lg">No configurations available</span>
         </div>
       ) : (
-        configs.map((cfg, idx) => (
-          <div
-            key={idx}
-            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            {/* Header: Name, Type, Enforcement */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <h2
-                className="text-lg font-semibold text-gray-800 truncate"
-                title={cfg.name}
-              >
-                {cfg.name || "Unnamed Configuration"}
-              </h2>
-              <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-                <span className="text-sm text-gray-500 capitalize">
-                  {cfg.target_type || "Unknown"}
+        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {configs.map((cfg, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col bg-white rounded-lg shadow-sm overflow-hidden"
+            >
+              <div className="p-4">
+                <div className="flex items-start justify-between">
+                  <h3 className="flex-1 text-lg font-semibold text-gray-800 truncate">
+                    {cfg.name || "Unnamed Configuration"}
+                  </h3>
+                  {cfg.html_url && (
+                    <div className="flex items-center text-gray-500 ml-3">
+                      <LucideReact.Link size={16} />
+                    </div>
+                  )}
+                </div>
+                {cfg.description && (
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+                    {cfg.description}
+                  </p>
+                )}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {/* Enforcement Badge */}
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                      cfg.enforcement === "enforced"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-gray-100 text-gray-800"
+                    }`}
+                  >
+                    {cfg.enforcement === "enforced" ? (
+                      <LucideReact.CheckCircle
+                        size={12}
+                        className="mr-1 text-green-500"
+                      />
+                    ) : (
+                      <LucideReact.XCircle
+                        size={12}
+                        className="mr-1 text-gray-500"
+                      />
+                    )}
+                    {cfg.enforcement === "enforced"
+                      ? "Enforced"
+                      : "Unenforced"}
+                  </span>
+                  {/* Feature Flags */}
+                  {featureDefinitions.map(({ key, label, color }) => {
+                    const status = cfg[key] as
+                      | "enabled"
+                      | "disabled"
+                      | "not_set"
+                      | undefined;
+                    if (!status || status === "not_set") return null;
+                    const isEnabled = status === "enabled";
+                    return (
+                      <span
+                        key={key as string}
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-${color}-100 text-${color}-800`}
+                      >
+                        {isEnabled ? (
+                          <LucideReact.CheckCircle
+                            size={12}
+                            className={`mr-1 text-${color}-500`}
+                          />
+                        ) : (
+                          <LucideReact.XCircle
+                            size={12}
+                            className={`mr-1 text-${color}-500`}
+                          />
+                        )}
+                        {label}: {status}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="mt-auto border-t border-gray-100 px-4 py-2 flex items-center text-xs text-gray-500">
+                <LucideReact.Calendar size={14} className="mr-1" />
+                <span>
+                  Updated: {formatDate(cfg.updated_at)}{" "}
+                  {cfg.created_at && (
+                    <span className="ml-3">Created: {formatDate(cfg.created_at)}</span>
+                  )}
                 </span>
-                {renderBadge(cfg.enforcement)}
               </div>
             </div>
-
-            {/* Optional description, truncated to two lines */}
-            {cfg.description && (
-              <p
-                className="mt-2 text-gray-600 line-clamp-2"
-                title={cfg.description}
-              >
-                {cfg.description}
-              </p>
-            )}
-
-            {/* Feature status grid */}
-            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div>
-                <div className="text-xs text-gray-500">Advanced Security</div>
-                {renderBadge(cfg.advanced_security)}
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">Dependency Graph</div>
-                {renderBadge(cfg.dependency_graph)}
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">Dependabot Alerts</div>
-                {renderBadge(cfg.dependabot_alerts)}
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">
-                  Dependabot Updates
-                </div>
-                {renderBadge(cfg.dependabot_security_updates)}
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">
-                  Code Scanning Setup
-                </div>
-                {renderBadge(cfg.code_scanning_default_setup)}
-              </div>
-              <div>
-                <div className="text-xs text-gray-500">Secret Scanning</div>
-                {renderBadge(cfg.secret_scanning)}
-              </div>
-            </div>
-
-            {/* Timestamps */}
-            <div className="mt-4 flex flex-col sm:flex-row sm:space-x-6 text-xs text-gray-500">
-              <div>Created: {formatDate(cfg.created_at)}</div>
-              <div>Updated: {formatDate(cfg.updated_at)}</div>
-            </div>
-          </div>
-        ))
+          ))}
+        </div>
       )}
     </div>
   );

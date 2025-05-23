@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The campaign metadata and alert stats.
      *
      * @title Campaign summary
     */
-    export type campaign_summary = {
+    export interface campaign_summary {
         /**
          * The number of the newly created campaign
         */
@@ -66,13 +67,13 @@ export namespace AutoViewInputSubTypes {
             */
             in_progress_count: number & tags.Type<"int32">;
         };
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -95,13 +96,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -122,7 +123,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -137,7 +138,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -181,155 +182,164 @@ export type AutoViewInput = AutoViewInputSubTypes.campaign_summary;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdAt = new Date(value.created_at).toLocaleString();
-  const updatedAt = new Date(value.updated_at).toLocaleString();
-  const publishedAt = value.published_at
-    ? new Date(value.published_at).toLocaleString()
-    : null;
-  const endsAt = new Date(value.ends_at).toLocaleDateString();
-  const closedAt = value.closed_at
-    ? new Date(value.closed_at).toLocaleString()
-    : null;
+  const {
+    number,
+    name,
+    description,
+    created_at,
+    published_at,
+    ends_at,
+    closed_at,
+    state,
+    contact_link,
+    managers,
+    team_managers,
+    alert_stats,
+  } = value;
 
-  const now = Date.now();
-  const msPerDay = 1000 * 60 * 60 * 24;
-  const daysLeftRaw =
-    (new Date(value.ends_at).getTime() - now) / msPerDay;
-  const daysLeft = Math.ceil(daysLeftRaw);
+  const displayName = name ?? `Campaign #${number}`;
 
-  const stateLabel = value.state === "open" ? "Open" : "Closed";
-  const badgeClass =
-    value.state === "open"
-      ? "bg-green-100 text-green-800"
-      : "bg-red-100 text-red-800";
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+  const maxDescLength = 200;
+  const truncatedDescription =
+    description.length > maxDescLength
+      ? `${description.slice(0, maxDescLength)}...`
+      : description;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <h2 className="text-xl font-semibold text-gray-900">
-          {value.name || `Campaign #${value.number}`}
-        </h2>
-        <span
-          className={`px-2 inline-flex text-xs font-medium rounded-full ${badgeClass}`}
-        >
-          {stateLabel}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col space-y-4">
+      {/* Header with title and state */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800">{displayName}</h2>
+        {state === "open" ? (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={20}
+            role="img"
+            aria-label="Open"
+          />
+        ) : (
+          <LucideReact.XCircle
+            className="text-red-500"
+            size={20}
+            role="img"
+            aria-label="Closed"
+          />
+        )}
+      </div>
+
+      {/* Date metadata */}
+      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Created: {formatDate(created_at)}</span>
+        </div>
+        {published_at && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Published: {formatDate(published_at)}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Ends: {formatDate(ends_at)}</span>
+        </div>
+        {closed_at && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Closed: {formatDate(closed_at)}</span>
+          </div>
+        )}
       </div>
 
       {/* Description */}
-      <p className="mt-2 text-gray-700 line-clamp-3">
-        {value.description}
-      </p>
+      <p className="text-gray-700 line-clamp-3">{truncatedDescription}</p>
 
-      {/* Dates Grid */}
-      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
-        <div>
-          <span className="font-medium">Created:</span>
-          <span className="ml-1">{createdAt}</span>
+      {/* Managers avatars */}
+      <div>
+        <div className="flex items-center gap-1 text-sm text-gray-600 mb-1">
+          <LucideReact.Users size={16} />
+          <span>Managers</span>
         </div>
-        <div>
-          <span className="font-medium">Ends:</span>
-          <span className="ml-1">
-            {endsAt}
-            {value.state === "open" && daysLeft > 0
-              ? ` (${daysLeft}d left)`
-              : ""}
-          </span>
+        <div className="flex -space-x-2">
+          {managers.map((mgr) => {
+            const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              mgr.name ?? mgr.login
+            )}&background=0D8ABC&color=fff`;
+            return (
+              <img
+                key={mgr.id}
+                src={mgr.avatar_url}
+                alt={mgr.name ?? mgr.login}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = fallbackAvatar;
+                }}
+                className="w-8 h-8 rounded-full border-2 border-white object-cover"
+              />
+            );
+          })}
         </div>
-        {publishedAt && (
-          <div>
-            <span className="font-medium">Published:</span>
-            <span className="ml-1">{publishedAt}</span>
-          </div>
-        )}
-        {closedAt && (
-          <div>
-            <span className="font-medium">Closed:</span>
-            <span className="ml-1">{closedAt}</span>
-          </div>
-        )}
       </div>
 
-      {/* Alert Stats */}
-      {value.alert_stats && (
-        <div className="mt-4 bg-gray-50 p-4 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-800">
-            Alert Stats
-          </h3>
-          <div className="mt-2 flex justify-between text-sm">
-            <div>
-              <span className="font-medium text-blue-600">
-                {value.alert_stats.open_count}
-              </span>
-              <span className="ml-1">Open</span>
-            </div>
-            <div>
-              <span className="font-medium text-yellow-600">
-                {value.alert_stats.in_progress_count}
-              </span>
-              <span className="ml-1">In Progress</span>
-            </div>
-            <div>
-              <span className="font-medium text-gray-600">
-                {value.alert_stats.closed_count}
-              </span>
-              <span className="ml-1">Closed</span>
-            </div>
+      {/* Team managers list */}
+      {team_managers && team_managers.length > 0 && (
+        <div>
+          <div className="flex items-center gap-1 text-sm text-gray-600">
+            <LucideReact.Users size={16} />
+            <span>Team Managers</span>
+          </div>
+          <div className="mt-1 text-sm text-gray-700">
+            {team_managers.map((team) => team.name).join(", ")}
           </div>
         </div>
       )}
 
-      {/* Managers */}
-      <div className="mt-6">
-        <h3 className="text-sm font-medium text-gray-800">
-          Managers
-        </h3>
-        <div className="mt-2 flex -space-x-2 overflow-hidden">
-          {value.managers.map((m, i) => (
-            <img
-              key={i}
-              className="inline-block h-8 w-8 rounded-full ring-2 ring-white"
-              src={m.avatar_url}
-              alt={m.name || m.login}
-              title={m.name || m.login}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Team Managers */}
-      {value.team_managers && value.team_managers.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-800">
-            Team Managers
-          </h3>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {value.team_managers.map(
-              (t, i) =>
-                t && (
-                  <span
-                    key={i}
-                    className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded"
-                  >
-                    {t.name}
-                  </span>
-                )
-            )}
-          </div>
+      {/* Contact link */}
+      {contact_link && (
+        <div className="flex items-center gap-1 text-sm text-blue-600">
+          <LucideReact.Link size={16} />
+          <a
+            href={contact_link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="truncate underline"
+          >
+            {contact_link}
+          </a>
         </div>
       )}
 
-      {/* Contact Link */}
-      {value.contact_link && (
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-800">
-            Contact
-          </h3>
-          <p className="mt-1 text-sm text-blue-600 truncate">
-            {value.contact_link}
-          </p>
+      {/* Alert statistics */}
+      {alert_stats && (
+        <div className="grid grid-cols-3 gap-4 text-center text-sm">
+          <div className="flex flex-col items-center text-yellow-500">
+            <LucideReact.AlertTriangle size={20} />
+            <span className="mt-1 text-gray-800">
+              {alert_stats.open_count}
+            </span>
+            <span className="text-gray-500">Open</span>
+          </div>
+          <div className="flex flex-col items-center text-blue-500">
+            <LucideReact.Clock size={20} />
+            <span className="mt-1 text-gray-800">
+              {alert_stats.in_progress_count}
+            </span>
+            <span className="text-gray-500">In Progress</span>
+          </div>
+          <div className="flex flex-col items-center text-green-500">
+            <LucideReact.CheckCircle size={20} />
+            <span className="mt-1 text-gray-800">
+              {alert_stats.closed_count}
+            </span>
+            <span className="text-gray-500">Closed</span>
+          </div>
         </div>
       )}
     </div>

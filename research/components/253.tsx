@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type PluginsView = {
+    export interface PluginsView {
         next?: number;
         plugins?: AutoViewInputSubTypes.Plugin[];
-    };
-    export type Plugin = {
+    }
+    export interface Plugin {
         id?: string;
         key?: string & tags.Format<"uuid">;
         channelId?: string;
@@ -40,20 +41,20 @@ export namespace AutoViewInputSubTypes {
         mobileImageUrl?: string;
         validLabelButtonText?: boolean;
         validLabelButtonTextI18nMap?: boolean;
-    };
-    export type ImageFile = {
+    }
+    export interface ImageFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
         contentType?: string & tags.Pattern<"^image/.*">;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.PluginsView;
 
@@ -63,106 +64,74 @@ export type AutoViewInput = AutoViewInputSubTypes.PluginsView;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const plugins = value.plugins ?? [];
-  const totalPlugins = plugins.length;
-  const hasMore = typeof value.next === 'number';
+  const formattedNext = value.next !== undefined ? `Next Page: ${value.next}` : null;
 
-  const formatDate = (timestamp?: number): string =>
-    timestamp
-      ? new Date(timestamp).toLocaleString(undefined, {
+  const formatDate = (ts?: number): string =>
+    ts
+      ? new Date(ts).toLocaleDateString(undefined, {
           year: 'numeric',
           month: 'short',
           day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
         })
-      : '—';
+      : '';
 
-  const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
-
-  const formatRate = (rate?: number): string =>
-    typeof rate === 'number' ? `${(rate * 100).toFixed(0)}%` : '—';
+  const getStateIcon = (state?: AutoViewInputSubTypes.Plugin['state']): React.ReactNode => {
+    if (state === 'active') {
+      return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+    } else if (state === 'waiting') {
+      return <LucideReact.Clock className="text-amber-500" size={16} />;
+    }
+    return null;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Plugins ({totalPlugins})
-        </h2>
-        {hasMore && (
-          <span className="text-sm text-blue-600">More available…</span>
-        )}
-      </div>
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      {formattedNext && <div className="mb-4 text-sm text-gray-500">{formattedNext}</div>}
 
-      {/* Plugin Cards */}
-      <div className="space-y-4">
-        {plugins.map((plugin, idx) => (
-          <div
-            key={plugin.id ?? plugin.key ?? idx}
-            className="flex flex-col sm:flex-row items-start sm:items-center p-4 bg-white rounded-lg shadow"
-          >
-            {/* Optional thumbnail */}
-            {plugin.customImageUrl && (
-              <img
-                src={plugin.customImageUrl}
-                alt={plugin.name}
-                className="w-16 h-16 object-cover rounded mr-4 mb-2 sm:mb-0"
-              />
-            )}
-            <div className="flex-1 min-w-0">
-              {/* Name & State */}
-              <div className="flex items-center mb-1">
-                <h3 className="text-lg font-medium text-gray-900 truncate">
-                  {plugin.name}
-                </h3>
-                <span
-                  className={`ml-3 text-xs font-semibold uppercase px-2 py-1 rounded-full ${
-                    plugin.state === 'active'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}
-                >
-                  {plugin.state === 'active' ? 'Active' : 'Waiting'}
-                </span>
+      {plugins.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2 text-lg">No plugins available</span>
+        </div>
+      ) : (
+        <ul className="space-y-4">
+          {plugins.map((plugin, idx) => (
+            <li
+              key={plugin.id ?? plugin.key ?? idx}
+              className="flex items-center p-4 bg-gray-50 rounded-md shadow-sm"
+            >
+              <div className="flex-shrink-0">
+                <LucideReact.Box className="text-indigo-500" size={24} />
               </div>
-
-              {/* Details Grid */}
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600">
-                <div>
-                  <span className="font-semibold">Created:</span>{' '}
-                  {formatDate(plugin.createdAt)}
+              <div className="ml-4 flex-grow">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-md font-semibold text-gray-900 truncate">
+                    {plugin.name}
+                  </h3>
+                  {getStateIcon(plugin.state)}
                 </div>
-                <div>
-                  <span className="font-semibold">Appearance:</span>{' '}
-                  {capitalize(plugin.appearance)}
-                </div>
-                <div>
-                  <span className="font-semibold">Button Type:</span>{' '}
-                  {capitalize(plugin.buttonType)}
-                </div>
-                <div>
-                  <span className="font-semibold">Label Btn:</span>{' '}
-                  {plugin.labelButton
-                    ? plugin.labelButtonText ?? 'Yes'
-                    : 'No'}
-                </div>
-                <div>
-                  <span className="font-semibold">Run Rate:</span>{' '}
-                  {formatRate(plugin.runRate)}
-                </div>
-                <div>
-                  <span className="font-semibold">URLs Allowed:</span>{' '}
-                  {plugin.urlWhitelist?.length ?? 0}
+                <div className="mt-1 flex flex-wrap items-center text-sm text-gray-500 space-x-2">
+                  {plugin.createdAt && (
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Calendar size={14} />
+                      <span>{formatDate(plugin.createdAt)}</span>
+                    </div>
+                  )}
+                  {plugin.appearance && (
+                    <span className="capitalize">{plugin.appearance}</span>
+                  )}
+                  {plugin.labelButton && plugin.labelButtonText && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">
+                      {plugin.labelButtonText}
+                    </span>
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
-        ))}
-        {totalPlugins === 0 && (
-          <p className="text-center text-gray-500">No plugins to display.</p>
-        )}
-      </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

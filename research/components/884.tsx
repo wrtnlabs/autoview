@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The status of a commit.
      *
      * @title Status
     */
-    export type status = {
+    export interface status {
         url: string;
         avatar_url: string | null;
         id: number & tags.Type<"int32">;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string;
         updated_at: string;
         creator: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -56,85 +57,99 @@ export type AutoViewInput = AutoViewInputSubTypes.status;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const updatedDate = new Date(value.updated_at);
-  const formattedCreated = createdDate.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+  const stateMap: Record<
+    string,
+    { label: string; icon: React.ElementType; color: string }
+  > = {
+    success: { label: "Success", icon: LucideReact.CheckCircle, color: "text-green-500" },
+    failure: { label: "Failure", icon: LucideReact.XCircle, color: "text-red-500" },
+    pending: { label: "Pending", icon: LucideReact.Clock, color: "text-amber-500" },
+    error: { label: "Error", icon: LucideReact.AlertTriangle, color: "text-red-500" },
+  };
+
+  const key = value.state.toLowerCase();
+  const { label: stateLabel, icon: StateIcon, color: stateColor } =
+    stateMap[key] || {
+      label: value.state,
+      icon: LucideReact.HelpCircle,
+      color: "text-gray-500",
+    };
+
+  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
-  const formattedUpdated = updatedDate.toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 
-  const stateLower = value.state.toLowerCase();
-  let stateBgColor = 'bg-gray-100';
-  let stateTextColor = 'text-gray-700';
-  if (stateLower === 'success') {
-    stateBgColor = 'bg-green-100';
-    stateTextColor = 'text-green-800';
-  } else if (stateLower === 'failure' || stateLower === 'error') {
-    stateBgColor = 'bg-red-100';
-    stateTextColor = 'text-red-800';
-  } else if (stateLower === 'pending' || stateLower === 'queued') {
-    stateBgColor = 'bg-yellow-100';
-    stateTextColor = 'text-yellow-800';
-  } else {
-    stateBgColor = 'bg-blue-100';
-    stateTextColor = 'text-blue-800';
-  }
+  const creator = value.creator;
+  const displayName =
+    creator && creator.name
+      ? creator.name
+      : creator && creator.login
+      ? creator.login
+      : "Unknown";
+
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName,
+  )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="p-4 bg-white rounded-lg shadow-md max-w-md w-full mx-auto">
-      <div className="flex items-center space-x-4">
-        {value.creator && value.creator.avatar_url ? (
-          <img
-            src={value.creator.avatar_url}
-            alt={`${value.creator.login} avatar`}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-gray-500 text-sm uppercase">
-              {value.creator?.login?.[0] ?? '?'}
-            </span>
-          </div>
-        )}
+    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-4 space-y-4">
+      {/* Status Header */}
+      <div className="flex items-center gap-2">
+        <StateIcon className={stateColor} size={20} strokeWidth={1.5} />
+        <span className={`font-semibold ${stateColor}`}>{stateLabel}</span>
+        <span className="ml-auto text-xs text-gray-500 truncate">{value.context}</span>
+      </div>
+
+      {/* Creator Info */}
+      <div className="flex items-center gap-3">
+        <img
+          src={value.avatar_url || avatarFallback}
+          alt={`${displayName} avatar`}
+          className="w-10 h-10 rounded-full object-cover bg-gray-100"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = avatarFallback;
+          }}
+        />
         <div className="flex flex-col">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {value.creator?.login ?? 'Unknown'}
-          </h2>
-          {value.creator?.name && (
-            <p className="text-sm text-gray-500">{value.creator.name}</p>
+          <span className="text-sm font-medium text-gray-900">{displayName}</span>
+          {creator && creator.html_url && (
+            <div className="flex items-center text-xs text-gray-500 gap-1 max-w-xs truncate">
+              <LucideReact.Link size={14} />
+              <span className="truncate">{creator.html_url}</span>
+            </div>
           )}
         </div>
       </div>
 
-      <div className="mt-4 flex items-center space-x-2">
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${stateBgColor} ${stateTextColor}`}
-        >
-          {value.state}
-        </span>
-        <span className="text-sm text-gray-500 capitalize">{value.context}</span>
-      </div>
-
+      {/* Description */}
       {value.description && (
-        <p className="mt-2 text-sm text-gray-700 line-clamp-3">
-          {value.description}
-        </p>
+        <p className="text-gray-700 text-sm line-clamp-3">{value.description}</p>
       )}
 
-      {value.target_url && (
-        <p className="mt-2 text-sm text-gray-500 truncate">{value.target_url}</p>
-      )}
-
-      <div className="mt-4 text-xs text-gray-500 space-x-2">
-        <time dateTime={value.created_at}>{formattedCreated}</time>
-        <span>•</span>
-        <time dateTime={value.updated_at}>{formattedUpdated}</time>
+      {/* Metadata */}
+      <div className="flex flex-wrap text-gray-500 text-xs gap-4">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={14} />
+          <span>{createdAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.RefreshCcw size={14} />
+          <span>{updatedAt}</span>
+        </div>
+        {value.target_url && (
+          <div className="flex items-center gap-1 w-full md:w-auto truncate max-w-full">
+            <LucideReact.Link size={14} />
+            <span className="truncate">{value.target_url}</span>
+          </div>
+        )}
       </div>
-    </article>
+    </div>
   );
 }

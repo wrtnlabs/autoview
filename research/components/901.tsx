@@ -1,19 +1,20 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiSearchIssues {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             incomplete_results: boolean;
             items: AutoViewInputSubTypes.issue_search_result_item[];
-        };
+        }
     }
     /**
      * Issue Search Result Item
      *
      * @title Issue Search Result Item
     */
-    export type issue_search_result_item = {
+    export interface issue_search_result_item {
         url: string & tags.Format<"uri">;
         repository_url: string & tags.Format<"uri">;
         labels_url: string;
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
         title: string;
         locked: boolean;
         active_lock_reason?: string | null;
-        assignees?: any[] | null;
+        assignees?: AutoViewInputSubTypes.simple_user[] | null;
         user: AutoViewInputSubTypes.nullable_simple_user;
         labels: {
             id?: number & tags.Type<"int32">;
@@ -72,13 +73,13 @@ export namespace AutoViewInputSubTypes {
         type?: AutoViewInputSubTypes.issue_type;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -101,7 +102,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -155,7 +156,7 @@ export namespace AutoViewInputSubTypes {
         */
         title: string;
         description: string | null;
-        creator: any;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
         open_issues: number & tags.Type<"int32">;
         closed_issues: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
@@ -187,7 +188,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -391,7 +392,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -434,11 +435,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -460,7 +461,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -488,11 +489,42 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -503,7 +535,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiSearchIssues.GetResponse;
 
@@ -511,85 +543,110 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiSearchIssues.GetResponse;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalCount = value.total_count;
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      {/* Summary */}
-      <div className="mb-4 text-lg font-semibold text-gray-700">
-        {totalCount} {totalCount === 1 ? 'Issue' : 'Issues'} Found
+    <div className="p-4 bg-white rounded-lg shadow-lg">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.List size={20} className="text-gray-500" />
+          <h2 className="ml-2 text-lg font-semibold">
+            Issues ({value.total_count})
+          </h2>
+        </div>
+        {value.incomplete_results && (
+          <div className="flex items-center text-amber-600">
+            <LucideReact.AlertTriangle size={20} className="mr-1" />
+            <span className="text-sm">Partial Results</span>
+          </div>
+        )}
       </div>
 
-      {/* No results case */}
+      {/* Empty state */}
       {value.items.length === 0 ? (
-        <div className="text-gray-500">No issues found.</div>
+        <div className="flex flex-col items-center text-gray-400 py-10">
+          <LucideReact.AlertCircle size={48} className="mb-2" />
+          <span>No issues found</span>
+        </div>
       ) : (
         <ul className="space-y-4">
           {value.items.map((item) => {
-            // Derived and formatted values
-            const date = formatDate(item.created_at);
-            const stateLabel =
-              item.state.charAt(0).toUpperCase() + item.state.slice(1);
-            const stateClasses =
-              item.state === 'open'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800';
-
-            // Truncate body text if too long
-            const snippet = item.body_text
-              ? item.body_text.length > 150
-                ? item.body_text.slice(0, 147) + '...'
-                : item.body_text
-              : '';
-
+            const author = item.user?.login ?? 'Unknown';
             return (
               <li
                 key={item.id}
-                className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition"
+                className="p-4 bg-gray-50 rounded-lg shadow-sm"
               >
-                <div className="flex items-start justify-between">
-                  <h3 className="flex-1 text-md font-medium text-gray-900 truncate">
-                    {`#${item.number} ${item.title}`}
-                  </h3>
-                  <span
-                    className={`ml-3 px-2 py-1 text-xs font-semibold rounded ${stateClasses}`}
-                  >
-                    {stateLabel}
-                  </span>
+                {/* Title & State */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <span className="text-sm font-medium text-gray-500 mr-2">
+                      #{item.number}
+                    </span>
+                    <h3 className="text-md font-semibold text-gray-800 truncate">
+                      {item.title}
+                    </h3>
+                  </div>
+                  {item.state === 'open' ? (
+                    <LucideReact.Circle
+                      size={16}
+                      className="text-green-500"
+                    />
+                  ) : (
+                    <LucideReact.XCircle
+                      size={16}
+                      className="text-red-500"
+                    />
+                  )}
                 </div>
 
-                <div className="mt-2 flex items-center text-sm text-gray-500">
-                  <span>{date}</span>
-                  <span className="mx-2">•</span>
-                  <span>{item.comments} comments</span>
+                {/* Metadata */}
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+                  <div className="flex items-center">
+                    <LucideReact.User size={16} className="mr-1" />
+                    <span>{author}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Calendar size={16} className="mr-1" />
+                    <span>{formatDate(item.created_at)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.MessageCircle size={16} className="mr-1" />
+                    <span>{item.comments}</span>
+                  </div>
+                  {item.assignees && item.assignees.length > 0 && (
+                    <div className="flex items-center">
+                      <LucideReact.Users size={16} className="mr-1" />
+                      <span>{item.assignees.length}</span>
+                    </div>
+                  )}
                 </div>
 
-                {snippet && (
-                  <p className="mt-2 text-sm text-gray-700 line-clamp-2">
-                    {snippet}
-                  </p>
-                )}
-
+                {/* Labels */}
                 {item.labels && item.labels.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {item.labels.slice(0, 5).map((label) =>
-                      label.name ? (
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {item.labels
+                      .filter((l) => typeof l.name === 'string')
+                      .map((label, idx) => (
                         <span
-                          key={label.id ?? label.name}
-                          className="bg-gray-200 text-gray-800 text-xs font-medium px-2 py-0.5 rounded"
+                          key={idx}
+                          className="px-2 py-0.5 text-xs font-medium rounded-full"
+                          style={{
+                            backgroundColor: label.color
+                              ? `#${label.color}`
+                              : '#E5E7EB',
+                            color: '#111827',
+                          }}
                         >
                           {label.name}
                         </span>
-                      ) : null
-                    )}
+                      ))}
                   </div>
                 )}
               </li>

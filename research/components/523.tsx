@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team Simple
     */
-    export type team_simple = {
+    export interface team_simple {
         /**
          * Unique identifier of the team
         */
@@ -44,7 +45,7 @@ export namespace AutoViewInputSubTypes {
          * Distinguished Name (DN) that team maps to within LDAP environment
         */
         ldap_dn?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_simple[];
 
@@ -52,54 +53,65 @@ export type AutoViewInput = AutoViewInputSubTypes.team_simple[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derived constants
-  const totalTeams = value.length;
+  // Utility to truncate long text
+  const truncate = (text: string, maxLength: number = 120): string =>
+    text.length > maxLength ? `${text.slice(0, maxLength).trim()}…` : text;
 
-  // 2. JSX structure
+  const teams = value;
+
+  // Empty state placeholder
+  if (!teams || teams.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span>No teams available</span>
+      </div>
+    );
+  }
+
+  // Main render: responsive grid of team cards
   return (
-    <div className="max-w-full mx-auto p-4">
-      <h1 className="text-xl font-semibold text-gray-800 mb-4">
-        Teams ({totalTeams})
-      </h1>
-      {totalTeams === 0 ? (
-        <p className="text-gray-500">No teams available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {value.map((team) => (
-            <li
-              key={team.id}
-              className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <h2 className="text-lg font-medium text-gray-900 truncate">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {teams.map((team) => {
+        const rawDesc = team.description ?? "No description provided.";
+        const description = truncate(rawDesc, 120);
+
+        return (
+          <div
+            key={team.id}
+            className="flex flex-col p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            {/* Team name */}
+            <div className="flex items-center gap-2">
+              <LucideReact.Users size={20} className="text-blue-500" />
+              <h3 className="text-lg font-semibold text-gray-800 truncate">
                 {team.name}
-              </h2>
-              {team.description && (
-                <p className="text-gray-600 mt-1 text-sm line-clamp-2">
-                  {team.description}
-                </p>
-              )}
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-semibold uppercase bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                  {team.permission}
-                </span>
-                {team.privacy && (
-                  <span className="text-xs font-semibold uppercase bg-green-100 text-green-800 px-2 py-1 rounded">
-                    {team.privacy}
-                  </span>
-                )}
-                {team.notification_setting && (
-                  <span className="text-xs font-semibold uppercase bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                    {team.notification_setting}
-                  </span>
-                )}
-                <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                  Slug: {team.slug}
-                </span>
+              </h3>
+            </div>
+
+            {/* Description */}
+            <p className="mt-2 text-gray-600 text-sm">{description}</p>
+
+            {/* Metadata: permission, slug, privacy */}
+            <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+              <div className="flex items-center gap-1">
+                <LucideReact.Lock size={16} className="text-gray-400" />
+                <span className="capitalize">{team.permission}</span>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+              <div className="flex items-center gap-1">
+                <LucideReact.Tag size={16} className="text-gray-400" />
+                <span>{team.slug}</span>
+              </div>
+              {team.privacy && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.EyeOff size={16} className="text-gray-400" />
+                  <span className="capitalize">{team.privacy}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

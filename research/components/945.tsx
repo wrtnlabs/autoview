@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Email
      *
      * @title Email
     */
-    export type email = {
+    export interface email {
         email: string & tags.Format<"email">;
         primary: boolean;
         verified: boolean;
         visibility: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.email[];
 
@@ -20,58 +21,73 @@ export type AutoViewInput = AutoViewInputSubTypes.email[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const emailList = Array.isArray(value) ? value : [];
-  const totalEmails = emailList.length;
-  // Prioritize primary emails at the top for clarity
-  const sortedEmails = [...emailList].sort(
-    (a, b) => (b.primary ? 1 : 0) - (a.primary ? 1 : 0),
-  );
+  const hasEmails = value.length > 0;
+  const formatVisibility = (vis: string | null): string =>
+    vis ? `${vis.charAt(0).toUpperCase()}${vis.slice(1)}` : 'Unknown';
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">
-        Email Addresses ({totalEmails})
-      </h2>
-      <ul className="divide-y divide-gray-200">
-        {sortedEmails.map((item, index) => {
-          const { email, primary, verified, visibility } = item;
-          // Capitalize visibility or mark as Hidden
-          const visibilityLabel = visibility
-            ? visibility.charAt(0).toUpperCase() + visibility.slice(1)
-            : "Hidden";
+    <div className="w-full p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-4 text-lg font-semibold text-gray-900">
+        <LucideReact.Mail className="mr-2 text-gray-600" size={20} />
+        Emails
+      </div>
 
-          return (
-            <li
-              key={index}
-              className={`flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 ${
-                primary ? "bg-blue-50" : ""
-              }`}
-            >
-              {/* Email address */}
-              <div className="text-gray-800 font-medium break-all">
-                {email}
-              </div>
-              {/* Badges for primary, verified, and visibility */}
-              <div className="flex flex-wrap space-x-2 mt-2 sm:mt-0">
-                {primary && (
-                  <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    Primary
+      {!hasEmails ? (
+        <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+          <LucideReact.AlertCircle size={48} aria-hidden="true" />
+          <p className="mt-2">No emails available</p>
+        </div>
+      ) : (
+        <ul className="divide-y divide-gray-200">
+          {value.map((item) => {
+            const visibilityLabel = formatVisibility(item.visibility);
+            return (
+              <li
+                key={item.email}
+                className="flex items-center justify-between py-3"
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <LucideReact.Mail
+                    size={16}
+                    className="text-gray-400 flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-gray-800 truncate">{item.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  {item.primary && (
+                    <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
+                      Primary
+                    </span>
+                  )}
+                  <div className="flex items-center">
+                    {item.verified ? (
+                      <LucideReact.CheckCircle
+                        size={16}
+                        className="text-green-500"
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <LucideReact.XCircle
+                        size={16}
+                        className="text-red-500"
+                        aria-hidden="true"
+                      />
+                    )}
+                    <span className="sr-only">
+                      {item.verified ? 'Verified' : 'Unverified'}
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                    {visibilityLabel}
                   </span>
-                )}
-                {verified && (
-                  <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                    Verified
-                  </span>
-                )}
-                <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                  {visibilityLabel}
-                </span>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

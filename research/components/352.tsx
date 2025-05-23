@@ -1,20 +1,21 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Gist Simple
      *
      * @title Gist Simple
     */
-    export type gist_simple = {
+    export interface gist_simple {
         forks?: {
             id?: string;
             url?: string & tags.Format<"uri">;
-            user?: any;
+            user?: AutoViewInputSubTypes.public_user;
             created_at?: string & tags.Format<"date-time">;
             updated_at?: string & tags.Format<"date-time">;
         }[] | null;
-        history?: any[] | null;
+        history?: AutoViewInputSubTypes.gist_history[] | null;
         /**
          * Gist
          *
@@ -44,9 +45,9 @@ export namespace AutoViewInputSubTypes {
             description: string | null;
             comments: number & tags.Type<"int32">;
             comments_enabled?: boolean;
-            user: any;
+            user: AutoViewInputSubTypes.nullable_simple_user;
             comments_url: string & tags.Format<"uri">;
-            owner?: any;
+            owner?: AutoViewInputSubTypes.nullable_simple_user;
             truncated?: boolean;
             forks?: any[];
             history?: any[];
@@ -84,16 +85,81 @@ export namespace AutoViewInputSubTypes {
         comments_url?: string;
         owner?: AutoViewInputSubTypes.simple_user;
         truncated?: boolean;
-    };
-    export type public_user = any;
-    export type gist_history = any;
-    export type nullable_simple_user = any;
+    }
+    /**
+     * Public User
+     *
+     * @title Public User
+    */
+    export interface public_user {
+        login: string;
+        id: number & tags.Type<"int32">;
+        user_view_type?: string;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        name: string | null;
+        company: string | null;
+        blog: string | null;
+        location: string | null;
+        email: (string & tags.Format<"email">) | null;
+        notification_email?: (string & tags.Format<"email">) | null;
+        hireable: boolean | null;
+        bio: string | null;
+        twitter_username?: string | null;
+        public_repos: number & tags.Type<"int32">;
+        public_gists: number & tags.Type<"int32">;
+        followers: number & tags.Type<"int32">;
+        following: number & tags.Type<"int32">;
+        created_at: string & tags.Format<"date-time">;
+        updated_at: string & tags.Format<"date-time">;
+        plan?: {
+            collaborators: number & tags.Type<"int32">;
+            name: string;
+            space: number & tags.Type<"int32">;
+            private_repos: number & tags.Type<"int32">;
+        };
+        private_gists?: number & tags.Type<"int32">;
+        total_private_repos?: number & tags.Type<"int32">;
+        owned_private_repos?: number & tags.Type<"int32">;
+        disk_usage?: number & tags.Type<"int32">;
+        collaborators?: number & tags.Type<"int32">;
+    }
+    /**
+     * Gist History
+     *
+     * @title Gist History
+    */
+    export interface gist_history {
+        user?: AutoViewInputSubTypes.nullable_simple_user;
+        version?: string;
+        committed_at?: string & tags.Format<"date-time">;
+        change_status?: {
+            total?: number & tags.Type<"int32">;
+            additions?: number & tags.Type<"int32">;
+            deletions?: number & tags.Type<"int32">;
+        };
+        url?: string & tags.Format<"uri">;
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export type nullable_simple_user = {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -116,7 +182,36 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    } | null;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.gist_simple[];
 
@@ -124,109 +219,91 @@ export type AutoViewInput = AutoViewInputSubTypes.gist_simple[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Helper: format ISO date strings to a human-friendly date
-  const formatDate = (dateStr?: string): string =>
-    dateStr
-      ? new Date(dateStr).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
-      : '—';
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formatDate = (iso?: string): string =>
+    iso ? new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "";
 
-  // If no gists, display a placeholder
-  if (!Array.isArray(value) || value.length === 0) {
-    return (
-      <div className="p-6 text-center text-gray-500">
-        No gists available.
-      </div>
-    );
-  }
+  const placeholderAvatar = (login?: string): string =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(login ?? "")}&background=0D8ABC&color=fff`;
 
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="space-y-6">
-      {value.map((gist, index) => {
-        const {
-          id,
-          description,
-          created_at,
-          updated_at,
-          forks,
-          comments,
-          html_url,
-        } = gist;
-        // "public" is a reserved word; access via index signature
-        const isPublic = gist['public'] ?? false;
-        // Owner details
-        const owner = gist.owner as Partial<AutoViewInputSubTypes.simple_user> | undefined;
-        const ownerLogin = owner?.login ?? 'Unknown';
-        const ownerAvatar = owner?.avatar_url;
-        // Files count
-        const files = gist.files;
-        const fileCount = files
-          ? Object.values(files).filter((f) => f != null).length
-          : 0;
-        // Fork count
-        const forkCount = Array.isArray(forks) ? forks.length : 0;
-        // Comments count
-        const commentCount = comments ?? 0;
+    <div className="space-y-4">
+      {value.length === 0 ? (
+        <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+          <LucideReact.AlertCircle className="mb-2 text-gray-400" size={48} />
+          <span className="text-sm">No gists available</span>
+        </div>
+      ) : (
+        value.map((gist, idx) => {
+          const desc = gist.description?.trim() || "No description provided.";
+          const created = formatDate(gist.created_at);
+          const filesCount = gist.files ? Object.keys(gist.files).length : 0;
+          const commentsCount = gist.comments ?? 0;
+          const isPublic = gist["public"] === true;
+          const owner = gist.owner;
+          const login = owner?.login;
+          const avatarUrl = owner?.avatar_url || placeholderAvatar(login);
 
-        return (
-          <div
-            key={id ?? index}
-            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center space-x-3">
-              {ownerAvatar ? (
+          return (
+            <article
+              key={gist.id ?? idx}
+              className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-150"
+            >
+              <header className="flex items-center mb-2">
                 <img
-                  src={ownerAvatar}
-                  alt={ownerLogin}
-                  className="w-8 h-8 rounded-full object-cover"
+                  src={avatarUrl}
+                  alt={login ? `${login}'s avatar` : "User avatar"}
+                  className="w-8 h-8 rounded-full object-cover mr-2 flex-shrink-0"
                 />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 truncate">
-                  {ownerLogin}
-                </p>
-                {html_url && (
-                  <a
-                    href={html_url}
-                    className="text-xs text-blue-500 hover:underline truncate block"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    View Gist
-                  </a>
+                <h2 className="font-medium text-gray-900 truncate">
+                  {login || "Unknown User"}
+                </h2>
+                {isPublic ? (
+                  <LucideReact.CheckCircle
+                    className="ml-auto text-green-500"
+                    size={16}
+                    aria-label="Public gist"
+                  />
+                ) : (
+                  <LucideReact.Lock
+                    className="ml-auto text-red-500"
+                    size={16}
+                    aria-label="Private gist"
+                  />
                 )}
-              </div>
-              <span
-                className={
-                  'px-2 py-0.5 text-xs font-semibold rounded-full ' +
-                  (isPublic
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800')
-                }
-              >
-                {isPublic ? 'Public' : 'Private'}
-              </span>
-            </div>
+              </header>
 
-            <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-              {description ?? 'No description provided.'}
-            </p>
+              <p className="text-gray-700 text-sm line-clamp-2 mb-3">{desc}</p>
 
-            <div className="mt-3 flex flex-wrap items-center text-gray-500 text-xs space-x-4">
-              <span>{fileCount} file{fileCount !== 1 ? 's' : ''}</span>
-              <span>Forks: {forkCount}</span>
-              <span>Comments: {commentCount}</span>
-              <span>Created: {formatDate(created_at)}</span>
-              <span>Updated: {formatDate(updated_at)}</span>
-            </div>
-          </div>
-        );
-      })}
+              <footer className="flex flex-wrap items-center text-gray-500 text-xs space-x-4">
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={14} aria-hidden="true" />
+                  <time dateTime={gist.created_at || ""}>{created}</time>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <LucideReact.FileText size={14} aria-hidden="true" />
+                  <span>{filesCount} file{filesCount !== 1 ? "s" : ""}</span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                  <LucideReact.MessageCircle size={14} aria-hidden="true" />
+                  <span>{commentsCount}</span>
+                </div>
+
+                {gist.html_url && (
+                  <div className="flex items-center gap-1 max-w-xs truncate">
+                    <LucideReact.Link size={14} aria-hidden="true" />
+                    <span className="truncate">{gist.html_url}</span>
+                  </div>
+                )}
+              </footer>
+            </article>
+          );
+        })
+      )}
     </div>
   );
 }

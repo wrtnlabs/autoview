@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Installation
      *
      * @title Installation
     */
-    export type installation = {
+    export interface installation {
         /**
          * The ID of the installation.
         */
         id: number & tags.Type<"int32">;
-        account: any | any | null;
+        account: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise | null;
         /**
          * Describe whether all repositories have been selected or there's a selection involved
         */
@@ -36,15 +37,74 @@ export namespace AutoViewInputSubTypes {
         suspended_by: AutoViewInputSubTypes.nullable_simple_user;
         suspended_at: (string & tags.Format<"date-time">) | null;
         contact_email?: string | null;
-    };
-    export type simple_user = any;
-    export type enterprise = any;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * The permissions granted to the user access token.
      *
      * @title App Permissions
     */
-    export type app_permissions = {
+    export interface app_permissions {
         /**
          * The level of permission to grant the access token for GitHub Actions workflows, workflow runs, and artifacts.
         */
@@ -237,7 +297,7 @@ export namespace AutoViewInputSubTypes {
          * The level of permission to grant the access token to list and manage repositories a user is starring.
         */
         starring?: "read" | "write";
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -275,6 +335,7 @@ export type AutoViewInput = AutoViewInputSubTypes.installation[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const installations = value;
   const formatDate = (dateStr: string): string =>
     new Date(dateStr).toLocaleDateString(undefined, {
       year: "numeric",
@@ -283,86 +344,118 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {value.map((item) => {
-        const suspended = item.suspended_at != null;
-        const selectionLabel =
-          item.repository_selection === "all"
-            ? "All Repositories"
-            : "Selected Repositories";
-        const eventsCount = item.events.length;
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      {installations.length === 0 && (
+        <div className="col-span-full flex flex-col items-center justify-center py-12 text-gray-400">
+          <LucideReact.AlertCircle size={48} className="mb-4" />
+          <p className="text-lg">No installations available</p>
+        </div>
+      )}
 
-        // permissions summary
-        const perms = item.permissions || {};
-        const permKeys = Object.keys(perms);
-        const totalPerms = permKeys.length;
-        const writePerms = permKeys.filter(
-          (key) => perms[key as keyof typeof perms] === "write" || perms[key as keyof typeof perms] === "admin"
+      {installations.map((inst) => {
+        const account = inst.account;
+        // Determine account display name and type icon
+        const isUser =
+          account !== null && "login" in account && typeof account.login === "string";
+        const displayName =
+          isUser && account
+            ? account.login
+            : account && "name" in account && account.name
+            ? account.name
+            : "Unknown Account";
+        const safeName = displayName ?? "";
+        const avatarSrc =
+          account && "avatar_url" in account && account.avatar_url
+            ? account.avatar_url
+            : `https://ui-avatars.com/api/?name=${encodeURIComponent(safeName)}&background=0D8ABC&color=fff`;
+        const repoSelectionLabel =
+          inst.repository_selection === "all"
+            ? "All repositories"
+            : "Selected repositories";
+        const eventsCount = inst.events.length;
+        const permEntries = Object.entries(inst.permissions);
+        const totalPerms = permEntries.length;
+        const writePerms = permEntries.filter(
+          ([, p]) => p === "write" || p === "admin"
         ).length;
+        const created = formatDate(inst.created_at);
+        const updated = formatDate(inst.updated_at);
+        const isSuspended = inst.suspended_at !== null;
 
         return (
           <div
-            key={item.id}
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            key={inst.id}
+            className="bg-white rounded-lg shadow hover:shadow-md transition p-5 flex flex-col"
           >
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-800 truncate">
-                {item.app_slug}
-              </h3>
-              <span
-                className={
-                  "text-sm font-medium " +
-                  (suspended ? "text-red-600" : "text-green-600")
-                }
-              >
-                {suspended ? "Suspended" : "Active"}
-              </span>
+            <div className="flex items-center space-x-3">
+              <img
+                src={avatarSrc}
+                alt={`${safeName} avatar`}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  target.onerror = null;
+                  target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    safeName
+                  )}&background=0D8ABC&color=fff`;
+                }}
+                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {safeName}
+                </p>
+                <p className="text-xs text-gray-500 truncate">{inst.app_slug}</p>
+              </div>
+              {isSuspended ? (
+                <LucideReact.AlertOctagon
+                  size={20}
+                  className="text-red-500"
+                  aria-label="Suspended"
+                />
+              ) : isUser ? (
+                <LucideReact.User
+                  size={20}
+                  className="text-gray-400"
+                  aria-label="User account"
+                />
+              ) : (
+                <LucideReact.Building
+                  size={20}
+                  className="text-gray-400"
+                  aria-label="Enterprise account"
+                />
+              )}
             </div>
-            <dl className="mt-3 text-sm text-gray-600 space-y-1">
-              <div className="flex justify-between">
-                <dt className="font-medium">Installation ID:</dt>
-                <dd>{item.id}</dd>
-              </div>
-              {item.contact_email != null && (
-                <div className="flex justify-between">
-                  <dt className="font-medium">Contact:</dt>
-                  <dd className="truncate">{item.contact_email}</dd>
-                </div>
-              )}
-              <div className="flex justify-between">
-                <dt className="font-medium">Repo Selection:</dt>
-                <dd>{selectionLabel}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="font-medium">Events:</dt>
-                <dd>{eventsCount}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="font-medium">Permissions:</dt>
-                <dd>
-                  {totalPerms} total, {writePerms} writable
-                </dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="font-medium">Created:</dt>
-                <dd>{formatDate(item.created_at)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="font-medium">Updated:</dt>
-                <dd>{formatDate(item.updated_at)}</dd>
-              </div>
-              {suspended && item.suspended_at && (
-                <div className="flex justify-between">
-                  <dt className="font-medium">Suspended At:</dt>
-                  <dd>{formatDate(item.suspended_at)}</dd>
-                </div>
-              )}
-            </dl>
+
+            <ul className="mt-4 space-y-2 text-sm text-gray-600 flex-1">
+              <li className="flex items-center space-x-2">
+                <LucideReact.Key size={16} className="text-blue-500" />
+                <span>
+                  {writePerms}/{totalPerms} write permissions
+                </span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <LucideReact.Bell size={16} className="text-yellow-500" />
+                <span>{eventsCount} events</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <LucideReact.GitBranch size={16} className="text-green-500" />
+                <span>{repoSelectionLabel}</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span>Created: {created}</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span>Updated: {updated}</span>
+              </li>
+            </ul>
           </div>
         );
       })}
     </div>
   );
+  // 3. Return the React element.
 }

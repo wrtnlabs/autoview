@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
      *
      * @title Reaction
     */
-    export type reaction = {
+    export interface reaction {
         id: number & tags.Type<"int32">;
         node_id: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -53,68 +54,53 @@ export type AutoViewInput = AutoViewInputSubTypes.reaction;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Map reaction content to emoji and human-readable label.
-  const contentMap: Record<AutoViewInput["content"], { emoji: string; label: string }> = {
-    "+1": { emoji: "👍", label: "Thumbs Up" },
-    "-1": { emoji: "👎", label: "Thumbs Down" },
-    laugh: { emoji: "😄", label: "Laugh" },
-    confused: { emoji: "😕", label: "Confused" },
-    heart: { emoji: "❤️", label: "Heart" },
-    hooray: { emoji: "🎉", label: "Hooray" },
-    rocket: { emoji: "🚀", label: "Rocket" },
-    eyes: { emoji: "👀", label: "Eyes" },
-  };
-  const { emoji, label } = contentMap[value.content];
+  const displayName = value.user?.name || value.user?.login || 'Unknown User';
+  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName,
+  )}&background=0D8ABC&color=fff`;
+  const avatarUrl = value.user?.avatar_url ?? avatarFallback;
 
-  // Format the creation timestamp into a readable string.
-  const createdDate = new Date(value.created_at);
-  const formattedDate =
-    createdDate.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }) +
-    " at " +
-    createdDate.toLocaleTimeString(undefined, {
-      hour: "numeric",
-      minute: "2-digit",
-    });
+  const reactionMap = {
+    '+1': { Icon: LucideReact.ThumbsUp, colorClass: 'text-green-500', label: 'Thumbs up' },
+    '-1': { Icon: LucideReact.ThumbsDown, colorClass: 'text-red-500', label: 'Thumbs down' },
+    laugh: { Icon: LucideReact.Laugh, colorClass: 'text-yellow-500', label: 'Laugh' },
+    confused: { Icon: LucideReact.HelpCircle, colorClass: 'text-amber-500', label: 'Confused' },
+    heart: { Icon: LucideReact.Heart, colorClass: 'text-pink-500', label: 'Heart' },
+    hooray: { Icon: LucideReact.Star, colorClass: 'text-purple-500', label: 'Hooray' },
+    rocket: { Icon: LucideReact.Rocket, colorClass: 'text-sky-500', label: 'Rocket' },
+    eyes: { Icon: LucideReact.Eye, colorClass: 'text-gray-500', label: 'Eyes' },
+  } as const;
 
-  // Extract user info, handling possible null.
-  const user = value.user;
-  const login = user?.login ?? "Unknown";
-  const displayName = user?.name ?? null;
-  const avatarUrl = user?.avatar_url;
+  const { Icon, colorClass, label } = reactionMap[value.content];
+  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow flex items-start space-x-4">
-      {avatarUrl ? (
-        <img
-          src={avatarUrl}
-          alt={`${login} avatar`}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-      ) : (
-        <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
-          <span className="text-gray-500 font-semibold">
-            {login.charAt(0).toUpperCase()}
-          </span>
+    <div className="p-4 bg-white rounded-lg shadow flex items-center gap-4">
+      <img
+        src={avatarUrl}
+        alt={`${displayName} avatar`}
+        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).src = avatarFallback;
+        }}
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-gray-900 truncate">{displayName}</span>
+          <Icon className={colorClass} size={16} aria-label={label} />
         </div>
-      )}
-      <div className="flex-1">
-        <div className="flex items-center space-x-2 text-gray-800">
-          <span className="text-xl">{emoji}</span>
-          <span className="font-medium">{label}</span>
-        </div>
-        <div className="mt-1 text-sm text-gray-500 flex flex-wrap">
-          <span>
-            {displayName ? `${displayName} (` : ""}
-            {login}
-            {displayName ? ")" : ""} reacted
-          </span>
-          <span className="mx-1">•</span>
-          <time dateTime={value.created_at}>{formattedDate}</time>
+        <div className="mt-1 flex items-center text-sm text-gray-500">
+          <LucideReact.Calendar size={16} className="mr-1" aria-label="Date" />
+          <time dateTime={value.created_at} className="truncate">
+            {formattedDate}
+          </time>
         </div>
       </div>
     </div>

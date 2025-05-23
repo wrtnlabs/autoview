@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The status of a deployment.
      *
      * @title Deployment Status
     */
-    export type deployment_status = {
+    export interface deployment_status {
         url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
         */
         log_url?: string & tags.Default<"">;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -86,7 +87,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -114,8 +115,67 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.deployment_status;
 
@@ -124,60 +184,109 @@ export type AutoViewInput = AutoViewInputSubTypes.deployment_status;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusMap: Record<AutoViewInput["state"], { text: string; color: string }> = {
-    success:    { text: "Success",    color: "bg-green-100 text-green-800" },
-    error:      { text: "Error",      color: "bg-red-100 text-red-800" },
-    failure:    { text: "Failure",    color: "bg-red-100 text-red-800" },
-    inactive:   { text: "Inactive",   color: "bg-gray-100 text-gray-800" },
-    pending:    { text: "Pending",    color: "bg-yellow-100 text-yellow-800" },
-    queued:     { text: "Queued",     color: "bg-blue-100 text-blue-800" },
-    in_progress:{ text: "In Progress",color: "bg-blue-100 text-blue-800" },
-  };
-  const statusInfo = statusMap[value.state];
-  const createdAt = new Date(value.created_at).toLocaleString();
-  const updatedAt = new Date(value.updated_at).toLocaleString();
-  const environment = value.environment && value.environment.length > 0
-    ? value.environment
-    : "default";
-  const description = value.description && value.description.length > 0
-    ? value.description
-    : "No description provided";
-  const creatorLogin = value.creator?.login ?? "Unknown";
-  const creatorAvatar = value.creator?.avatar_url;
-
+  const formattedCreatedAt = new Date(value.created_at).toLocaleString();
+  const formattedUpdatedAt = new Date(value.updated_at).toLocaleString();
+  const stateLabel = value.state
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+  // Select appropriate icon and color for status
+  const stateIcon = (() => {
+    switch (value.state) {
+      case 'error':
+      case 'failure':
+        return <LucideReact.AlertTriangle size={16} className="text-red-500" />;
+      case 'inactive':
+        return <LucideReact.MinusCircle size={16} className="text-gray-500" />;
+      case 'pending':
+      case 'queued':
+        return <LucideReact.Clock size={16} className="text-amber-500" />;
+      case 'in_progress':
+        return <LucideReact.Loader size={16} className="animate-spin text-blue-500" />;
+      case 'success':
+        return <LucideReact.CheckCircle size={16} className="text-green-500" />;
+      default:
+        return <LucideReact.HelpCircle size={16} className="text-gray-400" />;
+    }
+  })();
+  // Creator info
+  const creatorName = value.creator?.name ?? value.creator?.login ?? 'Unknown';
+  const avatarSrc =
+    value.creator?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(creatorName)}&background=ccc&color=fff`;
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center">
-        <span className={`px-2 py-1 text-sm font-semibold rounded ${statusInfo.color}`}>
-          {statusInfo.text}
-        </span>
-        <span className="text-xs text-gray-500">ID: {value.id}</span>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-sm space-y-4">
+      {/* Header: Status and Creation Time */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {stateIcon}
+          <span className="text-lg font-semibold text-gray-800">{stateLabel}</span>
+        </div>
+        <div className="flex items-center gap-1 text-sm text-gray-500">
+          <LucideReact.Calendar size={14} />
+          <span>{formattedCreatedAt}</span>
+        </div>
       </div>
-      <div className="mt-4 flex items-center">
-        {creatorAvatar ? (
+      {/* Description */}
+      <p className="text-gray-700 text-sm line-clamp-3">
+        {value.description || 'No description provided.'}
+      </p>
+      {/* Environment Badge */}
+      {value.environment && (
+        <div className="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">
+          {value.environment}
+        </div>
+      )}
+      {/* Links */}
+      <div className="space-y-2 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Link size={16} className="text-gray-400" />
+          <span className="truncate block max-w-xs">{value.target_url || '—'}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Link size={16} className="text-gray-400" />
+          <span className="truncate block max-w-xs">{value.repository_url}</span>
+        </div>
+        {value.deployment_url && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Link size={16} className="text-gray-400" />
+            <span className="truncate block max-w-xs">{value.deployment_url}</span>
+          </div>
+        )}
+        {value.log_url && (
+          <div className="flex items-center gap-1">
+            <LucideReact.FileText size={16} className="text-gray-400" />
+            <span className="truncate block max-w-xs">{value.log_url}</span>
+          </div>
+        )}
+      </div>
+      {/* Performed Via GitHub App */}
+      {value.performed_via_github_app && (
+        <div className="flex items-center gap-1 text-sm text-gray-600">
+          <LucideReact.Github size={16} className="text-gray-500" />
+          <span>{value.performed_via_github_app.name}</span>
+        </div>
+      )}
+      {/* Creator */}
+      {value.creator && (
+        <div className="flex items-center gap-2">
           <img
-            className="w-8 h-8 rounded-full mr-2 flex-shrink-0"
-            src={creatorAvatar}
-            alt={creatorLogin}
+            src={avatarSrc}
+            alt={creatorName}
+            onError={(e) =>
+              ((e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                creatorName,
+              )}&background=ccc&color=fff`))
+            }
+            className="w-8 h-8 rounded-full object-cover"
           />
-        ) : (
-          <div className="w-8 h-8 bg-gray-200 rounded-full mr-2" />
-        )}
-        <span className="text-sm font-medium text-gray-700">{creatorLogin}</span>
-      </div>
-      <div className="mt-3">
-        <h3 className="text-sm font-medium text-gray-800">
-          Environment: <span className="font-normal">{environment}</span>
-        </h3>
-        <p className="mt-1 text-sm text-gray-600 line-clamp-2">{description}</p>
-      </div>
-      <div className="mt-4 space-y-1 text-xs text-gray-500">
-        <div>Created: {createdAt}</div>
-        <div>Updated: {updatedAt}</div>
-        {value.target_url && (
-          <div className="truncate">Target URL: {value.target_url}</div>
-        )}
+          <span className="text-sm font-medium text-gray-800">{creatorName}</span>
+        </div>
+      )}
+      {/* Footer: Last Updated */}
+      <div className="flex items-center gap-1 text-xs text-gray-500">
+        <LucideReact.Calendar size={12} />
+        <span>Updated: {formattedUpdatedAt}</span>
       </div>
     </div>
   );

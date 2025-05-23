@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Full Team
     */
-    export type team_full = {
+    export interface team_full {
         /**
          * Unique identifier of the team
         */
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
          * Distinguished Name (DN) that team maps to within LDAP environment
         */
         ldap_dn?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -97,7 +98,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Team Organization
     */
-    export type team_organization = {
+    export interface team_organization {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -153,7 +154,7 @@ export namespace AutoViewInputSubTypes {
         web_commit_signoff_required?: boolean;
         updated_at: string & tags.Format<"date-time">;
         archived_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_full;
 
@@ -162,97 +163,104 @@ export type AutoViewInput = AutoViewInputSubTypes.team_full;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    name,
-    slug,
-    description,
-    privacy,
-    permission,
-    notification_setting,
-    members_count,
-    repos_count,
-    parent,
-    created_at,
-    updated_at,
-    organization,
-  } = value;
-
-  const formattedCreated = new Date(created_at).toLocaleDateString(undefined, {
+  const description = value.description ?? "No description provided";
+  const createdAt = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
-  const formattedUpdated = new Date(updated_at).toLocaleDateString(undefined, {
+  const updatedAt = new Date(value.updated_at).toLocaleDateString(undefined, {
+    year: "numeric",
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
-
-  const privacyLabel = privacy
-    ? privacy.charAt(0).toUpperCase() + privacy.slice(1)
-    : null;
-  const permissionLabel =
-    permission.charAt(0).toUpperCase() + permission.slice(1).toLowerCase();
-  const notificationLabel = notification_setting
-    ? notification_setting
-        .split("_")
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-        .join(" ")
-    : null;
+  const privacyLabel = value.privacy ?? "closed";
+  const notificationLabel =
+    value.notification_setting === "notifications_disabled"
+      ? "Off"
+      : value.notification_setting === "notifications_enabled"
+      ? "On"
+      : null;
+  const org = value.organization;
+  const orgName = org.name ?? org.login;
+  const orgDesc = org.description ?? "";
+  const orgAvatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    orgName,
+  )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md space-y-4">
-      {/* Header: Team & Organization */}
-      <div className="flex items-center space-x-4">
-        <img
-          src={organization.avatar_url}
-          alt={`${organization.login} logo`}
-          className="w-10 h-10 rounded-full object-cover"
-        />
-        <div className="flex flex-col">
-          <h2 className="text-xl font-semibold text-gray-900">{name}</h2>
-          <p className="text-sm text-gray-500">
-            @{organization.login}/{slug}
-          </p>
+    <div className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow">
+      <header className="mb-3">
+        <h2 className="text-xl font-semibold text-gray-900">{value.name}</h2>
+        <p className="text-sm text-gray-500">{value.slug}</p>
+      </header>
+      <p className="text-gray-700 line-clamp-2">{description}</p>
+
+      <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Users size={16} className="text-gray-500" />
+          <span>{value.members_count} members</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Folder size={16} className="text-gray-500" />
+          <span>{value.repos_count} repos</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Key size={16} className="text-gray-500" />
+          <span>{value.permission}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Lock size={16} className="text-gray-500" />
+          <span className="capitalize">{privacyLabel}</span>
+        </div>
+        {notificationLabel && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Bell size={16} className="text-gray-500" />
+            <span>Notifications {notificationLabel}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-4 mt-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Created {createdAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Updated {updatedAt}</span>
         </div>
       </div>
 
-      {/* Description */}
-      <p className="text-gray-700 line-clamp-2">
-        {description || "No description provided."}
-      </p>
-
-      {/* Badges: Privacy, Permission, Notification */}
-      <div className="flex flex-wrap gap-2">
-        {privacyLabel && (
-          <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs font-medium rounded">
-            {privacyLabel}
-          </span>
-        )}
-        <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded">
-          {permissionLabel}
-        </span>
-        {notificationLabel && (
-          <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-            {notificationLabel}
-          </span>
-        )}
-      </div>
-
-      {/* Stats: Members, Repos, Parent */}
-      <div className="flex flex-wrap text-sm text-gray-600 space-x-4">
-        <span>{members_count} Members</span>
-        <span>{repos_count} Repositories</span>
-        {parent && parent.name && (
-          <span>Parent: {parent.name}</span>
-        )}
-      </div>
-
-      {/* Timestamps */}
-      <div className="flex flex-wrap text-xs text-gray-500 space-x-4">
-        <span>Created: {formattedCreated}</span>
-        <span>Updated: {formattedUpdated}</span>
+      <div className="mt-6 pt-4 border-t flex items-center">
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+          <img
+            className="w-full h-full object-cover"
+            src={org.avatar_url}
+            alt={`${orgName} avatar`}
+            onError={(e) => {
+              e.currentTarget.src = orgAvatarFallback;
+            }}
+          />
+        </div>
+        <div className="ml-3 flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 truncate">
+            {orgName}
+          </p>
+          {orgDesc && (
+            <p className="text-xs text-gray-500 truncate">{orgDesc}</p>
+          )}
+        </div>
+        <a
+          href={org.html_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto flex items-center text-sm text-blue-500 hover:underline"
+        >
+          <LucideReact.Link size={16} className="mr-1" />
+          View Org
+        </a>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Short Branch
      *
      * @title Short Branch
     */
-    export type short_branch = {
+    export interface short_branch {
         name: string;
         commit: {
             sha: string;
@@ -15,13 +16,13 @@ export namespace AutoViewInputSubTypes {
         "protected": boolean;
         protection?: AutoViewInputSubTypes.branch_protection;
         protection_url?: string & tags.Format<"uri">;
-    };
+    }
     /**
      * Branch Protection
      *
      * @title Branch Protection
     */
-    export type branch_protection = {
+    export interface branch_protection {
         url?: string;
         enabled?: boolean;
         required_status_checks?: AutoViewInputSubTypes.protected_branch_required_status_check;
@@ -61,13 +62,13 @@ export namespace AutoViewInputSubTypes {
         allow_fork_syncing?: {
             enabled?: boolean;
         };
-    };
+    }
     /**
      * Protected Branch Required Status Check
      *
      * @title Protected Branch Required Status Check
     */
-    export type protected_branch_required_status_check = {
+    export interface protected_branch_required_status_check {
         url?: string;
         enforcement_level?: string;
         contexts: string[];
@@ -77,22 +78,22 @@ export namespace AutoViewInputSubTypes {
         }[];
         contexts_url?: string;
         strict?: boolean;
-    };
+    }
     /**
      * Protected Branch Admin Enforced
      *
      * @title Protected Branch Admin Enforced
     */
-    export type protected_branch_admin_enforced = {
+    export interface protected_branch_admin_enforced {
         url: string & tags.Format<"uri">;
         enabled: boolean;
-    };
+    }
     /**
      * Protected Branch Pull Request Review
      *
      * @title Protected Branch Pull Request Review
     */
-    export type protected_branch_pull_request_review = {
+    export interface protected_branch_pull_request_review {
         url?: string & tags.Format<"uri">;
         dismissal_restrictions?: {
             /**
@@ -135,13 +136,13 @@ export namespace AutoViewInputSubTypes {
          * Whether the most recent push must be approved by someone other than the person who pushed it.
         */
         require_last_push_approval?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -164,13 +165,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -191,7 +192,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -206,7 +207,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -252,7 +253,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -280,13 +281,44 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * Branch Restriction Policy
      *
      * @title Branch Restriction Policy
     */
-    export type branch_restriction_policy = {
+    export interface branch_restriction_policy {
         url: string & tags.Format<"uri">;
         users_url: string & tags.Format<"uri">;
         teams_url: string & tags.Format<"uri">;
@@ -372,87 +404,98 @@ export namespace AutoViewInputSubTypes {
             };
             events?: string[];
         }[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.short_branch[];
 
 
 
-// The component name is always "VisualComponent"
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Render a list of branch cards with key details: name, commit, protection status
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const branches = value;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {value.map((branch) => {
-        // Derive a short SHA for display
-        const shortSha = branch.commit.sha.slice(0, 7);
-        // Attempt to extract the last two segments of the commit URL for brevity
-        let commitPath = branch.commit.url;
-        try {
-          const parts = branch.commit.url.split("/");
-          commitPath = parts.slice(-2).join("/");
-        } catch {
-          // Fallback to full URL if any error
-        }
-        // Boolean flag for protection
-        const isProtected = branch["protected"];
-        // Summarize protection details presence
-        const protectionSummary = branch.protection
-          ? "Policy configured"
-          : branch.protection_url
-          ? "URL available"
-          : "None";
+    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      {branches.length === 0 ? (
+        <div className="flex items-center justify-center p-6 text-gray-500 col-span-full">
+          <LucideReact.AlertCircle size={24} className="mr-2" aria-label="No data" />
+          <span>No branches available</span>
+        </div>
+      ) : (
+        branches.map((branch) => {
+          const shortSha = branch.commit.sha.slice(0, 7);
+          const isProtected = branch["protected"];
 
-        return (
-          <div
-            key={branch.commit.sha}
-            className="p-4 bg-white rounded-lg shadow-sm"
-          >
-            {/* Header: Branch name + protection badge */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium text-gray-900 truncate">
-                {branch.name}
-              </h3>
-              <span
-                className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  isProtected
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {isProtected ? "Protected" : "Unprotected"}
-              </span>
-            </div>
-
-            {/* Details: Commit and optional protection info */}
-            <div className="mt-2 text-sm text-gray-600 space-y-1">
-              <div className="flex items-baseline space-x-2">
-                <span className="font-semibold">Commit:</span>
-                <code className="bg-gray-100 px-1 rounded text-xs">
-                  {shortSha}
-                </code>
-                <span className="truncate">{commitPath}</span>
+          return (
+            <div
+              key={branch.name}
+              className="p-4 bg-white rounded-lg shadow transition hover:shadow-md"
+            >
+              <div className="flex items-center justify-between">
+                <h3
+                  className="text-lg font-semibold text-gray-900 truncate"
+                  title={branch.name}
+                >
+                  {branch.name}
+                </h3>
+                {isProtected ? (
+                  <LucideReact.Lock
+                    size={18}
+                    className="text-green-500"
+                    aria-label="Protected branch"
+                  />
+                ) : (
+                  <LucideReact.Unlock
+                    size={18}
+                    className="text-gray-400"
+                    aria-label="Unprotected branch"
+                  />
+                )}
               </div>
 
-              {branch.protection && (
-                <div className="flex items-baseline space-x-2">
-                  <span className="font-semibold">Protection:</span>
-                  <span className="text-gray-700">{protectionSummary}</span>
-                </div>
-              )}
+              <div className="mt-2 flex items-center text-sm text-gray-600">
+                <LucideReact.GitBranch
+                  size={16}
+                  className="mr-1 text-gray-400"
+                  aria-label="Commit branch"
+                />
+                <span className="font-mono">{shortSha}</span>
+              </div>
 
-              {!branch.protection && branch.protection_url && (
-                <div className="flex items-baseline space-x-2">
-                  <span className="font-semibold">Protection URL:</span>
-                  <span className="text-blue-600 truncate">
+              <p
+                className="mt-1 text-xs text-gray-500 truncate"
+                title={branch.commit.url}
+              >
+                {branch.commit.url}
+              </p>
+
+              {branch.protection ? (
+                <div className="mt-2 flex items-center text-sm text-gray-700">
+                  <LucideReact.ShieldCheck
+                    size={16}
+                    className="mr-1 text-yellow-500"
+                    aria-label="Protection enabled"
+                  />
+                  <span>Protection rules configured</span>
+                </div>
+              ) : branch.protection_url ? (
+                <div className="mt-2 flex items-center text-sm text-gray-600">
+                  <LucideReact.Link
+                    size={16}
+                    className="mr-1 text-gray-400"
+                    aria-label="Protection rules link"
+                  />
+                  <span className="truncate" title={branch.protection_url}>
                     {branch.protection_url}
                   </span>
                 </div>
-              )}
+              ) : null}
             </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
     </div>
   );
 }

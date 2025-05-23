@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsCodespaces {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             codespaces: AutoViewInputSubTypes.codespace[];
-        };
+        }
     }
     /**
      * A codespace.
      *
      * @title Codespace
     */
-    export type codespace = {
+    export interface codespace {
         id: number & tags.Type<"int32">;
         /**
          * Automatically generated name of this codespace.
@@ -140,13 +141,13 @@ export namespace AutoViewInputSubTypes {
          * The text to display to a user when a codespace has been stopped for a potentially actionable reason.
         */
         last_known_stop_notice?: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -169,13 +170,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -278,19 +279,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -363,109 +364,104 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsCodespaces.GetResponse
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDateTime = (iso: string | null | undefined): string =>
-    iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }) : 'N/A';
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
 
-  const stateColors: Record<string, string> = {
-    Available: 'bg-green-100 text-green-800',
-    Starting: 'bg-blue-100 text-blue-800',
-    Provisioning: 'bg-yellow-100 text-yellow-800',
-    Queued: 'bg-yellow-100 text-yellow-800',
-    Shutdown: 'bg-yellow-100 text-yellow-800',
-    Deleted: 'bg-red-100 text-red-800',
-    Failed: 'bg-red-100 text-red-800',
-    Archived: 'bg-gray-100 text-gray-800',
-    Unknown: 'bg-gray-100 text-gray-800',
-    Moved: 'bg-purple-100 text-purple-800',
-    Awaiting: 'bg-yellow-100 text-yellow-800',
-    Unavailable: 'bg-gray-100 text-gray-800',
-    ShuttingDown: 'bg-yellow-100 text-yellow-800',
-    Exporting: 'bg-blue-100 text-blue-800',
-    Updating: 'bg-blue-100 text-blue-800',
-    Rebuilding: 'bg-blue-100 text-blue-800',
+  // Mapping codespace state to icon and color
+  const getStateIconProps = (state: AutoViewInputSubTypes.codespace['state']) => {
+    if (state === 'Available') {
+      return { Icon: LucideReact.CheckCircle, color: 'text-green-500' };
+    }
+    if (state === 'Failed') {
+      return { Icon: LucideReact.AlertTriangle, color: 'text-red-500' };
+    }
+    if (
+      [
+        'Provisioning',
+        'Starting',
+        'ShuttingDown',
+        'Queued',
+        'Rebuilding',
+        'Exporting',
+        'Updating',
+      ].includes(state)
+    ) {
+      return { Icon: LucideReact.Clock, color: 'text-amber-500' };
+    }
+    // Default for other states
+    return { Icon: LucideReact.Circle, color: 'text-gray-400' };
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="md:max-w-4xl mx-auto p-4">
-      {/* Header */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-900">
-          Codespaces ({value.total_count})
-        </h2>
-      </div>
-
-      {/* List of Codespace Cards */}
-      <div className="space-y-4">
-        {value.codespaces.map((space) => {
-          const createdAt = formatDateTime(space.created_at);
-          const lastUsed = formatDateTime(space.last_used_at);
-          const machineLabel = space.machine?.display_name ?? 'Standard';
-          const idleInfo =
-            space.idle_timeout_minutes != null
-              ? `${space.idle_timeout_minutes} min`
-              : 'Default';
-          const badgeColor = stateColors[space.state] ?? 'bg-gray-100 text-gray-800';
+    <div className="p-4">
+      <h2 className="text-xl font-semibold mb-4">Codespaces ({value.total_count})</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {value.codespaces.map((cs) => {
+          const displayName = cs.display_name?.trim() || cs.name;
+          const created = formatDate(cs.created_at);
+          const lastUsed = cs.last_used_at ? formatDate(cs.last_used_at) : 'Never used';
+          const { Icon: StateIcon, color: stateColor } = getStateIconProps(cs.state);
 
           return (
             <div
-              key={space.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
+              key={cs.id}
+              className="bg-white rounded-lg shadow p-4 flex flex-col justify-between"
             >
-              <div className="p-4">
-                {/* Title & State */}
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-800 truncate">
-                    {space.display_name ?? space.name}
-                  </h3>
-                  <span
-                    className={`text-xs font-semibold uppercase tracking-wide px-2 py-1 rounded ${badgeColor}`}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3
+                    className="text-lg font-medium truncate"
+                    title={displayName}
                   >
-                    {space.state}
+                    {displayName}
+                  </h3>
+                  <StateIcon
+                    className={stateColor}
+                    size={20}
+                    aria-label={cs.state}
+                  />
+                </div>
+                <div className="flex items-center text-sm text-gray-500 mb-2">
+                  <LucideReact.Calendar size={16} className="mr-1" aria-label="Created" />
+                  <span>Created {created}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500 mb-2">
+                  <LucideReact.Clock size={16} className="mr-1" aria-label="Last used" />
+                  <span>Last used {lastUsed}</span>
+                </div>
+                <div className="flex items-center text-sm text-gray-500 mb-2 truncate">
+                  <LucideReact.User size={16} className="mr-1" aria-label="Owner" />
+                  <span className="truncate" title={cs.owner.login}>
+                    {cs.owner.login}
                   </span>
                 </div>
-
-                {/* Owner & Repository */}
-                <div className="mt-2 flex flex-wrap text-sm text-gray-600 space-x-4">
-                  <div>
-                    <span className="font-semibold text-gray-700">Owner:</span>{' '}
-                    {space.owner.login}
-                  </div>
-                  <div>
-                    <span className="font-semibold text-gray-700">Repo:</span>{' '}
-                    {space.repository.full_name}
-                  </div>
+                <div className="flex items-center text-sm text-gray-500 mb-2 truncate">
+                  <LucideReact.GitBranch size={16} className="mr-1" aria-label="Repository" />
+                  <span className="truncate" title={cs.repository.full_name}>
+                    {cs.repository.full_name}
+                  </span>
                 </div>
-
-                {/* Timing & Machine */}
-                <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
-                  <div>
-                    <div className="font-semibold text-gray-700">Created:</div>
-                    <div>{createdAt}</div>
+              </div>
+              <div className="mt-2">
+                {cs.machine && (
+                  <div className="flex items-center text-sm text-gray-500 mb-2 truncate">
+                    <LucideReact.Cpu size={16} className="mr-1" aria-label="Machine" />
+                    <span className="truncate" title={cs.machine.display_name}>
+                      {cs.machine.display_name}
+                    </span>
                   </div>
-                  <div>
-                    <div className="font-semibold text-gray-700">Last Used:</div>
-                    <div>{lastUsed}</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-700">Machine:</div>
-                    <div>{machineLabel}</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-700">Idle Timeout:</div>
-                    <div>{idleInfo}</div>
-                  </div>
-                  <div>
-                    <div className="font-semibold text-gray-700">Location:</div>
-                    <div>{space.location}</div>
-                  </div>
-                </div>
-
-                {/* Pending Operation Notice */}
-                {space.pending_operation && (
-                  <div className="mt-3 text-sm text-red-600">
-                    {space.pending_operation_disabled_reason ||
-                      'Pending operation in progress'}
+                )}
+                {typeof cs.idle_timeout_minutes === 'number' && (
+                  <div className="flex items-center text-sm text-gray-500">
+                    <LucideReact.Clock size={16} className="mr-1" aria-label="Idle timeout" />
+                    <span>Idle timeout: {cs.idle_timeout_minutes} min</span>
                   </div>
                 )}
               </div>

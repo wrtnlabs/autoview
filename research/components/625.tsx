@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * An autolink reference.
      *
      * @title Autolink reference
     */
-    export type autolink = {
+    export interface autolink {
         id: number & tags.Type<"int32">;
         /**
          * The prefix of a key that is linkified.
@@ -20,7 +21,7 @@ export namespace AutoViewInputSubTypes {
          * Whether this autolink reference matches alphanumeric characters. If false, this autolink reference only matches numeric characters.
         */
         is_alphanumeric: boolean;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.autolink;
 
@@ -29,36 +30,46 @@ export type AutoViewInput = AutoViewInputSubTypes.autolink;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const patternLabel = value.is_alphanumeric ? "Alphanumeric" : "Numeric";
-  const patternBadgeClasses = value.is_alphanumeric
-    ? "bg-green-100 text-green-800"
-    : "bg-blue-100 text-blue-800";
+  const matchType = value.is_alphanumeric ? "Alphanumeric" : "Numeric Only";
+  const matchIcon = value.is_alphanumeric ? (
+    <LucideReact.CheckCircle
+      className="ml-2 text-green-500"
+      size={16}
+      role="img"
+      aria-label="Alphanumeric match"
+    />
+  ) : (
+    <LucideReact.XCircle
+      className="ml-2 text-red-500"
+      size={16}
+      role="img"
+      aria-label="Numeric only match"
+    />
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">Autolink Reference</h2>
-      <div className="space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center">
-          <span className="font-medium text-gray-700 w-32">Key Prefix:</span>
-          <code className="mt-1 sm:mt-0 bg-gray-100 text-gray-800 px-2 py-1 rounded break-all">
-            {value.key_prefix}
-          </code>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-start">
-          <span className="font-medium text-gray-700 w-32">URL Template:</span>
-          <code className="mt-1 sm:mt-0 bg-gray-100 text-gray-800 px-2 py-1 rounded break-all">
+    <div className="w-full sm:max-w-md p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-3">
+        <LucideReact.Tag className="text-blue-500" size={16} />
+        <span className="ml-2 text-sm font-medium text-gray-700">Key Prefix</span>
+        <span className="ml-auto text-sm text-gray-900">{value.key_prefix}</span>
+      </div>
+
+      <div className="flex items-start mb-3">
+        <LucideReact.Link className="text-gray-400 mt-0.5" size={16} />
+        <div className="ml-2 flex-1">
+          <span className="text-sm font-medium text-gray-700">URL Template</span>
+          <code className="block w-full font-mono text-sm text-blue-600 truncate">
             {value.url_template}
           </code>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center">
-          <span className="font-medium text-gray-700 w-32">Pattern:</span>
-          <span
-            className={`inline-block mt-1 sm:mt-0 px-2 py-0.5 text-xs font-semibold rounded ${patternBadgeClasses}`}
-          >
-            {patternLabel}
-          </span>
-        </div>
+      </div>
+
+      <div className="flex items-center">
+        <span className="text-sm font-medium text-gray-700">Match Type</span>
+        {matchIcon}
+        <span className="ml-1 text-sm text-gray-900">{matchType}</span>
       </div>
     </div>
   );

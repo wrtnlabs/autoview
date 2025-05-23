@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4WebhooksView = {
+                export interface LegacyV4WebhooksView {
                     webhooks?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook[];
                     next?: number;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Webhook = {
+            export interface LegacyV4Webhook {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -24,7 +25,7 @@ export namespace AutoViewInputSubTypes {
                 apiVersion: string;
                 lastBlockedAt?: number;
                 blocked?: boolean;
-            };
+            }
         }
     }
 }
@@ -34,95 +35,124 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Webhook
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // Derived data
   const webhooks = value.webhooks ?? [];
+  const hasWebhooks = webhooks.length > 0;
+  const formatDate = (timestamp?: number): string =>
+    timestamp ? new Date(timestamp).toLocaleString() : "—";
 
-  function formatDate(timestamp?: number): string {
-    if (!timestamp) return "—";
-    const d = new Date(timestamp);
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
-  function truncate(text: string, maxLength = 40): string {
-    if (text.length <= maxLength) return text;
-    return text.slice(0, maxLength - 1) + "…";
-  }
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Render
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      {webhooks.length === 0 ? (
-        <p className="text-center text-gray-500">No webhooks available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {webhooks.map((hook, idx) => (
-            <li
-              key={idx}
-              className="bg-white p-4 rounded-lg shadow flex flex-col sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">
-                  {hook.name}
-                </h3>
-                <p className="text-sm text-gray-500 truncate">
-                  {truncate(hook.url)}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <span
-                    className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${
-                      hook.blocked
-                        ? "bg-red-100 text-red-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {hook.blocked ? "Blocked" : "Active"}
-                  </span>
-                  <span className="inline-block px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
-                    v{hook.apiVersion}
-                  </span>
-                  {hook.watchUserChats && (
-                    <span className="inline-block px-2 py-0.5 text-xs bg-indigo-100 text-indigo-800 rounded-full">
-                      User Chats
-                    </span>
+    <div className="space-y-4">
+      {hasWebhooks ? (
+        webhooks.map((wh, idx) => (
+          <div
+            key={idx}
+            className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-start sm:justify-between"
+          >
+            {/* Main Info */}
+            <div className="flex-1">
+              <div className="text-lg font-semibold text-gray-800 truncate">
+                {wh.name}
+              </div>
+              <div className="mt-1 flex items-center text-gray-600 text-sm space-x-2">
+                <LucideReact.Link
+                  size={16}
+                  className="text-gray-400"
+                  aria-label="Webhook URL"
+                />
+                <a
+                  href={wh.url}
+                  title={wh.url}
+                  className="truncate hover:underline"
+                >
+                  {wh.url}
+                </a>
+              </div>
+              <div className="mt-2 flex flex-wrap items-center text-gray-500 text-sm gap-4">
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Calendar
+                    size={14}
+                    className="text-gray-400"
+                    aria-label="Created at"
+                  />
+                  <span>{formatDate(wh.createdAt)}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {wh.blocked ? (
+                    <>
+                      <LucideReact.AlertTriangle
+                        size={14}
+                        className="text-red-500"
+                        aria-label="Blocked"
+                      />
+                      <span>Blocked</span>
+                    </>
+                  ) : (
+                    <>
+                      <LucideReact.CheckCircle
+                        size={14}
+                        className="text-green-500"
+                        aria-label="Active"
+                      />
+                      <span>Active</span>
+                    </>
                   )}
-                  {hook.watchGroups && (
-                    <span className="inline-block px-2 py-0.5 text-xs bg-purple-100 text-purple-800 rounded-full">
-                      Groups
-                    </span>
-                  )}
-                  {hook.keywords &&
-                    hook.keywords.map((kw, i) => (
-                      <span
-                        key={i}
-                        className="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded-full"
-                      >
-                        {kw}
-                      </span>
-                    ))}
                 </div>
               </div>
-              <div className="mt-3 sm:mt-0 sm:ml-4 text-sm text-gray-600 text-right">
-                <p>Channel: {hook.channelId ?? "—"}</p>
-                <p>Created: {formatDate(hook.createdAt)}</p>
-                {hook.lastBlockedAt != null && (
-                  <p>Blocked At: {formatDate(hook.lastBlockedAt)}</p>
-                )}
+              {wh.keywords && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {wh.keywords.map((kw, kidx) => (
+                    <span
+                      key={kidx}
+                      className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded"
+                    >
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Metadata */}
+            <div className="mt-4 sm:mt-0 flex flex-wrap gap-4 text-gray-600 text-sm">
+              {wh.watchUserChats != null && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.MessageSquare
+                    size={16}
+                    className="text-gray-400"
+                    aria-label="User chats"
+                  />
+                  <span>
+                    {wh.watchUserChats ? "Watching Chats" : "Chats Off"}
+                  </span>
+                </div>
+              )}
+              {wh.watchGroups != null && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Users
+                    size={16}
+                    className="text-gray-400"
+                    aria-label="Groups"
+                  />
+                  <span>{wh.watchGroups ? "Watching Groups" : "Groups Off"}</span>
+                </div>
+              )}
+              <div className="flex items-center space-x-1">
+                <LucideReact.Code
+                  size={16}
+                  className="text-gray-400"
+                  aria-label="API Version"
+                />
+                <span>{wh.apiVersion}</span>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {value.next != null && (
-        <div className="mt-4 text-center">
-          <span className="inline-block px-3 py-1 text-xs bg-gray-200 text-gray-700 rounded-full">
-            Next Offset: {value.next}
-          </span>
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} aria-label="No data" />
+          <span className="mt-4 text-sm">No webhooks configured</span>
         </div>
       )}
     </div>

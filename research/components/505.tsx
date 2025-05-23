@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Custom property defined on an organization
      *
      * @title Organization Custom Property
     */
-    export type custom_property = {
+    export interface custom_property {
         /**
          * The name of the property
         */
@@ -44,7 +45,7 @@ export namespace AutoViewInputSubTypes {
          * Who can edit the values of the property
         */
         values_editable_by?: "org_actors" | "org_and_repo_actors" | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.custom_property[];
 
@@ -53,93 +54,130 @@ export type AutoViewInput = AutoViewInputSubTypes.custom_property[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDefaultValue = (dv?: string | string[] | null): string => {
-    if (dv == null) return "None";
-    return Array.isArray(dv) ? dv.join(", ") : dv;
-  };
+  const properties = value;
+  const total = properties.length;
 
-  const renderBadges = (items?: string[] | null, limit = 5) => {
-    if (!items || items.length === 0)
-      return <span className="text-sm text-gray-500">None</span>;
-    const visible = items.slice(0, limit);
-    return (
-      <>
-        {visible.map((item, idx) => (
-          <span
-            key={idx}
-            className="inline-block bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded mr-1 mb-1"
-          >
-            {item}
-          </span>
-        ))}
-        {items.length > limit && (
-          <span className="inline-block text-gray-500 text-xs">
-            +{items.length - limit} more
-          </span>
-        )}
-      </>
-    );
+  const valueTypeLabels: Record<AutoViewInputSubTypes.custom_property["value_type"], string> = {
+    string: "Text",
+    single_select: "Single Select",
+    multi_select: "Multiple Select",
+    true_false: "True / False",
   };
-
-  const capitalize = (str: string) =>
-    str.charAt(0).toUpperCase() + str.slice(1);
+  const sourceTypeLabels: Record<NonNullable<AutoViewInputSubTypes.custom_property["source_type"]>, string> = {
+    organization: "Organization",
+    enterprise: "Enterprise",
+  };
+  const editableByLabels: Record<NonNullable<AutoViewInputSubTypes.custom_property["values_editable_by"]>, string> = {
+    org_actors: "Organization Actors",
+    org_and_repo_actors: "Organization & Repository Actors",
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (total === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-4 text-lg">No custom properties available</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {value.map((prop, idx) => (
-        <div
-          key={idx}
-          className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-        >
-          <div className="flex flex-wrap items-center mb-2">
-            <h3 className="text-lg font-semibold text-gray-900 mr-2 truncate">
-              {prop.property_name}
-            </h3>
-            {prop.required && (
-              <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-0.5 rounded">
-                Required
-              </span>
-            )}
-          </div>
+    <div className="bg-white rounded-lg shadow p-4">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-gray-900">Custom Properties</h2>
+        <span className="text-sm text-gray-600">{total} items</span>
+      </div>
+      <ul className="divide-y divide-gray-200">
+        {properties.map((prop, idx) => {
+          // Format default value
+          let defaultDisplay: string | null = null;
+          if (prop.default_value !== undefined && prop.default_value !== null) {
+            if (Array.isArray(prop.default_value)) {
+              defaultDisplay = prop.default_value.join(", ");
+            } else {
+              defaultDisplay = prop.default_value;
+            }
+          }
 
-          {prop.description && (
-            <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-              {prop.description}
-            </p>
-          )}
+          const typeLabel = valueTypeLabels[prop.value_type];
+          const sourceLabel = prop.source_type ? sourceTypeLabels[prop.source_type] : null;
+          const editableLabel = prop.values_editable_by
+            ? editableByLabels[prop.values_editable_by]
+            : null;
 
-          <div className="mb-2 flex flex-wrap">
-            <span className="bg-blue-100 text-blue-800 text-xs font-medium mr-2 mb-1 px-2 py-0.5 rounded">
-              Type: {prop.value_type.replace("_", " ")}
-            </span>
-            {prop.source_type && (
-              <span className="bg-green-100 text-green-800 text-xs font-medium mr-2 mb-1 px-2 py-0.5 rounded">
-                Source: {capitalize(prop.source_type)}
-              </span>
-            )}
-            {prop.values_editable_by && (
-              <span className="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 mb-1 px-2 py-0.5 rounded">
-                Editable By: {prop.values_editable_by.replace(/_/g, " ")}
-              </span>
-            )}
-          </div>
-
-          <div className="mb-2 text-sm text-gray-700">
-            <span className="font-medium">Default:</span>{" "}
-            {formatDefaultValue(prop.default_value)}
-          </div>
-
-          <div>
-            <span className="font-medium text-gray-800 text-sm">
-              Allowed Values:
-            </span>
-            <div className="mt-1 flex flex-wrap">
-              {renderBadges(prop.allowed_values)}
-            </div>
-          </div>
-        </div>
-      ))}
+          return (
+            <li
+              key={idx}
+              className="py-4 flex flex-col md:flex-row md:items-start md:justify-between"
+            >
+              <div className="flex-1">
+                <div className="flex items-center space-x-2">
+                  <span className="text-lg font-semibold text-gray-900">
+                    {prop.property_name}
+                  </span>
+                  {prop.required ? (
+                    <LucideReact.CheckCircle
+                      className="text-green-500"
+                      size={16}
+                      aria-label="Required"
+                    />
+                  ) : (
+                    <LucideReact.XCircle
+                      className="text-gray-400"
+                      size={16}
+                      aria-label="Optional"
+                    />
+                  )}
+                </div>
+                {prop.description && (
+                  <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                    {prop.description}
+                  </p>
+                )}
+              </div>
+              <div className="mt-3 md:mt-0 md:ml-6 flex flex-wrap gap-4 text-sm text-gray-500">
+                <div className="flex items-center">
+                  <LucideReact.Code size={16} className="mr-1" aria-label="Value Type" />
+                  {typeLabel}
+                </div>
+                {defaultDisplay && (
+                  <div className="flex items-center">
+                    <LucideReact.Info size={16} className="mr-1" aria-label="Default Value" />
+                    <span className="font-medium text-gray-700">{defaultDisplay}</span>
+                  </div>
+                )}
+                {prop.allowed_values && prop.allowed_values.length > 0 && (
+                  <div className="flex items-center">
+                    <LucideReact.List
+                      size={16}
+                      className="mr-1"
+                      aria-label="Allowed Values Count"
+                    />
+                    <span className="font-medium text-gray-700">
+                      {prop.allowed_values.length} allowed
+                    </span>
+                  </div>
+                )}
+                {sourceLabel && (
+                  <div className="flex items-center">
+                    <LucideReact.Link size={16} className="mr-1" aria-label="Source Type" />
+                    {sourceLabel}
+                  </div>
+                )}
+                {editableLabel && (
+                  <div className="flex items-center">
+                    <LucideReact.User size={16} className="mr-1" aria-label="Editable By" />
+                    <span className="font-medium text-gray-700">{editableLabel}</span>
+                  </div>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
+  // 3. Return the React element.
+  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

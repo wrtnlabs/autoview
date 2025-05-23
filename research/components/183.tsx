@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4SessionsView = {
+                export interface LegacyV4SessionsView {
                     sessions?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession[];
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4ChatSession = {
+            export interface LegacyV4ChatSession {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -30,7 +31,7 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
+            }
         }
     }
 }
@@ -40,104 +41,120 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Session
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation and transformation
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const sessions = value.sessions ?? [];
-  const totalUnread = sessions.reduce((sum, s) => sum + (s.unread ?? 0), 0);
-  const totalAlerts = sessions.reduce((sum, s) => sum + (s.alert ?? 0), 0);
 
-  const formatDate = (ms?: number) => {
-    if (typeof ms !== 'number') return '—';
-    const d = new Date(ms);
-    return d.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const processed = sessions
+    .map((s) => {
+      const last = Math.max(
+        s.postedAt ?? 0,
+        s.receivedAt ?? 0,
+        s.updatedAt ?? 0,
+        s.readAt ?? 0
+      );
+      return { ...s, lastActivity: last };
+    })
+    .sort((a, b) => b.lastActivity - a.lastActivity);
 
-  const getLastActivity = (s: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession) => {
-    const times = [
-      s.updatedAt,
-      s.receivedAt,
-      s.postedAt,
-      s.readAt,
-      s.createdAt
-    ].filter((t): t is number => typeof t === 'number');
-    return times.length ? Math.max(...times) : undefined;
-  };
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (processed.length === 0) {
+    return (
+      <div className="p-6 flex flex-col items-center text-gray-400">
+        <LucideReact.AlertCircle size={48} aria-label="No data" />
+        <p className="mt-3 text-sm">No sessions available.</p>
+      </div>
+    );
+  }
 
-  const mapWatchLabel = (w?: 'all' | 'info' | 'none') => {
-    switch (w) {
-      case 'all':
-        return 'All';
-      case 'info':
-        return 'Info';
-      default:
-        return 'None';
-    }
-  };
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">
-        Chat Sessions ({sessions.length})
-      </h2>
-      <p className="text-sm text-gray-600 mb-4">
-        Total Unread: {totalUnread}
-        {totalAlerts > 0 && (
-          <span className="ml-4">Alerts: {totalAlerts}</span>
-        )}
-      </p>
+    <ul className="bg-white rounded-lg shadow-sm divide-y divide-gray-200">
+      {processed.map((session, idx) => {
+        const title =
+          session.chatId ||
+          session.chatKey ||
+          session.id ||
+          session.key ||
+          "Session";
 
-      {sessions.length === 0 ? (
-        <p className="text-sm text-gray-500">No sessions available.</p>
-      ) : (
-        <ul className="divide-y divide-gray-200">
-          {sessions.map((s, idx) => {
-            const lastActivity = getLastActivity(s);
-            const watchLabel = mapWatchLabel(s.watch);
-            const title =
-              s.chatId ?? s.channelId ?? s.id ?? 'Unknown Session';
+        const hasDate = session.lastActivity > 0;
+        const formattedDate = hasDate
+          ? new Date(session.lastActivity).toLocaleString([], {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : "";
 
-            return (
-              <li
-                key={idx}
-                className="flex flex-col sm:flex-row sm:justify-between py-3"
-              >
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900 truncate">
-                    {title}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    {s.chatType ?? s.personType ?? ''}
-                  </div>
+        let watchIcon = (
+          <LucideReact.BellOff
+            className="text-gray-400"
+            size={16}
+            aria-label="Not watching"
+          />
+        );
+        if (session.watch === "all") {
+          watchIcon = (
+            <LucideReact.Bell
+              className="text-blue-500"
+              size={16}
+              aria-label="Watching all"
+            />
+          );
+        } else if (session.watch === "info") {
+          watchIcon = (
+            <LucideReact.Info
+              className="text-blue-500"
+              size={16}
+              aria-label="Watching info"
+            />
+          );
+        }
+
+        return (
+          <li
+            key={idx}
+            className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:bg-gray-50"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 truncate">
+              <span className="font-medium text-gray-900 truncate">
+                {title}
+              </span>
+              {hasDate && (
+                <span className="flex items-center text-sm text-gray-500 mt-1 sm:mt-0">
+                  <LucideReact.Calendar
+                    className="mr-1"
+                    size={14}
+                    aria-label="Date"
+                  />
+                  {formattedDate}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center space-x-4 mt-3 sm:mt-0">
+              {session.alert != null && session.alert > 0 && (
+                <div className="flex items-center text-red-500 text-sm">
+                  <LucideReact.AlertTriangle
+                    className="mr-1"
+                    size={16}
+                    aria-label="Alerts"
+                  />
+                  <span>{session.alert}</span>
                 </div>
-                <div className="flex flex-wrap items-center mt-2 sm:mt-0 space-x-2">
-                  {s.unread ? (
-                    <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                      {s.unread} Unread
-                    </span>
-                  ) : null}
-                  {s.alert ? (
-                    <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-                      {s.alert} Alerts
-                    </span>
-                  ) : null}
-                  <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded">
-                    {watchLabel}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {formatDate(lastActivity)}
-                  </span>
+              )}
+              {session.unread != null && session.unread > 0 && (
+                <div className="flex items-center text-blue-500 text-sm">
+                  <LucideReact.MessageSquare
+                    className="mr-1"
+                    size={16}
+                    aria-label="Unread"
+                  />
+                  <span>{session.unread}</span>
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </div>
+              )}
+              <div>{watchIcon}</div>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

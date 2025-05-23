@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A page.
      *
      * Collection of records with pagination indformation.
     */
-    export type IPageIShoppingSection = {
+    export interface IPageIShoppingSection {
         /**
          * Page information.
          *
@@ -19,12 +20,12 @@ export namespace AutoViewInputSubTypes {
          * @title List of records
         */
         data: AutoViewInputSubTypes.IShoppingSection[];
-    };
+    }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -51,7 +52,7 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     /**
      * Section information.
@@ -68,7 +69,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -93,7 +94,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSection;
 
@@ -103,59 +104,67 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSection;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { current, limit, records, pages } = value.pagination;
-  const startIndex = records > 0 ? (current - 1) * limit + 1 : 0;
-  const endIndex = Math.min(current * limit, records);
-
-  // Date formatter for created_at fields
-  const dateFormatter = new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const startRecord = (current - 1) * limit + 1;
+  const endRecord = Math.min(current * limit, records);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-gray-50 rounded-lg shadow-sm">
+    <div className="p-4 bg-white rounded-lg shadow-md">
       {/* Pagination Summary */}
-      <div className="mb-4 text-sm text-gray-600">
-        {records === 0 ? (
-          "No sections available."
-        ) : (
-          <>
-            Showing{" "}
-            <span className="font-medium text-gray-800">{startIndex}</span>–{" "}
-            <span className="font-medium text-gray-800">{endIndex}</span> of{" "}
-            <span className="font-medium text-gray-800">{records}</span> sections
-            (Page{" "}
-            <span className="font-medium text-gray-800">{current}</span> of{" "}
-            <span className="font-medium text-gray-800">{pages}</span>)
-          </>
-        )}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        <div className="text-gray-700 font-medium">
+          Page{' '}
+          <span className="font-semibold text-gray-900">{current}</span> of{' '}
+          <span className="font-semibold text-gray-900">{pages}</span>
+        </div>
+        <div className="text-gray-500 text-sm mt-2 sm:mt-0">
+          Showing{' '}
+          <span className="font-semibold text-gray-900">{startRecord}</span>–
+          <span className="font-semibold text-gray-900">{endRecord}</span> of{' '}
+          <span className="font-semibold text-gray-900">{records}</span> records
+        </div>
       </div>
-      {/* Sections List */}
-      <div className="space-y-4">
-        {value.data.map((section) => (
-          <div
-            key={section.id}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-white rounded-lg border border-gray-200"
-          >
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {section.name}
-              </h3>
-              <p className="mt-1 text-sm text-gray-500 truncate">{section.code}</p>
-            </div>
-            <div className="mt-3 sm:mt-0 sm:ml-4 text-sm text-gray-500 whitespace-nowrap">
-              Created on{" "}
-              <time dateTime={section.created_at}>
-                {dateFormatter.format(new Date(section.created_at))}
-              </time>
-            </div>
-          </div>
-        ))}
-      </div>
+
+      {/* List of Shopping Sections */}
+      <ul className="space-y-3">
+        {value.data.map((section) => {
+          const formattedDate = new Date(section.created_at).toLocaleDateString(
+            undefined,
+            { year: 'numeric', month: 'short', day: 'numeric' }
+          );
+          return (
+            <li
+              key={section.id}
+              className="p-4 bg-gray-50 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center"
+            >
+              {/* Section Name & Creation Date */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-gray-800 font-semibold truncate">
+                  {section.name}
+                </h3>
+                <div className="mt-1 flex items-center text-sm text-gray-600">
+                  <LucideReact.Calendar
+                    size={16}
+                    className="mr-1 flex-shrink-0 text-gray-400"
+                  />
+                  <time dateTime={section.created_at}>
+                    {formattedDate}
+                  </time>
+                </div>
+              </div>
+
+              {/* Section Code */}
+              <div className="mt-3 sm:mt-0 flex items-center text-sm text-gray-500">
+                <LucideReact.Tag
+                  size={16}
+                  className="mr-1 flex-shrink-0 text-gray-400"
+                />
+                <span className="truncate">{section.code}</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

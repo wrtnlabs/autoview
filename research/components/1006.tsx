@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,19 +139,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -188,85 +189,119 @@ export type AutoViewInput = AutoViewInputSubTypes.minimal_repository[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const repos = value;
-  const formatCount = (num?: number): string => {
-    if (!num) return "0";
-    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, "") + "k";
-    return num.toString();
-  };
-  const formatDate = (str?: string | null): string => {
-    if (!str) return "—";
-    const d = new Date(str);
-    return d.toLocaleDateString(undefined, {
-      year: "numeric",
+  const formatDate = (iso?: string | null): string => {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    return d.toLocaleDateString("default", {
       month: "short",
       day: "numeric",
+      year: "numeric",
     });
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4">
-      {repos.length === 0 ? (
-        <p className="text-center text-gray-500">No repositories to display.</p>
-      ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {repos.map((repo) => (
-            <li
-              key={repo.id}
-              className="bg-white rounded-lg shadow hover:shadow-md transition-shadow overflow-hidden flex flex-col"
-            >
-              <div className="flex items-center px-4 py-3 space-x-3">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {value.map((repo) => {
+        const {
+          id,
+          name,
+          owner,
+          description,
+          stargazers_count,
+          forks_count,
+          watchers_count,
+          language,
+          topics,
+          updated_at,
+          created_at,
+        } = repo;
+        const displayDate = updated_at ?? created_at;
+
+        return (
+          <div
+            key={id}
+            className="flex flex-col bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center mb-3">
+              <div className="w-10 h-10 rounded-full overflow-hidden mr-3 flex-shrink-0">
                 <img
-                  src={repo.owner.avatar_url}
-                  alt={repo.owner.login}
-                  className="w-10 h-10 rounded-full flex-shrink-0"
+                  src={owner.avatar_url}
+                  alt={owner.login}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      owner.login
+                    )}&background=random`;
+                  }}
                 />
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {repo.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 truncate">
-                    {repo.owner.login}
-                  </p>
-                </div>
               </div>
-              {repo.description && (
-                <p className="px-4 text-sm text-gray-700 line-clamp-2">
-                  {repo.description}
-                </p>
-              )}
-              <div className="mt-auto px-4 py-3 border-t border-gray-200 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-                <span className="flex items-center">
-                  <span className="mr-1">★</span>
-                  {formatCount(repo.stargazers_count)}
+              <div className="flex flex-col overflow-hidden">
+                <span className="font-semibold text-gray-800 truncate">
+                  {name}
                 </span>
-                <span className="flex items-center">
-                  <span className="mr-1">🍴</span>
-                  {formatCount(repo.forks_count)}
+                <span className="text-sm text-gray-500 truncate">
+                  {owner.login}
                 </span>
-                <span className="flex items-center">
-                  <span className="mr-1">🐛</span>
-                  {formatCount(repo.open_issues_count)}
-                </span>
-                <span className="flex items-center">
-                  <span className="mr-1">👀</span>
-                  {formatCount(repo.watchers_count)}
-                </span>
-                {repo.language && (
-                  <span className="px-2 py-0.5 bg-gray-100 rounded">
-                    {repo.language}
+              </div>
+            </div>
+
+            {description && (
+              <p className="text-gray-700 text-sm mb-3 line-clamp-2">
+                {description}
+              </p>
+            )}
+
+            <div className="mt-auto">
+              <div className="flex flex-wrap items-center text-sm text-gray-500 space-x-4 mb-2">
+                {language && (
+                  <span className="flex items-center">
+                    <LucideReact.Tag size={16} className="mr-1" />
+                    {language}
                   </span>
                 )}
+                <span className="flex items-center">
+                  <LucideReact.Star size={16} className="mr-1" />
+                  {stargazers_count?.toLocaleString() ?? "0"}
+                </span>
+                <span className="flex items-center">
+                  <LucideReact.GitFork size={16} className="mr-1" />
+                  {forks_count?.toLocaleString() ?? "0"}
+                </span>
+                <span className="flex items-center">
+                  <LucideReact.Eye size={16} className="mr-1" />
+                  {watchers_count?.toLocaleString() ?? "0"}
+                </span>
               </div>
-              <div className="px-4 py-3 border-t border-gray-200 text-xs text-gray-500">
-                <p>Created: {formatDate(repo.created_at)}</p>
-                <p>Updated: {formatDate(repo.updated_at)}</p>
+
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <span className="flex items-center">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  {formatDate(displayDate)}
+                </span>
+                {topics && topics.length > 0 && (
+                  <div className="flex -space-x-1">
+                    {topics.slice(0, 3).map((topic) => (
+                      <span
+                        key={topic}
+                        className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full"
+                        title={topic}
+                      >
+                        {topic}
+                      </span>
+                    ))}
+                    {topics.length > 3 && (
+                      <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full">
+                        +{topics.length - 3}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

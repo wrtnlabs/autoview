@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repository invitations let you manage who you collaborate with.
      *
      * @title Repository Invitation
     */
-    export type repository_invitation = {
+    export interface repository_invitation {
         /**
          * Unique identifier of the repository invitation.
         */
@@ -29,13 +30,13 @@ export namespace AutoViewInputSubTypes {
         url: string;
         html_url: string;
         node_id: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -138,13 +139,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -167,19 +168,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -246,114 +247,91 @@ export type AutoViewInput = AutoViewInputSubTypes.repository_invitation[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Compute human‐readable dates, status badges, permission labels, and safe user fallbacks.
-  const formattedInvites = value.map(invite => {
-    const createdDate = new Date(invite.created_at).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
     });
-    const status = invite.expired ? 'Expired' : 'Active';
-    const permissionLabel = invite.permissions.charAt(0).toUpperCase() + invite.permissions.slice(1);
-    const inviteeLogin = invite.invitee?.login ?? 'Unknown';
-    const inviteeAvatar = invite.invitee?.avatar_url;
-    const inviterLogin = invite.inviter?.login ?? 'Unknown';
-    const inviterAvatar = invite.inviter?.avatar_url;
-    const repoName = invite.repository.full_name;
-    const isPrivate = invite.repository.private;
-    return {
-      id: invite.id,
-      createdDate,
-      status,
-      permissionLabel,
-      inviteeLogin,
-      inviteeAvatar,
-      inviterLogin,
-      inviterAvatar,
-      repoName,
-      isPrivate,
-    };
-  });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (formattedInvites.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No invitations found.
-      </div>
-    );
-  }
-
-  // 3. Return the React element.
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {formattedInvites.map(inv => (
-        <div
-          key={inv.id}
-          className="p-4 bg-white rounded-lg shadow hover:shadow-md transition"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-gray-800 truncate">
-              {inv.repoName}
-            </h2>
-            {inv.isPrivate && (
-              <span className="text-xs text-gray-500 border border-gray-300 px-2 py-0.5 rounded">
-                Private
-              </span>
-            )}
-          </div>
-          <div className="flex items-center space-x-2 mb-2">
-            {inv.inviterAvatar && (
-              <img
-                src={inv.inviterAvatar}
-                alt={`${inv.inviterLogin} avatar`}
-                className="w-6 h-6 rounded-full"
-              />
-            )}
-            <span className="text-sm text-gray-700 truncate">
-              {inv.inviterLogin}
-            </span>
-            <svg
-              className="w-4 h-4 text-gray-400"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10.293 15.707a1 1 0 010-1.414L13.586 11H4a1 1 0 110-2h9.586l-3.293-3.293a1 1 0 011.414-1.414l5 5a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-            {inv.inviteeAvatar && (
-              <img
-                src={inv.inviteeAvatar}
-                alt={`${inv.inviteeLogin} avatar`}
-                className="w-6 h-6 rounded-full"
-              />
-            )}
-            <span className="text-sm text-gray-700 truncate">
-              {inv.inviteeLogin}
-            </span>
-          </div>
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>{inv.createdDate}</span>
-            <span
-              className={`px-2 py-0.5 rounded text-xs ${
-                inv.status === 'Expired'
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-green-100 text-green-800'
-              }`}
-            >
-              {inv.status}
-            </span>
-          </div>
-          <div className="mt-2">
-            <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded">
-              {inv.permissionLabel}
-            </span>
-          </div>
+    <div className="flex flex-col space-y-4">
+      {value.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-gray-400 p-6">
+          <LucideReact.AlertCircle size={24} aria-label="No data" />
+          <span className="mt-2">No invitations available.</span>
         </div>
-      ))}
+      ) : (
+        value.map((invitation) => {
+          const isExpired = invitation.expired ?? false;
+          const inviteeLogin = invitation.invitee?.login ?? "Unknown";
+          const inviterLogin = invitation.inviter?.login ?? "Unknown";
+          const formattedDate = formatDate(invitation.created_at);
+          const permissions =
+            invitation.permissions.charAt(0).toUpperCase() +
+            invitation.permissions.slice(1);
+
+          return (
+            <div
+              key={invitation.id}
+              className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center justify-between">
+                <h3
+                  className="text-lg font-semibold text-gray-900 truncate"
+                  title={invitation.repository.full_name}
+                >
+                  {invitation.repository.full_name}
+                </h3>
+                {isExpired ? (
+                  <LucideReact.XCircle
+                    className="text-red-500"
+                    size={16}
+                    role="img"
+                    aria-label="Expired"
+                  />
+                ) : (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={16}
+                    role="img"
+                    aria-label="Active"
+                  />
+                )}
+              </div>
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
+                <div className="flex items-center gap-1">
+                  <LucideReact.User size={16} className="text-gray-500" />
+                  <span>Invitee: {inviteeLogin}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.User size={16} className="text-gray-500" />
+                  <span>Inviter: {inviterLogin}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Tag size={16} className="text-blue-500" />
+                  <span>{permissions}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={16} className="text-gray-500" />
+                  <span>{formattedDate}</span>
+                </div>
+                <div className="flex items-center gap-1 col-span-full">
+                  <LucideReact.Link size={16} className="text-gray-500" />
+                  <a
+                    href={invitation.html_url}
+                    className="truncate text-blue-600 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {invitation.html_url}
+                  </a>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }

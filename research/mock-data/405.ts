@@ -4,5 +4,5 @@ import Component from "../components/405";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"total_count":3,"labels":[{"id":11,"name":"Default Runner (Sample)"},{"name":"Windows Runner (Dummy)","type":"read-only"},{"id":33,"name":"GPU Intensive Runner (Test)","type":"custom"}]};
+  return {"total_count":4,"labels":[{"id":1,"name":"ubuntu-latest-sample","type":"read-only"},{"id":2,"name":"self-hosted-linux-sample","type":"custom"},{"name":"windows-2019-sample"},{"id":5,"name":"macos-11-sample"}]};
 }

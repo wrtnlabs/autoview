@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A suite of checks performed on the code of a given code change
      *
      * @title CheckSuite
     */
-    export type check_suite = {
+    export interface check_suite {
         id: number & tags.Type<"int32">;
         node_id: string;
         head_branch: string | null;
@@ -22,7 +23,7 @@ export namespace AutoViewInputSubTypes {
         url: string | null;
         before: string | null;
         after: string | null;
-        pull_requests: any[] | null;
+        pull_requests: AutoViewInputSubTypes.pull_request_minimal[] | null;
         app: AutoViewInputSubTypes.nullable_integration;
         repository: AutoViewInputSubTypes.minimal_repository;
         created_at: (string & tags.Format<"date-time">) | null;
@@ -32,8 +33,33 @@ export namespace AutoViewInputSubTypes {
         check_runs_url: string;
         rerequestable?: boolean;
         runs_rerequestable?: boolean;
-    };
-    export type pull_request_minimal = any;
+    }
+    /**
+     * @title Pull Request Minimal
+    */
+    export interface pull_request_minimal {
+        id: number & tags.Type<"int32">;
+        number: number & tags.Type<"int32">;
+        url: string;
+        head: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+        base: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+    }
     /**
      * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
      *
@@ -50,7 +76,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -83,7 +109,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -106,14 +132,45 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
-    export type enterprise = any;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -216,19 +273,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -263,7 +320,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple Commit
     */
-    export type simple_commit = {
+    export interface simple_commit {
         /**
          * SHA for the commit
         */
@@ -291,7 +348,7 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's author
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
         /**
          * Information about the Git committer
@@ -304,9 +361,9 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's committer
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.check_suite;
 
@@ -315,92 +372,120 @@ export type AutoViewInput = AutoViewInputSubTypes.check_suite;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const branch = value.head_branch ?? 'N/A';
-  const sha = value.head_sha ? value.head_sha.substring(0, 7) : 'N/A';
-  const statusMap: Record<string, { label: string; color: string }> = {
-    queued: { label: 'Queued', color: 'bg-gray-100 text-gray-800' },
-    waiting: { label: 'Waiting', color: 'bg-gray-100 text-gray-800' },
-    requested: { label: 'Requested', color: 'bg-yellow-100 text-yellow-800' },
-    pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
-    in_progress: { label: 'In Progress', color: 'bg-blue-100 text-blue-800' },
-    completed: { label: 'Completed', color: 'bg-green-100 text-green-800' },
-    'null': { label: 'N/A', color: 'bg-gray-100 text-gray-800' },
-  };
-  const statusKey = value.status ?? 'null';
-  const statusInfo =
-    statusMap[statusKey] || { label: String(statusKey), color: 'bg-gray-100 text-gray-800' };
-  const conclusionMap: Record<string, { label: string; color: string }> = {
-    success: { label: 'Success', color: 'bg-green-100 text-green-800' },
-    failure: { label: 'Failure', color: 'bg-red-100 text-red-800' },
-    neutral: { label: 'Neutral', color: 'bg-gray-100 text-gray-800' },
-    cancelled: { label: 'Cancelled', color: 'bg-red-100 text-red-800' },
-    skipped: { label: 'Skipped', color: 'bg-gray-100 text-gray-800' },
-    timed_out: { label: 'Timed Out', color: 'bg-red-100 text-red-800' },
-    action_required: { label: 'Action Required', color: 'bg-yellow-100 text-yellow-800' },
-    startup_failure: { label: 'Startup Failure', color: 'bg-red-100 text-red-800' },
-    stale: { label: 'Stale', color: 'bg-gray-100 text-gray-800' },
-  };
-  const conclusionInfo = value.conclusion
-    ? conclusionMap[value.conclusion] || {
-        label: String(value.conclusion),
-        color: 'bg-gray-100 text-gray-800',
-      }
-    : null;
-  const createdAt = value.created_at
-    ? new Date(value.created_at).toLocaleString()
-    : 'N/A';
-  const updatedAt = value.updated_at
-    ? new Date(value.updated_at).toLocaleString()
-    : 'N/A';
-  const commit = value.head_commit;
-  const author = commit.author ?? commit.committer;
-  const authorName = author?.name ?? 'Unknown';
-  const commitTime = commit.timestamp
-    ? new Date(commit.timestamp).toLocaleString()
-    : 'N/A';
-  const commitMessage = commit.message;
+  const branch = value.head_branch ?? "unknown";
+  const commitSHA = value.head_sha;
+  const shortSHA = commitSHA.slice(0, 7);
   const repoName = value.repository.full_name;
-  const appName = value.app?.name ?? 'N/A';
-  const runCount = value.latest_check_runs_count;
+  const repoDesc = value.repository.description;
+  const prCount = value.pull_requests?.length ?? 0;
+  const createdAt = value.created_at ? new Date(value.created_at) : null;
+  const updatedAt = value.updated_at ? new Date(value.updated_at) : null;
+
+  // Map status and conclusion to icons and labels
+  let statusIcon: React.ReactNode;
+  let statusText: string;
+  if (value.status !== "completed") {
+    statusIcon = <LucideReact.Clock size={16} className="text-amber-500" />;
+    statusText = value.status ?? "Unknown";
+  } else {
+    switch (value.conclusion) {
+      case "success":
+        statusIcon = <LucideReact.CheckCircle size={16} className="text-green-500" />;
+        statusText = "Success";
+        break;
+      case "failure":
+        statusIcon = <LucideReact.XCircle size={16} className="text-red-500" />;
+        statusText = "Failure";
+        break;
+      case "neutral":
+        statusIcon = <LucideReact.MinusCircle size={16} className="text-gray-500" />;
+        statusText = "Neutral";
+        break;
+      case "cancelled":
+        statusIcon = <LucideReact.XCircle size={16} className="text-amber-500" />;
+        statusText = "Cancelled";
+        break;
+      case "timed_out":
+        statusIcon = <LucideReact.AlertTriangle size={16} className="text-red-500" />;
+        statusText = "Timed Out";
+        break;
+      case "action_required":
+        statusIcon = <LucideReact.AlertTriangle size={16} className="text-amber-500" />;
+        statusText = "Action Required";
+        break;
+      case "stale":
+        statusIcon = <LucideReact.Clock size={16} className="text-gray-500" />;
+        statusText = "Stale";
+        break;
+      default:
+        statusIcon = <LucideReact.Clock size={16} className="text-gray-500" />;
+        statusText = value.conclusion ?? "Unknown";
+    }
+  }
+
+  const formattedCreated = createdAt ? createdAt.toLocaleString() : "—";
+  const formattedUpdated = updatedAt ? updatedAt.toLocaleString() : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Check Suite #{value.id}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${statusInfo.color}`}
-        >
-          {statusInfo.label}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Repository Header */}
+      <div>
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{repoName}</h2>
+        {repoDesc && (
+          <p className="text-sm text-gray-500 line-clamp-2">{repoDesc}</p>
+        )}
       </div>
-      {conclusionInfo && statusKey === 'completed' && (
-        <div className="mb-2">
-          <span
-            className={`px-2 py-0.5 text-xs font-medium rounded ${conclusionInfo.color}`}
-          >
-            {conclusionInfo.label}
+
+      {/* Branch, Commit & Timestamps */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 space-y-2 sm:space-y-0">
+        <div className="flex flex-wrap items-center gap-4 text-gray-600">
+          <div className="flex items-center gap-1">
+            <LucideReact.GitBranch size={16} />
+            <span className="text-sm">{branch}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.GitCommit size={16} />
+            <span className="text-sm font-mono">{shortSHA}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span className="text-sm">{formattedCreated}</span>
+          </div>
+        </div>
+        {formattedUpdated && (
+          <div className="flex items-center gap-1 text-gray-600">
+            <LucideReact.Edit2 size={16} />
+            <span className="text-sm">Updated {formattedUpdated}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Status & Metrics */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-gray-600">
+        <div className="flex items-center gap-1">
+          {statusIcon}
+          <span className="text-sm capitalize">{statusText}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.CheckSquare size={16} />
+          <span className="text-sm">
+            {value.latest_check_runs_count} check run
+            {value.latest_check_runs_count === 1 ? "" : "s"}
           </span>
         </div>
-      )}
-      <div className="mb-2 text-sm text-gray-600">
-        Branch: <span className="font-mono">{branch}</span> &bull; Commit:{' '}
-        <span className="font-mono">{sha}</span>
-      </div>
-      <p className="text-sm text-gray-700 truncate mb-1">{commitMessage}</p>
-      <div className="mb-2 text-xs text-gray-500">
-        By {authorName} on {commitTime}
-      </div>
-      <div className="flex flex-wrap text-xs text-gray-500 space-x-4 mb-2">
-        <div>Repo: {repoName}</div>
-        <div>App: {appName}</div>
-        <div>Runs: {runCount}</div>
-      </div>
-      <div className="text-xs text-gray-400">
-        Created: {createdAt} &bull; Updated: {updatedAt}
+        <div className="flex items-center gap-1">
+          <LucideReact.GitPullRequest size={16} />
+          <span className="text-sm">
+            {prCount} pull request{prCount === 1 ? "" : "s"}
+          </span>
+        </div>
+        {value.app && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Server size={16} />
+            <span className="text-sm">{value.app.name}</span>
+          </div>
+        )}
       </div>
     </div>
   );

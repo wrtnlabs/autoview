@@ -1,15 +1,16 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace open {
         export namespace marketing {
-            export type OneTimeMsgUserView = {
+            export interface OneTimeMsgUserView {
                 oneTimeMsgUser?: AutoViewInputSubTypes.marketing.OneTimeMsgUser;
-            };
+            }
         }
     }
     export namespace marketing {
-        export type OneTimeMsgUser = {
+        export interface OneTimeMsgUser {
             oneTimeMsgId?: string;
             userId?: string;
             sent?: number;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
             click?: number;
             version?: number & tags.Type<"int32">;
             id?: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.open.marketing.OneTimeMsgUserView;
@@ -27,99 +28,75 @@ export type AutoViewInput = AutoViewInputSubTypes.open.marketing.OneTimeMsgUserV
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data extraction and derived metrics
-  const userData = value.oneTimeMsgUser;
-  if (!userData) {
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const data = value.oneTimeMsgUser;
+  const sentCount = data?.sent ?? 0;
+  const viewCount = data?.view ?? 0;
+  const clickCount = data?.click ?? 0;
+  const goalCount = data?.goal ?? 0;
+
+  // Calculate rates relative to sentCount
+  const viewRate = sentCount > 0 ? (viewCount / sentCount) * 100 : 0;
+  const clickRate = sentCount > 0 ? (clickCount / sentCount) * 100 : 0;
+
+  // Formatting helpers
+  const formatNumber = (num: number) => num.toLocaleString();
+  const formatPercent = (num: number) => `${num.toFixed(1)}%`;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!data) {
     return (
-      <div className="p-4 bg-white rounded-md shadow-sm text-center text-gray-500">
-        No data available
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No data available</span>
       </div>
     );
   }
 
-  const sent = userData.sent ?? 0;
-  const views = userData.view ?? 0;
-  const clicks = userData.click ?? 0;
-  const goal = userData.goal ?? 0;
-
-  const viewRate = sent > 0 ? (views / sent) * 100 : 0;
-  const clickRate = sent > 0 ? (clicks / sent) * 100 : 0;
-  const goalProgress = goal > 0 ? (clicks / goal) * 100 : 0;
-
-  const formatNumber = (n: number) => new Intl.NumberFormat('en-US').format(n);
-  const formatPercent = (p: number) => `${p.toFixed(1)}%`;
-
-  const msgId = userData.oneTimeMsgId ?? '—';
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-lg font-semibold text-gray-800 mb-2">Message Metrics</h2>
-      <div className="text-sm text-gray-600 mb-4">
-        Campaign ID:{' '}
-        <span className="font-medium text-gray-800 truncate">{msgId}</span>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-        <div>
-          <div className="text-gray-500 text-xs uppercase">Sent</div>
-          <div className="text-xl font-semibold text-gray-900">
-            {formatNumber(sent)}
+    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md text-gray-800">
+      <h2 className="text-lg font-semibold mb-4">One-Time Message Metrics</h2>
+      <div className="grid grid-cols-2 gap-4">
+        {/* Sent */}
+        <div className="flex items-center">
+          <LucideReact.Send size={20} className="text-blue-500" />
+          <div className="ml-2">
+            <div className="text-sm text-gray-500">Sent</div>
+            <div className="text-xl font-semibold">{formatNumber(sentCount)}</div>
           </div>
         </div>
-
-        <div>
-          <div className="text-gray-500 text-xs uppercase">Views</div>
-          <div className="text-xl font-semibold text-gray-900">
-            {formatNumber(views)}
+        {/* Views */}
+        <div className="flex items-center">
+          <LucideReact.Eye size={20} className="text-green-500" />
+          <div className="ml-2">
+            <div className="text-sm text-gray-500">Views</div>
+            <div className="text-xl font-semibold">
+              {formatNumber(viewCount)}{' '}
+              <span className="text-sm text-gray-400">({formatPercent(viewRate)})</span>
+            </div>
           </div>
         </div>
-
-        <div>
-          <div className="text-gray-500 text-xs uppercase">Clicks</div>
-          <div className="text-xl font-semibold text-gray-900">
-            {formatNumber(clicks)}
+        {/* Goal */}
+        <div className="flex items-center">
+          <LucideReact.Target size={20} className="text-indigo-500" />
+          <div className="ml-2">
+            <div className="text-sm text-gray-500">Goal</div>
+            <div className="text-xl font-semibold">{formatNumber(goalCount)}</div>
           </div>
         </div>
-
-        <div>
-          <div className="text-gray-500 text-xs uppercase">Goal</div>
-          <div className="text-xl font-semibold text-gray-900">
-            {goal > 0 ? formatNumber(goal) : '—'}
-          </div>
-        </div>
-
-        <div>
-          <div className="text-gray-500 text-xs uppercase">View Rate</div>
-          <div className="text-xl font-semibold text-gray-900">
-            {sent > 0 ? formatPercent(viewRate) : '—'}
-          </div>
-        </div>
-
-        <div>
-          <div className="text-gray-500 text-xs uppercase">Click Rate</div>
-          <div className="text-xl font-semibold text-gray-900">
-            {sent > 0 ? formatPercent(clickRate) : '—'}
+        {/* Clicks */}
+        <div className="flex items-center">
+          <LucideReact.MousePointer size={20} className="text-red-500" />
+          <div className="ml-2">
+            <div className="text-sm text-gray-500">Clicks</div>
+            <div className="text-xl font-semibold">
+              {formatNumber(clickCount)}{' '}
+              <span className="text-sm text-gray-400">({formatPercent(clickRate)})</span>
+            </div>
           </div>
         </div>
       </div>
-
-      {goal > 0 && (
-        <div className="mt-4">
-          <div className="flex justify-between items-center mb-1 text-sm text-gray-600">
-            <span>Goal Progress</span>
-            <span className="font-medium text-gray-800">
-              {formatPercent(Math.min(goalProgress, 100))}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-            <div
-              className="bg-blue-500 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${Math.min(goalProgress, 100)}%` }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 }

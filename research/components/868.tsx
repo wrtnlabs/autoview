@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type secret_scanning_alert = {
+    export interface secret_scanning_alert {
         number?: AutoViewInputSubTypes.alert_number;
         created_at?: AutoViewInputSubTypes.alert_created_at;
         updated_at?: AutoViewInputSubTypes.nullable_alert_updated_at;
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
          * A boolean value representing whether or not alert is base64 encoded
         */
         is_base64_encoded?: boolean | null;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -136,149 +137,198 @@ export type AutoViewInput = AutoViewInputSubTypes.secret_scanning_alert;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateStr?: string | null): string => {
-    if (!dateStr) return "-";
-    const d = new Date(dateStr);
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // Derived and formatted values
+  const createdAt = value.created_at
+    ? new Date(value.created_at).toLocaleString()
+    : 'N/A';
+  const updatedAt = value.updated_at
+    ? new Date(value.updated_at).toLocaleString()
+    : undefined;
+  const resolvedAt = value.resolved_at
+    ? new Date(value.resolved_at).toLocaleString()
+    : undefined;
+  const typeName = value.secret_type_display_name || value.secret_type || '—';
+  const maskedSecret =
+    value.secret && value.secret.length > 0
+      ? value.secret.length > 8
+        ? `${value.secret.slice(0, 4)}…${value.secret.slice(-4)}`
+        : value.secret
+      : null;
 
-  const stateLabel = value.state === "resolved" ? "Resolved" : "Open";
+  // State badge
+  const stateLabel =
+    value.state === 'resolved'
+      ? 'Resolved'
+      : value.state === 'open'
+      ? 'Open'
+      : 'Unknown';
+  const stateIcon =
+    value.state === 'resolved' ? (
+      <LucideReact.CheckCircle className="text-green-500" size={16} aria-label="Resolved" />
+    ) : value.state === 'open' ? (
+      <LucideReact.AlertCircle className="text-amber-500" size={16} aria-label="Open" />
+    ) : (
+      <LucideReact.HelpCircle className="text-gray-400" size={16} aria-label="Unknown state" />
+    );
 
-  const resolutionMap: Record<string, string> = {
-    false_positive: "False Positive",
-    wont_fix: "Won't Fix",
-    revoked: "Revoked",
-    used_in_tests: "Used in Tests",
-  };
-  const resolutionLabel = value.resolution ? resolutionMap[value.resolution] || value.resolution : null;
+  // Validity icon
+  const validityIcon =
+    value.validity === 'active' ? (
+      <LucideReact.CheckCircle className="text-green-500" size={16} aria-label="Active" />
+    ) : value.validity === 'inactive' ? (
+      <LucideReact.XCircle className="text-red-500" size={16} aria-label="Inactive" />
+    ) : (
+      <LucideReact.HelpCircle className="text-amber-500" size={16} aria-label="Unknown validity" />
+    );
 
-  const validityLabel = value.validity
-    ? value.validity.charAt(0).toUpperCase() + value.validity.slice(1)
-    : "-";
+  // Flags
+  const publicIcon = value.publicly_leaked ? (
+    <LucideReact.AlertTriangle className="text-red-500" size={16} aria-label="Publicly Leaked" />
+  ) : (
+    <LucideReact.ShieldOff className="text-gray-400" size={16} aria-label="Not Publicly Leaked" />
+  );
+  const multiRepoIcon = value.multi_repo ? (
+    <LucideReact.Users className="text-blue-500" size={16} aria-label="Multiple Repos" />
+  ) : (
+    <LucideReact.UserMinus className="text-gray-400" size={16} aria-label="Single Repo" />
+  );
+  const base64Icon = value.is_base64_encoded ? (
+    <LucideReact.FileText className="text-indigo-500" size={16} aria-label="Base64 Encoded" />
+  ) : null;
 
-  const yesNo = (flag?: boolean | null): string => (flag ? "Yes" : "No");
+  // Push protection bypass
+  const bypassed = Boolean(value.push_protection_bypassed);
+  const bypassIcon = bypassed ? (
+    <LucideReact.ShieldCheck className="text-green-500" size={16} aria-label="Bypassed" />
+  ) : (
+    <LucideReact.ShieldOff className="text-gray-400" size={16} aria-label="Not Bypassed" />
+  );
 
-  const displayUser = (user?: AutoViewInputSubTypes.nullable_simple_user): string =>
-    user ? user.login : "-";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
-      <h2 className="text-xl font-semibold text-gray-800 truncate">
-        Secret Scanning Alert #{value.number}
-      </h2>
-      <dl className="grid grid-cols-1 gap-y-2">
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Created</dt>
-          <dd className="text-sm text-gray-900">{formatDate(value.created_at)}</dd>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Alert #{value.number ?? '—'}
+        </h2>
+        <div className="flex items-center gap-1">
+          {stateIcon}
+          <span className="text-sm font-medium">{stateLabel}</span>
         </div>
-        {value.updated_at && (
-          <div className="flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Updated</dt>
-            <dd className="text-sm text-gray-900">{formatDate(value.updated_at)}</dd>
+      </div>
+
+      {/* Details */}
+      <div className="space-y-2 text-sm text-gray-700">
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">Created</span>
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar className="text-gray-400" size={16} aria-label="Created date" />
+            <span>{createdAt}</span>
           </div>
-        )}
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Status</dt>
-          <dd className="text-sm font-semibold text-gray-800">{stateLabel}</dd>
         </div>
-        {resolutionLabel && (
-          <div className="flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Resolution</dt>
-            <dd className="text-sm text-gray-800">{resolutionLabel}</dd>
-          </div>
-        )}
-        {value.resolved_at && (
-          <div className="flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Resolved At</dt>
-            <dd className="text-sm text-gray-900">{formatDate(value.resolved_at)}</dd>
-          </div>
-        )}
-        {value.resolved_by && (
-          <div className="flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Resolved By</dt>
-            <dd className="text-sm text-gray-900">{displayUser(value.resolved_by)}</dd>
-          </div>
-        )}
-        {value.secret_type_display_name && (
-          <div className="flex justify-between">
-            <dt className="text-sm font-medium text-gray-500">Secret Type</dt>
-            <dd className="text-sm text-gray-900">{value.secret_type_display_name}</dd>
-          </div>
-        )}
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Validity</dt>
-          <dd className="text-sm text-gray-900">{validityLabel}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Publicly Leaked</dt>
-          <dd className="text-sm text-gray-900">{yesNo(value.publicly_leaked)}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Multiple Repos</dt>
-          <dd className="text-sm text-gray-900">{yesNo(value.multi_repo)}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-sm font-medium text-gray-500">Base64 Encoded</dt>
-          <dd className="text-sm text-gray-900">{yesNo(value.is_base64_encoded)}</dd>
-        </div>
-        {value.push_protection_bypassed && (
-          <>
-            <div className="flex justify-between pt-2">
-              <dt className="text-sm font-medium text-gray-500">Bypassed</dt>
-              <dd className="text-sm font-semibold text-red-600">Yes</dd>
+
+        {updatedAt && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Updated</span>
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar className="text-gray-400" size={16} aria-label="Updated date" />
+              <span>{updatedAt}</span>
             </div>
-            {value.push_protection_bypassed_at && (
-              <div className="flex justify-between">
-                <dt className="text-sm font-medium text-gray-500">Bypassed At</dt>
-                <dd className="text-sm text-gray-900">
-                  {formatDate(value.push_protection_bypassed_at)}
-                </dd>
-              </div>
-            )}
-            {value.push_protection_bypassed_by && (
-              <div className="flex justify-between">
-                <dt className="text-sm font-medium text-gray-500">Bypassed By</dt>
-                <dd className="text-sm text-gray-900">
-                  {displayUser(value.push_protection_bypassed_by)}
-                </dd>
-              </div>
-            )}
-          </>
+          </div>
         )}
-      </dl>
-      {/* Comments Section */}
-      {(value.resolution_comment ||
-        value.push_protection_bypass_request_comment ||
-        value.push_protection_bypass_request_reviewer_comment) && (
-        <div className="bg-gray-50 p-3 rounded">
-          <h3 className="text-sm font-medium text-gray-600 mb-1">Comments</h3>
-          {value.resolution_comment && (
-            <p className="text-sm text-gray-800 line-clamp-3 mb-1">
+
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">Type</span>
+          <span className="font-medium">{typeName}</span>
+        </div>
+
+        {maskedSecret && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Secret</span>
+            <code className="bg-gray-100 px-1 rounded text-xs">
+              {maskedSecret}
+            </code>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">Validity</span>
+          {validityIcon}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">Public Leak</span>
+          {publicIcon}
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">Multi-Repo</span>
+          {multiRepoIcon}
+        </div>
+
+        {base64Icon && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Base64</span>
+            {base64Icon}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600">Bypass</span>
+          {bypassIcon}
+        </div>
+
+        {bypassed && value.push_protection_bypassed_at && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Bypass At</span>
+            <span>
+              {new Date(value.push_protection_bypassed_at).toLocaleString()}
+            </span>
+          </div>
+        )}
+
+        {bypassed && value.push_protection_bypassed_by && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Bypassed By</span>
+            <span className="font-medium">
+              {value.push_protection_bypassed_by.login}
+            </span>
+          </div>
+        )}
+
+        {value.state === 'resolved' && resolvedAt && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Resolved At</span>
+            <span>{resolvedAt}</span>
+          </div>
+        )}
+
+        {value.resolved_by && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Resolved By</span>
+            <span className="font-medium">{value.resolved_by.login}</span>
+          </div>
+        )}
+
+        {value.resolution && (
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600">Resolution</span>
+            <span className="capitalize">
+              {value.resolution.replace('_', ' ')}
+            </span>
+          </div>
+        )}
+
+        {value.resolution_comment && (
+          <div>
+            <span className="text-gray-600 block">Comment</span>
+            <p className="text-gray-700 text-sm line-clamp-2">
               {value.resolution_comment}
             </p>
-          )}
-          {value.push_protection_bypass_request_comment && (
-            <p className="text-sm text-gray-800 line-clamp-3 mb-1">
-              {value.push_protection_bypass_request_comment}
-            </p>
-          )}
-          {value.push_protection_bypass_request_reviewer_comment && (
-            <p className="text-sm text-gray-800 line-clamp-3">
-              {value.push_protection_bypass_request_reviewer_comment}
-            </p>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

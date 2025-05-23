@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposActionsRunsAttemptsJobs {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             jobs: AutoViewInputSubTypes.job[];
-        };
+        }
     }
     /**
      * Information of a job execution in a workflow run
      *
      * @title Job
     */
-    export type job = {
+    export interface job {
         /**
          * The id of the job.
         */
@@ -112,7 +113,7 @@ export namespace AutoViewInputSubTypes {
          * The name of the current branch.
         */
         head_branch: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunsAttemptsJobs.GetResponse;
 
@@ -123,138 +124,186 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { total_count, jobs } = value;
 
-  // Format an ISO date string to "MMM d, yyyy, h:mm a"
   const formatDate = (iso: string): string =>
     new Date(iso).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
+      dateStyle: 'medium',
+      timeStyle: 'short',
     });
 
-  // Compute duration between two ISO date strings
-  const getDuration = (start: string, end: string): string => {
-    const ms = new Date(end).getTime() - new Date(start).getTime();
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    if (minutes > 0) return `${minutes}m ${seconds}s`;
-    return `${seconds}s`;
+  const formatDuration = (start: string, end: string): string => {
+    const diff = new Date(end).getTime() - new Date(start).getTime();
+    if (diff <= 0) return '0s';
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (minutes > 0) {
+      return `${minutes}m ${secs}s`;
+    }
+    return `${secs}s`;
   };
 
-  // Determine badge appearance and text based on status/conclusion
-  const getBadge = (status: string, conclusion: string | null) => {
-    let label = status.replace('_', ' ');
-    let bg = 'bg-gray-100';
-    let textColor = 'text-gray-800';
-
+  const getStatusIcon = (
+    status: AutoViewInputSubTypes.job['status'],
+    conclusion: AutoViewInputSubTypes.job['conclusion']
+  ): JSX.Element => {
     if (status !== 'completed') {
-      if (status === 'queued') {
-        bg = 'bg-yellow-100';
-        textColor = 'text-yellow-800';
-        label = 'Queued';
-      } else if (status === 'in_progress') {
-        bg = 'bg-blue-100';
-        textColor = 'text-blue-800';
-        label = 'In Progress';
+      if (status === 'in_progress') {
+        return (
+          <LucideReact.Loader
+            className="animate-spin text-blue-500"
+            size={16}
+            aria-label="In progress"
+          />
+        );
       }
-    } else {
-      // completed: use conclusion for color
-      switch (conclusion) {
-        case 'success':
-          bg = 'bg-green-100';
-          textColor = 'text-green-800';
-          label = 'Success';
-          break;
-        case 'failure':
-          bg = 'bg-red-100';
-          textColor = 'text-red-800';
-          label = 'Failure';
-          break;
-        case 'neutral':
-          bg = 'bg-gray-100';
-          textColor = 'text-gray-800';
-          label = 'Neutral';
-          break;
-        case 'cancelled':
-          bg = 'bg-orange-100';
-          textColor = 'text-orange-800';
-          label = 'Cancelled';
-          break;
-        case 'skipped':
-          bg = 'bg-indigo-100';
-          textColor = 'text-indigo-800';
-          label = 'Skipped';
-          break;
-        default:
-          label = 'Completed';
-      }
+      return (
+        <LucideReact.Clock
+          className="text-amber-500"
+          size={16}
+          aria-label={status.charAt(0).toUpperCase() + status.slice(1)}
+        />
+      );
     }
-
-    return { label, bg, textColor };
+    switch (conclusion) {
+      case 'success':
+        return (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={16}
+            aria-label="Success"
+          />
+        );
+      case 'failure':
+        return (
+          <LucideReact.XCircle
+            className="text-red-500"
+            size={16}
+            aria-label="Failure"
+          />
+        );
+      case 'neutral':
+        return (
+          <LucideReact.MinusCircle
+            className="text-gray-500"
+            size={16}
+            aria-label="Neutral"
+          />
+        );
+      case 'skipped':
+        return (
+          <LucideReact.SkipForward
+            className="text-gray-500"
+            size={16}
+            aria-label="Skipped"
+          />
+        );
+      case 'cancelled':
+        return (
+          <LucideReact.XCircle
+            className="text-gray-400"
+            size={16}
+            aria-label="Cancelled"
+          />
+        );
+      case 'timed_out':
+        return (
+          <LucideReact.AlertTriangle
+            className="text-red-400"
+            size={16}
+            aria-label="Timed out"
+          />
+        );
+      case 'action_required':
+        return (
+          <LucideReact.AlertCircle
+            className="text-red-600"
+            size={16}
+            aria-label="Action required"
+          />
+        );
+      default:
+        return (
+          <LucideReact.HelpCircle
+            className="text-gray-400"
+            size={16}
+            aria-label="Unknown status"
+          />
+        );
+    }
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
-        Jobs ({total_count})
-      </h2>
-      <div className="space-y-4">
-        {jobs.map((job) => {
-          const { label, bg, textColor } = getBadge(job.status, job.conclusion);
-          const started = formatDate(job.started_at);
-          const duration =
-            job.started_at && job.completed_at
-              ? getDuration(job.started_at, job.completed_at)
-              : null;
+      <header className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Jobs ({total_count})
+        </h2>
+      </header>
 
-          return (
-            <div
-              key={job.id}
-              className="bg-white rounded-lg shadow-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div className="flex-1">
-                <h3
-                  className="text-lg font-medium text-gray-900 truncate"
-                  title={job.name}
-                >
-                  {job.name}
-                </h3>
-                <div className="mt-1 text-sm text-gray-600">
-                  <span>Runner: {job.runner_name ?? 'Auto'}</span>
-                  <span className="mx-2">·</span>
-                  <span>Started: {started}</span>
-                  {duration && (
-                    <>
-                      <span className="mx-2">·</span>
-                      <span>Duration: {duration}</span>
-                    </>
-                  )}
+      {jobs.length > 0 ? (
+        <ul className="space-y-4">
+          {jobs.map((job) => {
+            const started = job.started_at;
+            const completed = job.completed_at;
+            const duration =
+              started && completed ? formatDuration(started, completed) : null;
+            return (
+              <li key={job.id}>
+                <div className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:justify-between items-start sm:items-center">
+                  <div className="flex items-center gap-3">
+                    {getStatusIcon(job.status, job.conclusion)}
+                    <div>
+                      <h3 className="font-medium text-gray-900 truncate">
+                        {job.name}
+                      </h3>
+                      {job.head_branch && (
+                        <div className="mt-1 text-gray-500 text-sm flex items-center gap-1">
+                          <LucideReact.GitBranch size={14} />
+                          <span className="truncate">{job.head_branch}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-3 sm:mt-0 flex flex-wrap items-center gap-4 text-gray-600 text-sm">
+                    {job.run_attempt && job.run_attempt > 1 && (
+                      <div className="flex items-center gap-1">
+                        <LucideReact.Hash size={14} />
+                        <span>Attempt {job.run_attempt}</span>
+                      </div>
+                    )}
+                    {job.runner_name && (
+                      <div className="flex items-center gap-1">
+                        <LucideReact.User size={14} />
+                        <span className="truncate">{job.runner_name}</span>
+                      </div>
+                    )}
+                    {duration ? (
+                      <div className="flex items-center gap-1">
+                        <LucideReact.Clock size={14} />
+                        <span>{duration}</span>
+                      </div>
+                    ) : (
+                      started && (
+                        <div className="flex items-center gap-1">
+                          <LucideReact.Calendar size={14} />
+                          <span>{formatDate(started)}</span>
+                        </div>
+                      )
+                    )}
+                  </div>
                 </div>
-              </div>
-              <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-wrap items-center gap-2">
-                {job.labels.map((tag) => (
-                  <span
-                    key={tag}
-                    className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded"
-                  >
-                    {tag}
-                  </span>
-                ))}
-                <span
-                  className={`${bg} ${textColor} text-xs font-semibold px-2 py-1 rounded`}
-                >
-                  {label}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <div className="py-12 text-center text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <p className="mt-2">No jobs found.</p>
+        </div>
+      )}
     </div>
   );
 }

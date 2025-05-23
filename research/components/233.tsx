@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type EventView = {
+    export interface EventView {
         event?: AutoViewInputSubTypes.Event;
-    };
-    export type Event = {
+    }
+    export interface Event {
         userId?: string;
         id?: string;
         channelId?: string;
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
         nameI18nMap?: {
             [key: string]: string;
         };
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.EventView;
 
@@ -27,104 +28,68 @@ export type AutoViewInput = AutoViewInputSubTypes.EventView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const event = value.event;
   if (!event) {
     return (
-      <div className="p-4 text-sm text-gray-500 italic">
-        No event data available.
+      <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md border border-gray-200">
+        <LucideReact.AlertCircle size={24} className="text-gray-400" />
+        <span className="mt-2 text-gray-500">No event data available</span>
       </div>
     );
   }
 
-  const {
-    name,
-    createdAt,
-    expireAt,
-    channelId,
-    managed,
-    version,
-    nameI18nMap,
-  } = event;
-
-  const displayName = name || "Untitled Event";
-
-  const createdAtStr = createdAt
-    ? new Date(createdAt).toLocaleDateString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
+  const createdDate = event.createdAt
+    ? new Date(event.createdAt).toLocaleString()
+    : "N/A";
+  const expireDate = event.expireAt
+    ? new Date(event.expireAt).toLocaleString()
+    : "N/A";
+  const managed = Boolean(event.managed);
+  const propertyCount = event.property
+    ? Object.keys(event.property).length
+    : 0;
+  const i18nCount = event.nameI18nMap
+    ? Object.keys(event.nameI18nMap).length
+    : 0;
+  const versionDisplay = event.version !== undefined
+    ? event.version
     : "N/A";
 
-  const expireAtStr = expireAt
-    ? new Date(expireAt).toLocaleDateString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
-    : null;
-
-  const isExpired = expireAt ? Date.now() > expireAt : false;
-  const statusBadge = isExpired
-    ? {
-        text: "Expired",
-        bg: "bg-red-100",
-        color: "text-red-800",
-      }
-    : {
-        text: "Active",
-        bg: "bg-green-100",
-        color: "text-green-800",
-      };
-
-  const managedStatus = managed ? "Managed" : "Unmanaged";
-  const channel = channelId || "N/A";
-  const translationsCount = nameI18nMap
-    ? Object.keys(nameI18nMap).length
-    : 0;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md mx-auto">
-      <div className="flex items-center justify-between">
-        <h2
-          className="text-lg font-semibold text-gray-800 truncate"
-          title={displayName}
-        >
-          {displayName}
-        </h2>
-        <span
-          className={`text-xs ${statusBadge.bg} ${statusBadge.color} px-2 py-1 rounded-full`}
-        >
-          {statusBadge.text}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200">
+      <h2 className="text-lg font-semibold text-gray-800 truncate">
+        {event.name}
+      </h2>
+      <div className="mt-3 grid grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created: {createdDate}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Expires: {expireDate}</span>
+        </div>
       </div>
-
-      <div className="mt-2 space-y-1 text-sm text-gray-600">
-        <div>
-          <span className="font-medium">Created:</span> {createdAtStr}
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          {managed ? (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          ) : (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          )}
+          <span>{managed ? "Managed" : "Unmanaged"}</span>
         </div>
-        {expireAtStr && (
-          <div>
-            <span className="font-medium">Expires:</span> {expireAtStr}
-          </div>
-        )}
-        <div>
-          <span className="font-medium">Channel:</span> {channel}
+        <div className="flex items-center gap-1">
+          <LucideReact.Hash size={16} className="text-gray-500" />
+          <span>Properties: {propertyCount}</span>
         </div>
-        <div>
-          <span className="font-medium">Mode:</span> {managedStatus}
+        <div className="flex items-center gap-1">
+          <LucideReact.Globe size={16} className="text-gray-500" />
+          <span>Translations: {i18nCount}</span>
         </div>
-        {translationsCount > 0 && (
-          <div>
-            <span className="font-medium">Translations:</span>{" "}
-            {translationsCount}
-          </div>
-        )}
-        {version !== undefined && (
-          <div>
-            <span className="font-medium">Version:</span> {version}
-          </div>
-        )}
+        <div className="flex items-center gap-1">
+          <span>Version: {versionDisplay}</span>
+        </div>
       </div>
     </div>
   );

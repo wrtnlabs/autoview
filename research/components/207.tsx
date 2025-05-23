@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4ChatBasedUserChatsView = {
+                export interface LegacyV4ChatBasedUserChatsView {
                     messages?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Message[];
                     sessions?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession[];
                     userChats?: AutoViewInputSubTypes.legacy.v4.LegacyV4UserChat[];
@@ -13,12 +14,12 @@ export namespace AutoViewInputSubTypes {
                     chatTags?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatTag[];
                     prev?: string;
                     next?: string;
-                };
+                }
             }
         }
         export namespace v4 {
             export namespace message {
-                export type LegacyV4Message = {
+                export interface LegacyV4Message {
                     chatKey?: string;
                     id?: string;
                     mainKey?: string;
@@ -49,19 +50,19 @@ export namespace AutoViewInputSubTypes {
                     threadMsg?: boolean;
                     broadcastedMsg?: boolean;
                     rootMessageId?: string;
-                };
-                export type LegacyV4Block = {
+                }
+                export interface LegacyV4Block {
                     type: "bullets" | "code" | "text";
                     language?: string;
                     value?: string;
                     blocks?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block[];
-                };
-                export type LegacyV4Button = {
+                }
+                export interface LegacyV4Button {
                     title: string;
                     colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
                     url: string;
-                };
-                export type LegacyV4File = {
+                }
+                export interface LegacyV4File {
                     id: string;
                     type?: string;
                     name: string;
@@ -78,41 +79,41 @@ export namespace AutoViewInputSubTypes {
                     channelId?: string;
                     chatType?: string;
                     chatId?: string;
-                };
-                export type LegacyV4Log = {
+                }
+                export interface LegacyV4Log {
                     action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
                     values?: string[];
-                };
-                export type LegacyV4Reaction = {
+                }
+                export interface LegacyV4Reaction {
                     emojiName: string;
                     personKeys?: string[] & tags.UniqueItems;
                     empty?: boolean;
-                };
-                export type LegacyV4ProfileBotInput = {
+                }
+                export interface LegacyV4ProfileBotInput {
                     id?: string;
                     key?: string;
                     type?: string;
                     name?: string;
                     value?: AutoViewInputSubTypes.AttributeValue;
-                };
-                export type LegacyV4MessageMarketing = {
+                }
+                export interface LegacyV4MessageMarketing {
                     type?: string;
                     id?: string;
                     advertising?: boolean;
                     sendToOfflineXms?: boolean;
                     sendToOfflineEmail?: boolean;
                     exposureType?: "fullScreen";
-                };
-                export type LegacyV4MessageSupportBot = {
+                }
+                export interface LegacyV4MessageSupportBot {
                     id?: string;
                     revisionId?: string;
                     sectionId?: string;
                     stepIndex?: number & tags.Type<"int32">;
                     buttons?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
                     submitButtonIndex?: number & tags.Type<"int32">;
-                };
+                }
             }
-            export type LegacyV4WebPage = {
+            export interface LegacyV4WebPage {
                 id: string;
                 url: string;
                 title?: string;
@@ -127,12 +128,12 @@ export namespace AutoViewInputSubTypes {
                 previewKey?: string;
                 logo?: string;
                 name?: string;
-            };
-            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+            }
+            export interface LegacyV4SupportBotRouteSection_dollar_LegacyV4Button {
                 text: string;
                 nextSectionId: string;
-            };
-            export type LegacyV4ChatSession = {
+            }
+            export interface LegacyV4ChatSession {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -152,8 +153,8 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
-            export type LegacyV4UserChat = {
+            }
+            export interface LegacyV4UserChat {
                 id?: string;
                 channelId?: string;
                 appUserKey?: string;
@@ -198,19 +199,19 @@ export namespace AutoViewInputSubTypes {
                 snoozedAt?: number;
                 expiresAt?: number;
                 version?: number & tags.Type<"int32">;
-            };
-            export type LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot = {
+            }
+            export interface LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot {
                 id?: string;
                 revisionId?: string;
                 sectionPath?: string[];
-            };
-            export type LegacyV4UserChat_dollar_LegacyV4UserChatMarketing = {
+            }
+            export interface LegacyV4UserChat_dollar_LegacyV4UserChatMarketing {
                 type?: string;
                 id?: string;
                 enableSupportBot?: boolean;
                 supportBotId?: string;
-            };
-            export type LegacyV4User = {
+            }
+            export interface LegacyV4User {
                 id?: string;
                 channelId?: string;
                 memberId?: string;
@@ -250,8 +251,8 @@ export namespace AutoViewInputSubTypes {
                 managed?: boolean;
                 mobileNumber?: string & tags.Default<"+18004424000">;
                 systemLanguage?: string & tags.Default<"en">;
-            };
-            export type LegacyV4Manager = {
+            }
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -287,8 +288,8 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4ChatTag = {
+            }
+            export interface LegacyV4ChatTag {
                 id?: string;
                 channelId?: string;
                 colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
@@ -297,10 +298,10 @@ export namespace AutoViewInputSubTypes {
                 description?: string;
                 followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
                 createdAt?: number;
-            };
+            }
         }
     }
-    export type AttributeValue = {
+    export interface AttributeValue {
         s?: string;
         n?: string;
         b?: {
@@ -331,13 +332,13 @@ export namespace AutoViewInputSubTypes {
         }[];
         "null"?: boolean;
         bool?: boolean;
-    };
-    export namespace profile {
-        export type UserProfile = {
-            [key: string]: {};
-        };
     }
-    export type WebInfo = {
+    export namespace profile {
+        export interface UserProfile {
+            [key: string]: {};
+        }
+    }
+    export interface WebInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -345,8 +346,8 @@ export namespace AutoViewInputSubTypes {
         browserName?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type MobileInfo = {
+    }
+    export interface MobileInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -356,17 +357,17 @@ export namespace AutoViewInputSubTypes {
         sdkVersion?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ChatBasedUserChatsView;
 
@@ -381,92 +382,99 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   const userCount = value.users?.length ?? 0;
   const managerCount = value.managers?.length ?? 0;
   const tagCount = value.chatTags?.length ?? 0;
-
-  // Display up to 5 chat tags as badges
-  const displayedTags = value.chatTags?.slice(0, 5) ?? [];
-
-  // Mapping chatTag.colorVariant to Tailwind CSS classes
-  const colorClassesMap: { [key: string]: string } = {
-    red: "bg-red-100 text-red-800",
-    orange: "bg-orange-100 text-orange-800",
-    yellow: "bg-yellow-100 text-yellow-800",
-    olive: "bg-green-100 text-green-800",
-    green: "bg-green-100 text-green-800",
-    cobalt: "bg-blue-100 text-blue-800",
-    purple: "bg-purple-100 text-purple-800",
-    pink: "bg-pink-100 text-pink-800",
-    navy: "bg-indigo-100 text-indigo-800",
-  };
-
-  // Helper to truncate long cursor strings
-  const truncateCursor = (cursor: string): string =>
-    cursor.length > 16 ? `${cursor.slice(0, 8)}…${cursor.slice(-8)}` : cursor;
-
-  const prevCursor = value.prev ? truncateCursor(value.prev) : "—";
-  const nextCursor = value.next ? truncateCursor(value.next) : "—";
+  const tagNames = value.chatTags?.map((tag) => tag.name) ?? [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Chat Overview</h2>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header */}
+      <h2 className="text-xl font-semibold text-gray-800">Chat Overview</h2>
 
-      <dl className="grid grid-cols-2 gap-4 mb-4 text-center">
-        <div>
-          <dt className="text-sm text-gray-500">Messages</dt>
-          <dd className="mt-1 text-lg font-bold text-gray-900">{messageCount}</dd>
+      {/* Summary Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="flex items-center p-2 bg-gray-50 rounded">
+          <LucideReact.MessageSquare size={20} className="text-blue-500" />
+          <span className="ml-2 text-sm font-medium text-gray-700">Messages</span>
+          <span className="ml-auto text-sm font-semibold text-gray-900">
+            {messageCount.toLocaleString()}
+          </span>
         </div>
-        <div>
-          <dt className="text-sm text-gray-500">Sessions</dt>
-          <dd className="mt-1 text-lg font-bold text-gray-900">{sessionCount}</dd>
+        <div className="flex items-center p-2 bg-gray-50 rounded">
+          <LucideReact.Clock size={20} className="text-indigo-500" />
+          <span className="ml-2 text-sm font-medium text-gray-700">Sessions</span>
+          <span className="ml-auto text-sm font-semibold text-gray-900">
+            {sessionCount.toLocaleString()}
+          </span>
         </div>
-        <div>
-          <dt className="text-sm text-gray-500">User Chats</dt>
-          <dd className="mt-1 text-lg font-bold text-gray-900">{userChatCount}</dd>
+        <div className="flex items-center p-2 bg-gray-50 rounded">
+          <LucideReact.MessageCircle size={20} className="text-green-500" />
+          <span className="ml-2 text-sm font-medium text-gray-700">User Chats</span>
+          <span className="ml-auto text-sm font-semibold text-gray-900">
+            {userChatCount.toLocaleString()}
+          </span>
         </div>
-        <div>
-          <dt className="text-sm text-gray-500">Users</dt>
-          <dd className="mt-1 text-lg font-bold text-gray-900">{userCount}</dd>
+        <div className="flex items-center p-2 bg-gray-50 rounded">
+          <LucideReact.Users size={20} className="text-yellow-500" />
+          <span className="ml-2 text-sm font-medium text-gray-700">Users</span>
+          <span className="ml-auto text-sm font-semibold text-gray-900">
+            {userCount.toLocaleString()}
+          </span>
         </div>
-        <div>
-          <dt className="text-sm text-gray-500">Managers</dt>
-          <dd className="mt-1 text-lg font-bold text-gray-900">{managerCount}</dd>
+        <div className="flex items-center p-2 bg-gray-50 rounded">
+          <LucideReact.UserCheck size={20} className="text-purple-500" />
+          <span className="ml-2 text-sm font-medium text-gray-700">Managers</span>
+          <span className="ml-auto text-sm font-semibold text-gray-900">
+            {managerCount.toLocaleString()}
+          </span>
         </div>
-        <div>
-          <dt className="text-sm text-gray-500">Tags</dt>
-          <dd className="mt-1 text-lg font-bold text-gray-900">{tagCount}</dd>
+        <div className="flex items-center p-2 bg-gray-50 rounded">
+          <LucideReact.Tag size={20} className="text-pink-500" />
+          <span className="ml-2 text-sm font-medium text-gray-700">Tags</span>
+          <span className="ml-auto text-sm font-semibold text-gray-900">
+            {tagCount.toLocaleString()}
+          </span>
         </div>
-      </dl>
+      </div>
 
-      {displayedTags.length > 0 && (
-        <div className="mb-4">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Top Tags</h3>
+      {/* Tag Badges */}
+      {tagNames.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Chat Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {displayedTags.map((tag, idx) => {
-              const classes = colorClassesMap[tag.colorVariant ?? ""] ?? "bg-gray-100 text-gray-800";
-              return (
-                <span
-                  key={idx}
-                  className={`${classes} px-2 py-1 text-xs font-medium rounded`}
-                >
-                  {tag.name}
-                </span>
-              );
-            })}
-            {tagCount > displayedTags.length && (
-              <span className="px-2 py-1 text-xs text-gray-600">+{tagCount - displayedTags.length}</span>
-            )}
+            {tagNames.map((name) => (
+              <span
+                key={name}
+                className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full max-w-xs truncate"
+              >
+                {name}
+              </span>
+            ))}
           </div>
         </div>
       )}
 
-      <div className="flex justify-between text-xs text-gray-500">
-        <div>
-          <span className="font-medium">Prev:</span> {prevCursor}
+      {/* Pagination Cursors */}
+      {(value.prev || value.next) && (
+        <div className="flex justify-between text-sm text-gray-600">
+          {value.prev ? (
+            <span className="flex items-center">
+              <LucideReact.ChevronLeft size={16} className="mr-1" />
+              <span className="truncate max-w-xs">{value.prev}</span>
+            </span>
+          ) : (
+            <span />
+          )}
+
+          {value.next ? (
+            <span className="flex items-center">
+              <span className="truncate max-w-xs">{value.next}</span>
+              <LucideReact.ChevronRight size={16} className="ml-1" />
+            </span>
+          ) : (
+            <span />
+          )}
         </div>
-        <div>
-          <span className="font-medium">Next:</span> {nextCursor}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

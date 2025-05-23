@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A team's access to a repository.
      *
      * @title Team Repository
     */
-    export type team_repository = {
+    export interface team_repository {
         /**
          * Unique identifier of the repository
         */
@@ -159,7 +160,7 @@ export namespace AutoViewInputSubTypes {
         open_issues: number & tags.Type<"int32">;
         watchers: number & tags.Type<"int32">;
         master_branch?: string;
-    };
+    }
     /**
      * License Simple
      *
@@ -207,92 +208,131 @@ export type AutoViewInput = AutoViewInputSubTypes.team_repository;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const visibility = value.private ? "Private" : "Public";
-  const licenseName = value.license?.name ?? "No license";
-  const language = value.language ?? "Unknown";
-  const topics = Array.isArray(value.topics) ? value.topics : [];
+  // 1. Derived values and formatting
+  const owner = value.owner;
+  const initialAvatar = owner?.avatar_url;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    owner?.login ?? value.name,
+  )}&background=0D8ABC&color=fff`;
+  const createdAt = value.created_at
+    ? new Date(value.created_at).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '';
+  const updatedAt = value.updated_at
+    ? new Date(value.updated_at).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    : '';
 
-  const formatDate = (iso: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleDateString(undefined, {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })
-      : "N/A";
-
-  const updatedAt = formatDate(value.updated_at);
-  const createdAt = formatDate(value.created_at);
-  const pushedAt = formatDate(value.pushed_at);
-
-  const stars = value.stargazers_count.toLocaleString();
-  const forks = value.forks_count.toLocaleString();
-  const watchers = value.watchers_count.toLocaleString();
-  const issues = value.open_issues_count.toLocaleString();
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Visual structure
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="p-6 bg-white rounded-lg shadow-md max-w-md w-full mx-auto">
+      <div className="flex items-start">
+        <img
+          src={initialAvatar ?? fallbackAvatar}
+          alt={`${owner?.login ?? 'Owner'} avatar`}
+          className="w-10 h-10 rounded-full object-cover bg-gray-200"
+          onError={(e) => {
+            e.currentTarget.src = fallbackAvatar;
+          }}
+        />
+        <div className="ml-4 flex-1">
+          <h2 className="text-lg font-semibold text-gray-900 flex items-center">
             {value.full_name}
+            <LucideReact.Link size={16} className="ml-2 text-gray-400" />
           </h2>
-          <span className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-            {visibility}
-          </span>
+          {value.description && (
+            <p className="mt-2 text-gray-700 text-sm line-clamp-3">
+              {value.description}
+            </p>
+          )}
         </div>
+      </div>
 
-        {value.description && (
-          <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-            {value.description}
-          </p>
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center">
+          {value.private ? (
+            <LucideReact.Lock size={16} className="text-gray-500" />
+          ) : (
+            <LucideReact.Unlock size={16} className="text-gray-500" />
+          )}
+          <span className="ml-1">{value.private ? 'Private' : 'Public'}</span>
+        </div>
+        {value.archived && (
+          <div className="flex items-center">
+            <LucideReact.Archive size={16} className="text-gray-500" />
+            <span className="ml-1">Archived</span>
+          </div>
         )}
+        {value.language && (
+          <div className="flex items-center">
+            <LucideReact.Code size={16} className="text-gray-500" />
+            <span className="ml-1">{value.language}</span>
+          </div>
+        )}
+        {value.license && (
+          <div className="flex items-center">
+            <LucideReact.FileText size={16} className="text-gray-500" />
+            <span className="ml-1">{value.license.name}</span>
+          </div>
+        )}
+      </div>
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {topics.slice(0, 5).map((topic) => (
+      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Star size={16} className="text-yellow-500" />
+          <span className="ml-1">{value.stargazers_count.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.GitFork size={16} className="text-gray-500" />
+          <span className="ml-1">{value.forks_count.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Eye size={16} className="text-gray-500" />
+          <span className="ml-1">{value.watchers_count.toLocaleString()}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.AlertCircle size={16} className="text-red-500" />
+          <span className="ml-1">{value.open_issues_count.toLocaleString()}</span>
+        </div>
+      </div>
+
+      {(createdAt || updatedAt) && (
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+          {createdAt && (
+            <div className="flex items-center">
+              <LucideReact.Calendar size={12} className="text-gray-400" />
+              <span className="ml-1">Created: {createdAt}</span>
+            </div>
+          )}
+          {updatedAt && (
+            <div className="flex items-center">
+              <LucideReact.Calendar size={12} className="text-gray-400" />
+              <span className="ml-1">Updated: {updatedAt}</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {value.topics && value.topics.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {value.topics.map((topic) => (
             <span
               key={topic}
-              className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full"
+              className="flex items-center bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
             >
+              <LucideReact.Tag size={12} className="mr-1 text-gray-500" />
               {topic}
             </span>
           ))}
         </div>
-
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          <div>
-            <div className="text-sm text-gray-500">Stars</div>
-            <div className="text-sm font-medium text-gray-900">{stars}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Forks</div>
-            <div className="text-sm font-medium text-gray-900">{forks}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Watchers</div>
-            <div className="text-sm font-medium text-gray-900">{watchers}</div>
-          </div>
-          <div>
-            <div className="text-sm text-gray-500">Open Issues</div>
-            <div className="text-sm font-medium text-gray-900">{issues}</div>
-          </div>
-        </div>
-
-        <div className="mt-4 flex flex-col sm:flex-row sm:justify-between text-xs text-gray-500 space-y-1 sm:space-y-0">
-          <span>Language: {language}</span>
-          <span>License: {licenseName}</span>
-          <span>Updated: {updatedAt}</span>
-        </div>
-      </div>
-
-      <div className="px-4 py-2 bg-gray-50 text-xs text-gray-500 flex justify-between">
-        <span>Created: {createdAt}</span>
-        <span>Last push: {pushedAt}</span>
-      </div>
+      )}
     </div>
   );
 }

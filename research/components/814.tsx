@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The configuration for GitHub Pages for a repository.
      *
      * @title GitHub Pages
     */
-    export type page = {
+    export interface page {
         /**
          * The API address for accessing this Page resource.
         */
@@ -49,18 +50,18 @@ export namespace AutoViewInputSubTypes {
          * Whether https is enabled on the domain
         */
         https_enforced?: boolean;
-    };
+    }
     /**
      * @title Pages Source Hash
     */
-    export type pages_source_hash = {
+    export interface pages_source_hash {
         branch: string;
         path: string;
-    };
+    }
     /**
      * @title Pages Https Certificate
     */
-    export type pages_https_certificate = {
+    export interface pages_https_certificate {
         state: "new" | "authorization_created" | "authorization_pending" | "authorized" | "authorization_revoked" | "issued" | "uploaded" | "approved" | "errored" | "bad_authz" | "destroy_pending" | "dns_changed";
         description: string;
         /**
@@ -68,7 +69,7 @@ export namespace AutoViewInputSubTypes {
         */
         domains: string[];
         expires_at?: string & tags.Format<"date">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.page;
 
@@ -77,199 +78,181 @@ export type AutoViewInput = AutoViewInputSubTypes.page;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDateTime = (iso?: string | null): string =>
-    iso ? new Date(iso).toLocaleString() : '—';
+  const statusMap = {
+    built: {
+      label: "Built",
+      icon: <LucideReact.CheckCircle className="text-green-500" size={16} />,
+    },
+    building: {
+      label: "Building",
+      icon: <LucideReact.Loader className="animate-spin text-amber-500" size={16} />,
+    },
+    errored: {
+      label: "Errored",
+      icon: <LucideReact.AlertTriangle className="text-red-500" size={16} />,
+    },
+    null: {
+      label: "Unknown",
+      icon: <LucideReact.HelpCircle className="text-gray-400" size={16} />,
+    },
+  } as const;
 
-  const formatDate = (iso?: string | null): string =>
-    iso ? new Date(iso).toLocaleDateString() : '—';
+  const protectionMap = {
+    pending: { label: "Pending", color: "text-amber-500" },
+    verified: { label: "Verified", color: "text-green-500" },
+    unverified: { label: "Unverified", color: "text-red-500" },
+    null: { label: "N/A", color: "text-gray-400" },
+  } as const;
 
-  const statusMap: Record<NonNullable<AutoViewInput['status']> | 'null', { label: string; color: string }> = {
-    built: { label: 'Built', color: 'bg-green-100 text-green-800' },
-    building: { label: 'Building', color: 'bg-blue-100 text-blue-800' },
-    errored: { label: 'Errored', color: 'bg-red-100 text-red-800' },
-    null: { label: 'Unknown', color: 'bg-gray-100 text-gray-800' },
-  };
+  const certStateMap = {
+    new: { icon: <LucideReact.FileText className="text-blue-500" size={16} />, label: "New" },
+    authorization_created: { icon: <LucideReact.FileText className="text-blue-500" size={16} />, label: "Auth Created" },
+    authorization_pending: { icon: <LucideReact.Loader className="animate-spin text-amber-500" size={16} />, label: "Auth Pending" },
+    authorized: { icon: <LucideReact.CheckCircle className="text-green-500" size={16} />, label: "Authorized" },
+    authorization_revoked: { icon: <LucideReact.AlertTriangle className="text-red-500" size={16} />, label: "Auth Revoked" },
+    issued: { icon: <LucideReact.CheckCircle className="text-green-500" size={16} />, label: "Issued" },
+    uploaded: { icon: <LucideReact.CheckCircle className="text-green-500" size={16} />, label: "Uploaded" },
+    approved: { icon: <LucideReact.CheckCircle className="text-green-500" size={16} />, label: "Approved" },
+    errored: { icon: <LucideReact.AlertTriangle className="text-red-500" size={16} />, label: "Errored" },
+    bad_authz: { icon: <LucideReact.AlertTriangle className="text-red-500" size={16} />, label: "Bad Auth" },
+    destroy_pending: { icon: <LucideReact.Loader className="animate-spin text-amber-500" size={16} />, label: "Destroy Pending" },
+    dns_changed: { icon: <LucideReact.AlertTriangle className="text-red-500" size={16} />, label: "DNS Changed" },
+  } as const;
 
-  const visibilityBadge = value.public
-    ? { label: 'Public', color: 'bg-green-100 text-green-800' }
-    : { label: 'Private', color: 'bg-gray-100 text-gray-800' };
+  const formattedPendingUnverify = value.pending_domain_unverified_at
+    ? new Date(value.pending_domain_unverified_at).toLocaleString()
+    : "—";
 
-  const buildTypeBadge = value.build_type
-    ? {
-        label:
-          value.build_type === 'legacy'
-            ? 'Legacy Build'
-            : value.build_type === 'workflow'
-            ? 'Workflow Build'
-            : '—',
-        color: 'bg-indigo-100 text-indigo-800',
-      }
-    : null;
-
-  const domainStateMap: Record<
-    NonNullable<AutoViewInput['protected_domain_state']> | 'null',
-    { label: string; color: string }
-  > = {
-    pending: { label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
-    verified: { label: 'Verified', color: 'bg-green-100 text-green-800' },
-    unverified: { label: 'Unverified', color: 'bg-red-100 text-red-800' },
-    null: { label: 'None', color: 'bg-gray-100 text-gray-800' },
-  };
-
-  const certStateMap: Record<
-    AutoViewInputSubTypes.pages_https_certificate['state'],
-    { label: string; color: string }
-  > = {
-    new: { label: 'New', color: 'bg-gray-100 text-gray-800' },
-    authorization_created: { label: 'Auth Created', color: 'bg-yellow-100 text-yellow-800' },
-    authorization_pending: { label: 'Auth Pending', color: 'bg-yellow-100 text-yellow-800' },
-    authorized: { label: 'Authorized', color: 'bg-green-100 text-green-800' },
-    authorization_revoked: { label: 'Auth Revoked', color: 'bg-red-100 text-red-800' },
-    issued: { label: 'Issued', color: 'bg-green-100 text-green-800' },
-    uploaded: { label: 'Uploaded', color: 'bg-gray-100 text-gray-800' },
-    approved: { label: 'Approved', color: 'bg-green-100 text-green-800' },
-    errored: { label: 'Errored', color: 'bg-red-100 text-red-800' },
-    bad_authz: { label: 'Bad Authz', color: 'bg-red-100 text-red-800' },
-    destroy_pending: { label: 'Destroy Pending', color: 'bg-gray-100 text-gray-800' },
-    dns_changed: { label: 'DNS Changed', color: 'bg-blue-100 text-blue-800' },
-  };
+  const cert = value.https_certificate;
+  const formattedCertExpiry = cert?.expires_at
+    ? new Date(cert.expires_at).toLocaleDateString()
+    : "—";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <section className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <h2 className="text-lg font-medium text-gray-900 mb-3 truncate">{value.url}</h2>
-
-      {/* Badges */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {/* Status */}
-        <span
-          className={`px-2 inline-flex text-xs font-semibold leading-5 rounded-full ${
-            statusMap[value.status ?? 'null'].color
-          }`}
-        >
-          {statusMap[value.status ?? 'null'].label}
-        </span>
-        {/* Visibility */}
-        <span
-          className={`px-2 inline-flex text-xs font-semibold leading-5 rounded-full ${
-            visibilityBadge.color
-          }`}
-        >
-          {visibilityBadge.label}
-        </span>
-        {/* Build Type */}
-        {buildTypeBadge && (
-          <span
-            className={`px-2 inline-flex text-xs font-semibold leading-5 rounded-full ${
-              buildTypeBadge.color
-            }`}
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header with primary URLs */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 truncate">
+          <LucideReact.Link className="text-gray-500" size={16} />
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline truncate"
+            title={value.url}
           >
-            {buildTypeBadge.label}
-          </span>
-        )}
-        {/* Custom 404 */}
-        {value.custom_404 && (
-          <span className="px-2 inline-flex text-xs font-semibold leading-5 rounded-full bg-purple-100 text-purple-800">
-            Custom 404
-          </span>
-        )}
-        {/* HTTPS Enforced */}
-        {value.https_enforced != null && (
-          <span
-            className={`px-2 inline-flex text-xs font-semibold leading-5 rounded-full ${
-              value.https_enforced ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-            }`}
-          >
-            {value.https_enforced ? 'HTTPS Enforced' : 'HTTP Allowed'}
-          </span>
+            {value.url}
+          </a>
+        </div>
+        {value.html_url && (
+          <div className="flex items-center gap-2 truncate">
+            <LucideReact.Globe className="text-gray-500" size={16} />
+            <a
+              href={value.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline truncate"
+              title={value.html_url}
+            >
+              {value.html_url}
+            </a>
+          </div>
         )}
       </div>
 
-      {/* Details */}
-      <dl className="space-y-2 text-sm text-gray-700">
-        {/* Custom Domain */}
-        {value.cname != null && (
-          <div>
-            <dt className="font-semibold">Custom Domain:</dt>
-            <dd className="ml-1 truncate">{value.cname || '—'}</dd>
-          </div>
-        )}
-
-        {/* Protected Domain State */}
-        {value.protected_domain_state != null && (
-          <div>
-            <dt className="font-semibold">Domain Protection:</dt>
-            <dd className="ml-1 inline-flex items-center gap-1">
-              <span
-                className={`px-1 inline-flex text-xs font-semibold leading-4 rounded-full ${
-                  domainStateMap[value.protected_domain_state ?? 'null'].color
-                }`}
-              >
-                {domainStateMap[value.protected_domain_state ?? 'null'].label}
-              </span>
-              {value.protected_domain_state === 'pending' &&
-                value.pending_domain_unverified_at && (
-                  <span className="text-xs text-gray-500">
-                    until {formatDateTime(value.pending_domain_unverified_at)}
-                  </span>
-                )}
-            </dd>
-          </div>
-        )}
-
-        {/* Pages Source */}
-        {value.source && (
-          <div>
-            <dt className="font-semibold">Source:</dt>
-            <dd className="ml-1">
-              {value.source.branch}
-              <span className="mx-1 text-gray-400">/</span>
-              {value.source.path}
-            </dd>
-          </div>
-        )}
-
-        {/* HTML URL */}
-        {value.html_url && (
-          <div>
-            <dt className="font-semibold">Site URL:</dt>
-            <dd className="ml-1 truncate">{value.html_url}</dd>
-          </div>
-        )}
+      {/* Core status and flags */}
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <div className="flex items-center gap-1">
+          {statusMap[value.status ?? "null"].icon}
+          <dt className="font-medium">Status:</dt>
+          <dd>{statusMap[value.status ?? "null"].label}</dd>
+        </div>
+        <div className="flex items-center gap-1">
+          {value.public ? (
+            <LucideReact.Unlock className="text-green-500" size={16} />
+          ) : (
+            <LucideReact.Lock className="text-red-500" size={16} />
+          )}
+          <dt className="font-medium">Public:</dt>
+          <dd>{value.public ? "Yes" : "No"}</dd>
+        </div>
+        <div className="flex items-center gap-1">
+          {value.https_enforced ? (
+            <LucideReact.CheckCircle className="text-green-500" size={16} />
+          ) : (
+            <LucideReact.XCircle className="text-red-500" size={16} />
+          )}
+          <dt className="font-medium">HTTPS Enforced:</dt>
+          <dd>{value.https_enforced ? "Yes" : "No"}</dd>
+        </div>
+        <div className="flex items-center gap-1">
+          {value.custom_404 ? (
+            <LucideReact.CheckCircle className="text-green-500" size={16} />
+          ) : (
+            <LucideReact.XCircle className="text-red-500" size={16} />
+          )}
+          <dt className="font-medium">Custom 404:</dt>
+          <dd>{value.custom_404 ? "Enabled" : "Disabled"}</dd>
+        </div>
+        <dt className="font-medium">Build Type:</dt>
+        <dd className="truncate">{value.build_type ?? "—"}</dd>
       </dl>
 
-      {/* HTTPS Certificate */}
-      {value.https_certificate && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <div className="font-semibold text-gray-800 mb-2">TLS Certificate</div>
-          <div className="flex flex-wrap gap-2 mb-3">
-            <span
-              className={`px-2 inline-flex text-xs font-semibold leading-5 rounded-full ${
-                certStateMap[value.https_certificate.state].color
-              }`}
-            >
-              {certStateMap[value.https_certificate.state].label}
+      {/* Domain configuration */}
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+        <dt className="font-medium">CNAME:</dt>
+        <dd className="truncate">{value.cname ?? "—"}</dd>
+        <div className="flex items-center gap-1">
+          {(() => {
+            const key = value.protected_domain_state ?? "null";
+            return (
+              <>
+                <LucideReact.Shield className={protectionMap[key].color} size={16} />
+                <dt className="font-medium">Domain State:</dt>
+                <dd className={protectionMap[key].color}>
+                  {protectionMap[key].label}
+                </dd>
+              </>
+            );
+          })()}
+        </div>
+        <dt className="font-medium">Pending Unverify At:</dt>
+        <dd>{formattedPendingUnverify}</dd>
+      </dl>
+
+      {/* Source info */}
+      {value.source && (
+        <div className="text-sm">
+          <dt className="font-medium">Source:</dt>
+          <dd>
+            <span className="font-mono bg-gray-100 px-1 rounded-sm">
+              {value.source.branch}:{value.source.path}
             </span>
-          </div>
-          <dl className="space-y-1 text-sm text-gray-700">
-            <div>
-              <dt className="font-semibold inline">Domains:</dt>{' '}
-              <dd className="inline">{value.https_certificate.domains.join(', ')}</dd>
-            </div>
-            <div>
-              <dt className="font-semibold inline">Expires:</dt>{' '}
-              <dd className="inline">{formatDate(value.https_certificate.expires_at)}</dd>
-            </div>
-            {value.https_certificate.description && (
-              <div>
-                <dt className="font-semibold">Notes:</dt>
-                <dd className="ml-1 line-clamp-2">{value.https_certificate.description}</dd>
-              </div>
-            )}
-          </dl>
+          </dd>
         </div>
       )}
-    </section>
+
+      {/* HTTPS Certificate details */}
+      {cert && (
+        <div className="space-y-1 text-sm">
+          <div className="flex items-center gap-1">
+            {certStateMap[cert.state]?.icon}
+            <dt className="font-medium">Certificate:</dt>
+            <dd>{certStateMap[cert.state]?.label}</dd>
+          </div>
+          <dt className="font-medium">Domains:</dt>
+          <dd>{cert.domains.join(", ")}</dd>
+          <dt className="font-medium">Expires:</dt>
+          <dd>{formattedCertExpiry}</dd>
+          {cert.description && (
+            <>
+              <dt className="font-medium">Note:</dt>
+              <dd className="italic text-gray-600">{cert.description}</dd>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

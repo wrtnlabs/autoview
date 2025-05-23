@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Full Team
     */
-    export type team_full = {
+    export interface team_full {
         /**
          * Unique identifier of the team
         */
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
          * Distinguished Name (DN) that team maps to within LDAP environment
         */
         ldap_dn?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -97,7 +98,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Team Organization
     */
-    export type team_organization = {
+    export interface team_organization {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -153,7 +154,7 @@ export namespace AutoViewInputSubTypes {
         web_commit_signoff_required?: boolean;
         updated_at: string & tags.Format<"date-time">;
         archived_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_full;
 
@@ -162,91 +163,95 @@ export type AutoViewInput = AutoViewInputSubTypes.team_full;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const teamName = value.name;
-  const teamSlug = value.slug;
-  const description = value.description ?? "No description provided.";
-  const memberCount = value.members_count.toLocaleString();
-  const repoCount = value.repos_count.toLocaleString();
-  const createdAt = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  const createdAt = new Date(value.created_at).toLocaleDateString('default', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
-  const updatedAt = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+  const updatedAt = new Date(value.updated_at).toLocaleDateString('default', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
-  const privacy = value.privacy ? value.privacy.charAt(0).toUpperCase() + value.privacy.slice(1) : null;
-  const notification = value.notification_setting
-    ? value.notification_setting.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-    : null;
-  const permission = value.permission.charAt(0).toUpperCase() + value.permission.slice(1);
+  const orgName = value.organization.name ?? value.organization.login;
+  const description = value.description?.trim();
+  const orgAvatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    orgName,
+  )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex items-center space-x-3">
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">{teamName}</h2>
-          <p className="text-sm text-gray-500 truncate">slug: {teamSlug}</p>
-        </div>
-      </div>
-
-      {/* Description */}
-      <p className="mt-3 text-gray-700 line-clamp-2">{description}</p>
-
-      {/* Badges */}
-      <div className="flex flex-wrap gap-2 mt-4">
-        <span className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
-          Permission: {permission}
-        </span>
-        {privacy && (
-          <span className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
-            Privacy: {privacy}
-          </span>
-        )}
-        {notification && (
-          <span className="px-2 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
-            Notifications: {notification}
-          </span>
-        )}
-      </div>
-
-      {/* Stats */}
-      <ul className="flex space-x-6 mt-4 text-sm text-gray-600">
-        <li>
-          <span className="font-medium text-gray-800">{memberCount}</span> Members
-        </li>
-        <li>
-          <span className="font-medium text-gray-800">{repoCount}</span> Repos
-        </li>
-      </ul>
-
-      {/* Parent Team */}
-      {value.parent && (
-        <p className="mt-4 text-sm text-gray-600">
-          Parent Team: <span className="font-medium text-gray-800">{value.parent.name}</span>
-        </p>
-      )}
-
-      {/* Organization */}
-      <div className="flex items-center mt-4 space-x-3">
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row gap-4">
+      {/* Organization Avatar */}
+      <div className="flex-shrink-0">
         <img
           src={value.organization.avatar_url}
-          alt={value.organization.login}
-          className="w-8 h-8 rounded-full object-cover"
+          alt={`${orgName} avatar`}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = orgAvatarFallback;
+          }}
+          className="w-16 h-16 rounded-full object-cover"
         />
-        <p className="text-sm text-gray-600">
-          Organization: <span className="font-medium text-gray-800">{value.organization.login}</span>
-        </p>
       </div>
 
-      {/* Timestamps */}
-      <div className="mt-4 text-xs text-gray-500 space-y-1">
-        <p>Created: {createdAt}</p>
-        <p>Updated: {updatedAt}</p>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col justify-between gap-3">
+        {/* Header: Team Name */}
+        <div className="flex items-center gap-2">
+          <LucideReact.Users size={20} className="text-gray-500" />
+          <h2 className="text-lg font-semibold text-gray-900">{value.name}</h2>
+        </div>
+
+        {/* Description */}
+        {description && (
+          <p className="text-sm text-gray-600 line-clamp-3">{description}</p>
+        )}
+
+        {/* Key Attributes */}
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <div className="flex items-center gap-1 text-gray-500">
+            <LucideReact.Building2 size={16} />
+            <span>{orgName}</span>
+          </div>
+          <div className="flex items-center gap-1 text-gray-500">
+            <LucideReact.Users size={16} />
+            <span>{value.members_count} members</span>
+          </div>
+          <div className="flex items-center gap-1 text-gray-500">
+            <LucideReact.Package size={16} />
+            <span>{value.repos_count} repos</span>
+          </div>
+          {value.privacy && (
+            <span className="px-2 py-0.5 text-xs bg-gray-100 text-gray-800 rounded">
+              {value.privacy.charAt(0).toUpperCase() + value.privacy.slice(1)}
+            </span>
+          )}
+          <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
+            {value.permission}
+          </span>
+          {value.notification_setting && (
+            <div className="flex items-center gap-1 text-gray-500">
+              <LucideReact.Bell size={16} />
+              <span>
+                {value.notification_setting === 'notifications_enabled'
+                  ? 'Notifications On'
+                  : 'Notifications Off'}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Footer: Timestamps */}
+        <div className="flex items-center gap-6 text-xs text-gray-400">
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={14} />
+            <span>Created: {createdAt}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={14} />
+            <span>Updated: {updatedAt}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

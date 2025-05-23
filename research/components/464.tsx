@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * API Insights usage time stats for an organization
@@ -19,117 +20,121 @@ export type AutoViewInput = AutoViewInputSubTypes.api_insights_time_stats;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const data = Array.isArray(value) ? value : [];
-  const validEntries = data.filter(
-    (e): e is NonNullable<typeof e> => !!e.timestamp
+  const totalRequests = value.reduce(
+    (sum, entry) => sum + (entry.total_request_count ?? 0),
+    0,
   );
-  const sortedEntries = [...validEntries].sort(
-    (a, b) =>
-      new Date(a.timestamp!).getTime() - new Date(b.timestamp!).getTime()
+  const totalRateLimited = value.reduce(
+    (sum, entry) => sum + (entry.rate_limited_request_count ?? 0),
+    0,
   );
-  const totalRequests = sortedEntries.reduce(
-    (sum, e) => sum + (e.total_request_count ?? 0),
-    0
-  );
-  const totalRateLimited = sortedEntries.reduce(
-    (sum, e) => sum + (e.rate_limited_request_count ?? 0),
-    0
-  );
-  const overallRatePercent =
-    totalRequests > 0 ? (totalRateLimited / totalRequests) * 100 : 0;
+  const rateLimitedPercent =
+    totalRequests > 0
+      ? Math.round((totalRateLimited / totalRequests) * 10000) / 100
+      : 0;
 
-  function formatNumber(num: number): string {
-    return num.toLocaleString(undefined);
-  }
-
-  function formatDate(iso?: string): string {
-    if (!iso) return "-";
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return iso;
-    return d.toLocaleString(undefined, {
+  const formatDate = (timestamp?: string): string => {
+    if (!timestamp) return "-";
+    const date = new Date(timestamp);
+    return date.toLocaleString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  // 2. Return early if there's no data
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={32} className="mb-2" />
+        <span className="text-sm">No usage data available</span>
+      </div>
+    );
   }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
+  // 3. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        API Insights Time Stats
-      </h2>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+        <h2 className="flex items-center text-lg font-semibold text-gray-800">
+          <LucideReact.Clock className="mr-2 text-gray-500" size={20} />
+          Time Stats Overview
+        </h2>
+        <span className="mt-2 sm:mt-0 text-sm text-gray-500">
+          {value.length} entries
+        </span>
+      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div>
-          <div className="text-sm text-gray-500">Period</div>
-          <div className="text-base font-medium text-gray-900">
-            {sortedEntries.length > 0
-              ? `${formatDate(sortedEntries[0].timestamp)} – ${formatDate(
-                  sortedEntries[sortedEntries.length - 1].timestamp
-                )}`
-              : "-"}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.Server className="mr-3 text-blue-500" size={20} />
+          <div>
+            <p className="text-xs text-gray-500">Total Requests</p>
+            <p className="text-lg font-medium text-gray-800">
+              {totalRequests.toLocaleString()}
+            </p>
           </div>
         </div>
-        <div>
-          <div className="text-sm text-gray-500">Total Requests</div>
-          <div className="text-base font-medium text-gray-900">
-            {formatNumber(totalRequests)}
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.AlertCircle className="mr-3 text-red-500" size={20} />
+          <div>
+            <p className="text-xs text-gray-500">Rate-Limited Requests</p>
+            <p className="text-lg font-medium text-gray-800">
+              {totalRateLimited.toLocaleString()}
+            </p>
           </div>
         </div>
-        <div>
-          <div className="text-sm text-gray-500">Rate-Limited</div>
-          <div className="text-base font-medium text-gray-900">
-            {formatNumber(totalRateLimited)}
-          </div>
-        </div>
-        <div>
-          <div className="text-sm text-gray-500">Rate-Limited %</div>
-          <div className="text-base font-medium text-gray-900">
-            {overallRatePercent.toFixed(1)}%
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.PieChart className="mr-3 text-green-500" size={20} />
+          <div>
+            <p className="text-xs text-gray-500">Rate Limited %</p>
+            <p className="text-lg font-medium text-gray-800">
+              {rateLimitedPercent}%
+            </p>
           </div>
         </div>
       </div>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full bg-white">
           <thead>
-            <tr className="bg-gray-50">
+            <tr>
               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                 Timestamp
               </th>
               <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                Total
+                Requests
               </th>
               <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
                 Rate-Limited
               </th>
               <th className="px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                % Rate
+                % Rate-Limited
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {sortedEntries.map((e, idx) => {
-              const total = e.total_request_count ?? 0;
-              const rateLimited = e.rate_limited_request_count ?? 0;
-              const percent = total > 0 ? (rateLimited / total) * 100 : 0;
+          <tbody>
+            {value.map((entry, idx) => {
+              const req = entry.total_request_count ?? 0;
+              const rl = entry.rate_limited_request_count ?? 0;
+              const pct =
+                req > 0 ? Math.round((rl / req) * 10000) / 100 + "%" : "-";
               return (
-                <tr key={idx}>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700">
-                    {formatDate(e.timestamp)}
+                <tr key={idx} className="border-t border-gray-100">
+                  <td className="px-4 py-2 text-sm text-gray-700">
+                    {formatDate(entry.timestamp)}
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
-                    {formatNumber(total)}
+                  <td className="px-4 py-2 text-sm text-gray-700 text-right">
+                    {req.toLocaleString()}
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
-                    {formatNumber(rateLimited)}
+                  <td className="px-4 py-2 text-sm text-gray-700 text-right">
+                    {rl.toLocaleString()}
                   </td>
-                  <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-700 text-right">
-                    {percent.toFixed(1)}%
+                  <td className="px-4 py-2 text-sm text-gray-700 text-right">
+                    {pct}
                   </td>
                 </tr>
               );

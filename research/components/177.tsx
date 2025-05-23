@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4ChatTagsView = {
+                export interface LegacyV4ChatTagsView {
                     chatTags?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatTag[];
                     next?: string;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4ChatTag = {
+            export interface LegacyV4ChatTag {
                 id?: string;
                 channelId?: string;
                 colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
@@ -20,7 +21,7 @@ export namespace AutoViewInputSubTypes {
                 description?: string;
                 followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
                 createdAt?: number;
-            };
+            }
         }
     }
 }
@@ -30,9 +31,11 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ChatTag
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const tags = value.chatTags ?? [];
-  const variantStyles: Record<string, string> = {
+  // 1. Data aggregation/transformation
+  const chatTags = value.chatTags ?? [];
+
+  // Map each color variant to Tailwind classes for tag pills
+  const variantClasses: Record<string, string> = {
     red:    'bg-red-100 text-red-800',
     orange: 'bg-orange-100 text-orange-800',
     yellow: 'bg-yellow-100 text-yellow-800',
@@ -41,57 +44,79 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
     cobalt: 'bg-blue-100 text-blue-800',
     purple: 'bg-purple-100 text-purple-800',
     pink:   'bg-pink-100 text-pink-800',
-    navy:   'bg-blue-200 text-blue-900',
+    navy:   'bg-blue-800 text-white',
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Chat Tags</h2>
-      {tags.length === 0 ? (
-        <p className="text-gray-500">No tags available.</p>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Tags size={20} className="text-gray-700 mr-2" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-gray-800">Chat Tags</h2>
+      </div>
+
+      {/* Empty state */}
+      {chatTags.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+          <LucideReact.AlertCircle size={48} className="mb-2" aria-hidden="true" />
+          <span className="text-sm">No chat tags available</span>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {tags.map((tag) => {
-            const followers = tag.followerIds?.length ?? 0;
+        /* Tag list */
+        <ul className="space-y-4">
+          {chatTags.map((tag) => {
+            const colorKey = tag.colorVariant ?? 'cobalt';
+            const pillClass = variantClasses[colorKey] || variantClasses['cobalt'];
+            const followerCount = tag.followerIds?.length ?? 0;
             const formattedDate = tag.createdAt
               ? new Date(tag.createdAt).toLocaleDateString(undefined, {
                   year: 'numeric',
                   month: 'short',
                   day: 'numeric',
                 })
-              : null;
-            const style = variantStyles[tag.colorVariant ?? ''] ?? 'bg-gray-100 text-gray-800';
+              : 'Unknown';
 
             return (
-              <div
-                key={tag.key}
-                className="p-4 border border-gray-200 rounded-lg flex flex-col h-full"
-              >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`${style} px-2 py-1 text-sm font-semibold rounded-full`}
-                  >
-                    {tag.name}
-                  </span>
-                  <code className="text-xs text-gray-500 bg-gray-100 px-1 py-0.5 rounded">
-                    {tag.key}
-                  </code>
+              <li key={tag.key} className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex flex-col md:flex-row md:justify-between md:items-center">
+                  {/* Tag name and description */}
+                  <div>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${pillClass}`}
+                    >
+                      {tag.name}
+                    </span>
+                    {tag.description && (
+                      <p className="mt-1 text-gray-600 text-sm line-clamp-2">
+                        {tag.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Followers and creation date */}
+                  <div className="flex items-center gap-4 mt-2 md:mt-0">
+                    <div className="flex items-center text-gray-500 text-sm">
+                      <LucideReact.Users size={16} className="mr-1" aria-hidden="true" />
+                      <span>{followerCount}</span>
+                    </div>
+                    <div className="flex items-center text-gray-500 text-sm">
+                      <LucideReact.Calendar size={16} className="mr-1" aria-hidden="true" />
+                      <span>{formattedDate}</span>
+                    </div>
+                  </div>
                 </div>
-                {tag.description && (
-                  <p className="text-gray-600 text-sm mt-2 line-clamp-3">{tag.description}</p>
-                )}
-                <div className="mt-auto pt-4 flex items-center justify-between text-xs text-gray-500">
-                  {followers > 0 ? (
-                    <span>{followers} follower{followers !== 1 ? 's' : ''}</span>
-                  ) : (
-                    <span>No followers</span>
-                  )}
-                  {formattedDate && <span>Created {formattedDate}</span>}
-                </div>
-              </div>
+              </li>
             );
           })}
+        </ul>
+      )}
+
+      {/* Pagination indicator */}
+      {chatTags.length > 0 && value.next && (
+        <div className="mt-6 flex justify-center items-center text-blue-600 text-sm">
+          <span>More tags available</span>
+          <LucideReact.ChevronRight size={16} className="ml-1" aria-hidden="true" />
         </div>
       )}
     </div>

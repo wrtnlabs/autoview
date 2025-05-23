@@ -1,4 +1,5 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Section information.
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 
@@ -48,30 +49,37 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation: format the creation date for readability
-  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formattedCreatedAt = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
-      {/* Section Name */}
-      <h2 className="text-lg font-semibold text-gray-900 truncate">
+    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-lg font-semibold text-gray-800 truncate">
         {value.name}
       </h2>
-
-      {/* Section Code Badge */}
-      <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-800 rounded">
-        {value.code.toUpperCase()}
-      </span>
-
-      {/* Creation Date */}
-      <p className="mt-3 text-xs text-gray-500">
-        Created on {formattedDate}
-      </p>
+      <div className="mt-3 flex items-center text-gray-600 text-sm">
+        <LucideReact.Hash
+          size={16}
+          className="mr-1 text-gray-400"
+          aria-hidden="true"
+        />
+        <span className="truncate">Code: {value.code}</span>
+      </div>
+      <div className="mt-2 flex items-center text-gray-600 text-sm">
+        <LucideReact.Calendar
+          size={16}
+          className="mr-1 text-gray-400"
+          aria-hidden="true"
+        />
+        <span className="truncate">Created: {formattedCreatedAt}</span>
+      </div>
     </div>
   );
 }

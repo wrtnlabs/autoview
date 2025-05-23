@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.
@@ -17,7 +18,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -45,8 +46,67 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.integration[];
 
@@ -54,97 +114,136 @@ export type AutoViewInput = AutoViewInputSubTypes.integration[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Handle empty or null list
-  if (!value || value.length === 0) {
+  // 1. Define data aggregation/transformation functions or derived constants
+  type Integration = Exclude<AutoViewInputSubTypes.integration, null>;
+  const integrations: Integration[] = value.filter(
+    (item): item is Integration => item !== null
+  );
+
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (integrations.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No GitHub integrations available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={32} />
+        <span className="mt-2 text-lg">No integrations available</span>
       </div>
     );
   }
 
-  // 2. Utility functions: date formatting and text truncation
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-
-  const truncateText = (text: string, max = 120): string =>
-    text.length > max ? text.slice(0, max) + "…" : text;
-
-  // 3. Render grid of integration cards
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {value.map((integration, idx) => {
-        if (!integration) return null;
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {integrations.map((integration) => {
         const {
           id,
           name,
+          slug,
           description,
+          owner,
+          external_url,
+          html_url,
           created_at,
           updated_at,
-          events,
-          permissions,
           installations_count,
+          permissions,
+          events,
         } = integration;
-        const permCount = permissions
-          ? Object.keys(permissions).length
-          : 0;
+
+        // Owner details
+        const isUser = (owner as any).login !== undefined;
+        const ownerName = isUser
+          ? (owner as AutoViewInputSubTypes.simple_user).login
+          : (owner as AutoViewInputSubTypes.enterprise).name;
+        const avatarUrl = isUser
+          ? (owner as AutoViewInputSubTypes.simple_user).avatar_url
+          : `https://ui-avatars.com/api/?name=${encodeURIComponent(ownerName)}&background=0D8ABC&color=fff`;
+
+        // Derived counts and text
+        const descText = description ?? "No description available";
+        const installCount = installations_count ?? 0;
+        const permCount = Object.keys(permissions).length;
+        const eventCount = events.length;
 
         return (
           <div
-            key={id ?? idx}
-            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+            key={id}
+            className="bg-white rounded-lg shadow hover:shadow-md transition p-5 flex flex-col"
           >
-            {/* Name */}
-            <h2 className="text-lg font-medium text-gray-800 truncate">
-              {name}
-            </h2>
-
-            {/* Description */}
-            {description && (
-              <p className="mt-2 text-sm text-gray-600">
-                {truncateText(description)}
-              </p>
-            )}
-
-            {/* Dates */}
-            <div className="mt-4 flex flex-wrap text-xs text-gray-500 space-x-2">
-              <span>Created: {formatDate(created_at)}</span>
-              <span>Updated: {formatDate(updated_at)}</span>
+            {/* Title & slug */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800 truncate">
+                {name}
+                {slug && (
+                  <span className="text-sm text-gray-500"> · {slug}</span>
+                )}
+              </h3>
+              <div className="flex items-center text-gray-500 text-sm">
+                <LucideReact.Users size={16} className="mr-1" />
+                <span>{installCount}</span>
+              </div>
             </div>
 
-            {/* Events as badges */}
-            {events && events.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {events.slice(0, 3).map((evt, i) => (
-                  <span
-                    key={i}
-                    className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs"
-                  >
-                    {evt}
-                  </span>
-                ))}
-                {events.length > 3 && (
-                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">
-                    +{events.length - 3} more
-                  </span>
-                )}
-              </div>
-            )}
+            {/* Description */}
+            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+              {descText}
+            </p>
 
-            {/* Permissions and installations */}
-            <div className="mt-4 flex items-center text-sm text-gray-700 space-x-4">
-              <span>Permissions: {permCount}</span>
-              {installations_count !== undefined && (
-                <span>Installs: {installations_count}</span>
-              )}
+            {/* Owner info */}
+            <div className="mt-3 flex items-center">
+              <img
+                src={avatarUrl}
+                alt={`${ownerName} avatar`}
+                className="w-6 h-6 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    ownerName
+                  )}&background=0D8ABC&color=fff`;
+                }}
+              />
+              <span className="ml-2 text-sm text-gray-700 truncate">
+                {ownerName}
+              </span>
+            </div>
+
+            {/* Permissions & events */}
+            <div className="mt-3 flex items-center space-x-4 text-gray-500 text-sm">
+              <div className="flex items-center">
+                <LucideReact.Settings size={16} className="mr-1" />
+                <span>{permCount} perms</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Zap size={16} className="mr-1" />
+                <span>{eventCount} events</span>
+              </div>
+            </div>
+
+            {/* Links */}
+            <div className="mt-3 space-y-1 text-sm">
+              <div className="flex items-center text-gray-500">
+                <LucideReact.Link size={16} className="mr-1" />
+                <span className="truncate">{external_url}</span>
+              </div>
+              <div className="flex items-center text-gray-500">
+                <LucideReact.Link size={16} className="mr-1" />
+                <span className="truncate">{html_url}</span>
+              </div>
+            </div>
+
+            {/* Dates */}
+            <div className="mt-3 border-t pt-3 flex justify-between text-xs text-gray-400">
+              <span>Created: {formatDate(created_at)}</span>
+              <span>Updated: {formatDate(updated_at)}</span>
             </div>
           </div>
         );
       })}
     </div>
   );
+  // 3. Return the React element.
 }

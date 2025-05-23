@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Installation
      *
      * @title Installation
     */
-    export type installation = {
+    export interface installation {
         /**
          * The ID of the installation.
         */
         id: number & tags.Type<"int32">;
-        account: any | any | null;
+        account: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise | null;
         /**
          * Describe whether all repositories have been selected or there's a selection involved
         */
@@ -36,15 +37,74 @@ export namespace AutoViewInputSubTypes {
         suspended_by: AutoViewInputSubTypes.nullable_simple_user;
         suspended_at: (string & tags.Format<"date-time">) | null;
         contact_email?: string | null;
-    };
-    export type simple_user = any;
-    export type enterprise = any;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * The permissions granted to the user access token.
      *
      * @title App Permissions
     */
-    export type app_permissions = {
+    export interface app_permissions {
         /**
          * The level of permission to grant the access token for GitHub Actions workflows, workflow runs, and artifacts.
         */
@@ -237,7 +297,7 @@ export namespace AutoViewInputSubTypes {
          * The level of permission to grant the access token to list and manage repositories a user is starring.
         */
         starring?: "read" | "write";
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -274,149 +334,154 @@ export type AutoViewInput = AutoViewInputSubTypes.installation;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and derived constants
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const account = value.account;
+  const isUser = account !== null && 'login' in account;
+  const accountName: string = account
+    ? isUser
+      ? account.login
+      : account.name
+    : "Unknown Account";
+  const avatarUrl: string = account
+    ? account.avatar_url
+    : "https://placehold.co/64x64?text=NA";
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    accountName,
+  )}&background=0D8ABC&color=fff`;
+  const formattedCreated = new Date(value.created_at).toLocaleString();
+  const formattedUpdated = new Date(value.updated_at).toLocaleString();
+  const isSuspended = Boolean(value.suspended_at);
+  const formattedSuspended = value.suspended_at
+    ? new Date(value.suspended_at).toLocaleString()
+    : "";
+  const suspendedBy = value.suspended_by
+    ? 'login' in value.suspended_by
+      ? value.suspended_by.login
+      : "Unknown"
+    : "";
+  const permissionCount = Object.entries(value.permissions).filter(
+    ([, v]) => v === "read" || v === "write" || v === "admin",
+  ).length;
+  const eventCount = value.events.length;
+  const displayedEvents = value.events.slice(0, 3);
+  const moreEvents = eventCount - displayedEvents.length;
 
-  const formattedCreated = formatDate(value.created_at);
-  const formattedUpdated = formatDate(value.updated_at);
-
-  const isSuspended = !!(value.suspended_at && value.suspended_by);
-  const formattedSuspendedAt = value.suspended_at
-    ? formatDate(value.suspended_at)
-    : null;
-
-  const permissionEntries = Object.entries(value.permissions || {}).filter(
-    ([, v]) => v !== undefined
-  ) as [string, "read" | "write" | "admin" | undefined][];
-
-  const humanize = (key: string) =>
-    key
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
-
-  const repoSelectionLabel =
-    value.repository_selection === "all"
-      ? "All Repositories"
-      : "Selected Repositories";
-
-  // 2. Visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow px-6 py-5 space-y-4">
-      <header className="border-b pb-3">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Installation Overview
-        </h2>
-      </header>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto space-y-4">
+      {/* Header */}
+      <div className="flex items-center space-x-3">
+        <img
+          src={avatarUrl}
+          alt={accountName}
+          onError={e => {
+            (e.currentTarget as HTMLImageElement).src = avatarPlaceholder;
+          }}
+          className="w-12 h-12 rounded-full object-cover bg-gray-100"
+        />
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-800 truncate">
+            {accountName}
+          </span>
+          <span className="text-sm text-gray-500">
+            App: {value.app_slug} (ID: {value.app_id})
+          </span>
+        </div>
+      </div>
 
-      <dl className="grid grid-cols-1 gap-y-2">
-        <div className="flex justify-between">
-          <dt className="text-gray-600">App Slug:</dt>
-          <dd className="text-gray-900 font-medium">{value.app_slug}</dd>
+      {/* Details */}
+      <div className="space-y-2 text-sm text-gray-700">
+        {/* Repository selection */}
+        <div className="flex items-center space-x-2">
+          {value.repository_selection === "all" ? (
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500"
+            />
+          ) : (
+            <LucideReact.List size={16} className="text-blue-500" />
+          )}
+          <span>
+            Repositories:{" "}
+            {value.repository_selection === "all"
+              ? "All repositories"
+              : "Selected repositories"}
+          </span>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-gray-600">App ID:</dt>
-          <dd className="text-gray-900 font-medium">{value.app_id}</dd>
+
+        {/* Permissions */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Key size={16} className="text-gray-500" />
+          <span>{permissionCount} permission{permissionCount !== 1 ? 's' : ''}</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Installation ID:</dt>
-          <dd className="text-gray-900 font-medium">{value.id}</dd>
+
+        {/* Events */}
+        <div className="flex items-center space-x-2 flex-wrap">
+          <LucideReact.Tag size={16} className="text-gray-400" />
+          {displayedEvents.map((evt, i) => (
+            <span
+              key={i}
+              className="px-2 py-0.5 bg-gray-200 text-gray-800 rounded-full truncate"
+            >
+              {evt}
+            </span>
+          ))}
+          {moreEvents > 0 && (
+            <span className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full">
+              +{moreEvents}
+            </span>
+          )}
         </div>
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Repository Selection:</dt>
-          <dd className="text-gray-900 font-medium">{repoSelectionLabel}</dd>
+
+        {/* Target Type */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Users size={16} className="text-gray-500" />
+          <span>Target: {value.target_type}</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Events Monitored:</dt>
-          <dd className="text-gray-900 font-medium">
-            {value.events.length}
-          </dd>
+
+        {/* Web URL */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Link size={16} className="text-gray-400" />
+          <span className="truncate">{value.html_url}</span>
         </div>
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Created At:</dt>
-          <dd className="text-gray-900 font-medium">{formattedCreated}</dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Updated At:</dt>
-          <dd className="text-gray-900 font-medium">{formattedUpdated}</dd>
-        </div>
-        {value.single_file_name != null && (
-          <div className="flex justify-between">
-            <dt className="text-gray-600">Managed File:</dt>
-            <dd className="text-gray-900 font-medium">
-              {value.single_file_name}
-              {value.has_multiple_single_files &&
-                value.single_file_paths && (
-                  <span className="ml-2 text-xs text-gray-500">
-                    ({value.single_file_paths.length} files)
-                  </span>
-                )}
-            </dd>
+
+        {/* Single file (if any) */}
+        {value.single_file_name && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.FileText size={16} className="text-gray-500" />
+            <span>Single file: {value.single_file_name}</span>
           </div>
         )}
-        {value.contact_email != null && (
-          <div className="flex justify-between">
-            <dt className="text-gray-600">Contact Email:</dt>
-            <dd className="text-gray-900 font-medium">{value.contact_email}</dd>
+
+        {/* Contact Email */}
+        {value.contact_email && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.Mail size={16} className="text-gray-400" />
+            <span>{value.contact_email}</span>
           </div>
         )}
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Access Tokens URL:</dt>
-          <dd className="text-blue-600 text-sm truncate max-w-xs">
-            {value.access_tokens_url}
-          </dd>
-        </div>
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Repositories URL:</dt>
-          <dd className="text-blue-600 text-sm truncate max-w-xs">
-            {value.repositories_url}
-          </dd>
-        </div>
-        <div className="flex justify-between items-center">
-          <dt className="text-gray-600">Status:</dt>
-          <dd>
-            {isSuspended ? (
-              <span className="px-2 py-0.5 text-sm bg-red-100 text-red-800 rounded-full">
-                Suspended on {formattedSuspendedAt}
-              </span>
-            ) : (
-              <span className="px-2 py-0.5 text-sm bg-green-100 text-green-800 rounded-full">
-                Active
-              </span>
-            )}
-          </dd>
-        </div>
-      </dl>
 
-      {permissionEntries.length > 0 && (
-        <section>
-          <h3 className="text-gray-700 font-medium mb-2">Permissions</h3>
-          <ul className="flex flex-wrap gap-2">
-            {permissionEntries.map(([key, level]) => (
-              <li key={key}>
-                <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
-                  {humanize(key)}: {level}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+        {/* Suspension */}
+        {isSuspended && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.XCircle size={16} className="text-red-500" />
+            <span>
+              Suspended at {formattedSuspended}
+              {suspendedBy ? ` by ${suspendedBy}` : ""}
+            </span>
+          </div>
+        )}
 
-      {value.suspended_by && (
-        <section className="border-t pt-3 text-gray-700 text-sm">
-          <p>
-            Suspended By: <span className="font-medium">{value.suspended_by.login}</span>
-          </p>
-        </section>
-      )}
+        {/* Timestamps */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created: {formattedCreated}</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Updated: {formattedUpdated}</span>
+        </div>
+      </div>
     </div>
   );
 }

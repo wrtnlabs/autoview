@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Simple
      *
      * @title Pull Request Simple
     */
-    export type pull_request_simple = {
+    export interface pull_request_simple {
         url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -75,7 +76,7 @@ export namespace AutoViewInputSubTypes {
          * Indicates whether or not the pull request is a draft.
         */
         draft?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -142,7 +143,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -165,13 +166,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -192,7 +193,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -242,7 +243,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -446,7 +447,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -465,9 +466,9 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Link
     */
-    export type link = {
+    export interface link {
         href: string;
-    };
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -499,104 +500,128 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_simple;
 
 
 
-// The component name is "VisualComponent"
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isMerged = Boolean(value.merged_at);
-  const status = isMerged
-    ? "Merged"
-    : value.state === "closed"
-    ? "Closed"
-    : "Open";
-
-  const formatDate = (iso: string): string =>
-    new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }).format(new Date(iso));
-
-  const createdAt = formatDate(value.created_at);
-  const updatedAt = formatDate(value.updated_at);
-
-  // Truncate body to a reasonable length for mobile-first display
-  const rawBody = value.body ?? "";
-  const truncatedBody =
-    rawBody.length > 300 ? rawBody.slice(0, 300).trimEnd() + "…" : rawBody;
+  const isMerged = value.merged_at !== null;
+  const isDraft = value.draft ?? false;
+  const formattedCreated = new Date(value.created_at).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  const labelCount = value.labels.length;
+  const displayedLabels = value.labels.slice(0, 3);
+  const overflowCount = labelCount - displayedLabels.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Header: PR Number, Title, Status */}
-      <div className="flex items-start justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 flex-1 pr-2 truncate">
-          #{value.number} {value.title}
+    <div className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-colors">
+      {/* Title and Draft Indicator */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 flex-1 line-clamp-2">
+          {value.title}
         </h2>
-        <span
-          className={`ml-2 inline-block px-2 py-1 text-xs font-medium rounded-full ${
-            status === "Open"
-              ? "bg-green-100 text-green-800"
-              : status === "Merged"
-              ? "bg-purple-100 text-purple-800"
-              : "bg-gray-200 text-gray-800"
-          }`}
-        >
-          {status}
-        </span>
-      </div>
-
-      {/* Author and Dates */}
-      <div className="flex items-center mt-3 text-sm text-gray-600">
-        {value.user?.avatar_url && (
-          <img
-            src={value.user.avatar_url}
-            alt={`${value.user.login} avatar`}
-            className="w-6 h-6 rounded-full mr-2 flex-shrink-0"
+        {isDraft && (
+          <LucideReact.FilePlus
+            size={16}
+            className="ml-2 text-blue-500"
+            role="img"
+            aria-label="Draft"
           />
         )}
-        <span className="truncate">{value.user?.login}</span>
-        <span className="mx-2">•</span>
-        <span>Created: {createdAt}</span>
-        <span className="mx-2">•</span>
-        <span>Updated: {updatedAt}</span>
       </div>
 
-      {/* Description (truncated) */}
-      {truncatedBody && (
-        <p className="mt-4 text-gray-700 text-sm line-clamp-3">
-          {truncatedBody}
-        </p>
-      )}
+      {/* PR Number & Status */}
+      <div className="flex items-center mt-2 text-sm text-gray-500 space-x-4">
+        <div className="flex items-center">
+          <LucideReact.Hash size={16} className="mr-1" />
+          <span>#{value.number}</span>
+        </div>
+        <div className="flex items-center">
+          {isMerged ? (
+            <>
+              <LucideReact.CheckCircle
+                size={16}
+                className="mr-1 text-green-500"
+              />
+              <span>Merged</span>
+            </>
+          ) : value.state === "closed" ? (
+            <>
+              <LucideReact.XCircle
+                size={16}
+                className="mr-1 text-red-500"
+              />
+              <span>Closed</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.Clock
+                size={16}
+                className="mr-1 text-amber-500"
+              />
+              <span>Open</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Author, Date & Branches */}
+      <div className="flex flex-wrap items-center mt-3 space-x-4 text-sm text-gray-500">
+        {value.user && (
+          <div className="flex items-center">
+            <img
+              src={value.user.avatar_url}
+              alt={value.user.login}
+              className="w-5 h-5 rounded-full object-cover"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  value.user?.login || "User"
+                )}&background=random`;
+              }}
+            />
+            <span className="ml-1 truncate">{value.user.login}</span>
+          </div>
+        )}
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1 text-gray-400" />
+          <span>{formattedCreated}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.GitBranch size={16} className="mr-1 text-gray-400" />
+          <span className="truncate">
+            {value.head.ref} → {value.base.ref}
+          </span>
+        </div>
+      </div>
 
       {/* Labels */}
-      {value.labels.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {value.labels.map((label) => (
+      {labelCount > 0 && (
+        <div className="flex flex-wrap gap-1 mt-3">
+          {displayedLabels.map((label) => (
             <span
               key={label.id}
+              className="px-2 py-0.5 text-xs font-medium text-white rounded"
               style={{ backgroundColor: `#${label.color}` }}
-              className="text-xs font-medium text-white px-2 py-1 rounded-full"
             >
               {label.name}
             </span>
           ))}
+          {overflowCount > 0 && (
+            <span className="px-2 py-0.5 text-xs text-gray-500">
+              +{overflowCount} more
+            </span>
+          )}
         </div>
       )}
 
-      {/* Branch Info */}
-      <div className="mt-4 text-sm text-gray-600 space-y-1">
-        <div>
-          <span className="font-medium">Base:</span>{" "}
-          <span className="truncate">
-            {value.base.repo.full_name}@{value.base.ref}
-          </span>
-        </div>
-        <div>
-          <span className="font-medium">Head:</span>{" "}
-          <span className="truncate">
-            {value.head.repo.full_name}@{value.head.ref}
-          </span>
-        </div>
-      </div>
+      {/* Description Snippet */}
+      {value.body && (
+        <p className="mt-3 text-sm text-gray-700 line-clamp-3">
+          {value.body}
+        </p>
+      )}
     </div>
   );
 }

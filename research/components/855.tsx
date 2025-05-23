@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Data related to a release.
      *
      * @title Release Asset
     */
-    export type release_asset = {
+    export interface release_asset {
         url: string & tags.Format<"uri">;
         browser_download_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         uploader: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -64,91 +65,130 @@ export type AutoViewInput = AutoViewInputSubTypes.release_asset[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(1)} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(1)} MB`;
-    const gb = mb / 1024;
-    return `${gb.toFixed(1)} GB`;
-  };
+  const totalAssets = value.length;
+  const totalSize = value.reduce((acc, a) => acc + a.size, 0);
+  const totalDownloads = value.reduce((acc, a) => acc + a.download_count, 0);
 
-  const formatDate = (iso: string): string => {
-    const date = new Date(iso);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const formatNumber = (num: number): string => {
-    if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
-    if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
-    return `${num}`;
-  };
-
-  const assets = value;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!assets || assets.length === 0) {
-    return (
-      <p className="text-center text-gray-500 py-8">
-        No assets to display.
-      </p>
-    );
+  function formatBytes(bytes: number): string {
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {assets.map((asset) => (
-        <div
-          key={asset.id}
-          className="p-4 bg-white rounded-lg shadow flex items-center"
-        >
-          <div className="flex-shrink-0">
-            {asset.uploader ? (
-              <img
-                src={asset.uploader.avatar_url}
-                alt={asset.uploader.login}
-                className="w-12 h-12 rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-full bg-gray-200" />
-            )}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Summary */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
+        <h2 className="text-xl font-semibold text-gray-800">Assets Summary</h2>
+        <div className="flex flex-wrap gap-4 mt-3 sm:mt-0 text-sm text-gray-600">
+          <div className="flex items-center gap-1">
+            <LucideReact.List size={16} className="text-gray-500" />
+            <span>Total: {totalAssets}</span>
           </div>
-          <div className="ml-4 flex-1 min-w-0">
-            <h3 className="text-lg font-semibold text-gray-900 truncate">
-              {asset.name}
-            </h3>
-            {asset.label && (
-              <p className="mt-1 text-sm text-gray-500 truncate">
-                {asset.label}
-              </p>
-            )}
-            <div className="mt-2 text-sm text-gray-600 flex flex-wrap items-center space-x-2">
-              <span>{formatSize(asset.size)}</span>
-              <span className="hidden sm:inline">&bull;</span>
-              <span>
-                {formatNumber(asset.download_count)} downloads
-              </span>
-              <span className="hidden sm:inline">&bull;</span>
-              <span>{formatDate(asset.created_at)}</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <LucideReact.HardDrive size={16} className="text-gray-500" />
+            <span>{formatBytes(totalSize)}</span>
           </div>
-          <span
-            className={
-              "ml-4 inline-flex items-center px-2 py-1 rounded text-xs font-medium " +
-              (asset.state === "uploaded"
-                ? "bg-green-100 text-green-800"
-                : "bg-blue-100 text-blue-800")
-            }
-          >
-            {asset.state === "uploaded" ? "Uploaded" : "Open"}
-          </span>
+          <div className="flex items-center gap-1">
+            <LucideReact.Download size={16} className="text-gray-500" />
+            <span>{totalDownloads} downloads</span>
+          </div>
         </div>
-      ))}
+      </div>
+
+      {/* Asset List */}
+      <div className="space-y-4">
+        {value.map((item) => {
+          const ext = item.name.split(".").pop()?.toLowerCase() || "";
+          const createdDate = new Date(item.created_at).toLocaleDateString();
+          const uploader = item.uploader;
+          return (
+            <div
+              key={item.id}
+              className="flex flex-col sm:flex-row sm:justify-between items-start sm:items-center gap-4 p-4 border border-gray-200 rounded-lg"
+            >
+              {/* Left: Icon + Details */}
+              <div className="flex items-center gap-4 min-w-0">
+                {ext === "zip" ? (
+                  <LucideReact.Archive
+                    size={20}
+                    className="text-indigo-500 flex-shrink-0"
+                  />
+                ) : (
+                  <LucideReact.FileText
+                    size={20}
+                    className="text-gray-500 flex-shrink-0"
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 truncate">
+                    {item.name}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500 mt-1">
+                    <span>{formatBytes(item.size)}</span>
+                    <span className="flex items-center gap-1">
+                      <LucideReact.Calendar size={14} />
+                      <span>{createdDate}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <LucideReact.Link size={14} />
+                      <span className="truncate">{item.browser_download_url}</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right: Stats & Uploader */}
+              <div className="flex flex-col items-start sm:items-end gap-2 w-full sm:w-auto">
+                <div className="flex items-center gap-1 text-sm text-gray-600">
+                  <LucideReact.Download size={16} />
+                  <span>{item.download_count}</span>
+                </div>
+                <div className="flex items-center gap-1 text-sm">
+                  {item.state === "uploaded" ? (
+                    <LucideReact.CheckCircle
+                      size={16}
+                      className="text-green-500"
+                    />
+                  ) : (
+                    <LucideReact.Unlock size={16} className="text-blue-500" />
+                  )}
+                  <span
+                    className={`capitalize ${
+                      item.state === "uploaded"
+                        ? "text-green-600"
+                        : "text-blue-600"
+                    }`}
+                  >
+                    {item.state}
+                  </span>
+                </div>
+                {uploader && (
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <img
+                      src={uploader.avatar_url}
+                      alt={uploader.name ?? uploader.login}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          (uploader.name ?? uploader.login) as string
+                        )}&background=0D8ABC&color=fff`;
+                      }}
+                      className="w-6 h-6 rounded-full object-cover"
+                    />
+                    <span className="truncate">
+                      {uploader.name ?? uploader.login}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposDependencyGraphSnapshots {
-        export type PostResponse = {
+        export interface PostResponse {
             /**
              * ID of the created snapshot.
             */
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
              * A message providing further details about the result, such as why the dependencies were not updated.
             */
             message: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposDependencyGraphSnapshots.PostResponse;
@@ -29,52 +30,53 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposDependencyGraphSnapsh
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const formattedDate = createdDate.toLocaleString("default", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
+  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
   });
 
-  // Map the raw result to a friendly label and a color for the badge
-  const statusMap: Record<string, { label: string; color: "green" | "yellow" | "red" | "gray" }> = {
-    SUCCESS: { label: "Success", color: "green" },
-    ACCEPTED: { label: "Accepted", color: "yellow" },
-    INVALID: { label: "Invalid", color: "red" },
-  };
-  const { label: statusLabel, color: statusColor } =
-    statusMap[value.result] ?? { label: value.result, color: "gray" };
-
-  // Determine badge style classes based on statusColor
-  const badgeClass =
-    statusColor === "green"
-      ? "bg-green-100 text-green-800"
-      : statusColor === "yellow"
-      ? "bg-yellow-100 text-yellow-800"
-      : statusColor === "red"
-      ? "bg-red-100 text-red-800"
-      : "bg-gray-100 text-gray-800";
+  // Map the result to an icon and color
+  let statusIcon: JSX.Element;
+  switch (value.result) {
+    case 'SUCCESS':
+      statusIcon = <LucideReact.CheckCircle className="text-green-500" size={20} aria-label="Success" />;
+      break;
+    case 'ACCEPTED':
+      statusIcon = <LucideReact.Clock className="text-amber-500" size={20} aria-label="Accepted" />;
+      break;
+    case 'INVALID':
+      statusIcon = <LucideReact.AlertTriangle className="text-red-500" size={20} aria-label="Invalid" />;
+      break;
+    default:
+      statusIcon = <LucideReact.HelpCircle className="text-gray-500" size={20} aria-label="Unknown status" />;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header: Date and Status Badge */}
-      <div className="flex items-center justify-between mb-2">
-        <time dateTime={value.created_at} className="text-sm text-gray-500">
+    <section className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full">
+      <header className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          {statusIcon}
+          <span className="font-semibold text-gray-900 uppercase">{value.result}</span>
+        </div>
+        <time className="flex items-center text-gray-500 text-sm" dateTime={value.created_at}>
+          <LucideReact.Calendar className="mr-1 text-gray-400" size={16} aria-label="Created at" />
           {formattedDate}
         </time>
-        <span
-          className={`inline-block px-2 py-1 text-xs font-semibold rounded ${badgeClass}`}
-        >
-          {statusLabel}
+      </header>
+
+      {value.message && (
+        <p className="text-gray-700 text-sm line-clamp-3">
+          {value.message}
+        </p>
+      )}
+
+      <div className="mt-3 text-xs text-gray-500">
+        Snapshot ID:{' '}
+        <span className="font-mono text-gray-700">
+          #{value.id}
         </span>
       </div>
-      {/* Message */}
-      <p className="text-gray-700 text-sm line-clamp-3">
-        {value.message || "-"}
-      </p>
-    </div>
+    </section>
   );
 }

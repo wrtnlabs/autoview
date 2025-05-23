@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4GroupsInfiniteScrollingView = {
+                export interface LegacyV4GroupsInfiniteScrollingView {
                     groups?: AutoViewInputSubTypes.legacy.v4.LegacyV4Group[];
                     next?: string;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Group = {
+            export interface LegacyV4Group {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -22,7 +23,7 @@ export namespace AutoViewInputSubTypes {
                 createdAt?: number;
                 updatedAt?: number;
                 active?: boolean;
-            };
+            }
         }
     }
 }
@@ -34,78 +35,84 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4GroupsI
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const groups = value.groups ?? [];
-  const hasMore = typeof value.next === "string" && value.next.length > 0;
-
-  const formatDate = (timestamp?: number): string =>
-    timestamp
-      ? new Date(timestamp).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "N/A";
+  const hasNext = Boolean(value.next);
+  const scopeColor: Record<AutoViewInputSubTypes.legacy.v4.LegacyV4Group['scope'], string> = {
+    all: 'bg-blue-100 text-blue-800',
+    public: 'bg-green-100 text-green-800',
+    private: 'bg-gray-100 text-gray-800',
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (groups.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2">No groups available</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-full mx-auto p-4">
-      {groups.length === 0 ? (
-        <div className="text-center text-gray-500">No groups available.</div>
-      ) : (
-        <ul className="space-y-4">
-          {groups.map((group, idx) => {
-            const managerCount = group.managerIds?.length ?? 0;
-            return (
-              <li
-                key={group.id ?? idx}
-                className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center"
-              >
-                {group.icon && (
-                  <img
-                    src={group.icon}
-                    alt={`${group.name} icon`}
-                    className="w-12 h-12 rounded-full mr-4 object-cover flex-shrink-0"
-                  />
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {group.name}
-                    </h3>
-                    <span
-                      className={
-                        group.active
-                          ? "text-green-700 bg-green-100 px-2 py-1 rounded-full text-sm font-medium"
-                          : "text-red-700 bg-red-100 px-2 py-1 rounded-full text-sm font-medium"
-                      }
-                    >
-                      {group.active ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-                  <div className="mt-1 text-sm text-gray-600">
-                    <span className="capitalize">{group.scope}</span>
-                    {" · "}
-                    {managerCount} manager{managerCount !== 1 ? "s" : ""}
-                  </div>
-                  {group.description && (
-                    <p className="mt-2 text-gray-700 text-sm line-clamp-3">
-                      {group.description}
-                    </p>
-                  )}
-                  <div className="mt-2 text-xs text-gray-500">
-                    Created: {formatDate(group.createdAt)}
-                    {group.updatedAt
-                      ? ` · Updated: ${formatDate(group.updatedAt)}`
-                      : ""}
-                  </div>
+    <div className="flex flex-wrap -mx-2">
+      {groups.map((group, idx) => {
+        const createdAt = group.createdAt
+          ? new Date(group.createdAt).toLocaleDateString(undefined, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+            })
+          : null;
+        const managerCount = group.managerIds?.length;
+        const isActive = group.active !== false;
+        const scopeCls = scopeColor[group.scope] || scopeColor.private;
+
+        return (
+          <div key={group.id ?? idx} className="w-full md:w-1/2 lg:w-1/3 px-2 mb-4">
+            <div className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center space-x-2">
+                  <LucideReact.Tag size={20} className="text-gray-400" />
+                  <h3 className="text-lg font-semibold text-gray-800 truncate">{group.name}</h3>
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-      {hasMore && (
-        <div className="mt-4 text-center text-blue-600 text-sm">
-          More groups available...
+                {isActive ? (
+                  <LucideReact.CheckCircle size={20} className="text-green-500" />
+                ) : (
+                  <LucideReact.XCircle size={20} className="text-red-500" />
+                )}
+              </div>
+
+              {group.description && (
+                <p className="mt-2 text-sm text-gray-600 line-clamp-2">{group.description}</p>
+              )}
+
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                <span className={`px-2 py-1 rounded ${scopeCls}`}>{group.scope}</span>
+
+                {typeof managerCount === 'number' && (
+                  <span className="flex items-center text-gray-500">
+                    <LucideReact.Users size={14} className="mr-1" />
+                    {managerCount}
+                  </span>
+                )}
+
+                {createdAt && (
+                  <span className="flex items-center text-gray-500">
+                    <LucideReact.Calendar size={14} className="mr-1" />
+                    {createdAt}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {hasNext && (
+        <div className="w-full px-2">
+          <div className="mt-4 flex items-center justify-center text-gray-500">
+            <LucideReact.ChevronsDown size={20} className="animate-bounce" />
+            <span className="ml-2">More items available</span>
+          </div>
         </div>
       )}
     </div>

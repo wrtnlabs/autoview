@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub organization.
      *
      * @title Organization Simple
     */
-    export type organization_simple = {
+    export interface organization_simple {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
         public_members_url: string;
         avatar_url: string;
         description: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_simple[];
 
@@ -27,42 +28,60 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_simple[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation: count total organizations
-  const totalOrgs = value.length;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  //    In this case, we derive a fallback avatar URL generator.
+  const getFallbackAvatar = (login: string) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(login)}&background=0D8ABC&color=fff&size=128`;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
-  return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold text-gray-900 mb-4">
-        Organizations ({totalOrgs})
-      </h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {value.map((org) => {
-          // Provide a fallback if description is missing
-          const description = org.description ?? "No description provided";
-          return (
-            <div
-              key={org.id}
-              className="bg-white rounded-lg shadow p-4 flex flex-col"
-            >
-              <img
-                src={org.avatar_url}
-                alt={`${org.login} avatar`}
-                className="w-16 h-16 rounded-full object-cover"
-              />
-              <h2 className="mt-3 text-lg font-semibold text-gray-900">
-                {org.login}
-              </h2>
-              <p className="mt-2 text-gray-600 text-sm line-clamp-3">
-                {description}
-              </p>
-              <p className="mt-auto text-xs text-blue-600 truncate">
-                {org.url}
-              </p>
-            </div>
-          );
-        })}
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No organizations found.</span>
       </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+      {value.map((org) => (
+        <div
+          key={org.id}
+          className="flex flex-col bg-white p-4 rounded-lg shadow transition-shadow hover:shadow-md"
+        >
+          <div className="flex items-center">
+            <img
+              src={org.avatar_url}
+              alt={`${org.login} avatar`}
+              className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+              onError={(e) => {
+                const img = e.currentTarget;
+                img.onerror = null;
+                img.src = getFallbackAvatar(org.login);
+              }}
+            />
+            <div className="ml-3">
+              <div className="text-lg font-semibold text-gray-800 truncate">
+                {org.login}
+              </div>
+              <div className="flex items-center text-sm text-gray-500 truncate">
+                <LucideReact.Link size={16} className="mr-1 flex-shrink-0" />
+                <span className="truncate">{org.url}</span>
+              </div>
+            </div>
+          </div>
+          {org.description ? (
+            <p className="mt-3 text-sm text-gray-700 line-clamp-2">
+              {org.description}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm italic text-gray-400">
+              No description available.
+            </p>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

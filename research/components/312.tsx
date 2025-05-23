@@ -1,16 +1,17 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Configuration object of the webhook
      *
      * @title Webhook Configuration
     */
-    export type webhook_config = {
+    export interface webhook_config {
         url?: AutoViewInputSubTypes.webhook_config_url;
         content_type?: AutoViewInputSubTypes.webhook_config_content_type;
         secret?: AutoViewInputSubTypes.webhook_config_secret;
         insecure_ssl?: AutoViewInputSubTypes.webhook_config_insecure_ssl;
-    };
+    }
     /**
      * The URL to which the payloads will be delivered.
     */
@@ -32,49 +33,75 @@ export type AutoViewInput = AutoViewInputSubTypes.webhook_config;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const url = value.url ?? "—";
-  const contentTypeRaw = value.content_type ?? "form";
-  const contentType = contentTypeRaw.charAt(0).toUpperCase() + contentTypeRaw.slice(1).toLowerCase();
-  const hasSecret = typeof value.secret === "string" && value.secret.length > 0;
-  const maskedSecret = hasSecret
-    ? "••••" + value.secret!.slice(-4)
-    : "Not configured";
-  const insecureRaw = value.insecure_ssl;
-  const isInsecure =
-    insecureRaw === "1" || insecureRaw === 1 || insecureRaw === "true";
-  const sslStatus = isInsecure ? "Disabled" : "Enabled";
-  const sslColor = isInsecure ? "text-red-600" : "text-green-600";
+  const { url, content_type, secret, insecure_ssl } = value;
+  const displayContentType = content_type ?? 'form';
+  // Treat any "1" or 1 as skip SSL verification; otherwise verification is enabled
+  const verifySSL = insecure_ssl !== '1' && insecure_ssl !== 1;
+  // Mask secret, preserving first 4 chars if available
+  const maskedSecret = secret
+    ? secret.length > 4
+      ? `${secret.slice(0, 4)}${'*'.repeat(secret.length - 4)}`
+      : '*'.repeat(secret.length)
+    : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
-        Webhook Configuration
-      </h3>
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-        <div>
-          <dt className="text-sm font-medium text-gray-500">URL</dt>
-          <dd className="mt-1 text-sm text-gray-900 truncate">{url}</dd>
+    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md border border-gray-200">
+      <div className="flex items-center mb-4">
+        <LucideReact.Zap className="text-indigo-500 mr-2" size={20} />
+        <h2 className="text-lg font-semibold text-gray-800">Webhook Configuration</h2>
+      </div>
+      <div className="space-y-3">
+        {/* URL */}
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Link className="text-gray-500 mr-2" size={16} />
+          {url ? (
+            <a
+              href={url}
+              className="text-indigo-600 hover:underline truncate"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {url}
+            </a>
+          ) : (
+            <span className="italic text-gray-400">Not configured</span>
+          )}
         </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">
-            Content Type
-          </dt>
-          <dd className="mt-1 text-sm text-gray-900">{contentType}</dd>
+
+        {/* Content Type */}
+        <div className="flex items-center text-gray-700">
+          <LucideReact.FileText className="text-gray-500 mr-2" size={16} />
+          <span>
+            Content Type:&nbsp;
+            <span className="font-medium">{displayContentType}</span>
+          </span>
         </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Secret</dt>
-          <dd className="mt-1 text-sm text-gray-900">{maskedSecret}</dd>
+
+        {/* Secret */}
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Key className="text-gray-500 mr-2" size={16} />
+          <span>
+            Secret:&nbsp;
+            <span className="font-medium">
+              {maskedSecret ?? <span className="italic text-gray-400">Not set</span>}
+            </span>
+          </span>
         </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">
-            SSL Verification
-          </dt>
-          <dd className={`mt-1 text-sm font-medium ${sslColor}`}>
-            {sslStatus}
-          </dd>
+
+        {/* SSL Verification */}
+        <div className="flex items-center text-gray-700">
+          {verifySSL ? (
+            <LucideReact.CheckCircle className="text-green-500 mr-2" size={16} />
+          ) : (
+            <LucideReact.AlertTriangle className="text-red-500 mr-2" size={16} />
+          )}
+          <span>
+            SSL Verification:&nbsp;
+            <span className="font-medium">{verifySSL ? 'Enabled' : 'Disabled'}</span>
+          </span>
         </div>
-      </dl>
+      </div>
     </div>
   );
 }

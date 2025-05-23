@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 
@@ -144,173 +145,130 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const displayName = value.name || 'Unnamed Configuration';
+  const displayScope = value.target_type
+    ? value.target_type.charAt(0).toUpperCase() + value.target_type.slice(1)
+    : 'Unknown Scope';
   const createdAt = value.created_at
-    ? new Date(value.created_at).toLocaleString()
+    ? new Date(value.created_at).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
     : null;
   const updatedAt = value.updated_at
-    ? new Date(value.updated_at).toLocaleString()
+    ? new Date(value.updated_at).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
     : null;
 
-  const statusClasses: Record<"enabled" | "disabled" | "not_set", string> = {
-    enabled: "bg-green-100 text-green-800",
-    disabled: "bg-red-100 text-red-800",
-    not_set: "bg-gray-100 text-gray-800",
+  type Status = 'enabled' | 'disabled' | 'not_set' | undefined;
+  const getStatusInfo = (status: Status) => {
+    switch (status) {
+      case 'enabled':
+        return {
+          icon: <LucideReact.CheckCircle size={16} className="text-green-500" />,
+          label: 'Enabled',
+          colorClass: 'text-green-500',
+        };
+      case 'disabled':
+        return {
+          icon: <LucideReact.XCircle size={16} className="text-red-500" />,
+          label: 'Disabled',
+          colorClass: 'text-red-500',
+        };
+      case 'not_set':
+        return {
+          icon: <LucideReact.MinusCircle size={16} className="text-amber-500" />,
+          label: 'Not set',
+          colorClass: 'text-amber-500',
+        };
+      default:
+        return {
+          icon: <LucideReact.HelpCircle size={16} className="text-gray-400" />,
+          label: 'Unknown',
+          colorClass: 'text-gray-400',
+        };
+    }
   };
 
-  function renderBadge(
-    label: string,
-    status?: "enabled" | "disabled" | "not_set"
-  ): React.ReactNode {
-    if (!status) return null;
-    const cls = statusClasses[status] || statusClasses.not_set;
-    const pretty = status.replace(/_/g, " ").replace(/\b\w/g, (c) =>
-      c.toUpperCase()
-    );
-    return (
-      <span
-        key={label}
-        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls}`}
-      >
-        {label}: {pretty}
-      </span>
-    );
-  }
-
-  // Aggregate core feature statuses
-  const featureBadges: React.ReactNode[] = [
-    renderBadge("Advanced Security", value.advanced_security),
-    renderBadge("Dependency Graph", value.dependency_graph),
-    renderBadge("Auto Dependency", value.dependency_graph_autosubmit_action),
-    renderBadge("Dependabot Alerts", value.dependabot_alerts),
-    renderBadge("Dependabot Updates", value.dependabot_security_updates),
-    renderBadge(
-      "Code Scanning Setup",
-      value.code_scanning_default_setup
-    ),
-    renderBadge(
-      "Scanning Delegated Dismissal",
-      value.code_scanning_delegated_alert_dismissal
-    ),
-    renderBadge("Secret Scanning", value.secret_scanning),
-    renderBadge(
-      "Push Protection",
-      value.secret_scanning_push_protection
-    ),
-    renderBadge(
-      "Delegated Bypass",
-      value.secret_scanning_delegated_bypass
-    ),
-    renderBadge(
-      "Validity Checks",
-      value.secret_scanning_validity_checks
-    ),
-    renderBadge(
-      "Non-Provider Patterns",
-      value.secret_scanning_non_provider_patterns
-    ),
-    renderBadge(
-      "Generic Secrets",
-      value.secret_scanning_generic_secrets
-    ),
-    renderBadge(
-      "Delegated Dismissal",
-      value.secret_scanning_delegated_alert_dismissal
-    ),
-    renderBadge(
-      "Private Vuln Reporting",
-      value.private_vulnerability_reporting
-    ),
-  ].filter(Boolean);
+  const features: { label: string; status?: Status }[] = [
+    { label: 'Advanced Security', status: value.advanced_security },
+    { label: 'Dependency Graph', status: value.dependency_graph },
+    { label: 'Autosubmit Action', status: value.dependency_graph_autosubmit_action },
+    { label: 'Dependabot Alerts', status: value.dependabot_alerts },
+    { label: 'Dependabot Security Updates', status: value.dependabot_security_updates },
+    { label: 'Code Scanning Setup', status: value.code_scanning_default_setup },
+    { label: 'Secret Scanning', status: value.secret_scanning },
+    { label: 'Private Vulnerability Reporting', status: value.private_vulnerability_reporting },
+  ];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <header className="mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 truncate">
-          {value.name || "Unnamed Configuration"}
-        </h2>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {value.target_type && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium">
-              Type: {value.target_type.charAt(0).toUpperCase() + value.target_type.slice(1)}
-            </span>
-          )}
-          {value.enforcement && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 text-xs font-medium">
-              {value.enforcement.charAt(0).toUpperCase() + value.enforcement.slice(1)}
-            </span>
-          )}
-        </div>
-      </header>
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <LucideReact.Settings size={20} className="text-gray-600" />
+        <h2 className="text-lg font-semibold text-gray-800">{displayName}</h2>
+      </div>
+      <div className="flex items-center gap-2 mt-1 text-sm text-gray-500">
+        <span>{displayScope}</span>
+        <span
+          className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+            value.enforcement === 'enforced'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-gray-100 text-gray-800'
+          }`}
+        >
+          {value.enforcement === 'enforced' ? 'Enforced' : 'Unenforced'}
+        </span>
+      </div>
 
+      {/* Description */}
       {value.description && (
-        <p className="text-gray-700 text-sm line-clamp-3 mb-4">
+        <p className="mt-2 text-sm text-gray-600 line-clamp-3">
           {value.description}
         </p>
       )}
 
-      {featureBadges.length > 0 && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-gray-800 mb-2">
-            Features
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {featureBadges}
+      {/* Feature Status Grid */}
+      <div className="grid grid-cols-2 gap-4 mt-4">
+        {features.map(({ label, status }) => {
+          const { icon, label: statusText, colorClass } = getStatusInfo(status);
+          return (
+            <div key={label} className="flex items-center gap-2">
+              {icon}
+              <span className="text-sm">
+                {label}: <span className={`font-medium ${colorClass}`}>{statusText}</span>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Timestamps & URL */}
+      <div className="flex flex-col gap-1 mt-4 text-sm text-gray-500">
+        {createdAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Created: {createdAt}</span>
           </div>
-        </section>
-      )}
-
-      {/* Options Details */}
-      {value.dependency_graph_autosubmit_action_options && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-gray-800 mb-1">
-            Auto Dependency Options
-          </h3>
-          <p className="text-gray-700 text-xs">
-            Labeled Runners:{" "}
-            {value.dependency_graph_autosubmit_action_options.labeled_runners
-              ? "Yes"
-              : "No"}
-          </p>
-        </section>
-      )}
-
-      {value.code_scanning_default_setup_options && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-gray-800 mb-1">
-            Scan Setup Options
-          </h3>
-          <p className="text-gray-700 text-xs">
-            Runner Type:{" "}
-            {value.code_scanning_default_setup_options.runner_type ||
-              "Not Set"}
-          </p>
-          {value.code_scanning_default_setup_options.runner_label && (
-            <p className="text-gray-700 text-xs">
-              Runner Label:{" "}
-              {value.code_scanning_default_setup_options.runner_label}
-            </p>
-          )}
-        </section>
-      )}
-
-      {value.secret_scanning_delegated_bypass_options?.reviewers && (
-        <section className="mb-4">
-          <h3 className="text-sm font-semibold text-gray-800 mb-1">
-            Bypass Reviewers
-          </h3>
-          <p className="text-gray-700 text-xs">
-            Total Reviewers:{" "}
-            {value.secret_scanning_delegated_bypass_options.reviewers.length}
-          </p>
-        </section>
-      )}
-
-      {/* Metadata */}
-      <footer className="pt-4 border-t border-gray-200 text-gray-500 text-xs">
-        {createdAt && <div>Created: {createdAt}</div>}
-        {updatedAt && <div>Updated: {updatedAt}</div>}
-      </footer>
+        )}
+        {updatedAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Updated: {updatedAt}</span>
+          </div>
+        )}
+        {value.html_url && (
+          <div className="flex items-center gap-1 truncate">
+            <LucideReact.Link size={16} className="text-gray-400" />
+            <span className="truncate">{value.html_url}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

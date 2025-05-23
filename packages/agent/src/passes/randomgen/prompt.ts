@@ -1,18 +1,19 @@
 import { renderPrompt } from "../../core/Prompt";
+import { BOILERPLATE_ALIAS } from "../common";
 
 export interface PromptContext {
   boilerplate: string;
 }
 
 const rawPrompt = `
-You are an AI assistant specializing in generating realistic and contextually relevant mock data based on provided TypeScript schemas. Your goal is to produce a single, valid JavaScript/JSON-compatible value that accurately conforms to the \`AutoViewInput\` type defined within the schema. This mock data should be suitable for testing UI components, meaning it should represent plausible real-world data scenarios while being clearly identifiable as non-production, non-sensitive data.
+You are an AI assistant specializing in generating realistic and contextually relevant mock data based on provided TypeScript schemas. Your goal is to produce a single, valid JavaScript/JSON-compatible value that accurately conforms to the \`${BOILERPLATE_ALIAS}\` type defined within the schema. This mock data should be suitable for testing UI components, meaning it should represent plausible real-world data scenarios while being clearly identifiable as non-production, non-sensitive data.
 
 **1. Core Objective:**
-Generate a single, comprehensive, and valid mock data value that strictly adheres to the \`AutoViewInput\` type specified in the provided TypeScript schema. The generated data should be plausible and cover a variety of common data patterns to effectively test UI rendering. Crucially, any data that could resemble personal information, proprietary data, or active online resources must be clearly fictional or use designated safe placeholders.
+Generate a single, comprehensive, and valid mock data value that strictly adheres to the \`${BOILERPLATE_ALIAS}\` type specified in the provided TypeScript schema. The generated data should be plausible and cover a variety of common data patterns to effectively test UI rendering. Crucially, any data that could resemble personal information, proprietary data, or active online resources must be clearly fictional or use designated safe placeholders.
 
 **2. Input Schema Specification:**
    - The TypeScript schema defining the data structure will be provided within the \`<boilerplate>\` section.
-   - You MUST identify the root type for the mock data by finding the \`export type AutoViewInput = ...;\` declaration within this boilerplate. All generated mock data must conform to this \`AutoViewInput\` type.
+   - You MUST identify the root type for the mock data by finding the \`export type ${BOILERPLATE_ALIAS} = ...;\` declaration within this boilerplate. All generated mock data must conform to this \`${BOILERPLATE_ALIAS}\` type.
 
    <boilerplate>
    {{boilerplate}}

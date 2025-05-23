@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 
@@ -144,13 +145,13 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const capitalize = (s?: string) =>
+    s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
   const createdAt = value.created_at
     ? new Date(value.created_at).toLocaleDateString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
       })
     : undefined;
   const updatedAt = value.updated_at
@@ -158,136 +159,90 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
         year: "numeric",
         month: "short",
         day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
       })
     : undefined;
 
-  const targetLabel = value.target_type
-    ? value.target_type.charAt(0).toUpperCase() + value.target_type.slice(1)
-    : undefined;
-
-  // Gather feature statuses, omitting "not_set" or undefined
-  const features: { label: string; status: "enabled" | "disabled"; }[] = [];
-  const statusMap: [string, keyof AutoViewInput][] = [
-    ["Advanced Security", "advanced_security"],
-    ["Dependency Graph", "dependency_graph"],
-    ["Autosubmit Dependencies", "dependency_graph_autosubmit_action"],
-    ["Dependabot Alerts", "dependabot_alerts"],
-    ["Dependabot Security Updates", "dependabot_security_updates"],
-    ["Code Scanning Setup", "code_scanning_default_setup"],
-    ["Delegated Alert Dismissal", "code_scanning_delegated_alert_dismissal"],
-    ["Secret Scanning", "secret_scanning"],
-    ["Push Protection", "secret_scanning_push_protection"],
-    ["Delegated Bypass", "secret_scanning_delegated_bypass"],
-    ["Validity Checks", "secret_scanning_validity_checks"],
-    ["Non-Provider Patterns", "secret_scanning_non_provider_patterns"],
-    ["Generic Secret Scanning", "secret_scanning_generic_secrets"],
-    ["Alert Dismissal (Secret)", "secret_scanning_delegated_alert_dismissal"],
-    ["Private Vulnerability Reporting", "private_vulnerability_reporting"],
+  type StatusItem = { key: string; label: string; val?: string };
+  const statusMap: StatusItem[] = [
+    { key: "advanced_security", label: "Advanced Security", val: value.advanced_security },
+    { key: "dependency_graph", label: "Dependency Graph", val: value.dependency_graph },
+    { key: "dependency_graph_autosubmit_action", label: "Auto Dependency Submission", val: value.dependency_graph_autosubmit_action },
+    { key: "dependabot_alerts", label: "Dependabot Alerts", val: value.dependabot_alerts },
+    { key: "dependabot_security_updates", label: "Dependabot Security Updates", val: value.dependabot_security_updates },
+    { key: "code_scanning_default_setup", label: "Code Scanning Setup", val: value.code_scanning_default_setup },
+    { key: "code_scanning_delegated_alert_dismissal", label: "Scanning Alert Dismissal", val: value.code_scanning_delegated_alert_dismissal },
+    { key: "secret_scanning", label: "Secret Scanning", val: value.secret_scanning },
+    { key: "secret_scanning_push_protection", label: "Push Protection", val: value.secret_scanning_push_protection },
+    { key: "secret_scanning_delegated_bypass", label: "Delegated Bypass", val: value.secret_scanning_delegated_bypass },
+    { key: "secret_scanning_validity_checks", label: "Validity Checks", val: value.secret_scanning_validity_checks },
+    { key: "secret_scanning_non_provider_patterns", label: "Non-Provider Patterns", val: value.secret_scanning_non_provider_patterns },
+    { key: "secret_scanning_generic_secrets", label: "Copilot Scanning", val: value.secret_scanning_generic_secrets },
+    { key: "secret_scanning_delegated_alert_dismissal", label: "Delegated Alert Dismissal", val: value.secret_scanning_delegated_alert_dismissal },
+    { key: "private_vulnerability_reporting", label: "Vulnerability Reporting", val: value.private_vulnerability_reporting },
   ];
-  statusMap.forEach(([label, key]) => {
-    const v = value[key] as any;
-    if (v === "enabled" || v === "disabled") {
-      features.push({ label, status: v });
-    }
-  });
-
-  // Include runner options if set
-  if (
-    value.dependency_graph_autosubmit_action === "enabled" &&
-    value.dependency_graph_autosubmit_action_options?.labeled_runners != null
-  ) {
-    features.push({
-      label: "Autosubmit Runner Type",
-      status: value.dependency_graph_autosubmit_action_options.labeled_runners
-        ? "enabled"
-        : "disabled",
-    });
-  }
-  if (
-    value.code_scanning_default_setup === "enabled" &&
-    value.code_scanning_default_setup_options
-  ) {
-    const opts = value.code_scanning_default_setup_options;
-    if (opts.runner_type && opts.runner_type !== "not_set") {
-      features.push({
-        label: `Scanning Runner (${opts.runner_type})`,
-        status: "enabled",
-      });
-    }
-    if (opts.runner_label) {
-      features.push({ label: `Runner Label`, status: "enabled" });
-    }
-  }
-  if (
-    value.secret_scanning_delegated_bypass === "enabled" &&
-    value.secret_scanning_delegated_bypass_options?.reviewers
-  ) {
-    features.push({
-      label: `Bypass Reviewers (${value.secret_scanning_delegated_bypass_options.reviewers.length})`,
-      status: "enabled",
-    });
-  }
+  const filteredStatuses = statusMap.filter(
+    (item) => item.val && item.val !== "not_set"
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900 truncate">
-          {value.name || "Configuration"}
+    <div className="p-6 bg-white border border-gray-200 rounded-lg shadow-sm max-w-md mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
+          {value.name ?? "Unnamed Configuration"}
         </h2>
-        <div className="flex space-x-2">
-          {targetLabel && (
-            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-              {targetLabel}
-            </span>
-          )}
-          {value.enforcement && (
-            <span
-              className={`px-2 py-0.5 text-xs font-medium rounded ${
-                value.enforcement === "enforced"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {value.enforcement.charAt(0).toUpperCase() +
-                value.enforcement.slice(1)}
-            </span>
-          )}
-        </div>
+        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-sm">
+          {capitalize(value.target_type)}
+        </span>
       </div>
 
-      {/* Description */}
       {value.description && (
-        <p className="text-gray-600 text-sm line-clamp-3">
+        <p className="text-gray-700 text-sm mb-3 line-clamp-3">
           {value.description}
         </p>
       )}
 
-      {/* Feature Grid */}
-      {features.length > 0 && (
-        <div className="grid grid-cols-2 gap-2">
-          {features.map((f, i) => (
-            <span
-              key={i}
-              className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                f.status === "enabled"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
-            >
-              {f.label}
-            </span>
-          ))}
+      {value.html_url || value.url ? (
+        <div className="flex items-center text-blue-500 text-sm mb-4 truncate">
+          <LucideReact.Link size={16} className="flex-shrink-0" />
+          <span className="ml-1 truncate">
+            {value.html_url ?? value.url}
+          </span>
         </div>
-      )}
+      ) : null}
 
-      {/* Metadata */}
-      <div className="flex justify-between text-gray-500 text-xs">
-        {createdAt && <div>Created: {createdAt}</div>}
-        {updatedAt && <div>Updated: {updatedAt}</div>}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {filteredStatuses.map((item) => (
+          <div key={item.key} className="flex items-center gap-2">
+            {item.val === "enabled" ? (
+              <LucideReact.CheckCircle
+                className="text-green-500 flex-shrink-0"
+                size={16}
+              />
+            ) : (
+              <LucideReact.XCircle
+                className="text-red-500 flex-shrink-0"
+                size={16}
+              />
+            )}
+            <span className="text-gray-800 text-sm">{item.label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between mt-4 text-gray-500 text-xs">
+        {createdAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={14} />
+            <span>Created: {createdAt}</span>
+          </div>
+        )}
+        {updatedAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={14} />
+            <span>Updated: {updatedAt}</span>
+          </div>
+        )}
       </div>
     </div>
   );

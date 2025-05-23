@@ -1,8 +1,9 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingSaleInquiryAnswer {
-        export type ISnapshot = {
+        export interface ISnapshot {
             /**
              * Primary Key.
              *
@@ -43,10 +44,10 @@ export namespace AutoViewInputSubTypes {
              * @title List of attachment files
             */
             files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
-        };
+        }
     }
     export namespace IAttachmentFile {
-        export type ICreate = {
+        export interface ICreate {
             /**
              * File name, except extension.
              *
@@ -69,7 +70,7 @@ export namespace AutoViewInputSubTypes {
              * @title URL path of the real file
             */
             url: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryAnswer.ISnapshot;
@@ -80,49 +81,60 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryAnswer.ISn
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
   });
-  const bodyPreview =
-    value.body.length > 300 ? value.body.slice(0, 300).trimEnd() + "…" : value.body;
-  const formatLabel = value.format.toUpperCase();
+  const formatLabel =
+    value.format === 'html' ? 'HTML' :
+    value.format === 'md'   ? 'Markdown' :
+                              'Text';
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-xl font-semibold text-gray-900 mb-2 truncate">
-        {value.title}
-      </h2>
-      <div className="flex items-center space-x-2 text-sm text-gray-500 mb-4">
-        <time dateTime={value.created_at}>{formattedDate}</time>
-        <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">
-          {formatLabel}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <h2 className="text-lg font-semibold text-gray-800 break-words">
+          {value.title}
+        </h2>
+        <div className="flex items-center space-x-2 mt-2 sm:mt-0 text-gray-500 text-sm">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>{formattedDate}</span>
+          <span className="inline-flex items-center bg-gray-100 text-gray-600 text-xs font-medium px-2 py-0.5 rounded">
+            {value.format === 'html' ? (
+              <LucideReact.Code size={12} className="mr-1" />
+            ) : value.format === 'md' ? (
+              <LucideReact.FileCode size={12} className="mr-1" />
+            ) : (
+              <LucideReact.FileText size={12} className="mr-1" />
+            )}
+            {formatLabel}
+          </span>
+        </div>
       </div>
-      <p className="text-gray-700 text-sm mb-4 overflow-hidden text-ellipsis line-clamp-3 whitespace-pre-wrap">
-        {bodyPreview}
-      </p>
+      <div className="text-gray-700 text-sm whitespace-pre-line line-clamp-3">
+        {value.body}
+      </div>
       {value.files.length > 0 && (
-        <div className="mt-2">
-          <h3 className="text-sm font-medium text-gray-800 mb-1">Attachments</h3>
-          <div className="flex flex-wrap gap-2">
-            {value.files.map((file, index) => {
-              const ext = file.extension ? `.${file.extension}` : "";
-              const displayName = `${file.name}${ext}`;
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
+            Attachments
+          </h3>
+          <ul className="space-y-2">
+            {value.files.map((file) => {
+              const filename = file.name + (file.extension ? `.${file.extension}` : '');
               return (
-                <span
-                  key={index}
-                  className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-                >
-                  {displayName}
-                </span>
+                <li key={file.url} className="flex items-center space-x-2">
+                  <LucideReact.File size={16} className="text-indigo-500" />
+                  <span className="text-sm text-gray-600 truncate">
+                    {filename}
+                  </span>
+                </li>
               );
             })}
-          </div>
+          </ul>
         </div>
       )}
     </div>

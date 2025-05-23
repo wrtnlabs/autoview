@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A reply to a discussion within a team.
      *
      * @title Team Discussion Comment
     */
-    export type team_discussion_comment = {
+    export interface team_discussion_comment {
         author: AutoViewInputSubTypes.nullable_simple_user;
         /**
          * The main text of the comment.
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         url: string & tags.Format<"uri">;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_discussion_comment;
 
@@ -83,96 +84,77 @@ export type AutoViewInput = AutoViewInputSubTypes.team_discussion_comment;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const author = value.author;
-  const authorName = author?.name?.trim() || author?.login || 'Unknown';
-  const avatarUrl = author?.avatar_url;
-  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  const authorName = author?.name || author?.login || "Unknown user";
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    authorName
+  )}&background=0D8ABC&color=fff`;
+
+  const createdDate = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
-  const editedAt = value.last_edited_at
+  const editedDate = value.last_edited_at
     ? new Date(value.last_edited_at).toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        dateStyle: "medium",
+        timeStyle: "short",
       })
     : null;
 
-  const reactionEmoji: Record<string, string> = {
-    '+1': '👍',
-    '-1': '👎',
-    laugh: '😂',
-    confused: '😕',
-    heart: '❤️',
-    hooray: '🎉',
-    eyes: '👀',
-    rocket: '🚀',
-  };
-
-  const reactions =
-    value.reactions
-      ? (Object.keys(reactionEmoji) as Array<keyof typeof reactionEmoji>)
-          .map((key) => ({
-            key,
-            count: (value.reactions as any)[key] as number,
-          }))
-          .filter((r) => r.count > 0)
+  // Prepare reaction items if any reactions exist
+  const reactions = value.reactions;
+  const reactionItems =
+    reactions && reactions.total_count > 0
+      ? [
+          { count: reactions["+1"], icon: LucideReact.ThumbsUp, color: "text-gray-500" },
+          { count: reactions["-1"], icon: LucideReact.ThumbsDown, color: "text-gray-500" },
+          { count: reactions.laugh, icon: LucideReact.Smile, color: "text-yellow-500" },
+          { count: reactions.confused, icon: LucideReact.Meh, color: "text-yellow-500" },
+          { count: reactions.heart, icon: LucideReact.Heart, color: "text-red-500" },
+          { count: reactions.hooray, icon: LucideReact.PartyPopper, color: "text-green-500" },
+          { count: reactions.eyes, icon: LucideReact.Eye, color: "text-blue-500" },
+          { count: reactions.rocket, icon: LucideReact.Rocket, color: "text-indigo-500" },
+        ].filter((item) => item.count > 0)
       : [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="w-full bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-      <header className="flex items-center space-x-3">
-        {avatarUrl && (
-          <img
-            src={avatarUrl}
-            alt={authorName}
-            className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-          />
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold text-gray-900 truncate">
-            {authorName}
-          </div>
-          <div className="flex flex-wrap items-center text-xs text-gray-500 space-x-1 truncate">
-            <span>#{value.number}</span>
-            <span>·</span>
-            <time dateTime={value.created_at}>{createdAt}</time>
-            {editedAt && (
-              <>
-                <span>·</span>
-                <span>Edited</span>
-                <time dateTime={value.last_edited_at!}>{editedAt}</time>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <section className="mt-4 text-gray-800 leading-relaxed break-words">
-        <div
-          dangerouslySetInnerHTML={{ __html: value.body_html }}
-          className="space-y-2"
+    <div className="p-4 bg-white rounded-lg shadow-sm space-y-4">
+      <div className="flex items-center space-x-3">
+        <img
+          src={author?.avatar_url || avatarPlaceholder}
+          alt={authorName}
+          className="w-10 h-10 rounded-full object-cover"
+          onError={(e) => {
+            e.currentTarget.src = avatarPlaceholder;
+          }}
         />
-      </section>
-
-      {reactions.length > 0 && (
-        <footer className="mt-4 flex flex-wrap items-center space-x-4">
-          {reactions.map((r) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-gray-900">{authorName}</span>
+          <span className="text-xs text-gray-500">
+            {createdDate}
+            {editedDate && (
+              <span className="italic"> • Edited {editedDate}</span>
+            )}
+          </span>
+        </div>
+      </div>
+      <div
+        className="text-gray-800 text-sm"
+        dangerouslySetInnerHTML={{ __html: value.body_html }}
+      />
+      {reactionItems.length > 0 && (
+        <div className="flex items-center space-x-4 pt-2 border-t border-gray-200">
+          {reactionItems.map((item, idx) => (
             <div
-              key={r.key}
+              key={idx}
               className="flex items-center text-sm text-gray-600 space-x-1"
             >
-              <span>{reactionEmoji[r.key]}</span>
-              <span>{r.count}</span>
+              <item.icon size={16} className={item.color} strokeWidth={1.5} />
+              <span>{item.count}</span>
             </div>
           ))}
-        </footer>
+        </div>
       )}
-    </article>
+    </div>
   );
 }

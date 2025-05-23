@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Organization Invitation
      *
      * @title Organization Invitation
     */
-    export type organization_invitation = {
+    export interface organization_invitation {
         id: number & tags.Type<"int32">;
         login: string | null;
         email: string | null;
@@ -19,13 +20,13 @@ export namespace AutoViewInputSubTypes {
         node_id: string;
         invitation_teams_url: string;
         invitation_source?: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -48,7 +49,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_invitation[];
 
@@ -57,100 +58,99 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_invitation[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  const invitations = value.map((inv) => {
+    const inviteeName = inv.login ?? inv.email ?? "Unknown";
+    const formattedCreatedAt = new Date(inv.created_at).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
     });
+    const isFailed = Boolean(inv.failed_at);
+    const statusText = isFailed ? "Failed" : "Sent";
+    const statusIcon = isFailed ? (
+      <LucideReact.AlertTriangle
+        className="text-red-500"
+        size={16}
+        aria-label="Failed invitation"
+      />
+    ) : (
+      <LucideReact.CheckCircle
+        className="text-green-500"
+        size={16}
+        aria-label="Invitation sent"
+      />
+    );
 
-  if (!value || value.length === 0) {
     return (
-      <div className="text-center text-gray-500 py-6">
-        No invitations available.
+      <article key={inv.id} className="p-4 bg-white rounded-lg shadow space-y-2">
+        {/* Header: Invitee + Role + Status */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 overflow-hidden">
+            <LucideReact.User className="text-gray-400 flex-shrink-0" size={20} />
+            <span className="font-semibold text-gray-900 truncate">{inviteeName}</span>
+            <span className="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded">
+              {inv.role}
+            </span>
+          </div>
+          <div className="flex items-center space-x-1">
+            {statusIcon}
+            <span className={`text-sm ${isFailed ? "text-red-600" : "text-green-600"}`}>
+              {statusText}
+            </span>
+          </div>
+        </div>
+
+        {/* Metadata: Date, Source, Team Count */}
+        <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-500">
+          <div className="flex items-center space-x-1">
+            <LucideReact.Calendar size={16} />
+            <span>{formattedCreatedAt}</span>
+          </div>
+          {inv.invitation_source && (
+            <div className="flex items-center space-x-1">
+              <LucideReact.Link size={16} />
+              <span>{inv.invitation_source}</span>
+            </div>
+          )}
+          <div className="flex items-center space-x-1">
+            <LucideReact.Users size={16} />
+            <span>
+              {inv.team_count} Team{inv.team_count !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+
+        {/* Inviter Info */}
+        <div className="flex items-center space-x-2 text-sm text-gray-700">
+          <img
+            src={inv.inviter.avatar_url}
+            alt={`${inv.inviter.login} avatar`}
+            className="w-6 h-6 rounded-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                inv.inviter.login
+              )}&background=random`;
+            }}
+          />
+          <span>Invited by {inv.inviter.login}</span>
+        </div>
+
+        {/* Failure Reason */}
+        {isFailed && inv.failed_reason && (
+          <div className="text-sm text-red-600">Reason: {inv.failed_reason}</div>
+        )}
+      </article>
+    );
+  });
+
+  // 3. Return the React element.
+  if (value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2">No invitations available.</span>
       </div>
     );
   }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <ul className="space-y-4">
-      {value.map((inv) => {
-        const statusLabel = inv.failed_at ? "Failed" : "Pending";
-        const statusColor = inv.failed_at
-          ? "bg-red-100 text-red-800"
-          : "bg-yellow-100 text-yellow-800";
-        const inviterName = inv.inviter.name ?? inv.inviter.login;
-
-        return (
-          <li
-            key={inv.id}
-            className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row items-start sm:items-center gap-4"
-          >
-            <img
-              src={inv.inviter.avatar_url}
-              alt={`${inviterName} avatar`}
-              className="w-12 h-12 rounded-full flex-shrink-0"
-            />
-            <div className="flex-1 w-full">
-              <div className="flex items-start justify-between">
-                <div className="min-w-0">
-                  <h3 className="text-lg font-medium text-gray-900 truncate">
-                    {inv.login}
-                  </h3>
-                  {inv.email && (
-                    <p className="text-sm text-gray-500 truncate">
-                      {inv.email}
-                    </p>
-                  )}
-                </div>
-                <span
-                  className={`${statusColor} inline-block px-2 py-0.5 text-xs font-semibold rounded`}
-                >
-                  {statusLabel}
-                </span>
-              </div>
-              <div className="mt-2 flex flex-wrap text-sm text-gray-600 gap-x-4 gap-y-1">
-                <span>
-                  Role:{" "}
-                  <span className="font-medium text-gray-800">{inv.role}</span>
-                </span>
-                <span>
-                  Teams:{" "}
-                  <span className="font-medium text-gray-800">
-                    {inv.team_count}
-                  </span>
-                </span>
-                <span>
-                  Invited by:{" "}
-                  <span className="font-medium text-gray-800">
-                    {inviterName}
-                  </span>
-                </span>
-                <span>
-                  Date:{" "}
-                  <span className="font-medium text-gray-800">
-                    {formatDate(inv.created_at)}
-                  </span>
-                </span>
-                {inv.invitation_source && (
-                  <span>
-                    Source:{" "}
-                    <span className="font-medium text-gray-800">
-                      {inv.invitation_source}
-                    </span>
-                  </span>
-                )}
-              </div>
-              {inv.failed_at && inv.failed_reason && (
-                <p className="mt-2 text-sm text-red-600">
-                  Reason: {inv.failed_reason}
-                </p>
-              )}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
-  );
+  return <div className="space-y-4">{invitations}</div>;
 }

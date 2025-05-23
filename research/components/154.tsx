@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IPageIShoppingSaleSnapshot {
         /**
@@ -7,7 +8,7 @@ export namespace AutoViewInputSubTypes {
          *
          * Collection of records with pagination indformation.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Page information.
              *
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
              * @title List of records
             */
             data: AutoViewInputSubTypes.IShoppingSaleSnapshot.ISummary[];
-        };
+        }
     }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -53,13 +54,13 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     export namespace IShoppingSaleSnapshot {
         /**
          * Summarized information of the sale snapshot.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Price range of the unit.
              *
@@ -117,16 +118,16 @@ export namespace AutoViewInputSubTypes {
              * @title List of units
             */
             units: AutoViewInputSubTypes.IShoppingSaleUnit.ISummary[];
-        };
+        }
     }
-    export type IShoppingSalePriceRange = {
+    export interface IShoppingSalePriceRange {
         lowest: AutoViewInputSubTypes.IShoppingPrice;
         highest: AutoViewInputSubTypes.IShoppingPrice;
-    };
+    }
     /**
      * Shopping price interface.
     */
-    export type IShoppingPrice = {
+    export interface IShoppingPrice {
         /**
          * Nominal price.
          *
@@ -143,13 +144,13 @@ export namespace AutoViewInputSubTypes {
          * @title Real price to pay
         */
         real: number;
-    };
+    }
     export namespace IShoppingSaleContent {
-        export type IInvert = {
+        export interface IInvert {
             id: string & tags.Format<"uuid">;
             title: string;
             thumbnails: AutoViewInputSubTypes.IAttachmentFile[];
-        };
+        }
     }
     /**
      * Attachment File.
@@ -160,7 +161,7 @@ export namespace AutoViewInputSubTypes {
      * or {@link extension} like `.gitignore` or `README` case, but not
      * possible to omit both of them.
     */
-    export type IAttachmentFile = {
+    export interface IAttachmentFile {
         /**
          * Primary Key.
          *
@@ -195,12 +196,12 @@ export namespace AutoViewInputSubTypes {
          * @title URL path of the real file
         */
         url: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
         /**
          * Invert category information with parent category.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Parent category info with recursive structure.
              *
@@ -208,7 +209,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Parent category info with recursive structure
             */
-            parent: null | any;
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
             /**
              * Primary Key.
              *
@@ -245,10 +246,10 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingSaleUnit {
-        export type ISummary = {
+        export interface ISummary {
             price_range: AutoViewInputSubTypes.IShoppingSalePriceRange;
             /**
              * Primary Key.
@@ -283,7 +284,7 @@ export namespace AutoViewInputSubTypes {
              * @title Whether the unit is required or not
             */
             required: boolean;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSaleSnapshot.ISummary;
@@ -293,85 +294,151 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSaleSnapshot.ISu
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { current, pages, records } = value.pagination;
+  const formatCurrency = (amount: number): string =>
+    new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 2,
+    }).format(amount);
 
-  // Format numbers with grouping separators.
-  const formatNumber = (n: number) =>
-    new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(n);
+  const getCategoryPath = (cat: AutoViewInputSubTypes.IShoppingChannelCategory.IInvert): string => {
+    const names: string[] = [];
+    let current: AutoViewInputSubTypes.IShoppingChannelCategory.IInvert | null = cat;
+    while (current) {
+      names.unshift(current.name);
+      current = current.parent;
+    }
+    return names.join(' > ');
+  };
 
+  const placeholderUrl = 'https://placehold.co/400x300/f1f5f9/64748b?text=No+Image';
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = placeholderUrl;
+  };
+
+  const { pagination, data } = value;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="p-4 bg-gray-50">
-      {/* Pagination summary */}
-      <div className="mb-4 text-sm text-gray-600">
-        Page {current} of {pages}, {records.toLocaleString()} total records
-      </div>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {data.map((record) => (
+          <div
+            key={record.snapshot_id}
+            className="bg-white rounded-lg shadow-md flex flex-col overflow-hidden"
+          >
+            {/* Image & Title */}
+            <div className="relative w-full aspect-[4/3] bg-gray-100">
+              {record.content.thumbnails[0]?.url ? (
+                <img
+                  src={record.content.thumbnails[0].url}
+                  alt={record.content.title}
+                  className="w-full h-full object-cover"
+                  onError={handleImageError}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <LucideReact.Image size={32} />
+                </div>
+              )}
+            </div>
+            <div className="p-4 flex flex-col flex-1">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2 truncate">
+                {record.content.title}
+              </h3>
 
-      {/* Grid of sale snapshots */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        {value.data.map((sale) => {
-          // Derive display values
-          const { lowest, highest } = sale.price_range;
-          const low = formatNumber(lowest.real);
-          const high = formatNumber(highest.real);
-          const priceDisplay = low === high ? `${low}` : `${low} – ${high}`;
-          const title = sale.content.title;
-          const thumbUrl = sale.content.thumbnails[0]?.url;
-          const unitsCount = sale.units.length;
+              {/* Price Range */}
+              <div className="flex items-baseline space-x-2 mb-3">
+                <span className="text-sm text-gray-500">From</span>
+                {record.price_range.lowest.nominal > record.price_range.lowest.real ? (
+                  <>
+                    <span className="text-gray-400 line-through text-sm">
+                      {formatCurrency(record.price_range.lowest.nominal)}
+                    </span>
+                    <span className="text-green-600 font-medium">
+                      {formatCurrency(record.price_range.lowest.real)}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-gray-800 font-medium">
+                    {formatCurrency(record.price_range.lowest.real)}
+                  </span>
+                )}
+                <span className="text-sm text-gray-500">to</span>
+                <span className="text-gray-800 font-medium">
+                  {formatCurrency(record.price_range.highest.real)}
+                </span>
+              </div>
 
-          return (
-            <div
-              key={sale.snapshot_id}
-              className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden"
-            >
-              <div className="relative h-40 w-full bg-gray-200">
-                {thumbUrl ? (
-                  <img
-                    src={thumbUrl}
-                    alt={title}
-                    className="object-cover w-full h-full"
-                  />
-                ) : null}
-                {sale.latest && (
-                  <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded-full">
-                    Latest
+              {/* Categories */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {record.categories.map((cat, idx) => (
+                  <span
+                    key={idx}
+                    className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded"
+                  >
+                    {getCategoryPath(cat)}
+                  </span>
+                ))}
+              </div>
+
+              {/* Tags */}
+              <div className="flex flex-wrap gap-1 mb-3">
+                {record.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="flex items-center bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded"
+                  >
+                    <LucideReact.Tag className="mr-1 text-gray-500" size={12} />
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Units */}
+              <div className="flex flex-wrap gap-1 mb-4">
+                {record.units.slice(0, 3).map((unit) => (
+                  <span
+                    key={unit.id}
+                    className={`text-xs px-2 py-0.5 rounded ${
+                      unit.primary
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {unit.name}
+                    {unit.required && <span className="ml-0.5 text-red-500">*</span>}
+                  </span>
+                ))}
+                {record.units.length > 3 && (
+                  <span className="text-xs text-gray-600 px-2 py-0.5">
+                    +{record.units.length - 3} more
                   </span>
                 )}
               </div>
 
-              <div className="flex-1 p-4 flex flex-col">
-                <h2 className="text-gray-800 font-semibold text-lg truncate">
-                  {title}
-                </h2>
-
-                <div className="mt-2 text-indigo-600 font-medium">
-                  {priceDisplay}
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2 items-center text-xs">
-                  <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                    {unitsCount} unit{unitsCount !== 1 ? 's' : ''}
-                  </span>
-                  {sale.categories.map((cat) => (
-                    <span
-                      key={cat.id}
-                      className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded truncate"
-                    >
-                      {cat.name}
-                    </span>
-                  ))}
-                  {sale.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="bg-gray-200 text-gray-800 px-2 py-0.5 rounded"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+              {/* Latest Indicator */}
+              <div className="mt-auto pt-2 border-t border-gray-200 flex items-center text-sm text-gray-600">
+                {record.latest ? (
+                  <LucideReact.CheckCircle
+                    className="text-green-500 mr-1"
+                    size={16}
+                  />
+                ) : (
+                  <LucideReact.XCircle className="text-gray-400 mr-1" size={16} />
+                )}
+                <span>{record.latest ? 'Latest Snapshot' : 'Snapshot'}</span>
               </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination Info */}
+      <div className="text-center text-gray-600 text-sm">
+        <LucideReact.ListChecks className="inline-block mr-1" size={16} />
+        Page {pagination.current} of {pagination.pages} &middot; Total: {pagination.records}
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type secret_scanning_alert = {
+    export interface secret_scanning_alert {
         number?: AutoViewInputSubTypes.alert_number;
         created_at?: AutoViewInputSubTypes.alert_created_at;
         updated_at?: AutoViewInputSubTypes.nullable_alert_updated_at;
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
          * A boolean value representing whether or not alert is base64 encoded
         */
         is_base64_encoded?: boolean | null;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -139,119 +140,134 @@ export type AutoViewInput = AutoViewInputSubTypes.secret_scanning_alert[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const alerts = Array.isArray(value) ? value : [];
+  const totalAlerts = value.length;
+  const openCount = value.filter((a) => a.state === "open").length;
+  const resolvedCount = value.filter((a) => a.state === "resolved").length;
 
-  function formatDateTime(dateString: string | undefined | null): string {
-    if (!dateString) return "-";
-    const d = new Date(dateString);
-    return d.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  const formatDate = (dateStr?: string | null): string =>
+    dateStr ? new Date(dateStr).toLocaleString() : "-";
 
-  const resolutionMap: Record<string, string> = {
-    false_positive: "False Positive",
-    wont_fix: "Won't Fix",
-    revoked: "Revoked",
-    used_in_tests: "Used in Tests",
-  };
+  const maskSecret = (s: string): string =>
+    s.length > 4 ? "****" + s.slice(-4) : s;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (alerts.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No secret scanning alerts to display.
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      {alerts.map((alert) => {
-        const title =
-          alert.secret_type_display_name || alert.secret_type || "Unknown Secret";
-        const stateBadgeColor =
-          alert.state === "resolved"
-            ? "bg-gray-100 text-gray-800"
-            : "bg-green-100 text-green-800";
-        const stateLabel = alert.state
-          ? alert.state.charAt(0).toUpperCase() + alert.state.slice(1)
-          : "Unknown";
-        return (
+    <div className="p-4">
+      {/* Summary Header */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Secret Scanning Alerts
+        </h2>
+        <div className="mt-2 sm:mt-0 flex flex-wrap gap-4 text-sm text-gray-600">
+          <div className="flex items-center">
+            <LucideReact.AlertTriangle
+              className="text-amber-500 mr-1"
+              size={16}
+            />
+            Open: {openCount}
+          </div>
+          <div className="flex items-center">
+            <LucideReact.CheckCircle
+              className="text-green-500 mr-1"
+              size={16}
+            />
+            Resolved: {resolvedCount}
+          </div>
+          <div className="flex items-center">
+            <LucideReact.List className="text-gray-500 mr-1" size={16} />
+            Total: {totalAlerts}
+          </div>
+        </div>
+      </div>
+
+      {/* Alerts Grid */}
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {value.map((alert, idx) => (
           <div
-            key={alert.number ?? Math.random()}
-            className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:justify-between"
+            key={alert.number ?? idx}
+            className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex flex-col space-y-2"
           >
-            <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold text-gray-900 truncate">
-                #{alert.number} — {title}
-              </h2>
-              <div className="mt-1 text-sm text-gray-500 space-y-1">
-                <p>
-                  Created:{" "}
-                  <time dateTime={alert.created_at || ""}>
-                    {formatDateTime(alert.created_at)}
-                  </time>
-                </p>
-                {alert.state === "resolved" && alert.resolved_at && (
-                  <p>
-                    Resolved:{" "}
-                    <time dateTime={alert.resolved_at}>
-                      {formatDateTime(alert.resolved_at)}
-                    </time>{" "}
-                    {alert.resolved_by?.login
-                      ? `by ${alert.resolved_by.login}`
-                      : ""}
-                  </p>
-                )}
-                {alert.resolution_comment && (
-                  <p className="italic text-gray-600 line-clamp-2">
-                    “{alert.resolution_comment}”
-                  </p>
-                )}
-                <p>
-                  Validity:{" "}
-                  {alert.validity
-                    ? alert.validity.charAt(0).toUpperCase() +
-                      alert.validity.slice(1)
-                    : "Unknown"}
-                </p>
-              </div>
-            </div>
-            <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-wrap gap-2">
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${stateBadgeColor}`}
-              >
-                {stateLabel}
+            {/* Header: Number & State */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-700">
+                #{alert.number ?? "—"}
               </span>
-              {alert.state === "resolved" && alert.resolution && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                  {resolutionMap[alert.resolution] || alert.resolution}
-                </span>
+              {alert.state === "open" ? (
+                <LucideReact.AlertTriangle
+                  className="text-amber-500"
+                  size={20}
+                />
+              ) : (
+                <LucideReact.CheckCircle
+                  className="text-green-500"
+                  size={20}
+                />
               )}
-              {alert.push_protection_bypassed && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                  Push Bypassed
-                </span>
-              )}
+            </div>
+
+            {/* Secret Type */}
+            <div className="flex items-center text-sm text-gray-600">
+              <LucideReact.Tag className="mr-1 text-blue-500" size={16} />
+              {alert.secret_type_display_name ?? alert.secret_type ?? "Unknown"}
+            </div>
+
+            {/* Created & Resolved Dates */}
+            <div className="flex items-center text-sm text-gray-500">
+              <LucideReact.Calendar className="mr-1" size={16} />
+              Created: {formatDate(alert.created_at)}
+            </div>
+            {alert.resolved_at && (
+              <div className="flex items-center text-sm text-gray-500">
+                <LucideReact.Calendar className="mr-1" size={16} />
+                Resolved: {formatDate(alert.resolved_at)}
+              </div>
+            )}
+
+            {/* Resolution Tag */}
+            {alert.state === "resolved" && alert.resolution && (
+              <div className="inline-block px-2 py-0.5 bg-gray-100 text-xs font-medium text-gray-800 rounded">
+                {alert.resolution.replaceAll("_", " ")}
+              </div>
+            )}
+
+            {/* Masked Secret */}
+            {alert.secret && (
+              <div className="flex items-center text-sm text-gray-600 break-all">
+                <LucideReact.Key className="mr-1 text-gray-400" size={16} />
+                {maskSecret(alert.secret)}
+              </div>
+            )}
+
+            {/* Flags */}
+            <div className="flex flex-wrap gap-2 pt-2 text-sm">
               {alert.publicly_leaked && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800">
-                  Publicly Leaked
-                </span>
+                <div className="flex items-center text-red-500">
+                  <LucideReact.Eye className="mr-1" size={16} />
+                  Leaked
+                </div>
               )}
               {alert.multi_repo && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                  Multi-Repo
-                </span>
+                <div className="flex items-center text-gray-500">
+                  <LucideReact.Users className="mr-1" size={16} />
+                  Multi-repo
+                </div>
+              )}
+              {alert.push_protection_bypassed && (
+                <div className="flex items-center text-orange-500">
+                  <LucideReact.ShieldOff className="mr-1" size={16} />
+                  Bypassed
+                </div>
+              )}
+              {alert.is_base64_encoded && (
+                <div className="flex items-center text-indigo-500">
+                  <LucideReact.Code className="mr-1" size={16} />
+                  Base64
+                </div>
               )}
             </div>
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }

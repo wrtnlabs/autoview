@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Reviews are reviews on pull requests.
      *
      * @title Pull Request Review
     */
-    export type pull_request_review = {
+    export interface pull_request_review {
         /**
          * Unique identifier of the review
         */
@@ -36,7 +37,7 @@ export namespace AutoViewInputSubTypes {
         body_html?: string;
         body_text?: string;
         author_association: AutoViewInputSubTypes.author_association;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -79,106 +80,96 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_review;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const reviewer = value.user;
-  const reviewerName = reviewer?.name ?? reviewer?.login ?? 'Unknown Reviewer';
-  const avatarUrl = reviewer?.avatar_url;
-  const submittedDate = value.submitted_at
-    ? new Date(value.submitted_at).toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : 'Not submitted';
-  const commitShort = value.commit_id ? value.commit_id.substring(0, 7) : null;
-
-  // Map review state to labels and colors
-  const stateMap: Record<string, { label: string; color: keyof typeof stateClasses }> = {
-    APPROVED: { label: 'Approved', color: 'green' },
-    CHANGES_REQUESTED: { label: 'Changes Requested', color: 'red' },
-    COMMENTED: { label: 'Commented', color: 'blue' },
-    DISMISSED: { label: 'Dismissed', color: 'gray' },
-    PENDING: { label: 'Pending', color: 'yellow' },
-  };
-  const defaultState = { label: value.state, color: 'gray' as const };
-  const stateInfo = stateMap[value.state.toUpperCase()] ?? defaultState;
-  const stateClasses: Record<string, string> = {
-    green: 'text-green-800 bg-green-100',
-    red: 'text-red-800 bg-red-100',
-    blue: 'text-blue-800 bg-blue-100',
-    gray: 'text-gray-800 bg-gray-100',
-    yellow: 'text-yellow-800 bg-yellow-100',
-  };
-
-  // Map author association to label and colors
-  const assocKey = value.author_association;
-  const assocLabel = assocKey
+  // 1. Define data aggregation/transformation
+  const userName = value.user?.login || 'Unknown';
+  const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    userName,
+  )}&background=random`;
+  const avatarUrl = value.user?.avatar_url || placeholderAvatar;
+  const associationLabel = value.author_association
     .toLowerCase()
     .split('_')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
-  const assocColorMap: Record<string, keyof typeof assocClasses> = {
-    OWNER: 'purple',
-    COLLABORATOR: 'blue',
-    MEMBER: 'green',
-    CONTRIBUTOR: 'yellow',
-    FIRST_TIME_CONTRIBUTOR: 'yellow',
-    FIRST_TIMER: 'yellow',
-    MANNEQUIN: 'gray',
-    NONE: 'gray',
-  };
-  const assocColor = assocColorMap[assocKey] || 'gray';
-  const assocClasses: Record<string, string> = {
-    purple: 'text-purple-800 bg-purple-100',
-    blue: 'text-blue-800 bg-blue-100',
-    green: 'text-green-800 bg-green-100',
-    yellow: 'text-yellow-800 bg-yellow-100',
-    gray: 'text-gray-800 bg-gray-100',
-  };
+  const submittedAt = value.submitted_at
+    ? new Date(value.submitted_at).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : 'Unknown date';
+  const shortSha = value.commit_id ? value.commit_id.substring(0, 7) : null;
+  // State mapping for icon and color
+  let StateIcon = LucideReact.Info;
+  let stateLabel =
+    value.state.charAt(0).toUpperCase() + value.state.slice(1).toLowerCase();
+  let stateColorClass = 'text-gray-500';
+  switch (value.state.toLowerCase()) {
+    case 'approved':
+      StateIcon = LucideReact.CheckCircle;
+      stateLabel = 'Approved';
+      stateColorClass = 'text-green-600';
+      break;
+    case 'changes_requested':
+    case 'changes requested':
+      StateIcon = LucideReact.AlertTriangle;
+      stateLabel = 'Changes Requested';
+      stateColorClass = 'text-amber-500';
+      break;
+    case 'commented':
+      StateIcon = LucideReact.MessageSquare;
+      stateLabel = 'Commented';
+      stateColorClass = 'text-blue-500';
+      break;
+    default:
+      StateIcon = LucideReact.Info;
+      stateColorClass = 'text-gray-500';
+  }
+  const bodyPreview = value.body_text ?? value.body ?? 'No review comment.';
 
-  const bodyText = value.body_text?.trim() || value.body?.trim() || 'No review comments.';
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header: Reviewer info, state badge, association badge */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt={reviewerName}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          )}
-          <div>
-            <h2 className="text-sm font-semibold text-gray-900">{reviewerName}</h2>
-            <p className="text-xs text-gray-500">{submittedDate}</p>
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-full">
+      <div className="flex flex-col md:flex-row gap-4">
+        <img
+          src={avatarUrl}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = placeholderAvatar;
+          }}
+          alt={`${userName} avatar`}
+          className="w-12 h-12 rounded-full object-cover"
+        />
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div>
+                <p className="font-medium text-gray-900">{userName}</p>
+                <p className="text-sm text-gray-500">{associationLabel}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <StateIcon size={16} className={stateColorClass} />
+              <span className={`text-sm font-semibold ${stateColorClass}`}>
+                {stateLabel}
+              </span>
+            </div>
+          </div>
+          <div className="mt-2 flex items-center text-sm text-gray-500 gap-2">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span>{submittedAt}</span>
+            {shortSha && (
+              <>
+                <LucideReact.GitCommit size={16} className="text-gray-400" />
+                <span className="font-mono">{shortSha}</span>
+              </>
+            )}
+          </div>
+          <p className="mt-2 text-gray-700 text-sm line-clamp-3">{bodyPreview}</p>
+          <div className="mt-3 text-xs text-gray-400 flex items-center gap-1 truncate">
+            <LucideReact.Link size={14} className="text-gray-400" />
+            <span className="truncate">{value.html_url}</span>
           </div>
         </div>
-        <div className="flex flex-col items-end space-y-1">
-          <span className={`px-2 py-0.5 text-xs font-medium ${stateClasses[stateInfo.color]} rounded-full`}>
-            {stateInfo.label}
-          </span>
-          <span className={`px-2 py-0.5 text-xs font-medium ${assocClasses[assocColor]} rounded-full`}>
-            {assocLabel}
-          </span>
-        </div>
       </div>
-
-      {/* Body preview */}
-      <div className="mt-4 text-gray-700 text-sm line-clamp-3">
-        {bodyText}
-      </div>
-
-      {/* Commit info */}
-      {commitShort && (
-        <p className="mt-3 text-xs text-gray-500">
-          Commit SHA: <span className="font-mono">{commitShort}</span>
-        </p>
-      )}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A repository security advisory.
     */
-    export type repository_advisory = {
+    export interface repository_advisory {
         /**
          * The GitHub Security Advisory ID.
         */
@@ -36,11 +37,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The author of the advisory.
         */
-        author: any | null;
+        author: AutoViewInputSubTypes.simple_user | null;
         /**
          * The publisher of the advisory.
         */
-        publisher: any | null;
+        publisher: AutoViewInputSubTypes.simple_user | null;
         identifiers: {
             /**
              * The type of identifier.
@@ -81,7 +82,7 @@ export namespace AutoViewInputSubTypes {
             */
             accepted: boolean;
         } | null;
-        vulnerabilities: any[] | null;
+        vulnerabilities: AutoViewInputSubTypes.repository_advisory_vulnerability[] | null;
         cvss: {
             /**
              * The CVSS vector.
@@ -112,24 +113,82 @@ export namespace AutoViewInputSubTypes {
              * The username of the user credited.
             */
             login?: string;
-            type?: any;
+            type?: AutoViewInputSubTypes.security_advisory_credit_types;
         }[] | null;
-        credits_detailed: any[] | null;
+        credits_detailed: AutoViewInputSubTypes.repository_advisory_credit[] | null;
         /**
          * A list of users that collaborate on the advisory.
         */
-        collaborating_users: any[] | null;
+        collaborating_users: AutoViewInputSubTypes.simple_user[] | null;
         /**
          * A list of teams that collaborate on the advisory.
         */
-        collaborating_teams: any[] | null;
+        collaborating_teams: AutoViewInputSubTypes.team[] | null;
         /**
          * A temporary private fork of the advisory's repository for collaborating on a fix.
         */
-        private_fork: any | null;
-    };
-    export type simple_user = any;
-    export type repository_advisory_vulnerability = any;
+        private_fork: AutoViewInputSubTypes.simple_repository | null;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * A product affected by the vulnerability detailed in a repository security advisory.
+    */
+    export interface repository_advisory_vulnerability {
+        /**
+         * The name of the package affected by the vulnerability.
+        */
+        "package": {
+            ecosystem: AutoViewInputSubTypes.security_advisory_ecosystems;
+            /**
+             * The unique package name within its ecosystem.
+            */
+            name: string | null;
+        } | null;
+        /**
+         * The range of the package versions affected by the vulnerability.
+        */
+        vulnerable_version_range: string | null;
+        /**
+         * The package version(s) that resolve the vulnerability.
+        */
+        patched_versions: string | null;
+        /**
+         * The functions in the package that are affected.
+        */
+        vulnerable_functions: string[] | null;
+    }
+    /**
+     * The package's language or package management ecosystem.
+    */
+    export type security_advisory_ecosystems = "rubygems" | "npm" | "pip" | "maven" | "nuget" | "composer" | "go" | "rust" | "erlang" | "actions" | "pub" | "other" | "swift";
     export type cvss_severities = {
         cvss_v3?: {
             /**
@@ -152,10 +211,280 @@ export namespace AutoViewInputSubTypes {
             score: (number & tags.Minimum<0> & tags.Maximum<10>) | null;
         } | null;
     } | null;
-    export type security_advisory_credit_types = any;
-    export type repository_advisory_credit = any;
-    export type team = any;
-    export type simple_repository = any;
+    /**
+     * The type of credit the user is receiving.
+    */
+    export type security_advisory_credit_types = "analyst" | "finder" | "reporter" | "coordinator" | "remediation_developer" | "remediation_reviewer" | "remediation_verifier" | "tool" | "sponsor" | "other";
+    /**
+     * A credit given to a user for a repository security advisory.
+    */
+    export interface repository_advisory_credit {
+        user: AutoViewInputSubTypes.simple_user;
+        type: AutoViewInputSubTypes.security_advisory_credit_types;
+        /**
+         * The state of the user's acceptance of the credit.
+        */
+        state: "accepted" | "declined" | "pending";
+    }
+    /**
+     * Groups of organization members that gives permissions on specified repositories.
+     *
+     * @title Team
+    */
+    export interface team {
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        name: string;
+        slug: string;
+        description: string | null;
+        privacy?: string;
+        notification_setting?: string;
+        permission: string;
+        permissions?: {
+            pull: boolean;
+            triage: boolean;
+            push: boolean;
+            maintain: boolean;
+            admin: boolean;
+        };
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        members_url: string;
+        repositories_url: string & tags.Format<"uri">;
+        parent: AutoViewInputSubTypes.nullable_team_simple;
+    }
+    /**
+     * Groups of organization members that gives permissions on specified repositories.
+     *
+     * @title Team Simple
+    */
+    export type nullable_team_simple = {
+        /**
+         * Unique identifier of the team
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * URL for the team
+        */
+        url: string;
+        members_url: string;
+        /**
+         * Name of the team
+        */
+        name: string;
+        /**
+         * Description of the team
+        */
+        description: string | null;
+        /**
+         * Permission that the team will have for its repositories
+        */
+        permission: string;
+        /**
+         * The level of privacy this team should have
+        */
+        privacy?: string;
+        /**
+         * The notification setting the team has set
+        */
+        notification_setting?: string;
+        html_url: string & tags.Format<"uri">;
+        repositories_url: string & tags.Format<"uri">;
+        slug: string;
+        /**
+         * Distinguished Name (DN) that team maps to within LDAP environment
+        */
+        ldap_dn?: string;
+    } | null;
+    /**
+     * A GitHub repository.
+     *
+     * @title Simple Repository
+    */
+    export interface simple_repository {
+        /**
+         * A unique identifier of the repository.
+        */
+        id: number & tags.Type<"int32">;
+        /**
+         * The GraphQL identifier of the repository.
+        */
+        node_id: string;
+        /**
+         * The name of the repository.
+        */
+        name: string;
+        /**
+         * The full, globally unique, name of the repository.
+        */
+        full_name: string;
+        owner: AutoViewInputSubTypes.simple_user;
+        /**
+         * Whether the repository is private.
+        */
+        "private": boolean;
+        /**
+         * The URL to view the repository on GitHub.com.
+        */
+        html_url: string;
+        /**
+         * The repository description.
+        */
+        description: string | null;
+        /**
+         * Whether the repository is a fork.
+        */
+        fork: boolean;
+        /**
+         * The URL to get more information about the repository from the GitHub API.
+        */
+        url: string;
+        /**
+         * A template for the API URL to download the repository as an archive.
+        */
+        archive_url: string;
+        /**
+         * A template for the API URL to list the available assignees for issues in the repository.
+        */
+        assignees_url: string;
+        /**
+         * A template for the API URL to create or retrieve a raw Git blob in the repository.
+        */
+        blobs_url: string;
+        /**
+         * A template for the API URL to get information about branches in the repository.
+        */
+        branches_url: string;
+        /**
+         * A template for the API URL to get information about collaborators of the repository.
+        */
+        collaborators_url: string;
+        /**
+         * A template for the API URL to get information about comments on the repository.
+        */
+        comments_url: string;
+        /**
+         * A template for the API URL to get information about commits on the repository.
+        */
+        commits_url: string;
+        /**
+         * A template for the API URL to compare two commits or refs.
+        */
+        compare_url: string;
+        /**
+         * A template for the API URL to get the contents of the repository.
+        */
+        contents_url: string;
+        /**
+         * A template for the API URL to list the contributors to the repository.
+        */
+        contributors_url: string;
+        /**
+         * The API URL to list the deployments of the repository.
+        */
+        deployments_url: string;
+        /**
+         * The API URL to list the downloads on the repository.
+        */
+        downloads_url: string;
+        /**
+         * The API URL to list the events of the repository.
+        */
+        events_url: string;
+        /**
+         * The API URL to list the forks of the repository.
+        */
+        forks_url: string;
+        /**
+         * A template for the API URL to get information about Git commits of the repository.
+        */
+        git_commits_url: string;
+        /**
+         * A template for the API URL to get information about Git refs of the repository.
+        */
+        git_refs_url: string;
+        /**
+         * A template for the API URL to get information about Git tags of the repository.
+        */
+        git_tags_url: string;
+        /**
+         * A template for the API URL to get information about issue comments on the repository.
+        */
+        issue_comment_url: string;
+        /**
+         * A template for the API URL to get information about issue events on the repository.
+        */
+        issue_events_url: string;
+        /**
+         * A template for the API URL to get information about issues on the repository.
+        */
+        issues_url: string;
+        /**
+         * A template for the API URL to get information about deploy keys on the repository.
+        */
+        keys_url: string;
+        /**
+         * A template for the API URL to get information about labels of the repository.
+        */
+        labels_url: string;
+        /**
+         * The API URL to get information about the languages of the repository.
+        */
+        languages_url: string;
+        /**
+         * The API URL to merge branches in the repository.
+        */
+        merges_url: string;
+        /**
+         * A template for the API URL to get information about milestones of the repository.
+        */
+        milestones_url: string;
+        /**
+         * A template for the API URL to get information about notifications on the repository.
+        */
+        notifications_url: string;
+        /**
+         * A template for the API URL to get information about pull requests on the repository.
+        */
+        pulls_url: string;
+        /**
+         * A template for the API URL to get information about releases on the repository.
+        */
+        releases_url: string;
+        /**
+         * The API URL to list the stargazers on the repository.
+        */
+        stargazers_url: string;
+        /**
+         * A template for the API URL to get information about statuses of a commit.
+        */
+        statuses_url: string;
+        /**
+         * The API URL to list the subscribers on the repository.
+        */
+        subscribers_url: string;
+        /**
+         * The API URL to subscribe to notifications for this repository.
+        */
+        subscription_url: string;
+        /**
+         * The API URL to get information about tags on the repository.
+        */
+        tags_url: string;
+        /**
+         * The API URL to list the teams on the repository.
+        */
+        teams_url: string;
+        /**
+         * A template for the API URL to create or retrieve a raw Git tree of the repository.
+        */
+        trees_url: string;
+        /**
+         * The API URL to list the hooks on the repository.
+        */
+        hooks_url: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.repository_advisory;
 
@@ -164,128 +493,150 @@ export type AutoViewInput = AutoViewInputSubTypes.repository_advisory;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const severityLabel = value.severity
-    ? value.severity.charAt(0).toUpperCase() + value.severity.slice(1)
-    : "Unknown";
-  const severityBg =
-    value.severity === "critical"
-      ? "bg-red-600"
-      : value.severity === "high"
-      ? "bg-red-500"
-      : value.severity === "medium"
-      ? "bg-yellow-500"
-      : value.severity === "low"
-      ? "bg-green-500"
-      : "bg-gray-500";
-
-  const stateLabel =
-    value.state.charAt(0).toUpperCase() + value.state.slice(1);
-  const stateBg =
-    value.state === "published"
-      ? "bg-green-100 text-green-800"
-      : value.state === "closed"
-      ? "bg-gray-100 text-gray-800"
-      : value.state === "withdrawn"
-      ? "bg-gray-100 text-gray-800"
-      : value.state === "draft"
-      ? "bg-blue-100 text-blue-800"
-      : "bg-yellow-100 text-yellow-800";
-
-  const publishedAtFormatted = value.published_at
-    ? new Date(value.published_at).toLocaleDateString("en-US", {
+  const publishedAt = value.published_at
+    ? new Date(value.published_at).toLocaleDateString(undefined, {
+        year: "numeric",
         month: "short",
         day: "numeric",
-        year: "numeric",
       })
     : "N/A";
 
-  const cveIdDisplay = value.cve_id || "—";
+  // Severity badge styling
+  let severityClasses = "bg-gray-100 text-gray-600";
+  switch (value.severity) {
+    case "critical":
+      severityClasses = "bg-red-100 text-red-800";
+      break;
+    case "high":
+      severityClasses = "bg-orange-100 text-orange-800";
+      break;
+    case "medium":
+      severityClasses = "bg-yellow-100 text-yellow-800";
+      break;
+    case "low":
+      severityClasses = "bg-green-100 text-green-800";
+      break;
+    default:
+      severityClasses = "bg-gray-100 text-gray-600";
+  }
 
+  // State badge styling & icon
+  let stateClasses = "bg-gray-100 text-gray-600";
+  let StateIcon = LucideReact.Clock;
+  switch (value.state) {
+    case "published":
+      stateClasses = "bg-green-100 text-green-800";
+      StateIcon = LucideReact.CheckCircle;
+      break;
+    case "closed":
+      stateClasses = "bg-gray-100 text-gray-600";
+      StateIcon = LucideReact.XCircle;
+      break;
+    case "withdrawn":
+      stateClasses = "bg-yellow-100 text-yellow-800";
+      StateIcon = LucideReact.AlertTriangle;
+      break;
+    case "draft":
+      stateClasses = "bg-blue-100 text-blue-800";
+      StateIcon = LucideReact.Clock;
+      break;
+    case "triage":
+      stateClasses = "bg-indigo-100 text-indigo-800";
+      StateIcon = LucideReact.HelpCircle;
+      break;
+  }
+
+  // Other derived values
+  const authorName = value.author?.login ?? "N/A";
+  const publisherName = value.publisher?.login ?? "N/A";
+  const idSummary =
+    value.identifiers && value.identifiers.length > 0
+      ? `${value.identifiers[0].type}:${value.identifiers[0].value}${
+          value.identifiers.length > 1 ? ` +${value.identifiers.length - 1}` : ""
+        }`
+      : "None";
+  const vulnCount = value.vulnerabilities?.length ?? 0;
   const cvssScore =
-    value.cvss && typeof value.cvss.score === "number"
-      ? value.cvss.score.toFixed(1)
-      : null;
-  const cvssVector = value.cvss?.vector_string || null;
-
-  const cweList = value.cwes || [];
-  const cweNames =
-    cweList.length > 0
-      ? cweList
-          .slice(0, 3)
-          .map((c) => c.name)
-          .join(", ") + (cweList.length > 3 ? ` +${cweList.length - 3} more` : "")
-      : null;
-
-  const creditsCount = value.credits ? value.credits.length : 0;
+    value.cvss?.score != null ? value.cvss.score.toFixed(1) : "N/A";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <article className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-150">
-      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-lg font-semibold text-gray-900 line-clamp-2">
+    <div className="p-4 bg-white rounded-lg shadow border border-gray-200">
+      <div className="flex items-start justify-between mb-2">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
           {value.summary}
         </h2>
-        <div className="mt-2 sm:mt-0 flex space-x-2">
-          <span
-            className={`px-2 py-1 text-xs font-medium text-white rounded ${severityBg}`}
+        {value.html_url && (
+          <a
+            href={value.html_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-400 hover:text-blue-500"
+            aria-label="View Advisory on GitHub"
           >
-            {severityLabel}
-          </span>
+            <LucideReact.Link size={20} />
+          </a>
+        )}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        {value.severity && (
           <span
-            className={`px-2 py-1 text-xs font-medium rounded ${stateBg}`}
+            className={`flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${severityClasses}`}
           >
-            {stateLabel}
+            <LucideReact.AlertTriangle size={12} />
+            {value.severity.toUpperCase()}
+          </span>
+        )}
+        <span
+          className={`flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${stateClasses}`}
+        >
+          <StateIcon size={12} />
+          {value.state.toUpperCase()}
+        </span>
+        <span className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
+          <LucideReact.Hash size={12} />
+          {idSummary}
+        </span>
+        <span className="flex items-center gap-1 px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full">
+          <LucideReact.Calendar size={12} />
+          {publishedAt}
+        </span>
+      </div>
+
+      {value.description && (
+        <p className="text-gray-700 text-sm line-clamp-3 mb-3">
+          {value.description}
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 gap-4 text-gray-600 text-sm">
+        <div className="flex items-center gap-1">
+          <LucideReact.User size={14} />
+          <span>Author:</span>
+          <span className="font-medium text-gray-800 truncate">
+            {authorName}
           </span>
         </div>
-      </header>
-
-      <section className="mt-3 text-sm text-gray-700 space-y-1">
-        <div>
-          <span className="font-medium">GHSA ID:</span> {value.ghsa_id}
-        </div>
-        <div>
-          <span className="font-medium">CVE ID:</span> {cveIdDisplay}
-        </div>
-        <div>
-          <span className="font-medium">Published:</span>{" "}
-          {publishedAtFormatted}
-        </div>
-        {value.description && (
-          <p className="mt-2 text-gray-600 line-clamp-3">
-            {value.description}
-          </p>
-        )}
-      </section>
-
-      <section className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
-        {cvssScore !== null && (
-          <div>
-            <span className="font-medium">CVSS Score:</span> {cvssScore}/10
-          </div>
-        )}
-        {cvssVector && (
-          <div>
-            <span className="font-medium">CVSS Vector:</span> {cvssVector}
-          </div>
-        )}
-        {cweNames && (
-          <div>
-            <span className="font-medium">CWEs:</span> {cweNames}
-          </div>
-        )}
-        <div>
-          <span className="font-medium">Credits:</span> {creditsCount}
-        </div>
-      </section>
-
-      <footer className="mt-4 text-xs text-gray-500">
-        <span className="font-medium">Identifiers:</span>{" "}
-        {value.identifiers.map((id, idx) => (
-          <span key={idx} className="mr-2">
-            {id.type}:{id.value}
+        <div className="flex items-center gap-1">
+          <LucideReact.User size={14} />
+          <span>Publisher:</span>
+          <span className="font-medium text-gray-800 truncate">
+            {publisherName}
           </span>
-        ))}
-      </footer>
-    </article>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Bug size={14} />
+          <span>Vulnerabilities:</span>
+          <span className="font-medium text-gray-800">{vulnCount}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Gauge size={14} />
+          <span>CVSS:</span>
+          <span className="font-medium text-gray-800">{cvssScore}</span>
+        </div>
+      </div>
+    </div>
   );
 }

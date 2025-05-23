@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IPageIShoppingSale {
         /**
@@ -7,7 +8,7 @@ export namespace AutoViewInputSubTypes {
          *
          * Collection of records with pagination indformation.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Page information.
              *
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
              * @title List of records
             */
             data: AutoViewInputSubTypes.IShoppingSale.ISummary[];
-        };
+        }
     }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -53,7 +54,7 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     export namespace IShoppingSale {
         /**
@@ -61,7 +62,7 @@ export namespace AutoViewInputSubTypes {
          *
          * This summarized information being used for pagination.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Belonged section.
              *
@@ -191,7 +192,7 @@ export namespace AutoViewInputSubTypes {
              * @title Closing time of the sale
             */
             closed_at: null | (string & tags.Format<"date-time">);
-        };
+        }
     }
     /**
      * Section information.
@@ -208,7 +209,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -233,12 +234,12 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingSeller {
         /**
          * Summary of seller information.
         */
-        export type ISummary = {
+        export interface ISummary {
             /**
              * Discriminant for the type of seller.
              *
@@ -271,7 +272,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation tmie of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingMember {
         /**
@@ -283,7 +284,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -310,7 +311,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Email address of member.
@@ -319,7 +320,7 @@ export namespace AutoViewInputSubTypes {
      * registered for one {@link IShoppingMember member}. If you don't have to
      * plan such multiple email addresses, just use only one.
     */
-    export type IShoppingMemberEmail = {
+    export interface IShoppingMemberEmail {
         /**
          * Primary Key.
          *
@@ -338,7 +339,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     /**
      * Citizen verification information.
      *
@@ -354,7 +355,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, real name and mobile phone authentication information are
      * encrypted and stored.
     */
-    export type IShoppingCitizen = {
+    export interface IShoppingCitizen {
         /**
          * Primary Key.
          *
@@ -379,15 +380,15 @@ export namespace AutoViewInputSubTypes {
          * @title Real name, or equivalent nickname
         */
         name: string;
-    };
-    export type IShoppingSalePriceRange = {
+    }
+    export interface IShoppingSalePriceRange {
         lowest: AutoViewInputSubTypes.IShoppingPrice;
         highest: AutoViewInputSubTypes.IShoppingPrice;
-    };
+    }
     /**
      * Shopping price interface.
     */
-    export type IShoppingPrice = {
+    export interface IShoppingPrice {
         /**
          * Nominal price.
          *
@@ -404,13 +405,13 @@ export namespace AutoViewInputSubTypes {
          * @title Real price to pay
         */
         real: number;
-    };
+    }
     export namespace IShoppingSaleContent {
-        export type IInvert = {
+        export interface IInvert {
             id: string & tags.Format<"uuid">;
             title: string;
             thumbnails: AutoViewInputSubTypes.IAttachmentFile[];
-        };
+        }
     }
     /**
      * Attachment File.
@@ -421,7 +422,7 @@ export namespace AutoViewInputSubTypes {
      * or {@link extension} like `.gitignore` or `README` case, but not
      * possible to omit both of them.
     */
-    export type IAttachmentFile = {
+    export interface IAttachmentFile {
         /**
          * Primary Key.
          *
@@ -456,12 +457,12 @@ export namespace AutoViewInputSubTypes {
          * @title URL path of the real file
         */
         url: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
         /**
          * Invert category information with parent category.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Parent category info with recursive structure.
              *
@@ -469,7 +470,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Parent category info with recursive structure
             */
-            parent: null | any;
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
             /**
              * Primary Key.
              *
@@ -506,10 +507,10 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingSaleUnit {
-        export type ISummary = {
+        export interface ISummary {
             price_range: AutoViewInputSubTypes.IShoppingSalePriceRange;
             /**
              * Primary Key.
@@ -544,7 +545,7 @@ export namespace AutoViewInputSubTypes {
              * @title Whether the unit is required or not
             */
             required: boolean;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSale.ISummary;
@@ -554,126 +555,148 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingSale.ISummary;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { pagination, data: sales } = value;
-  const { current, pages, records } = pagination;
+  const { pagination, data } = value;
 
-  // Format ISO date strings into a readable "MMM D, YYYY" format or return 'N/A'
-  function formatDate(dateStr: string | null): string {
-    if (!dateStr) return "N/A";
-    const d = new Date(dateStr);
-    return d.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
-  }
+
+  const formatPriceValue = (
+    price: AutoViewInputSubTypes.IShoppingPrice,
+  ): string =>
+    `$${price.real.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+
+  const formatPriceRange = (
+    range: AutoViewInputSubTypes.IShoppingSalePriceRange,
+  ): string =>
+    `${formatPriceValue(range.lowest)} - ${formatPriceValue(
+      range.highest,
+    )}`;
+
+  const deriveStatus = (
+    sale: AutoViewInputSubTypes.IShoppingSale.ISummary,
+  ): { label: string; color: string } => {
+    const now = new Date();
+    if (sale.suspended_at) return { label: 'Suspended', color: 'text-red-500' };
+    if (sale.paused_at) return { label: 'Paused', color: 'text-amber-500' };
+    if (sale.opened_at && new Date(sale.opened_at) > now)
+      return { label: 'Upcoming', color: 'text-blue-500' };
+    if (sale.closed_at && new Date(sale.closed_at) < now)
+      return { label: 'Closed', color: 'text-gray-500' };
+    return { label: 'Active', color: 'text-green-500' };
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4">
-      {/* Pagination Summary */}
+      {/* Page information */}
       <div className="mb-4 text-sm text-gray-600">
-        Page {current} of {pages} · {records} total sales
+        Page {pagination.current} of {pagination.pages} ({pagination.records}{' '}
+        records)
       </div>
 
-      {/* Sales Grid */}
+      {/* Grid of sale summaries */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sales.map((sale) => {
-          const { id, content, price_range, section, seller, tags, opened_at, closed_at, paused_at, suspended_at, latest } = sale;
-
-          // Pick first thumbnail if available
-          const firstThumb = content.thumbnails[0]?.url;
-          // Display title
-          const title = content.title;
-          // Price display, using 'real' prices (could use 'nominal' if desired)
-          const minPrice = price_range.lowest.real;
-          const maxPrice = price_range.highest.real;
-          const priceDisplay =
-            minPrice === maxPrice
-              ? `$${minPrice.toLocaleString()}`
-              : `$${minPrice.toLocaleString()} – $${maxPrice.toLocaleString()}`;
-          // Seller nickname
-          const sellerName = seller.member.nickname;
-          // Section name
-          const sectionName = section.name;
-          // Status badges
-          const isPaused = paused_at !== null;
-          const isSuspended = suspended_at !== null;
-          // Dates
-          const openDate = formatDate(opened_at);
-          const closeDate = closed_at ? formatDate(closed_at) : "Ongoing";
+        {data.map((sale) => {
+          const status = deriveStatus(sale);
+          const thumbnail = sale.content.thumbnails[0];
 
           return (
-            <div key={id} className="bg-white rounded-lg shadow hover:shadow-lg transition flex flex-col overflow-hidden">
-              {firstThumb && (
-                <img
-                  src={firstThumb}
-                  alt={title}
-                  className="w-full h-40 object-cover"
-                />
-              )}
-              <div className="p-4 flex flex-col flex-grow">
-                <h2 className="text-lg font-semibold text-gray-800 truncate">
-                  {title}
-                </h2>
-                <p className="text-sm text-gray-600 mt-1 truncate">
-                  Section: {sectionName}
-                </p>
-                <p className="text-sm text-gray-600">Seller: {sellerName}</p>
-                <p className="text-indigo-600 font-medium mt-2">{priceDisplay}</p>
+            <article
+              key={sale.id}
+              className="bg-white rounded-lg shadow transition hover:shadow-md flex flex-col overflow-hidden"
+            >
+              {/* Thumbnail */}
+              <div className="aspect-video w-full bg-gray-100 relative">
+                {thumbnail ? (
+                  <img
+                    src={thumbnail.url}
+                    alt={sale.content.title}
+                    className="object-cover w-full h-full"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src =
+                        'https://placehold.co/400x225/f1f5f9/64748b?text=Image';
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-300">
+                    <LucideReact.ImageOff size={48} />
+                  </div>
+                )}
+              </div>
 
-                {/* Tags */}
-                {tags.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {tags.map((tag) => (
+              {/* Content */}
+              <div className="p-4 flex flex-col flex-grow">
+                <h2 className="text-lg font-semibold text-gray-800 mb-2 truncate">
+                  {sale.content.title}
+                </h2>
+
+                {/* Section & Seller */}
+                <div className="flex items-center text-sm text-gray-500 mb-2">
+                  <LucideReact.MapPin size={16} className="mr-1" />
+                  <span className="mr-4">{sale.section.name}</span>
+                  <LucideReact.User size={16} className="mr-1" />
+                  <span>{sale.seller.member.nickname}</span>
+                </div>
+
+                {/* Price Range */}
+                <div className="flex items-center text-sm text-gray-600 mb-2">
+                  <LucideReact.Tag size={16} className="mr-1" />
+                  <span>{formatPriceRange(sale.price_range)}</span>
+                </div>
+
+                {/* Status */}
+                <div className="flex items-center text-sm mb-2">
+                  <LucideReact.Circle
+                    size={12}
+                    className={`mr-1 ${status.color}`}
+                  />
+                  <span className={status.color}>{status.label}</span>
+                </div>
+
+                {/* Categories */}
+                {sale.categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {sale.categories.map((cat) => (
                       <span
-                        key={tag}
-                        className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded"
+                        key={cat.id}
+                        className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded"
                       >
-                        {tag}
+                        {cat.name}
                       </span>
                     ))}
                   </div>
                 )}
 
-                {/* Status Badges */}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {isPaused && (
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                      Paused
-                    </span>
-                  )}
-                  {isSuspended && (
-                    <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
-                      Suspended
-                    </span>
-                  )}
-                  {!isPaused && !isSuspended && (
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      Active
-                    </span>
-                  )}
-                  {latest && (
-                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                      Latest
-                    </span>
-                  )}
+                {/* Tags */}
+                {sale.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {sale.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Creation Date */}
+                <div className="mt-auto text-xs text-gray-400 flex items-center">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  <span>{formatDate(sale.created_at)}</span>
                 </div>
               </div>
-
-              {/* Dates Footer */}
-              <div className="bg-gray-50 px-4 py-3 text-xs text-gray-500 border-t">
-                <div>Opened: {openDate}</div>
-                <div>Closes: {closeDate}</div>
-              </div>
-            </div>
+            </article>
           );
         })}
-      </div>
-
-      {/* Simple Footer Pagination */}
-      <div className="mt-6 text-center text-sm text-gray-600">
-        Page {current} of {pages}
       </div>
     </div>
   );

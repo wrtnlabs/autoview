@@ -1,19 +1,20 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiSearchCommits {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             incomplete_results: boolean;
             items: AutoViewInputSubTypes.commit_search_result_item[];
-        };
+        }
     }
     /**
      * Commit Search Result Item
      *
      * @title Commit Search Result Item
     */
-    export type commit_search_result_item = {
+    export interface commit_search_result_item {
         url: string & tags.Format<"uri">;
         sha: string;
         html_url: string & tags.Format<"uri">;
@@ -45,7 +46,7 @@ export namespace AutoViewInputSubTypes {
         score: number;
         node_id: string;
         text_matches?: AutoViewInputSubTypes.search_result_text_matches;
-    };
+    }
     /**
      * Metaproperties for Git author/committer information.
      *
@@ -59,13 +60,13 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Verification
     */
-    export type verification = {
+    export interface verification {
         verified: boolean;
         reason: string;
         payload: string | null;
         signature: string | null;
         verified_at: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -100,7 +101,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -203,13 +204,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -232,19 +233,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -295,85 +296,115 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiSearchCommits.GetResponse;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedTotal =
-    value.total_count > 999
-      ? `${(value.total_count / 1000).toFixed(1)}k`
-      : value.total_count.toString();
+  const { total_count, incomplete_results, items } = value;
+  const displayItems = items.slice(0, 5);
+  const remainingCount = total_count - displayItems.length;
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString(undefined, {
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Commits ({formattedTotal})
-        </h2>
-        <span
-          className={`text-sm font-medium ${
-            value.incomplete_results ? "text-yellow-600" : "text-green-600"
-          }`}
-        >
-          {value.incomplete_results ? "Partial Results" : "Complete"}
-        </span>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.GitCommit className="mr-2" size={20} />
+          <span className="font-semibold">
+            {total_count.toLocaleString()} Commits
+          </span>
+        </div>
+        {incomplete_results ? (
+          <div className="flex items-center text-amber-500">
+            <LucideReact.AlertTriangle size={20} className="mr-1" />
+            <span>Incomplete Results</span>
+          </div>
+        ) : (
+          <div className="flex items-center text-green-500">
+            <LucideReact.CheckCircle size={20} className="mr-1" />
+            <span>Complete Results</span>
+          </div>
+        )}
       </div>
 
-      {/* List of commit cards */}
-      <div className="mt-4 space-y-4">
-        {value.items.map((item) => {
-          // Derive author name: prefer GitHub login, fallback to commit author name
-          const authorName =
-            item.author?.login ??
-            item.commit.author.name ??
-            "Unknown author";
-          // Short SHA
-          const shortSha = item.sha.slice(0, 7);
-          // First line of commit message
-          const summary =
-            item.commit.message.split("\n", 1)[0] || "No commit message";
+      {/* Commit List */}
+      {displayItems.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-400 py-8">
+          <LucideReact.AlertCircle size={32} />
+          <span className="mt-2">No commits to display</span>
+        </div>
+      ) : (
+        <ul className="divide-y divide-gray-200">
+          {displayItems.map((item) => {
+            const authorName =
+              item.author?.login ?? item.commit.author.name;
+            const avatarSrc = item.author?.avatar_url;
+            const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              authorName
+            )}&background=random`;
 
-          return (
-            <div
-              key={item.sha}
-              className="relative p-4 bg-gray-50 border border-gray-200 rounded-md"
-            >
-              {/* Score badge */}
-              <span className="absolute top-2 right-2 text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
-                {item.score.toFixed(1)}
-              </span>
+            return (
+              <li key={item.sha} className="py-3 flex">
+                <div className="flex-shrink-0">
+                  {avatarSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt={authorName}
+                      className="w-10 h-10 rounded-full object-cover bg-gray-100"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src =
+                          placeholderAvatar;
+                      }}
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                      <LucideReact.User size={20} />
+                    </div>
+                  )}
+                </div>
+                <div className="ml-3 flex-1 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-gray-900 truncate">
+                      {item.sha.slice(0, 7)}
+                    </span>
+                    <div className="flex items-center text-gray-500">
+                      <LucideReact.Calendar className="mr-1" size={16} />
+                      <span>{formatDate(item.commit.author.date)}</span>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 truncate line-clamp-1">
+                    {item.commit.message}
+                  </p>
+                  <div className="mt-1 flex items-center text-gray-500 text-xs space-x-4">
+                    <div className="flex items-center">
+                      <LucideReact.User className="mr-1" size={14} />
+                      <span>{authorName}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <LucideReact.Archive className="mr-1" size={14} />
+                      <span className="truncate">
+                        {item.repository.full_name}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-              {/* Commit message */}
-              <h3 className="text-lg font-medium text-gray-900 line-clamp-2">
-                {summary}
-              </h3>
-
-              {/* Author and date */}
-              <div className="mt-1 flex items-center text-sm text-gray-600 space-x-2">
-                <span>{authorName}</span>
-                <span>•</span>
-                <span>{formatDate(item.commit.author.date)}</span>
-              </div>
-
-              {/* SHA and repository */}
-              <div className="mt-2 flex items-center text-sm text-gray-500 space-x-1">
-                <span className="font-mono">{shortSha}</span>
-                <span>in</span>
-                <span className="font-semibold truncate">
-                  {item.repository.full_name}
-                </span>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* Footer */}
+      {remainingCount > 0 && (
+        <div className="mt-3 text-center text-gray-500 text-sm">
+          Showing first {displayItems.length} of {total_count.toLocaleString()}{" "}
+          commits
+        </div>
+      )}
     </div>
   );
 }

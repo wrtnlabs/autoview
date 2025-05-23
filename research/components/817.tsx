@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Page Build
      *
      * @title Page Build
     */
-    export type page_build = {
+    export interface page_build {
         url: string & tags.Format<"uri">;
         status: string;
         error: {
@@ -17,7 +18,7 @@ export namespace AutoViewInputSubTypes {
         duration: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -55,85 +56,100 @@ export type AutoViewInput = AutoViewInputSubTypes.page_build;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { url, status, error, pusher, commit, duration, created_at } = value;
+  const statusLower = value.status.toLowerCase();
+  let StatusIcon = LucideReact.Circle;
+  let statusColorClass = 'text-gray-500';
+  let statusLabel = value.status.charAt(0).toUpperCase() + value.status.slice(1);
 
-  // Shorten commit hash
-  const commitShort = commit.slice(0, 7);
+  if (statusLower.includes('success')) {
+    StatusIcon = LucideReact.CheckCircle;
+    statusColorClass = 'text-green-500';
+    statusLabel = 'Success';
+  } else if (statusLower.includes('fail') || statusLower.includes('error')) {
+    StatusIcon = LucideReact.AlertTriangle;
+    statusColorClass = 'text-red-500';
+    statusLabel = 'Error';
+  } else if (statusLower.includes('pending') || statusLower.includes('in_progress') || statusLower.includes('running')) {
+    StatusIcon = LucideReact.Clock;
+    statusColorClass = 'text-amber-500';
+    statusLabel = value.status.charAt(0).toUpperCase() + value.status.slice(1);
+  }
 
-  // Format created date
-  const formattedDate = new Date(created_at).toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+  const commitShort = value.commit.slice(0, 7);
+  const minutes = Math.floor(value.duration / 60000);
+  const seconds = ((value.duration % 60000) / 1000).toFixed(0);
+  const durationLabel = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+
+  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
   });
 
-  // Duration formatter (HHh MMm SSs)
-  const formatDuration = (sec: number): string => {
-    const h = Math.floor(sec / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    if (h > 0) return `${h}h ${m}m ${s}s`;
-    if (m > 0) return `${m}m ${s}s`;
-    return `${s}s`;
-  };
-  const durationText = formatDuration(duration);
+  const pusherName = value.pusher?.name || value.pusher?.login || 'Unknown';
+  const avatarUrl =
+    value.pusher?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(pusherName)}&background=random`;
 
-  // Badge color mapping
-  const statusStyles: Record<string, string> = {
-    success: 'bg-green-100 text-green-800',
-    failure: 'bg-red-100 text-red-800',
-    error: 'bg-red-100 text-red-800',
-    pending: 'bg-yellow-100 text-yellow-800',
-    in_progress: 'bg-blue-100 text-blue-800',
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.onerror = null;
+    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      pusherName,
+    )}&background=random`;
   };
-  const badgeStyle = statusStyles[status] || 'bg-gray-100 text-gray-800';
-
-  // Human-readable status
-  const statusLabel = status.replace(/_/g, ' ').toLowerCase();
-  const statusText = statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md p-4">
+    <div className="p-6 bg-white rounded-lg shadow-md max-w-md w-full mx-auto space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-gray-900 text-lg font-semibold truncate">
-          {commitShort}
-        </h2>
-        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badgeStyle}`}>
-          {statusText}
-        </span>
+        <div className="flex items-center gap-2">
+          <StatusIcon className={statusColorClass} size={20} />
+          <span className="text-lg font-semibold text-gray-800">{statusLabel}</span>
+        </div>
+        <span className="text-sm text-gray-500">{durationLabel}</span>
       </div>
 
-      <div className="mt-3 text-sm text-gray-500 space-y-2">
-        <div className="flex items-center space-x-2">
-          {pusher ? (
-            <>
-              <img
-                src={pusher.avatar_url}
-                alt={pusher.login}
-                className="w-5 h-5 rounded-full"
-              />
-              <span className="truncate">{pusher.login}</span>
-            </>
-          ) : (
-            <span className="italic text-gray-400">Unknown pusher</span>
-          )}
-        </div>
-        <div className="truncate text-xs" title={url}>
-          {url}
+      <div className="flex items-center gap-4">
+        <img
+          src={avatarUrl}
+          alt={pusherName}
+          className="w-10 h-10 rounded-full object-cover"
+          onError={handleImgError}
+        />
+        <div className="flex flex-col">
+          <span className="text-gray-800 font-medium">{pusherName}</span>
+          {value.pusher?.login && <span className="text-sm text-gray-500">@{value.pusher.login}</span>}
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap text-sm text-gray-600 space-x-4">
-        <span>{durationText}</span>
-        <span>{formattedDate}</span>
+      <div className="flex items-center gap-2 text-sm text-gray-600">
+        <LucideReact.GitCommit size={16} className="text-gray-400" />
+        <span>{commitShort}</span>
       </div>
 
-      {error?.message && (
-        <div className="mt-4 text-sm text-red-600 break-words">
-          <strong>Error:</strong> {error.message}
+      <div className="flex flex-col sm:flex-row sm:gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created: {createdAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.RefreshCw size={16} className="text-gray-400" />
+          <span>Updated: {updatedAt}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 text-sm text-gray-600 break-all">
+        <LucideReact.Link size={16} className="text-gray-400" />
+        <span>{value.url}</span>
+      </div>
+
+      {value.error?.message && (
+        <div className="flex items-start gap-2 text-sm text-red-600">
+          <LucideReact.AlertTriangle size={16} className="flex-shrink-0" />
+          <span>Error: {value.error.message}</span>
         </div>
       )}
     </div>

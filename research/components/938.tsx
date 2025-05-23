@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * An export of a codespace. Also, latest export details for a codespace can be fetched with id = latest
      *
      * @title Fetches information about an export of a codespace.
     */
-    export type codespace_export_details = {
+    export interface codespace_export_details {
         /**
          * State of the latest export
         */
@@ -35,7 +36,7 @@ export namespace AutoViewInputSubTypes {
          * Web url for the exported branch
         */
         html_url?: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.codespace_export_details;
 
@@ -44,76 +45,67 @@ export type AutoViewInput = AutoViewInputSubTypes.codespace_export_details;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const stateRaw = value.state ?? "unknown";
-  const stateLabel = stateRaw.charAt(0).toUpperCase() + stateRaw.slice(1);
-  const stateColors: Record<string, string> = {
-    queued: "bg-yellow-100 text-yellow-800",
-    pending: "bg-yellow-100 text-yellow-800",
-    in_progress: "bg-blue-100 text-blue-800",
-    exporting: "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
-    succeeded: "bg-green-100 text-green-800",
-    failed: "bg-red-100 text-red-800",
-  };
-  const badgeClass = stateColors[stateRaw.toLowerCase()] ?? "bg-gray-100 text-gray-800";
+  const state = value.state ?? "unknown";
+  const stateKey = state.toLowerCase();
+  let StatusIcon: JSX.Element;
+  switch (stateKey) {
+    case "completed":
+      StatusIcon = <LucideReact.CheckCircle aria-label="Completed" role="img" size={16} className="text-green-500" />;
+      break;
+    case "failed":
+      StatusIcon = <LucideReact.AlertTriangle aria-label="Failed" role="img" size={16} className="text-red-500" />;
+      break;
+    case "pending":
+    case "queued":
+      StatusIcon = <LucideReact.Clock aria-label="Pending" role="img" size={16} className="text-amber-500" />;
+      break;
+    default:
+      StatusIcon = <LucideReact.HelpCircle aria-label="Unknown status" role="img" size={16} className="text-gray-500" />;
+  }
 
-  const formattedDate = value.completed_at
+  const completedAt = value.completed_at
     ? new Date(value.completed_at).toLocaleString(undefined, {
         year: "numeric",
         month: "short",
         day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       })
-    : "N/A";
+    : null;
 
-  const shortSha = value.sha ? value.sha.slice(0, 7) : "N/A";
+  const shortSha = value.sha ? value.sha.slice(0, 7) : null;
+  const branchName = value.branch ?? "—";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800">Export Details</h2>
-        <span className={`px-2 py-1 text-xs font-medium rounded ${badgeClass}`}>
-          {stateLabel}
-        </span>
-      </div>
-
-      <dl className="space-y-2">
-        {value.branch != null && (
-          <div className="flex justify-between">
-            <dt className="text-gray-600">Branch</dt>
-            <dd className="text-gray-800 font-medium truncate">{value.branch}</dd>
-          </div>
-        )}
-
-        {value.sha != null && (
-          <div className="flex justify-between">
-            <dt className="text-gray-600">Commit</dt>
-            <dd className="text-gray-800 font-mono">{shortSha}</dd>
-          </div>
-        )}
-
-        <div className="flex justify-between">
-          <dt className="text-gray-600">Completed</dt>
-          <dd className="text-gray-800">{formattedDate}</dd>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-lg font-semibold text-gray-800 truncate">{branchName}</h3>
+        <div className="flex items-center gap-1">
+          {StatusIcon}
+          <span className="text-sm text-gray-600 capitalize truncate">{stateKey}</span>
         </div>
-
-        {value.export_url && (
-          <div className="flex flex-col">
-            <dt className="text-gray-600">Export URL</dt>
-            <dd className="text-blue-600 text-sm truncate line-clamp-1">{value.export_url}</dd>
-          </div>
+      </div>
+      <ul className="space-y-2 text-sm text-gray-700">
+        {shortSha && (
+          <li className="flex items-center gap-2">
+            <LucideReact.GitCommit size={16} className="text-gray-500" aria-label="Commit" role="img" />
+            <span className="truncate">Commit: {shortSha}</span>
+          </li>
         )}
-
+        {completedAt && (
+          <li className="flex items-center gap-2">
+            <LucideReact.Calendar size={16} className="text-gray-500" aria-label="Completed at" role="img" />
+            <span className="truncate">Completed: {completedAt}</span>
+          </li>
+        )}
         {value.html_url && (
-          <div className="flex flex-col">
-            <dt className="text-gray-600">Web URL</dt>
-            <dd className="text-blue-600 text-sm truncate line-clamp-1">{value.html_url}</dd>
-          </div>
+          <li className="flex items-center gap-2">
+            <LucideReact.Link size={16} className="text-gray-500" aria-label="Export URL" role="img" />
+            <span className="truncate">URL: {value.html_url}</span>
+          </li>
         )}
-      </dl>
+      </ul>
     </div>
   );
 }

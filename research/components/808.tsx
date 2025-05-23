@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A collection of related issues and pull requests.
      *
      * @title Milestone
     */
-    export type milestone = {
+    export interface milestone {
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
         labels_url: string & tags.Format<"uri">;
@@ -32,7 +33,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         closed_at: (string & tags.Format<"date-time">) | null;
         due_on: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -70,103 +71,115 @@ export type AutoViewInput = AutoViewInputSubTypes.milestone;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalIssues = value.open_issues + value.closed_issues;
-  const closedPercentage = totalIssues > 0
-    ? Math.round((value.closed_issues / totalIssues) * 100)
-    : 0;
+  const {
+    number,
+    title,
+    state,
+    description,
+    open_issues,
+    closed_issues,
+    created_at,
+    due_on,
+    creator,
+  } = value;
 
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+  const totalIssues = open_issues + closed_issues;
+  const progress = totalIssues > 0 ? Math.round((closed_issues / totalIssues) * 100) : 0;
 
-  const formattedCreatedAt = formatDate(value.created_at);
-  const formattedUpdatedAt = formatDate(value.updated_at);
-  const formattedDueOn = value.due_on ? formatDate(value.due_on) : null;
-  const formattedClosedAt = value.closed_at ? formatDate(value.closed_at) : null;
+  const formatDate = (dateStr?: string | null): string | null =>
+    dateStr
+      ? new Date(dateStr).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null;
+
+  const createdDate = formatDate(created_at);
+  const dueDate = formatDate(due_on);
+
+  const creatorLogin = creator?.login ?? "Unknown";
+  const initialAvatar =
+    creator?.avatar_url ??
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      creatorLogin,
+    )}&background=random&color=fff`;
+
+  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      creatorLogin,
+    )}&background=random&color=fff`;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-      {/* Header: Title, Number, State */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.title}{' '}
-          <span className="text-gray-500 font-medium">#{value.number}</span>
-        </h2>
-        <span
-          className={
-            value.state === 'open'
-              ? 'px-2 py-1 text-sm bg-green-100 text-green-800 rounded-full'
-              : 'px-2 py-1 text-sm bg-red-100 text-red-800 rounded-full'
-          }
+    <div className="max-w-md mx-auto bg-white shadow-md rounded-lg p-4">
+      {/* Header: Title and State */}
+      <div className="flex items-center justify-between mb-2">
+        <h2
+          className="text-gray-800 font-semibold text-lg truncate"
+          title={title}
         >
-          {value.state === 'open' ? 'Open' : 'Closed'}
-        </span>
+          #{number} {title}
+        </h2>
+        {state === "closed" ? (
+          <div className="flex items-center text-green-600 text-sm font-medium">
+            <LucideReact.CheckCircle size={16} className="mr-1" />
+            Closed
+          </div>
+        ) : (
+          <div className="flex items-center text-amber-600 text-sm font-medium">
+            <LucideReact.Clock size={16} className="mr-1" />
+            Open
+          </div>
+        )}
       </div>
 
       {/* Description */}
-      {value.description && (
-        <p className="text-gray-700 text-sm mb-4 line-clamp-3">
-          {value.description}
-        </p>
+      {description && (
+        <p className="text-gray-600 text-sm mb-3 line-clamp-3">{description}</p>
       )}
 
       {/* Progress Bar */}
-      <div className="mb-4">
-        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-2 bg-blue-500"
-            style={{ width: `${closedPercentage}%` }}
-          />
-        </div>
-        <div className="flex justify-between text-xs text-gray-600 mt-1">
-          <span>{value.closed_issues} closed</span>
-          <span>{value.open_issues} open</span>
-          <span>{closedPercentage}% complete</span>
-        </div>
-      </div>
-
-      {/* Dates */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-600 mb-4">
-        <div>
-          <span className="font-medium">Created:</span> {formattedCreatedAt}
-        </div>
-        <div>
-          <span className="font-medium">Updated:</span> {formattedUpdatedAt}
-        </div>
-        {formattedDueOn && (
-          <div>
-            <span className="font-medium">Due:</span> {formattedDueOn}
+      {totalIssues > 0 && (
+        <div className="mb-4">
+          <div className="flex justify-between text-xs font-medium text-gray-600 mb-1">
+            <span>Progress</span>
+            <span>{progress}%</span>
           </div>
-        )}
-        {formattedClosedAt && (
-          <div>
-            <span className="font-medium">Closed:</span> {formattedClosedAt}
-          </div>
-        )}
-      </div>
-
-      {/* Creator */}
-      {value.creator && (
-        <div className="flex items-center space-x-3">
-          <img
-            src={value.creator.avatar_url}
-            alt={value.creator.login}
-            className="w-8 h-8 rounded-full flex-shrink-0"
-          />
-          <div className="text-sm">
-            <div className="font-medium text-gray-800 truncate">
-              {value.creator.login}
-            </div>
-            {value.creator.name && (
-              <div className="text-gray-600 truncate">{value.creator.name}</div>
-            )}
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-green-500"
+              style={{ width: `${progress}%` }}
+            />
           </div>
         </div>
       )}
+
+      {/* Metadata */}
+      <div className="flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+        {createdDate && (
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <span title={created_at}>{createdDate}</span>
+          </div>
+        )}
+        {dueDate && (
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <span title={due_on ?? undefined}>Due: {dueDate}</span>
+          </div>
+        )}
+        <div className="flex items-center ml-auto">
+          <img
+            src={initialAvatar}
+            onError={handleAvatarError}
+            alt={creatorLogin}
+            className="w-6 h-6 rounded-full object-cover mr-1"
+          />
+          <span>{creatorLogin}</span>
+        </div>
+      </div>
     </div>
   );
 }

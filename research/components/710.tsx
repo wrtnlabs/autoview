@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Community Profile
      *
      * @title Community Profile
     */
-    export type community_profile = {
+    export interface community_profile {
         health_percentage: number & tags.Type<"int32">;
         description: string | null;
         documentation: string | null;
@@ -21,7 +22,7 @@ export namespace AutoViewInputSubTypes {
         };
         updated_at: (string & tags.Format<"date-time">) | null;
         content_reports_enabled?: boolean;
-    };
+    }
     /**
      * Code of Conduct Simple
      *
@@ -60,111 +61,156 @@ export type AutoViewInput = AutoViewInputSubTypes.community_profile;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const healthPercent = Math.max(0, Math.min(100, value.health_percentage));
-  const updatedAt = value.updated_at
-    ? new Date(value.updated_at).toLocaleDateString(undefined, {
+  // 1. Destructure and derive primary values
+  const {
+    health_percentage,
+    description,
+    documentation,
+    files,
+    updated_at,
+    content_reports_enabled = false,
+  } = value;
+
+  // Format the updated date
+  const formattedUpdatedAt = updated_at
+    ? new Date(updated_at).toLocaleString(undefined, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
       })
-    : 'N/A';
+    : '—';
 
-  const fileLinks: { label: string; url: string }[] = [];
+  // Assemble a list of available health‐related files and links
+  const fileItems: { label: string; url: string }[] = [];
 
-  if (value.documentation) {
-    fileLinks.push({ label: 'Documentation', url: value.documentation });
+  // Code of Conduct (simple)
+  if (files.code_of_conduct) {
+    const f = files.code_of_conduct;
+    const url = f.html_url ?? f.url;
+    if (url) fileItems.push({ label: f.name, url });
   }
 
-  const coc = value.files.code_of_conduct;
-  if (coc) {
-    const cocUrl = coc.html_url || coc.url;
-    fileLinks.push({ label: 'Code of Conduct', url: cocUrl });
+  // License
+  if (files.license) {
+    const f = files.license;
+    const url = f.html_url ?? f.url ?? '';
+    if (url) fileItems.push({ label: f.name, url });
   }
 
-  const cocFile = value.files.code_of_conduct_file;
-  if (cocFile) {
-    const cocFileUrl = cocFile.html_url || cocFile.url;
-    fileLinks.push({ label: 'Code of Conduct File', url: cocFileUrl });
-  }
+  // Other community health files
+  const genericFiles: { key: keyof typeof files; label: string }[] = [
+    { key: 'code_of_conduct_file', label: 'Code of Conduct File' },
+    { key: 'contributing', label: 'Contributing Guidelines' },
+    { key: 'readme', label: 'README' },
+    { key: 'issue_template', label: 'Issue Template' },
+    { key: 'pull_request_template', label: 'Pull Request Template' },
+  ];
+  genericFiles.forEach(({ key, label }) => {
+    const f = files[key] as AutoViewInputSubTypes.nullable_community_health_file | null;
+    if (f?.html_url) {
+      fileItems.push({ label, url: f.html_url });
+    }
+  });
 
-  const license = value.files.license;
-  const licenseUrl = license?.html_url || license?.url;
-  if (license && licenseUrl) {
-    fileLinks.push({ label: 'License', url: licenseUrl });
-  }
-
-  const contributing = value.files.contributing;
-  if (contributing) {
-    const contribUrl = contributing.html_url || contributing.url;
-    fileLinks.push({ label: 'Contributing', url: contribUrl });
-  }
-
-  const readme = value.files.readme;
-  if (readme) {
-    const readmeUrl = readme.html_url || readme.url;
-    fileLinks.push({ label: 'Readme', url: readmeUrl });
-  }
-
-  const issueTemplate = value.files.issue_template;
-  if (issueTemplate) {
-    const issueUrl = issueTemplate.html_url || issueTemplate.url;
-    fileLinks.push({ label: 'Issue Template', url: issueUrl });
-  }
-
-  const prTemplate = value.files.pull_request_template;
-  if (prTemplate) {
-    const prUrl = prTemplate.html_url || prTemplate.url;
-    fileLinks.push({ label: 'Pull Request Template', url: prUrl });
-  }
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-        <div className="w-full sm:w-auto">
-          <div className="flex items-center">
-            <span className="text-gray-800 font-semibold mr-2">Health: {healthPercent}%</span>
-            <div className="flex-1 bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-green-500 h-2 rounded-full"
-                style={{ width: `${healthPercent}%` }}
-              />
-            </div>
-          </div>
-          {value.content_reports_enabled !== undefined && (
-            <span
-              className={`inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded-full ${
-                value.content_reports_enabled ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-              }`}
-            >
-              {value.content_reports_enabled ? 'Reports Enabled' : 'Reports Disabled'}
-            </span>
-          )}
+    <div className="p-6 bg-white rounded-lg shadow-md flex flex-col space-y-6">
+      {/* Health Score */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-sm font-medium text-gray-700">Health Score</span>
+          <span className="text-sm font-medium text-gray-900">
+            {health_percentage}%
+          </span>
         </div>
-        <div className="mt-2 sm:mt-0 text-xs text-gray-500">Updated: {updatedAt}</div>
-      </header>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className={`h-2 rounded-full ${
+              health_percentage >= 75
+                ? 'bg-green-500'
+                : health_percentage >= 40
+                ? 'bg-yellow-400'
+                : 'bg-red-500'
+            }`}
+            style={{ width: `${health_percentage}%` }}
+          />
+        </div>
+      </div>
 
-      {value.description && (
-        <p className="text-gray-700 text-sm mb-4 line-clamp-3">{value.description}</p>
+      {/* Description */}
+      {description && (
+        <p className="text-gray-700 text-sm line-clamp-3">
+          {description}
+        </p>
       )}
 
-      {fileLinks.length > 0 && (
-        <ul className="space-y-2">
-          {fileLinks.map((item) => (
-            <li key={item.label}>
+      {/* Documentation Link */}
+      {documentation && (
+        <div className="flex items-center gap-2 text-sm text-indigo-600 hover:underline">
+          <LucideReact.BookOpen size={16} className="text-indigo-500" />
+          <a
+            href={documentation}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Documentation
+          </a>
+        </div>
+      )}
+
+      {/* Metadata: Updated Date & Content Reports */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-500 space-y-1 sm:space-y-0">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Updated: {formattedUpdatedAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          {content_reports_enabled ? (
+            <>
+              <LucideReact.CheckCircle
+                size={16}
+                className="text-green-500"
+              />
+              <span>Content Reports Enabled</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.XCircle
+                size={16}
+                className="text-red-500"
+              />
+              <span>Content Reports Disabled</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Health Files */}
+      {fileItems.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
+            Health Files
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {fileItems.map((file) => (
               <a
-                href={item.url}
+                key={file.label}
+                href={file.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline text-sm break-all"
+                className="flex items-center gap-2 text-sm text-indigo-600 hover:bg-indigo-50 p-2 rounded"
               >
-                {item.label}
+                <LucideReact.FileText
+                  size={16}
+                  className="text-indigo-500"
+                />
+                <span className="truncate">{file.label}</span>
               </a>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

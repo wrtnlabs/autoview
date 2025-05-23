@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Marketplace Purchase
      *
      * @title Marketplace Purchase
     */
-    export type marketplace_purchase = {
+    export interface marketplace_purchase {
         url: string;
         type: string;
         id: number & tags.Type<"int32">;
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
             updated_at?: string;
             plan?: AutoViewInputSubTypes.marketplace_listing_plan;
         };
-    };
+    }
     /**
      * Marketplace Listing Plan
      *
      * @title Marketplace Listing Plan
     */
-    export type marketplace_listing_plan = {
+    export interface marketplace_listing_plan {
         url: string & tags.Format<"uri">;
         accounts_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
         unit_name: string | null;
         state: string;
         bullets: string[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase[];
 
@@ -58,135 +59,138 @@ export type AutoViewInput = AutoViewInputSubTypes.marketplace_purchase[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateStr: string): string => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const purchases = value;
+  // If there are no purchases, show an empty state
+  if (purchases.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No purchases available</span>
+      </div>
+    );
+  }
 
-  const formatPrice = (
-    plan: AutoViewInputSubTypes.marketplace_listing_plan | undefined,
-    cycle?: string,
-  ): string => {
-    if (!plan) return "—";
-    switch (plan.price_model) {
-      case "FREE":
-        return "Free";
-      case "FLAT_RATE":
-        if (cycle === "monthly")
-          return `$${(plan.monthly_price_in_cents / 100).toFixed(2)}/mo`;
-        if (cycle === "yearly")
-          return `$${(plan.yearly_price_in_cents / 100).toFixed(2)}/yr`;
-        return `$${(plan.monthly_price_in_cents / 100).toFixed(2)}/mo`;
-      case "PER_UNIT":
-        const unitName = plan.unit_name || "unit";
-        return `$${(plan.monthly_price_in_cents / 100).toFixed(2)}/${unitName}`;
-      default:
-        return "—";
-    }
-  };
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {value.map((purchase) => {
-        const p = purchase.marketplace_purchase;
-        const pending = purchase.marketplace_pending_change;
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {purchases.map((item) => {
+        // Destructure for clarity
+        const {
+          login,
+          email,
+          organization_billing_email,
+          marketplace_pending_change: pending,
+          marketplace_purchase,
+        } = item;
+
+        const contactEmail = email ?? organization_billing_email;
+        const plan = marketplace_purchase.plan;
+        const planName = plan?.name ?? 'Unknown Plan';
+        const billingCycle = marketplace_purchase.billing_cycle ?? 'monthly';
+        // Determine which price to show based on billing cycle
+        const priceCents = plan
+          ? billingCycle.toLowerCase().includes('year')
+            ? plan.yearly_price_in_cents
+            : plan.monthly_price_in_cents
+          : 0;
+        const price = (priceCents / 100).toLocaleString(undefined, {
+          style: 'currency',
+          currency: 'USD',
+        });
+
+        // Format dates
+        const nextBilling = marketplace_purchase.next_billing_date
+          ? new Date(marketplace_purchase.next_billing_date).toLocaleDateString()
+          : 'N/A';
+        const freeTrialEnds = marketplace_purchase.free_trial_ends_on
+          ? new Date(marketplace_purchase.free_trial_ends_on).toLocaleDateString()
+          : null;
+        const pendingDate = pending?.effective_date
+          ? new Date(pending.effective_date).toLocaleDateString()
+          : null;
+
+        const isInstalled = marketplace_purchase.is_installed;
+        const onFreeTrial = marketplace_purchase.on_free_trial;
+        const unitCount = marketplace_purchase.unit_count;
 
         return (
-          <div
-            key={purchase.id}
-            className="bg-white p-4 rounded-lg shadow space-y-3"
-          >
-            <div className="flex justify-between items-center">
-              <div className="truncate">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">
-                  {purchase.login}
-                </h3>
-                {purchase.organization_billing_email && (
-                  <p className="text-sm text-gray-500 truncate">
-                    {purchase.organization_billing_email}
-                  </p>
-                )}
-                {purchase.email && (
-                  <p className="text-sm text-gray-500 truncate">
-                    {purchase.email}
-                  </p>
-                )}
+          <div key={item.id} className="p-4 bg-white rounded-lg shadow">
+            {/* Header: Account & Contact */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <LucideReact.User className="text-gray-500" size={20} />
+                <span className="font-semibold text-gray-800">{login}</span>
               </div>
-              <span
-                className={`text-xs font-medium px-2 py-1 rounded ${
-                  p.is_installed
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {p.is_installed ? "Installed" : "Uninstalled"}
+              {contactEmail && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Mail className="text-gray-400" size={16} />
+                  <span className="text-sm text-gray-600 truncate">{contactEmail}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Plan Title & Cycle */}
+            <div className="mb-2">
+              <span className="text-lg font-medium text-gray-900">{planName}</span>
+              <span className="text-sm text-gray-500 ml-2 capitalize">
+                {billingCycle}
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
-              <div className="truncate">
-                <p className="font-medium">Plan</p>
-                <p className="truncate">{p.plan?.name || "—"}</p>
+            {/* Price */}
+            <div className="flex items-baseline gap-1 mb-3">
+              <span className="text-xl font-semibold text-gray-900">{price}</span>
+              <span className="text-sm text-gray-500">/ {billingCycle}</span>
+            </div>
+
+            {/* Key Details */}
+            <div className="space-y-1 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <LucideReact.Calendar size={16} />
+                <span>Next Billing: {nextBilling}</span>
               </div>
-              <div>
-                <p className="font-medium">Price</p>
-                <p>{formatPrice(p.plan, p.billing_cycle)}</p>
+              <div className="flex items-center gap-1">
+                {isInstalled ? (
+                  <LucideReact.CheckCircle className="text-green-500" size={16} />
+                ) : (
+                  <LucideReact.XCircle className="text-red-500" size={16} />
+                )}
+                <span>{isInstalled ? 'Installed' : 'Not Installed'}</span>
               </div>
-              <div>
-                <p className="font-medium">Billing Cycle</p>
-                <p>{p.billing_cycle || "—"}</p>
-              </div>
-              <div>
-                <p className="font-medium">Next Billing</p>
-                <p>
-                  {p.next_billing_date
-                    ? formatDate(p.next_billing_date)
-                    : "—"}
-                </p>
-              </div>
-              {p.on_free_trial && p.free_trial_ends_on && (
-                <div className="col-span-2">
-                  <p className="font-medium">Free Trial Ends</p>
-                  <p>{formatDate(p.free_trial_ends_on)}</p>
+              {typeof unitCount === 'number' && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Users className="text-gray-500" size={16} />
+                  <span>
+                    {unitCount} {plan?.unit_name ?? 'units'}
+                  </span>
                 </div>
               )}
-              {p.unit_count != null && p.plan?.price_model === "PER_UNIT" && (
-                <div>
-                  <p className="font-medium">Units</p>
-                  <p>{p.unit_count}</p>
+              {onFreeTrial && freeTrialEnds && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Clock className="text-amber-500" size={16} />
+                  <span>Free trial ends on {freeTrialEnds}</span>
                 </div>
               )}
             </div>
 
+            {/* Pending Change Section */}
             {pending && (
-              <div className="mt-3 p-3 bg-yellow-50 border-l-4 border-yellow-400 text-sm text-yellow-700">
-                <p className="font-medium">Pending Change</p>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
-                  {pending.plan && (
-                    <>
-                      <p className="font-medium">New Plan</p>
-                      <p className="truncate">{pending.plan.name}</p>
-                    </>
-                  )}
-                  {pending.effective_date && (
-                    <>
-                      <p className="font-medium">Effective Date</p>
-                      <p>{formatDate(pending.effective_date)}</p>
-                    </>
-                  )}
-                  {pending.unit_count != null && (
-                    <>
-                      <p className="font-medium">Units</p>
-                      <p>{pending.unit_count}</p>
-                    </>
-                  )}
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-gray-800">
+                <div className="flex items-center gap-1 mb-1">
+                  <LucideReact.Clock className="text-yellow-800" size={16} />
+                  <span>Pending Change</span>
                 </div>
+                {pendingDate && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Calendar size={16} />
+                    <span>Effective: {pendingDate}</span>
+                  </div>
+                )}
+                {pending.plan && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Tag size={16} />
+                    <span>New Plan: {pending.plan.name}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>

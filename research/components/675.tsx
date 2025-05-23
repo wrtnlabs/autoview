@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type code_scanning_analysis = {
+    export interface code_scanning_analysis {
         ref: AutoViewInputSubTypes.code_scanning_ref;
         commit_sha: AutoViewInputSubTypes.code_scanning_analysis_commit_sha;
         analysis_key: AutoViewInputSubTypes.code_scanning_analysis_analysis_key;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
          * Warning generated when processing the analysis
         */
         warning: string;
-    };
+    }
     /**
      * The Git reference, formatted as `refs/pull/<number>/merge`, `refs/pull/<number>/head`,
      * `refs/heads/<branch name>` or simply `<branch name>`.
@@ -63,11 +64,11 @@ export namespace AutoViewInputSubTypes {
      * An identifier for the upload.
     */
     export type code_scanning_analysis_sarif_id = string;
-    export type code_scanning_analysis_tool = {
+    export interface code_scanning_analysis_tool {
         name?: AutoViewInputSubTypes.code_scanning_analysis_tool_name;
         version?: AutoViewInputSubTypes.code_scanning_analysis_tool_version;
         guid?: AutoViewInputSubTypes.code_scanning_analysis_tool_guid;
-    };
+    }
     /**
      * The name of the tool used to generate the code scanning analysis.
     */
@@ -88,107 +89,120 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_analysis[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const shorten = (str: string) => str.slice(0, 7);
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString(undefined, {
+  const formatDate = (iso: string): string => {
+    const date = new Date(iso);
+    return date.toLocaleString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!value || value.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No analyses available.
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4 p-4">
-      {value.map((item) => (
-        <div
-          key={item.id}
-          className="bg-white rounded-lg shadow-md overflow-hidden"
-        >
-          <div className="px-4 py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800">
-                {item.tool.name ?? "Code Scan Analysis"}
-                {item.tool.version && (
-                  <span className="ml-2 text-sm text-gray-500">
-                    v{item.tool.version}
-                  </span>
-                )}
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                {formatDate(item.created_at)}
-              </p>
-            </div>
-            <div className="mt-3 sm:mt-0 flex items-center space-x-2">
-              {item.deletable ? (
-                <span className="text-green-600 text-sm font-medium">
-                  Deletable
-                </span>
-              ) : (
-                <span className="text-red-600 text-sm font-medium">
-                  Locked
-                </span>
-              )}
-              <span className="bg-gray-100 text-gray-800 text-sm px-2 py-1 rounded font-mono">
-                {shorten(item.commit_sha)}
-              </span>
-            </div>
-          </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {value.map((analysis) => {
+        const {
+          tool,
+          created_at,
+          category,
+          commit_sha,
+          results_count,
+          rules_count,
+          warning,
+          error,
+          url,
+        } = analysis;
+        const toolName = tool.name ?? "Code Analysis";
+        const toolVersion = tool.version ? ` v${tool.version}` : "";
+        const shortSha = commit_sha.slice(0, 7);
 
-          <div className="border-t border-gray-100 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-gray-500">Results</p>
-              <p className="mt-1 text-lg font-semibold text-gray-900">
-                {item.results_count}
-              </p>
+        return (
+          <div
+            key={analysis.id}
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition"
+          >
+            <div className="flex items-center mb-2">
+              <LucideReact.ShieldCheck
+                size={20}
+                className="text-blue-500 flex-shrink-0"
+              />
+              <h3 className="ml-2 text-lg font-semibold truncate">
+                {toolName}
+                {toolVersion}
+              </h3>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Rules</p>
-              <p className="mt-1 text-lg font-semibold text-gray-900">
-                {item.rules_count}
-              </p>
+            <div className="text-sm text-gray-500 mb-4 flex flex-wrap gap-2">
+              <div className="flex items-center">
+                <LucideReact.Calendar
+                  size={16}
+                  className="text-gray-400 flex-shrink-0"
+                />
+                <span className="ml-1">{formatDate(created_at)}</span>
+              </div>
+              {category && (
+                <div className="flex items-center">
+                  <LucideReact.Tag
+                    size={16}
+                    className="text-gray-400 flex-shrink-0"
+                  />
+                  <span className="ml-1">{category}</span>
+                </div>
+              )}
+              <div className="flex items-center">
+                <LucideReact.Hash
+                  size={16}
+                  className="text-gray-400 flex-shrink-0"
+                />
+                <span className="ml-1 font-mono">{shortSha}</span>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-500">Environment</p>
-              <p className="mt-1 text-md text-gray-800 truncate">
-                {item.environment}
-              </p>
+            <div className="flex items-center gap-4 mb-4 text-sm text-gray-700">
+              <div className="flex items-center">
+                <LucideReact.AlertTriangle
+                  size={16}
+                  className="text-red-500 flex-shrink-0"
+                />
+                <span className="ml-1">{results_count}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.FileText
+                  size={16}
+                  className="text-gray-500 flex-shrink-0"
+                />
+                <span className="ml-1">{rules_count}</span>
+              </div>
             </div>
-            {item.category && (
-              <div>
-                <p className="text-sm text-gray-500">Category</p>
-                <span className="mt-1 inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">
-                  {item.category}
-                </span>
+            {warning && (
+              <div className="flex items-center text-amber-600 text-sm mb-1">
+                <LucideReact.AlertTriangle
+                  size={16}
+                  className="flex-shrink-0"
+                />
+                <span className="ml-1 truncate">{warning}</span>
               </div>
             )}
-          </div>
-
-          {(item.error || item.warning) && (
-            <div className="px-4 py-3 space-y-2">
-              {item.error && (
-                <div className="bg-red-50 text-red-700 text-sm px-3 py-2 rounded line-clamp-3">
-                  {item.error}
-                </div>
-              )}
-              {item.warning && (
-                <div className="bg-yellow-50 text-yellow-700 text-sm px-3 py-2 rounded line-clamp-3">
-                  {item.warning}
-                </div>
-              )}
+            {error && (
+              <div className="flex items-center text-red-600 text-sm mb-2">
+                <LucideReact.AlertCircle
+                  size={16}
+                  className="flex-shrink-0"
+                />
+                <span className="ml-1 truncate">{error}</span>
+              </div>
+            )}
+            <div className="flex items-center text-sm text-gray-400 truncate">
+              <LucideReact.Link
+                size={16}
+                className="flex-shrink-0"
+              />
+              <span className="ml-1 break-all">{url}</span>
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }

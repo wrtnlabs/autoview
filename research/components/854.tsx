@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A release.
      *
      * @title Release
     */
-    export type release = {
+    export interface release {
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
         assets_url: string & tags.Format<"uri">;
@@ -45,13 +46,13 @@ export namespace AutoViewInputSubTypes {
         */
         discussion_url?: string;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -74,13 +75,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Data related to a release.
      *
      * @title Release Asset
     */
-    export type release_asset = {
+    export interface release_asset {
         url: string & tags.Format<"uri">;
         browser_download_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -100,7 +101,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         uploader: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -133,7 +134,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -144,7 +145,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.release;
 
@@ -153,80 +154,107 @@ export type AutoViewInput = AutoViewInputSubTypes.release;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const title = value.name && value.name.trim().length > 0 ? value.name : value.tag_name;
+  const publishedAt = value.published_at;
+  const formattedDate = publishedAt
+    ? new Date(publishedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+    : 'Unpublished';
+  const releaseName = value.name || value.tag_name;
   const isDraft = value.draft;
-  const isPreRelease = value.prerelease;
-  const dateObj = new Date(value.published_at ?? value.created_at);
-  const formattedDate = dateObj.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const author = value.author;
+  const isPrerelease = value.prerelease;
   const assetCount = value.assets.length;
-  const bodyText = value.body_text ?? value.body ?? "No description available.";
   const reactions = value.reactions;
+  const reactionEntries: [string, number][] = reactions
+    ? ([
+        ['+1', reactions['+1']],
+        ['-1', reactions['-1']],
+        ['laugh', reactions.laugh],
+        ['confused', reactions.confused],
+        ['heart', reactions.heart],
+        ['hooray', reactions.hooray],
+        ['eyes', reactions.eyes],
+        ['rocket', reactions.rocket],
+      ] as [string, number][])
+        .filter(([, count]) => count > 0)
+    : [];
+  const iconMap: Record<string, JSX.Element> = {
+    '+1': <LucideReact.ThumbsUp size={16} className="text-gray-500" aria-label="+1" />,
+    '-1': <LucideReact.ThumbsDown size={16} className="text-gray-500" aria-label="-1" />,
+    laugh: <LucideReact.Smile size={16} className="text-gray-500" aria-label="laugh" />,
+    confused: <LucideReact.AlertCircle size={16} className="text-gray-500" aria-label="confused" />,
+    heart: <LucideReact.Heart size={16} className="text-red-500" aria-label="heart" />,
+    hooray: <LucideReact.PartyPopper size={16} className="text-yellow-500" aria-label="hooray" />,
+    eyes: <LucideReact.Eye size={16} className="text-gray-500" aria-label="eyes" />,
+    rocket: <LucideReact.Rocket size={16} className="text-gray-500" aria-label="rocket" />,
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-      {/* Header: Title and Status Badges */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{title}</h2>
-        <div className="flex space-x-2">
+    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center">
+          <img
+            src={value.author.avatar_url}
+            alt={value.author.login}
+            className="w-10 h-10 rounded-full object-cover mr-3"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                value.author.login,
+              )}&background=ccc&color=fff`;
+            }}
+          />
+          <div className="flex flex-col">
+            <h2 className="text-lg font-semibold text-gray-900 truncate">{releaseName}</h2>
+            <div className="flex items-center text-sm text-gray-500">
+              <span>by {value.author.login}</span>
+              <LucideReact.Calendar size={14} className="ml-2 mr-1" />
+              <span>{formattedDate}</span>
+            </div>
+          </div>
+        </div>
+        <div className="flex space-x-1">
           {isDraft && (
-            <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded">
+            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">
               Draft
             </span>
           )}
-          {isPreRelease && (
-            <span className="px-2 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-              Pre-release
+          {isPrerelease && (
+            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+              Prerelease
             </span>
           )}
         </div>
       </div>
 
-      {/* Description */}
-      <p className="mt-2 text-sm text-gray-700 line-clamp-3">
-        {bodyText}
-      </p>
+      {value.body && (
+        <p className="mt-2 text-gray-700 text-sm line-clamp-3">{value.body}</p>
+      )}
 
-      {/* Meta Information */}
-      <div className="mt-4 flex flex-wrap items-center text-xs text-gray-600 space-x-4">
-        {/* Author */}
-        <div className="flex items-center space-x-2">
-          <img
-            src={author.avatar_url}
-            alt={author.login}
-            className="w-6 h-6 rounded-full object-cover"
-          />
-          <span className="truncate">{author.login}</span>
+      {assetCount > 0 && (
+        <div className="mt-4">
+          <span className="text-sm font-medium text-gray-800">Assets ({assetCount})</span>
+          <ul className="mt-1 space-y-1 max-h-40 overflow-auto">
+            {value.assets.map((asset) => (
+              <li key={asset.id} className="flex items-center text-sm text-gray-600">
+                <LucideReact.FileText size={16} className="mr-2 text-indigo-500" />
+                <span className="truncate">
+                  {asset.name} ({(asset.size / 1024).toFixed(1)} KB)
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
-        {/* Date */}
-        <span>{formattedDate}</span>
-        {/* Asset Count */}
-        <span>
-          {assetCount} {assetCount === 1 ? "asset" : "assets"}
-        </span>
-        {/* Reactions Summary */}
-        {reactions && (
-          <div className="flex items-center space-x-3">
-            <span className="flex items-center space-x-1">
-              <span>👍</span>
-              <span>{reactions["+1"]}</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <span>❤️</span>
-              <span>{reactions.heart}</span>
-            </span>
-            <span className="flex items-center space-x-1">
-              <span>💬</span>
-              <span>{reactions.total_count}</span>
-            </span>
-          </div>
-        )}
-      </div>
+      )}
+
+      {reactionEntries.length > 0 && (
+        <div className="mt-4 flex items-center flex-wrap gap-4">
+          {reactionEntries.map(([type, count]) => (
+            <div key={type} className="flex items-center text-sm text-gray-600 space-x-1">
+              {iconMap[type]}
+              <span>{count}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

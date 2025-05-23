@@ -4,5 +4,5 @@ import Component from "../components/560";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"url":"https://api.example.com/projects/columns/12345","project_url":"https://api.example.com/projects/9876","cards_url":"https://api.example.com/projects/columns/12345/cards","id":12345,"node_id":"NODEID_ProjectColumn_12345","name":"Backlog (Sample Project Column)","created_at":"2025-05-18T09:00:00Z","updated_at":"2025-05-20T15:30:45Z"};
+  return {"url":"https://api.example.com/v1/projects/1234/columns/42","project_url":"https://api.example.com/v1/projects/1234","cards_url":"https://api.example.com/v1/projects/1234/columns/42/cards","id":42,"node_id":"NODEID_ProjectColumn_ABC123xyz==","name":"Sample Column (Test)","created_at":"2025-05-19T08:30:00Z","updated_at":"2025-05-19T12:45:00Z"};
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A reply to a discussion within a team.
      *
      * @title Team Discussion Comment
     */
-    export type team_discussion_comment = {
+    export interface team_discussion_comment {
         author: AutoViewInputSubTypes.nullable_simple_user;
         /**
          * The main text of the comment.
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         url: string & tags.Format<"uri">;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -73,7 +74,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_discussion_comment;
 
@@ -83,97 +84,92 @@ export type AutoViewInput = AutoViewInputSubTypes.team_discussion_comment;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const author = value.author;
-  const displayName = author
-    ? author.name?.trim() || author.login
-    : "Unknown user";
-  const avatarUrl = author?.avatar_url || "";
-  const createdDate = new Date(value.created_at);
-  const formattedCreatedAt = createdDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const editedAt = value.last_edited_at
-    ? new Date(value.last_edited_at)
-    : null;
-  const formattedEditedAt = editedAt
-    ? editedAt.toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "";
+  const authorName = author ? author.name ?? author.login : 'Unknown User';
+  const initialAvatar = author?.avatar_url ?? '';
+  const fallbackAvatar = author
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random&color=fff`
+    : 'https://placehold.co/64x64?text=User';
 
-  // Prepare reactions
-  const reactionData = value.reactions;
-  const reactionMap: Record<string, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    eyes: "👀",
-    rocket: "🚀",
-  };
-  const renderedReactions =
-    reactionData && reactionData.total_count > 0
-      ? (Object.entries(reactionMap) as [keyof typeof reactionMap, string][])
-          .map(([key, emoji]) => {
-            const count = (reactionData as any)[key] as number;
-            return count > 0 ? (
-              <span
-                key={key}
-                className="flex items-center space-x-1 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full"
-              >
-                <span>{emoji}</span>
-                <span>{count}</span>
-              </span>
-            ) : null;
-          })
-          .filter(Boolean)
-      : null;
+  const createdAt = new Date(value.created_at);
+  const formattedCreatedAt = createdAt.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
+
+  const formattedEditedAt = value.last_edited_at
+    ? new Date(value.last_edited_at).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      })
+    : '';
+
+  // Strip HTML tags for safe preview
+  const plainBody = value.body_html.replace(/<[^>]+>/g, '').trim();
+
+  // Prepare reaction items if any
+  const reactions = value.reactions;
+  const reactionList = reactions
+    ? [
+        { count: reactions["+1"], Icon: LucideReact.ThumbsUp },
+        { count: reactions["-1"], Icon: LucideReact.ThumbsDown },
+        { count: reactions.laugh, Icon: LucideReact.Smile },
+        { count: reactions.confused, Icon: LucideReact.Frown },
+        { count: reactions.heart, Icon: LucideReact.Heart },
+        { count: reactions.hooray, Icon: LucideReact.Trophy },
+        { count: reactions.eyes, Icon: LucideReact.Eye },
+        { count: reactions.rocket, Icon: LucideReact.Rocket },
+      ].filter(item => item.count > 0)
+    : [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm">
-      <div className="flex items-start">
-        {avatarUrl && (
+    <article className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="p-4 sm:p-6">
+        <div className="flex items-center space-x-3 mb-4">
           <img
-            src={avatarUrl}
-            alt={displayName}
-            className="w-10 h-10 rounded-full mr-3 flex-shrink-0"
+            src={initialAvatar}
+            onError={e => { (e.currentTarget as HTMLImageElement).src = fallbackAvatar; }}
+            alt={`${authorName} avatar`}
+            className="w-10 h-10 rounded-full object-cover bg-gray-100"
           />
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline space-x-2">
-            <h3 className="text-sm font-medium text-gray-900 truncate">
-              {displayName}
-            </h3>
-            <span className="text-xs text-gray-500">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {authorName} <span className="text-gray-500">#{value.number}</span>
+            </p>
+            <p className="text-xs text-gray-500">
               {formattedCreatedAt}
-            </span>
-            {editedAt && (
-              <span className="text-xs text-gray-400 italic">
-                (edited {formattedEditedAt})
-              </span>
-            )}
+              {formattedEditedAt && (
+                <span> • Edited {formattedEditedAt}</span>
+              )}
+            </p>
           </div>
-          <div
-            className="mt-2 text-gray-800 text-sm leading-relaxed overflow-hidden line-clamp-3"
-            dangerouslySetInnerHTML={{ __html: value.body_html }}
-          />
-          {renderedReactions && renderedReactions.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {renderedReactions}
-            </div>
-          )}
         </div>
+        <p className="text-gray-700 text-sm leading-relaxed break-words line-clamp-3">
+          {plainBody}
+        </p>
       </div>
-    </div>
+      {reactionList.length > 0 && (
+        <footer className="px-4 py-2 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center space-x-4 text-gray-600 text-sm">
+            {reactionList.map((item, idx) => (
+              <div key={idx} className="flex items-center space-x-1">
+                <item.Icon size={16} className="text-gray-500" />
+                <span>{item.count}</span>
+              </div>
+            ))}
+            <div className="flex items-center space-x-1">
+              <LucideReact.Users size={16} className="text-gray-400" />
+              <span>{reactions?.total_count}</span>
+            </div>
+          </div>
+        </footer>
+      )}
+    </article>
   );
 }

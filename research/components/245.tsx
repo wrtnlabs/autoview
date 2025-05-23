@@ -1,13 +1,14 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type ManagerView = {
+        export interface ManagerView {
             manager?: AutoViewInputSubTypes.Manager;
             online?: AutoViewInputSubTypes.Online;
-        };
+        }
     }
-    export type Manager = {
+    export interface Manager {
         id?: string;
         channelId?: string;
         accountId?: string;
@@ -72,23 +73,23 @@ export namespace AutoViewInputSubTypes {
         meetOperator?: boolean;
         emailForFront?: string;
         mobileNumberForFront?: string & tags.Default<"+18004424000">;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
-    export type Online = {
+    }
+    export interface Online {
         channelId?: string;
         personType?: string;
         personId?: string;
         id?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.ManagerView;
 
@@ -96,109 +97,86 @@ export type AutoViewInput = AutoViewInputSubTypes.desk.ManagerView;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Prepare data and derived values
   const manager = value.manager;
+  const isOnline = Boolean(value.online?.id);
+
+  // Fallback avatar generation (initials-based)
+  const defaultAvatar = manager
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        manager.name
+      )}&background=0D8ABC&color=fff`
+    : '';
+
+  // Determine avatar source URL
+  const avatarSrc = manager?.avatarUrl
+    ? manager.avatarUrl
+    : manager?.avatar
+    ? `https://${manager.avatar.bucket}.s3.amazonaws.com/${manager.avatar.key}`
+    : defaultAvatar;
+
+  // 2. If there's no manager data, show an empty state
   if (!manager) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No manager information available.
+      <div className="p-4 text-gray-500 flex items-center justify-center">
+        <LucideReact.AlertCircle size={24} className="text-gray-400" />
+        <span className="ml-2">No manager data available</span>
       </div>
     );
   }
 
-  // Derive display name
-  const fullName: string = manager.name;
-
-  // Determine avatar URL (prefers explicit URL, falls back to TinyFile S3 URL)
-  const avatarFile = manager.avatar;
-  const avatarUrl: string | undefined =
-    manager.avatarUrl ||
-    (avatarFile
-      ? `https://${avatarFile.bucket}.s3.amazonaws.com/${avatarFile.key}`
-      : undefined);
-
-  // Description (only if allowed)
-  const description: string | undefined =
-    manager.showDescriptionToFront && manager.description
-      ? manager.description
-      : undefined;
-
-  // Custom status (emoji + text)
-  const customStatus: string | undefined =
-    manager.statusEmoji && manager.statusText
-      ? `${manager.statusEmoji} ${manager.statusText}`
-      : undefined;
-
-  // Online status
-  const isOnline: boolean = Boolean(value.online);
-  const statusLabel = isOnline ? "Online" : "Offline";
-  const statusBg = isOnline ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-500";
-  const dotBg = isOnline ? "bg-green-500" : "bg-gray-400";
-
-  // Contact info
-  const email: string | undefined =
-    manager.showEmailToFront && (manager.emailForFront || manager.email)
-      ? manager.emailForFront || manager.email!
-      : undefined;
-  const mobile: string | undefined =
-    manager.showMobileNumberToFront &&
-    (manager.mobileNumberForFront || manager.mobileNumber)
-      ? manager.mobileNumberForFront || manager.mobileNumber!
-      : undefined;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center space-x-4">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={fullName}
-            className="w-16 h-16 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-500">
-            {fullName.charAt(0)}
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {fullName}
-          </h2>
-          {customStatus && (
-            <p className="text-sm text-gray-500 truncate">{customStatus}</p>
-          )}
-          <div
-            className={`inline-flex items-center mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${statusBg}`}
-          >
-            <span className={`w-2 h-2 mr-1 rounded-full ${dotBg}`}></span>
-            {statusLabel}
-          </div>
-        </div>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row items-center sm:items-start">
+      {/* Avatar */}
+      <div className="w-24 h-24 flex-shrink-0">
+        <img
+          src={avatarSrc}
+          alt={manager.name}
+          className="w-full h-full object-cover rounded-full bg-gray-100"
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).src = defaultAvatar;
+          }}
+        />
       </div>
 
-      {description && (
-        <p className="mt-4 text-gray-700 text-sm line-clamp-2">
-          {description}
-        </p>
-      )}
+      {/* Textual Details */}
+      <div className="mt-4 sm:mt-0 sm:ml-4 flex-1">
+        {/* Name & Online Status */}
+        <div className="flex items-center">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">
+            {manager.name}
+          </h2>
+          <LucideReact.Circle
+            size={12}
+            className={`ml-2 ${isOnline ? 'text-green-500' : 'text-gray-400'}`}
+            aria-label={isOnline ? 'Online' : 'Offline'}
+          />
+        </div>
 
-      {(email || mobile) && (
-        <div className="mt-4 space-y-2 text-sm text-gray-600">
-          {email && (
-            <div>
-              <span className="font-medium text-gray-800">Email:</span>{" "}
-              {email}
+        {/* Description */}
+        {manager.showDescriptionToFront && manager.description && (
+          <p className="mt-2 text-gray-600 text-sm line-clamp-3">
+            {manager.description}
+          </p>
+        )}
+
+        {/* Contact Info */}
+        <div className="mt-3 space-y-2 text-sm">
+          {manager.showEmailToFront && manager.email && (
+            <div className="flex items-center text-gray-700">
+              <LucideReact.Mail size={16} className="text-gray-400" />
+              <span className="ml-2 truncate">{manager.email}</span>
             </div>
           )}
-          {mobile && (
-            <div>
-              <span className="font-medium text-gray-800">Mobile:</span>{" "}
-              {mobile}
+          {manager.showMobileNumberToFront && manager.mobileNumber && (
+            <div className="flex items-center text-gray-700">
+              <LucideReact.Phone size={16} className="text-gray-400" />
+              <span className="ml-2">{manager.mobileNumber}</span>
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

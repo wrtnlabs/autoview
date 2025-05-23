@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A collection of related issues and pull requests.
      *
      * @title Milestone
     */
-    export type milestone = {
+    export interface milestone {
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
         labels_url: string & tags.Format<"uri">;
@@ -32,7 +33,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         closed_at: (string & tags.Format<"date-time">) | null;
         due_on: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -70,78 +71,109 @@ export type AutoViewInput = AutoViewInputSubTypes.milestone[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const milestones = React.useMemo(
-    () => [...value].sort((a, b) => a.number - b.number),
-    [value],
-  );
-
-  const formatDate = (dateString: string | null | undefined): string => {
-    if (!dateString) return "—";
-    const date = new Date(dateString);
-    return date.toLocaleDateString(undefined, {
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
-
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} aria-hidden="true" />
+        <p className="mt-4">No milestones available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {milestones.map((ms) => (
-        <div
-          key={ms.id}
-          className="p-4 bg-white rounded-lg shadow-sm flex flex-col sm:flex-row sm:items-center"
-        >
-          <div className="flex-1">
-            <div className="flex items-center space-x-2">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {ms.title}
-              </h3>
-              <span className="text-sm text-gray-500 truncate">
-                #{ms.number}
-              </span>
-              <span
-                className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                  ms.state === "open"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {capitalize(ms.state)}
-              </span>
+      {value.map((m) => {
+        const created = formatDate(m.created_at);
+        const due = m.due_on ? formatDate(m.due_on) : null;
+        const closed = m.closed_at ? formatDate(m.closed_at) : null;
+        const hasCreator = Boolean(m.creator);
+        const creatorLogin = m.creator?.login ?? "";
+        const creatorAvatar = m.creator?.avatar_url ?? "";
+
+        return (
+          <div key={m.id} className="p-4 bg-white rounded-lg shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {m.state === "open" ? (
+                  <LucideReact.Clock
+                    className="text-amber-500"
+                    size={16}
+                    aria-label="Open"
+                  />
+                ) : (
+                  <LucideReact.CheckCircle
+                    className="text-green-500"
+                    size={16}
+                    aria-label="Closed"
+                  />
+                )}
+                <h3 className="text-lg font-semibold text-gray-800 truncate">
+                  #{m.number} {m.title}
+                </h3>
+              </div>
+              {hasCreator && (
+                <div className="flex items-center space-x-2">
+                  <img
+                    src={creatorAvatar}
+                    alt={creatorLogin}
+                    className="w-8 h-8 rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        creatorLogin,
+                      )}&background=0D8ABC&color=fff`;
+                    }}
+                  />
+                  <span className="text-sm text-gray-600 truncate">
+                    {creatorLogin}
+                  </span>
+                </div>
+              )}
             </div>
-            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
-              {ms.description ?? "No description provided."}
+            <p className="text-sm text-gray-700 mt-2 line-clamp-3">
+              {m.description ?? "No description"}
             </p>
-            <div className="mt-3 flex flex-wrap text-sm text-gray-500 space-x-4">
-              <span>
-                Open Issues: <span className="font-medium">{ms.open_issues}</span>
-              </span>
-              <span>
-                Closed Issues: <span className="font-medium">{ms.closed_issues}</span>
-              </span>
-              <span>
-                Due: <span className="font-medium">{formatDate(ms.due_on)}</span>
-              </span>
+            <div className="flex items-center gap-4 text-gray-600 text-sm mt-3">
+              <div className="flex items-center gap-1">
+                <LucideReact.Circle className="text-gray-500" size={16} />
+                <span>{m.open_issues}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <LucideReact.CheckCircle
+                  className="text-gray-500"
+                  size={16}
+                />
+                <span>{m.closed_issues}</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center text-gray-500 text-xs mt-3 space-x-4">
+              <div className="flex items-center gap-1">
+                <LucideReact.Calendar size={14} />
+                <span>Created: {created}</span>
+              </div>
+              {due && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={14} />
+                  <span>Due: {due}</span>
+                </div>
+              )}
+              {closed && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={14} />
+                  <span>Closed: {closed}</span>
+                </div>
+              )}
             </div>
           </div>
-          {ms.creator && (
-            <div className="mt-4 sm:mt-0 sm:ml-6 flex items-center">
-              <img
-                src={ms.creator.avatar_url}
-                alt={ms.creator.login}
-                className="w-10 h-10 rounded-full object-cover"
-              />
-              <span className="ml-3 text-gray-700 text-sm font-medium truncate">
-                {ms.creator.login}
-              </span>
-            </div>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

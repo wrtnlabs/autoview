@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 
@@ -144,75 +145,85 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const title = value.name || 'Unnamed Configuration';
-  const scope = value.target_type
+  const targetTypeLabel = value.target_type
     ? value.target_type.charAt(0).toUpperCase() + value.target_type.slice(1)
-    : 'Unknown Scope';
-  const description = value.description || 'No description provided';
-  const shortDescription =
-    description.length > 100 ? `${description.slice(0, 100)}...` : description;
-  const formatDate = (dateString?: string): string =>
-    dateString
-      ? new Date(dateString).toLocaleDateString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
-      : 'N/A';
-  const createdAt = formatDate(value.created_at);
-  const updatedAt = formatDate(value.updated_at);
-  const badgeStyles: Record<string, string> = {
-    enabled: 'bg-green-100 text-green-800',
-    disabled: 'bg-red-100 text-red-800',
-    not_set: 'bg-gray-100 text-gray-800',
-  };
-  const statuses: { label: string; status?: 'enabled' | 'disabled' | 'not_set' }[] = [
-    { label: 'Advanced Security', status: value.advanced_security },
-    { label: 'Dependency Graph', status: value.dependency_graph },
-    { label: 'Dependabot Alerts', status: value.dependabot_alerts },
-    { label: 'Dependabot Updates', status: value.dependabot_security_updates },
-    { label: 'Code Scanning', status: value.code_scanning_default_setup },
-    { label: 'Secret Scanning', status: value.secret_scanning },
-  ];
+    : "Unknown";
+  const formattedUpdatedAt = value.updated_at
+    ? new Date(value.updated_at).toLocaleString()
+    : undefined;
+
+  // Build a list of feature statuses, filtering out any "not_set" or undefined entries.
+  type Feature = { label: string; status: "enabled" | "disabled" };
+  const features: Feature[] = [
+    { label: "Advanced Security", status: value.advanced_security as any },
+    { label: "Dependency Graph", status: value.dependency_graph as any },
+    { label: "Autosubmit Dependencies", status: value.dependency_graph_autosubmit_action as any },
+    { label: "Dependabot Alerts", status: value.dependabot_alerts as any },
+    { label: "Dependabot Security Updates", status: value.dependabot_security_updates as any },
+    { label: "Code Scanning Default Setup", status: value.code_scanning_default_setup as any },
+    { label: "Delegated Scan Dismissal", status: value.code_scanning_delegated_alert_dismissal as any },
+    { label: "Secret Scanning", status: value.secret_scanning as any },
+    { label: "Push Protection", status: value.secret_scanning_push_protection as any },
+    { label: "Bypass Delegation", status: value.secret_scanning_delegated_bypass as any },
+    { label: "Validity Checks", status: value.secret_scanning_validity_checks as any },
+    { label: "Non-Provider Patterns", status: value.secret_scanning_non_provider_patterns as any },
+    { label: "Copilot Secrets", status: value.secret_scanning_generic_secrets as any },
+    { label: "Alert Dismissal (Secret)", status: value.secret_scanning_delegated_alert_dismissal as any },
+    { label: "Vulnerability Reporting", status: value.private_vulnerability_reporting as any },
+  ].filter((f): f is Feature => f.status === "enabled" || f.status === "disabled");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const element = (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <header className="mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-        <p className="text-sm text-gray-600">
-          {scope} &middot;{' '}
-          <span
-            className={`font-medium ${
-              value.enforcement === 'enforced' ? 'text-green-600' : 'text-red-600'
-            }`}>
-            {value.enforcement === 'enforced' ? 'Enforced' : 'Unenforced'}
-          </span>
-        </p>
-      </header>
-      <section className="mb-4">
-        <p className="text-gray-700 text-sm line-clamp-2">{shortDescription}</p>
-      </section>
-      <section className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4">
-        {statuses
-          .filter((item) => item.status && item.status !== 'not_set')
-          .map((item) => (
-            <span
-              key={item.label}
-              className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                badgeStyles[item.status as string]
-              }`}>
-              {item.label}: {item.status === 'enabled' ? 'Enabled' : 'Disabled'}
+  return (
+    <div className="w-full max-w-sm bg-white rounded-lg shadow-md p-4 flex flex-col space-y-4">
+      {/* Header: Name, Type & Enforcement */}
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name || "Unnamed Configuration"}</h2>
+          <div className="mt-1 flex items-center space-x-2">
+            <span className="uppercase text-xs font-medium text-blue-600 bg-blue-100 px-2 py-0.5 rounded">
+              {targetTypeLabel}
             </span>
+            {value.enforcement === "enforced" ? (
+              <div className="flex items-center text-green-600 text-sm">
+                <LucideReact.Lock size={16} /><span className="ml-1">Enforced</span>
+              </div>
+            ) : (
+              <div className="flex items-center text-red-600 text-sm">
+                <LucideReact.Unlock size={16} /><span className="ml-1">Unenforced</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Description */}
+      {value.description && (
+        <p className="text-sm text-gray-600 line-clamp-2">{value.description}</p>
+      )}
+
+      {/* Features Grid */}
+      {features.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {features.map((feat) => (
+            <div key={feat.label} className="flex items-center space-x-1 text-sm text-gray-700">
+              {feat.status === "enabled" ? (
+                <LucideReact.CheckCircle className="text-green-500" size={16} />
+              ) : (
+                <LucideReact.XCircle className="text-red-500" size={16} />
+              )}
+              <span className="truncate">{feat.label}</span>
+            </div>
           ))}
-      </section>
-      <footer className="text-xs text-gray-500">
-        <p>Created: {createdAt}</p>
-        <p>Updated: {updatedAt}</p>
-      </footer>
+        </div>
+      )}
+
+      {/* Footer: Last Updated */}
+      {formattedUpdatedAt && (
+        <div className="text-xs text-gray-500 flex items-center">
+          <LucideReact.Calendar size={14} className="mr-1" />
+          <span>Updated: {formattedUpdatedAt}</span>
+        </div>
+      )}
     </div>
   );
-
-  // 3. Return the React element.
-  return element;
 }

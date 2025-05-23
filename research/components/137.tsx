@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Answers to questions about sale snapshots.
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
      * prevent comments from being scattered in both inquiry and answer
      * articles.
     */
-    export type IShoppingSaleInquiryAnswer = {
+    export interface IShoppingSaleInquiryAnswer {
         /**
          * Seller who've written the answer.
          *
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of article
         */
         created_at: string;
-    };
+    }
     /**
      * Seller information.
      *
@@ -60,7 +61,7 @@ export namespace AutoViewInputSubTypes {
      * to operate sales. Also, seller must do the
      * {@link IShoppingCitizen real-name and mobile authentication}, too.
     */
-    export type IShoppingSeller = {
+    export interface IShoppingSeller {
         /**
          * Primary Key.
          *
@@ -75,7 +76,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation tmie of record
         */
         created_at: string;
-    };
+    }
     export namespace IBbsArticle {
         /**
          * Snapshot of article.
@@ -84,7 +85,7 @@ export namespace AutoViewInputSubTypes {
          * the article, as mentioned in {@link IBbsArticle}, the contents of the article
          * are separated from the article record to keep evidence and prevent fraud.
         */
-        export type ISnapshot = {
+        export interface ISnapshot {
             /**
              * Primary Key.
              *
@@ -125,10 +126,10 @@ export namespace AutoViewInputSubTypes {
              * @title List of attachment files
             */
             files: AutoViewInputSubTypes.IAttachmentFile.ICreate[];
-        };
+        }
     }
     export namespace IAttachmentFile {
-        export type ICreate = {
+        export interface ICreate {
             /**
              * File name, except extension.
              *
@@ -151,7 +152,7 @@ export namespace AutoViewInputSubTypes {
              * @title URL path of the real file
             */
             url: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryAnswer;
@@ -161,66 +162,120 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleInquiryAnswer;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { seller, snapshots, created_at } = value;
-  const formattedAnswerDate = new Date(created_at).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const formattedSellerSince = new Date(seller.created_at).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const revisionCount = snapshots.length;
-  const latest = revisionCount > 0 ? snapshots[revisionCount - 1] : undefined;
+  const { seller, created_at: answerCreatedAt, snapshots } = value;
+
+  // Format dates
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
+  const answerDate = formatDate(answerCreatedAt);
+  const sellerSince = formatDate(seller.created_at);
+
+  // Sort snapshots by creation time
+  const sortedSnapshots = [...snapshots].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+
+  const hasSnapshots = sortedSnapshots.length > 0;
+  const latestSnapshot = hasSnapshots
+    ? sortedSnapshots[sortedSnapshots.length - 1]
+    : null;
+  const firstSnapshot = hasSnapshots ? sortedSnapshots[0] : null;
+  const revisionCount = sortedSnapshots.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!hasSnapshots) {
+    return (
+      <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-gray-400">
+        <LucideReact.AlertCircle size={32} />
+        <span className="mt-2 text-sm">No content available</span>
+      </div>
+    );
+  }
+
+  // Build attachment display
+  const attachmentElements = latestSnapshot!.files.map((file) => {
+    const filename = file.extension
+      ? `${file.name || "•"}.${file.extension}`
+      : file.name || "Unnamed file";
+    return (
+      <li key={file.url} className="flex items-center text-sm text-gray-600">
+        <LucideReact.FileText className="mr-2 text-indigo-500" size={16} />
+        <span className="truncate">{filename}</span>
+      </li>
+    );
+  });
+
+  // Render body based on format
+  const renderBody = () => {
+    const { format, body } = latestSnapshot!;
+    if (format === "html") {
+      return (
+        <div
+          className="prose prose-sm max-w-none text-gray-800"
+          dangerouslySetInnerHTML={{ __html: body }}
+        />
+      );
+    }
+    // For markdown or plain text, render as pre-wrapped text with line clamp
+    return (
+      <pre className="whitespace-pre-wrap text-sm text-gray-800 line-clamp-4">
+        {body}
+      </pre>
+    );
+  };
+
   return (
-    <article className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">Seller Answer</h2>
-        <div className="text-sm text-gray-500">Answered on {formattedAnswerDate}</div>
-      </header>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header */}
+      <div className="flex items-center text-lg font-semibold text-gray-800">
+        <LucideReact.MessageSquare className="mr-2 text-blue-500" size={20} />
+        Answer
+      </div>
 
-      <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-        <div className="text-sm text-gray-700">
-          <span className="font-medium">Seller ID:</span> {seller.id}
+      {/* Metadata */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>Answered on {answerDate}</span>
         </div>
-        <div className="text-sm text-gray-700">
-          <span className="font-medium">Member since:</span> {formattedSellerSince}
+        <div className="flex items-center mt-1 sm:mt-0">
+          <LucideReact.User size={16} className="mr-1" />
+          <span>Seller since {sellerSince}</span>
         </div>
       </div>
 
-      <div className="mb-4 text-sm text-gray-600">
-        <span className="font-medium">Revisions:</span> {revisionCount}
-      </div>
-
-      {latest ? (
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-800 truncate">{latest.title}</h3>
-            <span className="px-2 py-0.5 text-xs font-semibold text-blue-800 bg-blue-100 rounded">
-              {latest.format.toUpperCase()}
-            </span>
-          </div>
-          <p className="text-gray-700 text-sm line-clamp-3">{latest.body}</p>
-          {latest.files.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {latest.files.map((file, idx) => {
-                const fileName = `${file.name}${file.extension ? `.${file.extension}` : ""}`;
-                return (
-                  <span key={idx} className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                    {fileName}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-        </section>
-      ) : (
-        <div className="text-gray-500 text-sm">No content available.</div>
+      {/* Revision info */}
+      {revisionCount > 1 && firstSnapshot && (
+        <div className="text-sm text-gray-500">
+          <LucideReact.History size={16} className="inline-block mr-1" />
+          {`Version history: ${revisionCount} snapshots (from ${formatDate(
+            firstSnapshot.created_at
+          )} to ${formatDate(latestSnapshot!.created_at)})`}
+        </div>
       )}
-    </article>
+
+      {/* Content Title */}
+      <h2 className="text-md font-bold text-gray-900 truncate">
+        {latestSnapshot!.title}
+      </h2>
+
+      {/* Content Body */}
+      <div>{renderBody()}</div>
+
+      {/* Attachments */}
+      {attachmentElements.length > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
+            Attachments
+          </h3>
+          <ul className="space-y-1">{attachmentElements}</ul>
+        </div>
+      )}
+    </div>
   );
 }

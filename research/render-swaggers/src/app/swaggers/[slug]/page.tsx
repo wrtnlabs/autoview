@@ -67,7 +67,7 @@ export default function Page() {
   );
 
   return (
-    <section className="mx-auto max-w-[512px] px-4 py-8 flex flex-col gap-4">
+    <section className="px-4 py-8 flex flex-col gap-4">
       <header>
         <h1 className="text-2xl text-center">AutoView Swagger Testbed</h1>
       </header>

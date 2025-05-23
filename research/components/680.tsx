@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type code_scanning_variant_analysis_repo_task = {
+    export interface code_scanning_variant_analysis_repo_task {
         repository: AutoViewInputSubTypes.simple_repository;
         analysis_status: AutoViewInputSubTypes.code_scanning_variant_analysis_status;
         /**
@@ -28,13 +29,13 @@ export namespace AutoViewInputSubTypes {
          * The URL of the artifact. This is only available for successful analyses.
         */
         artifact_url?: string;
-    };
+    }
     /**
      * A GitHub repository.
      *
      * @title Simple Repository
     */
-    export type simple_repository = {
+    export interface simple_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -216,13 +217,13 @@ export namespace AutoViewInputSubTypes {
          * The API URL to list the hooks on the repository.
         */
         hooks_url: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -245,7 +246,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * The new status of the CodeQL variant analysis repository task.
     */
@@ -258,97 +259,127 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_variant_analysis
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Map analysis statuses to labels and Tailwind color schemes.
-  const statusInfo: Record<AutoViewInputSubTypes.code_scanning_variant_analysis_status, { label: string; bg: string; text: string }> = {
-    pending:    { label: 'Pending',     bg: 'bg-yellow-100', text: 'text-yellow-800' },
-    in_progress:{ label: 'In Progress', bg: 'bg-blue-100',   text: 'text-blue-800' },
-    succeeded:  { label: 'Succeeded',   bg: 'bg-green-100',  text: 'text-green-800' },
-    failed:     { label: 'Failed',      bg: 'bg-red-100',    text: 'text-red-800' },
-    canceled:   { label: 'Canceled',    bg: 'bg-gray-100',   text: 'text-gray-800' },
-    timed_out:  { label: 'Timed Out',   bg: 'bg-orange-100', text: 'text-orange-800' },
-  };
-  const { label: statusLabel, bg: statusBg, text: statusText } = statusInfo[value.analysis_status];
+  const repositoryName = value.repository.full_name;
+  const ownerLogin = value.repository.owner.login;
 
-  // Human-friendly byte formatter
-  const formatBytes = (bytes: number): string => {
+  // Map analysis_status to icon, label, and color
+  const statusMap: Record<AutoViewInputSubTypes.code_scanning_variant_analysis_status, {
+    icon: JSX.Element;
+    label: string;
+    colorClass: string;
+  }> = {
+    pending: {
+      icon: <LucideReact.Clock size={16} className="text-amber-500" />,
+      label: "Pending",
+      colorClass: "text-amber-500",
+    },
+    in_progress: {
+      icon: <LucideReact.Loader size={16} className="animate-spin text-blue-500" />,
+      label: "In Progress",
+      colorClass: "text-blue-500",
+    },
+    succeeded: {
+      icon: <LucideReact.CheckCircle size={16} className="text-green-500" />,
+      label: "Succeeded",
+      colorClass: "text-green-500",
+    },
+    failed: {
+      icon: <LucideReact.XCircle size={16} className="text-red-500" />,
+      label: "Failed",
+      colorClass: "text-red-500",
+    },
+    canceled: {
+      icon: <LucideReact.XCircle size={16} className="text-gray-500" />,
+      label: "Canceled",
+      colorClass: "text-gray-500",
+    },
+    timed_out: {
+      icon: <LucideReact.AlertTriangle size={16} className="text-red-500" />,
+      label: "Timed Out",
+      colorClass: "text-red-500",
+    },
+  };
+  const statusInfo = statusMap[value.analysis_status];
+
+  // Format bytes to human-readable string
+  function formatBytes(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
-    const units = ['KB', 'MB', 'GB', 'TB'] as const;
-    let i = 0;
-    let num = bytes / 1024;
-    while (num >= 1024 && i < units.length - 1) {
-      num /= 1024;
-      i++;
-    }
-    return `${num.toFixed(2)} ${units[i]}`;
-  };
-
-  const renderedArtifactSize = value.artifact_size_in_bytes !== undefined
-    ? formatBytes(value.artifact_size_in_bytes)
-    : null;
-
-  const shortSha = value.database_commit_sha
-    ? value.database_commit_sha.slice(0, 7)
-    : null;
+    const kb = bytes / 1024;
+    if (kb < 1024) return `${kb.toFixed(2)} KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(2)} MB`;
+    const gb = mb / 1024;
+    return `${gb.toFixed(2)} GB`;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="max-w-md w-full p-6 bg-white rounded-xl shadow-md space-y-4">
-      {/* Repository Overview */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.repository.full_name}
-        </h2>
-        <div className="mt-1 flex items-center space-x-2 text-sm text-gray-500">
-          <span>{value.repository.owner.login}</span>
-          <span>&bull;</span>
-          <span>{value.repository.private ? 'Private' : 'Public'}</span>
-        </div>
-        <p className="mt-2 text-sm text-gray-600 truncate">
-          {value.repository.description ?? 'No description provided.'}
-        </p>
-      </section>
-
-      {/* Analysis Status */}
-      <section className="flex items-center">
-        <span className={`inline-block px-3 py-1 text-sm font-medium rounded-full ${statusBg} ${statusText}`}>
-          {statusLabel}
-        </span>
-      </section>
-
-      {/* Succeeded Details */}
-      {value.analysis_status === 'succeeded' && (
-        <section className="space-y-2">
-          {renderedArtifactSize && (
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">Artifact Size:</span> {renderedArtifactSize}
-            </p>
-          )}
-          {value.result_count !== undefined && (
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">Results:</span> {value.result_count.toLocaleString()}
-            </p>
-          )}
-          {shortSha && (
-            <p className="text-sm text-gray-700">
-              <span className="font-medium">DB SHA:</span> {shortSha}
-            </p>
-          )}
-          {value.artifact_url && (
-            <p className="text-sm text-gray-500 truncate">
-              {value.artifact_url}
-            </p>
-          )}
-        </section>
-      )}
-
-      {/* Failure Details */}
-      {value.analysis_status === 'failed' && value.failure_message && (
-        <section>
-          <p className="text-sm text-red-700 overflow-hidden line-clamp-3">
-            {value.failure_message}
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      {/* Header: repository name and status */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        <div className="truncate">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">
+            {repositoryName}
+          </h3>
+          <p className="text-sm text-gray-500 truncate">
+            Owner: {ownerLogin}
           </p>
-        </section>
-      )}
-    </article>
+        </div>
+        <div className="flex items-center gap-1 mt-2 sm:mt-0">
+          {statusInfo.icon}
+          <span className={`text-sm font-medium ${statusInfo.colorClass}`}>
+            {statusInfo.label}
+          </span>
+        </div>
+      </div>
+
+      {/* Body: success metrics or failure message */}
+      <div className="space-y-3 text-sm text-gray-700">
+        {value.analysis_status === "succeeded" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+            {value.artifact_size_in_bytes != null && (
+              <div className="flex items-center gap-2">
+                <LucideReact.Archive size={16} className="text-gray-400" />
+                <span>Artifact Size: {formatBytes(value.artifact_size_in_bytes)}</span>
+              </div>
+            )}
+            {value.result_count != null && (
+              <div className="flex items-center gap-2">
+                <LucideReact.ListChecks size={16} className="text-gray-400" />
+                <span>Result Count: {value.result_count}</span>
+              </div>
+            )}
+            {value.database_commit_sha && (
+              <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
+                <LucideReact.GitCommit size={16} className="text-gray-400" />
+                <span>
+                  Commit: {value.database_commit_sha.slice(0, 7)}
+                </span>
+              </div>
+            )}
+            {value.source_location_prefix && (
+              <div className="flex items-center gap-2 col-span-1 sm:col-span-2">
+                <LucideReact.Code size={16} className="text-gray-400" />
+                <span>Source Prefix: {value.source_location_prefix}</span>
+              </div>
+            )}
+            {value.artifact_url && (
+              <div className="flex items-start gap-2 col-span-1 sm:col-span-2">
+                <LucideReact.Link size={16} className="text-gray-400 mt-0.5" />
+                <span className="break-all text-blue-600 line-clamp-2">
+                  {value.artifact_url}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+        {value.analysis_status === "failed" && value.failure_message && (
+          <div className="flex items-start gap-3 text-red-600">
+            <LucideReact.AlertTriangle size={20} className="flex-shrink-0" />
+            <p className="break-words">{value.failure_message}</p>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

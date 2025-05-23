@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A migration.
      *
      * @title Migration
     */
-    export type migration = {
+    export interface migration {
         id: number & tags.Type<"int32">;
         owner: AutoViewInputSubTypes.nullable_simple_user;
         guid: string;
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
          * Exclude related items from being returned in the response in order to improve performance of the request. The array can include any of: `"repositories"`.
         */
         exclude?: string[];
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -66,7 +67,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -270,7 +271,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -289,7 +290,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -312,7 +313,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.migration[];
 
@@ -320,79 +321,108 @@ export type AutoViewInput = AutoViewInputSubTypes.migration[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const migrations = value;
-  
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (migrations.length === 0) {
+  // 1. Data transformation/helpers
+  const formatDate = (iso: string): string => {
+    const date = new Date(iso);
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const getStateIcon = (state: string): JSX.Element => {
+    const s = state.toLowerCase();
+    if (['pending', 'queued', 'in_progress', 'exporting'].some((kw) => s.includes(kw))) {
+      return <LucideReact.Clock size={16} className="mr-1 text-amber-500" />;
+    }
+    if (['completed', 'exported', 'finished'].some((kw) => s.includes(kw))) {
+      return <LucideReact.CheckCircle size={16} className="mr-1 text-green-500" />;
+    }
+    if (['failed', 'error', 'failure'].some((kw) => s.includes(kw))) {
+      return <LucideReact.AlertTriangle size={16} className="mr-1 text-red-500" />;
+    }
+    return <LucideReact.Circle size={16} className="mr-1 text-gray-500" />;
+  };
+
+  // 2. Empty state
+  if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No migrations to display.
+      <div className="p-4 flex items-center justify-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mr-2" />
+        <span>No migrations available.</span>
       </div>
     );
   }
 
+  // 3. Render migration list
   return (
     <div className="space-y-4">
-      {migrations.map((migration) => {
-        const owner = migration.owner;
-        const ownerName = owner?.login || "Unknown";
-        const avatarUrl = owner?.avatar_url || "";
-        const stateLabel =
-          migration.state.charAt(0).toUpperCase() + migration.state.slice(1);
-        const createdDate = new Date(migration.created_at).toLocaleDateString(
-          undefined,
-          { year: "numeric", month: "short", day: "numeric" }
-        );
-        const repoCount = migration.repositories.length;
-        const excludeList = migration.exclude;
-
-        return (
-          <div
-            key={migration.id}
-            className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-          >
-            <div className="flex items-center">
-              {avatarUrl ? (
-                <img
-                  src={avatarUrl}
-                  alt={`${ownerName} avatar`}
-                  className="w-10 h-10 rounded-full mr-4 flex-shrink-0"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-200 mr-4 flex-shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {ownerName}
-                  </h3>
-                  <span className="text-sm text-gray-500">#{migration.id}</span>
-                </div>
-                <div className="flex items-center space-x-2 mt-1">
-                  <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-                    {stateLabel}
-                  </span>
-                  <span className="text-sm text-gray-500">{createdDate}</span>
-                </div>
+      {value.map((migration) => (
+        <div
+          key={migration.id}
+          className="p-4 bg-white rounded-lg shadow flex flex-col md:flex-row md:items-center md:justify-between"
+        >
+          {/* Owner & Identification */}
+          <div className="flex items-center space-x-4">
+            {migration.owner?.avatar_url ? (
+              <img
+                src={migration.owner.avatar_url}
+                alt={migration.owner.login}
+                onError={(e) => {
+                  const img = e.currentTarget as HTMLImageElement;
+                  img.onerror = null;
+                  img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    migration.owner?.login ?? '',
+                  )}&background=0D8ABC&color=fff`;
+                }}
+                className="w-10 h-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                <LucideReact.User size={16} className="text-gray-400" />
               </div>
-            </div>
-            <div className="mt-3 flex flex-wrap text-sm text-gray-700 space-x-4">
-              <div>
-                <span className="font-medium">{repoCount}</span> repos
-              </div>
-              {excludeList && excludeList.length > 0 && (
-                <div className="truncate">
-                  <span className="font-medium">Exclude:</span>{" "}
-                  {excludeList.join(", ")}
-                </div>
-              )}
+            )}
+            <div className="flex flex-col">
+              <span className="text-lg font-semibold text-gray-900">
+                Migration #{migration.id}
+              </span>
+              <span className="text-sm text-gray-600 truncate line-clamp-1">
+                {migration.guid}
+              </span>
             </div>
           </div>
-        );
-      })}
+
+          {/* Details */}
+          <div className="mt-4 md:mt-0 flex flex-col space-y-2 md:flex-row md:space-y-0 md:space-x-6">
+            <div className="flex items-center text-sm text-gray-700">
+              {getStateIcon(migration.state)}
+              <span className="capitalize">{migration.state}</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-700">
+              <LucideReact.GitBranch size={16} className="mr-1 text-gray-500" />
+              <span>{migration.repositories.length} repos</span>
+            </div>
+            <div className="flex items-center text-sm text-gray-700">
+              <LucideReact.Calendar size={16} className="mr-1 text-gray-500" />
+              <span>{formatDate(migration.created_at)}</span>
+            </div>
+          </div>
+
+          {/* Link */}
+          <div className="mt-4 md:mt-0">
+            <a
+              href={migration.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline flex items-center text-sm"
+            >
+              <LucideReact.Link size={16} className="mr-1" />
+              View Migration
+            </a>
+          </div>
+        </div>
+      ))}
     </div>
   );
-  // 3. Return the React element.
-  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

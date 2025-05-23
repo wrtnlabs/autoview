@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Organization Invitation
      *
      * @title Organization Invitation
     */
-    export type organization_invitation = {
+    export interface organization_invitation {
         id: number & tags.Type<"int32">;
         login: string | null;
         email: string | null;
@@ -19,13 +20,13 @@ export namespace AutoViewInputSubTypes {
         node_id: string;
         invitation_teams_url: string;
         invitation_source?: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -48,7 +49,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_invitation[];
 
@@ -57,95 +58,105 @@ export type AutoViewInput = AutoViewInputSubTypes.organization_invitation[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string): string => {
-    try {
-      return new Date(iso).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch {
-      return iso;
-    }
-  };
+  const invitations = value;
+  const formatDate = (dateStr?: string | null): string =>
+    dateStr
+      ? new Date(dateStr).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "—";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!Array.isArray(value) || value.length === 0) {
+  if (invitations.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No invitations found.
+      <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No invitations found</span>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {value.map((invitation) => {
-        const {
-          id,
-          login,
-          email,
-          role,
-          created_at,
-          failed_at,
-          failed_reason,
-          inviter,
-          team_count,
-        } = invitation;
-        const invitee = login || email || "Unknown";
-        const createdDate = formatDate(created_at);
-        const failedDate = failed_at ? formatDate(failed_at) : null;
-        const status = failed_at ? "Failed" : "Pending";
-        const statusColor = failed_at
-          ? "bg-red-100 text-red-800"
-          : "bg-yellow-100 text-yellow-800";
+      {invitations.map((inv) => {
+        const status = inv.failed_at ? "Failed" : "Pending";
+        const statusIcon =
+          status === "Failed" ? (
+            <LucideReact.AlertTriangle className="text-red-500" size={16} />
+          ) : (
+            <LucideReact.Clock className="text-amber-500" size={16} />
+          );
+        const inviteeLabel = inv.login ?? inv.email ?? "Unknown user";
 
         return (
           <div
-            key={id}
-            className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white rounded-lg shadow-md"
+            key={inv.id}
+            className="p-4 bg-white rounded-lg shadow flex flex-col"
           >
-            {/* Left: Invitee and Role */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {invitee}
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                Role:{" "}
-                <span className="font-medium text-gray-700">{role}</span>
-              </p>
-              <p className="mt-1 text-sm text-gray-500">
-                Created:{" "}
-                <time dateTime={created_at} className="font-medium">
-                  {createdDate}
-                </time>
-              </p>
-              {failed_at && failed_reason && (
-                <p className="mt-1 text-sm text-red-600">
-                  Reason: <span className="font-medium">{failed_reason}</span>
-                </p>
-              )}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center gap-2">
+                <LucideReact.User size={20} className="text-gray-500" />
+                <span className="text-lg font-medium text-gray-900 truncate">
+                  {inviteeLabel}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 text-sm font-medium">
+                {statusIcon}
+                <span
+                  className={
+                    status === "Failed"
+                      ? "text-red-600"
+                      : "text-amber-600"
+                  }
+                >
+                  {status}
+                </span>
+              </div>
             </div>
 
-            {/* Right: Status, Teams, Inviter */}
-            <div className="mt-4 sm:mt-0 sm:ml-6 flex flex-col sm:items-end space-y-2">
-              <span
-                className={`inline-block px-2 py-1 text-xs font-medium rounded ${statusColor}`}
-              >
-                {status}
-              </span>
-              <span className="text-sm text-gray-600">
-                Teams invited: <span className="font-medium">{team_count}</span>
-              </span>
-              <div className="flex items-center space-x-2">
-                <img
-                  src={inviter.avatar_url}
-                  alt={inviter.login}
-                  className="w-6 h-6 rounded-full object-cover"
-                />
-                <span className="text-sm text-gray-700 truncate">
-                  {inviter.name || inviter.login}
-                </span>
+            <div className="mt-2 text-sm text-gray-500 flex items-center gap-1">
+              <LucideReact.Calendar size={16} />
+              <span>Invited on {formatDate(inv.created_at)}</span>
+            </div>
+
+            {inv.failed_at && (
+              <div className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                <LucideReact.AlertTriangle size={16} />
+                <span>Failed on {formatDate(inv.failed_at)}</span>
+              </div>
+            )}
+
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-700">
+              <div className="flex items-center gap-1">
+                <LucideReact.Crown size={16} />
+                <span>Role: {inv.role}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <LucideReact.Users size={16} />
+                <span>Teams: {inv.team_count}</span>
+              </div>
+              {inv.invitation_source && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Tag size={16} />
+                  <span>Source: {inv.invitation_source}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 col-span-full sm:col-auto">
+                <div className="w-5 h-5 rounded-full overflow-hidden bg-gray-100">
+                  <img
+                    src={inv.inviter.avatar_url}
+                    alt={inv.inviter.login}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const img = e.currentTarget as HTMLImageElement;
+                      img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        inv.inviter.login,
+                      )}&background=random`;
+                    }}
+                  />
+                </div>
+                <span>Invited by {inv.inviter.login}</span>
               </div>
             </div>
           </div>

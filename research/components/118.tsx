@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingSeller {
         /**
@@ -11,7 +12,7 @@ export namespace AutoViewInputSubTypes {
          * and access to the customer, member and {@link IShoppingCitizen citizen}
          * information inversely.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Discriminant for the type of seller.
              *
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation tmie of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingMember {
         /**
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -89,7 +90,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Email address of member.
@@ -98,7 +99,7 @@ export namespace AutoViewInputSubTypes {
      * registered for one {@link IShoppingMember member}. If you don't have to
      * plan such multiple email addresses, just use only one.
     */
-    export type IShoppingMemberEmail = {
+    export interface IShoppingMemberEmail {
         /**
          * Primary Key.
          *
@@ -117,7 +118,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingCustomer {
         /**
          * Inverted customer information.
@@ -128,7 +129,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -148,7 +149,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title External user information
             */
-            external_user: null | any;
+            external_user: null | AutoViewInputSubTypes.IShoppingExternalUser;
             /**
              * Connection address.
              *
@@ -177,7 +178,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of the connection record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Channel information.
@@ -189,7 +190,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -214,8 +215,80 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
-    export type IShoppingExternalUser = any;
+    }
+    /**
+     * External user information.
+     *
+     * `IShoppingExternalUser` is an entity dsigned for when this system needs
+     * to connect with external services and welcome their users as
+     * {@link IShoppingCustomer customers} of this service.
+     *
+     * For reference, customers who connect from an external service must have
+     * this record, and the external service user is identified through the two
+     * attributes {@link application} and {@link uid}. If a customer connected
+     * from an external service completes
+     * {@link IShoppingCitizen real-name authentication} from this service, each
+     * time the external service user reconnects to this service and issues a
+     * new customer authentication token, real-name authentication begins with
+     * completed.
+     *
+     * And {@link password} is the password issued to the user by the external
+     * service system (the so-called permanent user authentication token), and
+     * is never the actual user password. However, for customers who entered the
+     * same application and uid as the current external system user, this is to
+     * determine whether to view this as a correct external system user or a
+     * violation.
+     *
+     * In addition, additional information received from external services can
+     * be recorded in the data field in JSON format.
+    */
+    export interface IShoppingExternalUser {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Citizen activation info.
+         *
+         * @title Citizen activation info
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Creation time of record.
+         *
+         * Another word, first time when the external user connected.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier key of external user from the external system.
+         *
+         * @title Identifier key of external user from the external system
+        */
+        uid: string;
+        /**
+         * Identifier code of the external service.
+         *
+         * It can be same with {@link IShoppingChannel.code} in common.
+         *
+         * @title Identifier code of the external service
+        */
+        application: string;
+        /**
+         * Nickname of external user in the external system.
+         *
+         * @title Nickname of external user in the external system
+        */
+        nickname: string;
+        /**
+         * Additional information about external user from the external
+         * system.
+        */
+        data: any;
+    }
     /**
      * Citizen verification information.
      *
@@ -231,7 +304,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, real name and mobile phone authentication information are
      * encrypted and stored.
     */
-    export type IShoppingCitizen = {
+    export interface IShoppingCitizen {
         /**
          * Primary Key.
          *
@@ -256,7 +329,7 @@ export namespace AutoViewInputSubTypes {
          * @title Real name, or equivalent nickname
         */
         name: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSeller.IInvert;
 
@@ -265,98 +338,150 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSeller.IInvert;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string, opts: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" }) =>
-    new Date(iso).toLocaleDateString(undefined, opts);
-
-  const truncate = (text: string, max: number = 40) =>
-    text.length > max ? text.slice(0, max) + "…" : text;
-
-  const displayName = `${value.member.nickname} (${value.citizen.name})`;
-
-  const sellerSince = formatDate(value.created_at);
-  const memberSince = formatDate(value.member.created_at);
-  const customerSince = formatDate(value.customer.created_at);
-  const citizenSince = formatDate(value.citizen.created_at);
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-full">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">{displayName}</h2>
-        <span className="mt-2 sm:mt-0 inline-block bg-indigo-100 text-indigo-800 text-xs font-medium uppercase tracking-wide px-2 py-1 rounded-full">
-          {value.type}
-        </span>
-      </div>
-
-      {/* Details Grid */}
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Member Info */}
+    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold text-gray-800 mb-6">
+        Seller Profile
+      </h2>
+      <div className="space-y-6">
+        {/* Member Information */}
         <section>
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Member Info</h3>
-          <p className="mt-2 text-gray-700">
-            <span className="font-semibold">Nickname:</span> {value.member.nickname}
-          </p>
-          <p className="mt-1 text-gray-700">
-            <span className="font-semibold">Joined:</span> {memberSince}
-          </p>
-          <div className="mt-2">
-            <span className="font-semibold text-gray-700">Emails:</span>
-            <ul className="mt-1 space-y-1">
-              {value.member.emails.map((email) => (
-                <li key={email.id} className="text-sm text-gray-600 truncate">
-                  {email.value}
-                </li>
-              ))}
-            </ul>
+          <h3 className="text-lg font-medium text-gray-700 mb-3">
+            Member Information
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <LucideReact.User size={16} className="text-gray-500" />
+              <span className="font-medium text-gray-900">
+                {value.member.nickname}
+              </span>
+            </div>
+            {value.member.emails.map((email) => (
+              <div
+                key={email.id}
+                className="flex items-center gap-1 ml-6 text-sm"
+              >
+                <LucideReact.Mail size={16} className="text-gray-400" />
+                <span className="text-gray-700">{email.value}</span>
+              </div>
+            ))}
+            <div className="flex items-center gap-1 text-sm">
+              <LucideReact.Calendar size={16} className="text-gray-400" />
+              <span className="text-gray-700">
+                Joined on {formatDate(value.member.created_at)}
+              </span>
+            </div>
           </div>
-        </section>
-
-        {/* Citizen Info */}
-        <section>
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Citizen Info</h3>
-          <p className="mt-2 text-gray-700">
-            <span className="font-semibold">Real Name:</span> {value.citizen.name}
-          </p>
-          <p className="mt-1 text-gray-700">
-            <span className="font-semibold">Mobile:</span> {value.citizen.mobile}
-          </p>
-          <p className="mt-1 text-gray-700">
-            <span className="font-semibold">Verified:</span> {citizenSince}
-          </p>
         </section>
 
         {/* Customer Connection */}
         <section>
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Customer Connection</h3>
-          <p className="mt-2 text-gray-700">
-            <span className="font-semibold">Channel:</span> {value.customer.channel.name} ({value.customer.channel.code})
-          </p>
-          <p className="mt-1 text-gray-700">
-            <span className="font-semibold">IP:</span> {value.customer.ip}
-          </p>
-          {value.customer.referrer && (
-            <p className="mt-1 text-gray-700">
-              <span className="font-semibold">Referrer:</span> {truncate(value.customer.referrer)}
-            </p>
-          )}
-          <p className="mt-1 text-gray-700">
-            <span className="font-semibold">URL:</span> {truncate(value.customer.href)}
-          </p>
+          <h3 className="text-lg font-medium text-gray-700 mb-3">
+            Customer Connection
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <LucideReact.Users size={16} className="text-gray-500" />
+              <span className="font-medium text-gray-900">
+                {value.customer.channel.name}
+              </span>
+              <span className="text-sm text-gray-500">
+                ({value.customer.channel.code})
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <LucideReact.Calendar size={16} className="text-gray-400" />
+              <span className="text-gray-700">
+                Connected on {formatDate(value.customer.created_at)}
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <LucideReact.Server size={16} className="text-gray-400" />
+              <span className="text-gray-700">{value.customer.ip}</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <LucideReact.Link size={16} className="text-gray-400" />
+              <span className="text-gray-700 truncate">
+                {value.customer.href}
+              </span>
+            </div>
+            {value.customer.referrer && (
+              <div className="flex items-center gap-1 text-sm">
+                <LucideReact.Link size={16} className="text-gray-400" />
+                <span className="text-gray-700 truncate">
+                  {value.customer.referrer}
+                </span>
+              </div>
+            )}
+            {value.customer.external_user && (
+              <div className="mt-2">
+                <h4 className="text-sm font-medium text-gray-700">
+                  External User
+                </h4>
+                <div className="flex items-center gap-2 ml-4 text-sm">
+                  <LucideReact.ExternalLink
+                    size={16}
+                    className="text-gray-400"
+                  />
+                  <span className="text-gray-700">
+                    {value.customer.external_user.application} /{" "}
+                    {value.customer.external_user.uid}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 ml-4 text-sm mt-1">
+                  <LucideReact.Calendar
+                    size={16}
+                    className="text-gray-400"
+                  />
+                  <span className="text-gray-700">
+                    Joined external on{" "}
+                    {formatDate(value.customer.external_user.created_at)}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
 
-        {/* Metadata */}
+        {/* Citizen Verification */}
         <section>
-          <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wide">Metadata</h3>
-          <p className="mt-2 text-gray-700">
-            <span className="font-semibold">Seller Since:</span> {sellerSince}
-          </p>
-          <p className="mt-1 text-gray-700">
-            <span className="font-semibold">Customer Record:</span> {customerSince}
-          </p>
-          <p className="mt-1 text-gray-700">
-            <span className="font-semibold">Channel Created:</span> {formatDate(value.customer.channel.created_at, { year: "numeric", month: "short", day: "numeric" })}
-          </p>
+          <h3 className="text-lg font-medium text-gray-700 mb-3">
+            Verification
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-1 text-sm">
+              <LucideReact.User size={16} className="text-gray-400" />
+              <span className="text-gray-700">{value.citizen.name}</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <LucideReact.Phone size={16} className="text-gray-400" />
+              <span className="text-gray-700">{value.citizen.mobile}</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <LucideReact.Calendar size={16} className="text-gray-400" />
+              <span className="text-gray-700">
+                Verified on {formatDate(value.citizen.created_at)}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* Seller Meta */}
+        <section>
+          <div className="flex items-center gap-1 text-sm">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span className="text-gray-700">
+              Seller since {formatDate(value.created_at)}
+            </span>
+          </div>
         </section>
       </div>
     </div>

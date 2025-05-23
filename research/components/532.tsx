@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -27,7 +28,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -42,7 +43,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -79,57 +80,71 @@ export type AutoViewInput = AutoViewInputSubTypes.team[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalTeams = value.length;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <div className="container mx-auto p-4">
-      <div className="text-lg font-semibold mb-4">Teams ({totalTeams})</div>
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {value.map((team) => {
-          const description = team.description ?? "No description provided";
-          const parentName = team.parent?.name ?? "None";
-          const activePermissions = team.permissions
-            ? (Object.entries(team.permissions) as [keyof typeof team.permissions, boolean][])
-                .filter(([, has]) => has)
-                .map(([perm]) => perm)
-            : [];
-
-          return (
-            <div key={team.id} className="bg-white rounded-lg shadow p-4 flex flex-col">
-              <div className="mb-2">
-                <div className="flex items-center space-x-2">
-                  <h2 className="text-xl font-bold text-gray-800 truncate">{team.name}</h2>
-                  <span className="text-xs text-gray-500 truncate">({team.slug})</span>
-                </div>
-                <p className="text-sm text-gray-600 mt-1 line-clamp-2">{description}</p>
-              </div>
-              <div className="mt-auto space-y-2">
-                <div className="flex flex-wrap space-x-2 text-sm">
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded">{team.permission}</span>
-                  {team.privacy && (
-                    <span className="bg-green-100 text-green-800 px-2 py-1 rounded">
-                      {team.privacy}
-                    </span>
-                  )}
-                  {team.notification_setting && (
-                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded">
-                      {team.notification_setting}
-                    </span>
-                  )}
-                </div>
-                {activePermissions.length > 0 && (
-                  <div className="text-sm text-gray-700">
-                    Permissions: {activePermissions.join(", ")}
-                  </div>
-                )}
-                <div className="text-sm text-gray-500">Parent: {parentName}</div>
-              </div>
-            </div>
-          );
-        })}
+  // 1. Data transformation: derive privacy label and icon, handle empty state
+  const teams = value;
+  if (teams.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="text-gray-300" />
+        <span className="mt-2 text-sm">No teams available</span>
       </div>
+    );
+  }
+
+  // 2. Compose the visual structure
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      {teams.map((team) => {
+        const privacy = team.privacy ?? "public";
+        const privacyIcon =
+          privacy === "secret" ? (
+            <LucideReact.Lock size={16} className="text-gray-500" />
+          ) : (
+            <LucideReact.Unlock size={16} className="text-gray-500" />
+          );
+        const parentName = team.parent?.name;
+
+        return (
+          <div
+            key={team.id}
+            className="bg-white rounded-lg shadow-md p-4 flex flex-col space-y-3"
+          >
+            {/* Team Name */}
+            <div className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+              <LucideReact.Users size={20} className="text-blue-500" />
+              <span className="truncate">{team.name}</span>
+            </div>
+
+            {/* Description */}
+            {team.description && (
+              <p className="text-gray-600 text-sm line-clamp-2">
+                {team.description}
+              </p>
+            )}
+
+            {/* Meta Tags */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-xs text-gray-700">
+                {privacyIcon}
+                <span className="capitalize">{privacy}</span>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-xs text-gray-700">
+                <LucideReact.Tag size={16} className="text-gray-500" />
+                <span>{team.permission}</span>
+              </div>
+              {parentName && (
+                <div className="flex items-center gap-1 bg-gray-100 px-2 py-0.5 rounded text-xs text-gray-700">
+                  <LucideReact.ArrowUpLeft
+                    size={16}
+                    className="text-gray-500"
+                  />
+                  <span className="truncate">{parentName}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

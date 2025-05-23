@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A migration.
      *
      * @title Migration
     */
-    export type migration = {
+    export interface migration {
         id: number & tags.Type<"int32">;
         owner: AutoViewInputSubTypes.nullable_simple_user;
         guid: string;
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
          * Exclude related items from being returned in the response in order to improve performance of the request. The array can include any of: `"repositories"`.
         */
         exclude?: string[];
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -66,7 +67,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -270,7 +271,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -289,7 +290,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -312,7 +313,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.migration;
 
@@ -321,94 +322,161 @@ export type AutoViewInput = AutoViewInputSubTypes.migration;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Map migration state to Tailwind badge styles
-  const stateStyles: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-800",
-    exporting: "bg-blue-100 text-blue-800",
-    importing: "bg-blue-100 text-blue-800",
-    completed: "bg-green-100 text-green-800",
-    failed: "bg-red-100 text-red-800",
-  };
-  const stateKey = value.state.toLowerCase();
-  const badgeClass = stateStyles[stateKey] || "bg-gray-100 text-gray-800";
-
-  // Format timestamps
-  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-
-  // Owner info
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const updatedAt = new Date(value.updated_at).toLocaleString();
   const owner = value.owner;
-  const ownerName = owner?.login || "Unknown";
-  const ownerAvatar = owner?.avatar_url;
 
-  // Repository count
-  const repoCount = Array.isArray(value.repositories)
-    ? value.repositories.length
-    : 0;
+  // Status mapping: map state to icon and label
+  const stateLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
+  let statusIcon: React.ReactNode;
+  if (value.state === "completed" || value.state === "exported" || value.state === "finished") {
+    statusIcon = <LucideReact.CheckCircle className="text-green-500" size={16} />;
+  } else if (value.state === "failed" || value.state === "error") {
+    statusIcon = <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+  } else {
+    statusIcon = <LucideReact.Clock className="text-amber-500" size={16} />;
+  }
 
-  // Exclusion count (if any)
-  const excludeCount = Array.isArray(value.exclude)
-    ? value.exclude.length
-    : 0;
+  // Exclusion flags summarization
+  const exclusions = [
+    value.exclude_metadata && "Metadata",
+    value.exclude_git_data && "Git Data",
+    value.exclude_attachments && "Attachments",
+    value.exclude_releases && "Releases",
+    value.exclude_owner_projects && "Owner Projects",
+  ].filter(Boolean) as string[];
+  if (value.org_metadata_only) exclusions.push("Organization Metadata Only");
 
-  // Truncated GUID for display
-  const guidShort =
-    value.guid.length > 8 ? `${value.guid.slice(0, 8)}...` : value.guid;
+  // Repositories preview logic
+  const repoCount = value.repositories.length;
+  const previewRepos = value.repositories.slice(0, 3);
+  const moreCount = repoCount - previewRepos.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Migration {guidShort}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${badgeClass}`}
-        >
-          {value.state}
-        </span>
-      </div>
-
-      <div className="flex items-center mt-4">
-        {ownerAvatar ? (
-          <img
-            src={ownerAvatar}
-            alt={ownerName}
-            className="w-10 h-10 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-10 h-10 bg-gray-200 rounded-full" />
+      {/* Header: Status and Migration ID */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          {statusIcon}
+          <h2 className="text-lg font-semibold text-gray-800">
+            Migration #{value.id}
+          </h2>
+        </div>
+        {value.archive_url && (
+          <a
+            href={value.archive_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-gray-500 hover:text-gray-700"
+            aria-label="Download archive"
+          >
+            <LucideReact.Download size={20} />
+          </a>
         )}
-        <span className="ml-3 text-sm font-medium text-gray-700">
-          {ownerName}
-        </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 text-sm text-gray-600">
-        <div>
-          <span className="font-medium text-gray-800">Created:</span>{" "}
-          {createdAt}
+      {/* Details */}
+      <div className="mt-4 space-y-3 text-sm text-gray-600">
+        {/* Owner */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.User size={16} className="text-gray-400" />
+          {owner ? (
+            <a
+              href={owner.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center space-x-2 hover:underline"
+            >
+              <img
+                src={owner.avatar_url}
+                alt={owner.login}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    owner.login
+                  )}&background=0D8ABC&color=fff`;
+                }}
+                className="w-6 h-6 rounded-full object-cover"
+              />
+              <span className="font-medium text-gray-800">{owner.login}</span>
+            </a>
+          ) : (
+            <span className="font-medium text-gray-800">Unknown Owner</span>
+          )}
         </div>
-        <div>
-          <span className="font-medium text-gray-800">Updated:</span>{" "}
-          {updatedAt}
+
+        {/* Created & Updated */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>
+            Created:{" "}
+            <span className="font-medium text-gray-800">{createdAt}</span>
+          </span>
         </div>
-        <div>
-          <span className="font-medium text-gray-800">Repositories:</span>{" "}
-          {repoCount}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>
+            Updated:{" "}
+            <span className="font-medium text-gray-800">{updatedAt}</span>
+          </span>
         </div>
-        {excludeCount > 0 && (
+
+        {/* Repositories Preview */}
+        {repoCount > 0 && (
           <div>
-            <span className="font-medium text-gray-800">Excluded:</span>{" "}
-            {excludeCount}
+            <div className="flex items-center space-x-2">
+              <LucideReact.Database size={16} className="text-gray-400" />
+              <span className="font-medium text-gray-800">
+                {repoCount} repositories
+              </span>
+            </div>
+            <ul className="mt-1 ml-6 list-disc text-gray-700">
+              {previewRepos.map((repo) => (
+                <li key={repo.id}>
+                  <a
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {repo.full_name}
+                  </a>
+                </li>
+              ))}
+              {moreCount > 0 && (
+                <li className="text-gray-500">+{moreCount} more</li>
+              )}
+            </ul>
           </div>
         )}
+
+        {/* Exclusions */}
+        {exclusions.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-gray-500">Excluding:</span>
+            {exclusions.map((ex) => (
+              <span
+                key={ex}
+                className="px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full text-xs"
+              >
+                {ex}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* API URL */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Link size={16} className="text-gray-400" />
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-blue-600 hover:underline truncate"
+          >
+            {value.url}
+          </a>
+        </div>
       </div>
     </div>
   );

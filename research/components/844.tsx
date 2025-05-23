@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Content File
      *
      * @title Content File
     */
-    export type content_file = {
+    export interface content_file {
         type: "file";
         encoding: string;
         size: number & tags.Type<"int32">;
@@ -25,7 +26,7 @@ export namespace AutoViewInputSubTypes {
         };
         target?: string;
         submodule_git_url?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.content_file;
 
@@ -33,90 +34,83 @@ export type AutoViewInput = AutoViewInputSubTypes.content_file;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derived utilities and constants
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formatBytes = (bytes: number): string => {
-    const thresh = 1024;
-    if (Math.abs(bytes) < thresh) {
-      return bytes + " B";
-    }
-    const units = ["KB", "MB", "GB", "TB"];
-    let u = -1;
-    let b = bytes;
-    do {
-      b /= thresh;
-      u++;
-    } while (Math.abs(b) >= thresh && u < units.length - 1);
-    return b.toFixed(1) + " " + units[u];
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
+  const formattedSize = formatBytes(value.size);
+  const preview =
+    value.content.length > 200
+      ? value.content.slice(0, 200) + "..."
+      : value.content;
+  const shortSha = value.sha.slice(0, 7);
 
-  const decodedContent = (() => {
-    try {
-      if (value.encoding === "base64") {
-        return typeof atob === "function" ? atob(value.content) : value.content;
-      }
-      return value.content;
-    } catch {
-      return value.content;
-    }
-  })();
-
-  const previewText =
-    decodedContent.length > 500
-      ? decodedContent.slice(0, 500) + "..."
-      : decodedContent;
-
-  const links: { label: string; url: string }[] = [
-    { label: "HTML URL", url: value.html_url || "" },
-    { label: "Download URL", url: value.download_url || "" },
-    { label: "Git URL", url: value.git_url || "" },
-  ].filter((link) => link.url);
-
-  // 2. Visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-md space-y-4">
-      {/* File Name & Path */}
-      <div>
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header: Icon + File Name */}
+      <div className="flex items-center mb-3">
+        <LucideReact.FileText size={20} className="text-indigo-500 mr-2" />
         <h2 className="text-lg font-semibold text-gray-800 truncate">
           {value.name}
         </h2>
-        {value.path && value.path !== value.name && (
-          <p className="text-sm text-gray-500 truncate">{value.path}</p>
-        )}
       </div>
 
-      {/* Metadata Row */}
-      <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-        <span>Size: {formatBytes(value.size)}</span>
-        <span>Encoding: {value.encoding}</span>
-        <span>SHA: {value.sha.slice(0, 7)}</span>
-        {value.target && <span>Target: {value.target}</span>}
-        {value.submodule_git_url && (
-          <span className="truncate">
-            Submodule: {value.submodule_git_url}
-          </span>
-        )}
+      {/* File Attributes */}
+      <div className="space-y-2 text-sm text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Folder size={16} className="text-gray-400 mr-1" />
+          <span className="truncate">{value.path}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Code2 size={16} className="text-gray-400 mr-1" />
+          <span>{value.encoding}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Archive size={16} className="text-gray-400 mr-1" />
+          <span>{formattedSize}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Code size={16} className="text-gray-400 mr-1" />
+          <span className="font-mono">{shortSha}</span>
+        </div>
       </div>
 
       {/* Links Section */}
-      {links.length > 0 && (
-        <div className="space-y-1">
-          <h3 className="text-sm font-medium text-gray-700">Links</h3>
-          <div className="space-y-1">
-            {links.map((link) => (
-              <p key={link.label} className="text-xs text-blue-600 break-all">
-                <span className="font-medium">{link.label}:</span> {link.url}
-              </p>
-            ))}
+      {(value.url || value.html_url || value.download_url) && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Links</h3>
+          <div className="space-y-1 text-sm text-gray-600">
+            <div className="flex items-center">
+              <LucideReact.Link size={16} className="text-blue-500 mr-1" />
+              <span className="truncate">{value.url}</span>
+            </div>
+            {value.html_url && (
+              <div className="flex items-center">
+                <LucideReact.Link size={16} className="text-blue-500 mr-1" />
+                <span className="truncate">{value.html_url}</span>
+              </div>
+            )}
+            {value.download_url && (
+              <div className="flex items-center">
+                <LucideReact.Link size={16} className="text-blue-500 mr-1" />
+                <span className="truncate">{value.download_url}</span>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* Content Preview */}
-      {previewText && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Preview</h3>
-          <pre className="mt-1 p-2 bg-gray-100 rounded text-xs font-mono overflow-auto max-h-40">
-            {previewText}
+      {value.content && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Preview</h3>
+          <pre className="max-h-40 overflow-auto bg-gray-100 text-xs text-gray-800 p-2 rounded whitespace-pre-wrap">
+            {preview}
           </pre>
         </div>
       )}

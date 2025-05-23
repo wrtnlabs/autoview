@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * License Content
      *
      * @title License Content
     */
-    export type license_content = {
+    export interface license_content {
         name: string;
         path: string;
         sha: string;
@@ -24,7 +25,7 @@ export namespace AutoViewInputSubTypes {
             self: string & tags.Format<"uri">;
         };
         license: AutoViewInputSubTypes.nullable_license_simple;
-    };
+    }
     /**
      * License Simple
      *
@@ -43,95 +44,91 @@ export type AutoViewInput = AutoViewInputSubTypes.license_content;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatSize = (size: number): string => {
-    if (size >= 1024) return `${(size / 1024).toFixed(2)} KB`;
-    return `${size} B`;
-  };
+  const formattedSize =
+    value.size < 1024
+      ? `${value.size} B`
+      : `${(value.size / 1024).toFixed(2)} KB`;
+  const licenseInfo = value.license
+    ? `${value.license.name}${value.license.spdx_id ? ` (${value.license.spdx_id})` : ''}`
+    : 'No license metadata';
+  const maxPreview = 200;
+  const contentPreview =
+    value.content.length > maxPreview
+      ? `${value.content.slice(0, maxPreview)}...`
+      : value.content;
 
-  // Decode base64 content safely and create a truncated snippet
-  let decodedContent = "";
-  try {
-    decodedContent = typeof atob === "function" ? atob(value.content) : "";
-  } catch {
-    decodedContent = "";
-  }
-  const contentSnippet = decodedContent.length > 0
-    ? decodedContent.slice(0, 200) + (decodedContent.length > 200 ? "…" : "")
-    : "(No preview available)";
-
-  const license = value.license;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.name}
-        </h2>
-        <span className="text-xs font-medium uppercase bg-gray-200 text-gray-600 px-2 py-1 rounded">
-          {value.type}
+    <div className="space-y-4 p-4 bg-white rounded-lg shadow-md max-w-full">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LucideReact.FileText size={20} className="text-indigo-500" aria-hidden="true" />
+          <span className="text-lg font-semibold text-gray-800">{value.name}</span>
+        </div>
+        <span className="text-sm text-gray-500">{formattedSize}</span>
+      </div>
+
+      <div className="flex items-center gap-2 text-gray-600">
+        <LucideReact.Folder size={16} className="text-gray-400" aria-hidden="true" />
+        <span className="truncate">{value.path}</span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Tag size={16} className="text-gray-400" aria-hidden="true" />
+          <span>Type: {value.type}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Code size={16} className="text-gray-400" aria-hidden="true" />
+          <span>Encoding: {value.encoding}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2 text-sm">
+        <LucideReact.BadgeCheck
+          size={16}
+          className={value.license ? 'text-green-500' : 'text-gray-400'}
+          aria-hidden="true"
+        />
+        <span className="text-gray-700">
+          License:{' '}
+          <span className={value.license ? 'text-gray-800' : 'text-gray-500'}>
+            {licenseInfo}
+          </span>
         </span>
       </div>
 
-      {/* Metadata */}
-      <div className="space-y-1 text-sm text-gray-600 mb-3">
-        <p className="truncate">
-          <span className="font-medium">Path:</span> {value.path}
-        </p>
-        <p>
-          <span className="font-medium">SHA:</span>{" "}
-          <span className="font-mono">{value.sha}</span>
-        </p>
-        <p>
-          <span className="font-medium">Size:</span> {formatSize(value.size)}
-        </p>
-        <p className="truncate">
-          <span className="font-medium">URL:</span> {value.url}
-        </p>
-        {value.html_url && (
-          <p className="truncate">
-            <span className="font-medium">HTML URL:</span> {value.html_url}
-          </p>
-        )}
-      </div>
-
-      {/* Content Snippet */}
-      <div className="bg-gray-50 p-3 rounded-md mb-3">
-        <h3 className="text-sm font-medium text-gray-700 mb-1">Content Preview</h3>
-        <pre className="text-xs font-mono text-gray-700 overflow-hidden line-clamp-3">
-          {contentSnippet}
+      <div>
+        <h4 className="text-sm font-medium text-gray-700 mb-1">Content Preview:</h4>
+        <pre className="bg-gray-100 p-2 rounded text-sm font-mono text-gray-800 overflow-hidden line-clamp-4">
+          {contentPreview}
         </pre>
       </div>
 
-      {/* License Information */}
-      <div className="border-t pt-3">
-        <h3 className="text-sm font-medium text-gray-700 mb-1">License</h3>
-        {license ? (
-          <div className="space-y-1 text-sm text-gray-600">
-            <p>
-              <span className="font-medium">Name:</span> {license.name}
-            </p>
-            <p>
-              <span className="font-medium">SPDX ID:</span>{" "}
-              {license.spdx_id ?? "N/A"}
-            </p>
-            <p className="truncate">
-              <span className="font-medium">URL:</span>{" "}
-              {license.url ?? "N/A"}
-            </p>
-            {license.html_url && (
-              <p className="truncate">
-                <span className="font-medium">HTML URL:</span>{" "}
-                {license.html_url}
-              </p>
-            )}
+      <div className="space-y-1 text-sm">
+        {value.url && (
+          <div className="flex items-center gap-1 text-gray-600">
+            <LucideReact.Link size={16} className="text-gray-400" aria-hidden="true" />
+            <span className="truncate">{value.url}</span>
           </div>
-        ) : (
-          <p className="text-sm text-gray-600">No license information.</p>
+        )}
+        {value.html_url && (
+          <div className="flex items-center gap-1 text-gray-600">
+            <LucideReact.Link2 size={16} className="text-gray-400" aria-hidden="true" />
+            <span className="truncate">{value.html_url}</span>
+          </div>
+        )}
+        {value.git_url && (
+          <div className="flex items-center gap-1 text-gray-600">
+            <LucideReact.GitBranch size={16} className="text-gray-400" aria-hidden="true" />
+            <span className="truncate">{value.git_url}</span>
+          </div>
+        )}
+        {value.download_url && (
+          <div className="flex items-center gap-1 text-gray-600">
+            <LucideReact.Download size={16} className="text-gray-400" aria-hidden="true" />
+            <span className="truncate">{value.download_url}</span>
+          </div>
         )}
       </div>
     </div>

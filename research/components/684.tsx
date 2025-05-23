@@ -1,20 +1,21 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Code security configuration associated with a repository and attachment status
     */
-    export type code_security_configuration_for_repository = {
+    export interface code_security_configuration_for_repository {
         /**
          * The attachment status of the code security configuration on the repository.
         */
         status?: "attached" | "attaching" | "detached" | "removed" | "enforced" | "failed" | "updating" | "removed_by_enterprise";
         configuration?: AutoViewInputSubTypes.code_security_configuration;
-    };
+    }
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -145,7 +146,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration_for_repository;
 
@@ -154,135 +155,131 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration_fo
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { status, configuration } = value;
-  const formatDate = (iso?: string): string =>
-    iso
-      ? new Date(iso).toLocaleDateString(undefined, {
+  const status = value.status ?? "unknown";
+  const statusMap = {
+    attached: { icon: LucideReact.CheckCircle, color: "text-green-500", label: "Attached" },
+    attaching: { icon: LucideReact.Loader, color: "text-blue-500 animate-spin", label: "Attaching" },
+    detached: { icon: LucideReact.XCircle, color: "text-red-500", label: "Detached" },
+    removed: { icon: LucideReact.Trash2, color: "text-red-500", label: "Removed" },
+    enforced: { icon: LucideReact.ShieldCheck, color: "text-green-500", label: "Enforced" },
+    failed: { icon: LucideReact.AlertTriangle, color: "text-red-500", label: "Failed" },
+    updating: { icon: LucideReact.RefreshCw, color: "text-blue-500", label: "Updating" },
+    removed_by_enterprise: { icon: LucideReact.Users, color: "text-gray-500", label: "Removed by Enterprise" },
+    unknown: { icon: LucideReact.AlertCircle, color: "text-gray-400", label: status },
+  } as const;
+  const { icon: StatusIcon, color: statusColor, label: statusLabel } =
+    statusMap[status as keyof typeof statusMap] ?? statusMap.unknown;
+
+  const config = value.configuration;
+  const formatDate = (d?: string): string | null =>
+    d
+      ? new Date(d).toLocaleString(undefined, {
           year: "numeric",
           month: "short",
           day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
         })
-      : "";
-  const formatStatus = (s: string): string =>
-    s
-      .split("_")
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
+      : null;
 
-  // Badge color maps for attachment status and feature statuses
-  const statusColorMap: Record<string, string> = {
-    attached: "bg-green-100 text-green-800",
-    enforced: "bg-green-100 text-green-800",
-    attaching: "bg-yellow-100 text-yellow-800",
-    updating: "bg-yellow-100 text-yellow-800",
-    failed: "bg-red-100 text-red-800",
-    detached: "bg-gray-100 text-gray-800",
-    removed: "bg-gray-100 text-gray-800",
-    removed_by_enterprise: "bg-gray-100 text-gray-800",
-  };
-  const featureColorMap: Record<string, string> = {
-    enabled: "bg-green-100 text-green-800",
-    disabled: "bg-red-100 text-red-800",
-    not_set: "bg-gray-100 text-gray-800",
-    enforced: "bg-green-100 text-green-800",
-    unenforced: "bg-gray-100 text-gray-800",
+  // Mapping feature flags to a consistent on/off/neutral indicator
+  type FeatureValue = "enabled" | "disabled" | "not_set" | "enforced" | "unenforced" | undefined | null;
+  const mapFeature = (val: FeatureValue) => {
+    if (val === "enabled" || val === "enforced") {
+      return { icon: LucideReact.CheckCircle, color: "text-green-500" };
+    }
+    if (val === "disabled" || val === "unenforced") {
+      return { icon: LucideReact.XCircle, color: "text-red-500" };
+    }
+    return { icon: LucideReact.MinusCircle, color: "text-gray-400" };
   };
 
-  // If there's no configuration, show a placeholder message
-  if (!configuration) {
-    const label = formatStatus(status ?? "unknown");
-    const color = statusColorMap[status ?? ""] ?? "bg-gray-100 text-gray-800";
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!config) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md w-full">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-800">
-            No Configuration
-          </h2>
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${color}`}>
-            {label}
-          </span>
-        </div>
-        <p className="mt-2 text-sm text-gray-600">
-          No code security configuration details are available.
-        </p>
+      <div className="flex items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle size={24} />
+        <span className="ml-2">No configuration data available</span>
       </div>
     );
   }
 
-  // Prepare feature list
-  const rawFeatures: { key: keyof typeof configuration; label: string }[] = [
-    { key: "advanced_security", label: "Advanced Security" },
-    { key: "dependency_graph", label: "Dependency Graph" },
-    { key: "dependency_graph_autosubmit_action", label: "Autosubmit" },
-    { key: "dependabot_alerts", label: "Dependabot Alerts" },
-    { key: "dependabot_security_updates", label: "Dependabot Security Updates" },
-    { key: "code_scanning_default_setup", label: "Code Scanning Setup" },
-    { key: "code_scanning_delegated_alert_dismissal", label: "Delegated Alert Dismissal" },
-    { key: "secret_scanning", label: "Secret Scanning" },
-    { key: "secret_scanning_push_protection", label: "Push Protection" },
-    { key: "secret_scanning_delegated_bypass", label: "Delegated Bypass" },
-    { key: "private_vulnerability_reporting", label: "Private Reporting" },
-    { key: "enforcement", label: "Enforcement" },
+  const features: { label: string; value: FeatureValue }[] = [
+    { label: "Advanced Security", value: config.advanced_security },
+    { label: "Dependency Graph", value: config.dependency_graph },
+    { label: "Dep. Autosubmit", value: config.dependency_graph_autosubmit_action },
+    { label: "Dependabot Alerts", value: config.dependabot_alerts },
+    { label: "Security Updates", value: config.dependabot_security_updates },
+    { label: "Code Scanning Setup", value: config.code_scanning_default_setup },
+    { label: "Delegated Alert Dismissal", value: config.code_scanning_delegated_alert_dismissal },
+    { label: "Secret Scanning", value: config.secret_scanning },
+    { label: "Push Protection", value: config.secret_scanning_push_protection },
+    { label: "Delegated Bypass", value: config.secret_scanning_delegated_bypass },
+    { label: "Validity Checks", value: config.secret_scanning_validity_checks },
+    { label: "Generic Secrets", value: config.secret_scanning_generic_secrets },
+    { label: "Deleg. Alert Dismissal", value: config.secret_scanning_delegated_alert_dismissal },
+    { label: "Private Vuln. Reporting", value: config.private_vulnerability_reporting },
+    { label: "Enforcement", value: config.enforcement },
   ];
 
-  const features = rawFeatures
-    .map(({ key, label }) => {
-      const val = configuration[key] as string | undefined;
-      if (val == null) return null;
-      const plain = formatStatus(val);
-      const color = featureColorMap[val] ?? "bg-gray-100 text-gray-800";
-      return { label, plain, color };
-    })
-    .filter(Boolean) as { label: string; plain: string; color: string }[];
+  const created = formatDate(config.created_at);
+  const updated = formatDate(config.updated_at);
 
-  // Prepare status badge for repository-level attachment status
-  const statusLabel = formatStatus(status ?? "unknown");
-  const statusColor = statusColorMap[status ?? ""] ?? "bg-gray-100 text-gray-800";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-lg">
-      {/* Header: Name and Attachment Status */}
-      <div className="flex items-center justify-between">
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold text-gray-800">
-          {configuration.name ?? "Unnamed Configuration"}
+          {config.name ?? "Code Security Configuration"}
         </h2>
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusColor}`}>
-          {statusLabel}
-        </span>
+        <div className="flex items-center gap-1">
+          <StatusIcon size={20} className={statusColor} />
+          <span className="text-sm font-medium capitalize text-gray-600">{statusLabel}</span>
+        </div>
       </div>
-
-      {/* Description */}
-      {configuration.description && (
-        <p className="mt-2 text-sm text-gray-600 line-clamp-3">
-          {configuration.description}
-        </p>
+      {config.description && (
+        <p className="text-sm text-gray-600 mb-4 line-clamp-3">{config.description}</p>
       )}
-
-      {/* Feature Grid */}
-      {features.length > 0 && (
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {features.map((f) => (
-            <div key={f.label} className="flex items-center justify-between">
-              <span className="text-sm text-gray-700">{f.label}</span>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${f.color}`}>
-                {f.plain}
-              </span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* Target Type */}
+        {config.target_type && (
+          <div className="flex items-center gap-2 text-sm text-gray-700">
+            <LucideReact.Tag size={16} className="text-blue-500" />
+            <span className="capitalize">{config.target_type}</span>
+          </div>
+        )}
+        {/* Feature Flags */}
+        {features.map(({ label, value: val }) => {
+          const { icon: Icon, color } = mapFeature(val);
+          const text =
+            val === "not_set" || val === undefined || val === null
+              ? "Not configured"
+              : String(val).replace(/_/g, " ");
+          return (
+            <div key={label} className="flex items-center gap-2 text-sm text-gray-700">
+              <Icon size={16} className={color} />
+              <span className="whitespace-nowrap">{label}:</span>
+              <span className="font-medium">{text}</span>
             </div>
-          ))}
+          );
+        })}
+      </div>
+      {(created || updated) && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+          {created && (
+            <div className="flex items-center gap-2">
+              <LucideReact.Calendar size={16} />
+              <span>Created: {created}</span>
+            </div>
+          )}
+          {updated && (
+            <div className="flex items-center gap-2">
+              <LucideReact.Calendar size={16} />
+              <span>Updated: {updated}</span>
+            </div>
+          )}
         </div>
       )}
-
-      {/* Dates */}
-      <div className="mt-4 flex flex-col space-y-1 text-xs text-gray-500">
-        {configuration.created_at && (
-          <div>Created: {formatDate(configuration.created_at)}</div>
-        )}
-        {configuration.updated_at && (
-          <div>Updated: {formatDate(configuration.updated_at)}</div>
-        )}
-      </div>
     </div>
   );
 }

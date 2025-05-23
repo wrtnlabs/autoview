@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,19 +139,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -187,90 +188,83 @@ export type AutoViewInput = AutoViewInputSubTypes.minimal_repository[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Utility: format large numbers (e.g., 1500 → "1.5k")
-  const formatNumber = (n?: number): string => {
-    if (n === undefined || n === null) return "0";
-    return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : `${n}`;
-  };
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const repos = value;
+  const formatDate = (dateStr?: string | null): string =>
+    dateStr
+      ? new Date(dateStr).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : '';
 
-  // Utility: format ISO date to "MMM D, YYYY"
-  const formatDate = (iso?: string | null): string => {
-    if (!iso) return "";
-    const d = new Date(iso);
-    return d.toLocaleDateString("default", { year: "numeric", month: "short", day: "numeric" });
-  };
-
-  // If no data, show a placeholder
-  if (!Array.isArray(value) || value.length === 0) {
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (repos.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No repositories available.
+      <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-lg">No repositories available</span>
       </div>
     );
   }
 
-  // Render a responsive grid of repository cards
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {value.map((repo) => {
-        const latestDate = repo.updated_at ?? repo.pushed_at ?? repo.created_at ?? "";
-        const updatedLabel = latestDate ? `Updated ${formatDate(latestDate)}` : "";
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {repos.map((repo) => {
+        const lastUpdated = formatDate(
+          repo.updated_at ?? repo.pushed_at ?? repo.created_at ?? null,
+        );
 
         return (
           <div
             key={repo.id}
-            className="flex flex-col p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            className="flex flex-col bg-white rounded-lg shadow hover:shadow-md transition p-5"
           >
-            {/* Owner */}
-            <div className="flex items-center space-x-3">
-              <img
-                src={repo.owner.avatar_url}
-                alt={`${repo.owner.login} avatar`}
-                className="w-8 h-8 rounded-full flex-shrink-0"
-              />
-              <span className="text-sm font-medium text-gray-700 truncate">
-                {repo.owner.login}
-              </span>
+            {/* Header: Name & visibility */}
+            <div className="flex items-center justify-between mb-3">
+              <h2
+                className="text-lg font-semibold text-gray-800 truncate"
+                title={repo.full_name}
+              >
+                {repo.full_name}
+              </h2>
+              {repo.private ? (
+                <LucideReact.Lock className="text-gray-500" size={16} />
+              ) : (
+                <LucideReact.Unlock className="text-gray-500" size={16} />
+              )}
             </div>
 
-            {/* Repo Name */}
-            <h3
-              className="mt-2 text-lg font-semibold text-gray-900 truncate"
-              title={repo.full_name}
-            >
-              {repo.name}
-            </h3>
+            {/* Owner info */}
+            <div className="flex items-center mb-3">
+              <img
+                src={repo.owner.avatar_url}
+                alt={repo.owner.login}
+                className="w-8 h-8 rounded-full object-cover mr-2"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    repo.owner.login,
+                  )}&background=random`;
+                }}
+              />
+              <span className="text-sm text-gray-600">{repo.owner.login}</span>
+            </div>
 
             {/* Description */}
             {repo.description && (
-              <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+              <p className="text-gray-700 text-sm line-clamp-2 mb-4">
                 {repo.description}
               </p>
             )}
 
-            {/* Stats */}
-            <div className="mt-3 flex items-center space-x-4 text-gray-500 text-sm">
-              <div className="flex items-center space-x-1">
-                <span className="text-sm">★</span>
-                <span>{formatNumber(repo.stargazers_count)}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <span className="text-sm">🍴</span>
-                <span>{formatNumber(repo.forks_count)}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <span className="text-sm">❗</span>
-                <span>{formatNumber(repo.open_issues_count)}</span>
-              </div>
-            </div>
-
             {/* Topics */}
             {repo.topics && repo.topics.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1">
-                {repo.topics.slice(0, 5).map((topic) => (
+              <div className="flex flex-wrap gap-1 mb-4">
+                {repo.topics.map((topic) => (
                   <span
                     key={topic}
-                    className="px-2 py-0.5 text-xs bg-gray-100 text-gray-700 rounded"
+                    className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-md"
                   >
                     {topic}
                   </span>
@@ -278,15 +272,73 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
               </div>
             )}
 
-            {/* Updated At */}
-            {updatedLabel && (
-              <div className="mt-auto pt-3 text-xs text-gray-400">
-                {updatedLabel}
+            {/* Stats & language */}
+            <div className="flex flex-wrap items-center text-gray-600 text-sm gap-4 mb-4">
+              <div className="flex items-center">
+                <LucideReact.Star
+                  size={14}
+                  className="text-yellow-500 mr-1"
+                  strokeWidth={1.5}
+                />
+                {repo.stargazers_count ?? 0}
               </div>
-            )}
+              <div className="flex items-center">
+                <LucideReact.GitBranch
+                  size={14}
+                  className="text-gray-500 mr-1"
+                  strokeWidth={1.5}
+                />
+                {repo.forks_count ?? repo.forks ?? 0}
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Eye
+                  size={14}
+                  className="text-gray-500 mr-1"
+                  strokeWidth={1.5}
+                />
+                {repo.watchers_count ?? repo.watchers ?? 0}
+              </div>
+              {typeof repo.open_issues_count === 'number' && (
+                <div className="flex items-center">
+                  <LucideReact.AlertCircle
+                    size={14}
+                    className="text-red-500 mr-1"
+                    strokeWidth={1.5}
+                  />
+                  {repo.open_issues_count}
+                </div>
+              )}
+              {repo.language && (
+                <div className="flex items-center">
+                  <LucideReact.Tag
+                    size={14}
+                    className="text-blue-500 mr-1"
+                    strokeWidth={1.5}
+                  />
+                  {repo.language}
+                </div>
+              )}
+            </div>
+
+            {/* Footer: last updated & default branch */}
+            <div className="mt-auto flex items-center justify-between text-gray-500 text-xs">
+              <div className="flex items-center">
+                <LucideReact.Clock size={12} className="mr-1" strokeWidth={1.5} />
+                {lastUpdated}
+              </div>
+              <div className="flex items-center">
+                <LucideReact.GitBranch
+                  size={12}
+                  className="mr-1"
+                  strokeWidth={1.5}
+                />
+                {repo.default_branch}
+              </div>
+            </div>
           </div>
         );
       })}
     </div>
   );
+  // 3. Return the React element.
 }

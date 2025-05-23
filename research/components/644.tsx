@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Branch Restriction Policy
      *
      * @title Branch Restriction Policy
     */
-    export type branch_restriction_policy = {
+    export interface branch_restriction_policy {
         url: string & tags.Format<"uri">;
         users_url: string & tags.Format<"uri">;
         teams_url: string & tags.Format<"uri">;
@@ -92,7 +93,7 @@ export namespace AutoViewInputSubTypes {
             };
             events?: string[];
         }[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.branch_restriction_policy;
 
@@ -101,153 +102,113 @@ export type AutoViewInput = AutoViewInputSubTypes.branch_restriction_policy;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const userCount = value.users.length;
-  const teamCount = value.teams.length;
-  const appCount = value.apps.length;
+  const userCount = value.users?.length ?? 0;
+  const teamCount = value.teams?.length ?? 0;
+  const appCount = value.apps?.length ?? 0;
 
-  // Limit avatars and badges for brevity on small screens
-  const displayedUsers = value.users.filter(u => u.avatar_url && u.login).slice(0, 5);
-  const displayedTeams = value.teams.filter(t => t.name).slice(0, 5);
-  const displayedApps = value.apps.filter(a => a.name).slice(0, 5);
+  const userPreview = (value.users ?? []).slice(0, 3);
+  const teamPreview = (value.teams ?? []).slice(0, 3);
+  const appPreview = (value.apps ?? []).slice(0, 3);
 
-  // Date formatter
-  const formatDate = (iso?: string): string =>
-    iso
-      ? new Date(iso).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "";
+  const userAvatarPlaceholder = (login: string) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(login)}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md space-y-6">
-      {/* Header */}
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Branch Restriction Policy
-        </h2>
-        <div className="text-xs text-gray-500 truncate" title={value.url}>
-          Policy URL: {value.url}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+        <LucideReact.Lock size={20} className="mr-2 text-gray-500" />
+        Branch Restriction Policy
+      </h2>
+
+      <div className="flex justify-between text-sm text-gray-600 mb-4">
+        <div className="flex items-center">
+          <LucideReact.Users size={16} className="mr-1 text-gray-400" />
+          <span>{userCount} {userCount === 1 ? 'User' : 'Users'}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.UserCheck size={16} className="mr-1 text-gray-400" />
+          <span>{teamCount} {teamCount === 1 ? 'Team' : 'Teams'}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Box size={16} className="mr-1 text-gray-400" />
+          <span>{appCount} {appCount === 1 ? 'App' : 'Apps'}</span>
         </div>
       </div>
 
-      {/* Counts Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-          <span className="text-2xl">👤</span>
-          <div className="ml-3">
-            <div className="text-xl font-semibold text-gray-800">
-              {userCount}
-            </div>
-            <div className="text-sm text-gray-600">Users</div>
-          </div>
-        </div>
-        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-          <span className="text-2xl">👥</span>
-          <div className="ml-3">
-            <div className="text-xl font-semibold text-gray-800">
-              {teamCount}
-            </div>
-            <div className="text-sm text-gray-600">Teams</div>
-          </div>
-        </div>
-        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
-          <span className="text-2xl">📦</span>
-          <div className="ml-3">
-            <div className="text-xl font-semibold text-gray-800">
-              {appCount}
-            </div>
-            <div className="text-sm text-gray-600">Apps</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Detailed Lists */}
-      <div className="space-y-4">
-        {/* Users Avatars */}
-        {userCount > 0 && (
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
-              User Avatars
-            </h3>
-            <div className="flex -space-x-2">
-              {displayedUsers.map((user, i) => (
-                <div
-                  key={`user-${i}`}
-                  className="w-8 h-8 rounded-full border-2 border-white overflow-hidden"
-                  title={user.login}
-                >
+      {userCount > 0 && (
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Allowed Users</h3>
+          <ul className="flex items-center -space-x-2">
+            {userPreview.map((user, idx) => {
+              const login = user.login ?? 'User';
+              const src = user.avatar_url ?? userAvatarPlaceholder(login);
+              return (
+                <li key={idx}>
                   <img
-                    src={user.avatar_url!}
-                    alt={user.login}
-                    className="w-full h-full object-cover"
+                    src={src}
+                    alt={login}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = userAvatarPlaceholder(login);
+                    }}
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover"
                   />
-                </div>
-              ))}
-              {userCount > displayedUsers.length && (
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-600 border-2 border-white">
-                  +{userCount - displayedUsers.length}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                </li>
+              );
+            })}
+            {userCount > userPreview.length && (
+              <li className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 border-2 border-white">
+                +{userCount - userPreview.length}
+              </li>
+            )}
+          </ul>
+        </div>
+      )}
 
-        {/* Teams List */}
-        {teamCount > 0 && (
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Teams</h3>
-            <div className="flex flex-wrap gap-2">
-              {displayedTeams.map((team, i) => (
-                <span
-                  key={`team-${i}`}
-                  className="bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs truncate"
-                  title={team.name}
-                >
-                  {team.name}
-                </span>
-              ))}
-              {teamCount > displayedTeams.length && (
-                <span className="text-xs text-gray-500">
-                  +{teamCount - displayedTeams.length} more
-                </span>
-              )}
-            </div>
-          </div>
-        )}
+      {teamCount > 0 && (
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Allowed Teams</h3>
+          <ul className="space-y-1">
+            {teamPreview.map((team, idx) => (
+              <li key={idx} className="flex items-center text-sm text-gray-600">
+                <LucideReact.Users size={16} className="mr-2 text-gray-400" />
+                <span className="font-medium text-gray-800">{team.name ?? team.slug ?? 'Team'}</span>
+                {team.slug && (
+                  <span className="ml-1 truncate text-gray-500 text-xs">({team.slug})</span>
+                )}
+              </li>
+            ))}
+            {teamCount > teamPreview.length && (
+              <li className="text-xs text-gray-500">+{teamCount - teamPreview.length} more</li>
+            )}
+          </ul>
+        </div>
+      )}
 
-        {/* Apps List */}
-        {appCount > 0 && (
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Apps</h3>
-            <div className="flex flex-wrap gap-2">
-              {displayedApps.map((app, i) => (
-                <div
-                  key={`app-${i}`}
-                  className="bg-blue-50 border border-blue-100 p-2 rounded-lg text-xs max-w-xs"
-                >
-                  <div className="font-medium text-blue-800 truncate" title={app.name}>
-                    {app.name}
-                  </div>
-                  {app.created_at && (
-                    <div className="text-gray-500">
-                      Created: {formatDate(app.created_at)}
-                    </div>
+      {appCount > 0 && (
+        <div>
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Allowed Apps</h3>
+          <ul className="space-y-1">
+            {appPreview.map((app, idx) => {
+              const created = app.created_at
+                ? new Date(app.created_at).toLocaleDateString()
+                : null;
+              return (
+                <li key={idx} className="flex items-center text-sm text-gray-600">
+                  <LucideReact.Box size={16} className="mr-2 text-gray-400" />
+                  <span className="font-medium text-gray-800 truncate">{app.name ?? app.slug ?? 'App'}</span>
+                  {created && (
+                    <span className="ml-auto text-xs text-gray-500">{created}</span>
                   )}
-                </div>
-              ))}
-              {appCount > displayedApps.length && (
-                <div className="text-xs text-gray-500 flex items-center">
-                  +{appCount - displayedApps.length} more
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
+                </li>
+              );
+            })}
+            {appCount > appPreview.length && (
+              <li className="text-xs text-gray-500">+{appCount - appPreview.length} more</li>
+            )}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

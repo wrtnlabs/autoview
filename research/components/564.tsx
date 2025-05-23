@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Projects are a way to organize columns and cards of work.
      *
      * @title Project
     */
-    export type project = {
+    export interface project {
         owner_url: string & tags.Format<"uri">;
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
@@ -37,7 +38,7 @@ export namespace AutoViewInputSubTypes {
          * Whether or not this project can be seen by everyone. Only present if owner is an organization.
         */
         "private"?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -75,92 +76,95 @@ export type AutoViewInput = AutoViewInputSubTypes.project;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const stateLabel =
-    value.state === "open" ? "Open" :
-    value.state === "closed" ? "Closed" :
-    value.state.charAt(0).toUpperCase() + value.state.slice(1);
-
-  const privacyLabel = value.private ? "Private" : "Public";
-
-  const permissionLabel = value.organization_permission
-    ? value.organization_permission.charAt(0).toUpperCase() + value.organization_permission.slice(1)
-    : null;
-
   const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
-
   const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
-
-  const description = value.body ?? "No description provided.";
+  const description = value.body ?? '';
+  const truncatedDescription =
+    description.length > 200 ? description.slice(0, 200) + '…' : description;
+  const creatorName = value.creator
+    ? value.creator.name ?? value.creator.login
+    : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-      {/* Header: Name and badges */}
-      <div className="flex items-start justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          {value.name}
-        </h2>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <span
-            className={
-              "px-2 py-0.5 text-xs font-medium rounded-full " +
-              (value.state === "open"
-                ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800")
-            }
-          >
-            {stateLabel}
+          {value["private"] && (
+            <LucideReact.Lock size={20} className="text-gray-500" />
+          )}
+          <h2 className="text-lg font-semibold text-gray-900 truncate">
+            {value.name}
+          </h2>
+          <span className="text-sm text-gray-500">#{value.number}</span>
+        </div>
+        {value.organization_permission && (
+          <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
+            {value.organization_permission.charAt(0).toUpperCase() +
+              value.organization_permission.slice(1)}
           </span>
-          {permissionLabel && (
-            <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-              {permissionLabel}
-            </span>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Subheader: Number and Privacy */}
-      <div className="mt-1 text-sm text-gray-500">
-        #{value.number} · {privacyLabel}
-      </div>
+      {truncatedDescription && (
+        <p className="text-gray-700 text-sm line-clamp-2">{truncatedDescription}</p>
+      )}
 
-      {/* Description */}
-      <p className="mt-3 text-gray-700 text-sm line-clamp-3">
-        {description}
-      </p>
-
-      {/* Footer: Creator and Dates */}
-      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
-        <div className="flex items-center">
-          {value.creator ? (
-            <>
-              <img
-                className="w-6 h-6 rounded-full"
-                src={value.creator.avatar_url}
-                alt={value.creator.login}
-              />
-              <span className="ml-2 text-sm text-gray-700">
-                {value.creator.name ?? value.creator.login}
-              </span>
-            </>
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center space-x-1">
+          {value.state === 'open' ? (
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500"
+              aria-label="Open"
+            />
           ) : (
-            <span className="text-sm text-gray-700">Unknown creator</span>
+            <LucideReact.XCircle
+              size={16}
+              className="text-red-500"
+              aria-label="Closed"
+            />
           )}
+          <span className="capitalize">{value.state}</span>
         </div>
-        <div className="text-xs text-gray-500 whitespace-nowrap">
-          Created {createdDate}
-          <span className="mx-1">·</span>
-          Updated {updatedDate}
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created {createdDate}</span>
+        </div>
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Updated {updatedDate}</span>
         </div>
       </div>
+
+      {value.creator && (
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-100">
+            <img
+              src={value.creator.avatar_url}
+              alt={creatorName ?? 'Creator avatar'}
+              className="w-full h-full object-cover"
+              onError={(e) =>
+                (e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  creatorName || ''
+                )}&background=ddd&color=444`)
+              }
+            />
+          </div>
+          <div className="flex items-center space-x-1 text-gray-700 text-sm">
+            <LucideReact.User size={16} className="text-gray-400" />
+            <span className="truncate">{creatorName}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type combined_billing_usage = {
+    export interface combined_billing_usage {
         /**
          * Numbers of days left in billing cycle.
         */
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
          * Estimated sum of free and paid storage space (GB) used in billing cycle.
         */
         estimated_storage_for_month: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.combined_billing_usage;
 
@@ -23,52 +24,64 @@ export type AutoViewInput = AutoViewInputSubTypes.combined_billing_usage;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const daysLeft = value.days_left_in_billing_cycle;
-  const paidStorage = value.estimated_paid_storage_for_month;
-  const totalStorage = value.estimated_storage_for_month;
-  const freeStorage = Math.max(totalStorage - paidStorage, 0);
-  const paidPercentage = totalStorage > 0 ? (paidStorage / totalStorage) * 100 : 0;
-  const freePercentage = totalStorage > 0 ? (freeStorage / totalStorage) * 100 : 0;
+  const {
+    days_left_in_billing_cycle,
+    estimated_paid_storage_for_month,
+    estimated_storage_for_month,
+  } = value;
+
+  // Calculate percent of storage used, safeguarding against division by zero
+  const percentUsed =
+    estimated_storage_for_month > 0
+      ? (estimated_paid_storage_for_month / estimated_storage_for_month) * 100
+      : 0;
+
+  // Format percentage to one decimal place
+  const percentLabel = `${percentUsed.toFixed(1)}% used`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // Utilize semantic HTML elements where appropriate.
   return (
-    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Billing Usage</h2>
-        <span className="text-sm font-medium text-indigo-600">
-          {daysLeft} days left
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-lg font-semibold text-gray-800">
+        Billing Cycle Usage
+      </h2>
+
+      <div className="mt-3 flex items-center text-gray-600 text-sm">
+        <LucideReact.Calendar
+          className="mr-1 flex-shrink-0"
+          size={16}
+          aria-hidden="true"
+        />
+        <span>
+          {days_left_in_billing_cycle}{" "}
+          {days_left_in_billing_cycle === 1 ? "day" : "days"} left
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        <div>
-          <p className="text-sm text-gray-500">Total</p>
-          <p className="text-xl font-bold text-gray-800">{totalStorage} GB</p>
+
+      <div className="mt-4">
+        <div className="flex items-center text-gray-600 text-sm">
+          <LucideReact.Database
+            className="mr-1 flex-shrink-0"
+            size={16}
+            aria-hidden="true"
+          />
+          <span>
+            {estimated_paid_storage_for_month} / {estimated_storage_for_month}{" "}
+            GB
+          </span>
         </div>
-        <div>
-          <p className="text-sm text-gray-500">Paid</p>
-          <p className="text-xl font-bold text-gray-800">{paidStorage} GB</p>
+
+        <div className="mt-2 w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div
+            className="bg-indigo-500 h-2"
+            style={{ width: `${percentUsed}%` }}
+          />
         </div>
-        <div>
-          <p className="text-sm text-gray-500">Free</p>
-          <p className="text-xl font-bold text-gray-800">{freeStorage} GB</p>
+
+        <div className="mt-1 text-right text-xs text-gray-500">
+          {percentLabel}
         </div>
-      </div>
-      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden flex mb-2">
-        <div
-          className="h-full bg-green-500"
-          style={{ width: `${freePercentage}%` }}
-        />
-        <div
-          className="h-full bg-indigo-500"
-          style={{ width: `${paidPercentage}%` }}
-        />
-      </div>
-      <div className="flex justify-between text-xs text-gray-600">
-        <span>{freePercentage.toFixed(0)}% free</span>
-        <span>{paidPercentage.toFixed(0)}% paid</span>
       </div>
     </div>
   );
-  // 3. Return the React element.
 }

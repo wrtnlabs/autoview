@@ -1,11 +1,12 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IShoppingChannelCategory {
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -48,7 +49,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[];
@@ -57,58 +58,56 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingChannelCategory.IHier
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
+  // Type alias for clarity
+  type Hierarchical = AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical;
+
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  //    Count nested children recursively to get a total category count.
+  const countChildren = (node: Hierarchical): number =>
+    node.children.reduce((sum, child) => sum + 1 + countChildren(child), 0);
+  const totalCount = value.reduce((sum, node) => sum + 1 + countChildren(node), 0);
+
+  //    Format ISO date strings into a concise, readable format.
   const formatDate = (iso: string): string =>
     new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
 
-  // Recursive renderer for hierarchical categories
-  const renderCategories = (
-    items: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
-    level = 0
-  ): React.ReactNode => (
-    <ul className="space-y-2">
-      {items.map((item) => {
-        const subCount = item.children?.length ?? 0;
-        return (
-          <li key={item.id}>
-            <div
-              style={{ paddingLeft: `${level * 1}rem` }}
-              className="flex flex-col md:flex-row md:justify-between md:items-center bg-white p-4 rounded-lg shadow-sm"
-            >
-              <div className="flex items-center flex-wrap">
-                <span className="text-gray-900 font-medium">{item.name}</span>
-                <span className="text-sm text-gray-500 ml-2">({item.code})</span>
-                {subCount > 0 && (
-                  <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded">
-                    {subCount} {subCount === 1 ? "subcategory" : "subcategories"}
-                  </span>
-                )}
-              </div>
-              <div className="mt-2 md:mt-0 text-sm text-gray-500">
-                Created {formatDate(item.created_at)}
-              </div>
-            </div>
-            {subCount > 0 && renderCategories(item.children, level + 1)}
-          </li>
-        );
-      })}
-    </ul>
+  //    Recursive renderer for a category node and its children.
+  const renderNode = (node: Hierarchical): JSX.Element => (
+    <li key={node.id}>
+      <div className="flex items-center">
+        <LucideReact.Tag size={16} className="text-blue-500 mr-2 flex-shrink-0" />
+        <span className="font-medium text-gray-900 truncate">{node.name}</span>
+        <span className="ml-2 text-gray-500 text-sm truncate">({node.code})</span>
+        <span className="ml-auto text-gray-400 text-xs">{formatDate(node.created_at)}</span>
+      </div>
+      {node.children.length > 0 && (
+        <ul className="mt-1 ml-6 border-l border-gray-200 pl-4 space-y-1">
+          {node.children.map(child => renderNode(child))}
+        </ul>
+      )}
+    </li>
   );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      {value && value.length > 0 ? (
-        renderCategories(value)
-      ) : (
-        <div className="text-center text-gray-500 py-10">
-          No categories available.
+    <div className="p-4 bg-white rounded-lg shadow w-full max-w-full overflow-auto">
+      <div className="flex items-center mb-4">
+        <LucideReact.Trees size={20} className="text-indigo-500 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800">
+          Shopping Categories ({totalCount})
+        </h2>
+      </div>
+      {value.length === 0 ? (
+        <div className="flex items-center text-gray-500">
+          <LucideReact.AlertCircle size={24} className="mr-2" />
+          <span>No categories available.</span>
         </div>
+      ) : (
+        <ul className="space-y-3">{value.map(node => renderNode(node))}</ul>
       )}
     </div>
   );

@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4MessageView = {
+                export interface LegacyV4MessageView {
                     message?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Message;
-                };
+                }
             }
         }
         export namespace v4 {
             export namespace message {
-                export type LegacyV4Message = {
+                export interface LegacyV4Message {
                     chatKey?: string;
                     id?: string;
                     mainKey?: string;
@@ -42,19 +43,19 @@ export namespace AutoViewInputSubTypes {
                     threadMsg?: boolean;
                     broadcastedMsg?: boolean;
                     rootMessageId?: string;
-                };
-                export type LegacyV4Block = {
+                }
+                export interface LegacyV4Block {
                     type: "bullets" | "code" | "text";
                     language?: string;
                     value?: string;
                     blocks?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block[];
-                };
-                export type LegacyV4Button = {
+                }
+                export interface LegacyV4Button {
                     title: string;
                     colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
                     url: string;
-                };
-                export type LegacyV4File = {
+                }
+                export interface LegacyV4File {
                     id: string;
                     type?: string;
                     name: string;
@@ -71,41 +72,41 @@ export namespace AutoViewInputSubTypes {
                     channelId?: string;
                     chatType?: string;
                     chatId?: string;
-                };
-                export type LegacyV4Log = {
+                }
+                export interface LegacyV4Log {
                     action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
                     values?: string[];
-                };
-                export type LegacyV4Reaction = {
+                }
+                export interface LegacyV4Reaction {
                     emojiName: string;
                     personKeys?: string[] & tags.UniqueItems;
                     empty?: boolean;
-                };
-                export type LegacyV4ProfileBotInput = {
+                }
+                export interface LegacyV4ProfileBotInput {
                     id?: string;
                     key?: string;
                     type?: string;
                     name?: string;
                     value?: AutoViewInputSubTypes.AttributeValue;
-                };
-                export type LegacyV4MessageMarketing = {
+                }
+                export interface LegacyV4MessageMarketing {
                     type?: string;
                     id?: string;
                     advertising?: boolean;
                     sendToOfflineXms?: boolean;
                     sendToOfflineEmail?: boolean;
                     exposureType?: "fullScreen";
-                };
-                export type LegacyV4MessageSupportBot = {
+                }
+                export interface LegacyV4MessageSupportBot {
                     id?: string;
                     revisionId?: string;
                     sectionId?: string;
                     stepIndex?: number & tags.Type<"int32">;
                     buttons?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
                     submitButtonIndex?: number & tags.Type<"int32">;
-                };
+                }
             }
-            export type LegacyV4WebPage = {
+            export interface LegacyV4WebPage {
                 id: string;
                 url: string;
                 title?: string;
@@ -120,14 +121,14 @@ export namespace AutoViewInputSubTypes {
                 previewKey?: string;
                 logo?: string;
                 name?: string;
-            };
-            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+            }
+            export interface LegacyV4SupportBotRouteSection_dollar_LegacyV4Button {
                 text: string;
                 nextSectionId: string;
-            };
+            }
         }
     }
-    export type AttributeValue = {
+    export interface AttributeValue {
         s?: string;
         n?: string;
         b?: {
@@ -158,7 +159,7 @@ export namespace AutoViewInputSubTypes {
         }[];
         "null"?: boolean;
         bool?: boolean;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4MessageView;
 
@@ -168,232 +169,239 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Message
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const msg = value.message;
+  // Format timestamps
+  const formattedCreatedAt = msg?.createdAt
+    ? new Date(msg.createdAt).toLocaleString()
+    : "";
+  const formattedUpdatedAt = msg?.updatedAt
+    ? new Date(msg.updatedAt).toLocaleString()
+    : "";
+  // File size formatter
+  const formatFileSize = (bytes: number): string => {
+    if (bytes >= 1_048_576) {
+      return `${(bytes / 1_048_576).toFixed(1)} MB`;
+    }
+    if (bytes >= 1024) {
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    }
+    return `${bytes} B`;
+  };
+  // Button color mapping
+  const colorClass = (variant?: string): string => {
+    switch (variant) {
+      case "cobalt":
+        return "bg-indigo-600";
+      case "green":
+        return "bg-green-500";
+      case "orange":
+        return "bg-orange-500";
+      case "red":
+        return "bg-red-500";
+      case "black":
+        return "bg-gray-800";
+      case "pink":
+        return "bg-pink-500";
+      case "purple":
+        return "bg-purple-500";
+      default:
+        return "bg-gray-500";
+    }
+  };
+  // State icon
+  const renderStateIcon = (state?: string) => {
+    switch (state) {
+      case "sent":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "sending":
+        return <LucideReact.Clock className="text-amber-500" size={16} />;
+      case "failed":
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      case "removed":
+        return <LucideReact.XCircle className="text-gray-400" size={16} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400" size={16} />;
+    }
+  };
+  // Recursive block renderer
+  const renderBlocks = (
+    blocks: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block[] | undefined
+  ): React.ReactNode => {
+    if (!blocks || !blocks.length) return null;
+    return blocks.map((blk, idx) => {
+      if (blk.type === "text") {
+        return (
+          <p key={idx} className="text-gray-800 mb-2">
+            {blk.value}
+          </p>
+        );
+      }
+      if (blk.type === "code") {
+        return (
+          <pre
+            key={idx}
+            className="bg-gray-100 p-2 rounded text-sm font-mono overflow-auto mb-2"
+          >
+            {blk.value}
+          </pre>
+        );
+      }
+      if (blk.type === "bullets") {
+        return (
+          <ul key={idx} className="list-disc pl-5 mb-2 space-y-1">
+            {blk.blocks?.map((sub, sidx) => (
+              <li key={sidx} className="text-gray-800">
+                {sub.value}
+                {sub.blocks && renderBlocks(sub.blocks)}
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      return null;
+    });
+  };
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (!msg) {
     return (
-      <div className="p-4 text-gray-500 italic text-center">
-        No message content.
+      <div className="flex items-center justify-center text-gray-400 text-sm p-4">
+        <LucideReact.AlertCircle size={24} />
+        <span className="ml-2">No message available</span>
       </div>
     );
   }
 
-  const {
-    plainText,
-    blocks,
-    files,
-    buttons,
-    webPage,
-    createdAt,
-    state,
-    reactions,
-  } = msg;
-
-  // Format timestamp
-  const formattedDate = createdAt
-    ? new Date(createdAt).toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-      })
-    : null;
-
-  // Map state to a badge style and label
-  const stateMap: Record<
-    string,
-    { label: string; classes: string }
-  > = {
-    sending: { label: "Sending", classes: "bg-gray-100 text-gray-700" },
-    sent: { label: "Sent", classes: "bg-green-100 text-green-800" },
-    failed: { label: "Failed", classes: "bg-red-100 text-red-800" },
-    removed: { label: "Removed", classes: "bg-gray-100 text-gray-500 line-through" },
-  };
-  const stateInfo = stateMap[state ?? ""] || {
-    label: state ?? "Unknown",
-    classes: "bg-gray-100 text-gray-700",
-  };
-
-  // Utility: human-readable file size
-  const formatBytes = (bytes: number): string => {
-    if (bytes < 1024) return bytes + " B";
-    const kb = bytes / 1024;
-    if (kb < 1024) return kb.toFixed(1) + " KB";
-    const mb = kb / 1024;
-    return mb.toFixed(1) + " MB";
-  };
-
-  // Render structured blocks
-  const renderBlock = (
-    block: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block,
-    idx: number
-  ): React.ReactNode => {
-    const text = block.value ?? "";
-    switch (block.type) {
-      case "text":
-        return (
-          <p key={idx} className="mb-2 text-gray-800 whitespace-pre-wrap">
-            {text}
-          </p>
-        );
-      case "code":
-        return (
-          <pre
-            key={idx}
-            className="mb-2 bg-gray-100 p-2 rounded text-sm font-mono overflow-x-auto"
-          >
-            {text}
-          </pre>
-        );
-      case "bullets":
-        {
-          const items = text.split("\n").filter((line) => line.trim() !== "");
-          return (
-            <ul key={idx} className="mb-2 list-disc list-inside text-gray-800">
-              {items.map((item, i) => (
-                <li key={i}>{item}</li>
-              ))}
-            </ul>
-          );
-        }
-      default:
-        return null;
-    }
-  };
-
-  // Render file attachments
-  const renderFile = (
-    file: AutoViewInputSubTypes.legacy.v4.message.LegacyV4File,
-    idx: number
-  ): React.ReactNode => {
-    const isImage = file.contentType?.startsWith("image/");
-    const src = file.previewKey
-      ? `https://cdn.example.com/${file.previewKey}`
-      : `https://cdn.example.com/${file.key}`;
-    return (
-      <div
-        key={idx}
-        className="border rounded overflow-hidden flex flex-col"
-      >
-        {isImage ? (
-          <img
-            src={src}
-            alt={file.name}
-            className="object-cover w-full h-32"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-32 bg-gray-50">
-            <span className="text-gray-600 text-sm truncate px-2">
-              {file.name}
-            </span>
-          </div>
-        )}
-        <div className="px-2 py-1 text-xs text-gray-500">
-          {formatBytes(file.size)}
-        </div>
-      </div>
-    );
-  };
-
-  // Render emoji reactions
-  const renderReaction = (
-    reaction: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Reaction,
-    idx: number
-  ): React.ReactNode => {
-    const count = reaction.personKeys?.length ?? 0;
-    return (
-      <div
-        key={idx}
-        className="flex items-center space-x-1 bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
-      >
-        <span>{reaction.emojiName}</span>
-        {count > 0 && <span>· {count}</span>}
-      </div>
-    );
-  };
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="w-full max-w-lg mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-3">
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${stateInfo.classes}`}
-        >
-          {stateInfo.label}
-        </span>
-        {formattedDate && (
-          <span className="text-xs text-gray-500">{formattedDate}</span>
-        )}
+    <article className="p-4 bg-white rounded-lg shadow-md space-y-4 max-w-full">
+      {/* Message Content */}
+      <div className="prose prose-sm">
+        {msg.blocks && msg.blocks.length > 0
+          ? renderBlocks(msg.blocks)
+          : msg.plainText
+          ? (
+            <p className="text-gray-800">{msg.plainText}</p>
+          )
+          : null}
       </div>
 
-      <div className="mb-4 text-gray-800 text-sm leading-relaxed">
-        {plainText ? (
-          <p className="whitespace-pre-wrap">{plainText}</p>
-        ) : blocks && blocks.length > 0 ? (
-          blocks.map(renderBlock)
-        ) : (
-          <p className="italic text-gray-500">[No textual content]</p>
-        )}
-      </div>
-
-      {webPage && (
-        <a
-          href={webPage.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block mb-4 border rounded-lg overflow-hidden hover:shadow-sm transition-shadow"
-        >
-          {webPage.imageUrl && (
-            <img
-              src={webPage.imageUrl}
-              alt={webPage.title ?? "Preview"}
-              className="w-full h-40 object-cover"
-            />
-          )}
-          <div className="p-3 bg-gray-50">
-            <h4 className="text-gray-800 font-semibold truncate">
-              {webPage.title || webPage.url}
-            </h4>
-            {webPage.description && (
-              <p className="mt-1 text-gray-600 text-xs line-clamp-2">
-                {webPage.description}
-              </p>
-            )}
+      {/* Attachments & Extras */}
+      <div className="space-y-4">
+        {/* Files */}
+        {msg.files && msg.files.length > 0 && (
+          <div className="space-y-1">
+            <div className="font-semibold text-gray-700">Attachments</div>
+            {msg.files.map((file) => (
+              <div
+                key={file.id}
+                className="flex items-center gap-2 text-gray-600 text-sm"
+              >
+                <LucideReact.FileText size={16} />
+                <span>
+                  {file.name} ({formatFileSize(file.size)})
+                </span>
+              </div>
+            ))}
           </div>
-        </a>
-      )}
+        )}
 
-      {files && files.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {files.map(renderFile)}
-        </div>
-      )}
+        {/* Buttons */}
+        {msg.buttons && msg.buttons.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {msg.buttons.map((btn, idx) => (
+              <div
+                key={idx}
+                className={`px-2 py-1 text-xs font-semibold text-white rounded ${colorClass(
+                  btn.colorVariant
+                )}`}
+              >
+                {btn.title}
+              </div>
+            ))}
+          </div>
+        )}
 
-      {buttons && buttons.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {buttons.map((btn, i) => (
-            <a
-              key={i}
-              href={btn.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`px-3 py-1 text-sm font-medium rounded border ${
-                btn.colorVariant
-                  ? `text-${btn.colorVariant}-600 border-${btn.colorVariant}-300 hover:bg-${btn.colorVariant}-50`
-                  : "text-blue-600 border-blue-300 hover:bg-blue-50"
-              } transition-colors`}
-            >
-              {btn.title}
-            </a>
+        {/* Web page preview */}
+        {msg.webPage && (
+          <div className="border rounded-lg overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              <div className="md:w-1/3 bg-gray-100">
+                <img
+                  src={
+                    msg.webPage.imageUrl ||
+                    "https://placehold.co/400x300/f1f5f9/64748b?text=WebPage"
+                  }
+                  alt={msg.webPage.title || "Preview"}
+                  className="w-full h-32 object-cover"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src =
+                      "https://placehold.co/400x300/f1f5f9/64748b?text=WebPage";
+                  }}
+                />
+              </div>
+              <div className="p-3 flex-1">
+                {msg.webPage.title && (
+                  <h3 className="font-semibold text-gray-800 text-sm">
+                    {msg.webPage.title}
+                  </h3>
+                )}
+                {msg.webPage.description && (
+                  <p className="text-gray-600 text-xs line-clamp-3">
+                    {msg.webPage.description}
+                  </p>
+                )}
+                {msg.webPage.url && (
+                  <div className="flex items-center gap-1 text-gray-500 text-xs mt-1">
+                    <LucideReact.Link size={14} />
+                    <span className="truncate">{msg.webPage.url}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Log */}
+        {msg.log?.action && (
+          <div className="text-gray-600 text-sm">
+            <span className="font-medium">Log:</span> {msg.log.action}
+            {msg.log.values && msg.log.values.length > 0
+              ? ` (${msg.log.values.join(", ")})`
+              : ""}
+          </div>
+        )}
+      </div>
+
+      {/* Reactions */}
+      {msg.reactions && msg.reactions.length > 0 && (
+        <div className="flex flex-wrap items-center gap-4 pt-2">
+          {msg.reactions.map((r, idx) => (
+            <div key={idx} className="flex items-center gap-1 text-gray-600">
+              <span>{r.emojiName}</span>
+              <span className="text-gray-500">
+                ×{r.personKeys?.length ?? 0}
+              </span>
+            </div>
           ))}
         </div>
       )}
 
-      {reactions && reactions.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {reactions.map(renderReaction)}
+      {/* Footer: status and timestamps */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-gray-500 text-xs pt-3 border-t">
+        <div className="flex items-center gap-2 mb-1 sm:mb-0">
+          {renderStateIcon(msg.state)}
+          <span className="capitalize">{msg.state || "unknown"}</span>
         </div>
-      )}
-    </div>
+        <div className="flex items-center gap-2">
+          <LucideReact.Calendar size={16} />
+          <span>{formattedCreatedAt}</span>
+          {formattedUpdatedAt && (
+            <>
+              <span className="mx-1">·</span>
+              <span>Edited: {formattedUpdatedAt}</span>
+            </>
+          )}
+        </div>
+      </div>
+    </article>
   );
 }

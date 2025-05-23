@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Delivery made by a webhook, without request and response information.
      *
      * @title Simple webhook delivery
     */
-    export type hook_delivery_item = {
+    export interface hook_delivery_item {
         /**
          * Unique identifier of the webhook delivery.
         */
@@ -55,7 +56,7 @@ export namespace AutoViewInputSubTypes {
          * Time when the webhook delivery was throttled.
         */
         throttled_at?: (string & tags.Format<"date-time">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.hook_delivery_item[];
 
@@ -64,128 +65,84 @@ export type AutoViewInput = AutoViewInputSubTypes.hook_delivery_item[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+    });
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (!value || value.length === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No webhook deliveries available.
+      <div className="flex items-center justify-center p-4 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="ml-2">No deliveries found</span>
       </div>
     );
   }
 
-  const totalDeliveries = value.length;
-  const redeliveryCount = value.filter((item) => item.redelivery).length;
-  const totalDuration = value.reduce((sum, item) => sum + item.duration, 0);
-  const averageDuration = totalDuration / totalDeliveries;
-  const successCount = value.filter((item) => item.status_code >= 200 && item.status_code < 300).length;
-  const successRate = (successCount / totalDeliveries) * 100;
-
-  // Sort by delivery time (newest first) and take the most recent 5 entries
-  const recentDeliveries = [...value]
-    .sort(
-      (a, b) =>
-        new Date(b.delivered_at).getTime() - new Date(a.delivered_at).getTime(),
-    )
-    .slice(0, 5);
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Webhook Deliveries Overview
-      </h2>
+    <div className="space-y-4">
+      {value.map((item: AutoViewInputSubTypes.hook_delivery_item) => {
+        const deliveredAt = formatDate(item.delivered_at);
+        const throttledAt = item.throttled_at ? formatDate(item.throttled_at) : null;
+        const durationMs = `${item.duration} ms`;
+        const eventAction = item.action ? `${item.event} / ${item.action}` : item.event;
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gray-50 p-3 rounded">
-          <div className="text-xs text-gray-500">Total Deliveries</div>
-          <div className="text-xl font-medium text-gray-900">
-            {totalDeliveries}
-          </div>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <div className="text-xs text-gray-500">Redeliveries</div>
-          <div className="text-xl font-medium text-gray-900">
-            {redeliveryCount}
-          </div>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <div className="text-xs text-gray-500">Success Rate</div>
-          <div className="text-xl font-medium text-gray-900">
-            {successRate.toFixed(1)}%
-          </div>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <div className="text-xs text-gray-500">Avg. Duration</div>
-          <div className="text-xl font-medium text-gray-900">
-            {averageDuration.toFixed(0)} ms
-          </div>
-        </div>
-      </div>
+        // Determine status icon and color
+        let statusIcon = <LucideReact.Clock size={16} className="text-amber-500" />;
+        if (item.status_code >= 200 && item.status_code < 300) {
+          statusIcon = <LucideReact.CheckCircle size={16} className="text-green-500" />;
+        } else if (item.status_code >= 400) {
+          statusIcon = <LucideReact.AlertTriangle size={16} className="text-red-500" />;
+        }
 
-      <h3 className="mt-6 text-md font-semibold text-gray-800">
-        Recent Deliveries
-      </h3>
-      <div className="overflow-x-auto mt-2">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead>
-            <tr>
-              <th className="px-2 py-1 text-left text-gray-600">Time</th>
-              <th className="px-2 py-1 text-left text-gray-600">Event</th>
-              <th className="px-2 py-1 text-left text-gray-600">Status</th>
-              <th className="px-2 py-1 text-left text-gray-600">Duration</th>
-              <th className="px-2 py-1 text-left text-gray-600">Redelivery</th>
-              <th className="px-2 py-1 text-left text-gray-600">Throttled</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {recentDeliveries.map((item) => {
-              const time = new Date(item.delivered_at).toLocaleString();
-              const isSuccess = item.status_code >= 200 && item.status_code < 300;
-              const statusBadge = isSuccess
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800';
-
-              return (
-                <tr key={item.id}>
-                  <td className="px-2 py-2 text-gray-700 whitespace-nowrap">
-                    {time}
-                  </td>
-                  <td className="px-2 py-2 text-gray-700 truncate">
-                    {item.event}
-                  </td>
-                  <td className="px-2 py-2">
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${statusBadge}`}
-                    >
-                      {item.status_code}
-                    </span>
-                  </td>
-                  <td className="px-2 py-2 text-gray-700 whitespace-nowrap">
-                    {item.duration} ms
-                  </td>
-                  <td className="px-2 py-2">
-                    {item.redelivery ? (
-                      <span className="inline-block px-2 py-0.5 text-xs bg-yellow-100 text-yellow-800 rounded">
-                        Yes
-                      </span>
-                    ) : (
-                      <span className="inline-block px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
-                        No
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-2 py-2 text-gray-700 whitespace-nowrap">
-                    {item.throttled_at
-                      ? new Date(item.throttled_at).toLocaleString()
-                      : '-'}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+        return (
+          <div key={item.id} className="p-4 bg-white rounded-lg shadow">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <LucideReact.Calendar size={16} />
+                <span>{deliveredAt}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {item.redelivery && (
+                  <LucideReact.RefreshCcw
+                    size={16}
+                    className="text-yellow-500"
+                    aria-label="Redelivery"
+                  />
+                )}
+                {throttledAt && (
+                  <LucideReact.PauseCircle
+                    size={16}
+                    className="text-red-500"
+                    aria-label={`Throttled at ${throttledAt}`}
+                  />
+                )}
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
+              <div className="flex items-center space-x-2">
+                <LucideReact.Activity size={16} className="text-gray-500" />
+                <span className="truncate">{eventAction}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <LucideReact.Timer size={16} className="text-gray-500" />
+                <span>{durationMs}</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {statusIcon}
+                <span>
+                  {item.status} ({item.status_code})
+                </span>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
-  // 3. Return the React element.
 }

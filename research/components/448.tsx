@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Event
      *
      * @title Event
     */
-    export type event = {
+    export interface event {
         id: string;
         type: string | null;
         actor: AutoViewInputSubTypes.actor;
@@ -31,26 +32,26 @@ export namespace AutoViewInputSubTypes {
         };
         "public": boolean;
         created_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * Actor
      *
      * @title Actor
     */
-    export type actor = {
+    export interface actor {
         id: number & tags.Type<"int32">;
         login: string;
         display_login?: string;
         gravatar_id: string | null;
         url: string & tags.Format<"uri">;
         avatar_url: string & tags.Format<"uri">;
-    };
+    }
     /**
      * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
      *
      * @title Issue
     */
-    export type issue = {
+    export interface issue {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -96,7 +97,7 @@ export namespace AutoViewInputSubTypes {
             "default"?: boolean;
         })[];
         assignee: AutoViewInputSubTypes.nullable_simple_user;
-        assignees?: any[] | null;
+        assignees?: AutoViewInputSubTypes.simple_user[] | null;
         milestone: AutoViewInputSubTypes.nullable_milestone;
         locked: boolean;
         active_lock_reason?: string | null;
@@ -122,7 +123,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         sub_issues_summary?: AutoViewInputSubTypes.sub_issues_summary;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -157,7 +158,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -180,7 +181,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A collection of related issues and pull requests.
      *
@@ -205,7 +206,7 @@ export namespace AutoViewInputSubTypes {
         */
         title: string;
         description: string | null;
-        creator: any;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
         open_issues: number & tags.Type<"int32">;
         closed_issues: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
@@ -242,11 +243,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -257,7 +258,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -461,7 +462,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -491,7 +492,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -519,7 +520,38 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -529,7 +561,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -540,21 +572,21 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
     /**
      * @title Sub-issues Summary
     */
-    export type sub_issues_summary = {
+    export interface sub_issues_summary {
         total: number & tags.Type<"int32">;
         completed: number & tags.Type<"int32">;
         percent_completed: number & tags.Type<"int32">;
-    };
+    }
     /**
      * Comments provide a way for people to collaborate on an issue.
      *
      * @title Issue Comment
     */
-    export type issue_comment = {
+    export interface issue_comment {
         /**
          * Unique identifier of the issue comment
         */
@@ -578,7 +610,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.event[];
 
@@ -587,92 +619,100 @@ export type AutoViewInput = AutoViewInputSubTypes.event[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string | null): string => {
-    if (!iso) return "Unknown date";
-    const d = new Date(iso);
-    return d.toLocaleString(undefined, {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-    });
+  // Sort events by most recent
+  const sortedEvents = [...value].sort((a, b) => {
+    const da = a.created_at ? new Date(a.created_at).getTime() : 0;
+    const db = b.created_at ? new Date(b.created_at).getTime() : 0;
+    return db - da;
+  });
+
+  // Format ISO date to a human-readable string
+  const formatDate = (iso?: string | null): string =>
+    iso
+      ? new Date(iso).toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '-';
+
+  // Derive a concise event label from type and action
+  const getEventLabel = (e: AutoViewInputSubTypes.event): string => {
+    const rawType = e.type ?? '';
+    const baseType = rawType.replace(/Event$/, '');
+    if (e.payload.action) {
+      const action = e.payload.action.charAt(0).toUpperCase() + e.payload.action.slice(1);
+      return `${action} ${baseType}`;
+    }
+    return baseType || 'Event';
   };
 
-  const renderEventSummary = (event: AutoViewInputSubTypes.event): React.ReactNode => {
-    const actorName = event.actor.display_login || event.actor.login;
-    const repoName = event.repo.name;
-    const actionRaw = event.payload.action
-      ? event.payload.action.replace(/_/g, " ")
-      : event.type?.replace(/([A-Z])/g, " $1").trim() || "did something";
-    // Issue event
-    if (event.payload.issue) {
-      const issue = event.payload.issue;
-      return (
-        <>
-          <span className="font-medium text-gray-800">{actorName}</span>{" "}
-          <span className="text-gray-700">{actionRaw} issue</span>{" "}
-          <span className="font-semibold text-gray-900">#{issue.number}</span>
-          <span className="italic text-gray-600 truncate">: {issue.title}</span>{" "}
-          <span className="text-blue-500">@ {repoName}</span>
-        </>
-      );
-    }
-    // Comment on issue
-    if (event.payload.comment) {
-      const comment = event.payload.comment;
-      return (
-        <>
-          <span className="font-medium text-gray-800">{actorName}</span>{" "}
-          <span className="text-gray-700">{actionRaw} on issue</span>{" "}
-          <span className="font-semibold text-gray-900">#{comment.id}</span>{" "}
-          <span className="text-blue-500">@ {repoName}</span>
-        </>
-      );
-    }
-    // Fallback for other events
-    return (
-      <>
-        <span className="font-medium text-gray-800">{actorName}</span>{" "}
-        <span className="text-gray-700">{actionRaw}</span>{" "}
-        <span className="text-blue-500">@ {repoName}</span>
-      </>
-    );
-  };
+  // Fallback avatar URL generator
+  const getAvatarFallback = (login: string): string =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(login)}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const events = Array.isArray(value) ? value : [];
-  if (events.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No events available.
-      </div>
-    );
-  }
-
-  // 3. Return the React element.
   return (
-    <div className="space-y-3">
-      {events.map((event) => (
-        <div
-          key={event.id}
-          className="flex items-start space-x-3 p-4 bg-white rounded-lg shadow hover:shadow-md transition"
-        >
-          <img
-            src={event.actor.avatar_url}
-            alt={event.actor.login}
-            className="w-10 h-10 rounded-full flex-shrink-0"
-          />
-          <div className="flex-1">
-            <div className="text-sm text-gray-700 truncate">
-              {renderEventSummary(event)}
-            </div>
-            <div className="mt-1 text-xs text-gray-500">
-              {formatDate(event.created_at)}
-            </div>
-          </div>
+    <div className="p-4">
+      {sortedEvents.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <p className="mt-2 text-sm">No events to display</p>
         </div>
-      ))}
+      ) : (
+        <ul className="space-y-4">
+          {sortedEvents.map((e) => (
+            <li
+              key={e.id}
+              className="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="flex-shrink-0">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
+                  <img
+                    src={e.actor.avatar_url || getAvatarFallback(e.actor.login)}
+                    alt={`${e.actor.login} avatar`}
+                    className="w-full h-full object-cover"
+                    onError={({ currentTarget }) => {
+                      currentTarget.onerror = null;
+                      currentTarget.src = getAvatarFallback(e.actor.login);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="ml-4 flex-1 min-w-0">
+                <div className="flex flex-wrap items-center gap-1 text-sm text-gray-700">
+                  <span className="font-medium truncate">{e.actor.login}</span>
+                  <span className="text-gray-500">·</span>
+                  <span className="truncate">{getEventLabel(e)}</span>
+                  <LucideReact.GitBranch className="text-gray-400" size={16} />
+                  <span className="text-indigo-600 truncate">{e.repo.name}</span>
+                </div>
+
+                {e.payload.issue && (
+                  <div className="mt-1 flex items-center text-sm text-gray-500 gap-1">
+                    <LucideReact.FileText size={16} />
+                    <span className="truncate">{e.payload.issue.title}</span>
+                  </div>
+                )}
+
+                {e.payload.comment && (
+                  <div className="mt-1 flex items-center text-sm text-gray-500 gap-1">
+                    <LucideReact.MessageSquare size={16} />
+                    <span className="truncate">{e.payload.comment.body ?? ''}</span>
+                  </div>
+                )}
+
+                <div className="mt-2 flex items-center text-xs text-gray-400">
+                  <LucideReact.Calendar size={14} />
+                  <span className="ml-1">{formatDate(e.created_at)}</span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 
@@ -144,106 +145,124 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const name = value.name ?? "Unnamed Configuration";
-  const description = value.description;
-  const createdAt = value.created_at
-    ? new Date(value.created_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : undefined;
-  const updatedAt = value.updated_at
-    ? new Date(value.updated_at).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : undefined;
+  type Status = "enabled" | "disabled" | "not_set";
+  const formatDate = (iso?: string): string =>
+    iso
+      ? new Date(iso).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "—";
 
-  // Badge generators
-  const getStatusBadge = (label: string, status?: string) => {
-    if (!status) return null;
-    const text = status === "not_set" ? "Not Set" : status.charAt(0).toUpperCase() + status.slice(1);
-    const colors =
-      status === "enabled"
-        ? { bg: "bg-green-100", text: "text-green-800" }
-        : status === "disabled"
-        ? { bg: "bg-red-100", text: "text-red-800" }
-        : { bg: "bg-gray-100", text: "text-gray-500" };
-    return (
-      <span
-        key={label}
-        className={`${colors.bg} ${colors.text} px-2 py-0.5 rounded-full text-xs font-medium`}
-      >
-        {label}: {text}
-      </span>
-    );
+  const createdAt = formatDate(value.created_at);
+  const updatedAt = formatDate(value.updated_at);
+
+  const statusIcons: Record<Status, JSX.Element> = {
+    enabled: (
+      <LucideReact.CheckCircle size={16} className="text-green-500" />
+    ),
+    disabled: <LucideReact.XCircle size={16} className="text-red-500" />,
+    not_set: (
+      <LucideReact.MinusCircle size={16} className="text-gray-400" />
+    ),
   };
 
-  const getScopeBadge = (scope?: string) => {
-    if (!scope) return null;
-    const caps = scope.charAt(0).toUpperCase() + scope.slice(1);
-    const palette =
-      scope === "global"
-        ? { bg: "bg-blue-100", text: "text-blue-800" }
-        : scope === "organization"
-        ? { bg: "bg-indigo-100", text: "text-indigo-800" }
-        : { bg: "bg-purple-100", text: "text-purple-800" };
-    return (
-      <span className={`${palette.bg} ${palette.text} px-2 py-0.5 rounded-full text-xs font-medium`}>
-        Scope: {caps}
-      </span>
-    );
-  };
-
-  const enforcementBadge = (status?: string) => {
-    if (!status) return null;
-    const caps = status.charAt(0).toUpperCase() + status.slice(1);
-    const colors =
-      status === "enforced"
-        ? { bg: "bg-green-50", text: "text-green-700" }
-        : { bg: "bg-red-50", text: "text-red-700" };
-    return (
-      <span className={`${colors.bg} ${colors.text} px-2 py-0.5 rounded-full text-xs font-semibold`}>
-        {caps}
-      </span>
-    );
-  };
+  const features: { label: string; status: Status }[] = [
+    {
+      label: "GitHub Advanced Security",
+      status: (value.advanced_security as Status) ?? "not_set",
+    },
+    {
+      label: "Dependency Graph",
+      status: (value.dependency_graph as Status) ?? "not_set",
+    },
+    {
+      label: "Auto Dependency Submission",
+      status: (value.dependency_graph_autosubmit_action as Status) ??
+        "not_set",
+    },
+    {
+      label: "Dependabot Alerts",
+      status: (value.dependabot_alerts as Status) ?? "not_set",
+    },
+    {
+      label: "Dependabot Security Updates",
+      status: (value.dependabot_security_updates as Status) ?? "not_set",
+    },
+    {
+      label: "Code Scanning Default Setup",
+      status: (value.code_scanning_default_setup as Status) ?? "not_set",
+    },
+    {
+      label: "Secret Scanning",
+      status: (value.secret_scanning as Status) ?? "not_set",
+    },
+  ];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 truncate">{name}</h2>
-        <div className="mt-2 sm:mt-0 flex flex-wrap gap-2">
-          {getScopeBadge(value.target_type)}
-          {enforcementBadge(value.enforcement)}
-        </div>
-      </div>
+    <div className="max-w-md p-6 bg-white rounded-lg shadow-md">
+      <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <h2 className="text-xl font-semibold text-gray-800 truncate">
+          {value.name ?? "Unnamed Configuration"}
+        </h2>
+        {value.target_type && (
+          <span className="mt-2 sm:mt-0 inline-block px-2 py-1 text-xs font-medium text-white bg-indigo-600 rounded">
+            {value.target_type.charAt(0).toUpperCase() +
+              value.target_type.slice(1)}
+          </span>
+        )}
+      </header>
 
-      {/* Description */}
-      {description && (
-        <p className="text-gray-700 text-sm mb-4 line-clamp-3">{description}</p>
+      {value.description && (
+        <p className="mt-3 text-gray-600 text-sm line-clamp-3">
+          {value.description}
+        </p>
       )}
 
-      {/* Feature Status Badges */}
-      <div className="grid grid-cols-2 gap-2 mb-4">
-        {getStatusBadge("Advanced Security", value.advanced_security)}
-        {getStatusBadge("Dependency Graph", value.dependency_graph)}
-        {getStatusBadge("Dependabot Alerts", value.dependabot_alerts)}
-        {getStatusBadge("Dependabot Security Updates", value.dependabot_security_updates)}
-        {getStatusBadge("Code Scanning Setup", value.code_scanning_default_setup)}
-        {getStatusBadge("Secret Scanning", value.secret_scanning)}
-        {getStatusBadge("Private Vuln Reporting", value.private_vulnerability_reporting)}
+      <div className="mt-5 grid grid-cols-2 gap-x-4 gap-y-3">
+        {features.map(({ label, status }) => (
+          <div
+            key={label}
+            className="flex items-center gap-2 text-sm text-gray-700"
+          >
+            {statusIcons[status]}
+            <span className="truncate">{label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Dates */}
-      <div className="flex text-xs text-gray-500 space-x-4">
-        {createdAt && <span>Created: {createdAt}</span>}
-        {updatedAt && <span>Updated: {updatedAt}</span>}
-      </div>
+      {value.enforcement && (
+        <div className="mt-5 flex items-center text-sm text-gray-700">
+          {value.enforcement === "enforced" ? (
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500"
+            />
+          ) : (
+            <LucideReact.XCircle size={16} className="text-red-500" />
+          )}
+          <span className="ml-2">
+            Enforcement:{" "}
+            <span className="font-medium">
+              {value.enforcement.charAt(0).toUpperCase() +
+                value.enforcement.slice(1)}
+            </span>
+          </span>
+        </div>
+      )}
+
+      <footer className="mt-6 border-t pt-4 text-xs text-gray-500 space-y-1">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={14} className="text-gray-400" />
+          <span>Created: {createdAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={14} className="text-gray-400" />
+          <span>Updated: {updatedAt}</span>
+        </div>
+      </footer>
     </div>
   );
 }

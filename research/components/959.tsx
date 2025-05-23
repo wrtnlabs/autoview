@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * User Marketplace Purchase
      *
      * @title User Marketplace Purchase
     */
-    export type user_marketplace_purchase = {
+    export interface user_marketplace_purchase {
         billing_cycle: string;
         next_billing_date: (string & tags.Format<"date-time">) | null;
         unit_count: (number & tags.Type<"int32">) | null;
@@ -15,11 +16,11 @@ export namespace AutoViewInputSubTypes {
         updated_at: (string & tags.Format<"date-time">) | null;
         account: AutoViewInputSubTypes.marketplace_account;
         plan: AutoViewInputSubTypes.marketplace_listing_plan;
-    };
+    }
     /**
      * @title Marketplace Account
     */
-    export type marketplace_account = {
+    export interface marketplace_account {
         url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
         type: string;
@@ -27,13 +28,13 @@ export namespace AutoViewInputSubTypes {
         login: string;
         email?: (string & tags.Format<"email">) | null;
         organization_billing_email?: (string & tags.Format<"email">) | null;
-    };
+    }
     /**
      * Marketplace Listing Plan
      *
      * @title Marketplace Listing Plan
     */
-    export type marketplace_listing_plan = {
+    export interface marketplace_listing_plan {
         url: string & tags.Format<"uri">;
         accounts_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
         unit_name: string | null;
         state: string;
         bullets: string[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.user_marketplace_purchase[];
 
@@ -55,120 +56,122 @@ export type AutoViewInput = AutoViewInputSubTypes.user_marketplace_purchase[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateStr: string | null): string =>
-    dateStr
-      ? new Date(dateStr).toLocaleDateString(undefined, {
+  const purchases = value;
+
+  // Format a date string into "MMM D, YYYY"
+  const formatDate = (dateString: string | null | undefined): string =>
+    dateString
+      ? new Date(dateString).toLocaleDateString(undefined, {
           year: "numeric",
           month: "short",
           day: "numeric",
         })
-      : "—";
+      : "-";
 
-  const formatMoney = (cents: number): string =>
-    (cents / 100).toLocaleString(undefined, {
-      style: "currency",
-      currency: "USD",
-    });
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <div className="p-4">
-      {/* Header with total count */}
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          Subscriptions ({value.length})
-        </h2>
+  // Empty state
+  if (purchases.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-4 text-lg">No purchases found</p>
       </div>
+    );
+  }
 
-      {/* Grid of subscription cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {value.map((purchase, idx) => {
-          const {
-            billing_cycle,
-            next_billing_date,
-            unit_count,
-            on_free_trial,
-            free_trial_ends_on,
-            updated_at,
-            account,
-            plan,
-          } = purchase;
+  // Render list of user marketplace purchases
+  return (
+    <div className="space-y-4">
+      {purchases.map((purchase, idx) => {
+        const plan = purchase.plan;
 
-          // Determine display name and email
-          const userName = account.login;
-          const userEmail =
-            account.email ?? account.organization_billing_email ?? "—";
+        // Derive a human-friendly price label
+        const priceLabel =
+          plan.price_model === "FREE"
+            ? "Free"
+            : plan.price_model === "FLAT_RATE"
+            ? `$${(plan.monthly_price_in_cents / 100).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })} / ${purchase.billing_cycle}`
+            : `$${(plan.monthly_price_in_cents / 100).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })} per ${plan.unit_name ?? "unit"}`;
 
-          // Price display logic
-          let priceLabel: string;
-          if (plan.price_model === "FREE") {
-            priceLabel = "Free";
-          } else {
-            const cents =
-              billing_cycle === "yearly"
-                ? plan.yearly_price_in_cents
-                : plan.monthly_price_in_cents;
-            const cycleAbbrev = billing_cycle === "yearly" ? "yr" : "mo";
-            if (plan.price_model === "PER_UNIT" && unit_count != null) {
-              priceLabel = `${unit_count} × ${formatMoney(
-                cents
-              )}/${plan.unit_name}`;
-            } else {
-              priceLabel = `${formatMoney(cents)}/${cycleAbbrev}`;
-            }
-          }
+        // Show up to three feature bullets, with an indicator if there are more
+        const features = plan.bullets.slice(0, 3);
 
-          // Status badge & date info
-          const statusLabel = on_free_trial
-            ? `Trial ends ${formatDate(free_trial_ends_on)}`
-            : `Next billing ${formatDate(next_billing_date)}`;
-
-          return (
-            <div
-              key={idx}
-              className="bg-white rounded-lg shadow p-5 flex flex-col justify-between"
-            >
-              {/* Plan header */}
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 truncate">
-                  {plan.name}
-                </h3>
-                <span className="inline-block mt-1 text-sm font-medium text-indigo-600">
-                  {priceLabel}
+        return (
+          <div key={idx} className="p-4 bg-white rounded-lg shadow">
+            {/* Account header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <LucideReact.User size={20} className="text-gray-500" />
+                <span className="font-semibold text-gray-800">
+                  {purchase.account.login}
                 </span>
               </div>
+              {purchase.on_free_trial && purchase.free_trial_ends_on && (
+                <div className="flex items-center gap-1 text-amber-600 text-sm">
+                  <LucideReact.Clock size={16} />
+                  <span>Trial until {formatDate(purchase.free_trial_ends_on)}</span>
+                </div>
+              )}
+            </div>
 
-              {/* User info */}
-              <div className="mt-4 text-sm text-gray-700">
-                <p className="font-medium text-gray-800 truncate">{userName}</p>
-                <p className="truncate">{userEmail}</p>
+            {/* Plan name and price */}
+            <div className="mt-2">
+              <div className="flex items-center gap-1">
+                <LucideReact.Tag size={16} className="text-blue-500" />
+                <span className="text-gray-800 font-medium">{plan.name}</span>
               </div>
-
-              {/* Plan description */}
-              <p className="mt-3 text-gray-600 text-sm line-clamp-2">
-                {plan.description}
-              </p>
-
-              {/* Features count */}
-              <p className="mt-2 text-xs text-gray-500">
-                {plan.bullets.length} feature
-                {plan.bullets.length !== 1 ? "s" : ""} included
-              </p>
-
-              {/* Status and updated info */}
-              <div className="mt-4 flex flex-col space-y-1">
-                <span className="inline-block text-xs font-medium text-white bg-blue-500 px-2 py-1 rounded-full">
-                  {statusLabel}
-                </span>
-                <span className="text-xs text-gray-400">
-                  Updated {formatDate(updated_at)}
-                </span>
+              <div className="flex items-center gap-1 mt-1 text-gray-700">
+                <LucideReact.DollarSign size={16} className="text-gray-500" />
+                <span>{priceLabel}</span>
               </div>
             </div>
-          );
-        })}
-      </div>
+
+            {/* Plan description */}
+            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+              {plan.description}
+            </p>
+
+            {/* Feature bullets */}
+            {features.length > 0 && (
+              <ul className="mt-2 list-disc list-inside text-gray-600 text-sm space-y-1">
+                {features.map((feat, i) => (
+                  <li key={i}>{feat}</li>
+                ))}
+                {plan.bullets.length > features.length && <li>...and more</li>}
+              </ul>
+            )}
+
+            {/* Metadata: next billing, updated date, unit count */}
+            <div className="mt-4 flex flex-wrap items-center text-gray-600 text-sm gap-4">
+              {purchase.next_billing_date && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={16} className="text-gray-500" />
+                  <span>Next bill: {formatDate(purchase.next_billing_date)}</span>
+                </div>
+              )}
+              {purchase.updated_at && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.RefreshCw size={16} className="text-gray-500" />
+                  <span>Updated: {formatDate(purchase.updated_at)}</span>
+                </div>
+              )}
+              {plan.unit_name && purchase.unit_count !== null && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Box size={16} className="text-gray-500" />
+                  <span>
+                    {purchase.unit_count} {plan.unit_name}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

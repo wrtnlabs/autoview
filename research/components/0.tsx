@@ -1,18 +1,19 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type IPerformance = {
+    export interface IPerformance {
         cpu: AutoViewInputSubTypes.process.global.NodeJS.CpuUsage;
         memory: AutoViewInputSubTypes.process.global.NodeJS.MemoryUsage;
         resource: AutoViewInputSubTypes.process.global.NodeJS.ResourceUsage;
-    };
+    }
     export namespace process {
         export namespace global {
             export namespace NodeJS {
-                export type CpuUsage = {
+                export interface CpuUsage {
                     user: number;
                     system: number;
-                };
-                export type MemoryUsage = {
+                }
+                export interface MemoryUsage {
                     /**
                      * Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the
                      * process, including all C++ and JavaScript objects and code.
@@ -37,8 +38,8 @@ export namespace AutoViewInputSubTypes {
                      * may not be tracked in that case.
                     */
                     arrayBuffers: number;
-                };
-                export type ResourceUsage = {
+                }
+                export interface ResourceUsage {
                     fsRead: number;
                     fsWrite: number;
                     involuntaryContextSwitches: number;
@@ -55,7 +56,7 @@ export namespace AutoViewInputSubTypes {
                     unsharedStackSize: number;
                     userCPUTime: number;
                     voluntaryContextSwitches: number;
-                };
+                }
             }
         }
     }
@@ -67,128 +68,132 @@ export type AutoViewInput = AutoViewInputSubTypes.IPerformance;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // CPU usage percentages
-  const cpuUser = value.cpu.user;
-  const cpuSystem = value.cpu.system;
-  const cpuTotal = cpuUser + cpuSystem || 1;
-  const cpuUserPct = (cpuUser / cpuTotal) * 100;
-  const cpuSystemPct = (cpuSystem / cpuTotal) * 100;
+  const toMb = (bytes: number) => bytes / (1024 * 1024);
 
-  // Memory usage conversions
-  const toMB = (bytes: number) => (bytes / 1024 / 1024).toFixed(2);
-  const rssMB = toMB(value.memory.rss);
-  const heapTotalMB = toMB(value.memory.heapTotal);
-  const heapUsedMB = toMB(value.memory.heapUsed);
-  const externalMB = toMB(value.memory.external);
-  const arrayBuffersMB = toMB(value.memory.arrayBuffers);
-  const heapUsagePct =
-    value.memory.heapTotal > 0
-      ? ((value.memory.heapUsed / value.memory.heapTotal) * 100).toFixed(1)
-      : '0';
+  // CPU times in ms and percentages
+  const userMs = (value.cpu.user / 1000).toFixed(1);
+  const systemMs = (value.cpu.system / 1000).toFixed(1);
+  const totalCpu = value.cpu.user + value.cpu.system || 1;
+  const userPct = ((value.cpu.user / totalCpu) * 100).toFixed(1);
+  const systemPct = ((value.cpu.system / totalCpu) * 100).toFixed(1);
 
-  // Resource usage key metrics
-  const toSeconds = (micros: number) => (micros / 1e6).toFixed(2);
-  const resourceMetrics: { label: string; value: string }[] = [
-    { label: 'Max RSS', value: `${toMB(value.resource.maxRSS)} MB` },
-    { label: 'FS Reads', value: new Intl.NumberFormat().format(value.resource.fsRead) },
-    { label: 'FS Writes', value: new Intl.NumberFormat().format(value.resource.fsWrite) },
-    {
-      label: 'Voluntary Context Switches',
-      value: new Intl.NumberFormat().format(value.resource.voluntaryContextSwitches),
-    },
-    {
-      label: 'Involuntary Context Switches',
-      value: new Intl.NumberFormat().format(value.resource.involuntaryContextSwitches),
-    },
-    { label: 'Minor Page Faults', value: value.resource.minorPageFault.toString() },
-    { label: 'Major Page Faults', value: value.resource.majorPageFault.toString() },
-    { label: 'Signals Count', value: value.resource.signalsCount.toString() },
-    { label: 'IPC Received', value: value.resource.ipcReceived.toString() },
-    { label: 'IPC Sent', value: value.resource.ipcSent.toString() },
-    {
-      label: 'User CPU Time',
-      value: `${toSeconds(value.resource.userCPUTime)} s`,
-    },
-    {
-      label: 'System CPU Time',
-      value: `${toSeconds(value.resource.systemCPUTime)} s`,
-    },
-  ];
+  // Memory usage in MB and heap percentage
+  const rssMb = toMb(value.memory.rss).toFixed(2);
+  const heapTotalMb = toMb(value.memory.heapTotal).toFixed(2);
+  const heapUsedMb = toMb(value.memory.heapUsed).toFixed(2);
+  const externalMb = toMb(value.memory.external).toFixed(2);
+  const heapPct = value.memory.heapTotal
+    ? ((value.memory.heapUsed / value.memory.heapTotal) * 100).toFixed(1)
+    : "0";
+
+  // Resource summary metrics
+  const ioOps = (value.resource.fsRead + value.resource.fsWrite).toLocaleString();
+  const contextSwitches = (
+    value.resource.voluntaryContextSwitches + value.resource.involuntaryContextSwitches
+  ).toLocaleString();
+  const peakRssMb = toMb(value.resource.maxRSS).toFixed(2);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-lg mx-auto space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800">Performance Metrics</h2>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-4">
+        <LucideReact.Activity
+          className="text-blue-500"
+          size={24}
+          strokeWidth={1.5}
+          aria-label="Performance Overview"
+        />
+        <h2 className="ml-2 text-lg font-semibold text-gray-700">
+          Performance Overview
+        </h2>
+      </div>
 
-      {/* CPU Usage */}
-      <section>
-        <h3 className="text-lg font-medium text-gray-700 mb-2">CPU Usage</h3>
-        <div className="flex items-center text-sm text-gray-600 mb-1">
-          <span className="mr-4">User: {cpuUser.toFixed(0)}</span>
-          <span>System: {cpuSystem.toFixed(0)}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* CPU Usage */}
+        <div>
+          <div className="flex items-center mb-2">
+            <LucideReact.Cpu className="text-gray-500" size={20} />
+            <h3 className="ml-2 text-md font-medium text-gray-600">
+              CPU Usage
+            </h3>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3 flex overflow-hidden">
+            <div
+              className="bg-blue-500 h-3"
+              style={{ width: `${userPct}%` }}
+              title={`User ${userPct}%`}
+            />
+            <div
+              className="bg-green-500 h-3"
+              style={{ width: `${systemPct}%` }}
+              title={`System ${systemPct}%`}
+            />
+          </div>
+          <div className="flex justify-between text-sm text-gray-600 mt-1">
+            <span>User: {userMs} ms</span>
+            <span>System: {systemMs} ms</span>
+          </div>
         </div>
-        <div className="relative h-3 w-full bg-gray-200 rounded overflow-hidden">
-          <div
-            className="absolute left-0 top-0 h-3 bg-blue-500"
-            style={{ width: `${cpuUserPct}%` }}
-          />
-          <div
-            className="absolute top-0 h-3 bg-green-500"
-            style={{
-              left: `${cpuUserPct}%`,
-              width: `${cpuSystemPct}%`,
-            }}
-          />
-        </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>{cpuUserPct.toFixed(1)}%</span>
-          <span>{cpuSystemPct.toFixed(1)}%</span>
-        </div>
-      </section>
 
-      {/* Memory Usage */}
-      <section>
-        <h3 className="text-lg font-medium text-gray-700 mb-2">Memory Usage</h3>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-          <div>
-            <dt className="text-gray-500">RSS</dt>
-            <dd className="font-medium text-gray-800">{rssMB} MB</dd>
+        {/* Memory Usage */}
+        <div>
+          <div className="flex items-center mb-2">
+            <LucideReact.Database className="text-gray-500" size={20} />
+            <h3 className="ml-2 text-md font-medium text-gray-600">
+              Memory Usage
+            </h3>
           </div>
-          <div>
-            <dt className="text-gray-500">Heap Total</dt>
-            <dd className="font-medium text-gray-800">{heapTotalMB} MB</dd>
+          <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div
+              className="bg-indigo-500 h-3 rounded-full"
+              style={{ width: `${heapPct}%` }}
+              title={`Heap ${heapPct}%`}
+            />
           </div>
-          <div>
-            <dt className="text-gray-500">Heap Used</dt>
-            <dd className="font-medium text-gray-800">
-              {heapUsedMB} MB ({heapUsagePct}%)
-            </dd>
+          <div className="flex justify-between text-sm text-gray-600 mt-1">
+            <span>Heap Used: {heapUsedMb} MB</span>
+            <span>Heap Total: {heapTotalMb} MB</span>
           </div>
-          <div>
-            <dt className="text-gray-500">External</dt>
-            <dd className="font-medium text-gray-800">{externalMB} MB</dd>
+          <div className="flex justify-between text-sm text-gray-600 mt-1">
+            <span>RSS: {rssMb} MB</span>
+            <span>External: {externalMb} MB</span>
           </div>
-          <div>
-            <dt className="text-gray-500">Array Buffers</dt>
-            <dd className="font-medium text-gray-800">{arrayBuffersMB} MB</dd>
-          </div>
-        </dl>
-      </section>
+        </div>
+      </div>
 
-      {/* Resource Usage */}
-      <section>
-        <h3 className="text-lg font-medium text-gray-700 mb-2">Resource Usage</h3>
-        <div className="overflow-x-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-            {resourceMetrics.map((m) => (
-              <div key={m.label} className="flex justify-between">
-                <span className="text-gray-500 truncate">{m.label}</span>
-                <span className="font-medium text-gray-800">{m.value}</span>
+      {/* Resource Summary */}
+      <div className="mt-6">
+        <h3 className="text-md font-medium text-gray-700 mb-3">
+          Resource Summary
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex items-center bg-gray-50 p-3 rounded">
+            <LucideReact.HardDrive className="text-gray-500" size={20} />
+            <div className="ml-2">
+              <div className="text-sm font-medium text-gray-600">I/O Ops</div>
+              <div className="text-lg text-gray-800">{ioOps}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center bg-gray-50 p-3 rounded">
+            <LucideReact.RefreshCw className="text-gray-500" size={20} />
+            <div className="ml-2">
+              <div className="text-sm font-medium text-gray-600">
+                Context Switches
               </div>
-            ))}
+              <div className="text-lg text-gray-800">{contextSwitches}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center bg-gray-50 p-3 rounded">
+            <LucideReact.Database className="text-indigo-500" size={20} />
+            <div className="ml-2">
+              <div className="text-sm font-medium text-gray-600">Peak RSS</div>
+              <div className="text-lg text-gray-800">{peakRssMb} MB</div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

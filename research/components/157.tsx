@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Supplementation of inventory quantity of stock.
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
      * `IShoppingSaleUnitStockSupplement` is an entity that embodies the
      * supplementation of the inventory quantity of the belonged stock.
     */
-    export type IShoppingSaleUnitStockSupplement = {
+    export interface IShoppingSaleUnitStockSupplement {
         /**
          * Primary Key.
          *
@@ -35,7 +36,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of the record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleUnitStockSupplement;
 
@@ -43,42 +44,31 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleUnitStockSuppleme
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { value: supplementedQty, created_at } = value;
-  const dateObj = new Date(created_at);
-  const formattedDate = dateObj.toLocaleString(undefined, {
+  // 1. Data transformation: format the creation timestamp to a human-readable string
+  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
   });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  //    We display only the supplemented quantity and its creation time.
   return (
-    <div
-      role="region"
-      aria-label="Stock Supplement Record"
-      className="w-full max-w-md mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
-    >
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <div className="mb-4 sm:mb-0">
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Supplemented Quantity
-          </p>
-          <p className="mt-1 text-2xl font-semibold text-gray-900">
-            {supplementedQty}
-          </p>
+    <div className="p-4 bg-white rounded-lg shadow-md sm:flex sm:items-center sm:justify-between">
+      <div className="flex items-center space-x-3">
+        <div className="p-2 bg-blue-50 text-blue-500 rounded-full">
+          <LucideReact.PlusCircle size={24} aria-hidden="true" />
         </div>
-        <div>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-            Recorded At
-          </p>
-          <p className="mt-1 text-sm text-gray-700 truncate">
-            {formattedDate}
-          </p>
+        <div className="space-y-1">
+          <p className="text-sm font-medium text-gray-700">Supplemented Quantity</p>
+          <p className="text-2xl font-semibold text-gray-900">{value.value}</p>
         </div>
+      </div>
+      <div className="mt-3 sm:mt-0 flex items-center text-sm text-gray-500">
+        <LucideReact.Calendar size={16} className="mr-1" aria-hidden="true" />
+        <span>{formattedDate}</span>
       </div>
     </div>
   );

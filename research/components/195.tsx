@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4OneTimeMsgView = {
+                export interface LegacyV4OneTimeMsgView {
                     oneTimeMsg?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4OneTimeMsg;
-                };
+                }
             }
         }
         export namespace v4 {
             export namespace marketing {
-                export type LegacyV4OneTimeMsg = {
+                export interface LegacyV4OneTimeMsg {
                     id?: string;
                     channelId?: string;
                     name: string;
@@ -36,18 +37,18 @@ export namespace AutoViewInputSubTypes {
                     goal?: number & tags.Type<"int32">;
                     click?: number & tags.Type<"int32">;
                     userChatExpireDuration?: string;
-                };
+                }
             }
         }
     }
     export namespace marketing {
-        export type SendMediumSettings = {
+        export interface SendMediumSettings {
             type: string;
-        };
-        export type OneTimeMsgDraft = {
+        }
+        export interface OneTimeMsgDraft {
             oneTimeMsg: AutoViewInputSubTypes.marketing.OneTimeMsg;
-        };
-        export type OneTimeMsg = {
+        }
+        export interface OneTimeMsg {
             id?: string;
             channelId?: string;
             name: string;
@@ -73,17 +74,18 @@ export namespace AutoViewInputSubTypes {
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
             userChatExpireDuration?: string;
-        };
+        }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
+    }
+    export interface Operator {
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4OneTimeMsgView;
 
@@ -91,135 +93,136 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4OneTime
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const msg = value.oneTimeMsg;
   if (!msg) {
     return (
-      <div className="p-4 text-center text-sm text-gray-500">
-        No message data available.
+      <div className="flex flex-col items-center justify-center p-4 text-gray-500 bg-white rounded-lg shadow">
+        <LucideReact.AlertCircle size={24} />
+        <p className="mt-2">No message data available.</p>
       </div>
     );
   }
 
-  const stateLabelMap: Record<typeof msg.state, string> = {
-    draft: "Draft",
-    waiting: "Waiting",
-    sent: "Sent",
-    canceled: "Canceled",
-    removed: "Removed",
-  };
-  const stateColorMap: Record<typeof msg.state, string> = {
-    draft: "bg-gray-100 text-gray-800",
-    waiting: "bg-yellow-100 text-yellow-800",
-    sent: "bg-green-100 text-green-800",
-    canceled: "bg-red-100 text-red-800",
-    removed: "bg-gray-100 text-gray-800",
-  };
-  const mediumLabelMap: Record<NonNullable<typeof msg.sendMedium>, string> = {
-    appAlimtalk: "AlimTalk",
-    appLine: "LINE",
-    email: "Email",
-    inAppChat: "In-App Chat",
-    xms: "XMS",
-  };
-  const modeLabelMap: Record<NonNullable<typeof msg.sendMode>, string> = {
-    immediately: "Immediately",
-    reservedWithSenderTime: "Scheduled (Sender Time)",
-    reservedWithReceiverTime: "Scheduled (Receiver Time)",
-  };
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formatDateTime = (ts?: number): string =>
+    ts
+      ? new Date(ts).toLocaleString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+        })
+      : '—';
 
-  function formatDateTime(ts?: number): string {
-    if (!ts) return "-";
-    const date = new Date(ts);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
+  const startAt = formatDateTime(msg.startAt);
+  const createdAt = formatDateTime(msg.createdAt);
+  const updatedAt = formatDateTime(msg.updatedAt);
 
-  function formatCount(n?: number & number): string {
-    if (n == null) return "-";
-    if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
-    if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
-    return n.toString();
-  }
+  // State mapping: icon + color
+  const stateConfig: Record<string, { icon: JSX.Element; color: string }> = {
+    draft: { icon: <LucideReact.Edit2 size={16} />, color: 'text-gray-500' },
+    waiting: { icon: <LucideReact.Clock size={16} />, color: 'text-amber-500' },
+    sent: { icon: <LucideReact.CheckCircle size={16} />, color: 'text-green-500' },
+    canceled: { icon: <LucideReact.XCircle size={16} />, color: 'text-red-500' },
+    removed: { icon: <LucideReact.MinusCircle size={16} />, color: 'text-red-500' },
+  };
+  const stateInfo = stateConfig[msg.state] || stateConfig.draft;
+
+  // Medium icons mapping
+  const mediumIcons = {
+    email: LucideReact.Mail,
+    inAppChat: LucideReact.MessageCircle,
+    appLine: LucideReact.Slack,
+    appAlimtalk: LucideReact.Smartphone,
+    xms: LucideReact.MessageSquare,
+  };
+  const MediumIcon = msg.sendMedium
+    ? (mediumIcons as Record<string, React.ComponentType<any>>)[msg.sendMedium]
+    : null;
+
+  // Metrics definition
+  type Metric = { label: string; value?: number; icon: JSX.Element };
+  const metrics: Metric[] = [
+    { label: 'Sent', value: msg.sent, icon: <LucideReact.Send size={16} /> },
+    { label: 'Viewed', value: msg.view, icon: <LucideReact.Eye size={16} /> },
+    { label: 'Goal', value: msg.goal, icon: <LucideReact.Target size={16} /> },
+    { label: 'Clicks', value: msg.click, icon: <LucideReact.MousePointer size={16} /> },
+  ];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="p-4 bg-white rounded-lg shadow-md max-w-md w-full mx-auto">
-      <header className="flex justify-between items-start">
-        <h2
-          className="text-lg font-semibold text-gray-900 truncate"
-          title={msg.name}
-        >
-          {msg.name}
-        </h2>
-        <span
-          className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
-            stateColorMap[msg.state]
-          }`}
-        >
-          {stateLabelMap[msg.state]}
-        </span>
-      </header>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header: Name + State */}
+      <div className="flex items-center justify-between">
+        <h2 className="flex-1 text-lg font-semibold text-gray-800 truncate">{msg.name}</h2>
+        <div className={`flex items-center gap-1 text-sm ${stateInfo.color}`}>
+          {stateInfo.icon}
+          <span className="capitalize">{msg.state}</span>
+        </div>
+      </div>
 
-      <div className="mt-2 flex flex-wrap text-sm text-gray-600 space-x-4">
-        {msg.sendMedium && (
-          <div>{mediumLabelMap[msg.sendMedium]}</div>
+      {/* Schedule */}
+      <div className="flex items-center text-sm text-gray-600 gap-1">
+        <LucideReact.Calendar size={16} />
+        <span>Scheduled: {startAt}</span>
+      </div>
+
+      {/* Send Mode & Medium */}
+      <div className="flex flex-wrap gap-4 text-sm text-gray-700">
+        {msg.sendMode && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Clock size={16} />
+            <span className="capitalize">
+              {msg.sendMode.replace(/([a-z])([A-Z])/g, '$1 $2')}
+            </span>
+          </div>
         )}
-        {msg.sendMode && <div>{modeLabelMap[msg.sendMode]}</div>}
-        {msg.startAt && (
-          <div>Scheduled: {formatDateTime(msg.startAt)}</div>
+        {MediumIcon && (
+          <div className="flex items-center gap-1">
+            <MediumIcon size={16} className="text-gray-500" />
+            <span className="capitalize">{msg.sendMedium}</span>
+          </div>
         )}
       </div>
 
-      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <dt className="text-gray-500">Sent</dt>
-        <dd className="font-medium text-gray-900">
-          {formatCount(msg.sent)}
-        </dd>
+      {/* Features: Advertising & Support Bot */}
+      <div className="flex items-center gap-4 text-gray-500">
+        {msg.advertising && <LucideReact.Megaphone size={16} />}
+        {msg.enableSupportBot && <LucideReact.MessageCircle size={16} />}
+      </div>
 
-        <dt className="text-gray-500">Views</dt>
-        <dd className="font-medium text-gray-900">
-          {formatCount(msg.view)}
-        </dd>
+      {/* Goal Event Name */}
+      {msg.goalEventName && (
+        <div className="flex items-center text-sm text-gray-600 gap-1">
+          <LucideReact.Target size={16} />
+          <span>Goal Event: {msg.goalEventName}</span>
+        </div>
+      )}
 
-        <dt className="text-gray-500">Clicks</dt>
-        <dd className="font-medium text-gray-900">
-          {formatCount(msg.click)}
-        </dd>
-
-        <dt className="text-gray-500">Goals</dt>
-        <dd className="font-medium text-gray-900">
-          {formatCount(msg.goal)}
-        </dd>
-      </dl>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        {msg.enableSupportBot && (
-          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-            Support Bot Enabled
-          </span>
-        )}
-        {msg.advertising && (
-          <span className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
-            Advertising
-          </span>
-        )}
-        {msg.sendToOfflineXms && (
-          <span className="inline-block bg-indigo-50 text-indigo-800 text-xs px-2 py-1 rounded-full">
-            Offline XMS
-          </span>
-        )}
-        {msg.sendToOfflineEmail && (
-          <span className="inline-block bg-indigo-50 text-indigo-800 text-xs px-2 py-1 rounded-full">
-            Offline Email
-          </span>
+      {/* Metrics */}
+      <div className="flex flex-wrap gap-6 text-gray-700">
+        {metrics.map((mt) =>
+          mt.value !== undefined ? (
+            <div key={mt.label} className="flex items-center gap-1 text-sm">
+              {mt.icon}
+              <span>{mt.value}</span>
+            </div>
+          ) : null
         )}
       </div>
-    </article>
+
+      {/* Timestamps */}
+      <div className="flex flex-wrap text-xs text-gray-400 gap-4">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={12} />
+          <span>Created: {createdAt}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={12} />
+          <span>Updated: {updatedAt}</span>
+        </div>
+      </div>
+    </div>
   );
 }

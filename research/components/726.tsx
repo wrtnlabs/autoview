@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The status of a deployment.
      *
      * @title Deployment Status
     */
-    export type deployment_status = {
+    export interface deployment_status {
         url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
         */
         log_url?: string & tags.Default<"">;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -86,7 +87,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -114,8 +115,67 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.deployment_status[];
 
@@ -124,64 +184,116 @@ export type AutoViewInput = AutoViewInputSubTypes.deployment_status[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const stateColorMap: Record<string, string> = {
-    success: "bg-green-100 text-green-800",
-    error: "bg-red-100 text-red-800",
-    failure: "bg-red-100 text-red-800",
-    inactive: "bg-gray-100 text-gray-800",
-    pending: "bg-yellow-100 text-yellow-800",
-    queued: "bg-yellow-100 text-yellow-800",
-    in_progress: "bg-blue-100 text-blue-800",
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  const getStateIcon = (state: AutoViewInputSubTypes.deployment_status['state']) => {
+    switch (state) {
+      case 'success':
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case 'pending':
+        return <LucideReact.Clock className="text-amber-500" size={16} />;
+      case 'in_progress':
+        return <LucideReact.Loader className="animate-spin text-blue-500" size={16} />;
+      case 'queued':
+        return <LucideReact.Clock className="text-gray-500" size={16} />;
+      case 'failure':
+        return <LucideReact.XCircle className="text-red-500" size={16} />;
+      case 'error':
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      case 'inactive':
+        return <LucideReact.PauseCircle className="text-gray-500" size={16} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-500" size={16} />;
+    }
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Handle empty or missing data
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-4 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2">No deployment statuses available</span>
+      </div>
+    );
+  }
+
+  // 3. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="space-y-4">
       {value.map((status) => {
-        const badgeClasses =
-          stateColorMap[status.state] || "bg-gray-100 text-gray-800";
-        const createdAt = new Date(status.created_at).toLocaleString();
-        const updatedAt = new Date(status.updated_at).toLocaleString();
-        const description = status.description?.trim() || "";
+        const displayState = status.state
+          .replace(/_/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+
         return (
           <div
             key={status.id}
-            className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
+            className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:justify-between"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+            {/* State Indicator */}
+            <div className="flex items-center gap-2 mb-2 sm:mb-0">
+              {getStateIcon(status.state)}
+              <span className="font-medium">{displayState}</span>
+            </div>
+
+            {/* Description & Metadata */}
+            <div className="flex-1 px-2">
+              <p className="text-gray-700 text-sm line-clamp-2">
+                {status.description || 'No description provided.'}
+              </p>
+              <div className="flex items-center text-gray-500 text-xs mt-2 space-x-4">
                 {status.creator && (
-                  <img
-                    src={status.creator.avatar_url}
-                    alt={status.creator.login}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
+                  <div className="flex items-center gap-1">
+                    <img
+                      src={status.creator.avatar_url}
+                      alt={status.creator.login}
+                      className="w-6 h-6 rounded-full object-cover"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          status.creator?.login ?? ''
+                        )}&background=0D8ABC&color=fff`;
+                      }}
+                    />
+                    <span>{status.creator.login}</span>
+                  </div>
                 )}
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-gray-900">
-                    {status.creator?.login || "Unknown"}
-                  </span>
-                  <span className="text-xs text-gray-500">{createdAt}</span>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={14} />
+                  <span>Created: {formatDate(status.created_at)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Edit2 size={14} />
+                  <span>Updated: {formatDate(status.updated_at)}</span>
                 </div>
               </div>
-              <span
-                className={`px-2 py-1 text-xs font-semibold rounded ${badgeClasses}`}
-              >
-                {status.state.replace(/_/g, " ")}
-              </span>
             </div>
-            {description && (
-              <p className="mt-2 text-gray-700 line-clamp-2">{description}</p>
-            )}
-            {status.environment && status.environment.length > 0 && (
-              <div className="mt-2">
-                <span className="inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-0.5 rounded">
+
+            {/* Links & Tags */}
+            <div className="mt-2 sm:mt-0 flex items-center gap-4 flex-wrap">
+              {status.environment && (
+                <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
                   {status.environment}
                 </span>
-              </div>
-            )}
-            <div className="mt-3 text-xs text-gray-500">
-              Updated: {updatedAt}
+              )}
+              {status.target_url && (
+                <div className="flex items-center gap-1 text-gray-500 text-xs truncate max-w-xs">
+                  <LucideReact.Link size={14} />
+                  <span className="truncate">{status.target_url}</span>
+                </div>
+              )}
+              {status.log_url && (
+                <div className="flex items-center gap-1 text-gray-500 text-xs truncate max-w-xs">
+                  <LucideReact.FileText size={14} />
+                  <span className="truncate">{status.log_url}</span>
+                </div>
+              )}
             </div>
           </div>
         );

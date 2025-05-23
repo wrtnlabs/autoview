@@ -1,12 +1,13 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsActionsRunnerGroups {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number;
             runner_groups: AutoViewInputSubTypes.runner_groups_org[];
-        };
+        }
     }
-    export type runner_groups_org = {
+    export interface runner_groups_org {
         id: number;
         name: string;
         visibility: string;
@@ -36,7 +37,7 @@ export namespace AutoViewInputSubTypes {
          * List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.
         */
         selected_workflows?: string[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnerGroups.GetResponse;
 
@@ -45,122 +46,118 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnerGroups.Ge
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalGroups = value.total_count.toLocaleString();
-  const groups = value.runner_groups;
-
-  const capitalize = (s: string) =>
-    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-
-  // Badge generator for consistent styling
-  const Badge = ({
-    text,
-    colorClass,
-  }: {
-    text: string;
-    colorClass: string;
-  }): React.ReactNode => (
-    <span
-      className={`inline-block px-2 py-0.5 mr-2 mb-2 text-xs font-semibold uppercase rounded-full ${colorClass}`}
-    >
-      {text}
-    </span>
-  );
+  const totalGroups = value.total_count;
+  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full mx-auto p-4">
-      <header className="mb-4">
-        <h2 className="text-lg font-bold text-gray-800">
-          Runner Groups ({totalGroups})
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Users size={20} className="text-gray-600 mr-2" aria-label="Groups" />
+        <h2 className="text-lg font-semibold text-gray-800">
+          Runner Groups <span className="text-gray-500">({totalGroups})</span>
         </h2>
-      </header>
+      </div>
 
-      {groups.length === 0 ? (
-        <p className="text-gray-600">No runner groups available.</p>
-      ) : (
-        <div className="space-y-4">
-          {groups.map((group) => (
+      {/* Runner Groups List */}
+      <div className="space-y-4">
+        {value.runner_groups.map(group => {
+          // Derived labels and counts
+          const visibilityLabel = capitalize(group.visibility);
+          const selectedWorkflowsCount = group.selected_workflows?.length ?? 0;
+          const visibilityStyles =
+            group.visibility === "all"
+              ? "bg-green-100 text-green-800"
+              : group.visibility === "selected"
+              ? "bg-amber-100 text-amber-800"
+              : "bg-gray-100 text-gray-800";
+
+          return (
             <div
               key={group.id}
-              className="bg-white rounded-lg shadow p-4 space-y-2"
+              className="border border-gray-200 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4"
             >
-              <h3 className="text-md font-semibold text-gray-900 truncate">
-                {group.name}
-              </h3>
-              <div className="flex flex-wrap items-center">
-                {/* Visibility */}
-                <Badge
-                  text={group.visibility === "selected" ? "Selected" : capitalize(group.visibility)}
-                  colorClass={
-                    group.visibility === "selected"
-                      ? "bg-indigo-100 text-indigo-800"
-                      : "bg-gray-100 text-gray-800"
-                  }
-                />
-
-                {/* Default */}
+              {/* Group Name & Default Indicator */}
+              <div className="flex items-center space-x-2">
+                <LucideReact.Server size={16} className="text-gray-500" aria-label="Group icon" />
+                <span className="font-medium text-gray-800 truncate">
+                  {group.name}
+                </span>
                 {group.default && (
-                  <Badge text="Default" colorClass="bg-blue-100 text-blue-800" />
-                )}
-
-                {/* Inherited */}
-                {group.inherited && (
-                  <Badge
-                    text="Inherited"
-                    colorClass="bg-purple-100 text-purple-800"
-                  />
-                )}
-
-                {/* Public repos */}
-                <Badge
-                  text={
-                    group.allows_public_repositories
-                      ? "Public Repos"
-                      : "Private Only"
-                  }
-                  colorClass={
-                    group.allows_public_repositories
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800"
-                  }
-                />
-
-                {/* Restricted to workflows */}
-                {group.restricted_to_workflows && (
-                  <Badge
-                    text="Restricted Workflows"
-                    colorClass="bg-yellow-100 text-yellow-800"
-                  />
-                )}
-
-                {/* Read-only workflow restrictions */}
-                {group.workflow_restrictions_read_only && (
-                  <Badge
-                    text="Workflows Locked"
-                    colorClass="bg-red-100 text-red-800"
-                  />
-                )}
-
-                {/* Network configuration */}
-                {group.network_configuration_id && (
-                  <Badge
-                    text={`Network: ${group.network_configuration_id}`}
-                    colorClass="bg-teal-100 text-teal-800"
-                  />
-                )}
-
-                {/* Selected workflows count */}
-                {group.selected_workflows && group.selected_workflows.length > 0 && (
-                  <Badge
-                    text={`Workflows: ${group.selected_workflows.length}`}
-                    colorClass="bg-indigo-50 text-indigo-700"
+                  <LucideReact.CheckCircle
+                    size={16}
+                    className="text-green-500"
+                    aria-label="Default group"
                   />
                 )}
               </div>
+
+              {/* Details Panel */}
+              <div className="flex flex-wrap items-center text-sm text-gray-600 gap-4">
+                {/* Visibility Badge */}
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-semibold ${visibilityStyles}`}
+                >
+                  {visibilityLabel}
+                </span>
+
+                {/* Inheritance */}
+                <div className="flex items-center space-x-1">
+                  {group.inherited ? (
+                    <LucideReact.ArrowUpRight
+                      size={16}
+                      className="text-blue-500"
+                      aria-label="Inherited"
+                    />
+                  ) : (
+                    <LucideReact.ShieldOff
+                      size={16}
+                      className="text-gray-400"
+                      aria-label="Local"
+                    />
+                  )}
+                  <span>{group.inherited ? "Inherited" : "Local"}</span>
+                </div>
+
+                {/* Public Repositories */}
+                <div className="flex items-center space-x-1">
+                  {group.allows_public_repositories ? (
+                    <LucideReact.Globe
+                      size={16}
+                      className="text-green-500"
+                      aria-label="Public repos allowed"
+                    />
+                  ) : (
+                    <LucideReact.Lock
+                      size={16}
+                      className="text-red-500"
+                      aria-label="Public repos restricted"
+                    />
+                  )}
+                  <span>
+                    {group.allows_public_repositories
+                      ? "Public repos allowed"
+                      : "Public repos restricted"}
+                  </span>
+                </div>
+
+                {/* Workflow Restrictions */}
+                {group.restricted_to_workflows && (
+                  <div className="flex items-center space-x-1">
+                    <LucideReact.Activity
+                      size={16}
+                      className="text-amber-500"
+                      aria-label="Workflow restrictions"
+                    />
+                    <span>{selectedWorkflowsCount} workflows</span>
+                  </div>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }

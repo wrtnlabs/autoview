@@ -1,20 +1,21 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4GroupView = {
+                export interface LegacyV4GroupView {
                     managers?: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager[];
                     onlines?: AutoViewInputSubTypes.legacy.v4.LegacyV4Online[];
                     bookmark?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatBookmark;
                     session?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession;
                     group?: AutoViewInputSubTypes.legacy.v4.LegacyV4Group;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Manager = {
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -50,14 +51,14 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4Online = {
+            }
+            export interface LegacyV4Online {
                 channelId?: string;
                 personType?: string;
                 personId?: string;
                 id?: string;
-            };
-            export type LegacyV4ChatBookmark = {
+            }
+            export interface LegacyV4ChatBookmark {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -67,8 +68,8 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
-            export type LegacyV4ChatSession = {
+            }
+            export interface LegacyV4ChatSession {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -88,8 +89,8 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
-            export type LegacyV4Group = {
+            }
+            export interface LegacyV4Group {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -100,19 +101,19 @@ export namespace AutoViewInputSubTypes {
                 createdAt?: number;
                 updatedAt?: number;
                 active?: boolean;
-            };
+            }
         }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4GroupView;
 
@@ -122,98 +123,105 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4GroupVi
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const group = value.group;
+  const managers = value.managers ?? [];
+  const onlines = value.onlines ?? [];
+  const session = value.session;
+
+  // If there's no group data, show a placeholder
   if (!group) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No group data available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} aria-hidden="true" />
+        <span className="mt-2 text-sm">No group data available</span>
       </div>
     );
   }
 
-  const managersCount = value.managers?.length ?? 0;
-  const onlineCount = value.onlines?.length ?? 0;
-  const unreadCount = value.session?.unread ?? 0;
-  const isBookmarked = !!value.bookmark;
+  // Format dates
   const createdDate = group.createdAt
-    ? new Date(group.createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
+    ? new Date(group.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
     : null;
-  const scopeLabel =
-    group.scope.charAt(0).toUpperCase() + group.scope.slice(1);
-  const initials = group.name
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join('')
-    .substring(0, 2)
-    .toUpperCase();
+  const updatedDate = group.updatedAt
+    ? new Date(group.updatedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })
+    : null;
+
+  // Truncate long description
+  const truncatedDescription = group.description
+    ? group.description.length > 120
+      ? group.description.slice(0, 120) + '…'
+      : group.description
+    : 'No description';
+
+  // Human-readable scope
+  const scopeLabel = (() => {
+    switch (group.scope) {
+      case 'public': return 'Public';
+      case 'private': return 'Private';
+      case 'all': return 'All';
+      default: return group.scope;
+    }
+  })();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-4">
-      {/* Header: Icon or Initials + Name + Badges */}
-      <div className="flex items-center space-x-4">
-        {group.icon ? (
-          <img
-            src={group.icon}
-            alt={`${group.name} icon`}
-            className="w-12 h-12 rounded-full object-cover"
+    <div className="max-w-sm w-full bg-white rounded-lg shadow-md p-5 flex flex-col gap-4">
+      {/* Header: Group Name and Active Status */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{group.name}</h2>
+        {group.active ? (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={20}
+            role="img"
+            aria-label="Active"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-lg font-semibold text-gray-600">
-            {initials}
-          </div>
+          <LucideReact.XCircle
+            className="text-red-500"
+            size={20}
+            role="img"
+            aria-label="Inactive"
+          />
         )}
-        <div className="flex-1">
-          <h2 className="text-lg font-bold text-gray-800 truncate">
-            {group.name}
-          </h2>
-          <div className="mt-1 flex flex-wrap gap-2">
-            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">
-              {scopeLabel}
-            </span>
-            {group.active === false ? (
-              <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-                Inactive
-              </span>
-            ) : null}
-            {isBookmarked && (
-              <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
-                ★ Bookmarked
-              </span>
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* Description (truncated) */}
-      {group.description && (
-        <p className="text-gray-600 text-sm line-clamp-2">
-          {group.description}
-        </p>
-      )}
-
-      {/* Statistics */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-700">
-        <div className="flex flex-col items-center">
-          <span className="font-semibold text-gray-800">{managersCount}</span>
-          <span>Managers</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="font-semibold text-gray-800">{onlineCount}</span>
-          <span>Online</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="font-semibold text-gray-800">{unreadCount}</span>
-          <span>Unread</span>
+      {/* Metadata: Scope and Dates */}
+      <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Tag size={14} aria-hidden="true" />
+          <span>{scopeLabel}</span>
         </div>
         {createdDate && (
-          <div className="flex flex-col items-center">
-            <span className="font-semibold text-gray-800">{createdDate}</span>
-            <span>Created</span>
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={14} aria-hidden="true" />
+            <span>Created {createdDate}</span>
+          </div>
+        )}
+        {updatedDate && (
+          <div className="flex items-center gap-1">
+            <LucideReact.RefreshCw size={14} aria-hidden="true" />
+            <span>Updated {updatedDate}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Description */}
+      <p className="text-gray-700 text-sm line-clamp-2">{truncatedDescription}</p>
+
+      {/* Footer: Counts */}
+      <div className="flex flex-wrap items-center gap-4 text-gray-600 text-sm">
+        <div className="flex items-center gap-1">
+          <LucideReact.Users size={16} aria-hidden="true" />
+          <span>{managers.length} manager{managers.length !== 1 ? 's' : ''}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.UserCheck size={16} aria-hidden="true" />
+          <span>{onlines.length} online</span>
+        </div>
+        {session && typeof session.unread === 'number' && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Mail size={16} aria-hidden="true" />
+            <span>{session.unread} unread</span>
           </div>
         )}
       </div>

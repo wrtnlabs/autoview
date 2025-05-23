@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Thread
      *
      * @title Thread
     */
-    export type thread = {
+    export interface thread {
         id: string;
         repository: AutoViewInputSubTypes.minimal_repository;
         subject: {
@@ -21,13 +22,13 @@ export namespace AutoViewInputSubTypes {
         last_read_at: string | null;
         url: string;
         subscription_url: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -130,13 +131,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -159,19 +160,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -208,71 +209,99 @@ export type AutoViewInput = AutoViewInputSubTypes.thread[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and formatting
-  const threads = Array.isArray(value) ? value : [];
-  const sortedThreads = threads.slice().sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-  );
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const notifications = value;
+  const totalCount = notifications.length;
+  const unreadCount = notifications.filter((n) => n.unread).length;
   const formatDate = (iso: string): string => {
     const d = new Date(iso);
-    return d.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
+    return d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
-  // 2. Handle empty state
-  if (sortedThreads.length === 0) {
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Handle empty state
+  if (totalCount === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No threads to display.
+      <div className="w-full p-6 bg-white rounded-lg shadow-md text-center text-gray-500">
+        <LucideReact.AlertCircle
+          size={48}
+          className="mx-auto mb-2 text-gray-400"
+          aria-label="No data"
+        />
+        <p>No notifications available</p>
       </div>
     );
   }
 
-  // 3. Compose the visual structure using JSX and Tailwind CSS
+  // 3. Return the React element.
+  // Ensure all displayed data is appropriately filtered, transformed, and formatted.
   return (
-    <div className="space-y-4">
-      {sortedThreads.map((thread) => (
-        <div
-          key={thread.id}
-          className="flex items-start p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-        >
-          {/* Unread Indicator */}
-          <div className="flex-shrink-0 mr-3 mt-1">
-            {thread.unread ? (
-              <span className="inline-block w-2 h-2 bg-blue-500 rounded-full" />
-            ) : (
-              <span className="inline-block w-2 h-2 bg-transparent" />
-            )}
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center justify-between">
-              {/* Thread Title */}
-              <h3 className="text-sm font-semibold text-gray-900 truncate">
-                {thread.subject.title}
-              </h3>
-              {/* Updated Date */}
-              <time className="ml-2 text-xs text-gray-500 flex-shrink-0">
-                {formatDate(thread.updated_at)}
-              </time>
-            </div>
-            {/* Repository, Type & Reason */}
-            <p className="mt-1 text-xs text-gray-600 truncate">
-              <span className="font-medium">{thread.repository.full_name}</span>
-              <span className="mx-1">·</span>
-              <span className="capitalize">{thread.subject.type}</span>
-              <span className="mx-1">·</span>
-              <span>{thread.reason}</span>
-            </p>
-          </div>
+    <div className="w-full p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">
+          Notifications
+        </h2>
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.CircleDot
+            size={16}
+            className="text-blue-500 mr-1"
+            aria-label="Unread count"
+          />
+          <span>{unreadCount} unread</span>
         </div>
-      ))}
+      </div>
+      <ul className="space-y-4">
+        {notifications.map((item) => (
+          <li
+            key={item.id}
+            className="flex items-start space-x-4 p-3 rounded-md hover:bg-gray-50"
+          >
+            <div className="mt-1 flex-shrink-0">
+              {item.unread ? (
+                <LucideReact.CircleDot
+                  size={12}
+                  className="text-blue-500"
+                  aria-label="Unread"
+                />
+              ) : (
+                <LucideReact.CheckCircle
+                  size={12}
+                  className="text-green-500"
+                  aria-label="Read"
+                />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium text-gray-900 truncate">
+                {item.subject.title}
+              </p>
+              <div className="mt-1 flex items-center text-sm text-gray-600 space-x-2">
+                <LucideReact.GitBranch
+                  size={14}
+                  className="text-gray-500"
+                  aria-label="Repository"
+                />
+                <span className="truncate">{item.repository.full_name}</span>
+              </div>
+              <div className="mt-1 flex items-center text-xs text-gray-500 space-x-2">
+                <LucideReact.Calendar
+                  size={12}
+                  className="text-gray-400"
+                  aria-label="Updated"
+                />
+                <span>{formatDate(item.updated_at)}</span>
+                <span className="bg-gray-100 text-gray-600 px-1 rounded">
+                  {item.reason}
+                </span>
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

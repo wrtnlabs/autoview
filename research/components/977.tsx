@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repository invitations let you manage who you collaborate with.
      *
      * @title Repository Invitation
     */
-    export type repository_invitation = {
+    export interface repository_invitation {
         /**
          * Unique identifier of the repository invitation.
         */
@@ -29,13 +30,13 @@ export namespace AutoViewInputSubTypes {
         url: string;
         html_url: string;
         node_id: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -138,13 +139,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -167,19 +168,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -246,74 +247,131 @@ export type AutoViewInput = AutoViewInputSubTypes.repository_invitation[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  if (!value || value.length === 0) {
-    return <div className="text-center text-gray-500 py-8">No repository invitations found.</div>;
-  }
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const items = value.map((invitation) => {
-    const createdAt = new Date(invitation.created_at);
-    const formattedDate = createdAt.toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-    const status = invitation.expired ? 'Expired' : 'Active';
-    const statusColor = invitation.expired
-      ? 'bg-red-100 text-red-800'
-      : 'bg-green-100 text-green-800';
 
-    return (
-      <div
-        key={invitation.id}
-        className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:justify-between sm:items-center"
-      >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2 mb-1">
-            <h2 className="text-lg font-semibold text-gray-900 truncate">
-              {invitation.repository.full_name}
-            </h2>
-            <span
-              className={`text-sm font-medium px-2 py-0.5 rounded ${statusColor}`}
-            >
-              {status}
-            </span>
-          </div>
-          {invitation.repository.description && (
-            <p className="text-gray-600 text-sm line-clamp-2">
-              {invitation.repository.description}
-            </p>
-          )}
-          <div className="text-gray-500 text-sm mt-2 flex flex-wrap space-x-4">
-            <span>
-              Inviter:{' '}
-              <span className="font-medium text-gray-700 truncate">
-                {invitation.inviter?.login ?? 'N/A'}
-              </span>
-            </span>
-            <span>
-              Invitee:{' '}
-              <span className="font-medium text-gray-700 truncate">
-                {invitation.invitee?.login ?? 'N/A'}
-              </span>
-            </span>
-            <span>
-              Permission:{' '}
-              <span className="font-medium text-gray-700">
-                {invitation.permissions}
-              </span>
-            </span>
-          </div>
-        </div>
-        <div className="mt-3 sm:mt-0 sm:ml-4 flex-shrink-0 text-gray-500 text-xs">
-          {formattedDate}
-        </div>
-      </div>
-    );
-  });
+  const getPermissionClasses = (perm: string): string => {
+    switch (perm) {
+      case "read":
+        return "bg-green-100 text-green-800";
+      case "write":
+        return "bg-blue-100 text-blue-800";
+      case "admin":
+        return "bg-red-100 text-red-800";
+      case "triage":
+        return "bg-yellow-100 text-yellow-800";
+      case "maintain":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   // 3. Return the React element.
-  return <div className="space-y-6">{items}</div>;
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2">No invitations available</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {value.map((invitation) => {
+        const { id, repository, invitee, inviter, permissions, created_at, expired } =
+          invitation;
+
+        return (
+          <div key={id} className="p-4 bg-white rounded-lg shadow">
+            {/* Repository */}
+            <div className="flex items-center text-lg font-semibold text-indigo-600 truncate">
+              <LucideReact.GitBranch size={20} className="mr-2 flex-shrink-0" />
+              <span className="truncate">{repository.full_name}</span>
+            </div>
+
+            {/* Permissions */}
+            <div className="mt-2">
+              <span
+                className={`inline-block px-2 py-1 text-xs font-medium rounded ${getPermissionClasses(
+                  permissions,
+                )}`}
+              >
+                {permissions.charAt(0).toUpperCase() + permissions.slice(1)}
+              </span>
+            </div>
+
+            {/* Invitee & Inviter */}
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center">
+                <LucideReact.User size={16} className="text-gray-500 mr-1 flex-shrink-0" />
+                <span className="text-gray-700 text-sm">Invitee:</span>
+                {invitee ? (
+                  <>
+                    <img
+                      src={invitee.avatar_url}
+                      alt={invitee.login}
+                      className="ml-2 w-6 h-6 rounded-full object-cover bg-gray-100 flex-shrink-0"
+                      onError={(e) =>
+                        (e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          invitee.login,
+                        )}&background=ccc&color=fff`)
+                      }
+                    />
+                    <span className="ml-1 text-sm text-gray-800 truncate">
+                      {invitee.login}
+                    </span>
+                  </>
+                ) : (
+                  <span className="ml-2 text-sm text-gray-500">None</span>
+                )}
+              </div>
+              <div className="flex items-center">
+                <LucideReact.User size={16} className="text-gray-500 mr-1 flex-shrink-0" />
+                <span className="text-gray-700 text-sm">Inviter:</span>
+                {inviter ? (
+                  <>
+                    <img
+                      src={inviter.avatar_url}
+                      alt={inviter.login}
+                      className="ml-2 w-6 h-6 rounded-full object-cover bg-gray-100 flex-shrink-0"
+                      onError={(e) =>
+                        (e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          inviter.login,
+                        )}&background=bbb&color=fff`)
+                      }
+                    />
+                    <span className="ml-1 text-sm text-gray-800 truncate">
+                      {inviter.login}
+                    </span>
+                  </>
+                ) : (
+                  <span className="ml-2 text-sm text-gray-500">None</span>
+                )}
+              </div>
+            </div>
+
+            {/* Created date & expired status */}
+            <div className="mt-4 flex items-center text-sm text-gray-500">
+              <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+              <span>{formatDate(created_at)}</span>
+              {expired && (
+                <div className="ml-auto flex items-center text-red-500">
+                  <LucideReact.XCircle size={16} className="mr-1 flex-shrink-0" />
+                  <span>Expired</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
 }

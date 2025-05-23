@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4ChannelView = {
+                export interface LegacyV4ChannelView {
                     channel?: AutoViewInputSubTypes.legacy.v4.LegacyV4Channel;
                     manager?: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager;
                     managerBadge?: AutoViewInputSubTypes.legacy.v4.LegacyV4ManagerBadge;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Channel = {
+            export interface LegacyV4Channel {
                 id?: string;
                 name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
                 homepageUrl?: string;
@@ -99,8 +100,8 @@ export namespace AutoViewInputSubTypes {
                 initial?: string;
                 utcOffset?: string;
                 systemDomain?: string;
-            };
-            export type LegacyV4Manager = {
+            }
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -136,8 +137,8 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4ManagerBadge = {
+            }
+            export interface LegacyV4ManagerBadge {
                 id?: string;
                 teamChatAlert?: number & tags.Type<"int32">;
                 teamChatUnread?: number & tags.Type<"int32">;
@@ -150,24 +151,24 @@ export namespace AutoViewInputSubTypes {
                 managerId?: string;
                 alert?: number & tags.Type<"int32">;
                 unread?: number & tags.Type<"int32">;
-            };
+            }
         }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TimeRange = {
+    }
+    export interface TimeRange {
         dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
         from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
         to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ChannelView;
 
@@ -180,133 +181,170 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   const manager = value.manager;
   const badge = value.managerBadge;
 
-  const createdDate = channel?.createdAt
-    ? new Date(channel.createdAt).toLocaleDateString('default', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
+  // Fallback avatar URLs
+  const channelAvatar =
+    channel?.avatarUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      channel?.name || "Channel"
+    )}&background=0D8ABC&color=fff`;
+  const managerAvatar =
+    manager?.avatarUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      manager?.name || "Manager"
+    )}&background=64748B&color=fff`;
+
+  // Date formatting
+  const createdAtDate = channel?.createdAt
+    ? new Date(channel.createdAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric"
       })
-    : 'N/A';
+    : null;
 
-  const plan = channel?.servicePlan
-    ? channel.servicePlan.charAt(0).toUpperCase() + channel.servicePlan.slice(1)
-    : '—';
+  // State label & icon mapping
+  const stateLabelMap: Record<string, string> = {
+    waiting: "Waiting",
+    active: "Active",
+    restricted: "Restricted",
+    preIndebted: "Pre-Indebted",
+    indebted: "Indebted",
+    banned: "Banned",
+    removed: "Removed"
+  };
+  const state = channel?.state;
+  const stateLabel = state ? stateLabelMap[state] || state : null;
 
-  const status = channel?.state
-    ? channel.state.charAt(0).toUpperCase() + channel.state.slice(1)
-    : 'Unknown';
+  const getStateIcon = () => {
+    switch (state) {
+      case "active":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "waiting":
+        return <LucideReact.Clock className="text-amber-500" size={16} />;
+      case "restricted":
+      case "banned":
+      case "indebted":
+      case "preIndebted":
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      default:
+        return null;
+    }
+  };
 
-  const isOperational =
-    channel?.inOperation === true
-      ? 'Operational'
-      : channel?.inOperation === false
-      ? 'Not operational'
-      : '—';
-
-  const bizGrade = channel?.bizGrade ? channel.bizGrade.toUpperCase() : '—';
-
+  // Manager badge unread count
   const unreadCount = badge?.unread ?? 0;
-  const alertCount = badge?.alert ?? 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // If there's no channel data, show a placeholder state
+  if (!channel) {
+    return (
+      <div className="p-4 bg-white rounded-lg shadow flex flex-col items-center text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <p className="text-sm">No channel information available.</p>
+      </div>
+    );
+  }
+
+  // 3. Return the React element.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow">
-      {/* Channel Section */}
-      {channel && (
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-gray-800 truncate">
-              {channel.name}
-            </h2>
-            <span
-              className="px-2 py-0.5 text-xs font-medium rounded"
-              style={{ backgroundColor: channel.color || '#123456', color: '#fff' }}
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header: Avatar, Name, State */}
+      <div className="flex items-center space-x-4">
+        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+          <img
+            src={channelAvatar}
+            alt={`${channel.name} avatar`}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                channel.name
+              )}&background=E5E7EB&color=6B7280`;
+            }}
+          />
+        </div>
+        <div className="flex-grow">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">
+            {channel.name}
+          </h2>
+          {stateLabel && (
+            <div className="flex items-center space-x-1 text-sm text-gray-600 mt-1">
+              {getStateIcon()}
+              <span>{stateLabel}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Description */}
+      {channel.description && (
+        <p className="mt-3 text-gray-700 text-sm line-clamp-2">
+          {channel.description}
+        </p>
+      )}
+
+      {/* Meta information */}
+      <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-gray-600">
+        {createdAtDate && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Calendar size={16} />
+            <span>{createdAtDate}</span>
+          </div>
+        )}
+        {channel.homepageUrl && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Link size={16} />
+            <a
+              href={channel.homepageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate hover:underline text-blue-600"
             >
-              {bizGrade}
-            </span>
+              {channel.homepageUrl}
+            </a>
           </div>
-          {channel.description && (
-            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
-              {channel.description}
-            </p>
-          )}
-          <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            {channel.domain && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">
-                {channel.domain}
-              </span>
-            )}
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">
-              Plan: {plan}
-            </span>
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">
-              Status: {status}
-            </span>
-            <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">
-              {isOperational}
-            </span>
+        )}
+        {channel.phoneNumber && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Phone size={16} />
+            <span>{channel.phoneNumber}</span>
           </div>
-          <div className="mt-3 text-xs text-gray-500">
-            <div>Created: {createdDate}</div>
-            {channel.country && <div>Country: {channel.country}</div>}
+        )}
+        {channel.country && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Globe size={16} />
+            <span>{channel.country}</span>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Manager Section */}
+      {/* Manager section */}
       {manager && (
-        <div className="mb-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">
-            Manager
-          </h3>
-          <div className="flex items-center space-x-3">
-            {manager.avatarUrl && (
+        <div className="mt-6 border-t pt-4">
+          <h3 className="text-sm font-medium text-gray-800">Administrator</h3>
+          <div className="flex items-center space-x-3 mt-3">
+            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
               <img
-                src={manager.avatarUrl}
-                alt={manager.name}
-                className="w-10 h-10 rounded-full object-cover"
+                src={managerAvatar}
+                alt={`${manager.name} avatar`}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    manager.name
+                  )}&background=E5E7EB&color=6B7280`;
+                }}
               />
-            )}
-            <div className="flex-1">
-              <p className="text-gray-800 font-medium truncate">
-                {manager.name}
-              </p>
-              <p className="text-xs text-gray-500 truncate">
-                {manager.email}
-              </p>
             </div>
-            <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
-              {manager.role.charAt(0).toUpperCase() + manager.role.slice(1)}
-            </span>
+            <div className="flex-grow">
+              <p className="text-gray-900 font-medium truncate">{manager.name}</p>
+              <p className="text-gray-600 text-sm truncate">{manager.email}</p>
+            </div>
           </div>
-          {manager.mobileNumber && (
-            <p className="mt-2 text-xs text-gray-500">
-              📱 {manager.mobileNumber}
-            </p>
+          {unreadCount > 0 && (
+            <div className="flex items-center space-x-1 text-sm text-gray-600 mt-2">
+              <LucideReact.MessageSquare size={16} />
+              <span>Unread: {unreadCount}</span>
+            </div>
           )}
-        </div>
-      )}
-
-      {/* Badge Section */}
-      {badge && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">
-            Notifications
-          </h3>
-          <div className="flex space-x-4 text-xs">
-            <div className="flex items-center space-x-1">
-              <span className="px-2 py-1 bg-red-100 text-red-800 rounded">
-                Alerts
-              </span>
-              <span className="font-medium text-gray-800">{alertCount}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span className="px-2 py-1 bg-green-100 text-green-800 rounded">
-                Unread
-              </span>
-              <span className="font-medium text-gray-800">{unreadCount}</span>
-            </div>
-          </div>
         </div>
       )}
     </div>

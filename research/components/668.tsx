@@ -1,7 +1,8 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type code_scanning_alert_items = {
+    export interface code_scanning_alert_items {
         number: AutoViewInputSubTypes.alert_number;
         created_at: AutoViewInputSubTypes.alert_created_at;
         updated_at?: AutoViewInputSubTypes.alert_updated_at;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         tool: AutoViewInputSubTypes.code_scanning_analysis_tool;
         most_recent_instance: AutoViewInputSubTypes.code_scanning_alert_instance;
         dismissal_approved_by?: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -92,7 +93,7 @@ export namespace AutoViewInputSubTypes {
      * The dismissal comment associated with the dismissal of the alert.
     */
     export type code_scanning_alert_dismissed_comment = (string & tags.MaxLength<280>) | null;
-    export type code_scanning_alert_rule_summary = {
+    export interface code_scanning_alert_rule_summary {
         /**
          * A unique identifier for the rule used to detect the alert.
         */
@@ -129,12 +130,12 @@ export namespace AutoViewInputSubTypes {
          * A link to the documentation for the rule used to detect the alert.
         */
         help_uri?: string | null;
-    };
-    export type code_scanning_analysis_tool = {
+    }
+    export interface code_scanning_analysis_tool {
         name?: AutoViewInputSubTypes.code_scanning_analysis_tool_name;
         version?: AutoViewInputSubTypes.code_scanning_analysis_tool_version;
         guid?: AutoViewInputSubTypes.code_scanning_analysis_tool_guid;
-    };
+    }
     /**
      * The name of the tool used to generate the code scanning analysis.
     */
@@ -147,7 +148,7 @@ export namespace AutoViewInputSubTypes {
      * The GUID of the tool used to generate the code scanning analysis, if provided in the uploaded SARIF data.
     */
     export type code_scanning_analysis_tool_guid = string | null;
-    export type code_scanning_alert_instance = {
+    export interface code_scanning_alert_instance {
         ref?: AutoViewInputSubTypes.code_scanning_ref;
         analysis_key?: AutoViewInputSubTypes.code_scanning_analysis_analysis_key;
         environment?: AutoViewInputSubTypes.code_scanning_alert_environment;
@@ -164,7 +165,7 @@ export namespace AutoViewInputSubTypes {
          * For example identifying it as documentation, or a generated file.
         */
         classifications?: AutoViewInputSubTypes.code_scanning_alert_classification[];
-    };
+    }
     /**
      * The Git reference, formatted as `refs/pull/<number>/merge`, `refs/pull/<number>/head`,
      * `refs/heads/<branch name>` or simply `<branch name>`.
@@ -185,13 +186,13 @@ export namespace AutoViewInputSubTypes {
     /**
      * Describe a region within a file for the alert.
     */
-    export type code_scanning_alert_location = {
+    export interface code_scanning_alert_location {
         path?: string;
         start_line?: number & tags.Type<"int32">;
         end_line?: number & tags.Type<"int32">;
         start_column?: number & tags.Type<"int32">;
         end_column?: number & tags.Type<"int32">;
-    };
+    }
     /**
      * A classification of the file. For example to identify it as generated.
     */
@@ -204,121 +205,182 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_alert_items[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalAlerts = value.length;
-  const counts = value.reduce(
-    (acc, alert) => {
-      const stateKey = alert.state ?? "unknown";
-      if (stateKey === "open") acc.open++;
-      else if (stateKey === "dismissed") acc.dismissed++;
-      else if (stateKey === "fixed") acc.fixed++;
-      else acc.unknown++;
-      return acc;
-    },
-    { open: 0, dismissed: 0, fixed: 0, unknown: 0 }
-  );
-  const formatDate = (iso: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
+
+  // Format ISO dates to a medium date + short time string.
+  const formatDate = (dateStr?: string | null): string =>
+    dateStr
+      ? new Date(dateStr).toLocaleString(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
         })
-      : "";
+      : '—';
+
+  // Map rule severity to Tailwind badge colors.
+  const severityColor = {
+    none: 'bg-gray-100 text-gray-800',
+    note: 'bg-blue-100 text-blue-800',
+    warning: 'bg-yellow-100 text-yellow-800',
+    error: 'bg-red-100 text-red-800',
+  } as Record<NonNullable<AutoViewInputSubTypes.code_scanning_alert_rule_summary['severity']>, string>;
+
+  // Map security severity level to Tailwind badge colors.
+  const secSeverityColor = {
+    low: 'bg-green-100 text-green-800',
+    medium: 'bg-yellow-100 text-yellow-800',
+    high: 'bg-red-100 text-red-800',
+    critical: 'bg-purple-100 text-purple-800',
+  } as Record<NonNullable<AutoViewInputSubTypes.code_scanning_alert_rule_summary['security_severity_level']>, string>;
+
+  // Return appropriate icon for alert state.
+  const getStateIcon = (state: AutoViewInputSubTypes.code_scanning_alert_state) => {
+    switch (state) {
+      case 'open':
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      case 'fixed':
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case 'dismissed':
+        return <LucideReact.XCircle className="text-amber-500" size={16} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400" size={16} />;
+    }
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Handle empty array gracefully.
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2">No alerts available</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {/* Summary Bar */}
-      <section className="p-3 bg-gray-100 rounded-lg text-sm text-gray-700">
-        {totalAlerts} Alert{totalAlerts !== 1 ? "s" : ""}:{" "}
-        <span className="font-medium text-green-600">{counts.open} Open</span>,{" "}
-        <span className="font-medium text-yellow-600">{counts.dismissed} Dismissed</span>,{" "}
-        <span className="font-medium text-gray-600">{counts.fixed} Fixed</span>
-      </section>
+      {value.map((item) => {
+        const {
+          number,
+          state,
+          rule,
+          created_at,
+          updated_at,
+          fixed_at,
+          dismissed_at,
+          dismissed_by,
+          dismissed_reason,
+          dismissed_comment,
+          tool,
+          html_url,
+        } = item;
 
-      {/* Alert List */}
-      <ul className="space-y-4">
-        {value.map((alert) => {
-          const stateKey = alert.state ?? "unknown";
-          const stateLabel = stateKey.charAt(0).toUpperCase() + stateKey.slice(1);
-          const stateStyles: Record<string, string> = {
-            open: "text-green-700 bg-green-100",
-            dismissed: "text-yellow-700 bg-yellow-100",
-            fixed: "text-gray-700 bg-gray-100",
-            unknown: "text-gray-700 bg-gray-100",
-          };
-          const ruleName = alert.rule?.name ?? alert.rule?.id ?? "Unnamed Rule";
-          const severity = alert.rule?.security_severity_level
-            ? alert.rule.security_severity_level.toUpperCase()
-            : null;
-          const toolLabel = alert.tool?.name
-            ? alert.tool.version
-              ? `${alert.tool.name} v${alert.tool.version}`
-              : alert.tool.name
-            : null;
-          const createdAt = formatDate(alert.created_at);
-          const message = alert.most_recent_instance?.message?.text;
-          const loc = alert.most_recent_instance?.location;
+        // Derive a display title: prefer rule.name, then rule.id, fallback to alert number.
+        const title = rule?.name || rule?.id || `Alert #${number}`;
 
-          return (
-            <li
-              key={alert.number}
-              className="p-4 bg-white rounded-lg shadow flex flex-col"
-            >
-              {/* Header */}
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center space-x-2">
-                  <span className="font-semibold text-gray-800">#{alert.number}</span>
-                  <span
-                    className={`px-2 py-0.5 rounded-full text-xs font-medium ${stateStyles[stateKey]}`}
-                  >
-                    {stateLabel}
+        return (
+          <div key={number} className="p-4 bg-white rounded-lg shadow">
+            {/* Header: Icon + Title + Link */}
+            <div className="flex justify-between items-start">
+              <div className="flex items-center space-x-2">
+                {getStateIcon(state)}
+                <h3 className="text-lg font-semibold text-gray-900 truncate">{title}</h3>
+              </div>
+              <div className="flex items-center space-x-1 max-w-xs">
+                <LucideReact.Link size={16} className="text-gray-400" />
+                <span className="text-sm text-gray-500 truncate">{html_url}</span>
+              </div>
+            </div>
+
+            {/* Badges: severity, security level, tags */}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {rule?.severity && (
+                <span
+                  className={`px-2 py-0.5 rounded ${severityColor[rule.severity]} text-xs font-medium`}
+                >
+                  {rule.severity.charAt(0).toUpperCase() + rule.severity.slice(1)}
+                </span>
+              )}
+              {rule?.security_severity_level && (
+                <span
+                  className={`px-2 py-0.5 rounded ${secSeverityColor[rule.security_severity_level]} text-xs font-medium`}
+                >
+                  {rule.security_severity_level.charAt(0).toUpperCase() +
+                    rule.security_severity_level.slice(1)}
+                </span>
+              )}
+              {rule?.tags && rule.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1">
+                  {rule.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-1.5 py-0.5 bg-gray-100 text-gray-700 text-xs rounded"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Rule description (truncated) */}
+            {rule?.description && (
+              <p className="mt-2 text-sm text-gray-700 line-clamp-2">{rule.description}</p>
+            )}
+
+            {/* Dates & Tool Info */}
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
+              <div className="flex items-center space-x-1">
+                <LucideReact.Calendar size={16} />
+                <span>Created: {formatDate(created_at)}</span>
+              </div>
+              {updated_at && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Edit2 size={16} />
+                  <span>Updated: {formatDate(updated_at)}</span>
+                </div>
+              )}
+              {state === 'fixed' && fixed_at && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.CheckCircle size={16} className="text-green-500" />
+                  <span>Fixed: {formatDate(fixed_at)}</span>
+                </div>
+              )}
+              {state === 'dismissed' && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.XCircle size={16} className="text-amber-500" />
+                  <span>Dismissed: {formatDate(dismissed_at)}</span>
+                </div>
+              )}
+              {tool?.name && (
+                <div className="flex items-center space-x-1 col-span-full sm:col-span-2">
+                  <LucideReact.Code size={16} className="text-gray-400" />
+                  <span>
+                    {tool.name}
+                    {tool.version ? ` v${tool.version}` : ''}
+                    {tool.guid ? ` (${tool.guid})` : ''}
                   </span>
                 </div>
-                <time className="text-sm text-gray-500">{createdAt}</time>
-              </div>
-
-              {/* Rule & Meta */}
-              <h3 className="text-lg font-semibold text-gray-800 mb-1 truncate">
-                {ruleName}
-              </h3>
-              <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2 space-x-2">
-                {severity && (
-                  <span className="px-1 bg-red-100 text-red-800 rounded">{severity}</span>
-                )}
-                {toolLabel && (
-                  <span className="px-1 bg-blue-100 text-blue-800 rounded">{toolLabel}</span>
-                )}
-              </div>
-
-              {/* Message */}
-              {message && (
-                <p className="text-gray-700 text-sm mb-2 overflow-hidden line-clamp-2">
-                  {message}
-                </p>
               )}
+            </div>
 
-              {/* Location */}
-              {loc?.path && (
-                <p className="text-sm text-gray-500">
-                  Path:{" "}
-                  <span className="font-mono break-all">
-                    {loc.path}
-                    {loc.start_line &&
-                      `:${loc.start_line}${
-                        loc.end_line && loc.end_line !== loc.start_line
-                          ? `-${loc.end_line}`
-                          : ""
-                      }`}
-                  </span>
-                </p>
-              )}
-            </li>
-          );
-        })}
-      </ul>
+            {/* Dismissal details */}
+            {state === 'dismissed' && dismissed_by && (
+              <div className="mt-2 text-sm text-gray-600">
+                <span className="font-medium">Dismissed by:</span> {dismissed_by.login}
+                {dismissed_reason && (
+                  <>
+                    <span className="mx-1">—</span>
+                    <span className="italic">{dismissed_reason}</span>
+                  </>
+                )}
+                {dismissed_comment && (
+                  <p className="mt-1 text-gray-700 line-clamp-2">{dismissed_comment}</p>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

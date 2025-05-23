@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
@@ -37,77 +38,82 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const users = value;
-  
-  // Helper to format optional ISO dates
-  const formatDate = (iso?: string): string =>
-    iso ? new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }) : "";
+  // 1. Data transformation
+  const users = Array.isArray(value) ? value : [];
+  const userCount = users.length;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!users || users.length === 0) {
-    return (
-      <p className="p-4 text-center text-gray-500">
-        No users found.
-      </p>
-    );
-  }
-
+  // 2. JSX composition with Tailwind CSS
   return (
-    <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {users.map((user) => {
-        const displayName = user.name?.trim() || user.login;
-        const starredDate = formatDate(user.starred_at);
-        const isAdmin = user.site_admin;
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-4">
+        <LucideReact.Users className="text-gray-500 mr-2" size={20} />
+        <h2 className="text-lg font-semibold text-gray-700">
+          {userCount} GitHub User{userCount !== 1 ? "s" : ""}
+        </h2>
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {users.map((user) => {
+          const displayName = user.name ?? user.login;
+          const isAdmin = user.site_admin;
+          const handleError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+            e.currentTarget.onerror = null;
+            const initials = encodeURIComponent(
+              displayName
+                .split(" ")
+                .map((n) => n[0] ?? "")
+                .join("")
+            );
+            e.currentTarget.src = `https://ui-avatars.com/api/?name=${initials}&background=0D8ABC&color=fff`;
+          };
 
-        return (
-          <div
-            key={user.id}
-            className="flex items-center bg-white rounded-lg shadow-sm hover:shadow-md transition p-4"
-          >
-            <img
-              className="w-12 h-12 rounded-full flex-shrink-0"
-              src={user.avatar_url}
-              alt={displayName}
-            />
-            <div className="ml-4 flex-1 min-w-0">
-              <div className="flex items-center space-x-2">
-                <a
-                  href={user.html_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-lg font-semibold text-blue-600 hover:underline truncate"
-                  title={displayName}
-                >
-                  {displayName}
-                </a>
-                {isAdmin && (
-                  <span className="px-2 py-0.5 text-xs font-medium text-red-800 bg-red-100 rounded-full">
-                    Admin
-                  </span>
+          return (
+            <div
+              key={user.id}
+              className="flex items-center p-3 bg-gray-50 rounded-lg"
+            >
+              <div className="flex-shrink-0">
+                <img
+                  src={user.avatar_url}
+                  alt={`${displayName} avatar`}
+                  onError={handleError}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              </div>
+              <div className="ml-4 flex-1 min-w-0">
+                <div className="flex items-center">
+                  <p className="text-md font-medium text-gray-800 truncate">
+                    {displayName}
+                  </p>
+                  {isAdmin && (
+                    <LucideReact.CheckCircle
+                      className="ml-2 text-green-500 flex-shrink-0"
+                      size={16}
+                      aria-label="Site Admin"
+                      role="img"
+                    />
+                  )}
+                </div>
+                <div className="mt-1 text-sm text-gray-500 flex items-center truncate">
+                  <LucideReact.AtSign
+                    className="mr-1 text-gray-400"
+                    size={14}
+                  />
+                  <span>{user.login}</span>
+                </div>
+                {user.email && (
+                  <div className="mt-1 text-sm text-gray-500 flex items-center truncate">
+                    <LucideReact.Mail
+                      className="mr-1 text-gray-400"
+                      size={14}
+                    />
+                    <span>{user.email}</span>
+                  </div>
                 )}
               </div>
-              {user.email && (
-                <p className="mt-1 text-sm text-gray-500 truncate">
-                  {user.email}
-                </p>
-              )}
-              <p className="mt-1 text-sm text-gray-400 truncate">
-                Type: {user.type}
-              </p>
-              {starredDate && (
-                <p className="mt-1 text-xs text-gray-400">
-                  Starred on {starredDate}
-                </p>
-              )}
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

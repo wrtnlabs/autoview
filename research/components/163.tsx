@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IPageIShoppingChannel {
         /**
@@ -7,7 +8,7 @@ export namespace AutoViewInputSubTypes {
          *
          * Collection of records with pagination indformation.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * Page information.
              *
@@ -20,13 +21,13 @@ export namespace AutoViewInputSubTypes {
              * @title List of records
             */
             data: AutoViewInputSubTypes.IShoppingChannel.IHierarchical[];
-        };
+        }
     }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -53,13 +54,13 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     export namespace IShoppingChannel {
         /**
          * Hierarchical channel information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * Children categories with hierarchical structure.
              *
@@ -90,13 +91,13 @@ export namespace AutoViewInputSubTypes {
              * @title Name of the channel
             */
             name: string;
-        };
+        }
     }
     export namespace IShoppingChannelCategory {
         /**
          * Hierarchical category information with children categories.
         */
-        export type IHierarchical = {
+        export interface IHierarchical {
             /**
              * List of children categories with hierarchical structure.
              *
@@ -139,7 +140,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingChannel.IHierarchical;
@@ -150,86 +151,86 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingChannel.IHierarc
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { pagination, data: channels } = value;
-
+  const { current, pages, records } = pagination;
   const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
 
-  // Recursive renderer for categories
-  const renderCategory = (
-    category: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical,
-    level: number = 0,
-  ): React.ReactNode => (
-    <div
-      key={category.id}
-      style={{ paddingLeft: level * 16 }}
-      className="py-1"
-    >
-      <div className="flex items-center space-x-2">
-        <span className="font-medium text-gray-800">{category.name}</span>
-        <span className="text-xs text-gray-500">({category.code})</span>
-      </div>
-      {category.children.length > 0 &&
-        category.children.map((child) => renderCategory(child, level + 1))}
-    </div>
-  );
+  function renderCategories(
+    categories: AutoViewInputSubTypes.IShoppingChannelCategory.IHierarchical[],
+  ): React.ReactNode {
+    return (
+      <ul className="mt-2 space-y-2">
+        {categories.map((cat) => (
+          <li key={cat.id}>
+            <div className="flex items-start">
+              <LucideReact.Tag size={16} className="text-gray-400 flex-shrink-0 mt-1" />
+              <div className="ml-2">
+                <div className="text-sm font-medium text-gray-800">{cat.name}</div>
+                <div className="text-xs text-gray-500 flex items-center">
+                  <LucideReact.Calendar size={12} className="mr-1" />
+                  <span>{formatDate(cat.created_at)}</span>
+                </div>
+              </div>
+            </div>
+            {cat.children.length > 0 && (
+              <ul className="mt-2 pl-4 border-l border-gray-200">
+                {renderCategories(cat.children)}
+              </ul>
+            )}
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
+    <div className="p-4 bg-white rounded-lg shadow-md">
       {/* Pagination Summary */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <div className="text-sm text-gray-600">
-          Page{" "}
-          <span className="font-medium text-gray-800">
-            {pagination.current}
-          </span>{" "}
-          of{" "}
-          <span className="font-medium text-gray-800">{pagination.pages}</span>
-        </div>
-        <div className="text-sm text-gray-600 mt-1 sm:mt-0">
-          Showing{" "}
-          <span className="font-medium text-gray-800">{pagination.limit}</span>{" "}
-          per page of{" "}
-          <span className="font-medium text-gray-800">
-            {pagination.records}
-          </span>{" "}
-          records
-        </div>
+      <div className="flex items-center text-sm text-gray-600 mb-6">
+        <LucideReact.ListOrdered size={16} className="mr-2" />
+        <span>
+          Page {current} of {pages} &middot; {records} record{records !== 1 ? 's' : ''}
+        </span>
       </div>
 
-      {/* Channels List */}
-      <div className="grid gap-4">
-        {channels.map((channel) => (
-          <div
-            key={channel.id}
-            className="p-4 bg-gray-50 rounded-md border border-gray-200"
-          >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {channel.name}
-              </h2>
-              <div className="text-sm text-gray-500">Code: {channel.code}</div>
-            </div>
-            <div className="mt-1 text-sm text-gray-500">
-              Created: {formatDate(channel.created_at)}
-            </div>
-            {channel.categories.length > 0 && (
-              <div className="mt-3">
-                <div className="text-sm font-medium text-gray-700 mb-1">
-                  Categories
+      {/* Channel List or Empty State */}
+      {channels.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10">
+          <LucideReact.AlertCircle size={24} className="text-gray-400 mb-2" />
+          <p className="text-gray-500">No shopping channels available.</p>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {channels.map((channel) => (
+            <div key={channel.id} className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <LucideReact.ShoppingCart size={20} className="text-indigo-500" />
+                  <h2 className="ml-2 text-lg font-semibold text-gray-800">{channel.name}</h2>
                 </div>
-                <div>{channel.categories.map((cat) => renderCategory(cat))}</div>
+                <div className="text-sm text-gray-500 flex items-center">
+                  <LucideReact.Calendar size={16} className="mr-1" />
+                  <span>{formatDate(channel.created_at)}</span>
+                </div>
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+              {channel.categories.length === 0 ? (
+                <p className="mt-4 text-gray-500 text-sm">No categories available.</p>
+              ) : (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-gray-700">Categories:</h3>
+                  {renderCategories(channel.categories)}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

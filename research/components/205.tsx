@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4UserChatView = {
+                export interface LegacyV4UserChatView {
                     campaign?: AutoViewInputSubTypes.legacy.v4.marketing.LegacyV4Campaign;
                     bookmark?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatBookmark;
                     session?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
                     supportBot?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBot;
                     user?: AutoViewInputSubTypes.legacy.v4.LegacyV4User;
                     userChat?: AutoViewInputSubTypes.legacy.v4.LegacyV4UserChat;
-                };
+                }
             }
         }
         export namespace v4 {
@@ -25,7 +26,7 @@ export namespace AutoViewInputSubTypes {
                  *
                  * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
                 */
-                export type LegacyV4Campaign = {
+                export interface LegacyV4Campaign {
                     id?: string;
                     channelId?: string;
                     name: string;
@@ -59,8 +60,8 @@ export namespace AutoViewInputSubTypes {
                     click?: number & tags.Type<"int32">;
                     userChatExpireDuration?: string;
                     managerId?: string;
-                };
-                export type LegacyV4OneTimeMsg = {
+                }
+                export interface LegacyV4OneTimeMsg {
                     id?: string;
                     channelId?: string;
                     name: string;
@@ -85,9 +86,9 @@ export namespace AutoViewInputSubTypes {
                     goal?: number & tags.Type<"int32">;
                     click?: number & tags.Type<"int32">;
                     userChatExpireDuration?: string;
-                };
+                }
             }
-            export type LegacyV4ChatBookmark = {
+            export interface LegacyV4ChatBookmark {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -97,8 +98,8 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
-            export type LegacyV4ChatSession = {
+            }
+            export interface LegacyV4ChatSession {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -118,8 +119,8 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
-            export type LegacyV4ChatTag = {
+            }
+            export interface LegacyV4ChatTag {
                 id?: string;
                 channelId?: string;
                 colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
@@ -128,9 +129,9 @@ export namespace AutoViewInputSubTypes {
                 description?: string;
                 followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
                 createdAt?: number;
-            };
+            }
             export namespace message {
-                export type LegacyV4Message = {
+                export interface LegacyV4Message {
                     chatKey?: string;
                     id?: string;
                     mainKey?: string;
@@ -161,19 +162,19 @@ export namespace AutoViewInputSubTypes {
                     threadMsg?: boolean;
                     broadcastedMsg?: boolean;
                     rootMessageId?: string;
-                };
-                export type LegacyV4Block = {
+                }
+                export interface LegacyV4Block {
                     type: "bullets" | "code" | "text";
                     language?: string;
                     value?: string;
                     blocks?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block[];
-                };
-                export type LegacyV4Button = {
+                }
+                export interface LegacyV4Button {
                     title: string;
                     colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
                     url: string;
-                };
-                export type LegacyV4File = {
+                }
+                export interface LegacyV4File {
                     id: string;
                     type?: string;
                     name: string;
@@ -190,41 +191,41 @@ export namespace AutoViewInputSubTypes {
                     channelId?: string;
                     chatType?: string;
                     chatId?: string;
-                };
-                export type LegacyV4Log = {
+                }
+                export interface LegacyV4Log {
                     action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
                     values?: string[];
-                };
-                export type LegacyV4Reaction = {
+                }
+                export interface LegacyV4Reaction {
                     emojiName: string;
                     personKeys?: string[] & tags.UniqueItems;
                     empty?: boolean;
-                };
-                export type LegacyV4ProfileBotInput = {
+                }
+                export interface LegacyV4ProfileBotInput {
                     id?: string;
                     key?: string;
                     type?: string;
                     name?: string;
                     value?: AutoViewInputSubTypes.AttributeValue;
-                };
-                export type LegacyV4MessageMarketing = {
+                }
+                export interface LegacyV4MessageMarketing {
                     type?: string;
                     id?: string;
                     advertising?: boolean;
                     sendToOfflineXms?: boolean;
                     sendToOfflineEmail?: boolean;
                     exposureType?: "fullScreen";
-                };
-                export type LegacyV4MessageSupportBot = {
+                }
+                export interface LegacyV4MessageSupportBot {
                     id?: string;
                     revisionId?: string;
                     sectionId?: string;
                     stepIndex?: number & tags.Type<"int32">;
                     buttons?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
                     submitButtonIndex?: number & tags.Type<"int32">;
-                };
+                }
             }
-            export type LegacyV4WebPage = {
+            export interface LegacyV4WebPage {
                 id: string;
                 url: string;
                 title?: string;
@@ -239,12 +240,12 @@ export namespace AutoViewInputSubTypes {
                 previewKey?: string;
                 logo?: string;
                 name?: string;
-            };
-            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+            }
+            export interface LegacyV4SupportBotRouteSection_dollar_LegacyV4Button {
                 text: string;
                 nextSectionId: string;
-            };
-            export type LegacyV4SupportBot = {
+            }
+            export interface LegacyV4SupportBot {
                 id?: string;
                 channelId: string;
                 pluginId?: string;
@@ -264,8 +265,8 @@ export namespace AutoViewInputSubTypes {
                 updatedAt?: number;
                 userChatExpireDuration?: string;
                 managerId?: string;
-            };
-            export type LegacyV4User = {
+            }
+            export interface LegacyV4User {
                 id?: string;
                 channelId?: string;
                 memberId?: string;
@@ -305,8 +306,8 @@ export namespace AutoViewInputSubTypes {
                 managed?: boolean;
                 mobileNumber?: string & tags.Default<"+18004424000">;
                 systemLanguage?: string & tags.Default<"en">;
-            };
-            export type LegacyV4UserChat = {
+            }
+            export interface LegacyV4UserChat {
                 id?: string;
                 channelId?: string;
                 appUserKey?: string;
@@ -351,45 +352,46 @@ export namespace AutoViewInputSubTypes {
                 snoozedAt?: number;
                 expiresAt?: number;
                 version?: number & tags.Type<"int32">;
-            };
-            export type LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot = {
+            }
+            export interface LegacyV4UserChat_dollar_LegacyV4UserChatSupportBot {
                 id?: string;
                 revisionId?: string;
                 sectionPath?: string[];
-            };
-            export type LegacyV4UserChat_dollar_LegacyV4UserChatMarketing = {
+            }
+            export interface LegacyV4UserChat_dollar_LegacyV4UserChatMarketing {
                 type?: string;
                 id?: string;
                 enableSupportBot?: boolean;
                 supportBotId?: string;
-            };
+            }
         }
     }
-    export type Expression = {
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
-    export type TimeRange = {
+    }
+    export interface Operator {
+    }
+    export interface TimeRange {
         dayOfWeeks: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] & tags.UniqueItems;
         from: number & tags.Type<"uint32"> & tags.Maximum<1440>;
         to: number & tags.Type<"uint32"> & tags.Maximum<1440>;
-    };
+    }
     export namespace marketing {
-        export type CampaignDraft = {
+        export interface CampaignDraft {
             campaign: AutoViewInputSubTypes.marketing.Campaign;
             msgs: AutoViewInputSubTypes.marketing.CampaignMsg[] & tags.MinItems<1> & tags.MaxItems<4>;
-        };
+        }
         /**
          * ### 이벤트 기록
          *
          * - 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)
         */
-        export type Campaign = {
+        export interface Campaign {
             id?: string;
             channelId?: string;
             name: string;
@@ -427,16 +429,16 @@ export namespace AutoViewInputSubTypes {
             userChatExpireDuration?: string;
             managerId?: string;
             recipeCaseId?: string;
-        };
-        export type HoldingPropertyConstant = {
+        }
+        export interface HoldingPropertyConstant {
             baseEventName: string;
             baseEventKey: string;
             eventQuery?: AutoViewInputSubTypes.Expression;
             baseEventType: "triggerEvent" | "additionalFilter";
             operator?: AutoViewInputSubTypes.EventSchema;
             values?: {};
-        };
-        export type CampaignMsg = {
+        }
+        export interface CampaignMsg {
             id: string;
             campaignId?: string;
             channelId?: string;
@@ -449,14 +451,14 @@ export namespace AutoViewInputSubTypes {
             view?: number & tags.Type<"int32">;
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
-        };
-        export type SendMediumSettings = {
+        }
+        export interface SendMediumSettings {
             type: string;
-        };
-        export type OneTimeMsgDraft = {
+        }
+        export interface OneTimeMsgDraft {
             oneTimeMsg: AutoViewInputSubTypes.marketing.OneTimeMsg;
-        };
-        export type OneTimeMsg = {
+        }
+        export interface OneTimeMsg {
             id?: string;
             channelId?: string;
             name: string;
@@ -482,9 +484,9 @@ export namespace AutoViewInputSubTypes {
             goal?: number & tags.Type<"int32">;
             click?: number & tags.Type<"int32">;
             userChatExpireDuration?: string;
-        };
+        }
     }
-    export type EventSchema = {
+    export interface EventSchema {
         id?: string;
         channelId?: string;
         eventName?: string;
@@ -494,8 +496,8 @@ export namespace AutoViewInputSubTypes {
         createdAt?: number;
         updatedAt?: number;
         icon?: string;
-    };
-    export type AttributeValue = {
+    }
+    export interface AttributeValue {
         s?: string;
         n?: string;
         b?: {
@@ -526,13 +528,13 @@ export namespace AutoViewInputSubTypes {
         }[];
         "null"?: boolean;
         bool?: boolean;
-    };
+    }
     export namespace supportbot {
-        export type SupportBotDraft = {
+        export interface SupportBotDraft {
             supportBot?: AutoViewInputSubTypes.supportbot.SupportBot;
             sections?: AutoViewInputSubTypes.supportbot.SupportBotSection[];
-        };
-        export type SupportBot = {
+        }
+        export interface SupportBot {
             id?: string;
             channelId: string;
             botName: string;
@@ -551,38 +553,38 @@ export namespace AutoViewInputSubTypes {
             updatedAt?: number;
             userChatExpireDuration?: string;
             managerId?: string;
-        };
-        export type SupportBotSection = {
+        }
+        export interface SupportBotSection {
             name?: string;
             actions?: AutoViewInputSubTypes.userchat.UserChatStaticAction[];
             id?: string;
             steps?: AutoViewInputSubTypes.supportbot.SupportBotSection_dollar_Step[];
             type: string;
-        };
-        export type SupportBotSection_dollar_Step = {
+        }
+        export interface SupportBotSection_dollar_Step {
             message: AutoViewInputSubTypes.message.NestedMessage;
-        };
+        }
     }
     export namespace userchat {
-        export type UserChatStaticAction = {
+        export interface UserChatStaticAction {
             type: string;
-        };
+        }
     }
     export namespace message {
-        export type NestedMessage = {
+        export interface NestedMessage {
             blocks?: AutoViewInputSubTypes.message.Block[];
             buttons?: AutoViewInputSubTypes.message.Button[] & tags.MinItems<1> & tags.MaxItems<2>;
             files?: AutoViewInputSubTypes.message.File[] & tags.MinItems<1> & tags.MaxItems<30>;
             webPage?: AutoViewInputSubTypes.message.WebPage;
             form?: AutoViewInputSubTypes.message.form.Form;
-        };
-        export type Block = {
+        }
+        export interface Block {
             type: "bullets" | "code" | "text";
             language?: string;
             value?: string;
             blocks?: AutoViewInputSubTypes.message.Block[];
-        };
-        export type Button = {
+        }
+        export interface Button {
             title: string;
             colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
             action: AutoViewInputSubTypes.message.action.Action;
@@ -590,15 +592,16 @@ export namespace AutoViewInputSubTypes {
              * @deprecated
             */
             url?: string;
-        };
+        }
         export namespace action {
-            export type Action = {
+            export interface Action {
                 attributes?: AutoViewInputSubTypes.message.action.Attributes;
                 type: string;
-            };
-            export type Attributes = {};
+            }
+            export interface Attributes {
+            }
         }
-        export type File = {
+        export interface File {
             id: string;
             type?: string;
             name: string;
@@ -615,8 +618,8 @@ export namespace AutoViewInputSubTypes {
             channelId?: string;
             chatType?: string;
             chatId?: string;
-        };
-        export type WebPage = {
+        }
+        export interface WebPage {
             id: string;
             url: string;
             title?: string;
@@ -631,14 +634,14 @@ export namespace AutoViewInputSubTypes {
             previewKey?: string;
             logo?: string;
             name?: string;
-        };
+        }
         export namespace form {
-            export type Form = {
+            export interface Form {
                 submittedAt?: number;
                 inputs?: AutoViewInputSubTypes.message.form.FormInput[];
                 type: string;
-            };
-            export type FormInput = {
+            }
+            export interface FormInput {
                 value?: {};
                 readOnly?: boolean;
                 type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
@@ -647,15 +650,15 @@ export namespace AutoViewInputSubTypes {
                 dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
                 userChatProfileBindingKey?: boolean;
                 userProfileBindingKey?: boolean;
-            };
+            }
         }
     }
     export namespace profile {
-        export type UserProfile = {
+        export interface UserProfile {
             [key: string]: {};
-        };
+        }
     }
-    export type WebInfo = {
+    export interface WebInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -663,8 +666,8 @@ export namespace AutoViewInputSubTypes {
         browserName?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type MobileInfo = {
+    }
+    export interface MobileInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -674,7 +677,7 @@ export namespace AutoViewInputSubTypes {
         sdkVersion?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4UserChatView;
 
@@ -684,88 +687,120 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4UserCha
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const user = value.user;
-  const userName = user?.name || 'Unknown User';
-  const avatarUrl = user?.avatarUrl;
-  const lastSeen = user?.lastSeenAt
-    ? new Date(user.lastSeenAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
-    : null;
+  const name = user?.name || user?.memberId || 'Unnamed User';
+  const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    name,
+  )}&background=random`;
+  const avatarUrl = user?.avatarUrl || placeholderAvatar;
 
-  const session = value.session;
-  const unreadCount = session?.unread || 0;
+  const lastMsg =
+    value.message?.plainText ||
+    value.message?.blocks?.map(b => b.value).filter(Boolean).join(' ') ||
+    'No messages yet';
 
-  const chatState = value.userChat?.state;
+  const timestamp =
+    value.message?.createdAt ??
+    value.session?.updatedAt ??
+    value.userSession?.updatedAt ??
+    value.userChat?.openedAt;
+  const formattedTime = timestamp
+    ? new Date(timestamp).toLocaleDateString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      })
+    : '';
 
+  const unreadCount = value.session?.unread ?? value.userSession?.unread ?? 0;
   const tags = value.chatTags ?? [];
+  const bookmarked = Boolean(value.bookmark);
+  const support = Boolean(value.supportBot);
 
-  const message = value.message;
-  const messageText =
-    message?.plainText ||
-    message?.blocks?.map(block => block.value).filter(Boolean).join(' ') ||
-    'No message available';
-  const messageTime = message?.createdAt
-    ? new Date(message.createdAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
-    : null;
-
-  const campaignName = value.campaign?.name;
-  const oneTimeMsgName = value.oneTimeMsg?.name;
+  const colorMap: Record<string, { bg: string; text: string }> = {
+    red: { bg: 'bg-red-100', text: 'text-red-800' },
+    orange: { bg: 'bg-orange-100', text: 'text-orange-800' },
+    yellow: { bg: 'bg-yellow-100', text: 'text-yellow-800' },
+    olive: { bg: 'bg-green-100', text: 'text-green-800' },
+    green: { bg: 'bg-green-100', text: 'text-green-800' },
+    cobalt: { bg: 'bg-indigo-100', text: 'text-indigo-800' },
+    purple: { bg: 'bg-purple-100', text: 'text-purple-800' },
+    pink: { bg: 'bg-pink-100', text: 'text-pink-800' },
+    navy: { bg: 'bg-blue-100', text: 'text-blue-800' },
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow p-4 space-y-4">
-      {(avatarUrl || userName) && (
-        <div className="flex items-center space-x-3">
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt={userName}
-              className="w-10 h-10 rounded-full object-cover"
-            />
-          )}
-          <div className="flex-1 min-w-0">
-            <div className="text-lg font-medium text-gray-900 truncate">{userName}</div>
-            {lastSeen && (
-              <div className="text-sm text-gray-500 truncate">Last seen: {lastSeen}</div>
+    <div className="p-4 bg-white rounded-lg shadow-md flex items-start space-x-4">
+      <div className="flex-shrink-0">
+        <img
+          src={avatarUrl}
+          alt={name}
+          className="w-12 h-12 rounded-full object-cover bg-gray-100"
+          onError={e => {
+            (e.currentTarget as HTMLImageElement).src = placeholderAvatar;
+          }}
+        />
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 truncate">
+            <span className="font-semibold text-gray-900 truncate">
+              {name}
+            </span>
+            {support && (
+              <LucideReact.Bot
+                className="text-gray-500"
+                size={16}
+                aria-label="Support Bot"
+              />
+            )}
+            {bookmarked && (
+              <LucideReact.Bookmark
+                className="text-yellow-500"
+                size={16}
+                aria-label="Bookmarked"
+              />
+            )}
+          </div>
+          <div className="flex items-center space-x-2 text-xs text-gray-500 flex-shrink-0">
+            {formattedTime && (
+              <>
+                <LucideReact.Calendar size={14} className="text-gray-400" />
+                <span>{formattedTime}</span>
+              </>
+            )}
+            {unreadCount > 0 && (
+              <span className="ml-2 bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                {unreadCount}
+              </span>
             )}
           </div>
         </div>
-      )}
 
-      {session && (
-        <div className="flex items-center text-sm text-gray-600 space-x-4">
-          {chatState && <span className="capitalize">{chatState}</span>}
-          {unreadCount > 0 && (
-            <span className="bg-red-100 text-red-800 px-2 py-0.5 rounded-full">
-              {unreadCount} unread
-            </span>
-          )}
+        <div className="mt-1 text-gray-700 text-sm line-clamp-2">
+          {lastMsg}
         </div>
-      )}
 
-      {tags.length > 0 && (
-        <div className="flex flex-wrap">
-          {tags.map((tag, idx) => (
-            <span
-              key={idx}
-              className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded mr-1 mb-1 truncate"
-            >
-              {tag.name}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {(campaignName || oneTimeMsgName) && (
-        <div className="text-sm text-blue-600">
-          {campaignName
-            ? `Campaign: ${campaignName}`
-            : `One-time Msg: ${oneTimeMsgName}`}
-        </div>
-      )}
-
-      <div>
-        <div className="text-sm text-gray-700 line-clamp-2">{messageText}</div>
-        {messageTime && (
-          <div className="text-xs text-gray-400 mt-1">{messageTime}</div>
+        {tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {tags.map(tag => {
+              const key = tag.key ?? tag.id ?? tag.name;
+              const variant =
+                tag.colorVariant && colorMap[tag.colorVariant]
+                  ? colorMap[tag.colorVariant]
+                  : { bg: 'bg-gray-100', text: 'text-gray-800' };
+              return (
+                <span
+                  key={key}
+                  className={`${variant.bg} ${variant.text} text-xs px-2 py-0.5 rounded-full`}
+                >
+                  {tag.name}
+                </span>
+              );
+            })}
+          </div>
         )}
       </div>
     </div>

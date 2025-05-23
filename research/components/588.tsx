@@ -1,11 +1,12 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Runner Application
      *
      * @title Runner Application
     */
-    export type runner_application = {
+    export interface runner_application {
         os: string;
         architecture: string;
         download_url: string;
@@ -15,72 +16,86 @@ export namespace AutoViewInputSubTypes {
         */
         temp_download_token?: string;
         sha256_checksum?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner_application[];
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const runnerApps = Array.isArray(value) ? value : [];
-  const totalCount = runnerApps.length;
+  // 1. Derived constants
+  const totalCount = value.length;
+  const hasItems = totalCount > 0;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  // 2. JSX structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {totalCount === 0 ? (
-        <div className="text-center text-gray-500">No runner applications available.</div>
+    <div className="space-y-4">
+      {/* Header with total count */}
+      <div className="flex items-center text-xl font-semibold text-gray-700">
+        <LucideReact.DownloadCloud size={24} className="mr-2 text-blue-500" />
+        <span>Runner Applications ({totalCount})</span>
+      </div>
+
+      {/* Empty state */}
+      {!hasItems ? (
+        <div className="flex items-center justify-center text-gray-400 py-8">
+          <LucideReact.AlertCircle size={24} className="mr-2" />
+          <span>No runner applications available.</span>
+        </div>
       ) : (
-        <>
-          <header className="mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">
-              Runner Applications ({totalCount})
-            </h2>
-          </header>
-          <ul className="space-y-4">
-            {runnerApps.map((app) => (
-              <li
-                key={app.download_url}
-                className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center space-y-2 md:space-y-0">
-                  <div className="flex-1 min-w-0">
-                    <h3
-                      className="text-md font-medium text-gray-900 truncate"
-                      title={app.filename}
-                    >
-                      {app.filename}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      <span className="font-semibold">OS:</span> {app.os}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      <span className="font-semibold">Arch:</span> {app.architecture}
-                    </p>
-                  </div>
-                  <div className="mt-2 md:mt-0 md:ml-4">
-                    <p
-                      className="text-sm text-blue-600 break-all"
-                      title={app.download_url}
-                    >
-                      <span className="font-semibold">URL:</span> {app.download_url}
-                    </p>
-                  </div>
+        /* List of runner_application cards */
+        value.map((runner, idx) => {
+          // Shortened SHA-256 checksum
+          const checksum = runner.sha256_checksum
+            ? `${runner.sha256_checksum.slice(0, 8)}…${runner.sha256_checksum.slice(-8)}`
+            : null;
+
+          return (
+            <div
+              key={`${runner.os}-${runner.architecture}-${idx}`}
+              className="p-4 bg-white rounded-lg shadow-md"
+            >
+              {/* OS / Architecture */}
+              <div className="flex items-center gap-2 mb-2">
+                <LucideReact.Computer size={20} className="text-gray-500" />
+                <span className="text-lg font-medium text-gray-800">
+                  {runner.os} / {runner.architecture}
+                </span>
+              </div>
+
+              {/* Details */}
+              <div className="space-y-1 text-sm text-gray-600">
+                {/* Filename */}
+                <div className="flex items-center gap-2">
+                  <LucideReact.FileText size={16} className="text-gray-400" />
+                  <span className="truncate">{runner.filename}</span>
                 </div>
-                {app.sha256_checksum && (
-                  <div className="mt-2">
-                    <span className="text-xs font-mono text-gray-500">
-                      SHA-256: {app.sha256_checksum}
-                    </span>
+
+                {/* Temporary download token */}
+                {runner.temp_download_token && (
+                  <div className="flex items-center gap-2">
+                    <LucideReact.Key size={16} className="text-gray-400" />
+                    <span className="font-mono">{runner.temp_download_token}</span>
                   </div>
                 )}
-              </li>
-            ))}
-          </ul>
-        </>
+
+                {/* Download URL */}
+                <div className="flex items-center gap-2">
+                  <LucideReact.Link size={16} className="text-gray-400" />
+                  <span className="break-all">{runner.download_url}</span>
+                </div>
+
+                {/* SHA-256 checksum */}
+                {checksum && (
+                  <div className="flex items-center gap-2">
+                    <LucideReact.Hash size={16} className="text-gray-400" />
+                    <span className="font-mono">{checksum}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })
       )}
     </div>
   );

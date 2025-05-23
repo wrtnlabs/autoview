@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposActionsRunners {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             runners: AutoViewInputSubTypes.runner[];
-        };
+        }
     }
     /**
      * A self hosted runner
      *
      * @title Self hosted runners
     */
-    export type runner = {
+    export interface runner {
         /**
          * The ID of the runner.
         */
@@ -36,13 +37,13 @@ export namespace AutoViewInputSubTypes {
         busy: boolean;
         labels: AutoViewInputSubTypes.runner_label[];
         ephemeral?: boolean;
-    };
+    }
     /**
      * A label for a self hosted runner
      *
      * @title Self hosted runner label
     */
-    export type runner_label = {
+    export interface runner_label {
         /**
          * Unique identifier of the label.
         */
@@ -55,7 +56,7 @@ export namespace AutoViewInputSubTypes {
          * The type of label. Read-only labels are applied automatically when the runner is configured.
         */
         type?: "read-only" | "custom";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunners.GetResponse;
 
@@ -63,83 +64,115 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunners.GetRes
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const busyCount = value.runners.filter(r => r.busy).length;
-  const idleCount = value.runners.length - busyCount;
-  const ephemeralCount = value.runners.filter(r => r.ephemeral).length;
-  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  // 1. Derived constants and helper functions
+  const total = value.total_count;
+  const getStatusIndicator = (
+    status: string
+  ): {
+    icon: JSX.Element;
+    title: string;
+    bgColor: string;
+    textColor: string;
+  } => {
+    const s = status.toLowerCase();
+    if (s === "online") {
+      return {
+        icon: <LucideReact.CheckCircle size={14} className="text-green-500" />,
+        title: "Online",
+        bgColor: "bg-green-100",
+        textColor: "text-green-800",
+      };
+    }
+    if (s === "offline") {
+      return {
+        icon: <LucideReact.XCircle size={14} className="text-red-500" />,
+        title: "Offline",
+        bgColor: "bg-red-100",
+        textColor: "text-red-800",
+      };
+    }
+    // fallback for other statuses
+    return {
+      icon: <LucideReact.Clock size={14} className="text-amber-500" />,
+      title: status.charAt(0).toUpperCase() + status.slice(1),
+      bgColor: "bg-amber-100",
+      textColor: "text-amber-800",
+    };
+  };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. JSX structure
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Summary Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Self-Hosted Runners ({value.total_count})
-        </h2>
-        <div className="mt-2 sm:mt-0 flex flex-wrap gap-2">
-          <span className="inline-flex items-center px-2 py-1 bg-red-100 text-red-800 text-sm font-medium rounded-full">
-            Busy: {busyCount}
-          </span>
-          <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">
-            Idle: {idleCount}
-          </span>
-          {ephemeralCount > 0 && (
-            <span className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              Ephemeral: {ephemeralCount}
-            </span>
-          )}
-        </div>
+      {/* Header */}
+      <div className="flex items-center mb-4 text-lg font-semibold text-gray-800">
+        <LucideReact.Users size={20} className="text-gray-600 mr-2" />
+        <span>
+          {total} Runner{total !== 1 ? "s" : ""}
+        </span>
       </div>
-
-      {/* Runners List */}
-      <ul className="mt-4 space-y-4">
-        {value.runners.map(runner => (
-          <li
-            key={runner.id}
-            className="p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
-          >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {runner.name}
-              </h3>
-              <div className="mt-2 sm:mt-0 flex flex-wrap gap-2 text-sm text-gray-600">
-                <span>OS: {capitalize(runner.os)}</span>
-                <span>Status: {capitalize(runner.status)}</span>
-                {runner.busy ? (
-                  <span className="inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded-full">
-                    Busy
+      {/* Runner List */}
+      <ul className="space-y-4">
+        {value.runners.map((runner) => {
+          const { icon, title, bgColor, textColor } = getStatusIndicator(
+            runner.status
+          );
+          return (
+            <li
+              key={runner.id}
+              className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+            >
+              {/* Name & OS */}
+              <div className="flex flex-col md:flex-row md:justify-between">
+                <div className="flex items-center gap-2">
+                  {icon}
+                  <span className="font-medium text-gray-800 truncate">
+                    {runner.name}
                   </span>
-                ) : (
-                  <span className="inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded-full">
-                    Idle
+                </div>
+                <div className="flex items-center gap-1 text-sm text-gray-500 mt-2 md:mt-0">
+                  <LucideReact.Computer size={14} className="text-gray-400" />
+                  <span>{runner.os}</span>
+                </div>
+              </div>
+              {/* Status & Labels */}
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${bgColor} ${textColor} rounded-full`}
+                  title={title}
+                >
+                  {icon}
+                  <span className="ml-1">{title}</span>
+                </span>
+                {runner.busy && (
+                  <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    <LucideReact.Loader
+                      size={12}
+                      className="mr-1 animate-spin text-blue-500"
+                    />
+                    Busy
                   </span>
                 )}
                 {runner.ephemeral && (
-                  <span className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 rounded-full">
+                  <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">
+                    <LucideReact.Tag
+                      size={12}
+                      className="mr-1 text-purple-500"
+                    />
                     Ephemeral
                   </span>
                 )}
-              </div>
-            </div>
-            {runner.labels.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {runner.labels.map(label => (
+                {runner.labels.map((label, idx) => (
                   <span
-                    key={label.id ?? label.name}
-                    className={`px-2 py-0.5 text-xs font-medium rounded-full ${
-                      label.type === "read-only"
-                        ? "bg-blue-50 text-blue-700"
-                        : "bg-green-50 text-green-700"
-                    }`}
+                    key={idx}
+                    className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full"
                   >
                     {label.name}
                   </span>
                 ))}
               </div>
-            )}
-          </li>
-        ))}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

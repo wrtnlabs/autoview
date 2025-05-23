@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type IShoppingDepositChargePublish = {
+    export interface IShoppingDepositChargePublish {
         id: string & tags.Format<"uuid">;
         created_at: string & tags.Format<"date-time">;
         paid_at: null | (string & tags.Format<"date-time">);
         cancelled_at: null | (string & tags.Format<"date-time">);
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDepositChargePublish;
 
@@ -15,67 +16,55 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingDepositChargePublish;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Determine current status based on paid_at and cancelled_at fields.
-  const status = value.paid_at
-    ? "Paid"
-    : value.cancelled_at
+  const status = value.cancelled_at
     ? "Cancelled"
+    : value.paid_at
+    ? "Paid"
     : "Pending";
 
-  // Map status to Tailwind CSS badge styles
-  const statusStyles: Record<string, string> = {
-    Paid: "bg-green-100 text-green-800",
-    Cancelled: "bg-red-100 text-red-800",
-    Pending: "bg-yellow-100 text-yellow-800",
-  };
+  const statusIcon = value.cancelled_at ? (
+    <LucideReact.XCircle aria-hidden="true" className="text-red-500" size={16} />
+  ) : value.paid_at ? (
+    <LucideReact.CheckCircle aria-hidden="true" className="text-green-500" size={16} />
+  ) : (
+    <LucideReact.Clock aria-hidden="true" className="text-amber-500" size={16} />
+  );
 
-  // Format dates into a readable form
   const formatDate = (iso: string) =>
-    new Date(iso).toLocaleString("default", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
+    new Date(iso).toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
     });
 
-  const formattedCreatedAt = formatDate(value.created_at);
-  const formattedPaidAt = value.paid_at ? formatDate(value.paid_at) : null;
-  const formattedCancelledAt = value.cancelled_at
-    ? formatDate(value.cancelled_at)
-    : null;
+  const createdAt = formatDate(value.created_at);
+  const paidAt = value.paid_at ? formatDate(value.paid_at) : null;
+  const cancelledAt = value.cancelled_at ? formatDate(value.cancelled_at) : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-      {/* Header with title and status badge */}
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Deposit Charge
-        </h2>
-        <span
-          className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${statusStyles[status]}`}
-        >
-          {status}
-        </span>
+    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-sm">
+      {/* Status Header */}
+      <div className="flex items-center space-x-2 mb-3">
+        {statusIcon}
+        <span className="text-sm font-semibold text-gray-800">{status}</span>
       </div>
 
-      {/* Details section */}
-      <div className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-        <div>
-          <span className="font-medium">Created:</span>{" "}
-          <span>{formattedCreatedAt}</span>
+      {/* Dates */}
+      <div className="space-y-2 text-sm text-gray-600">
+        <div className="flex items-center space-x-1">
+          <LucideReact.Calendar aria-hidden="true" className="text-gray-400" size={16} />
+          <time dateTime={value.created_at}>Created: {createdAt}</time>
         </div>
-        {formattedPaidAt && (
-          <div>
-            <span className="font-medium">Paid at:</span>{" "}
-            <span>{formattedPaidAt}</span>
+        {paidAt && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Calendar aria-hidden="true" className="text-gray-400" size={16} />
+            <time dateTime={value.paid_at!}>Paid: {paidAt}</time>
           </div>
         )}
-        {formattedCancelledAt && (
-          <div>
-            <span className="font-medium">Cancelled at:</span>{" "}
-            <span>{formattedCancelledAt}</span>
+        {cancelledAt && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Calendar aria-hidden="true" className="text-gray-400" size={16} />
+            <time dateTime={value.cancelled_at!}>Cancelled: {cancelledAt}</time>
           </div>
         )}
       </div>

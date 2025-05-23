@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -135,7 +136,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 
@@ -143,87 +144,101 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derived and formatted values
-  const name = value.name ?? '—';
-  const targetType = value.target_type
-    ? value.target_type.charAt(0).toUpperCase() + value.target_type.slice(1)
-    : '—';
-  const description = value.description ?? '';
-  const descriptionSnippet =
-    description.length > 100 ? description.slice(0, 100) + '…' : description;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formattedCreated = value.created_at
+    ? new Date(value.created_at).toLocaleDateString()
+    : 'N/A';
+  const formattedUpdated = value.updated_at
+    ? new Date(value.updated_at).toLocaleDateString()
+    : 'N/A';
 
-  const formatDate = (dateStr?: string) =>
-    dateStr
-      ? new Date(dateStr).toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        })
-      : '—';
+  // Choose an icon for the scope/type
+  const ScopeIcon =
+    value.target_type === 'global'
+      ? LucideReact.Globe
+      : value.target_type === 'organization'
+      ? LucideReact.Users
+      : LucideReact.Building;
 
-  const created = formatDate(value.created_at);
-  const updated = formatDate(value.updated_at);
-
-  // feature statuses to display
+  // Prepare a list of core feature statuses
   const featureStatuses: { label: string; status?: string }[] = [
     { label: 'Advanced Security', status: value.advanced_security },
     { label: 'Dependency Graph', status: value.dependency_graph },
     { label: 'Dependabot Alerts', status: value.dependabot_alerts },
-    { label: 'Code Scanning', status: value.code_scanning_default_setup },
+    { label: 'Dependabot Sec. Updates', status: value.dependabot_security_updates },
+    { label: 'Code Scanning Setup', status: value.code_scanning_default_setup ?? undefined },
     { label: 'Secret Scanning', status: value.secret_scanning },
-    { label: 'Vulnerability Reporting', status: value.private_vulnerability_reporting },
+    { label: 'Private Vuln. Reporting', status: value.private_vulnerability_reporting },
   ];
 
-  const renderStatus = (status?: string) => {
-    const map: Record<string, { text: string; bg: string; textColor: string }> = {
-      enabled: { text: 'Enabled', bg: 'bg-green-100', textColor: 'text-green-800' },
-      disabled: { text: 'Disabled', bg: 'bg-red-100', textColor: 'text-red-800' },
-      not_set: { text: 'Not set', bg: 'bg-gray-100', textColor: 'text-gray-800' },
-    };
-    const cfg = status && map[status] ? map[status] : map.not_set;
-    return (
-      <span className={`${cfg.bg} ${cfg.textColor} px-2 py-1 text-xs rounded-full`}>
-        {cfg.text}
-      </span>
-    );
+  // Map a status to an icon
+  const renderStatusIcon = (status?: string) => {
+    if (status === 'enabled')
+      return <LucideReact.CheckCircle size={16} className="text-green-500" aria-label="Enabled" />;
+    if (status === 'disabled')
+      return <LucideReact.XCircle size={16} className="text-red-500" aria-label="Disabled" />;
+    return <LucideReact.MinusCircle size={16} className="text-amber-500" aria-label="Not set" />;
   };
 
-  const enforcementBadge =
-    value.enforcement === 'enforced' ? (
-      <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full ml-2">
-        Enforced
-      </span>
-    ) : (
-      <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full ml-2">
-        Unenforced
-      </span>
-    );
-
-  // 2. Visual structure with Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex items-center">
-        <h2 className="text-lg font-semibold text-gray-900">{name}</h2>
-        {enforcementBadge}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header: Name and Enforcement */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LucideReact.Code size={20} className="text-indigo-500" aria-label="Configuration" />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {value.name ?? 'Unnamed Configuration'}
+          </h2>
+        </div>
+        <div className="flex items-center gap-1">
+          {value.enforcement === 'enforced' ? (
+            <LucideReact.CheckCircle
+              size={20}
+              className="text-green-500"
+              aria-label="Enforced"
+            />
+          ) : (
+            <LucideReact.XCircle
+              size={20}
+              className="text-red-500"
+              aria-label="Unenforced"
+            />
+          )}
+        </div>
       </div>
-      <div className="text-sm text-gray-500 mt-1">{targetType}</div>
-      {descriptionSnippet && (
-        <p className="text-gray-700 mt-2 line-clamp-2">{descriptionSnippet}</p>
+
+      {/* Description */}
+      {value.description && (
+        <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+          {value.description}
+        </p>
       )}
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {featureStatuses.map((feat) => (
-          <div
-            key={feat.label}
-            className="flex items-center justify-between bg-gray-50 p-2 rounded"
-          >
-            <span className="text-sm text-gray-800">{feat.label}</span>
-            {renderStatus(feat.status)}
+
+      {/* Meta: Scope and Dates */}
+      <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <ScopeIcon size={16} className="text-gray-400" aria-label={value.target_type} />
+          <span className="capitalize">{value.target_type}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" aria-label="Created date" />
+          <span>Created: {formattedCreated}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" aria-label="Updated date" />
+          <span>Updated: {formattedUpdated}</span>
+        </div>
+      </div>
+
+      {/* Feature Status Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-4">
+        {featureStatuses.map(({ label, status }) => (
+          <div key={label} className="flex items-center gap-1">
+            {renderStatusIcon(status)}
+            <span className="text-sm text-gray-700">{label}</span>
           </div>
         ))}
-      </div>
-      <div className="flex justify-between text-xs text-gray-500 mt-4">
-        <div>Created: {created}</div>
-        <div>Updated: {updated}</div>
       </div>
     </div>
   );

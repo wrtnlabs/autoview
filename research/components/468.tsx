@@ -1,23 +1,24 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsInstallations {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             installations: AutoViewInputSubTypes.installation[];
-        };
+        }
     }
     /**
      * Installation
      *
      * @title Installation
     */
-    export type installation = {
+    export interface installation {
         /**
          * The ID of the installation.
         */
         id: number & tags.Type<"int32">;
-        account: any | any | null;
+        account: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise | null;
         /**
          * Describe whether all repositories have been selected or there's a selection involved
         */
@@ -42,15 +43,74 @@ export namespace AutoViewInputSubTypes {
         suspended_by: AutoViewInputSubTypes.nullable_simple_user;
         suspended_at: (string & tags.Format<"date-time">) | null;
         contact_email?: string | null;
-    };
-    export type simple_user = any;
-    export type enterprise = any;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * The permissions granted to the user access token.
      *
      * @title App Permissions
     */
-    export type app_permissions = {
+    export interface app_permissions {
         /**
          * The level of permission to grant the access token for GitHub Actions workflows, workflow runs, and artifacts.
         */
@@ -243,7 +303,7 @@ export namespace AutoViewInputSubTypes {
          * The level of permission to grant the access token to list and manage repositories a user is starring.
         */
         starring?: "read" | "write";
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -278,123 +338,105 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsInstallations.GetRespo
 
 
 
-// The component name is always "VisualComponent"
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedTotal = new Intl.NumberFormat().format(value.total_count);
+  const installations = value.installations;
+  const repoSelectionLabel = (sel: "all" | "selected") =>
+    sel === "all" ? "All repositories" : "Selected repositories";
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="space-y-6">
-      <header>
-        <h2 className="text-xl font-semibold text-gray-800">
-          Installations ({formattedTotal})
-        </h2>
-      </header>
+      <div className="flex items-center text-gray-700">
+        <LucideReact.Users size={20} className="mr-2 text-gray-500" />
+        <h2 className="text-lg font-semibold">Installations ({value.total_count})</h2>
+      </div>
+      <ul className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {installations.map((inst) => {
+          const isSuspended = inst.suspended_at !== null;
+          const account = inst.account;
+          const accountName = account
+            ? ("login" in account ? account.login : account.name)
+            : "Unknown";
+          const avatarSrc = account
+            ? account.avatar_url
+            : "https://placehold.co/40x40/e2e8f0/1e293b?text=–";
 
-      {value.installations.map((inst) => {
-        // Derive account name if available
-        const accountName =
-          inst.account && typeof inst.account === "object"
-            ? // @ts-ignore
-              inst.account.login || // @ts-ignore
-              inst.account.name ||
-              "N/A"
-            : "N/A";
-
-        // Format dates
-        const formattedCreated = new Date(inst.created_at).toLocaleString();
-        const formattedUpdated = new Date(inst.updated_at).toLocaleString();
-        const formattedSuspendedAt = inst.suspended_at
-          ? new Date(inst.suspended_at).toLocaleString()
-          : "";
-
-        // Prepare events list and permissions count
-        const events = inst.events || [];
-        const permissionEntries = inst.permissions
-          ? Object.entries(inst.permissions)
-          : [];
-        const permissionCount = permissionEntries.filter(
-          ([, v]) => v !== undefined
-        ).length;
-
-        // Suspended info
-        const suspendedByName =
-          inst.suspended_by && typeof inst.suspended_by === "object"
-            ? inst.suspended_by.login || inst.suspended_by.name
-            : null;
-
-        return (
-          <div
-            key={inst.id}
-            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
-              <div className="flex-1">
-                <h3 className="text-lg font-bold text-gray-800 truncate">
-                  {inst.app_slug}
-                </h3>
-                <span
-                  className={`mt-1 inline-block text-sm font-medium ${
-                    inst.repository_selection === "all"
-                      ? "text-green-600"
-                      : "text-yellow-600"
-                  }`}
-                >
-                  {inst.repository_selection === "all"
-                    ? "All Repositories"
-                    : "Selected Repositories"}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
-              <div>ID: {inst.id}</div>
-              <div>Account: {accountName}</div>
-              <div>
-                Target: {inst.target_type} (ID: {inst.target_id})
-              </div>
-              {inst.contact_email && <div>Contact: {inst.contact_email}</div>}
-              <div>Created: {formattedCreated}</div>
-              <div>Updated: {formattedUpdated}</div>
-              {inst.single_file_name != null && (
-                <div>
-                  Single File: {inst.single_file_name}
-                  {inst.has_multiple_single_files ? " (multiple)" : ""}
+          return (
+            <li key={inst.id} className="p-4 bg-white rounded-lg shadow">
+              <div className="flex items-center mb-3">
+                <img
+                  src={avatarSrc}
+                  alt={accountName}
+                  className="w-8 h-8 rounded-full object-cover mr-2"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      accountName
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+                <div className="flex items-center">
+                  {account ? (
+                    "login" in account ? (
+                      <LucideReact.User size={16} className="mr-1 text-gray-500" />
+                    ) : (
+                      <LucideReact.Building size={16} className="mr-1 text-gray-500" />
+                    )
+                  ) : null}
+                  <span className="font-medium text-gray-800 truncate">{accountName}</span>
                 </div>
-              )}
-            </div>
-
-            <div className="mt-4">
-              <h4 className="text-sm font-medium text-gray-700">Events</h4>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {events.slice(0, 5).map((e, i) => (
-                  <span
-                    key={i}
-                    className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded"
-                  >
-                    {e}
-                  </span>
-                ))}
-                {events.length > 5 && (
-                  <span className="text-xs text-gray-500">
-                    +{events.length - 5} more
-                  </span>
+              </div>
+              <div className="space-y-2 text-sm text-gray-600">
+                <div className="flex items-center gap-1">
+                  <LucideReact.GitBranch size={16} className="text-gray-400" />
+                  <span>{repoSelectionLabel(inst.repository_selection)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={16} className="text-gray-400" />
+                  <span>Created: {formatDate(inst.created_at)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Clock size={16} className="text-gray-400" />
+                  <span>Updated: {formatDate(inst.updated_at)}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <LucideReact.List size={16} className="text-gray-400" />
+                  <span>{inst.events.length} events</span>
+                </div>
+                {inst.single_file_name && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.FileText size={16} className="text-gray-400" />
+                    <span>{inst.single_file_name}</span>
+                  </div>
                 )}
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-col sm:flex-row sm:justify-between text-sm text-gray-600">
-              <div>Permissions: {permissionCount}</div>
-              {suspendedByName && (
-                <div className="text-red-600">
-                  Suspended by {suspendedByName} at {formattedSuspendedAt}
+                <div className="flex items-center gap-1">
+                  <LucideReact.Key size={16} className="text-gray-400" />
+                  <span>{Object.keys(inst.permissions).length} permissions</span>
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      })}
+                {inst.contact_email && (
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Mail size={16} className="text-gray-400" />
+                    <span>{inst.contact_email}</span>
+                  </div>
+                )}
+                {isSuspended && inst.suspended_at && (
+                  <div className="flex items-center gap-1 text-red-500">
+                    <LucideReact.XCircle size={16} />
+                    <span>Suspended: {formatDate(inst.suspended_at)}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1 text-xs text-gray-500 truncate">
+                  <LucideReact.Link size={12} />
+                  <span className="truncate">{inst.html_url}</span>
+                </div>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

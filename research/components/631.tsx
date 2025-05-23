@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Branch protections protect branches
      *
      * @title Protected Branch
     */
-    export type protected_branch = {
+    export interface protected_branch {
         url: string & tags.Format<"uri">;
         required_status_checks?: AutoViewInputSubTypes.status_check_policy;
         required_pull_request_reviews?: {
@@ -68,13 +69,13 @@ export namespace AutoViewInputSubTypes {
         allow_fork_syncing?: {
             enabled?: boolean;
         };
-    };
+    }
     /**
      * Status Check Policy
      *
      * @title Status Check Policy
     */
-    export type status_check_policy = {
+    export interface status_check_policy {
         url: string & tags.Format<"uri">;
         strict: boolean;
         contexts: string[];
@@ -83,13 +84,13 @@ export namespace AutoViewInputSubTypes {
             app_id: (number & tags.Type<"int32">) | null;
         }[];
         contexts_url: string & tags.Format<"uri">;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -112,13 +113,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -139,7 +140,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -154,7 +155,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -200,7 +201,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -228,13 +229,44 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * Branch Restriction Policy
      *
      * @title Branch Restriction Policy
     */
-    export type branch_restriction_policy = {
+    export interface branch_restriction_policy {
         url: string & tags.Format<"uri">;
         users_url: string & tags.Format<"uri">;
         teams_url: string & tags.Format<"uri">;
@@ -320,7 +352,7 @@ export namespace AutoViewInputSubTypes {
             };
             events?: string[];
         }[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.protected_branch;
 
@@ -329,114 +361,169 @@ export type AutoViewInput = AutoViewInputSubTypes.protected_branch;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const status = value.required_status_checks;
-  const pr = value.required_pull_request_reviews;
-  const restrictions = value.restrictions;
-  const features = [
-    { label: "Required Signatures", enabled: !!value.required_signatures?.enabled },
-    { label: "Enforce Admins", enabled: !!value.enforce_admins?.enabled },
-    { label: "Linear History", enabled: !!value.required_linear_history?.enabled },
-    { label: "Force Pushes", enabled: !!value.allow_force_pushes?.enabled },
-    { label: "Deletions", enabled: !!value.allow_deletions?.enabled },
-    { label: "Conversation Resolution", enabled: !!value.required_conversation_resolution?.enabled },
-    { label: "Block Creations", enabled: !!value.block_creations?.enabled },
-    { label: "Lock Branch", enabled: !!value.lock_branch?.enabled },
-    { label: "Fork Syncing", enabled: !!value.allow_fork_syncing?.enabled },
-  ];
+  const { 
+    required_status_checks: statusChecks,
+    required_pull_request_reviews: prReviews,
+    required_signatures: signatures,
+    enforce_admins: admins,
+    required_linear_history: linearHistory,
+    allow_force_pushes: forcePushes,
+    allow_deletions: deletions,
+    restrictions,
+    required_conversation_resolution: convResolution,
+    block_creations: blockCreations,
+    lock_branch: lockBranch,
+    allow_fork_syncing: forkSync
+  } = value;
+
+  const renderToggle = (enabled?: boolean) =>
+    enabled
+      ? <LucideReact.CheckCircle className="text-green-500" size={16} />
+      : <LucideReact.XCircle className="text-red-500" size={16} />;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
-      <h2 className="text-lg font-semibold text-gray-800">Branch Protection Settings</h2>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-lg mx-auto space-y-4">
+      <h2 className="text-xl font-semibold flex items-center">
+        <LucideReact.ShieldUser className="text-blue-500 mr-2" size={24} />
+        Branch Protection
+      </h2>
 
-      {status ? (
-        <section>
-          <h3 className="text-md font-medium text-gray-700 mb-1">Status Checks</h3>
-          <div className="text-sm text-gray-600 space-y-1">
-            <div className="flex justify-between">
-              <span>Strict Mode:</span>
-              <span className="font-medium">{status.strict ? "Enabled" : "Disabled"}</span>
-            </div>
-            <div>Contexts:</div>
-            <div className="flex flex-wrap mt-1">
-              {status.contexts.map((ctx, idx) => (
-                <span
-                  key={idx}
-                  className="bg-blue-50 text-blue-800 text-xs px-2 py-0.5 rounded mr-2 mb-2 truncate"
-                >
-                  {ctx}
-                </span>
-              ))}
-            </div>
+      {/* Required Status Checks */}
+      {statusChecks && (
+        <div className="flex items-start space-x-3">
+          <LucideReact.CheckSquare className="mt-1 text-green-500" size={20} />
+          <div>
+            <p className="font-medium">Required Status Checks</p>
+            <p className="text-sm text-gray-600">
+              Mode: <span className="font-semibold">{statusChecks.strict ? 'Strict' : 'Non-strict'}</span> •{' '}
+              {statusChecks.contexts.length} check{statusChecks.contexts.length !== 1 ? 's' : ''}
+            </p>
           </div>
-        </section>
-      ) : (
-        <div className="text-sm text-gray-600">No status check requirements.</div>
-      )}
-
-      {pr ? (
-        <section>
-          <h3 className="text-md font-medium text-gray-700 mb-1">Pull Request Reviews</h3>
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-sm text-gray-600">
-            <div className="flex justify-between">
-              <dt>Required Approvals</dt>
-              <dd className="font-medium">{pr.required_approving_review_count ?? 0}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Code Owner Reviews</dt>
-              <dd className="font-medium">{pr.require_code_owner_reviews ? "Yes" : "No"}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Dismiss Stale Reviews</dt>
-              <dd className="font-medium">{pr.dismiss_stale_reviews ? "Yes" : "No"}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt>Last Push Approval</dt>
-              <dd className="font-medium">{pr.require_last_push_approval ? "Yes" : "No"}</dd>
-            </div>
-          </dl>
-        </section>
-      ) : (
-        <div className="text-sm text-gray-600">No pull request review requirements.</div>
-      )}
-
-      {restrictions ? (
-        <section>
-          <h3 className="text-md font-medium text-gray-700 mb-1">Push Restrictions</h3>
-          <div className="text-sm text-gray-600 space-y-1">
-            <div className="flex justify-between">
-              <span>Users</span>
-              <span className="font-medium">{restrictions.users.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Teams</span>
-              <span className="font-medium">{restrictions.teams.length}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Apps</span>
-              <span className="font-medium">{restrictions.apps.length}</span>
-            </div>
-          </div>
-        </section>
-      ) : null}
-
-      <section>
-        <h3 className="text-md font-medium text-gray-700 mb-2">Other Settings</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-          {features.map((f) => (
-            <div key={f.label} className="flex items-center space-x-2">
-              <span
-                className={`inline-block w-2 h-2 rounded-full ${
-                  f.enabled ? "bg-green-500" : "bg-gray-300"
-                }`}
-              ></span>
-              <span className="font-medium text-gray-700">{f.label}</span>
-              <span className="ml-auto text-gray-600">{f.enabled ? "Enabled" : "Disabled"}</span>
-            </div>
-          ))}
         </div>
-      </section>
+      )}
+
+      {/* Pull Request Reviews */}
+      {prReviews && (
+        <div className="flex items-start space-x-3">
+          <LucideReact.Users className="mt-1 text-indigo-500" size={20} />
+          <div>
+            <p className="font-medium">Pull Request Reviews</p>
+            <p className="text-sm text-gray-600">
+              {prReviews.required_approving_review_count ?? 0} approval
+              {prReviews.required_approving_review_count === 1 ? '' : 's'}
+              {prReviews.require_code_owner_reviews ? ', code owner reviews' : ''}
+              {prReviews.dismiss_stale_reviews ? ', dismiss stale reviews' : ''}
+              {prReviews.require_last_push_approval ? ', last-push approval' : ''}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Required Signatures */}
+      {signatures && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.PenTool className="text-purple-500" size={20} />
+          <span className="font-medium">Signatures Required:</span>
+          {renderToggle(signatures.enabled)}
+        </div>
+      )}
+
+      {/* Enforce Admins */}
+      {admins && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.UserCheck className="text-green-600" size={20} />
+          <span className="font-medium">Enforce for Admins:</span>
+          {renderToggle(admins.enabled)}
+        </div>
+      )}
+
+      {/* Linear History */}
+      {linearHistory && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.SplitSquareVertical className="text-gray-700" size={20} />
+          <span className="font-medium">Linear History:</span>
+          {renderToggle(linearHistory.enabled)}
+        </div>
+      )}
+
+      {/* Force Pushes */}
+      {forcePushes && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.XOctagon className="text-red-500" size={20} />
+          <span className="font-medium">Force Pushes Allowed:</span>
+          {renderToggle(forcePushes.enabled)}
+        </div>
+      )}
+
+      {/* Deletions */}
+      {deletions && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.Trash2 className="text-red-500" size={20} />
+          <span className="font-medium">Deletions Allowed:</span>
+          {renderToggle(deletions.enabled)}
+        </div>
+      )}
+
+      {/* Conversation Resolution */}
+      {convResolution && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.MessageSquare className="text-yellow-600" size={20} />
+          <span className="font-medium">Conversation Resolution:</span>
+          {renderToggle(convResolution.enabled ?? false)}
+        </div>
+      )}
+
+      {/* Block Creations */}
+      {blockCreations && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.Ban className="text-red-600" size={20} />
+          <span className="font-medium">Block Branch Creations:</span>
+          {renderToggle(blockCreations.enabled)}
+        </div>
+      )}
+
+      {/* Lock Branch */}
+      {lockBranch && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.Lock className="text-gray-800" size={20} />
+          <span className="font-medium">Branch Locked:</span>
+          {renderToggle(lockBranch.enabled ?? false)}
+        </div>
+      )}
+
+      {/* Fork Sync */}
+      {forkSync && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.RefreshCcw className="text-blue-600" size={20} />
+          <span className="font-medium">Allow Fork Syncing:</span>
+          {renderToggle(forkSync.enabled ?? false)}
+        </div>
+      )}
+
+      {/* Restrictions */}
+      {restrictions && (
+        <div className="flex items-start space-x-3">
+          <LucideReact.Lock className="mt-1 text-red-500" size={20} />
+          <div>
+            <p className="font-medium">Restrictions</p>
+            <div className="flex flex-wrap gap-4 text-sm text-gray-600 mt-1">
+              <div className="flex items-center space-x-1">
+                <LucideReact.User className="text-gray-500" size={16}/>
+                <span>{restrictions.users.length} user{restrictions.users.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.Users className="text-gray-500" size={16}/>
+                <span>{restrictions.teams.length} team{restrictions.teams.length !== 1 ? 's' : ''}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.Box className="text-gray-500" size={16}/>
+                <span>{restrictions.apps.length} app{restrictions.apps.length !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-  // 3. Return the React element.
 }

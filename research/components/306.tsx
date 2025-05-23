@@ -1,41 +1,51 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type Try_lt_string_gt_ = {
+    export interface Try_lt_string_gt_ {
         result: true;
         code: 1000;
         requestToResponse?: string;
         data: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.Try_lt_string_gt_;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isSuccess = value.result === true;
-  const statusLabel = isSuccess ? "Success" : "Error";
-  const statusClasses = isSuccess
-    ? "bg-green-100 text-green-800"
-    : "bg-red-100 text-red-800";
+  // 1. Destructure and derive display values
+  const { result, code, requestToResponse, data } = value;
+  const statusText = result ? "Success" : "Failure";
+  const statusIcon = result
+    ? <LucideReact.CheckCircle className="text-green-500" size={16} />
+    : <LucideReact.XCircle className="text-red-500" size={16} />;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center justify-between mb-4">
-        <span className={`px-2 py-1 text-sm font-medium rounded ${statusClasses}`}>
-          {statusLabel}
-        </span>
-        <span className="text-sm text-gray-500">Code: {value.code}</span>
+    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-3">
+        {statusIcon}
+        <span className="ml-2 font-semibold text-gray-800">{statusText}</span>
       </div>
-      {value.requestToResponse && (
-        <div className="mb-4 text-sm italic text-gray-600">
-          {value.requestToResponse}
+
+      <div className="mb-4 text-sm text-gray-600">
+        <span className="font-medium">Code:</span> {code}
+      </div>
+
+      {requestToResponse && (
+        <div className="mb-4">
+          <div className="text-sm font-medium text-gray-700">Request / Response</div>
+          <p className="mt-1 text-gray-600 line-clamp-3 overflow-hidden">
+            {requestToResponse}
+          </p>
         </div>
       )}
-      <div className="overflow-auto max-h-40 p-2 bg-gray-50 text-sm text-gray-800 rounded whitespace-pre-wrap break-words">
-        {value.data}
+
+      <div>
+        <div className="text-sm font-medium text-gray-700">Data</div>
+        <p className="mt-1 text-gray-800 line-clamp-3 overflow-hidden">
+          {data}
+        </p>
       </div>
     </div>
   );

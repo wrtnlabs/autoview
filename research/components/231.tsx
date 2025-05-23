@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type ChatTagView = {
+        export interface ChatTagView {
             chatTag?: AutoViewInputSubTypes.ChatTag;
-        };
+        }
     }
-    export type ChatTag = {
+    export interface ChatTag {
         id?: string;
         channelId?: string;
         colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         */
         followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
         createdAt?: number;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.ChatTagView;
 
@@ -28,65 +29,85 @@ export type AutoViewInput = AutoViewInputSubTypes.desk.ChatTagView;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const tag = value.chatTag;
+  // Mapping of colorVariant to Tailwind CSS badge classes
+  const variantClasses: Record<NonNullable<AutoViewInputSubTypes.ChatTag['colorVariant']>, string> = {
+    red:    'bg-red-100 text-red-800',
+    orange: 'bg-orange-100 text-orange-800',
+    yellow: 'bg-yellow-100 text-yellow-800',
+    olive:  'bg-lime-100 text-lime-800',
+    green:  'bg-green-100 text-green-800',
+    cobalt: 'bg-blue-100 text-blue-800',
+    purple: 'bg-purple-100 text-purple-800',
+    pink:   'bg-pink-100 text-pink-800',
+    navy:   'bg-indigo-100 text-indigo-800',
+  };
+
   if (!tag) {
+    // 3. Return placeholder when no data is present
     return (
-      <div className="p-4 text-gray-500 italic text-sm">
-        No tag data available
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span>No Tag Data Available</span>
       </div>
     );
   }
 
-  // Map the colorVariant to appropriate Tailwind CSS classes
-  const colorMap: Record<NonNullable<AutoViewInputSubTypes.ChatTag["colorVariant"]>, string> = {
-    red: "bg-red-100 text-red-800",
-    orange: "bg-orange-100 text-orange-800",
-    yellow: "bg-yellow-100 text-yellow-800",
-    olive: "bg-green-100 text-green-800",
-    green: "bg-green-100 text-green-800",
-    cobalt: "bg-blue-100 text-blue-800",
-    purple: "bg-purple-100 text-purple-800",
-    pink: "bg-pink-100 text-pink-800",
-    navy: "bg-blue-900 text-white",
-  };
-  const variantClass = tag.colorVariant
-    ? colorMap[tag.colorVariant]
-    : "bg-gray-100 text-gray-800";
+  // Derive badge styling
+  const variant = tag.colorVariant ?? 'cobalt';
+  const badgeClass = variantClasses[variant] || variantClasses.cobalt;
 
-  // Format creation date to a human-friendly string
-  const formattedDate = tag.createdAt
-    ? new Date(tag.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
+  // Format creation date
+  const createdAtDate = tag.createdAt
+    ? new Date(tag.createdAt)
+    : null;
+  const formattedDate = createdAtDate
+    ? createdAtDate.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
       })
-    : undefined;
+    : null;
 
-  // Count followers if present
-  const followersCount =
-    Array.isArray(tag.followerIds) ? tag.followerIds.length : undefined;
+  // Compute follower count (deprecated field but may provide insight)
+  const followerCount = tag.followerIds?.length ?? 0;
+  const followerLabel = followerCount === 1 ? 'follower' : 'followers';
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow duration-200 max-w-sm">
-      <div className="flex items-center space-x-2 mb-2">
-        <span
-          className={`px-2 py-1 text-xs font-semibold rounded ${variantClass}`}
-        >
+    <div className="max-w-sm w-full bg-white rounded-lg shadow-sm p-4 mx-auto">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
           {tag.name}
-        </span>
-        <span className="text-gray-500 text-sm font-mono truncate">
+        </h2>
+        <span
+          className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded ${badgeClass}`}
+        >
           {tag.key}
         </span>
       </div>
+
       {tag.description && (
-        <p className="text-gray-700 text-sm line-clamp-2 mb-2">
+        <p className="mt-2 text-sm text-gray-600 line-clamp-2">
           {tag.description}
         </p>
       )}
-      <div className="flex flex-wrap text-gray-500 text-xs space-x-4">
-        {formattedDate && <span>Created: {formattedDate}</span>}
-        {followersCount !== undefined && (
-          <span>Followers: {followersCount}</span>
+
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        {formattedDate && (
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <time dateTime={createdAtDate!.toISOString()}>
+              {formattedDate}
+            </time>
+          </div>
+        )}
+        {followerCount > 0 && (
+          <div className="flex items-center">
+            <LucideReact.Users size={16} className="mr-1" />
+            <span>
+              {followerCount} {followerLabel}
+            </span>
+          </div>
         )}
       </div>
     </div>

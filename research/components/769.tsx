@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A repository import from an external source.
      *
      * @title Import
     */
-    export type _import = {
+    export interface _import {
         vcs: string | null;
         use_lfs?: boolean;
         /**
@@ -37,7 +38,7 @@ export namespace AutoViewInputSubTypes {
         authors_url: string & tags.Format<"uri">;
         repository_url: string & tags.Format<"uri">;
         svn_root?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes._import;
 
@@ -46,161 +47,186 @@ export type AutoViewInput = AutoViewInputSubTypes._import;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusLabel = (() => {
-    const mapping: Record<string, string> = {
-      auth: "Authentication Required",
-      error: "Error",
-      none: "Not Started",
-      detecting: "Detecting",
-      choose: "Choose Repository",
-      auth_failed: "Authentication Failed",
-      importing: "Importing",
-      mapping: "Mapping",
-      waiting_to_push: "Waiting to Push",
-      pushing: "Pushing",
-      complete: "Complete",
-      setup: "Setup",
-      unknown: "Unknown",
-      detection_found_multiple: "Multiple Found",
-      detection_found_nothing: "None Found",
-      detection_needs_auth: "Detection Needs Auth",
-    };
-    return mapping[value.status] || value.status;
-  })();
+  type IconComponent = React.ComponentType<{
+    size?: number;
+    className?: string;
+    color?: string;
+    strokeWidth?: number;
+    title?: string;
+  }>;
+  const statusMapping: Record<
+    AutoViewInput["status"],
+    { label: string; Icon: IconComponent; colorClass: string }
+  > = {
+    none: { label: "Not Started", Icon: LucideReact.Circle, colorClass: "text-gray-500" },
+    setup: { label: "Setup", Icon: LucideReact.Settings, colorClass: "text-indigo-500" },
+    auth: { label: "Authenticating", Icon: LucideReact.Key, colorClass: "text-purple-500" },
+    auth_failed: { label: "Auth Failed", Icon: LucideReact.XCircle, colorClass: "text-red-500" },
+    choose: { label: "Choose Project", Icon: LucideReact.List, colorClass: "text-indigo-600" },
+    detecting: { label: "Detecting Repos", Icon: LucideReact.Search, colorClass: "text-amber-500" },
+    detection_found_multiple: {
+      label: "Multiple Found",
+      Icon: LucideReact.Users,
+      colorClass: "text-amber-600",
+    },
+    detection_found_nothing: {
+      label: "No Repos Found",
+      Icon: LucideReact.EyeOff,
+      colorClass: "text-gray-400",
+    },
+    detection_needs_auth: {
+      label: "Detection Needs Auth",
+      Icon: LucideReact.Lock,
+      colorClass: "text-purple-600",
+    },
+    importing: {
+      label: "Importing",
+      Icon: LucideReact.DownloadCloud,
+      colorClass: "text-blue-500",
+    },
+    mapping: { label: "Mapping", Icon: LucideReact.Map, colorClass: "text-teal-500" },
+    waiting_to_push: {
+      label: "Waiting to Push",
+      Icon: LucideReact.Clock,
+      colorClass: "text-amber-500",
+    },
+    pushing: {
+      label: "Pushing",
+      Icon: LucideReact.UploadCloud,
+      colorClass: "text-blue-600",
+    },
+    complete: { label: "Complete", Icon: LucideReact.CheckCircle, colorClass: "text-green-500" },
+    error: { label: "Error", Icon: LucideReact.AlertTriangle, colorClass: "text-red-500" },
+    unknown: { label: "Unknown", Icon: LucideReact.HelpCircle, colorClass: "text-gray-400" },
+  };
+  const statusInfo =
+    statusMapping[value.status] ?? statusMapping.unknown;
 
   const importPercent = value.import_percent ?? 0;
   const pushPercent = value.push_percent ?? 0;
-  const commitCount = value.commit_count ?? 0;
-  const authorsCount = value.authors_count ?? 0;
-  const hasLarge = value.has_large_files;
-  const largeCount = value.large_files_count ?? 0;
-  const largeSizeRaw = value.large_files_size ?? 0;
+  const hasLarge = Boolean(value.has_large_files);
+  const formattedLargeSize =
+    value.large_files_size != null
+      ? `${(value.large_files_size / (1024 * 1024)).toFixed(2)} MB`
+      : null;
 
-  const formatBytes = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(1)} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(1)} MB`;
-    return `${(mb / 1024).toFixed(1)} GB`;
-  };
-
-  const truncate = (str: string, len = 40): string =>
-    str.length > len ? str.slice(0, len) + "…" : str;
+  // extract repo path from URL
+  let repoPath: string;
+  try {
+    repoPath = new URL(value.vcs_url).pathname.replace(/^\/+/, "");
+  } catch {
+    repoPath = value.vcs_url;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-4 space-y-4">
-      {/* Header */}
-      <div>
-        <h2 className="text-lg font-semibold text-gray-800">Repository Import</h2>
-        <p className="text-sm text-gray-500 truncate" title={value.vcs_url}>
-          {truncate(value.vcs_url)}
-        </p>
-      </div>
-
-      {/* Status */}
-      <div className="flex items-center space-x-2">
-        <span
-          className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700"
-        >
-          {statusLabel}
-        </span>
-        {value.status_text && (
-          <span className="text-sm text-gray-500 truncate" title={value.status_text}>
-            {truncate(value.status_text, 50)}
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4 text-sm max-w-md mx-auto">
+      {/* Header: Repository */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2 truncate">
+          <LucideReact.GitBranch size={20} className="text-gray-600" />
+          <h2 className="font-semibold text-gray-800 truncate">{repoPath}</h2>
+        </div>
+        <div className="flex items-center space-x-1">
+          <statusInfo.Icon size={16} className={statusInfo.colorClass} />
+          <span className={`font-medium ${statusInfo.colorClass}`}>
+            {statusInfo.label}
           </span>
-        )}
+        </div>
       </div>
 
-      {/* Error Message */}
-      {value.status === "error" && value.error_message && (
-        <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
-          {truncate(value.error_message, 100)}
+      {/* Optional status text or message */}
+      {value.status_text ? (
+        <div className="text-gray-600 line-clamp-2">{value.status_text}</div>
+      ) : value.message ? (
+        <div className="text-gray-600 line-clamp-2">{value.message}</div>
+      ) : null}
+
+      {/* Progress bars */}
+      {value.import_percent != null && (
+        <div className="space-y-1">
+          <div className="flex justify-between text-gray-600 text-xs">
+            <span>Import Progress</span>
+            <span>{importPercent}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-blue-500 h-2"
+              style={{ width: `${importPercent}%` }}
+            />
+          </div>
         </div>
       )}
-
-      {/* Progress Bars */}
-      {["importing", "pushing"].includes(value.status) && (
-        <div className="space-y-3">
-          {/* Import Progress */}
-          <div>
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Import Progress</span>
-              <span>{importPercent}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded h-2 overflow-hidden">
-              <div
-                className="h-2 bg-blue-500"
-                style={{ width: `${importPercent}%` }}
-              />
-            </div>
+      {value.push_percent != null && (
+        <div className="space-y-1">
+          <div className="flex justify-between text-gray-600 text-xs">
+            <span>Push Progress</span>
+            <span>{pushPercent}%</span>
           </div>
-          {/* Push Progress */}
-          <div>
-            <div className="flex justify-between text-sm text-gray-600 mb-1">
-              <span>Push Progress</span>
-              <span>{pushPercent}%</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded h-2 overflow-hidden">
-              <div
-                className="h-2 bg-green-500"
-                style={{ width: `${pushPercent}%` }}
-              />
-            </div>
+          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-blue-600 h-2"
+              style={{ width: `${pushPercent}%` }}
+            />
           </div>
         </div>
       )}
 
-      {/* Key Metrics */}
-      <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-        <div>
-          <div className="font-medium">Commits</div>
-          <div>{commitCount}</div>
-        </div>
-        <div>
-          <div className="font-medium">Authors</div>
-          <div>{authorsCount}</div>
-        </div>
-        {hasLarge && (
-          <>
-            <div>
-              <div className="font-medium">Large Files</div>
-              <div>{largeCount}</div>
-            </div>
-            <div>
-              <div className="font-medium">Total Size</div>
-              <div>{formatBytes(largeSizeRaw)}</div>
-            </div>
-          </>
+      {/* Statistics */}
+      <div className="flex flex-wrap gap-4 text-gray-600">
+        {value.commit_count != null && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.GitCommit size={16} />
+            <span>{value.commit_count} commits</span>
+          </div>
+        )}
+        {value.authors_count != null && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Users size={16} />
+            <span>{value.authors_count} authors</span>
+          </div>
+        )}
+        {hasLarge && value.large_files_count != null && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.FileText size={16} />
+            <span>
+              {value.large_files_count} files{" "}
+              {formattedLargeSize && `(${formattedLargeSize})`}
+            </span>
+          </div>
         )}
       </div>
 
-      {/* Project Choices */}
-      {Array.isArray(value.project_choices) && value.project_choices.length > 0 && (
-        <div>
-          <div className="font-medium text-gray-800 mb-1">Project Choices</div>
-          <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-            {value.project_choices.map((choice, idx) => {
-              const label =
-                choice.human_name ||
-                `${choice.vcs ?? "Unknown VCS"}${choice.tfvc_project ? ` / ${choice.tfvc_project}` : ""}`;
-              return (
-                <li key={idx} title={label}>
-                  {truncate(label, 50)}
-                </li>
-              );
-            })}
-          </ul>
+      {/* Project choices */}
+      {value.status === "choose" &&
+        Array.isArray(value.project_choices) &&
+        value.project_choices.length > 0 && (
+          <div>
+            <h3 className="text-gray-800 font-medium mb-1">Project Choices</h3>
+            <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
+              {value.project_choices.map((p, i) => {
+                const name =
+                  p.human_name ??
+                  `${p.vcs ?? ""}/${p.tfvc_project ?? ""}`.replace(/\/$/, "");
+                return <li key={i}>{name}</li>;
+              })}
+            </ul>
+          </div>
+        )}
+
+      {/* Error or failure */}
+      {value.error_message && (
+        <div className="flex items-start space-x-1 text-red-600">
+          <LucideReact.AlertTriangle size={16} />
+          <span className="break-words">{value.error_message}</span>
         </div>
       )}
 
-      {/* Additional Message */}
-      {value.message && (
-        <div className="text-sm text-gray-600">
-          {truncate(value.message, 120)}
-        </div>
-      )}
+      {/* Link to HTML view */}
+      <div className="flex items-center space-x-1 text-gray-500 text-xs break-all">
+        <LucideReact.Link size={16} />
+        <span className="truncate">{value.html_url}</span>
+      </div>
     </div>
   );
 }

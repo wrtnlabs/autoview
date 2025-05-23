@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4ManagerView = {
+                export interface LegacyV4ManagerView {
                     manager?: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager;
                     online?: AutoViewInputSubTypes.legacy.v4.LegacyV4Online;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Manager = {
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -47,25 +48,25 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4Online = {
+            }
+            export interface LegacyV4Online {
                 channelId?: string;
                 personType?: string;
                 personId?: string;
                 id?: string;
-            };
+            }
         }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ManagerView;
 
@@ -75,115 +76,118 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Manager
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const manager = value.manager;
-  const onlineInfo = value.online;
-  const isOnline = Boolean(onlineInfo?.id);
+  const online = value.online;
 
-  // Format creation date
-  const formattedCreatedAt = manager?.createdAt
-    ? new Date(manager.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : undefined;
-
-  // Determine which email to show
-  const emailToShow =
-    manager?.showEmailToFront && manager.emailForFront
-      ? manager.emailForFront
-      : manager?.showEmailToFront && manager.email
-      ? manager.email
-      : undefined;
-
-  // Determine which mobile number to show
-  const mobileToShow =
-    manager?.showMobileNumberToFront && manager.mobileNumberForFront
-      ? manager.mobileNumberForFront
-      : manager?.showMobileNumberToFront && manager.mobileNumber
-      ? manager.mobileNumber
-      : undefined;
-
-  // Combine status emoji and text
-  const statusDisplay =
-    manager?.statusText || manager?.statusEmoji
-      ? `${manager.statusEmoji || ""} ${manager.statusText || ""}`.trim()
-      : undefined;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (!manager) {
+    // No manager data available state
     return (
-      <div className="p-4 bg-gray-100 rounded-lg text-center text-gray-600">
-        No manager data available
+      <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-gray-500">
+        <LucideReact.AlertCircle size={48} aria-label="No data" />
+        <p className="mt-2 text-sm">No manager data available</p>
       </div>
     );
   }
 
+  const fullName = manager.name;
+  const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    fullName
+  )}&background=0D8ABC&color=fff`;
+  const imageSrc = manager.avatarUrl || fallbackAvatarUrl;
+
+  const createdAtDate =
+    manager.createdAt != null
+      ? new Date(manager.createdAt).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null;
+
+  const hasDescription = manager.showDescriptionToFront && !!manager.description;
+  const hasEmail = manager.showEmailToFront && !!manager.email;
+  const hasMobile =
+    manager.showMobileNumberToFront && !!manager.mobileNumber;
+
+  const statusIcon = online && online.id ? (
+    <LucideReact.CheckCircle
+      size={16}
+      className="text-green-500"
+      role="img"
+      aria-label="Online"
+    />
+  ) : (
+    <LucideReact.XCircle
+      size={16}
+      className="text-gray-400"
+      role="img"
+      aria-label="Offline"
+    />
+  );
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center gap-4">
-      {/* Avatar & Online Indicator */}
-      <div className="relative flex-shrink-0">
-        {manager.avatarUrl ? (
-          <img
-            src={manager.avatarUrl}
-            alt={`${manager.name} avatar`}
-            className="w-16 h-16 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-            {manager.name.charAt(0).toUpperCase()}
-          </div>
-        )}
-        <span
-          className={`absolute bottom-0 right-0 inline-block w-3 h-3 rounded-full ring-2 ring-white ${
-            isOnline ? "bg-green-400" : "bg-gray-400"
-          }`}
-        />
-      </div>
-
-      {/* Manager Details */}
-      <div className="flex-1 flex flex-col space-y-2">
-        <div className="flex items-center space-x-2">
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+      <img
+        src={imageSrc}
+        alt={`${fullName} avatar`}
+        className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+        onError={(e) => {
+          (e.currentTarget as HTMLImageElement).src = fallbackAvatarUrl;
+        }}
+      />
+      <div className="flex-1 w-full">
+        <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {manager.name}
+            {fullName}
           </h2>
-          <span
-            className={`px-2 py-0.5 text-xs font-medium uppercase rounded ${
-              manager.role === "owner"
-                ? "bg-red-100 text-red-800"
-                : "bg-blue-100 text-blue-800"
-            }`}
-          >
-            {manager.role}
-          </span>
+          {statusIcon}
         </div>
-
-        {statusDisplay && (
-          <p className="text-sm text-gray-500 truncate">{statusDisplay}</p>
-        )}
-
-        {manager.description && manager.showDescriptionToFront && (
-          <p className="text-sm text-gray-700 line-clamp-2">
+        {hasDescription && (
+          <p className="mt-1 text-sm text-gray-600 line-clamp-2">
             {manager.description}
           </p>
         )}
-
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-          {emailToShow && (
-            <div className="flex items-center space-x-1">
-              <span>📧</span>
-              <span className="truncate">{emailToShow}</span>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-700">
+          {hasEmail && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Mail
+                size={16}
+                className="text-gray-400"
+                role="img"
+                aria-label="Email"
+              />
+              <span className="truncate">{manager.email}</span>
             </div>
           )}
-          {mobileToShow && (
-            <div className="flex items-center space-x-1">
-              <span>📱</span>
-              <span className="truncate">{mobileToShow}</span>
+          {hasMobile && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Phone
+                size={16}
+                className="text-gray-400"
+                role="img"
+                aria-label="Phone"
+              />
+              <span className="truncate">{manager.mobileNumber}</span>
             </div>
           )}
-          {formattedCreatedAt && (
-            <div className="flex items-center space-x-1">
-              <span>📅</span>
-              <span>{formattedCreatedAt}</span>
+          <div className="flex items-center gap-1">
+            <LucideReact.User
+              size={16}
+              className="text-gray-400"
+              role="img"
+              aria-label="Role"
+            />
+            <span className="capitalize">{manager.role}</span>
+          </div>
+          {createdAtDate && (
+            <div className="flex items-center gap-1">
+              <LucideReact.Calendar
+                size={16}
+                className="text-gray-400"
+                role="img"
+                aria-label="Created"
+              />
+              <span>{createdAtDate}</span>
             </div>
           )}
         </div>

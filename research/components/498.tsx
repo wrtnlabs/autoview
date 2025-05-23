@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,19 +139,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -187,86 +188,109 @@ export type AutoViewInput = AutoViewInputSubTypes.minimal_repository[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateString?: string | null): string =>
-    dateString
-      ? new Date(dateString).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "—";
+  // Empty state when no repositories provided
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="text-gray-400" />
+        <span className="mt-2 text-lg">No repositories available.</span>
+      </div>
+    );
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {value.map((repo) => {
-        const description = repo.description?.trim() || "No description provided.";
-        const updatedAt = formatDate(repo.updated_at);
+        // Derived and formatted values
+        const updatedDate = repo.updated_at
+          ? new Date(repo.updated_at).toLocaleDateString(undefined, {
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          : "Unknown";
+
+        const stars = repo.stargazers_count ?? 0;
+        const forks = repo.forks_count ?? repo.forks ?? 0;
+        const language = repo.language ?? "Unknown";
+        const topics = repo.topics ?? [];
+
+        // Fallback for avatar image errors
+        const placeholderAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          repo.owner.login
+        )}&background=0D8ABC&color=fff`;
 
         return (
           <div
             key={repo.id}
             className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden"
           >
-            <div className="px-4 py-3 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-800 truncate">
+            <div className="flex items-center px-4 py-3 bg-gray-50">
+              <img
+                src={repo.owner.avatar_url}
+                onError={(e) => {
+                  e.currentTarget.src = placeholderAvatar;
+                }}
+                alt={repo.owner.login}
+                className="w-8 h-8 rounded-full object-cover mr-2"
+              />
+              <span className="text-sm font-medium text-gray-700 truncate">
+                {repo.owner.login}
+              </span>
+            </div>
+
+            <div className="flex flex-col flex-1 px-4 py-3">
+              <h2 className="text-lg font-semibold text-blue-600 truncate">
                 {repo.name}
               </h2>
-              <p className="text-sm text-gray-500 truncate">
-                {repo.owner.login}
+              <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                {repo.description ?? "No description provided."}
               </p>
-            </div>
 
-            <div className="p-4 flex-1">
-              <p className="text-gray-700 text-sm mb-3 line-clamp-2">
-                {description}
-              </p>
-            </div>
+              <div className="mt-auto pt-4">
+                <div className="flex items-center text-sm text-gray-500 space-x-4">
+                  <div className="flex items-center">
+                    <LucideReact.Star
+                      size={16}
+                      className="text-yellow-500"
+                      aria-hidden="true"
+                    />
+                    <span className="ml-1">{stars.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.GitBranch
+                      size={16}
+                      className="text-gray-500"
+                      aria-hidden="true"
+                    />
+                    <span className="ml-1">{forks.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Code
+                      size={16}
+                      className="text-indigo-500"
+                      aria-hidden="true"
+                    />
+                    <span className="ml-1">{language}</span>
+                  </div>
+                </div>
 
-            <div className="px-4 py-3 bg-gray-50 flex flex-wrap items-center justify-between text-sm text-gray-600 space-y-1 sm:space-y-0">
-              <div className="flex items-center space-x-3">
-                <span className="flex items-center">
-                  <svg
-                    className="w-4 h-4 mr-1 text-yellow-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.172 3.603a1 1 0 00.95.69h3.786c.969 0 1.371 1.24.588 1.81l-3.066 2.228a1 1 0 00-.364 1.118l1.172 3.603c.3.921-.755 1.688-1.54 1.118l-3.066-2.228a1 1 0 00-1.176 0l-3.066 2.228c-.784.57-1.838-.197-1.539-1.118l1.172-3.603a1 1 0 00-.364-1.118L2.554 8.03c-.783-.57-.38-1.81.588-1.81h3.786a1 1 0 00.95-.69l1.172-3.603z" />
-                  </svg>
-                  {repo.stargazers_count ?? 0}
-                </span>
-                <span className="flex items-center">
-                  <svg
-                    className="w-4 h-4 mr-1 text-gray-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M10 2a2 2 0 00-2 2v2H5a2 2 0 00-2 2v8h14V8a2 2 0 00-2-2h-3V4a2 2 0 00-2-2z" />
-                  </svg>
-                  {repo.forks_count ?? 0}
-                </span>
-                <span className="flex items-center">
-                  <svg
-                    className="w-4 h-4 mr-1 text-blue-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v7a5 5 0 01-5 5H7l-5 3V5z" />
-                  </svg>
-                  {repo.open_issues_count ?? 0}
-                </span>
-              </div>
-              <div className="text-right">
-                <p>
-                  <span className="font-medium text-gray-700">Updated:</span>{" "}
-                  {updatedAt}
-                </p>
-                {repo.language && (
-                  <p className="mt-1">
-                    <span className="font-medium text-gray-700">Lang:</span>{" "}
-                    {repo.language}
-                  </p>
+                <div className="mt-2 flex items-center text-xs text-gray-400">
+                  <LucideReact.Calendar size={14} aria-hidden="true" />
+                  <span className="ml-1">Updated on {updatedDate}</span>
+                </div>
+
+                {topics.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {topics.map((topic) => (
+                      <span
+                        key={topic}
+                        className="px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded"
+                      >
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

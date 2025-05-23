@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Snapshot record of sale.
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
      * concept of "snapshot" is still important, so it is recommended to understand
      * the concept of "snapshot" properly.
     */
-    export type IShoppingSaleSnapshot = {
+    export interface IShoppingSaleSnapshot {
         /**
          * Primary Key of Sale.
          *
@@ -83,14 +84,14 @@ export namespace AutoViewInputSubTypes {
          * @title List of units
         */
         units: AutoViewInputSubTypes.IShoppingSaleUnit[];
-    };
+    }
     /**
      * Content information of sale snapshot.
      *
      * `IShoppingSaleContent` is an entity embodies the description contents
      * of {@link IShoppingSale}.
     */
-    export type IShoppingSaleContent = {
+    export interface IShoppingSaleContent {
         /**
          * Primary Key.
          *
@@ -131,7 +132,7 @@ export namespace AutoViewInputSubTypes {
          * @title List of thumbnails
         */
         thumbnails: AutoViewInputSubTypes.IAttachmentFile[];
-    };
+    }
     /**
      * Attachment File.
      *
@@ -141,7 +142,7 @@ export namespace AutoViewInputSubTypes {
      * or {@link extension} like `.gitignore` or `README` case, but not
      * possible to omit both of them.
     */
-    export type IAttachmentFile = {
+    export interface IAttachmentFile {
         /**
          * Primary Key.
          *
@@ -176,12 +177,12 @@ export namespace AutoViewInputSubTypes {
          * @title URL path of the real file
         */
         url: string;
-    };
+    }
     export namespace IShoppingChannelCategory {
         /**
          * Invert category information with parent category.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Parent category info with recursive structure.
              *
@@ -189,7 +190,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title Parent category info with recursive structure
             */
-            parent: null | any;
+            parent: null | AutoViewInputSubTypes.IShoppingChannelCategory.IInvert;
             /**
              * Primary Key.
              *
@@ -226,7 +227,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Product composition information handled in the sale.
@@ -255,13 +256,13 @@ export namespace AutoViewInputSubTypes {
      * For example, even if you buy a Macbook, the final stocks are determined only
      * after selecting all the options (CPU / RAM / SSD), etc.
     */
-    export type IShoppingSaleUnit = {
+    export interface IShoppingSaleUnit {
         /**
          * List of options.
          *
          * @title List of options
         */
-        options: (any | any)[];
+        options: (AutoViewInputSubTypes.IShoppingSaleUnitSelectableOption | AutoViewInputSubTypes.IShoppingSaleUnitDescriptiveOption)[];
         /**
          * List of final stocks.
          *
@@ -301,9 +302,129 @@ export namespace AutoViewInputSubTypes {
          * @title Whether the unit is required or not
         */
         required: boolean;
-    };
-    export type IShoppingSaleUnitSelectableOption = any;
-    export type IShoppingSaleUnitDescriptiveOption = any;
+    }
+    /**
+     * Individual option information on units for sale.
+     *
+     * `IShoppingSaleUnitSelectableOption` is a subsidiary entity of
+     * {@link IShoppingSaleUnit} that represents individual products in the
+     * {@link IShoppingSale sale}, and is an entity designed to represent individual
+     * selectable option information for the unit.
+     *
+     * - Examples of Options
+     *   - selectable options
+     *     - Computer: CPU, RAM, SSD, etc.
+     *     - Clothes: size, color, style, etc.
+     *   - descriptive options
+     *     - Engrave
+     *     - Simple question
+     *
+     * If the {@link variable} property value is `true`, the final stock that the
+     * {@link IShoppingCustomer customer} will purchase changes depending on the
+     * selection of the {@link IShoppingSaleUnitOptionCandidate candidate value}.
+     *
+     * Conversely, if it is a type other than "select", or if the {@link variable}
+     * property value is "false", , this is an option that has no meaning beyond
+     * simple information transfer. Therefore, no matter what value the customer
+     * chooses when purchasing it, the option in this case does not affect the
+     * {@link IShoppingSaleUnitStock final stock}.
+    */
+    export interface IShoppingSaleUnitSelectableOption {
+        /**
+         * List of candidate values.
+         *
+         * @title List of candidate values
+        */
+        candidates: AutoViewInputSubTypes.IShoppingSaleUnitOptionCandidate[];
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Discriminant for the type of selectable option.
+         *
+         * @title Discriminant for the type of selectable option
+        */
+        type: "select";
+        /**
+         * Represents the name of the option.
+         *
+         * @title Represents the name of the option
+        */
+        name: string;
+        /**
+         * Whether the option is variable or not.
+         *
+         * When type of current option is "select", this attribute means whether
+         * selecting different candidate value affects the final stock or not.
+         *
+         * @title Whether the option is variable or not
+        */
+        variable: boolean;
+    }
+    /**
+     * Selectable candidate values within an option.
+     *
+     * `IShoppingSaleUnitOptionCandidate` is an entity that represents individual
+     * candidate values that can be selected from
+     * {@link IShoppingSaleUnitSelectableOption options of the "select" type}.
+     *
+     * - Example
+     *   - RAM: 8GB, 16GB, 32GB
+     *   - GPU: RTX 3060, RTX 4080, TESLA
+     *   - License: Private, Commercial, Educatiion
+     *
+     * By the way, if belonged option is not "select" type, this entity never
+     * being used.
+    */
+    export interface IShoppingSaleUnitOptionCandidate {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Represents the name of the candidate value.
+         *
+         * @title Represents the name of the candidate value
+        */
+        name: string;
+    }
+    /**
+     * Descriptive option.
+     *
+     * When type of the option not `"select"`, it means the option is descriptive
+     * that requiring {@link IShoppingCustomer customers} to write some value to
+     * {@link IShoppingOrder purchase}. Also, whatever customer writes about the
+     * option, it does not affect the {@link IShoppingSaleUnitStock final stock}.
+     *
+     * Another words, the descriptive option is just for information transfer.
+    */
+    export interface IShoppingSaleUnitDescriptiveOption {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Type of descriptive option.
+         *
+         * Which typed value should be written when purchasing.
+         *
+         * @title Type of descriptive option
+        */
+        type: "string" | "number" | "boolean";
+        /**
+         * Readable name of the option.
+         *
+         * @title Readable name of the option
+        */
+        name: string;
+    }
     /**
      * Final component information on units for sale.
      *
@@ -330,7 +451,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, without a single variable "select" type option, the final stocks
      * count in the unit is only 1.
     */
-    export type IShoppingSaleUnitStock = {
+    export interface IShoppingSaleUnitStock {
         /**
          * Primary Key.
          *
@@ -363,11 +484,11 @@ export namespace AutoViewInputSubTypes {
          * @title List of choices
         */
         choices: AutoViewInputSubTypes.IShoppingSaleUnitStockChoice[];
-    };
+    }
     /**
      * Shopping price interface.
     */
-    export type IShoppingPrice = {
+    export interface IShoppingPrice {
         /**
          * Nominal price.
          *
@@ -384,11 +505,11 @@ export namespace AutoViewInputSubTypes {
          * @title Real price to pay
         */
         real: number;
-    };
+    }
     /**
      * Inventory information of a final stock.
     */
-    export type IShoppingSaleUnitStockInventory = {
+    export interface IShoppingSaleUnitStockInventory {
         /**
          * Total income quantity.
          *
@@ -401,7 +522,7 @@ export namespace AutoViewInputSubTypes {
          * @title Total outcome quantity
         */
         outcome: number & tags.Type<"int32">;
-    };
+    }
     /**
      * Selection information of final stock.
      *
@@ -414,7 +535,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, if the bound {@link IShoppingSaleUnit unit} does not have any
      * options, this entity can also be ignored.
     */
-    export type IShoppingSaleUnitStockChoice = {
+    export interface IShoppingSaleUnitStockChoice {
         /**
          * Primary Key.
          *
@@ -429,7 +550,7 @@ export namespace AutoViewInputSubTypes {
          * Target candidate's {@link IShoppingSaleUnitOptionCandidate.id}
         */
         candidate_id: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleSnapshot;
 
@@ -438,103 +559,121 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSaleSnapshot;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { content, latest, categories, tags, units } = value;
+  const prices = value.units.flatMap(unit => unit.stocks.map(stock => stock.price.real));
+  const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+  const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+  const formatPrice = (price: number) =>
+    new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 }).format(price);
+  const formattedMinPrice = formatPrice(minPrice);
+  const formattedMaxPrice = formatPrice(maxPrice);
 
-  // Build readable category breadcrumbs (e.g., "Electronics > Phones")
-  const categoryPaths = categories.map((cat) => {
-    const path: string[] = [];
-    let current: any = cat;
-    while (current) {
-      if (typeof current.name === "string") {
-        path.unshift(current.name);
-      }
-      current = current.parent;
-    }
-    return path.join(" > ");
-  });
-  const displayedCategories = categoryPaths.slice(0, 3);
-  const moreCategories = categoryPaths.length - displayedCategories.length;
+  const totalAvailable = value.units.reduce((sum, unit) => {
+    return sum + unit.stocks.reduce((s, stock) => {
+      const avail = stock.inventory.income - stock.inventory.outcome;
+      return s + (avail > 0 ? avail : 0);
+    }, 0);
+  }, 0);
 
-  // Aggregate all stock prices to compute a display price or range
-  const allStocks = units.flatMap((u) => u.stocks);
-  const realPrices = allStocks.map((s) => s.price.real);
-  const minReal = Math.min(...realPrices);
-  const maxReal = Math.max(...realPrices);
-  const formatPrice = (n: number) =>
-    n.toLocaleString(undefined, { style: "currency", currency: "USD" });
-  const displayPrice =
-    minReal === maxReal ? formatPrice(minReal) : `From ${formatPrice(minReal)}`;
+  const thumbnailUrl =
+    value.content.thumbnails[0]?.url ??
+    'https://placehold.co/400x300/f1f5f9/64748b?text=Image';
+
+  const bodyText = value.content.body || '';
+  const bodyPreview = bodyText.split('\n').slice(0, 3).join(' ');
+  const isBodyLong = bodyPreview.length < bodyText.length;
+  const displayBody = isBodyLong ? `${bodyPreview.trim()}...` : bodyPreview.trim();
+
+  const categoryPaths = Array.from(
+    new Set(
+      value.categories.map(cat => {
+        const names: string[] = [];
+        let current: AutoViewInputSubTypes.IShoppingChannelCategory.IInvert | null = cat;
+        while (current) {
+          names.unshift(current.name);
+          current = current.parent;
+        }
+        return names.join(' > ');
+      })
+    )
+  );
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Thumbnail */}
-      {content.thumbnails?.[0] && (
-        <img
-          src={content.thumbnails[0].url}
-          alt={content.title}
-          className="w-full h-48 object-cover rounded-md"
-        />
-      )}
-
-      {/* Title and Latest Badge */}
-      <div className="mt-4 flex items-center">
-        <h2 className="text-xl font-semibold text-gray-900">{content.title}</h2>
-        {latest && (
-          <span className="ml-2 inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded-full">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {value.content.title}
+        </h2>
+        {value.latest && (
+          <span className="flex items-center text-sm text-green-600">
+            <LucideReact.CheckCircle size={16} className="mr-1" />
             Latest
           </span>
         )}
       </div>
 
-      {/* Categories */}
-      {displayedCategories.length > 0 && (
-        <p className="mt-1 text-sm text-gray-500">
-          {displayedCategories.join(", ")}
-          {moreCategories > 0 && ` +${moreCategories}`}
-        </p>
+      <div className="w-full mb-4 bg-gray-100 overflow-hidden rounded aspect-[16/9]">
+        <img
+          src={thumbnailUrl}
+          alt={value.content.title}
+          className="w-full h-full object-cover"
+          onError={e => {
+            (e.currentTarget as HTMLImageElement).src =
+              'https://placehold.co/400x300/f1f5f9/64748b?text=Image';
+          }}
+        />
+      </div>
+
+      <p className="text-gray-700 text-sm mb-4 line-clamp-3">{displayBody}</p>
+
+      {categoryPaths.length > 0 && (
+        <div className="mb-2 text-sm text-gray-500 flex items-center">
+          <LucideReact.Tag size={16} className="mr-1" />
+          {categoryPaths.join(', ')}
+        </div>
       )}
 
-      {/* Price */}
-      <p className="mt-2 text-lg font-bold text-gray-800">{displayPrice}</p>
-
-      {/* Tags */}
-      {tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap">
-          {tags.map((tag, idx) => (
+      {value.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {value.tags.slice(0, 5).map(tag => (
             <span
-              key={idx}
-              className="mr-2 mb-2 px-2 py-1 bg-gray-200 text-gray-600 text-xs rounded-full"
+              key={tag}
+              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded"
             >
               {tag}
             </span>
           ))}
+          {value.tags.length > 5 && (
+            <span className="text-xs text-gray-500">
+              +{value.tags.length - 5}
+            </span>
+          )}
         </div>
       )}
 
-      {/* Body Preview */}
-      {content.body && (
-        <p className="mt-2 text-sm text-gray-700 line-clamp-3 overflow-hidden">
-          {content.body}
-        </p>
-      )}
-
-      {/* Units Summary */}
-      {units.length > 0 && (
-        <div className="mt-4">
-          <p className="text-sm font-medium text-gray-800">Units ({units.length})</p>
-          <ul className="mt-1 list-disc list-inside text-sm text-gray-700 space-y-1">
-            {units.map((unit) => (
-              <li key={unit.id}>
-                {unit.name}
-                {unit.required && (
-                  <span className="ml-1 text-xs text-red-500">(Required)</span>
-                )}
-              </li>
-            ))}
-          </ul>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1 text-gray-800 font-medium">
+          <LucideReact.DollarSign size={16} />
+          <span>
+            {minPrice === maxPrice
+              ? formattedMinPrice
+              : `${formattedMinPrice} - ${formattedMaxPrice}`}
+          </span>
         </div>
-      )}
+        <div className="flex items-center text-sm font-medium">
+          {totalAvailable > 0 ? (
+            <span className="flex items-center text-green-600 gap-1">
+              <LucideReact.CheckCircle size={16} />
+              In Stock
+            </span>
+          ) : (
+            <span className="flex items-center text-red-600 gap-1">
+              <LucideReact.XCircle size={16} />
+              Out of Stock
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

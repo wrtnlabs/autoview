@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A comment made to a gist.
      *
      * @title Gist Comment
     */
-    export type gist_comment = {
+    export interface gist_comment {
         id: number & tags.Type<"int32">;
         node_id: string;
         url: string & tags.Format<"uri">;
@@ -18,7 +19,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         author_association: AutoViewInputSubTypes.author_association;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -61,67 +62,101 @@ export type AutoViewInput = AutoViewInputSubTypes.gist_comment;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Define data aggregation/transformation functions or derived constants.
   const createdDate = new Date(value.created_at);
-  const formattedCreatedAt = createdDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
+  const formattedCreated = createdDate.toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
-
-  const updatedDate = value.updated_at !== value.created_at ? new Date(value.updated_at) : null;
-  const formattedUpdatedAt = updatedDate
+  const isEdited = value.updated_at !== value.created_at;
+  const updatedDate = isEdited ? new Date(value.updated_at) : null;
+  const formattedUpdated = updatedDate
     ? updatedDate.toLocaleString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
+        dateStyle: "medium",
+        timeStyle: "short",
       })
-    : null;
+    : "";
 
-  // Transform enum to human-readable label
-  const assocLabel = value.author_association
-    .toLowerCase()
-    .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-
-  // User info (may be null)
   const user = value.user;
-  const userLogin = user?.login ?? "Anonymous";
-  const avatarUrl = user?.avatar_url;
+  const userLogin = user?.login ?? "unknown";
+  const displayName = user?.name ?? userLogin;
+  const avatarUrl =
+    user?.avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      displayName
+    )}&background=random`;
+
+  function getAssociationClasses(
+    assoc: AutoViewInputSubTypes.author_association
+  ): string {
+    switch (assoc) {
+      case "OWNER":
+        return "bg-blue-100 text-blue-800";
+      case "COLLABORATOR":
+        return "bg-green-100 text-green-800";
+      case "MEMBER":
+        return "bg-blue-100 text-blue-800";
+      case "CONTRIBUTOR":
+        return "bg-indigo-100 text-indigo-800";
+      case "FIRST_TIMER":
+      case "FIRST_TIME_CONTRIBUTOR":
+        return "bg-yellow-100 text-yellow-800";
+      case "MANNEQUIN":
+        return "bg-purple-100 text-purple-800";
+      case "NONE":
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  }
+  const assocClasses = getAssociationClasses(value.author_association);
+  const assocLabel = value.author_association.replace(/_/g, " ");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-lg mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center mb-4">
-        {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt={`${userLogin}'s avatar`}
-            className="w-10 h-10 rounded-full object-cover bg-gray-100"
-          />
-        ) : (
-          <div className="w-10 h-10 rounded-full bg-gray-200" />
-        )}
-        <div className="ml-3 flex flex-col">
-          <span className="text-sm font-semibold text-gray-900">{userLogin}</span>
-          <div className="flex items-center text-xs text-gray-500 space-x-2">
-            <span className="capitalize">{assocLabel}</span>
-            <span>•</span>
-            <span>{formattedCreatedAt}</span>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-start space-x-4">
+        <img
+          src={avatarUrl}
+          alt={`${displayName} avatar`}
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            img.onerror = null;
+            img.src =
+              "https://ui-avatars.com/api/?name=User&background=ccc&color=fff";
+          }}
+          className="w-10 h-10 rounded-full object-cover bg-gray-200 flex-shrink-0"
+        />
+        <div className="flex-1">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-semibold text-gray-900">
+                {displayName}
+              </p>
+              <p className="text-xs text-gray-500">@{userLogin}</p>
+            </div>
+            <span
+              className={`text-xs font-medium px-2 py-1 rounded ${assocClasses}`}
+            >
+              {assocLabel}
+            </span>
+          </div>
+          <p className="mt-2 text-gray-800 text-sm line-clamp-3 whitespace-pre-wrap">
+            {value.body}
+          </p>
+          <div className="mt-3 flex items-center space-x-4 text-xs text-gray-500">
+            <div className="flex items-center">
+              <LucideReact.Calendar size={14} className="mr-1" />
+              <span>{formattedCreated}</span>
+            </div>
+            {isEdited && (
+              <div className="flex items-center">
+                <LucideReact.Edit2 size={14} className="mr-1" />
+                <span>Edited {formattedUpdated}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      <p className="text-gray-800 text-sm break-words line-clamp-5">{value.body}</p>
-      {formattedUpdatedAt && (
-        <div className="mt-2 text-xs text-gray-400">
-          Updated: <time dateTime={value.updated_at}>{formattedUpdatedAt}</time>
-        </div>
-      )}
     </div>
   );
 }

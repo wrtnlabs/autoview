@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Delivery information.
@@ -20,7 +21,7 @@ export namespace AutoViewInputSubTypes {
      * manufacturing, planning, shipping and delivering. Those steps are represented by
      * another subsidiary entity {@link IShoppingDeliveryJourney}.
     */
-    export type IShoppingDelivery = {
+    export interface IShoppingDelivery {
         /**
          * Primary Key.
          *
@@ -63,7 +64,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of the record
         */
         created_at: string;
-    };
+    }
     /**
      * Seller information.
      *
@@ -76,7 +77,7 @@ export namespace AutoViewInputSubTypes {
      * to operate sales. Also, seller must do the
      * {@link IShoppingCitizen real-name and mobile authentication}, too.
     */
-    export type IShoppingSeller = {
+    export interface IShoppingSeller {
         /**
          * Primary Key.
          *
@@ -91,7 +92,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation tmie of record
         */
         created_at: string;
-    };
+    }
     /**
      * Journey of delivery.
      *
@@ -101,7 +102,7 @@ export namespace AutoViewInputSubTypes {
      * delivering {@link IShoppingOrderGood goods} to the
      * {@link IShoppingCustomer customer}.
     */
-    export type IShoppingDeliveryJourney = {
+    export interface IShoppingDeliveryJourney {
         /**
          * Primary Key.
          *
@@ -155,7 +156,7 @@ export namespace AutoViewInputSubTypes {
          * @title Completion time of the journey
         */
         completed_at: null | (string & tags.Format<"date-time">);
-    };
+    }
     /**
      * Which stocks are delivered.
      *
@@ -167,7 +168,7 @@ export namespace AutoViewInputSubTypes {
      * or weight problem, it is possible to have multiple `IShoppingDeliveryPiece`
      * records for a single stock.
     */
-    export type IShoppingDeliveryPiece = {
+    export interface IShoppingDeliveryPiece {
         /**
          * Primary Key.
          *
@@ -200,14 +201,14 @@ export namespace AutoViewInputSubTypes {
          * @title Quantity of the stock
         */
         quantity: number;
-    };
-    export type IShoppingDeliveryShipper = {
+    }
+    export interface IShoppingDeliveryShipper {
         id: string & tags.Format<"uuid">;
         created_at: string & tags.Format<"date-time">;
         company: null | string;
         name: string;
         mobile: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDelivery;
 
@@ -216,117 +217,153 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingDelivery;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDateTime = (iso: string | null): string =>
-    iso
-      ? new Date(iso).toLocaleString(undefined, {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-        })
-      : 'N/A';
-
-  const stateMapping: Record<AutoViewInput['state'], { label: string; badgeClass: string }> = {
-    none: { label: 'None', badgeClass: 'bg-gray-100 text-gray-800' },
-    underway: { label: 'Underway', badgeClass: 'bg-indigo-100 text-indigo-800' },
-    preparing: { label: 'Preparing', badgeClass: 'bg-blue-100 text-blue-800' },
-    manufacturing: { label: 'Manufacturing', badgeClass: 'bg-purple-100 text-purple-800' },
-    shipping: { label: 'Shipping', badgeClass: 'bg-yellow-100 text-yellow-800' },
-    delivering: { label: 'Delivering', badgeClass: 'bg-orange-100 text-orange-800' },
-    arrived: { label: 'Arrived', badgeClass: 'bg-green-100 text-green-800' },
+  const stateMap: Record<AutoViewInput['state'], { label: string; className: string }> = {
+    none:         { label: 'None',           className: 'text-gray-800 bg-gray-100' },
+    preparing:    { label: 'Preparing',      className: 'text-blue-800 bg-blue-100' },
+    manufacturing:{ label: 'Manufacturing',  className: 'text-indigo-800 bg-indigo-100' },
+    shipping:     { label: 'Shipping',       className: 'text-amber-800 bg-amber-100' },
+    delivering:   { label: 'Delivering',     className: 'text-teal-800 bg-teal-100' },
+    underway:     { label: 'Underway',       className: 'text-purple-800 bg-purple-100' },
+    arrived:      { label: 'Arrived',        className: 'text-green-800 bg-green-100' },
   };
-  const { label: stateLabel, badgeClass } = stateMapping[value.state];
-
-  const totalPieces = value.pieces.length;
-  const totalQuantity = value.pieces.reduce((sum, p) => sum + p.quantity, 0);
-
-  const sortedJourneys = [...value.journeys].sort((a, b) => {
-    const aTime = a.started_at ?? a.created_at;
-    const bTime = b.started_at ?? b.created_at;
-    return new Date(aTime).getTime() - new Date(bTime).getTime();
+  const stateInfo = stateMap[value.state];
+  const formatDateTime = (d: string) =>
+    new Date(d).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  const formattedCreatedAt  = formatDateTime(value.created_at);
+  const formattedSellerSince = new Date(value.seller.created_at).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
   });
+  const totalPieces   = value.pieces.length;
+  const totalQuantity = value.pieces.reduce((sum, p) => sum + p.quantity, 0);
+  const sortedJourneys = [...value.journeys].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
+  const journeyTypeMap: Record<string, { icon: any; colorClass: string }> = {
+    preparing:     { icon: LucideReact.Clock,        colorClass: 'text-blue-500' },
+    manufacturing: { icon: LucideReact.Settings,     colorClass: 'text-indigo-500' },
+    shipping:      { icon: LucideReact.Truck,        colorClass: 'text-amber-500' },
+    delivering:    { icon: LucideReact.Package,      colorClass: 'text-teal-500' },
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <h2 className="text-xl font-semibold text-gray-800">Delivery Overview</h2>
-        <div className="mt-2 sm:mt-0 flex items-center space-x-3">
-          <span className={`px-2 py-1 text-sm font-medium rounded-full ${badgeClass}`}>
-            {stateLabel}
-          </span>
-          <time className="text-sm text-gray-500">{formatDateTime(value.created_at)}</time>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
+      {/* Header: State and Created At */}
+      <div className="flex items-center justify-between">
+        <span className={`text-xs font-medium uppercase px-2 py-1 rounded ${stateInfo.className}`}>
+          {stateInfo.label}
+        </span>
+        <div className="flex items-center text-sm text-gray-500">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          <span>{formattedCreatedAt}</span>
         </div>
       </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-gray-50 p-3 rounded">
-          <h3 className="text-xs text-gray-500 uppercase">Seller Since</h3>
-          <p className="mt-1 text-sm text-gray-700">{formatDateTime(value.seller.created_at)}</p>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <h3 className="text-xs text-gray-500 uppercase">Pieces</h3>
-          <p className="mt-1 text-sm text-gray-700">{totalPieces}</p>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <h3 className="text-xs text-gray-500 uppercase">Total Quantity</h3>
-          <p className="mt-1 text-sm text-gray-700">{totalQuantity}</p>
-        </div>
-        <div className="bg-gray-50 p-3 rounded">
-          <h3 className="text-xs text-gray-500 uppercase">Shippers</h3>
-          <p className="mt-1 text-sm text-gray-700">{value.shippers.length}</p>
-        </div>
+      {/* Seller Info */}
+      <div className="border-t pt-4">
+        <div className="text-sm font-medium text-gray-500">Seller since</div>
+        <div className="mt-1 text-sm text-gray-700">{formattedSellerSince}</div>
       </div>
 
-      {/* Journey Timeline */}
-      {sortedJourneys.length > 0 && (
-        <div>
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Delivery Journey</h3>
-          <ul className="relative border-l border-gray-200">
-            {sortedJourneys.map((j) => (
-              <li key={j.id} className="mb-6 ml-4">
-                <span className="absolute -left-1.5 top-1 w-3 h-3 bg-white border-2 border-gray-300 rounded-full" />
-                <div className="text-sm space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="font-semibold text-gray-800">
-                      {j.type.charAt(0).toUpperCase() + j.type.slice(1)}
-                    </span>
-                    <time className="text-gray-500">{formatDateTime(j.started_at)}</time>
-                  </div>
-                  {j.title && <p className="text-gray-700 truncate">{j.title}</p>}
-                  {j.description && (
-                    <p className="text-gray-600 text-sm line-clamp-2">{j.description}</p>
-                  )}
-                  {j.completed_at && (
-                    <p className="text-green-600 text-xs">
-                      Completed: {formatDateTime(j.completed_at)}
-                    </p>
+      {/* Shippers */}
+      {value.shippers.length > 0 && (
+        <div className="border-t pt-4">
+          <div className="text-sm font-medium text-gray-500 mb-2">Shippers</div>
+          <div className="space-y-2">
+            {value.shippers.map((shipper) => (
+              <div
+                key={shipper.id}
+                className="p-2 border rounded flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <LucideReact.User size={16} className="text-gray-400" />
+                  <span className="font-medium text-gray-700">{shipper.name}</span>
+                  {shipper.company && (
+                    <span className="text-sm text-gray-500">({shipper.company})</span>
                   )}
                 </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Shippers List */}
-      {value.shippers.length > 0 && (
-        <div>
-          <h3 className="text-lg font-medium text-gray-800 mb-2">Shippers</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {value.shippers.map((s) => (
-              <div key={s.id} className="p-4 bg-gray-50 rounded">
-                <p className="text-sm font-semibold text-gray-800">
-                  {s.company ? `${s.name} (${s.company})` : s.name}
-                </p>
-                <p className="mt-1 text-sm text-gray-600">{s.mobile}</p>
-                <time className="mt-1 text-xs text-gray-500">{formatDateTime(s.created_at)}</time>
+                <div className="flex items-center text-sm text-gray-500">
+                  <LucideReact.Phone size={16} className="mr-1" />
+                  <span>{shipper.mobile}</span>
+                </div>
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Pieces Summary */}
+      <div className="border-t pt-4">
+        <div className="flex items-center text-sm text-gray-500">
+          <LucideReact.ListOrdered size={16} className="mr-1" />
+          <span>Total Pieces:</span>
+          <span className="ml-1 font-medium text-gray-700">{totalPieces}</span>
+        </div>
+        <div className="flex items-center mt-2 text-sm text-gray-500">
+          <LucideReact.Box size={16} className="mr-1" />
+          <span>Total Quantity:</span>
+          <span className="ml-1 font-medium text-gray-700">{totalQuantity}</span>
+        </div>
+      </div>
+
+      {/* Journeys */}
+      {sortedJourneys.length > 0 && (
+        <div className="border-t pt-4">
+          <div className="text-sm font-medium text-gray-500 mb-2">Delivery Journey</div>
+          <ul className="space-y-3">
+            {sortedJourneys.map((journey) => {
+              const mapping = journeyTypeMap[journey.type] || {
+                icon: LucideReact.Clock,
+                colorClass: 'text-gray-500',
+              };
+              const Icon = mapping.icon;
+              return (
+                <li key={journey.id} className="flex items-start">
+                  <Icon
+                    size={20}
+                    className={`${mapping.colorClass} flex-shrink-0 mt-0.5`}
+                    aria-label={journey.type}
+                  />
+                  <div className="ml-3">
+                    <div className="text-sm font-medium text-gray-700">
+                      {journey.title ??
+                        journey.type.charAt(0).toUpperCase() + journey.type.slice(1)}
+                    </div>
+                    {journey.description && (
+                      <div className="text-sm text-gray-600 line-clamp-2">
+                        {journey.description}
+                      </div>
+                    )}
+                    <div className="mt-1 flex flex-wrap gap-2 text-xs text-gray-500">
+                      {journey.started_at && (
+                        <span className="flex items-center">
+                          <LucideReact.Play size={12} className="mr-1" />
+                          {formatDateTime(journey.started_at)}
+                        </span>
+                      )}
+                      {journey.completed_at && (
+                        <span className="flex items-center">
+                          <LucideReact.CheckCircle
+                            size={12}
+                            className="mr-1 text-green-500"
+                          />
+                          {formatDateTime(journey.completed_at)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
     </div>

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes { }
 export type AutoViewInput = number;
 
@@ -7,21 +8,26 @@ export type AutoViewInput = number;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Here we format the raw number with locale-aware compact notation (e.g., 1.5K, 2M).
-  const formattedValue = new Intl.NumberFormat(undefined, {
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(value);
+  const isValidNumber = typeof value === "number" && !isNaN(value);
+  const formattedValue = isValidNumber
+    ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value)
+    : "N/A";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    We present the number in a centered card with responsive typography.
-  const containerClasses = 'p-4 bg-white rounded-lg shadow-md flex items-center justify-center';
-  const numberClasses = 'text-4xl md:text-5xl font-bold text-gray-800';
-
-  // 3. Return the React element.
+  //    We display a simple stat card with a label and the formatted number.
   return (
-    <div className={containerClasses}>
-      <span className={numberClasses}>{formattedValue}</span>
+    <div className="p-4 bg-white rounded-lg shadow-md flex items-center justify-between">
+      <div>
+        <p className="text-sm font-medium text-gray-500">Value</p>
+        <p
+          className={`mt-1 text-2xl font-semibold ${
+            isValidNumber ? "text-gray-900" : "text-gray-400"
+          } truncate`}
+        >
+          {formattedValue}
+        </p>
+      </div>
+      <LucideReact.BarChart2 className="text-gray-400" size={24} />
     </div>
   );
 }

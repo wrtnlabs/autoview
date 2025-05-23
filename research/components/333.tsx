@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A list of default code security configurations
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -145,7 +146,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_default_configurations;
 
@@ -154,78 +155,178 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_default_configur
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const configs = value;
-  const formatDate = (iso?: string) =>
-    iso ? new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
+  const configs = Array.isArray(value) ? value : [];
 
-  const renderStatus = (label: string, status?: string) => {
-    const map: Record<string, { text: string; color: string }> = {
-      enabled: { text: 'Enabled', color: 'bg-green-100 text-green-800' },
-      disabled: { text: 'Disabled', color: 'bg-red-100 text-red-800' },
-      not_set: { text: 'Not Set', color: 'bg-gray-100 text-gray-800' },
-    };
-    const entry = status && map[status] ? map[status] : { text: 'Unknown', color: 'bg-gray-100 text-gray-800' };
-    return (
-      <div key={label} className="flex items-center space-x-2">
-        <span className="text-xs text-gray-600">{label}:</span>
-        <span className={`px-2 py-0.5 text-xs font-medium rounded ${entry.color}`}>{entry.text}</span>
-      </div>
-    );
+  const formatDate = (date?: string) =>
+    date
+      ? new Date(date).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "";
+
+  const getStatusIcon = (status?: string) => {
+    switch (status) {
+      case "enabled":
+      case "enforced":
+        return (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={16}
+            aria-label="Enabled"
+          />
+        );
+      case "disabled":
+      case "unenforced":
+        return (
+          <LucideReact.XCircle
+            className="text-red-500"
+            size={16}
+            aria-label="Disabled"
+          />
+        );
+      case "not_set":
+        return (
+          <LucideReact.MinusCircle
+            className="text-gray-400"
+            size={16}
+            aria-label="Not set"
+          />
+        );
+      default:
+        return (
+          <LucideReact.HelpCircle
+            className="text-gray-400"
+            size={16}
+            aria-label="Unknown"
+          />
+        );
+    }
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!configs || configs.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No default code security configurations available.
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {configs.map((item, idx) => {
-        const cfg = item.configuration;
-        if (!cfg) return null;
-        return (
-          <div key={idx} className="flex flex-col p-4 bg-white rounded-lg shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-base font-semibold text-gray-800 truncate">
-                {cfg.name ?? 'Unnamed'}
-              </h2>
-              {cfg.target_type && (
-                <span className="px-2 py-0.5 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-                  {cfg.target_type}
-                </span>
+    <div className="space-y-4">
+      {configs.length === 0 ? (
+        <div className="flex items-center text-gray-500 space-x-2">
+          <LucideReact.AlertCircle
+            size={24}
+            className="text-gray-400"
+            aria-label="No data"
+          />
+          <span>No default configurations available.</span>
+        </div>
+      ) : (
+        configs.map((item, idx) => {
+          const cfg = item.configuration;
+          if (!cfg) return null;
+
+          return (
+            <div
+              key={idx}
+              className="p-4 bg-white rounded-lg shadow-sm border border-gray-100"
+            >
+              <div className="flex justify-between items-start">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  {cfg.name ?? "Unnamed Configuration"}
+                </h3>
+                {item.default_for_new_repos != null && (
+                  <span className="text-sm text-gray-500 whitespace-nowrap">
+                    Default for new repos:{" "}
+                    <span className="font-medium">
+                      {String(item.default_for_new_repos)}
+                    </span>
+                  </span>
+                )}
+              </div>
+              {cfg.description && (
+                <p className="mt-1 text-gray-600 text-sm line-clamp-2">
+                  {cfg.description}
+                </p>
+              )}
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Target
+                    size={16}
+                    className="text-gray-500"
+                    aria-label="Target type"
+                  />
+                  <span className="text-sm text-gray-700 capitalize truncate">
+                    {cfg.target_type ?? "not_set"}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {getStatusIcon(cfg.advanced_security)}
+                  <span className="text-sm text-gray-700">
+                    Advanced Security
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {getStatusIcon(cfg.dependency_graph)}
+                  <span className="text-sm text-gray-700">
+                    Dependency Graph
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {getStatusIcon(cfg.dependabot_alerts)}
+                  <span className="text-sm text-gray-700">
+                    Dependabot Alerts
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {getStatusIcon(cfg.dependabot_security_updates)}
+                  <span className="text-sm text-gray-700">
+                    Security Updates
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {getStatusIcon(cfg.code_scanning_default_setup)}
+                  <span className="text-sm text-gray-700">
+                    Code Scanning
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {getStatusIcon(cfg.secret_scanning)}
+                  <span className="text-sm text-gray-700">
+                    Secret Scanning
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  {getStatusIcon(cfg.enforcement)}
+                  <span className="text-sm text-gray-700 capitalize">
+                    Enforcement
+                  </span>
+                </div>
+              </div>
+              {(cfg.created_at || cfg.updated_at) && (
+                <div className="mt-4 flex flex-wrap text-xs text-gray-500 gap-4">
+                  {cfg.created_at && (
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Calendar
+                        size={14}
+                        className="text-gray-400"
+                        aria-label="Created date"
+                      />
+                      <span>Created: {formatDate(cfg.created_at)}</span>
+                    </div>
+                  )}
+                  {cfg.updated_at && (
+                    <div className="flex items-center space-x-1">
+                      <LucideReact.Calendar
+                        size={14}
+                        className="text-gray-400"
+                        aria-label="Updated date"
+                      />
+                      <span>Updated: {formatDate(cfg.updated_at)}</span>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-
-            {item.default_for_new_repos !== undefined && (
-              <p className="text-xs text-gray-500 mb-1">
-                Default for new repos: <span className="font-medium">{String(item.default_for_new_repos)}</span>
-              </p>
-            )}
-
-            {cfg.description && (
-              <p className="text-sm text-gray-600 line-clamp-2 mb-3">{cfg.description}</p>
-            )}
-
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 flex-1">
-              {renderStatus('Advanced Sec.', cfg.advanced_security)}
-              {renderStatus('Dependency Graph', cfg.dependency_graph)}
-              {renderStatus('Dependabot Alerts', cfg.dependabot_alerts)}
-              {renderStatus('Security Updates', cfg.dependabot_security_updates)}
-              {renderStatus('Code Scan Setup', cfg.code_scanning_default_setup)}
-              {renderStatus('Secret Scanning', cfg.secret_scanning)}
-            </div>
-
-            <div className="mt-4 text-xs text-gray-400 space-y-0.5">
-              <div>Created: {formatDate(cfg.created_at)}</div>
-              <div>Updated: {formatDate(cfg.updated_at)}</div>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })
+      )}
     </div>
   );
 }

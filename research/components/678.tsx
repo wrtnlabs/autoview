@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A run of a CodeQL query against one or more repositories.
      *
      * @title Variant Analysis
     */
-    export type code_scanning_variant_analysis = {
+    export interface code_scanning_variant_analysis {
         /**
          * The ID of the variant analysis.
         */
@@ -73,13 +74,13 @@ export namespace AutoViewInputSubTypes {
             no_codeql_db_repos: AutoViewInputSubTypes.code_scanning_variant_analysis_skipped_repo_group;
             over_limit_repos: AutoViewInputSubTypes.code_scanning_variant_analysis_skipped_repo_group;
         };
-    };
+    }
     /**
      * A GitHub repository.
      *
      * @title Simple Repository
     */
-    export type simple_repository = {
+    export interface simple_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -261,13 +262,13 @@ export namespace AutoViewInputSubTypes {
          * The API URL to list the hooks on the repository.
         */
         hooks_url: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -290,7 +291,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * The language targeted by the CodeQL query
     */
@@ -300,7 +301,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository Identifier
     */
-    export type code_scanning_variant_analysis_repository = {
+    export interface code_scanning_variant_analysis_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -319,12 +320,12 @@ export namespace AutoViewInputSubTypes {
         "private": boolean;
         stargazers_count: number & tags.Type<"int32">;
         updated_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * The new status of the CodeQL variant analysis repository task.
     */
     export type code_scanning_variant_analysis_status = "pending" | "in_progress" | "succeeded" | "failed" | "canceled" | "timed_out";
-    export type code_scanning_variant_analysis_skipped_repo_group = {
+    export interface code_scanning_variant_analysis_skipped_repo_group {
         /**
          * The total number of repositories that were skipped for this reason.
         */
@@ -333,7 +334,7 @@ export namespace AutoViewInputSubTypes {
          * A list of repositories that were skipped. This list may not include all repositories that were skipped. This is only available when the repository was found and the user has access to it.
         */
         repositories: AutoViewInputSubTypes.code_scanning_variant_analysis_repository[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_scanning_variant_analysis;
 
@@ -342,140 +343,150 @@ export type AutoViewInput = AutoViewInputSubTypes.code_scanning_variant_analysis
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusLabel = value.status
-    .split('_')
-    .map(s => s.charAt(0).toUpperCase() + s.slice(1))
-    .join(' ');
-  const statusColor = {
-    in_progress: 'bg-yellow-100 text-yellow-800',
-    succeeded: 'bg-green-100 text-green-800',
-    failed: 'bg-red-100 text-red-800',
-    cancelled: 'bg-gray-100 text-gray-800',
-  }[value.status] ?? 'bg-gray-100 text-gray-800';
+  const statusMap: Record<string, { icon: React.ComponentType<any>; color: string; label: string }> = {
+    in_progress: { icon: LucideReact.Clock, color: 'text-amber-500', label: 'In Progress' },
+    succeeded: { icon: LucideReact.CheckCircle, color: 'text-green-500', label: 'Succeeded' },
+    failed: { icon: LucideReact.AlertTriangle, color: 'text-red-500', label: 'Failed' },
+    cancelled: { icon: LucideReact.XCircle, color: 'text-gray-500', label: 'Cancelled' },
+  };
+  const { icon: StatusIcon, color: statusColor, label: statusLabel } =
+    statusMap[value.status] || { icon: LucideReact.AlertCircle, color: 'text-gray-500', label: value.status };
 
-  const createdAt = value.created_at
-    ? new Date(value.created_at).toLocaleString()
-    : '—';
-  const updatedAt = value.updated_at
-    ? new Date(value.updated_at).toLocaleString()
-    : '—';
-  const completedAt =
-    value.completed_at != null
-      ? new Date(value.completed_at).toLocaleString()
-      : '—';
-
-  const languageLabel =
-    value.query_language.charAt(0).toUpperCase() +
-    value.query_language.slice(1);
+  const created = value.created_at ? new Date(value.created_at).toLocaleString() : '—';
+  const updated = value.updated_at ? new Date(value.updated_at).toLocaleString() : '—';
+  const completed = value.completed_at ? new Date(value.completed_at).toLocaleString() : '—';
 
   const scanned = value.scanned_repositories ?? [];
-  const totalScanned = scanned.length;
-  const succeededCount = scanned.filter(r => r.analysis_status === 'succeeded').length;
-  const failedCount = scanned.filter(r => r.analysis_status === 'failed').length;
-  const inProgressCount = scanned.filter(r =>
-    ['pending', 'in_progress'].includes(r.analysis_status)
-  ).length;
+  const statusCounts = scanned.reduce((acc: Record<string, number>, repo) => {
+    const key = repo.analysis_status;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
 
-  const skipped = value.skipped_repositories;
-  const skipGroups = skipped
+  const badgeStyles: Record<string, string> = {
+    pending: 'bg-gray-200 text-gray-800',
+    in_progress: 'bg-amber-100 text-amber-800',
+    succeeded: 'bg-green-100 text-green-800',
+    failed: 'bg-red-100 text-red-800',
+    canceled: 'bg-gray-100 text-gray-800',
+    timed_out: 'bg-red-100 text-red-800',
+  };
+
+  const skippedGroups: { label: string; count: number }[] = value.skipped_repositories
     ? [
-        { label: 'Access Mismatch', count: skipped.access_mismatch_repos.repository_count },
-        { label: 'Not Found', count: skipped.not_found_repos.repository_count },
-        { label: 'No CodeQL DB', count: skipped.no_codeql_db_repos.repository_count },
-        { label: 'Over Limit', count: skipped.over_limit_repos.repository_count },
+        { label: 'Access Mismatch', count: value.skipped_repositories.access_mismatch_repos.repository_count },
+        { label: 'Not Found', count: value.skipped_repositories.not_found_repos.repository_count },
+        { label: 'No DB', count: value.skipped_repositories.no_codeql_db_repos.repository_count },
+        { label: 'Over Limit', count: value.skipped_repositories.over_limit_repos.repository_count },
       ]
     : [];
-  const totalSkipped = skipGroups.reduce((sum, g) => sum + g.count, 0);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900">
-          Variant Analysis #{value.id}
-        </h2>
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusColor}`}>
-          {statusLabel}
-        </span>
-      </div>
-
-      {/* Core Info */}
-      <div className="text-sm text-gray-700 space-y-1">
-        <div>
-          <span className="font-medium text-gray-800">Controller Repo:</span>{' '}
-          {value.controller_repo.full_name}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Actor:</span> {value.actor.login}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Language:</span> {languageLabel}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Query Pack URL:</span>{' '}
-          <span className="block break-all text-blue-600">
-            {value.query_pack_url}
-          </span>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <h2 className="text-lg font-semibold text-gray-900">Variant Analysis #{value.id}</h2>
+        <div className="flex items-center mt-2 sm:mt-0">
+          <StatusIcon className={`mr-1 ${statusColor}`} size={20} />
+          <span className={`text-sm font-medium ${statusColor}`}>{statusLabel}</span>
         </div>
       </div>
 
-      {/* Dates */}
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
+      {/* Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
         <div>
-          <dt className="font-medium text-gray-800">Created</dt>
-          <dd>{createdAt}</dd>
+          <div className="font-medium text-gray-800 mb-1">Query Language</div>
+          <div className="flex items-center gap-1 capitalize">
+            <LucideReact.Tag size={16} className="text-gray-500" />
+            <span>{value.query_language}</span>
+          </div>
         </div>
         <div>
-          <dt className="font-medium text-gray-800">Updated</dt>
-          <dd>{updatedAt}</dd>
+          <div className="font-medium text-gray-800 mb-1">Repository</div>
+          <div className="flex items-center gap-1">
+            <LucideReact.Folder size={16} className="text-gray-500" />
+            <span className="truncate">{value.controller_repo.full_name}</span>
+          </div>
         </div>
         <div>
-          <dt className="font-medium text-gray-800">Completed</dt>
-          <dd>{completedAt}</dd>
+          <div className="font-medium text-gray-800 mb-1">Actor</div>
+          <div className="flex items-center gap-2">
+            <img
+              src={value.actor.avatar_url}
+              alt={value.actor.login}
+              className="w-6 h-6 rounded-full object-cover"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  value.actor.login
+                )}`;
+              }}
+            />
+            <span>{value.actor.login}</span>
+          </div>
         </div>
-      </dl>
+        <div>
+          <div className="font-medium text-gray-800 mb-1">Dates</div>
+          <ul className="space-y-1">
+            <li className="flex items-center gap-1">
+              <LucideReact.Calendar size={16} className="text-gray-500" />
+              <span>Created: {created}</span>
+            </li>
+            <li className="flex items-center gap-1">
+              <LucideReact.Calendar size={16} className="text-gray-500" />
+              <span>Updated: {updated}</span>
+            </li>
+            {value.completed_at && (
+              <li className="flex items-center gap-1">
+                <LucideReact.Calendar size={16} className="text-gray-500" />
+                <span>Completed: {completed}</span>
+              </li>
+            )}
+          </ul>
+        </div>
+      </div>
 
-      {/* Scanning Summary */}
-      <div className="space-y-2 text-sm text-gray-700">
-        <div>
-          <span className="font-medium">Scanned Repositories:</span> {totalScanned}
-        </div>
-        <div className="flex space-x-4">
-          <div className="flex items-center space-x-1">
-            <span className="text-green-600">✅</span>
-            <span>{succeededCount}</span>
+      {/* Scanned Repositories Summary */}
+      <div>
+        <h3 className="text-md font-semibold text-gray-900 mb-2">
+          Scanned Repositories ({scanned.length})
+        </h3>
+        {scanned.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {Object.entries(statusCounts).map(([status, count]) => {
+              const style = badgeStyles[status] || 'bg-gray-100 text-gray-800';
+              const label = status.replace('_', ' ');
+              return (
+                <span key={status} className={`px-2 py-1 text-xs font-medium rounded ${style}`}>
+                  {label}: {count}
+                </span>
+              );
+            })}
           </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-yellow-600">⚠️</span>
-            <span>{inProgressCount}</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <span className="text-red-600">❌</span>
-            <span>{failedCount}</span>
-          </div>
-        </div>
-        {totalSkipped > 0 && (
-          <div>
-            <div>
-              <span className="font-medium">Skipped Repositories:</span> {totalSkipped}
-            </div>
-            <ul className="mt-1 flex flex-wrap gap-2">
-              {skipGroups.map(
-                grp =>
-                  grp.count > 0 && (
-                    <li
-                      key={grp.label}
-                      className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs"
-                    >
-                      {grp.label}: {grp.count}
-                    </li>
-                  )
-              )}
-            </ul>
+        ) : (
+          <div className="flex items-center text-sm text-gray-500">
+            <LucideReact.AlertCircle size={20} className="mr-2" />
+            <span>No scanned repositories available</span>
           </div>
         )}
       </div>
+
+      {/* Skipped Repositories Summary */}
+      {skippedGroups.some((g) => g.count > 0) && (
+        <div>
+          <h3 className="text-md font-semibold text-gray-900 mb-2">Skipped Repositories</h3>
+          <div className="flex flex-wrap gap-2">
+            {skippedGroups.map(({ label, count }) => (
+              <span
+                key={label}
+                className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded"
+              >
+                {label}: {count}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

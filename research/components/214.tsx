@@ -1,17 +1,18 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4UserView = {
+                export interface LegacyV4UserView {
                     user?: AutoViewInputSubTypes.legacy.v4.LegacyV4User;
                     online?: AutoViewInputSubTypes.Online;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4User = {
+            export interface LegacyV4User {
                 id?: string;
                 channelId?: string;
                 memberId?: string;
@@ -51,15 +52,15 @@ export namespace AutoViewInputSubTypes {
                 managed?: boolean;
                 mobileNumber?: string & tags.Default<"+18004424000">;
                 systemLanguage?: string & tags.Default<"en">;
-            };
+            }
         }
     }
     export namespace profile {
-        export type UserProfile = {
+        export interface UserProfile {
             [key: string]: {};
-        };
+        }
     }
-    export type WebInfo = {
+    export interface WebInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -67,8 +68,8 @@ export namespace AutoViewInputSubTypes {
         browserName?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type MobileInfo = {
+    }
+    export interface MobileInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -78,13 +79,13 @@ export namespace AutoViewInputSubTypes {
         sdkVersion?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type Online = {
+    }
+    export interface Online {
         channelId?: string;
         personType?: string;
         personId?: string;
         id?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4UserView;
 
@@ -94,123 +95,139 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4UserVie
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const user = value.user;
+  const online = value.online;
+  const isOnline = Boolean(online?.id);
+
+  const displayName = user?.name ?? user?.email ?? "Unknown User";
+  const avatarUrl =
+    user?.avatarUrl ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      displayName
+    )}&background=random&color=fff`;
+  const avatarFallback = avatarUrl;
+
+  const formattedLastSeen = user?.lastSeenAt
+    ? new Date(user.lastSeenAt).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      })
+    : null;
+  const tags = user?.tags ?? [];
+  const alerts = user?.alert ?? 0;
+  const unread = user?.unread ?? 0;
+  const location = [user?.city, user?.country].filter(Boolean).join(", ");
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (!user) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No user data available.
+      <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md">
+        <LucideReact.AlertCircle
+          size={48}
+          className="text-gray-400 mb-2"
+          aria-label="No data"
+        />
+        <span className="text-gray-600">No user data available</span>
       </div>
     );
   }
 
-  const displayName = user.name ?? "Unnamed User";
-  const email = user.email ?? "";
-  const avatarUrl = user.avatarUrl;
-  const locationParts = [user.city, user.country].filter(Boolean);
-  const displayLocation = locationParts.length > 0 ? locationParts.join(", ") : undefined;
-  const language = (user.language ?? "en").toUpperCase();
-  const unreadCount = user.unread ?? 0;
-  const alertCount = user.alert ?? 0;
-  const sessions = user.sessionsCount ?? 0;
-  const joinDate = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString("default", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : undefined;
-  const lastSeen = user.lastSeenAt
-    ? new Date(user.lastSeenAt).toLocaleDateString("default", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : undefined;
-  const isBlocked = user.blocked;
-  const isUnsubscribed = user.unsubscribed;
-
-  const online = value.online;
-  const isOnline = Boolean(online && (online.id ?? online.channelId));
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm mx-auto">
       <div className="flex items-center space-x-4">
-        {avatarUrl ? (
+        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
           <img
             src={avatarUrl}
             alt={displayName}
-            className="w-16 h-16 rounded-full object-cover"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = avatarFallback;
+            }}
           />
-        ) : (
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-            ?
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center space-x-2">
+            <h2 className="text-lg font-semibold text-gray-900">
+              {displayName}
+            </h2>
+            {isOnline ? (
+              <LucideReact.Circle
+                size={12}
+                className="text-green-500"
+                aria-label="Online"
+              />
+            ) : (
+              <LucideReact.Circle
+                size={12}
+                className="text-gray-300"
+                aria-label="Offline"
+              />
+            )}
           </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {displayName}
-          </h2>
-          {email && (
-            <p className="text-sm text-gray-500 truncate">{email}</p>
+          {tags.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
         </div>
-        {isOnline && (
-          <span className="flex-shrink-0 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-            Online
-          </span>
-        )}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-gray-600">
-        {displayLocation && (
-          <div>
-            <span className="font-medium text-gray-800">Location:</span>{" "}
-            {displayLocation}
+      <div className="mt-4 space-y-2 text-sm text-gray-600">
+        {user.email && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.Mail size={16} />
+            <span className="truncate">{user.email}</span>
           </div>
         )}
-        <div>
-          <span className="font-medium text-gray-800">Language:</span> {language}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Unread:</span> {unreadCount}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Alerts:</span> {alertCount}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Sessions:</span> {sessions}
-        </div>
-        {lastSeen && (
-          <div>
-            <span className="font-medium text-gray-800">Last Seen:</span>{" "}
-            {lastSeen}
+        {location && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.MapPin size={16} />
+            <span className="truncate">{location}</span>
           </div>
         )}
-        {joinDate && (
-          <div>
-            <span className="font-medium text-gray-800">Joined:</span>{" "}
-            {joinDate}
+        {formattedLastSeen && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.Clock size={16} />
+            <span>Last seen: {formattedLastSeen}</span>
           </div>
         )}
-        {isBlocked != null && (
-          <div>
-            <span className="font-medium text-gray-800">Blocked:</span>{" "}
-            {isBlocked ? "Yes" : "No"}
+        {unread > 0 && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.MessageSquare size={16} />
+            <span>{unread} unread messages</span>
           </div>
         )}
-        {isUnsubscribed != null && (
-          <div>
-            <span className="font-medium text-gray-800">Unsubscribed:</span>{" "}
-            {isUnsubscribed ? "Yes" : "No"}
+        {alerts > 0 && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.Bell size={16} />
+            <span>{alerts} alerts</span>
+          </div>
+        )}
+        {user.mobile?.sessionsCount != null && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.Smartphone size={16} />
+            <span>{user.mobile.sessionsCount} mobile sessions</span>
+          </div>
+        )}
+        {user.web?.sessionsCount != null && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.Monitor size={16} />
+            <span>{user.web.sessionsCount} web sessions</span>
+          </div>
+        )}
+        {user.language && (
+          <div className="flex items-center space-x-2">
+            <LucideReact.Globe size={16} />
+            <span>{user.language.toUpperCase()}</span>
           </div>
         )}
       </div>
-
-      {online && online.channelId && (
-        <div className="mt-4 text-xs text-gray-500 truncate">
-          <span className="font-medium">Channel ID:</span> {online.channelId}
-        </div>
-      )}
     </div>
   );
 }

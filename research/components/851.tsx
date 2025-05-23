@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A release.
      *
      * @title Release
     */
-    export type release = {
+    export interface release {
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
         assets_url: string & tags.Format<"uri">;
@@ -45,13 +46,13 @@ export namespace AutoViewInputSubTypes {
         */
         discussion_url?: string;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -74,13 +75,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Data related to a release.
      *
      * @title Release Asset
     */
-    export type release_asset = {
+    export interface release_asset {
         url: string & tags.Format<"uri">;
         browser_download_url: string & tags.Format<"uri">;
         id: number & tags.Type<"int32">;
@@ -100,7 +101,7 @@ export namespace AutoViewInputSubTypes {
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         uploader: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -133,7 +134,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -144,7 +145,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.release;
 
@@ -153,116 +154,90 @@ export type AutoViewInput = AutoViewInputSubTypes.release;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const title = value.name?.trim() || value.tag_name;
-  const rawDate = value.published_at || value.created_at;
-  const formattedDate = new Date(rawDate).toLocaleString(undefined, {
+  const publishedDate = value.published_at ?? value.created_at;
+  const formattedDate = new Date(publishedDate).toLocaleDateString(undefined, {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
-  const status = value.draft
+  const statusLabel = value.draft
     ? "Draft"
     : value.prerelease
     ? "Prerelease"
-    : "Published";
-  const bodySource = value.body_text ?? value.body ?? "";
-  const previewBody =
-    bodySource.length > 200 ? bodySource.slice(0, 200).trim() + "…" : bodySource;
-  const assetCount = value.assets.length;
-  const reactions = value.reactions;
-
-  const reactionEmojis: Record<string, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    eyes: "👀",
-    rocket: "🚀",
-  };
+    : "Release";
+  const statusClasses = value.draft
+    ? "bg-yellow-100 text-yellow-800"
+    : value.prerelease
+    ? "bg-blue-100 text-blue-800"
+    : "bg-green-100 text-green-800";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="p-6">
-        {/* Title & Status */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-gray-800 truncate">{title}</h2>
-          <span
-            className={
-              "px-2 py-1 text-xs font-medium rounded-full " +
-              (status === "Published"
-                ? "bg-green-100 text-green-800"
-                : status === "Draft"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-blue-100 text-blue-800")
-            }
-          >
-            {status}
-          </span>
+    <div className="max-w-xl mx-auto p-6 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header: Title and Status */}
+      <div className="flex items-start justify-between">
+        <div className="pr-4">
+          <h2 className="text-xl font-semibold text-gray-800 truncate">
+            {value.name || value.tag_name}
+          </h2>
+          <p className="mt-1 text-sm text-gray-500">Tag: {value.tag_name}</p>
         </div>
+        <span
+          className={`px-2 py-1 text-xs font-medium rounded ${statusClasses}`}
+        >
+          {statusLabel}
+        </span>
+      </div>
 
-        {/* Date */}
-        <p className="mt-1 text-gray-500 text-sm">{formattedDate}</p>
+      {/* Description */}
+      <p className="text-gray-700 text-sm line-clamp-3">
+        {value.body?.trim() || "No description provided."}
+      </p>
 
-        {/* Author */}
-        <div className="mt-4 flex items-center">
-          <img
-            src={value.author.avatar_url}
-            alt={value.author.login}
-            className="w-8 h-8 rounded-full flex-shrink-0"
-          />
-          <span className="ml-3 text-gray-700 text-sm truncate">
-            {value.author.login}
-          </span>
+      {/* Meta Info */}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.User size={16} className="text-gray-400" />
+          <span className="ml-1 truncate">{value.author.login}</span>
         </div>
-
-        {/* Body Preview */}
-        {previewBody && (
-          <p className="mt-4 text-gray-700 text-sm leading-relaxed overflow-hidden">
-            {previewBody}
-          </p>
-        )}
-
-        {/* Assets Summary */}
-        <div className="mt-4 text-gray-600 text-sm">
-          <span className="font-medium">{assetCount}</span>{" "}
-          {assetCount === 1 ? "asset" : "assets"}
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span className="ml-1">{formattedDate}</span>
         </div>
-
-        {/* Reactions */}
-        {reactions && (
-          <div className="mt-4 flex flex-wrap gap-3">
-            {(
-              [
-                "+1",
-                "-1",
-                "laugh",
-                "confused",
-                "heart",
-                "hooray",
-                "eyes",
-                "rocket",
-              ] as Array<keyof typeof reactions>
-            ).map((key) => {
-              const count = reactions[key];
-              if (count === undefined || count === 0) return null;
-              return (
-                <div
-                  key={key}
-                  className="flex items-center bg-gray-100 px-2 py-1 rounded-full text-gray-700 text-xs"
-                >
-                  <span className="mr-1">{reactionEmojis[key] || key}</span>
-                  <span>{count}</span>
-                </div>
-              );
-            })}
+        <div className="flex items-center">
+          <LucideReact.Download size={16} className="text-gray-400" />
+          <span className="ml-1">{value.assets.length} assets</span>
+        </div>
+        {value.reactions && (
+          <div className="flex items-center">
+            <LucideReact.Heart size={16} className="text-red-400" />
+            <span className="ml-1">{value.reactions.total_count}</span>
           </div>
         )}
       </div>
+
+      {/* Assets List */}
+      {value.assets.length > 0 && (
+        <ul className="mt-4 space-y-2">
+          {value.assets.slice(0, 3).map((asset) => (
+            <li
+              key={asset.id}
+              className="flex items-center justify-between text-sm"
+            >
+              <span className="truncate">{asset.name}</span>
+              <div className="flex items-center text-gray-500">
+                <LucideReact.Download size={14} className="text-gray-400" />
+                <span className="ml-1">{asset.download_count}</span>
+              </div>
+            </li>
+          ))}
+          {value.assets.length > 3 && (
+            <li className="text-xs text-gray-500">
+              +{value.assets.length - 3} more assets
+            </li>
+          )}
+        </ul>
+      )}
     </div>
   );
 }

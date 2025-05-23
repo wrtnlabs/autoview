@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -27,7 +28,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -42,7 +43,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -77,73 +78,84 @@ export type AutoViewInput = AutoViewInputSubTypes.team[];
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation logic
+  // If there are no teams, show a placeholder
   if (!value || value.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No teams available.
+      <div className="flex flex-col items-center justify-center p-8 text-gray-500">
+        <LucideReact.AlertCircle size={48} aria-hidden="true" />
+        <span className="mt-2 text-sm">No teams available</span>
       </div>
     );
   }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // Render a responsive grid of team cards
   return (
-    <div className="flex flex-col space-y-4">
-      {value.map((team: AutoViewInputSubTypes.team) => {
-        const enabledPermissionsCount: number = team.permissions
-          ? Object.values(team.permissions).filter((flag) => flag).length
-          : 0;
-        const formattedPermission: string =
-          team.permission.charAt(0).toUpperCase() + team.permission.slice(1);
-        const parentName: string | undefined = team.parent?.name ?? undefined;
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+      {value.map((team) => (
+        <div
+          key={team.id}
+          className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+        >
+          <div className="p-4">
+            {/* Team Name */}
+            <div className="flex items-center space-x-2">
+              <LucideReact.Users
+                className="text-gray-600"
+                size={20}
+                aria-hidden="true"
+              />
+              <h3 className="text-lg font-semibold text-gray-900 truncate">
+                {team.name}
+              </h3>
+            </div>
+            {/* Slug */}
+            <p className="mt-1 text-sm text-gray-500 truncate">
+              @{team.slug}
+            </p>
 
-        return (
-          <article key={team.id} className="p-4 bg-white rounded-lg shadow-md">
-            <header className="flex justify-between items-start">
-              <div className="overflow-hidden">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">{team.name}</h3>
-                <p className="text-sm text-gray-500 truncate">{team.slug}</p>
-              </div>
-              <span className="text-sm font-medium text-white bg-blue-600 px-2 py-1 rounded">
-                {formattedPermission}
-              </span>
-            </header>
-
+            {/* Description */}
             {team.description && (
-              <p className="mt-2 text-gray-600 line-clamp-2">
+              <p className="mt-2 text-gray-700 text-sm line-clamp-2">
                 {team.description}
               </p>
             )}
 
+            {/* Badges: Permission & Privacy */}
             <div className="mt-4 flex flex-wrap gap-2">
+              <span className="flex items-center px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-800 rounded-full">
+                <LucideReact.Key className="mr-1" size={14} aria-hidden="true" />
+                {team.permission.charAt(0).toUpperCase() + team.permission.slice(1)}
+              </span>
               {team.privacy && (
-                <span className="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-200 rounded">
+                <span className="flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                  {(team.privacy === "secret" || team.privacy === "closed") ? (
+                    <LucideReact.Lock className="mr-1" size={14} aria-hidden="true" />
+                  ) : (
+                    <LucideReact.Eye className="mr-1" size={14} aria-hidden="true" />
+                  )}
                   {team.privacy.charAt(0).toUpperCase() + team.privacy.slice(1)}
                 </span>
               )}
-
-              {team.notification_setting && (
-                <span className="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-200 rounded">
-                  {team.notification_setting.replace(/_/g, ' ')}
-                </span>
-              )}
-
-              {enabledPermissionsCount > 0 && (
-                <span className="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-200 rounded">
-                  {enabledPermissionsCount} Permissions Enabled
-                </span>
-              )}
-
-              {parentName && (
-                <span className="px-2 py-1 text-sm font-medium text-gray-700 bg-gray-200 rounded">
-                  Parent: {parentName}
-                </span>
-              )}
             </div>
-          </article>
-        );
-      })}
+
+            {/* Parent Team */}
+            {team.parent && (
+              <div className="mt-3 flex items-center text-sm text-gray-600">
+                <LucideReact.CornerLeftUp
+                  className="mr-1"
+                  size={16}
+                  aria-hidden="true"
+                />
+                <span className="truncate">
+                  Parent: <span className="font-medium">{team.parent.name}</span>
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

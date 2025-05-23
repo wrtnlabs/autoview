@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Webhooks for repositories.
      *
      * @title Webhook
     */
-    export type hook = {
+    export interface hook {
         type: string;
         /**
          * Unique identifier of the webhook.
@@ -32,18 +33,18 @@ export namespace AutoViewInputSubTypes {
         ping_url: string & tags.Format<"uri">;
         deliveries_url?: string & tags.Format<"uri">;
         last_response: AutoViewInputSubTypes.hook_response;
-    };
+    }
     /**
      * Configuration object of the webhook
      *
      * @title Webhook Configuration
     */
-    export type webhook_config = {
+    export interface webhook_config {
         url?: AutoViewInputSubTypes.webhook_config_url;
         content_type?: AutoViewInputSubTypes.webhook_config_content_type;
         secret?: AutoViewInputSubTypes.webhook_config_secret;
         insecure_ssl?: AutoViewInputSubTypes.webhook_config_insecure_ssl;
-    };
+    }
     /**
      * The URL to which the payloads will be delivered.
     */
@@ -60,11 +61,11 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Hook Response
     */
-    export type hook_response = {
+    export interface hook_response {
         code: (number & tags.Type<"int32">) | null;
         status: string | null;
         message: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.hook;
 
@@ -75,99 +76,120 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const createdAt = new Date(value.created_at).toLocaleString();
   const updatedAt = new Date(value.updated_at).toLocaleString();
+  const isLastResponseSuccess =
+    value.last_response.code !== null &&
+    value.last_response.code >= 200 &&
+    value.last_response.code < 300;
 
-  const statusBadge = value.active
-    ? (
-      <span className="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-        Active
-      </span>
-    )
-    : (
-      <span className="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">
-        Inactive
-      </span>
-    );
-
-  const eventBadges = value.events.map((evt, idx) => (
-    <span
-      key={idx}
-      className="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-1 mb-1 px-2 py-0.5 rounded"
-    >
-      {evt}
-    </span>
-  ));
-
-  const { code, status, message } = value.last_response;
-  const hasLastResponse = code !== null || status !== null || message !== null;
+  // insecure_ssl is defined as string|number when present
+  const rawInsecure = value.config.insecure_ssl;
+  const isInsecureSSL =
+    rawInsecure !== undefined && (rawInsecure === '1' || rawInsecure === 1);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold text-gray-900 truncate">{value.name}</h2>
-        {statusBadge}
+    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
+      {/* Header: Name + Active Status */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold text-gray-800">{value.name}</h2>
+        {value.active ? (
+          <LucideReact.CheckCircle
+            size={20}
+            className="text-green-500"
+            aria-label="Active"
+          />
+        ) : (
+          <LucideReact.XCircle
+            size={20}
+            className="text-red-500"
+            aria-label="Inactive"
+          />
+        )}
       </div>
 
-      {/* Events */}
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Events</h3>
-        <div className="flex flex-wrap">{eventBadges}</div>
+      {/* Events Tags */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {value.events.map((event) => (
+          <span
+            key={event}
+            className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+          >
+            {event}
+          </span>
+        ))}
       </div>
 
-      {/* Configuration */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3 text-sm text-gray-700 mb-4">
-        <div>
-          <div className="font-medium text-gray-800">Target URL</div>
-          <div className="truncate">{value.config.url ?? "N/A"}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-800">Content Type</div>
-          <div>{value.config.content_type ?? "N/A"}</div>
-        </div>
-        <div>
-          <div className="font-medium text-gray-800">Insecure SSL</div>
-          <div>{value.config.insecure_ssl != null ? String(value.config.insecure_ssl) : "N/A"}</div>
-        </div>
+      {/* URLs */}
+      <div className="mb-4 space-y-2">
+        {[value.url, value.test_url, value.ping_url, value.deliveries_url]
+          .filter(Boolean)
+          .map((link, idx) => (
+            <div
+              key={idx}
+              className="flex items-center text-sm text-gray-600 overflow-hidden"
+            >
+              <LucideReact.Link size={16} className="mr-1 flex-shrink-0" />
+              <span className="truncate">{link}</span>
+            </div>
+          ))}
       </div>
 
-      {/* Timestamps */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs text-gray-500 mb-4">
-        <div>
-          <div>Created</div>
-          <div>{createdAt}</div>
+      {/* Creation & Update Dates */}
+      <div className="mb-4 space-y-2">
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+          <span>Created: {createdAt}</span>
         </div>
-        <div>
-          <div>Last Updated</div>
-          <div>{updatedAt}</div>
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+          <span>Updated: {updatedAt}</span>
         </div>
       </div>
 
       {/* Last Response */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Last Response</h3>
-        <div className="p-3 bg-gray-50 rounded text-sm text-gray-700">
-          {hasLastResponse ? (
-            <>
-              <div className="mb-1">
-                <span className="font-medium">Code: </span>
-                {code ?? "-"}
-              </div>
-              <div className="mb-1">
-                <span className="font-medium">Status: </span>
-                {status ?? "-"}
-              </div>
-              {message && (
-                <div className="truncate">
-                  <span className="font-medium">Message: </span>
-                  {message}
-                </div>
-              )}
-            </>
+      <div className="mb-4">
+        <div className="flex items-center mb-1">
+          {isLastResponseSuccess ? (
+            <LucideReact.CheckCircle
+              className="text-green-500 mr-1"
+              size={16}
+              aria-label="Last response successful"
+            />
           ) : (
-            <div className="text-gray-500">No recent response</div>
+            <LucideReact.AlertTriangle
+              className="text-red-500 mr-1"
+              size={16}
+              aria-label="Last response error"
+            />
+          )}
+          <span className="text-sm font-medium">Last Response</span>
+        </div>
+        <div className="ml-6 text-sm text-gray-700 space-y-1">
+          <div>Status: {value.last_response.status ?? 'N/A'}</div>
+          <div>Code: {value.last_response.code ?? 'N/A'}</div>
+          {value.last_response.message && (
+            <div>Message: {value.last_response.message}</div>
           )}
         </div>
+      </div>
+
+      {/* Config Summary */}
+      <div className="space-y-2">
+        {value.config.content_type && (
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Tag size={16} className="mr-1 flex-shrink-0" />
+            <span>Content Type: {value.config.content_type}</span>
+          </div>
+        )}
+        {rawInsecure !== undefined && (
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.ShieldOff
+              size={16}
+              className="mr-1 flex-shrink-0"
+            />
+            <span>Insecure SSL: {isInsecureSSL ? 'Yes' : 'No'}</span>
+          </div>
+        )}
       </div>
     </div>
   );

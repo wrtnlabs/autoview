@@ -1,15 +1,16 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Project Collaborator Permission
      *
      * @title Project Collaborator Permission
     */
-    export type project_collaborator_permission = {
+    export interface project_collaborator_permission {
         permission: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -47,55 +48,62 @@ export type AutoViewInput = AutoViewInputSubTypes.project_collaborator_permissio
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { permission, user } = value;
-  const permissionLower = permission.toLowerCase();
-  const permissionClass =
-    permissionLower === "admin"
-      ? "bg-red-100 text-red-800"
-      : permissionLower === "write"
-      ? "bg-blue-100 text-blue-800"
-      : permissionLower === "read"
-      ? "bg-green-100 text-green-800"
-      : "bg-gray-100 text-gray-800";
+  const user = value.user;
+  const displayName = user && user.name ? user.name : user ? user.login : "Unknown User";
+  const placeholderAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName,
+  )}&background=0D8ABC&color=fff`;
 
-  const displayName = user
-    ? user.name && user.name.trim().length > 0
-      ? user.name
-      : user.login
-    : "Unknown";
+  // Badge color mapping for common GitHub permission levels
+  const badgeColors: Record<string, { bg: string; text: string }> = {
+    admin: { bg: "bg-red-100", text: "text-red-800" },
+    maintain: { bg: "bg-yellow-100", text: "text-yellow-800" },
+    write: { bg: "bg-blue-100", text: "text-blue-800" },
+    triage: { bg: "bg-orange-100", text: "text-orange-800" },
+    read: { bg: "bg-green-100", text: "text-green-800" },
+  };
+  const key = value.permission.toLowerCase();
+  const { bg, text } = badgeColors[key] ?? { bg: "bg-gray-100", text: "text-gray-800" };
+  const formattedPermission = value.permission.charAt(0).toUpperCase() + value.permission.slice(1);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="max-w-xs w-full bg-white shadow-sm rounded-lg p-4 mx-auto">
-      <div className="flex justify-between items-center mb-3">
-        <h2 className="text-gray-900 font-semibold text-lg">Collaborator</h2>
-        <span className={`px-2 py-1 text-xs font-medium rounded ${permissionClass}`}>
-          {permission}
-        </span>
-      </div>
+    <div className="p-4 bg-white rounded-lg shadow-md flex items-center space-x-4">
       {user ? (
-        <div className="flex items-center">
-          <img
-            src={user.avatar_url}
-            alt={displayName}
-            className="w-12 h-12 rounded-full object-cover flex-shrink-0"
-          />
-          <div className="ml-3 min-w-0 flex-1">
-            <p className="text-gray-900 font-medium text-base truncate">{displayName}</p>
-            <p className="text-gray-500 text-sm truncate">@{user.login}</p>
-            {user.email && (
-              <p className="text-gray-500 text-sm truncate">{user.email}</p>
-            )}
-            {user.site_admin && (
-              <span className="mt-1 inline-block px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs rounded">
-                Site Admin
-              </span>
-            )}
-          </div>
-        </div>
+        <img
+          src={user.avatar_url}
+          alt={displayName}
+          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = placeholderAvatarUrl;
+          }}
+        />
       ) : (
-        <p className="text-gray-500 text-sm">No user information available.</p>
+        <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+          <LucideReact.User className="text-gray-400" size={24} />
+        </div>
       )}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center space-x-2">
+          <span className="text-lg font-semibold text-gray-900 truncate">{displayName}</span>
+          {user && user.name ? (
+            <span className="text-sm text-gray-500 truncate">@{user.login}</span>
+          ) : null}
+        </div>
+        {user && user.email ? (
+          <div className="flex items-center text-sm text-gray-500 mt-1 truncate">
+            <LucideReact.Mail size={16} className="mr-1 flex-shrink-0" />
+            <span>{user.email}</span>
+          </div>
+        ) : null}
+        <div className="mt-2">
+          <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${bg} ${text}`}>
+            {formattedPermission}
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Project cards represent a scope of work.
      *
      * @title Project Card
     */
-    export type project_card = {
+    export interface project_card {
         url: string & tags.Format<"uri">;
         /**
          * The project card's ID
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
         column_url: string & tags.Format<"uri">;
         content_url?: string & tags.Format<"uri">;
         project_url: string & tags.Format<"uri">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -63,64 +64,100 @@ export type AutoViewInput = AutoViewInputSubTypes.project_card;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  // 1. Data transformation / derived constants
+  const creator = value.creator;
+  const creatorName = creator?.name ?? creator?.login ?? "Unknown User";
+  const formattedCreatedAt = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
-  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  const formattedUpdatedAt = new Date(value.updated_at).toLocaleString(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
   const isArchived = value.archived ?? false;
-  const note = value.note ?? "No description provided";
-  const columnName = value.column_name ?? "Unassigned Column";
-  const creator = value.creator;
-  const creatorName = creator?.name?.trim() || creator?.login || "Unknown";
-  const avatarUrl = creator?.avatar_url;
+  const columnName = value.column_name ?? "Uncategorized";
+  const displayNote = value.note?.trim() || "No description provided.";
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Avatar handling with fallback
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    creatorName,
+  )}&background=0D8ABC&color=fff`;
+  const [avatarSrc, setAvatarSrc] = React.useState<string>(
+    creator?.avatar_url ?? fallbackAvatar,
+  );
+
+  // 2. JSX structure
   return (
-    <div className="max-w-sm mx-auto bg-white rounded-lg shadow-md p-4">
-      {/* Header: Column name and status badge */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-medium text-gray-700">{columnName}</span>
-        <span
-          className={`px-2 py-1 text-xs font-semibold rounded-full ${
-            isArchived ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"
-          }`}
-        >
-          {isArchived ? "Archived" : "Active"}
-        </span>
-      </div>
-
-      {/* Main content: Note/description */}
-      <p className="text-gray-900 text-lg font-semibold mb-2 line-clamp-3">
-        {note}
-      </p>
-
-      {/* Footer: Creator info and timestamps */}
-      <div className="flex items-center justify-between mt-4">
-        <div className="flex items-center">
-          {avatarUrl && (
-            <img
-              src={avatarUrl}
-              alt={creatorName}
-              className="w-8 h-8 rounded-full mr-2"
-              loading="lazy"
-            />
-          )}
-          <span className="text-sm text-gray-800">{creatorName}</span>
+    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+      {/* Header: creator info & status */}
+      <div className="flex items-center p-4">
+        <div className="flex-shrink-0">
+          <img
+            src={avatarSrc}
+            alt={creatorName}
+            onError={() => setAvatarSrc(fallbackAvatar)}
+            className="h-10 w-10 rounded-full object-cover"
+          />
         </div>
-        <span className="text-sm text-gray-600">{createdAt}</span>
+        <div className="ml-3 flex-1">
+          <p className="text-sm font-medium text-gray-900">{creatorName}</p>
+          <div className="flex items-center text-xs text-gray-500">
+            <LucideReact.Calendar size={14} className="mr-1" />
+            <span>Created {formattedCreatedAt}</span>
+          </div>
+        </div>
+        <div className="ml-auto flex items-center space-x-1">
+          {isArchived ? (
+            <>
+              <LucideReact.Archive size={16} className="text-red-500" />
+              <span className="text-xs font-semibold text-red-500">Archived</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.CheckCircle size={16} className="text-green-500" />
+              <span className="text-xs font-semibold text-green-500">Active</span>
+            </>
+          )}
+        </div>
       </div>
-      <p className="mt-1 text-xs text-gray-500">Updated: {updatedAt}</p>
+
+      {/* Body: card meta and note */}
+      <div className="px-4 pb-4">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            Card #{value.id}
+          </h2>
+          <span className="text-sm text-gray-500">{columnName}</span>
+        </div>
+        <p className="text-gray-700 text-sm line-clamp-3 mb-4">{displayNote}</p>
+
+        {/* Footer: additional metadata */}
+        <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+          <div className="flex items-center">
+            <LucideReact.Clock size={14} className="mr-1" />
+            <span>Updated {formattedUpdatedAt}</span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.Link size={14} className="mr-1" />
+            <span className="truncate">{value.url}</span>
+          </div>
+          {value.content_url && (
+            <div className="flex items-center">
+              <LucideReact.FileText size={14} className="mr-1" />
+              <span className="truncate">{value.content_url}</span>
+            </div>
+          )}
+          <div className="flex items-center">
+            <LucideReact.Link2 size={14} className="mr-1" />
+            <span className="truncate">{value.project_url}</span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.Link2 size={14} className="mr-1" />
+            <span className="truncate">{value.column_url}</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

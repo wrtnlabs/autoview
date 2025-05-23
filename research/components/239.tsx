@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type GroupView = {
+        export interface GroupView {
             managers?: AutoViewInputSubTypes.Manager[];
             onlines?: AutoViewInputSubTypes.Online[];
             bookmark?: AutoViewInputSubTypes.ChatBookmark;
             session?: AutoViewInputSubTypes.ChatSession;
             group?: AutoViewInputSubTypes.Group;
-        };
+        }
     }
-    export type Manager = {
+    export interface Manager {
         id?: string;
         channelId?: string;
         accountId?: string;
@@ -75,24 +76,24 @@ export namespace AutoViewInputSubTypes {
         meetOperator?: boolean;
         emailForFront?: string;
         mobileNumberForFront?: string & tags.Default<"+18004424000">;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
-    export type Online = {
+    }
+    export interface Online {
         channelId?: string;
         personType?: string;
         personId?: string;
         id?: string;
-    };
-    export type ChatBookmark = {
+    }
+    export interface ChatBookmark {
         key?: string;
         chatId?: string;
         chatKey?: string;
@@ -102,8 +103,8 @@ export namespace AutoViewInputSubTypes {
         chatType?: string;
         personType?: string;
         personId?: string;
-    };
-    export type ChatSession = {
+    }
+    export interface ChatSession {
         key?: string;
         chatId?: string;
         teamChatSectionId?: string;
@@ -125,8 +126,8 @@ export namespace AutoViewInputSubTypes {
         chatType?: string;
         personType?: string;
         personId?: string;
-    };
-    export type Group = {
+    }
+    export interface Group {
         id?: string;
         channelId?: string;
         title: string;
@@ -142,7 +143,7 @@ export namespace AutoViewInputSubTypes {
         */
         name?: string;
         active?: boolean;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.GroupView;
 
@@ -151,122 +152,194 @@ export type AutoViewInput = AutoViewInputSubTypes.desk.GroupView;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { group, managers, onlines, bookmark, session } = value;
-  if (!group) return null;
+  const group = value.group;
+  const managers = value.managers ?? [];
+  const onlines = value.onlines ?? [];
+  const session = value.session;
+  const managerCount = managers.length;
+  const onlineCount = onlines.length;
+  const createdDate = group?.createdAt
+    ? new Date(group.createdAt).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
 
-  const title = group.title;
-  const description = group.description ?? "";
-
-  const scopeLabels: Record<AutoViewInputSubTypes.Group["scope"], string> = {
-    all: "All",
-    public: "Public",
-    private: "Private",
+  // Badge color mapping for group.scope
+  const scopeColors: Record<"all" | "public" | "private", string> = {
+    all: "bg-gray-100 text-gray-800",
+    public: "bg-blue-100 text-blue-800",
+    private: "bg-yellow-100 text-yellow-800",
   };
-  const scopeLabel = scopeLabels[group.scope] ?? group.scope;
+  const scopeLabel = group?.scope
+    ? group.scope.charAt(0).toUpperCase() + group.scope.slice(1)
+    : "";
 
-  const isActive = group.active ?? false;
-
-  const managerNames = managers?.map((m) => m.name) ?? [];
-  const managerCount = managerNames.length;
-
-  const onlineCount = onlines?.length ?? 0;
-  const unreadCount = session?.unread ?? 0;
-  const hasBookmark = Boolean(bookmark?.bookmarkKey);
+  // Watch mode icon mapping
+  const renderWatchIcon = (): JSX.Element | null => {
+    if (!session?.watch) return null;
+    switch (session.watch) {
+      case "all":
+        return (
+          <LucideReact.CheckCircle
+            size={16}
+            className="text-green-500 ml-1"
+            role="img"
+            aria-label="Watching all"
+          />
+        );
+      case "info":
+        return (
+          <LucideReact.Info
+            size={16}
+            className="text-blue-500 ml-1"
+            role="img"
+            aria-label="Watching info"
+          />
+        );
+      default:
+        return (
+          <LucideReact.XCircle
+            size={16}
+            className="text-gray-400 ml-1"
+            role="img"
+            aria-label="Not watching"
+          />
+        );
+    }
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!group) {
+    return (
+      <div className="p-4 bg-white rounded-lg shadow-md flex items-center text-gray-500">
+        <LucideReact.AlertCircle
+          size={24}
+          className="mr-2"
+          role="img"
+          aria-label="No data"
+        />
+        <span>No group data available.</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <div className="flex items-center">
-        {group.icon ? (
-          <img
-            src={group.icon}
-            alt={title}
-            className="h-12 w-12 rounded-md object-cover mr-4"
-          />
-        ) : (
-          <div className="h-12 w-12 rounded-md bg-gray-200 flex items-center justify-center mr-4">
-            <span className="text-gray-500 font-bold">{title.charAt(0)}</span>
-          </div>
-        )}
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">{title}</h2>
-          <div className="flex items-center space-x-2 mt-1">
-            <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded">
+    <div className="p-4 bg-white rounded-lg shadow hover:shadow-lg transition-shadow w-full max-w-md mx-auto">
+      {/* Header: Title, Active Status, Scope */}
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
+          {group.title}
+        </h2>
+        <div className="flex items-center space-x-2">
+          {group.active ? (
+            <LucideReact.CheckCircle
+              size={16}
+              className="text-green-500"
+              role="img"
+              aria-label="Active"
+            />
+          ) : (
+            <LucideReact.XCircle
+              size={16}
+              className="text-red-500"
+              role="img"
+              aria-label="Inactive"
+            />
+          )}
+          {group.scope && (
+            <span
+              className={`text-xs font-medium px-2 py-0.5 rounded ${scopeColors[group.scope]}`}
+            >
               {scopeLabel}
             </span>
-            <span className="flex items-center text-xs text-gray-500">
-              <span
-                className={`inline-block h-2 w-2 rounded-full ${
-                  isActive ? "bg-green-500" : "bg-gray-400"
-                } mr-1`}
-              />
-              {isActive ? "Active" : "Inactive"}
-            </span>
-          </div>
+          )}
         </div>
       </div>
 
-      {description && (
-        <p className="mt-3 text-gray-600 text-sm line-clamp-2">{description}</p>
+      {/* Description */}
+      {group.description && (
+        <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+          {group.description}
+        </p>
       )}
 
-      <div className="mt-4 grid grid-cols-2 gap-4">
-        <div className="flex items-center text-gray-600 text-sm">
-          <svg
-            className="h-5 w-5 text-gray-400 mr-2"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M13 7a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path
-              fillRule="evenodd"
-              d="M4 13a4 4 0 014-4h4a4 4 0 014 4v1H4v-1z"
-              clipRule="evenodd"
+      {/* Metadata */}
+      <div className="flex flex-wrap items-center text-gray-500 text-xs mb-4 space-x-4">
+        {createdDate && (
+          <div className="flex items-center">
+            <LucideReact.Calendar
+              size={14}
+              className="mr-1"
+              role="img"
+              aria-hidden="true"
             />
-          </svg>
-          <span>
-            {managerCount} Manager{managerCount !== 1 && "s"}
-          </span>
-        </div>
-
-        <div className="flex items-center text-gray-600 text-sm">
-          <svg
-            className="h-5 w-5 text-green-400 mr-2"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M2.166 8.94a8 8 0 0113.668 4.082l1.215 1.215a1 1 0 01-1.414 1.414l-1.293-1.293A8 8 0 012.166 8.94z" />
-          </svg>
-          <span>{onlineCount} Online</span>
-        </div>
-
-        <div className="flex items-center text-gray-600 text-sm">
-          <svg
-            className="h-5 w-5 text-red-400 mr-2"
-            fill="currentColor"
-            viewBox="0 0 20 20"
-          >
-            <path d="M2 5a2 2 0 012-2h9a2 2 0 012 2v.086a1 1 0 01-.293.707l-5 5a1 1 0 01-1.414 0l-5-5A1 1 0 012 5.086V5z" />
-            <path
-              d="M3 9.414V17a1 1 0 001 1h12a1 1 0 001-1V9.414l-6-6-6 6z"
-            />
-          </svg>
-          <span>{unreadCount} Unread</span>
-        </div>
-
-        {hasBookmark && (
-          <div className="flex items-center text-gray-600 text-sm">
-            <svg
-              className="h-5 w-5 text-yellow-500 mr-2"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M5 3a2 2 0 00-2 2v12l7-5 7 5V5a2 2 0 00-2-2H5z" />
-            </svg>
-            <span>Bookmarked</span>
+            <span>Created: {createdDate}</span>
           </div>
         )}
+        {onlineCount > 0 && (
+          <div className="flex items-center">
+            <LucideReact.Users
+              size={14}
+              className="mr-1"
+              role="img"
+              aria-hidden="true"
+            />
+            <span>{onlineCount} online</span>
+          </div>
+        )}
+        {session?.unread != null && (
+          <div className="flex items-center">
+            <LucideReact.Mail
+              size={14}
+              className="mr-1 text-blue-500"
+              role="img"
+              aria-hidden="true"
+            />
+            <span>{session.unread} unread</span>
+          </div>
+        )}
+        {renderWatchIcon()}
       </div>
+
+      {/* Managers */}
+      {managerCount > 0 && (
+        <div className="mb-2">
+          <h3 className="text-gray-700 text-sm font-medium mb-1">
+            Managers ({managerCount})
+          </h3>
+          <div className="flex items-center">
+            {managers.slice(0, 5).map((mgr, idx) => {
+              const src =
+                mgr.avatarUrl ??
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  mgr.name
+                )}&background=0D8ABC&color=fff`;
+              return (
+                <img
+                  key={idx}
+                  src={src}
+                  alt={mgr.name}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    target.onerror = null;
+                    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      mgr.name
+                    )}&background=ccc&color=fff`;
+                  }}
+                  className="-ml-2 first:ml-0 w-8 h-8 rounded-full object-cover border-2 border-white shadow-sm"
+                />
+              );
+            })}
+            {managerCount > 5 && (
+              <div className="-ml-2 first:ml-0 w-8 h-8 rounded-full bg-gray-200 border-2 border-white flex items-center justify-center text-gray-600 text-xs">
+                +{managerCount - 5}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A repository rule with ruleset details.
@@ -13,83 +14,127 @@ export type AutoViewInput = AutoViewInputSubTypes.repository_rule_detailed[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Helper to format individual primitive values
-  const formatValue = (v: string | number | boolean): string => {
-    if (typeof v === "string") {
-      // ISO date detection
-      const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?$/;
-      if (isoDateRegex.test(v)) {
-        const d = new Date(v);
-        return isNaN(d.getTime()) ? v : d.toLocaleString(undefined, {
-          year: "numeric", month: "short", day: "numeric",
-          hour: "2-digit", minute: "2-digit"
-        });
-      }
-      // Truncate very long strings
-      return v.length > 80 ? v.slice(0, 77) + "..." : v;
-    }
-    if (typeof v === "number") {
-      return v.toLocaleString();
-    }
-    if (typeof v === "boolean") {
-      return v ? "Yes" : "No";
-    }
-    return String(v);
-  };
+  // Helper to turn camelCase or snake_case into Title Case
+  const formatKey = (key: string) =>
+    key
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!Array.isArray(value) || value.length === 0) {
+  // Type guards
+  const isDateString = (v: any): v is string =>
+    typeof v === 'string' && !isNaN(Date.parse(v));
+  const isPrimitive = (v: any) =>
+    ['string', 'number', 'boolean'].includes(typeof v);
+
+  const rules = value;
+
+  if (rules.length === 0) {
     return (
-      <div className="text-gray-500 text-center p-4">
-        No rules to display.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-4 text-lg">No repository rules available</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {value.map((rule: any, idx: number) => {
-        // Extract primitive entries and filter out internal/meta fields
+    <div className="space-y-6">
+      {rules.map((rule, idx) => {
+        // Filter out internal or complex fields
         const entries = Object.entries(rule)
-          .filter(([key, val]) => {
-            const isPrimitive =
-              ["string", "number", "boolean"].includes(typeof val);
-            const isInternal = /id$|^_+|internal|meta/i.test(key);
-            return isPrimitive && !isInternal && val != null;
-          });
+          .filter(
+            ([k, v]) =>
+              !/^(_|internal|metadata|__|.*Id$)/i.test(k) &&
+              (isPrimitive(v) ||
+                (Array.isArray(v) && v.every((item) => isPrimitive(item))) ||
+                isDateString(v))
+          );
 
-        // Choose up to 5 entries for summary display
-        const displayEntries = entries.slice(0, 5);
-
-        // Determine a header label
-        const header =
-          typeof rule.name === "string"
-            ? rule.name
-            : typeof rule.title === "string"
-            ? rule.title
+        // Derive a title
+        const title =
+          typeof (rule as any).name === 'string'
+            ? (rule as any).name
+            : typeof (rule as any).ruleName === 'string'
+            ? (rule as any).ruleName
             : `Rule ${idx + 1}`;
 
         return (
-          <div
-            key={idx}
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
-          >
-            <h2 className="text-lg font-semibold text-gray-800 mb-2 truncate">
-              {header}
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-              {displayEntries.map(([key, val]) => (
-                <div key={key} className="flex">
-                  <span className="font-medium text-gray-700 capitalize">
-                    {key.replace(/([A-Z])/g, " $1")}:
-                  </span>
-                  <span className="ml-2 text-gray-900 truncate">
-                    {formatValue(val as any)}
-                  </span>
-                </div>
-              ))}
+          <div key={idx} className="bg-white p-5 rounded-lg shadow-sm">
+            <div className="flex items-center border-b pb-2 mb-4">
+              <LucideReact.GitBranch size={20} className="text-gray-700 mr-2" />
+              <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
             </div>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              {entries.map(([k, v]) => {
+                const displayName = formatKey(k);
+                let content: React.ReactNode;
+
+                if (typeof v === 'boolean') {
+                  content = (
+                    <div className="flex items-center gap-1">
+                      {v ? (
+                        <LucideReact.CheckCircle
+                          size={16}
+                          className="text-green-500"
+                          aria-label="True"
+                        />
+                      ) : (
+                        <LucideReact.XCircle
+                          size={16}
+                          className="text-red-500"
+                          aria-label="False"
+                        />
+                      )}
+                      <span>{v ? 'True' : 'False'}</span>
+                    </div>
+                  );
+                } else if (isDateString(v)) {
+                  const date = new Date(v);
+                  const formatted = date.toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  });
+                  content = (
+                    <div className="flex items-center gap-1 text-gray-700">
+                      <LucideReact.Calendar
+                        size={16}
+                        className="text-gray-400"
+                        aria-label="Date"
+                      />
+                      <span>{formatted}</span>
+                    </div>
+                  );
+                } else if (Array.isArray(v)) {
+                  content = (
+                    <div className="flex flex-wrap gap-2">
+                      {v.map((item, i) => (
+                        <span
+                          key={i}
+                          className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded"
+                        >
+                          {String(item)}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                } else {
+                  content = (
+                    <span className="text-gray-900">{String(v)}</span>
+                  );
+                }
+
+                return (
+                  <div key={k}>
+                    <dt className="text-sm font-medium text-gray-500">
+                      {displayName}
+                    </dt>
+                    <dd className="mt-1 text-sm">{content}</dd>
+                  </div>
+                );
+              })}
+            </dl>
           </div>
         );
       })}

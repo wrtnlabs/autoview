@@ -1,21 +1,22 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposActionsRunnersGenerateJitconfig {
-        export type PostResponse = {
+        export interface PostResponse {
             runner: AutoViewInputSubTypes.runner;
             /**
              * The base64 encoded runner configuration.
             */
             encoded_jit_config: string;
-        };
+        }
     }
     /**
      * A self hosted runner
      *
      * @title Self hosted runners
     */
-    export type runner = {
+    export interface runner {
         /**
          * The ID of the runner.
         */
@@ -39,13 +40,13 @@ export namespace AutoViewInputSubTypes {
         busy: boolean;
         labels: AutoViewInputSubTypes.runner_label[];
         ephemeral?: boolean;
-    };
+    }
     /**
      * A label for a self hosted runner
      *
      * @title Self hosted runner label
     */
-    export type runner_label = {
+    export interface runner_label {
         /**
          * Unique identifier of the label.
         */
@@ -58,7 +59,7 @@ export namespace AutoViewInputSubTypes {
          * The type of label. Read-only labels are applied automatically when the runner is configured.
         */
         type?: "read-only" | "custom";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunnersGenerateJitconfig.PostResponse;
 
@@ -67,79 +68,103 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunnersGenerat
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { runner, encoded_jit_config } = value;
-  const statusLabel = runner.status.charAt(0).toUpperCase() + runner.status.slice(1);
-  const busyLabel = runner.busy ? "Busy" : "Idle";
-  const busyClasses = runner.busy ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800";
+  // Decode the base64-encoded configuration
   const decodedConfig = React.useMemo(() => {
     try {
-      return atob(encoded_jit_config);
+      return atob(value.encoded_jit_config);
     } catch {
-      return encoded_jit_config;
+      return value.encoded_jit_config;
     }
-  }, [encoded_jit_config]);
+  }, [value.encoded_jit_config]);
+
+  // Truncate the configuration snippet for display
+  const maxChars = 300;
+  const isTruncated = decodedConfig.length > maxChars;
+  const configSnippet = isTruncated
+    ? decodedConfig.slice(0, maxChars) + "…"
+    : decodedConfig;
+
+  // Capitalize status text
+  const statusLabel = value.runner.status
+    .split(/[\s_-]/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Runner Details</h2>
-      <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700 mb-6">
-        <dt className="font-medium">ID</dt>
-        <dd>{runner.id}</dd>
-
-        {runner.runner_group_id != null && (
-          <>
-            <dt className="font-medium">Group ID</dt>
-            <dd>{runner.runner_group_id}</dd>
-          </>
+      {/* Runner Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {value.runner.name}
+        </h2>
+        {value.runner.ephemeral && (
+          <div className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs">
+            <LucideReact.Zap size={14} aria-hidden="true" />
+            <span>Ephemeral</span>
+          </div>
         )}
+      </div>
 
-        <dt className="font-medium">Name</dt>
-        <dd className="truncate">{runner.name}</dd>
+      {/* Basic Info */}
+      <div className="mt-3 space-y-2 text-sm text-gray-700">
+        <div className="flex items-center gap-1">
+          <LucideReact.Cpu size={16} className="text-gray-500" />
+          <span>{value.runner.os}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span>Status:</span>
+          {value.runner.busy ? (
+            <LucideReact.Loader
+              className="animate-spin text-yellow-500"
+              size={16}
+              aria-label="Busy"
+            />
+          ) : (
+            <LucideReact.CheckCircle
+              className="text-green-500"
+              size={16}
+              aria-label="Idle"
+            />
+          )}
+          <span className="ml-1">{statusLabel}</span>
+        </div>
+      </div>
 
-        <dt className="font-medium">OS</dt>
-        <dd>{runner.os}</dd>
-
-        <dt className="font-medium">Status</dt>
-        <dd>{statusLabel}</dd>
-
-        <dt className="font-medium">Busy</dt>
-        <dd>
-          <span className={`px-2 py-0.5 rounded text-xs font-medium ${busyClasses}`}>
-            {busyLabel}
-          </span>
-        </dd>
-
-        {runner.ephemeral && (
-          <>
-            <dt className="font-medium">Type</dt>
-            <dd>
-              <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                Ephemeral
+      {/* Labels */}
+      {value.runner.labels.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {value.runner.labels.map((lbl, idx) => {
+            const bgColor =
+              lbl.type === "read-only" ? "bg-gray-200" : "bg-blue-100";
+            const textColor =
+              lbl.type === "read-only" ? "text-gray-700" : "text-blue-800";
+            return (
+              <span
+                key={idx}
+                className={`${bgColor} ${textColor} px-2 py-0.5 rounded-full text-xs truncate`}
+              >
+                {lbl.name}
               </span>
-            </dd>
-          </>
-        )}
+            );
+          })}
+        </div>
+      )}
 
-        <dt className="font-medium">Labels</dt>
-        <dd className="flex flex-wrap">
-          {runner.labels.map((lbl) => (
-            <span
-              key={lbl.name}
-              className="px-2 py-0.5 mr-1 mb-1 rounded text-xs bg-gray-100 text-gray-800 truncate"
-            >
-              {lbl.name}
-            </span>
-          ))}
-        </dd>
-      </dl>
-
-      <section>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">JIT Configuration</h3>
-        <pre className="font-mono text-xs bg-gray-50 text-gray-800 p-3 rounded overflow-auto max-h-48 whitespace-pre-wrap">
-          {decodedConfig}
+      {/* Configuration Snippet */}
+      <div className="mt-5">
+        <h3 className="text-sm font-medium text-gray-800 mb-1">
+          Runner Configuration
+        </h3>
+        <pre className="bg-gray-100 p-3 rounded text-xs font-mono max-h-48 overflow-y-auto whitespace-pre-wrap">
+          {configSnippet}
         </pre>
-      </section>
+        {isTruncated && (
+          <p className="mt-1 text-xs text-gray-500">
+            Configuration truncated for preview.
+          </p>
+        )}
+      </div>
     </div>
   );
 }

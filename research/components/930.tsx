@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A codespace.
      *
      * @title Codespace
     */
-    export type codespace = {
+    export interface codespace {
         id: number & tags.Type<"int32">;
         /**
          * Automatically generated name of this codespace.
@@ -134,13 +135,13 @@ export namespace AutoViewInputSubTypes {
          * The text to display to a user when a codespace has been stopped for a potentially actionable reason.
         */
         last_known_stop_notice?: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -163,13 +164,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -272,19 +273,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -357,97 +358,134 @@ export type AutoViewInput = AutoViewInputSubTypes.codespace;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const displayName = value.display_name || value.name;
-  const repoFullName = value.repository.full_name;
-  const machineName = value.machine?.display_name || "N/A";
-  const lastUsed = new Date(value.last_used_at).toLocaleString();
-  const createdAt = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-  const updatedAt = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const displayName = value.display_name ?? value.name;
+  const createdAt = new Date(value.created_at).toLocaleString();
+  const lastUsedAt = value.last_used_at
+    ? new Date(value.last_used_at).toLocaleString()
+    : "Never used";
+  const machineName = value.machine?.display_name ?? "Unknown";
 
-  function getStateBadgeClasses(state: AutoViewInput["state"]): string {
-    switch (state) {
-      case "Available":
-      case "Starting":
-      case "Created":
-        return "bg-green-100 text-green-800";
-      case "Queued":
-      case "Provisioning":
-      case "Awaiting":
-        return "bg-yellow-100 text-yellow-800";
-      case "Failed":
-      case "Unavailable":
-      case "Deleted":
-      case "Archived":
-        return "bg-red-100 text-red-800";
-      case "ShuttingDown":
-      case "Rebuilding":
-      case "Updating":
-      case "Exporting":
-      case "Moved":
-        return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  }
+  const stateBadgeClass = (() => {
+    const green = ["Available"];
+    const amber = ["Provisioning", "Queued", "Awaiting", "Starting", "Updating", "Rebuilding", "Exporting"];
+    const red = ["Unavailable", "Deleted", "Failed", "Shutdown", "ShuttingDown", "Archived", "Moved"];
+    if (green.includes(value.state)) return "bg-green-100 text-green-800";
+    if (amber.includes(value.state)) return "bg-yellow-100 text-yellow-800";
+    if (red.includes(value.state)) return "bg-red-100 text-red-800";
+    return "bg-gray-100 text-gray-800";
+  })();
 
-  const stateBadgeClasses = getStateBadgeClasses(value.state);
-
-  const prebuildBadge = value.prebuild != null
-    ? value.prebuild
-      ? { label: "Prebuild Ready", classes: "bg-blue-100 text-blue-800" }
-      : { label: "No Prebuild", classes: "bg-gray-100 text-gray-800" }
+  const retentionExpiresAt = value.retention_expires_at
+    ? new Date(value.retention_expires_at).toLocaleString()
     : null;
+
+  const recent = value.recent_folders ?? [];
+  const showFolders = recent.slice(0, 3);
+  const moreCount = recent.length - showFolders.length;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-4 space-y-4">
-      <div>
-        <h2 className="text-xl font-semibold truncate">{displayName}</h2>
-        <p className="text-sm text-gray-500 truncate">{repoFullName}</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <span className={`px-2 py-1 text-xs font-medium rounded ${stateBadgeClasses}`}>
-          {value.state}
-        </span>
-        <span className="px-2 py-1 text-xs font-medium rounded bg-gray-200 text-gray-800">
-          {value.location}
-        </span>
-        {prebuildBadge && (
-          <span className={`px-2 py-1 text-xs font-medium rounded ${prebuildBadge.classes}`}>
-            {prebuildBadge.label}
-          </span>
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex items-center space-x-2 mb-4">
+        <LucideReact.Code className="text-blue-500" size={20} />
+        <h2 className="text-lg font-semibold text-gray-900">{displayName}</h2>
+        {displayName !== value.name && (
+          <span className="text-sm text-gray-500 truncate">({value.name})</span>
         )}
       </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
-        <div>
-          <span className="font-medium">Owner:</span> {value.owner.login}
-        </div>
-        <div>
-          <span className="font-medium">Machine:</span> {machineName}
-        </div>
-        <div>
-          <span className="font-medium">Last Used:</span> {lastUsed}
-        </div>
-        {value.idle_timeout_minutes != null && (
-          <div>
-            <span className="font-medium">Idle Timeout:</span> {value.idle_timeout_minutes} min
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <LucideReact.User size={16} className="text-gray-500" />
+            <span>Owner: {value.owner.login}</span>
           </div>
-        )}
-      </div>
-      <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-        <div>
-          <span className="font-medium">Created:</span> {createdAt}
+
+          <div className="flex items-center space-x-2">
+            <LucideReact.GitBranch size={16} className="text-gray-500" />
+            <span>Repo: {value.repository.full_name}</span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <LucideReact.Server size={16} className="text-gray-500" />
+            <span>Machine: {machineName}</span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <LucideReact.MapPin size={16} className="text-gray-500" />
+            <span>Location: {value.location}</span>
+          </div>
+
+          <div>
+            <span className={`inline-block px-2 py-1 rounded-full text-xs ${stateBadgeClass}`}>
+              {value.state}
+            </span>
+          </div>
+
+          {value.prebuild != null && (
+            <div className="flex items-center space-x-1">
+              {value.prebuild ? (
+                <LucideReact.CheckCircle size={16} className="text-green-500" />
+              ) : (
+                <LucideReact.XCircle size={16} className="text-red-500" />
+              )}
+              <span>Prebuild: {value.prebuild ? "Yes" : "No"}</span>
+            </div>
+          )}
         </div>
-        <div>
-          <span className="font-medium">Updated:</span> {updatedAt}
+
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <LucideReact.Calendar size={16} className="text-gray-500" />
+            <span>Created: {createdAt}</span>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <LucideReact.Clock size={16} className="text-gray-500" />
+            <span>Last Used: {lastUsedAt}</span>
+          </div>
+
+          {value.idle_timeout_minutes != null && (
+            <div className="flex items-center space-x-2">
+              <LucideReact.Clock size={16} className="text-gray-500" />
+              <span>Idle Timeout: {value.idle_timeout_minutes} min</span>
+            </div>
+          )}
+
+          {retentionExpiresAt && (
+            <div className="flex items-center space-x-2">
+              <LucideReact.Calendar size={16} className="text-gray-500" />
+              <span>Expires: {retentionExpiresAt}</span>
+            </div>
+          )}
+
+          {value.pending_operation && (
+            <div className="flex items-center space-x-2">
+              <LucideReact.AlertTriangle size={16} className="text-red-500" />
+              <span className="text-red-600">
+                {value.pending_operation_disabled_reason ?? "Operation pending"}
+              </span>
+            </div>
+          )}
+
+          {recent.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <LucideReact.Folder size={16} className="text-gray-500" />
+              <div className="flex flex-wrap gap-1">
+                {showFolders.map((dir) => (
+                  <span
+                    key={dir}
+                    className="bg-gray-100 rounded px-1 text-xs text-gray-600 truncate"
+                  >
+                    {dir}
+                  </span>
+                ))}
+                {moreCount > 0 && (
+                  <span className="text-xs text-gray-500">+{moreCount} more</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

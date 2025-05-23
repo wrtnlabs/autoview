@@ -4,5 +4,5 @@ import Component from "../components/825";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return [{"property_name":"environment","value":"development (Test)"},{"property_name":"supported_locales","value":["en-US","fr-FR","de-DE"]},{"property_name":"release_notes","value":"Initial release for testing purposes. This is safe fictional data."},{"property_name":"enabled_features","value":["featureA","featureB","featureC"]},{"property_name":"maintenance_window","value":null}];
+  return [{"property_name":"owner_email","value":"test.user@example.com"},{"property_name":"tags","value":["alpha-test","ui-demo","mock-data"]},{"property_name":"deployment_urls","value":["https://api.example.com/v1/test-deployment","https://staging.example.com/test-app"]},{"property_name":"description","value":"This is a sample description for this custom property. For UI testing purposes only."},{"property_name":"last_updated","value":null}];
 }

@@ -1,20 +1,21 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4GroupView = {
+                export interface LegacyV4GroupView {
                     managers?: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager[];
                     onlines?: AutoViewInputSubTypes.legacy.v4.LegacyV4Online[];
                     bookmark?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatBookmark;
                     session?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession;
                     group?: AutoViewInputSubTypes.legacy.v4.LegacyV4Group;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Manager = {
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -50,14 +51,14 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4Online = {
+            }
+            export interface LegacyV4Online {
                 channelId?: string;
                 personType?: string;
                 personId?: string;
                 id?: string;
-            };
-            export type LegacyV4ChatBookmark = {
+            }
+            export interface LegacyV4ChatBookmark {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -67,8 +68,8 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
-            export type LegacyV4ChatSession = {
+            }
+            export interface LegacyV4ChatSession {
                 key?: string;
                 chatId?: string;
                 chatKey?: string;
@@ -88,8 +89,8 @@ export namespace AutoViewInputSubTypes {
                 chatType?: string;
                 personType?: string;
                 personId?: string;
-            };
-            export type LegacyV4Group = {
+            }
+            export interface LegacyV4Group {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -100,19 +101,19 @@ export namespace AutoViewInputSubTypes {
                 createdAt?: number;
                 updatedAt?: number;
                 active?: boolean;
-            };
+            }
         }
     }
-    export type NameDesc = {
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4GroupView;
 
@@ -122,88 +123,147 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4GroupVi
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const group = value.group;
-  if (!group) return null;
-
-  const {
-    name,
-    scope,
-    description = "",
-    createdAt,
-  } = group;
-
-  const createdDate = createdAt
-    ? new Date(createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
-
-  const managersCount = value.managers?.length ?? 0;
+  const managers = value.managers ?? [];
   const onlineCount = value.onlines?.length ?? 0;
-  const unreadCount = value.session?.unread ?? 0;
-  const updatedAt = value.session?.updatedAt;
-  const lastActive = updatedAt
-    ? new Date(updatedAt).toLocaleString(undefined, {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
+  const session = value.session;
+  const bookmark = value.bookmark;
+  const unreadCount = session?.unread ?? 0;
+  const alertCount = session?.alert ?? 0;
+
+  const formattedCreatedAt = group?.createdAt
+    ? new Date(group.createdAt).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
       })
     : null;
 
-  const isBookmarked = Boolean(value.bookmark);
+  const formattedUpdatedAt = group?.updatedAt
+    ? new Date(group.updatedAt).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      })
+    : null;
+
+  // badge color by scope
+  const scopeBadgeClasses: Record<string, string> = {
+    all: 'bg-gray-100 text-gray-800',
+    public: 'bg-blue-100 text-blue-800',
+    private: 'bg-red-100 text-red-800',
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!group) {
+    return (
+      <div className="flex items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} aria-label="No data" />
+        <span className="ml-2">No Group Information Available</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+    <div className="max-w-md mx-auto bg-white p-4 rounded-lg shadow-md">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+        <div className="flex items-center space-x-2">
+          <h2 className="text-lg font-semibold text-gray-900 truncate">{group.name}</h2>
+          {group.active !== undefined && (
+            group.active ? (
+              <LucideReact.CheckCircle
+                size={16}
+                className="text-green-500"
+                aria-label="Active"
+              />
+            ) : (
+              <LucideReact.XCircle
+                size={16}
+                className="text-red-500"
+                aria-label="Inactive"
+              />
+            )
+          )}
+        </div>
         <span
-          className={`text-xs font-medium uppercase px-2 py-1 rounded-full ${
-            scope === "public"
-              ? "bg-green-100 text-green-800"
-              : scope === "private"
-              ? "bg-yellow-100 text-yellow-800"
-              : "bg-blue-100 text-blue-800"
+          className={`px-2 py-0.5 text-xs font-medium rounded ${
+            scopeBadgeClasses[group.scope] || scopeBadgeClasses.all
           }`}
         >
-          {scope}
+          {group.scope.toUpperCase()}
         </span>
       </div>
 
-      {createdDate && (
-        <p className="mt-1 text-sm text-gray-500">Created on {createdDate}</p>
-      )}
-
-      {description && (
-        <p className="mt-2 text-sm text-gray-600 line-clamp-3">
-          {description}
+      {/* Description */}
+      {group.description && (
+        <p className="mt-2 text-gray-700 text-sm line-clamp-2">
+          {group.description}
         </p>
       )}
 
-      <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-700">
-        <div>
-          <span className="font-medium">Managers:</span> {managersCount}
+      {/* Stats Grid */}
+      <div className="mt-4 grid grid-cols-2 gap-4 text-gray-600 text-sm">
+        <div className="flex items-center">
+          <LucideReact.Users size={16} className="text-gray-400" aria-label="Managers" />
+          <span className="ml-1">
+            {managers.length} Manager{managers.length !== 1 && 's'}
+          </span>
         </div>
-        <div>
-          <span className="font-medium">Online:</span> {onlineCount}
+        <div className="flex items-center">
+          <LucideReact.Activity size={16} className="text-gray-400" aria-label="Online users" />
+          <span className="ml-1">{onlineCount} Online</span>
         </div>
-        <div>
-          <span className="font-medium">Unread:</span> {unreadCount}
+        <div className="flex items-center">
+          <LucideReact.MessageSquare size={16} className="text-gray-400" aria-label="Unread messages" />
+          <span className="ml-1">{unreadCount} Unread</span>
         </div>
-        {lastActive && (
-          <div>
-            <span className="font-medium">Last Active:</span> {lastActive}
+        <div className="flex items-center">
+          {bookmark ? (
+            <>
+              <LucideReact.Bookmark size={16} className="text-gray-400" aria-label="Bookmarked" />
+              <span className="ml-1">Bookmarked</span>
+            </>
+          ) : (
+            <>
+              <LucideReact.Bookmark
+                size={16}
+                className="text-gray-400 opacity-50"
+                aria-label="Not bookmarked"
+              />
+              <span className="ml-1">Not Bookmarked</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Footer Dates */}
+      <div className="mt-4 flex flex-wrap items-center text-gray-500 text-xs space-x-4">
+        {formattedCreatedAt && (
+          <div className="flex items-center">
+            <LucideReact.Calendar size={14} aria-label="Created date" />
+            <span className="ml-1">Created: {formattedCreatedAt}</span>
+          </div>
+        )}
+        {formattedUpdatedAt && (
+          <div className="flex items-center">
+            <LucideReact.Edit2 size={14} aria-label="Updated date" />
+            <span className="ml-1">Updated: {formattedUpdatedAt}</span>
+          </div>
+        )}
+        {alertCount > 0 && (
+          <div className="flex items-center">
+            <LucideReact.AlertTriangle
+              size={14}
+              className="text-amber-500"
+              aria-label="Alerts"
+            />
+            <span className="ml-1">
+              {alertCount} Alert{alertCount !== 1 && 's'}
+            </span>
           </div>
         )}
       </div>
-
-      {isBookmarked && (
-        <div className="mt-4 text-sm text-indigo-600 font-medium">
-          ★ Bookmarked
-        </div>
-      )}
     </div>
   );
+  // 3. Return the React element.
 }

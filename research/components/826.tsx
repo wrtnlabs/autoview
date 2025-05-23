@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Review Comments are comments on a portion of the Pull Request's diff.
      *
      * @title Pull Request Review Comment
     */
-    export type pull_request_review_comment = {
+    export interface pull_request_review_comment {
         /**
          * URL for the pull request review comment
         */
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         body_html?: string;
         body_text?: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,7 +139,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -148,7 +149,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -159,7 +160,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.pull_request_review_comment[];
 
@@ -167,89 +168,94 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_review_comment[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data Transformation: sort comments by newest first
-  const comments = React.useMemo(
-    () =>
-      [...value].sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      ),
-    [value]
-  );
-
-  // Mapping of reaction keys to emojis
-  const reactionIcons: Record<string, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    eyes: "👀",
-    rocket: "🚀",
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formatDateTime = (iso: string): string => {
+    const date = new Date(iso);
+    const datePart = date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+    const timePart = date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    return `${datePart} ${timePart}`;
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-4 text-gray-400 text-sm">
+        <LucideReact.AlertCircle size={24} />
+        <span className="ml-2">No comments available</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {comments.map((comment) => {
-        const date = new Date(comment.created_at);
-        const formattedDate = date.toLocaleDateString(undefined, {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
-        // Extract and filter reactions
-        const reactionEntries = comment.reactions
-          ? (Object.entries(comment.reactions) as [string, number][])
-              .filter(
-                ([key, count]) =>
-                  key !== "url" && key !== "total_count" && count > 0
-              )
-          : [];
+      {value.map((comment) => {
+        const {
+          id,
+          user,
+          created_at,
+          path,
+          line,
+          position,
+          body,
+          reactions,
+        } = comment;
+        const displayName = user.name?.trim() || user.login;
+        const timestamp = formatDateTime(created_at);
+        const lineNumber = line ?? position;
+        const reactionCount = reactions?.total_count ?? 0;
 
         return (
           <div
-            key={comment.id}
-            className="bg-white shadow rounded-lg p-4 flex flex-col sm:flex-row"
+            key={id}
+            className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm"
           >
-            {/* Avatar */}
-            <img
-              src={comment.user.avatar_url}
-              alt={`${comment.user.login} avatar`}
-              className="w-10 h-10 rounded-full flex-shrink-0"
-            />
-            {/* Content */}
-            <div className="mt-3 sm:mt-0 sm:ml-4 flex-1">
-              {/* Header: user and date */}
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-900">
-                  {comment.user.login}
-                </span>
-                <span className="text-xs text-gray-500">{formattedDate}</span>
-              </div>
-              {/* File path and line info */}
-              <div className="text-xs text-gray-500 mt-1">
-                {comment.path}
-                {comment.line != null ? `:${comment.line}` : ""}
-              </div>
-              {/* Comment body, truncated for mobile */}
-              <p className="text-sm text-gray-700 mt-2 line-clamp-3 break-words">
-                {comment.body}
-              </p>
-              {/* Reactions */}
-              {reactionEntries.length > 0 && (
-                <div className="mt-3 flex flex-wrap space-x-4 text-sm text-gray-600">
-                  {reactionEntries.map(([key, count]) => (
-                    <span key={key} className="flex items-center space-x-1">
-                      <span>{reactionIcons[key] || key}</span>
-                      <span>{count}</span>
-                    </span>
-                  ))}
+            <div className="flex items-start gap-3">
+              <img
+                src={user.avatar_url}
+                alt={displayName}
+                className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    displayName,
+                  )}&background=random`;
+                }}
+              />
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-gray-900 dark:text-gray-100">
+                    {displayName}
+                  </span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {timestamp}
+                  </span>
                 </div>
-              )}
+                {(path || lineNumber) && (
+                  <div className="mt-1 text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1 truncate">
+                    <LucideReact.FileText size={14} />
+                    <span>
+                      {path}
+                      {lineNumber ? `:${lineNumber}` : ''}
+                    </span>
+                  </div>
+                )}
+                <p className="mt-3 text-sm text-gray-700 dark:text-gray-300 line-clamp-3 whitespace-pre-wrap">
+                  {body}
+                </p>
+                {reactionCount > 0 && (
+                  <div className="flex items-center mt-3 text-gray-500 text-sm gap-1">
+                    <LucideReact.ThumbsUp size={14} />
+                    <span>{reactionCount}</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );

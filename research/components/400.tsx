@@ -1,11 +1,12 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Runner Application
      *
      * @title Runner Application
     */
-    export type runner_application = {
+    export interface runner_application {
         os: string;
         architecture: string;
         download_url: string;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         temp_download_token?: string;
         sha256_checksum?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner_application[];
 
@@ -24,55 +25,59 @@ export type AutoViewInput = AutoViewInputSubTypes.runner_application[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const truncate = (str: string, maxChars: number): string => {
-    if (str.length <= maxChars) return str;
-    const half = Math.floor(maxChars / 2);
-    return `${str.slice(0, half)}…${str.slice(-half)}`;
-  };
+  const runners = value;
+  const count = runners.length;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!value || value.length === 0) {
+  // Handle empty state
+  if (count === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-sm text-center text-gray-500">
-        No runner applications available.
+      <div className="flex items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mr-2" />
+        <span>No runner downloads available.</span>
       </div>
     );
   }
 
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {value.map((runner, idx) => {
-        const { os, architecture, filename, download_url, temp_download_token, sha256_checksum } = runner;
-        const displayUrl = truncate(download_url, 60);
-
-        return (
-          <div
-            key={`${os}-${architecture}-${idx}`}
-            className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-2"
-          >
-            <div className="flex flex-wrap gap-2">
-              <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded">
-                {os}
+    <div className="p-4 bg-gray-50 rounded-lg">
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        Available Runner Downloads ({count})
+      </h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        {runners.map((app, idx) => (
+          <div key={idx} className="p-4 bg-white rounded-lg shadow">
+            {/* OS and Architecture */}
+            <div className="flex items-center gap-2 mb-2">
+              <LucideReact.Computer size={20} className="text-gray-500" />
+              <span className="font-medium text-gray-800">{app.os}</span>
+              <span className="ml-auto flex items-center text-gray-600 text-sm">
+                <LucideReact.Cpu size={14} className="mr-1" />
+                {app.architecture}
               </span>
-              <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded">
-                {architecture}
-              </span>
-              {temp_download_token && (
-                <span className="px-2 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded">
-                  Auth Required
-                </span>
-              )}
             </div>
-            <p className="text-sm font-medium text-gray-900 truncate">{filename}</p>
-            <p className="text-xs text-blue-600 break-all">{displayUrl}</p>
-            {sha256_checksum && (
-              <p className="text-xs text-gray-500">
-                SHA256: <span className="font-mono">{truncate(sha256_checksum, 64)}</span>
-              </p>
+            {/* Filename */}
+            <div className="flex items-center text-gray-700 text-sm mb-1">
+              <LucideReact.FileText size={16} className="text-indigo-500 mr-2" />
+              <span className="truncate">{app.filename}</span>
+            </div>
+            {/* Download URL */}
+            <div className="flex items-start text-gray-700 text-sm mb-1">
+              <LucideReact.Link size={16} className="text-gray-400 mt-0.5 mr-2" />
+              <span className="break-all">{app.download_url}</span>
+            </div>
+            {/* SHA-256 Checksum */}
+            {app.sha256_checksum && (
+              <div className="flex items-center text-gray-700 text-sm">
+                <LucideReact.Hash size={16} className="text-gray-400 mr-2" />
+                <span className="font-mono text-xs break-all">
+                  {app.sha256_checksum}
+                </span>
+              </div>
             )}
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }

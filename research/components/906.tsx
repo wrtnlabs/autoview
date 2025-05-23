@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A team discussion is a persistent record of a free-form conversation within a team.
      *
      * @title Team Discussion
     */
-    export type team_discussion = {
+    export interface team_discussion {
         author: AutoViewInputSubTypes.nullable_simple_user;
         /**
          * The main text of the discussion.
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         url: string & tags.Format<"uri">;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -76,7 +77,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -87,7 +88,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_discussion[];
 
@@ -96,116 +97,120 @@ export type AutoViewInput = AutoViewInputSubTypes.team_discussion[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleString('en-US', {
+  const discussions = value;
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
       hour: 'numeric',
-      minute: '2-digit',
+      minute: 'numeric',
     });
 
-  const stripHtml = (html: string): string =>
-    html.replace(/<\/?[^>]+(>|$)/g, '').trim();
-
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!Array.isArray(value) || value.length === 0) {
+  if (!discussions || discussions.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No discussions found.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No discussions available.</span>
       </div>
     );
   }
 
   return (
-    <ul className="space-y-4">
-      {value.map((disc) => {
-        const {
-          number,
-          title,
-          author,
-          created_at,
-          updated_at,
-          body_html,
-          comments_count,
-          pinned,
-          private: isPrivate,
-          reactions,
-        } = disc;
-        const snippet = stripHtml(body_html).slice(0, 120) + '…';
+    <div className="space-y-4">
+      {discussions.map((disc) => {
+        const author = disc.author;
+        const authorName = author ? author.name ?? author.login : '';
+        const authorLogin = author ? author.login : '';
+        const avatarUrl = author ? author.avatar_url : '';
+
         return (
-          <li
+          <article
             key={disc.node_id}
-            className="bg-white rounded-lg shadow-sm p-4 flex flex-col sm:flex-row gap-4"
+            className="bg-white shadow-sm rounded-lg p-4 hover:shadow-md transition-shadow"
           >
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              {author && author.avatar_url ? (
-                <img
-                  src={author.avatar_url}
-                  alt={author.login}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 bg-gray-200 rounded-full" />
+            <header className="flex items-start justify-between">
+              <div className="flex items-center">
+                {author ? (
+                  <img
+                    src={avatarUrl}
+                    alt={authorLogin}
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        authorName
+                      )}&background=0D8ABC&color=fff`;
+                    }}
+                  />
+                ) : (
+                  <LucideReact.User
+                    className="w-10 h-10 text-gray-300"
+                    aria-label="No avatar"
+                  />
+                )}
+                <div className="ml-3">
+                  <p className="text-sm font-semibold text-gray-900">
+                    {authorName || 'Unknown User'}
+                  </p>
+                  {authorLogin && (
+                    <p className="text-xs text-gray-500">{authorLogin}</p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {disc.pinned && (
+                  <LucideReact.Pin
+                    size={16}
+                    className="text-indigo-500"
+                    aria-label="Pinned"
+                  />
+                )}
+                {disc.private && (
+                  <LucideReact.Lock
+                    size={16}
+                    className="text-gray-500"
+                    aria-label="Private"
+                  />
+                )}
+              </div>
+            </header>
+
+            <h2 className="mt-3 text-lg font-medium text-gray-800 truncate">
+              {disc.title}
+            </h2>
+            <p className="mt-2 text-gray-700 text-sm line-clamp-2">
+              {disc.body}
+            </p>
+
+            <footer className="mt-4 flex flex-wrap items-center text-gray-500 text-sm space-x-4">
+              <div className="flex items-center">
+                <LucideReact.Calendar size={16} className="mr-1" />
+                <time dateTime={disc.created_at}>
+                  {formatDate(disc.created_at)}
+                </time>
+                {disc.last_edited_at && (
+                  <span className="ml-2">
+                    (edited {formatDate(disc.last_edited_at)})
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center">
+                <LucideReact.MessageCircle size={16} className="mr-1" />
+                <span>{disc.comments_count}</span>
+              </div>
+
+              {disc.reactions && (
+                <div className="flex items-center">
+                  <LucideReact.ThumbsUp size={16} className="mr-1" />
+                  <span>{disc.reactions.total_count}</span>
+                </div>
               )}
-            </div>
-            {/* Content */}
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center flex-wrap gap-2">
-                <h3 className="text-lg font-semibold text-gray-900 truncate">
-                  {title}
-                </h3>
-                {pinned && (
-                  <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
-                    Pinned
-                  </span>
-                )}
-                {isPrivate && (
-                  <span className="px-2 py-0.5 text-xs bg-red-100 text-red-800 rounded">
-                    Private
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 text-sm text-gray-500 flex flex-wrap gap-2">
-                <span>#{number}</span>
-                {author && <span>by {author.login}</span>}
-                <span>· {formatDate(created_at)}</span>
-                {updated_at && updated_at !== created_at && (
-                  <span>· updated {formatDate(updated_at)}</span>
-                )}
-              </div>
-              <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-                {snippet}
-              </p>
-              <div className="mt-3 flex items-center text-sm text-gray-600 space-x-4">
-                <span className="flex items-center gap-1">
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M18 10c0 3.866-3.582 7-8 7s-8-3.134-8-7 3.582-7 8-7 8 3.134 8 7zM9 7v6l5-3-5-3z" />
-                  </svg>
-                  {comments_count}
-                </span>
-                {reactions && reactions.total_count > 0 && (
-                  <span className="flex items-center gap-1">
-                    <svg
-                      className="w-4 h-4 text-gray-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M2 10a6 6 0 0111.293-3.707L18 6v4h-4l1.707 1.707A6 6 0 112 10z" />
-                    </svg>
-                    {reactions.total_count}
-                  </span>
-                )}
-              </div>
-            </div>
-          </li>
+            </footer>
+          </article>
         );
       })}
-    </ul>
+    </div>
   );
 }

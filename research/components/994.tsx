@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A unique encryption key
      *
      * @title GPG Key
     */
-    export type gpg_key = {
+    export interface gpg_key {
         id: number & tags.Type<"int32">;
         name?: string | null;
         primary_key_id: (number & tags.Type<"int32">) | null;
@@ -43,108 +44,134 @@ export namespace AutoViewInputSubTypes {
         expires_at: (string & tags.Format<"date-time">) | null;
         revoked: boolean;
         raw_key: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.gpg_key[];
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDateTime = (iso: string): string =>
-    new Date(iso).toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  const maskKeyId = (id: string): string =>
+    id.length > 8 ? `${id.slice(0, 4)}…${id.slice(-4)}` : id;
+
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-4" aria-label="No data" />
+        <span>No GPG keys available.</span>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {value.map((key) => {
-        const createdAt = formatDateTime(key.created_at);
-        const expiresAt = key.expires_at
-          ? formatDateTime(key.expires_at)
-          : "Never";
-        const statusText = key.revoked ? "Revoked" : "Active";
-
-        return (
-          <div
-            key={key.key_id}
-            className="p-4 bg-white rounded-lg shadow-sm flex flex-col md:flex-row"
-          >
-            <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {key.name ?? "Unnamed Key"}
-              </h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Key ID:{" "}
-                <span className="font-mono text-gray-700">{key.key_id}</span>
-              </p>
-              {key.primary_key_id != null && (
-                <p className="text-sm text-gray-600">
-                  Primary Key ID: {key.primary_key_id}
-                </p>
-              )}
-              <p className="text-sm text-gray-600">Created: {createdAt}</p>
-              <p className="text-sm text-gray-600">Expires: {expiresAt}</p>
-              <p className="text-sm">
-                Status:{" "}
-                <span
-                  className={
-                    key.revoked
-                      ? "text-red-600 font-medium"
-                      : "text-green-600 font-medium"
-                  }
-                >
-                  {statusText}
-                </span>
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {key.can_sign && (
-                  <span className="px-2 py-1 text-xs font-medium text-blue-800 bg-blue-100 rounded">
-                    Sign
-                  </span>
-                )}
-                {key.can_encrypt_comms && (
-                  <span className="px-2 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded">
-                    Encrypt Comms
-                  </span>
-                )}
-                {key.can_encrypt_storage && (
-                  <span className="px-2 py-1 text-xs font-medium text-purple-800 bg-purple-100 rounded">
-                    Encrypt Storage
-                  </span>
-                )}
-                {key.can_certify && (
-                  <span className="px-2 py-1 text-xs font-medium text-green-800 bg-green-100 rounded">
-                    Certify
-                  </span>
-                )}
-              </div>
+      {value.map((key) => (
+        <div key={key.id} className="p-4 bg-white rounded-lg shadow">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <LucideReact.Key size={20} className="text-gray-600" aria-hidden />
+              <span className="font-medium text-gray-800">
+                {key.name ?? maskKeyId(key.key_id)}
+              </span>
             </div>
-            <div className="mt-4 md:mt-0 md:ml-6 flex-shrink-0 w-full md:w-auto">
-              <p className="text-sm text-gray-600">
-                Emails ({key.emails.length}):
-              </p>
-              {key.emails.length > 0 ? (
-                <ul className="list-disc list-inside text-sm text-gray-700 max-h-24 overflow-y-auto">
-                  {key.emails.map((emailObj, idx) => (
-                    <li key={idx} className="truncate">
-                      {emailObj.email ?? "—"}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-sm text-gray-500">None</p>
-              )}
-              <p className="mt-2 text-sm text-gray-600">
-                Subkeys: {key.subkeys.length}
-              </p>
+            {key.revoked ? (
+              <LucideReact.AlertTriangle
+                size={20}
+                className="text-red-500"
+                aria-label="Revoked"
+              />
+            ) : (
+              <LucideReact.CheckCircle
+                size={20}
+                className="text-green-500"
+                aria-label="Active"
+              />
+            )}
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 text-sm text-gray-600">
+            <div className="flex items-center space-x-1">
+              <LucideReact.Clock size={16} className="text-gray-400" aria-hidden />
+              <span>Created:</span>
+              <span>{formatDate(key.created_at)}</span>
+            </div>
+            {key.expires_at && (
+              <div className="flex items-center space-x-1">
+                <LucideReact.Calendar size={16} className="text-gray-400" aria-hidden />
+                <span>Expires:</span>
+                <span>{formatDate(key.expires_at)}</span>
+              </div>
+            )}
+            <div className="flex items-center space-x-1">
+              <LucideReact.Mail size={16} className="text-gray-400" aria-hidden />
+              <span>Emails:</span>
+              <span>{key.emails.length}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <LucideReact.Key size={16} className="text-gray-400" aria-hidden />
+              <span>Subkeys:</span>
+              <span>{key.subkeys.length}</span>
             </div>
           </div>
-        );
-      })}
+
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            {key.can_sign && (
+              <span className="flex items-center space-x-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full">
+                <LucideReact.Pen size={12} className="text-blue-500" aria-hidden />
+                <span>Sign</span>
+              </span>
+            )}
+            {key.can_encrypt_comms && (
+              <span className="flex items-center space-x-1 px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full">
+                <LucideReact.Lock size={12} className="text-purple-500" aria-hidden />
+                <span>Encrypt Comms</span>
+              </span>
+            )}
+            {key.can_encrypt_storage && (
+              <span className="flex items-center space-x-1 px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded-full">
+                <LucideReact.Database size={12} className="text-indigo-500" aria-hidden />
+                <span>Encrypt Storage</span>
+              </span>
+            )}
+            {key.can_certify && (
+              <span className="flex items-center space-x-1 px-2 py-0.5 bg-green-100 text-green-800 rounded-full">
+                <LucideReact.BadgeCheck size={12} className="text-green-500" aria-hidden />
+                <span>Certify</span>
+              </span>
+            )}
+          </div>
+
+          {key.emails.length > 0 && (
+            <div className="mt-3 space-y-1">
+              <span className="block text-sm font-medium text-gray-700">
+                Email Addresses
+              </span>
+              <ul className="list-disc list-inside text-sm text-gray-600">
+                {key.emails.map((e, idx) => (
+                  <li key={idx} className="flex items-center space-x-1">
+                    <LucideReact.Mail size={14} className="text-gray-400" aria-hidden />
+                    <span className="truncate">{e.email ?? '—'}</span>
+                    {e.verified && (
+                      <LucideReact.CheckCircle
+                        size={14}
+                        className="text-green-500"
+                        aria-label="Verified"
+                      />
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

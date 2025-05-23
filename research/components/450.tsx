@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Org Hook
      *
      * @title Org Hook
     */
-    export type org_hook = {
+    export interface org_hook {
         id: number & tags.Type<"int32">;
         url: string & tags.Format<"uri">;
         ping_url: string & tags.Format<"uri">;
@@ -23,7 +24,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         created_at: string & tags.Format<"date-time">;
         type: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.org_hook[];
 
@@ -31,72 +32,92 @@ export type AutoViewInput = AutoViewInputSubTypes.org_hook[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Helper: format ISO date-time string into "Jan 1, 2023, 03:45 PM"
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formatDate = (dateStr: string): string =>
-    new Date(dateStr).toLocaleString(undefined, {
+    new Date(dateStr).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2">No hooks available.</span>
+      </div>
+    );
+  }
+
+  // 3. Return the React element.
   return (
-    <div className="space-y-6">
-      {value.length === 0 ? (
-        <p className="text-center text-gray-500">No webhooks configured.</p>
-      ) : (
-        value.map((hook) => (
-          <div
-            key={hook.id}
-            className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between"
-          >
-            {/* Left section: hook details */}
-            <div className="flex-1 min-w-0">
-              <h3 className="text-lg font-semibold text-gray-900 truncate">
-                {hook.name || "(Unnamed Hook)"}
-              </h3>
-              <p className="mt-1 text-sm text-gray-500 truncate">{hook.type}</p>
-
-              <div className="mt-3 flex flex-wrap gap-2">
-                {hook.events.map((evt, idx) => (
-                  <span
-                    key={idx}
-                    className="text-xs font-medium bg-blue-100 text-blue-800 px-2 py-0.5 rounded"
-                  >
-                    {evt}
-                  </span>
-                ))}
-              </div>
-
-              <p className="mt-3 text-sm text-gray-700">
-                <span className="font-medium">Endpoint:</span>{" "}
-                <span className="font-mono truncate block">{hook.url}</span>
-              </p>
-            </div>
-
-            {/* Right section: status and timestamps */}
-            <div className="mt-4 sm:mt-0 flex flex-col sm:items-end sm:space-y-1">
-              <span
-                className={`inline-block px-2 py-1 text-xs font-medium rounded ${
-                  hook.active
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {hook.active ? "Active" : "Inactive"}
+    <div className="space-y-4">
+      {value.map((hook) => (
+        <div
+          key={hook.id}
+          className="p-4 bg-white rounded-lg shadow flex flex-col space-y-3"
+        >
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+            <div className="flex items-center space-x-2">
+              <LucideReact.Link size={20} className="text-gray-500" />
+              <span className="font-semibold text-gray-800 truncate">
+                {hook.name}
               </span>
-              <p className="text-xs text-gray-500">
-                Created: {formatDate(hook.created_at)}
-              </p>
-              <p className="text-xs text-gray-500">
-                Updated: {formatDate(hook.updated_at)}
-              </p>
+              <span className="ml-2 px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded">
+                {hook.type}
+              </span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1">
+                {hook.active ? (
+                  <LucideReact.CheckCircle
+                    size={16}
+                    className="text-green-500"
+                  />
+                ) : (
+                  <LucideReact.XCircle size={16} className="text-red-500" />
+                )}
+                <span className="text-sm text-gray-600">
+                  {hook.active ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span className="text-sm text-gray-600">
+                  Created {formatDate(hook.created_at)}
+                </span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.Edit2 size={16} className="text-gray-400" />
+                <span className="text-sm text-gray-600">
+                  Updated {formatDate(hook.updated_at)}
+                </span>
+              </div>
             </div>
           </div>
-        ))
-      )}
+
+          {/* Details */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-6 space-y-2 sm:space-y-0">
+            <div className="flex items-center space-x-1 text-sm text-gray-600 truncate">
+              <LucideReact.Link size={16} className="text-gray-400" />
+              <span className="truncate">{hook.url}</span>
+            </div>
+            <div className="flex items-center flex-wrap gap-2">
+              <LucideReact.ListChecks size={16} className="text-gray-400" />
+              {hook.events.map((event) => (
+                <span
+                  key={event}
+                  className="bg-blue-100 text-blue-800 px-2 py-0.5 text-xs rounded-full"
+                >
+                  {event}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

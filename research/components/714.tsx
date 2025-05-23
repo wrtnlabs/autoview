@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A Dependabot alert.
     */
-    export type dependabot_alert = {
+    export interface dependabot_alert {
         number: AutoViewInputSubTypes.alert_number;
         /**
          * The state of the Dependabot alert.
@@ -50,7 +51,7 @@ export namespace AutoViewInputSubTypes {
         dismissed_comment: (string & tags.MaxLength<280>) | null;
         fixed_at: AutoViewInputSubTypes.alert_fixed_at;
         auto_dismissed_at?: AutoViewInputSubTypes.alert_auto_dismissed_at;
-    };
+    }
     /**
      * The security alert number.
     */
@@ -58,7 +59,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * Details for the vulnerable package.
     */
-    export type dependabot_alert_package = {
+    export interface dependabot_alert_package {
         /**
          * The package's language or package management ecosystem.
         */
@@ -67,11 +68,11 @@ export namespace AutoViewInputSubTypes {
          * The unique package name within its ecosystem.
         */
         name: string;
-    };
+    }
     /**
      * Details for the GitHub Security Advisory.
     */
-    export type dependabot_alert_security_advisory = {
+    export interface dependabot_alert_security_advisory {
         /**
          * The unique GitHub Security Advisory ID assigned to the advisory.
         */
@@ -158,11 +159,11 @@ export namespace AutoViewInputSubTypes {
          * The time that the advisory was withdrawn in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.
         */
         withdrawn_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
     /**
      * Details pertaining to one vulnerable version range for the advisory.
     */
-    export type dependabot_alert_security_vulnerability = {
+    export interface dependabot_alert_security_vulnerability {
         "package": AutoViewInputSubTypes.dependabot_alert_package;
         /**
          * The severity of the vulnerability.
@@ -181,7 +182,7 @@ export namespace AutoViewInputSubTypes {
             */
             identifier: string;
         } | null;
-    };
+    }
     export type cvss_severities = {
         cvss_v3?: {
             /**
@@ -276,7 +277,6 @@ export type AutoViewInput = AutoViewInputSubTypes.dependabot_alert[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const alerts = value;
   const formatDate = (iso: string | null): string =>
     iso
       ? new Date(iso).toLocaleDateString(undefined, {
@@ -286,150 +286,138 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
         })
       : "-";
 
-  const stateMap: Record<string, { text: string; color: string }> = {
-    open: { text: "Open", color: "bg-yellow-100 text-yellow-800" },
-    fixed: { text: "Fixed", color: "bg-green-100 text-green-800" },
-    dismissed: { text: "Dismissed", color: "bg-gray-100 text-gray-800" },
-    auto_dismissed: { text: "Auto-dismissed", color: "bg-blue-100 text-blue-800" },
+  const stateConfig: Record<
+    AutoViewInputSubTypes.dependabot_alert["state"],
+    { text: string; icon: JSX.Element }
+  > = {
+    open: {
+      text: "Open",
+      icon: <LucideReact.Clock size={16} className="text-amber-500" />,
+    },
+    fixed: {
+      text: "Fixed",
+      icon: <LucideReact.CheckCircle size={16} className="text-green-500" />,
+    },
+    dismissed: {
+      text: "Dismissed",
+      icon: <LucideReact.XCircle size={16} className="text-red-500" />,
+    },
+    auto_dismissed: {
+      text: "Auto-Dismissed",
+      icon: <LucideReact.AlertCircle size={16} className="text-gray-500" />,
+    },
   };
 
-  const severityMap: Record<string, { text: string; color: string }> = {
-    low: { text: "Low", color: "bg-green-100 text-green-800" },
-    medium: { text: "Medium", color: "bg-yellow-100 text-yellow-800" },
-    high: { text: "High", color: "bg-red-100 text-red-800" },
-    critical: { text: "Critical", color: "bg-purple-100 text-purple-800" },
+  const severityConfig: Record<
+    AutoViewInputSubTypes.dependabot_alert_security_advisory["severity"],
+    { text: string; color: string; icon: JSX.Element }
+  > = {
+    low: {
+      text: "Low",
+      color: "text-green-500",
+      icon: <LucideReact.AlertTriangle size={16} className="text-green-500" />,
+    },
+    medium: {
+      text: "Medium",
+      color: "text-amber-500",
+      icon: <LucideReact.AlertTriangle size={16} className="text-amber-500" />,
+    },
+    high: {
+      text: "High",
+      color: "text-orange-500",
+      icon: <LucideReact.AlertTriangle size={16} className="text-orange-500" />,
+    },
+    critical: {
+      text: "Critical",
+      color: "text-red-500",
+      icon: <LucideReact.AlertCircle size={16} className="text-red-500" />,
+    },
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!alerts || alerts.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">No Dependabot alerts found.</div>
-    );
-  }
-
   return (
-    <div className="space-y-4">
-      {alerts.map((alert) => (
-        <div
-          key={alert.number}
-          className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow"
-        >
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-            <h3 className="text-lg font-semibold text-gray-800 truncate">
-              Alert #{alert.number} •{" "}
-              {alert.dependency["package"]?.name || "Unknown Package"}
-            </h3>
-            <span
-              className={`mt-2 sm:mt-0 inline-block px-2 py-1 text-sm font-medium rounded-full ${
-                stateMap[alert.state]?.color || "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {stateMap[alert.state]?.text || alert.state}
-            </span>
-          </div>
+    <div className="grid gap-4">
+      {value.map((alert) => {
+        const state = stateConfig[alert.state];
+        const sev = severityConfig[alert.security_advisory.severity];
+        const pkg = alert.dependency.package;
+        const depLabel = pkg
+          ? `${pkg.ecosystem}/${pkg.name}`
+          : alert.dependency.manifest_path || "-";
 
-          {/* Advisory Summary */}
-          <p className="mt-2 line-clamp-2 text-gray-700">
-            {alert.security_advisory.summary}
-          </p>
+        return (
+          <div
+            key={alert.number}
+            className="p-4 bg-white rounded-lg shadow-sm border border-gray-100"
+          >
+            {/* Header: state & number */}
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-1">
+                {state.icon}
+                <span className="text-sm font-medium text-gray-700">
+                  {state.text}
+                </span>
+              </div>
+              <span className="text-sm text-gray-500">#{alert.number}</span>
+            </div>
 
-          {/* Badges: Severity & CVSS */}
-          <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-            <span
-              className={`inline-block px-2 py-1 rounded-full ${
-                severityMap[alert.security_advisory.severity].color
-              }`}
-            >
-              {severityMap[alert.security_advisory.severity].text}
-            </span>
-            {alert.security_advisory.cvss?.score != null && (
-              <span className="inline-block px-2 py-1 rounded-full bg-indigo-100 text-indigo-800">
-                CVSS {alert.security_advisory.cvss.score.toFixed(1)}
-              </span>
+            {/* Dependency */}
+            <div className="mb-1 text-sm text-gray-600">
+              <span className="font-semibold">Dependency:</span> {depLabel}
+            </div>
+
+            {/* Advisory summary */}
+            <div className="mb-2 text-sm text-gray-800 line-clamp-2">
+              <span className="font-semibold">Advisory:</span>{" "}
+              {alert.security_advisory.summary}
+            </div>
+
+            {/* Meta info */}
+            <div className="flex flex-wrap items-center text-sm gap-4">
+              {/* Severity */}
+              <div className="flex items-center gap-1">
+                {sev.icon}
+                <span className={sev.color + " font-medium"}>
+                  {sev.text}
+                </span>
+              </div>
+
+              {/* CVSS score */}
+              {alert.security_advisory.cvss.score != null && (
+                <div className="flex items-center gap-1 text-gray-600">
+                  <LucideReact.ShieldCheck size={16} className="text-blue-500" />
+                  <span>CVSS {alert.security_advisory.cvss.score.toFixed(1)}</span>
+                </div>
+              )}
+
+              {/* Created date */}
+              <div className="flex items-center gap-1 text-gray-600">
+                <LucideReact.Calendar size={16} className="text-gray-400" />
+                <span>Created {formatDate(alert.created_at)}</span>
+              </div>
+
+              {/* Updated date */}
+              <div className="flex items-center gap-1 text-gray-600">
+                <LucideReact.Edit2 size={16} className="text-gray-400" />
+                <span>Updated {formatDate(alert.updated_at)}</span>
+              </div>
+            </div>
+
+            {/* Dismissed info */}
+            {alert.dismissed_at && (
+              <div className="mt-2 flex items-center gap-1 text-sm text-red-600">
+                <LucideReact.XCircle size={16} className="text-red-400" />
+                <span>
+                  Dismissed {formatDate(alert.dismissed_at)}
+                  {alert.dismissed_reason
+                    ? ` (${alert.dismissed_reason.replace(/_/g, " ")})`
+                    : ""}
+                </span>
+              </div>
             )}
           </div>
-
-          {/* Dependency Details */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-600">
-            <div>
-              <span className="font-medium">Ecosystem:</span>{" "}
-              {alert.dependency["package"]?.ecosystem || "-"}
-            </div>
-            <div>
-              <span className="font-medium">Manifest Path:</span>{" "}
-              {alert.dependency.manifest_path || "-"}
-            </div>
-            {alert.dependency.scope != null && (
-              <div>
-                <span className="font-medium">Scope:</span>{" "}
-                {alert.dependency.scope || "N/A"}
-              </div>
-            )}
-            {alert.dependency.relationship != null && (
-              <div>
-                <span className="font-medium">Relationship:</span>{" "}
-                {alert.dependency.relationship}
-              </div>
-            )}
-          </div>
-
-          {/* Dates & Actions */}
-          <div className="mt-4 border-t pt-3 text-sm text-gray-500 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-            <div className="space-y-1">
-              <div>
-                <span className="font-medium">Created:</span>{" "}
-                {formatDate(alert.created_at)}
-              </div>
-              <div>
-                <span className="font-medium">Updated:</span>{" "}
-                {formatDate(alert.updated_at)}
-              </div>
-              {alert.fixed_at && (
-                <div>
-                  <span className="font-medium">Fixed:</span>{" "}
-                  {formatDate(alert.fixed_at)}
-                </div>
-              )}
-            </div>
-            <a
-              href={alert.html_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 sm:mt-0 inline-block text-indigo-600 hover:underline text-sm"
-            >
-              View on GitHub →
-            </a>
-          </div>
-
-          {/* Dismissal Info */}
-          {alert.dismissed_at && (
-            <div className="mt-4 border-t pt-3 text-sm text-gray-500">
-              <div>
-                <span className="font-medium">Dismissed:</span>{" "}
-                {formatDate(alert.dismissed_at)}
-              </div>
-              {alert.dismissed_by && (
-                <div>
-                  <span className="font-medium">By:</span>{" "}
-                  {alert.dismissed_by.login}
-                </div>
-              )}
-              {alert.dismissed_reason && (
-                <div>
-                  <span className="font-medium">Reason:</span>{" "}
-                  {alert.dismissed_reason.replace(/_/g, " ")}
-                </div>
-              )}
-              {alert.dismissed_comment && (
-                <div className="mt-2 italic text-gray-700 line-clamp-2">
-                  “{alert.dismissed_comment}”
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

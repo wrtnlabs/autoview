@@ -1,14 +1,15 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Social media account
      *
      * @title Social account
     */
-    export type social_account = {
+    export interface social_account {
         provider: string;
         url: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.social_account[];
 
@@ -16,52 +17,47 @@ export type AutoViewInput = AutoViewInputSubTypes.social_account[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const accounts = Array.isArray(value) ? value : [];
+  // 1. Data transformation
+  const accounts: AutoViewInputSubTypes.social_account[] = Array.isArray(value) ? value : [];
+  const sortedAccounts = [...accounts].sort((a, b) =>
+    a.provider.localeCompare(b.provider)
+  );
 
-  // Helper: capitalize provider names
-  const formatProvider = (provider: string): string =>
-    provider.charAt(0).toUpperCase() + provider.slice(1).toLowerCase();
-
-  // Helper: extract and truncate hostnames
-  const extractHost = (urlString: string): string => {
-    try {
-      const host = new URL(urlString).hostname;
-      return host.length > 30 ? `${host.slice(0, 30)}…` : host;
-    } catch {
-      return urlString.length > 30 ? `${urlString.slice(0, 30)}…` : urlString;
-    }
-  };
-
-  // 3. Return the React element.
-  if (accounts.length === 0) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md">
-        <p className="text-center text-gray-500">No social accounts available.</p>
-      </div>
-    );
-  }
-
+  // 2. Compose the visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-lg font-semibold text-gray-800">Social Accounts</h2>
-      <ul className="mt-4 space-y-3">
-        {accounts.map((account, index) => {
-          const providerName = formatProvider(account.provider);
-          const hostDisplay = extractHost(account.url);
-          return (
-            <li key={index} className="flex items-center space-x-3">
-              <div className="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                <span className="text-gray-600 font-medium">{providerName.charAt(0)}</span>
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{providerName}</p>
-                <p className="text-sm text-gray-500 truncate">{hostDisplay}</p>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      {sortedAccounts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center text-gray-400 py-8">
+          <LucideReact.AlertCircle size={24} className="mb-2" />
+          <span>No social accounts available</span>
+        </div>
+      ) : (
+        <ul className="flex flex-col divide-y divide-gray-200">
+          {sortedAccounts.map((account, idx) => {
+            const { provider, url } = account;
+            let domain = url;
+            try {
+              domain = new URL(url).hostname;
+            } catch {
+              // leave domain as raw URL if parsing fails
+            }
+            const displayName = provider.trim()
+              ? provider.charAt(0).toUpperCase() + provider.slice(1)
+              : 'Account';
+            return (
+              <li key={idx} className="flex items-center py-3">
+                <div className="flex items-center gap-2 w-1/3 text-gray-700">
+                  <LucideReact.Link size={18} className="text-gray-400" strokeWidth={1.5} aria-label="Link icon" />
+                  <span className="font-medium truncate">{displayName}</span>
+                </div>
+                <div className="flex-1 text-blue-600 truncate" title={url}>
+                  {domain}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }

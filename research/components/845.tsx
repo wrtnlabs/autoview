@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Content File
      *
      * @title Content File
     */
-    export type content_file = {
+    export interface content_file {
         type: "file";
         encoding: string;
         size: number & tags.Type<"int32">;
@@ -25,7 +26,7 @@ export namespace AutoViewInputSubTypes {
         };
         target?: string;
         submodule_git_url?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.content_file;
 
@@ -34,59 +35,69 @@ export type AutoViewInput = AutoViewInputSubTypes.content_file;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
-    const kb = bytes / 1024;
-    if (kb < 1024) return `${kb.toFixed(2)} KB`;
-    const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(2)} MB`;
-    const gb = mb / 1024;
-    return `${gb.toFixed(2)} GB`;
+  //    Convert raw bytes into human-readable format.
+  const humanFileSize = (bytes: number, si = false): string => {
+    const thresh = si ? 1000 : 1024;
+    if (bytes < thresh) return `${bytes} B`;
+    const units = si
+      ? ["kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+      : ["KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
+    let u = -1;
+    let num = bytes;
+    do {
+      num /= thresh;
+      u++;
+    } while (num >= thresh && u < units.length - 1);
+    return `${num.toFixed(1)} ${units[u]}`;
   };
-  const readableSize = formatSize(value.size);
-  const shortSha = value.sha.slice(0, 7);
+
+  const sizeDisplay = humanFileSize(value.size);
+  const shaDisplay = value.sha;
+  const fileName = value.name;
+  const filePath = value.path;
+  const encoding = value.encoding;
+  const htmlUrl = value.html_url;
+  const downloadUrl = value.download_url;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
-      <div className="mb-2">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.name}
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header: File name */}
+      <div className="flex items-center mb-2">
+        <LucideReact.FileText size={20} className="text-indigo-500 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
+          {fileName}
         </h2>
-        <p className="text-sm text-gray-500 truncate">{value.path}</p>
       </div>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
-        <div>
-          <span className="font-medium">Size:</span> {readableSize}
+      {/* File path */}
+      <p className="text-sm text-gray-600 break-all mb-4">{filePath}</p>
+      {/* Metadata grid */}
+      <div className="grid grid-cols-1 gap-y-2">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Code size={16} className="text-gray-400 mr-1" />
+          <span className="text-sm">{encoding}</span>
         </div>
-        <div>
-          <span className="font-medium">Encoding:</span> {value.encoding}
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Archive size={16} className="text-gray-400 mr-1" />
+          <span className="text-sm">{sizeDisplay}</span>
         </div>
-        <div>
-          <span className="font-medium">Type:</span> {value.type}
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Hash size={16} className="text-gray-400 mr-1" />
+          <span className="text-sm break-all">{shaDisplay}</span>
         </div>
-        <div>
-          <span className="font-medium">SHA:</span>{" "}
-          <code className="text-xs text-gray-600">{shortSha}</code>
-        </div>
+        {htmlUrl && (
+          <div className="flex items-center text-gray-700">
+            <LucideReact.Link size={16} className="text-gray-400 mr-1" />
+            <span className="text-sm break-all">{htmlUrl}</span>
+          </div>
+        )}
+        {downloadUrl && (
+          <div className="flex items-center text-gray-700">
+            <LucideReact.Download size={16} className="text-gray-400 mr-1" />
+            <span className="text-sm break-all">{downloadUrl}</span>
+          </div>
+        )}
       </div>
-      {value.html_url && (
-        <div className="mt-4">
-          <p className="text-xs text-gray-600 mb-1">View URL:</p>
-          <p className="text-xs text-blue-600 break-all truncate">
-            {value.html_url}
-          </p>
-        </div>
-      )}
-      {value.download_url && (
-        <div className="mt-2">
-          <p className="text-xs text-gray-600 mb-1">Download URL:</p>
-          <p className="text-xs text-blue-600 break-all truncate">
-            {value.download_url}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

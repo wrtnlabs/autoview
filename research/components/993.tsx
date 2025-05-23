@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Base Gist
      *
      * @title Base Gist
     */
-    export type base_gist = {
+    export interface base_gist {
         url: string & tags.Format<"uri">;
         forks_url: string & tags.Format<"uri">;
         commits_url: string & tags.Format<"uri">;
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
         truncated?: boolean;
         forks?: any[];
         history?: any[];
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -75,7 +76,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -98,7 +99,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.base_gist[];
 
@@ -106,80 +107,105 @@ export type AutoViewInput = AutoViewInputSubTypes.base_gist[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Format a date string into a human-readable format.
+  // Derive a reusable date formatter
   const formatDate = (iso: string): string =>
     new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
     });
 
-  // Render nothing if there is no data.
-  if (!Array.isArray(value) || value.length === 0) {
+  const gists = value ?? [];
+
+  // Empty state
+  if (gists.length === 0) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        No gists available.
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="text-gray-300" />
+        <p className="mt-2 text-lg">No gists available</p>
       </div>
     );
   }
 
-  // Compose the visual structure using JSX and Tailwind CSS.
+  // Main grid of gist cards
   return (
-    <div className="space-y-4">
-      {value.map((gist) => {
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {gists.map((gist) => {
+        // Determine author (fallback to placeholder)
         const author = gist.owner ?? gist.user;
-        const login = author?.login ?? "Unknown";
-        const avatar = author?.avatar_url;
-        const description = gist.description?.trim() || "No description";
-        const created = formatDate(gist.created_at);
-        const filesCount = Object.keys(gist.files || {}).length;
-        const commentsCount = gist.comments;
-        const isPublic = gist.public;
+        const authorName = author?.login ?? 'Unknown';
+        const avatarUrl =
+          author?.avatar_url ||
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            authorName,
+          )}&background=0D8ABC&color=fff`;
+
+        // Files info
+        const fileKeys = Object.keys(gist.files || {});
+        const fileCount = fileKeys.length;
 
         return (
           <div
             key={gist.id}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200"
+            className="bg-white rounded-lg shadow p-4 flex flex-col"
           >
-            {/* Header: Avatar, Username, Date */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                {avatar && (
-                  <img
-                    src={avatar}
-                    alt={`${login} avatar`}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
-                )}
-                <span className="text-gray-800 font-medium truncate">
-                  {login}
-                </span>
-              </div>
-              <span className="text-sm text-gray-500">{created}</span>
+            {/* Author */}
+            <div className="flex items-center mb-3">
+              <img
+                src={avatarUrl}
+                alt={authorName}
+                className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    authorName,
+                  )}&background=0D8ABC&color=fff`;
+                }}
+              />
+              <span className="ml-2 text-gray-900 font-medium text-sm">
+                {authorName}
+              </span>
             </div>
 
             {/* Description */}
-            <p className="mt-2 text-gray-700 text-sm line-clamp-2">
-              {description}
+            <p className="text-gray-800 text-sm mb-2 line-clamp-2">
+              {gist.description ?? 'No description'}
             </p>
 
-            {/* Footer: badges for files, comments, visibility */}
-            <div className="mt-3 flex flex-wrap items-center space-x-4 text-xs">
-              <span className="flex-shrink-0 bg-gray-100 text-gray-800 px-2 py-0.5 rounded">
-                {filesCount} file{filesCount !== 1 ? "s" : ""}
-              </span>
-              <span className="flex-shrink-0 bg-gray-100 text-gray-800 px-2 py-0.5 rounded">
-                {commentsCount} comment{commentsCount !== 1 ? "s" : ""}
-              </span>
-              <span
-                className={`flex-shrink-0 px-2 py-0.5 rounded ${
-                  isPublic
-                    ? "bg-green-100 text-green-800"
-                    : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {isPublic ? "Public" : "Private"}
-              </span>
+            {/* Meta info */}
+            <div className="flex items-center text-gray-600 text-xs space-x-4 mb-3">
+              <div className="flex items-center">
+                <LucideReact.FileText
+                  size={16}
+                  className="mr-1 text-indigo-500"
+                />
+                <span>
+                  {fileCount} {fileCount === 1 ? 'file' : 'files'}
+                </span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Calendar size={16} className="mr-1" />
+                <span>{formatDate(gist.created_at)}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Clock size={16} className="mr-1" />
+                <span>{formatDate(gist.updated_at)}</span>
+              </div>
+            </div>
+
+            {/* Footer stats */}
+            <div className="flex items-center text-gray-600 text-xs space-x-4 mt-auto">
+              <div className="flex items-center">
+                <LucideReact.MessageCircle size={16} className="mr-1" />
+                <span>{gist.comments}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.GitBranch size={16} className="mr-1" />
+                <span>{gist.forks?.length ?? 0}</span>
+              </div>
+              <div className="flex items-center flex-1">
+                <LucideReact.Link size={16} className="mr-1" />
+                <span className="truncate max-w-xs">{gist.html_url}</span>
+              </div>
             </div>
           </div>
         );

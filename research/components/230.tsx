@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type ChatTagView = {
+        export interface ChatTagView {
             chatTag?: AutoViewInputSubTypes.ChatTag;
-        };
+        }
     }
-    export type ChatTag = {
+    export interface ChatTag {
         id?: string;
         channelId?: string;
         colorVariant?: "red" | "orange" | "yellow" | "olive" | "green" | "cobalt" | "purple" | "pink" | "navy";
@@ -18,89 +19,87 @@ export namespace AutoViewInputSubTypes {
         */
         followerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
         createdAt?: number;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.ChatTagView;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // Derive the chat tag object
   const tag = value.chatTag;
+
+  // Map colorVariant to Tailwind CSS classes
+  const colorClasses: Record<string, string> = {
+    red: 'bg-red-100 text-red-800',
+    orange: 'bg-orange-100 text-orange-800',
+    yellow: 'bg-yellow-100 text-yellow-800',
+    olive: 'bg-lime-100 text-lime-800',
+    green: 'bg-green-100 text-green-800',
+    cobalt: 'bg-blue-100 text-blue-800',
+    purple: 'bg-purple-100 text-purple-800',
+    pink: 'bg-pink-100 text-pink-800',
+    navy: 'bg-blue-800 text-white',
+  };
+
+  // Format creation date if available
+  const formattedDate =
+    tag?.createdAt != null
+      ? new Date(tag.createdAt).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        })
+      : null;
+
+  // Render placeholder when no tag data is provided
   if (!tag) {
     return (
-      <div className="w-full p-4 text-center text-gray-500">
-        No chat tag available.
+      <div className="p-6 flex flex-col items-center justify-center text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-2 text-sm">No tag data available</span>
       </div>
     );
   }
 
-  const {
-    name,
-    key,
-    description,
-    colorVariant,
-    createdAt,
-  } = tag;
+  // Determine badge styling based on variant
+  const badgeClasses = tag.colorVariant
+    ? colorClasses[tag.colorVariant] || 'bg-gray-100 text-gray-800'
+    : 'bg-gray-100 text-gray-800';
 
-  // Map colorVariant to Tailwind color classes
-  const variantMap: Record<string, { border: string; bg: string; text: string }> = {
-    red:    { border: 'border-red-500', bg: 'bg-red-100',    text: 'text-red-800'    },
-    orange: { border: 'border-orange-500', bg: 'bg-orange-100', text: 'text-orange-800' },
-    yellow: { border: 'border-yellow-500', bg: 'bg-yellow-100', text: 'text-yellow-700' },
-    olive:  { border: 'border-green-700',  bg: 'bg-green-100',  text: 'text-green-700'  },
-    green:  { border: 'border-green-500',  bg: 'bg-green-100',  text: 'text-green-800'  },
-    cobalt: { border: 'border-blue-500',   bg: 'bg-blue-100',   text: 'text-blue-800'   },
-    navy:   { border: 'border-blue-700',   bg: 'bg-blue-100',   text: 'text-blue-900'   },
-    purple: { border: 'border-purple-500', bg: 'bg-purple-100', text: 'text-purple-800' },
-    pink:   { border: 'border-pink-500',   bg: 'bg-pink-100',   text: 'text-pink-800'   },
-  };
-
-  const variant = colorVariant && variantMap[colorVariant]
-    ? variantMap[colorVariant]
-    : { border: 'border-gray-300', bg: 'bg-gray-100', text: 'text-gray-800' };
-
-  const formattedDate = createdAt
-    ? new Date(createdAt).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      })
-    : '—';
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div
-      className={`w-full max-w-sm bg-white rounded-lg shadow-md border-l-4 ${variant.border} overflow-hidden`}
-    >
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
-            {name}
-          </h3>
-          {colorVariant && (
-            <span
-              className={`${variant.bg} ${variant.text} text-xs font-medium px-2 py-1 rounded-full ml-2`}
-            >
-              {colorVariant}
-            </span>
-          )}
-        </div>
-        <p className="mt-1 text-sm text-gray-500 truncate">
-          {key}
-        </p>
-        {description && (
-          <p className="mt-3 text-sm text-gray-700 line-clamp-3">
-            {description}
-          </p>
-        )}
-        <div className="mt-4 border-t pt-3">
-          <p className="text-xs text-gray-500">
-            Created: {formattedDate}
-          </p>
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm mx-auto">
+      {/* Header: Tag icon and name badge */}
+      <div className="flex items-center">
+        <LucideReact.Tag
+          size={20}
+          strokeWidth={1.5}
+          className={tag.colorVariant ? badgeClasses.split(' ')[1] : 'text-gray-500'}
+        />
+        <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-sm font-medium ${badgeClasses}`}>
+          {tag.name}
+        </span>
       </div>
+
+      {/* Key (secondary info) */}
+      <div className="mt-2 text-xs text-gray-500 truncate">
+        Key: <code className="font-mono">{tag.key}</code>
+      </div>
+
+      {/* Description (truncated) */}
+      {tag.description && (
+        <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+          {tag.description}
+        </p>
+      )}
+
+      {/* Creation date */}
+      {formattedDate && (
+        <div className="mt-3 flex items-center text-xs text-gray-500">
+          <LucideReact.Calendar size={14} className="mr-1" />
+          <span>Created on {formattedDate}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub Security Advisory.
     */
-    export type global_advisory = {
+    export interface global_advisory {
         /**
          * The GitHub Security Advisory ID.
         */
@@ -80,7 +81,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * The products and respective version ranges affected by the advisory.
         */
-        vulnerabilities: any[] | null;
+        vulnerabilities: AutoViewInputSubTypes.vulnerability[] | null;
         cvss: {
             /**
              * The CVSS vector.
@@ -107,11 +108,41 @@ export namespace AutoViewInputSubTypes {
          * The users who contributed to the advisory.
         */
         credits: {
-            user: any;
-            type: any;
+            user: AutoViewInputSubTypes.simple_user;
+            type: AutoViewInputSubTypes.security_advisory_credit_types;
         }[] | null;
-    };
-    export type vulnerability = any;
+    }
+    /**
+     * A vulnerability describing the product and its affected versions within a GitHub Security Advisory.
+    */
+    export interface vulnerability {
+        /**
+         * The name of the package affected by the vulnerability.
+        */
+        "package": {
+            ecosystem: AutoViewInputSubTypes.security_advisory_ecosystems;
+            /**
+             * The unique package name within its ecosystem.
+            */
+            name: string | null;
+        } | null;
+        /**
+         * The range of the package versions affected by the vulnerability.
+        */
+        vulnerable_version_range: string | null;
+        /**
+         * The package version that resolves the vulnerability.
+        */
+        first_patched_version: string | null;
+        /**
+         * The functions in the package that are affected by the vulnerability.
+        */
+        vulnerable_functions: string[] | null;
+    }
+    /**
+     * The package's language or package management ecosystem.
+    */
+    export type security_advisory_ecosystems = "rubygems" | "npm" | "pip" | "maven" | "nuget" | "composer" | "go" | "rust" | "erlang" | "actions" | "pub" | "other" | "swift";
     export type cvss_severities = {
         cvss_v3?: {
             /**
@@ -141,8 +172,39 @@ export namespace AutoViewInputSubTypes {
         percentage?: number & tags.Minimum<0> & tags.Maximum<100>;
         percentile?: number & tags.Minimum<0> & tags.Maximum<100>;
     } | null;
-    export type simple_user = any;
-    export type security_advisory_credit_types = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * The type of credit the user is receiving.
+    */
+    export type security_advisory_credit_types = "analyst" | "finder" | "reporter" | "coordinator" | "remediation_developer" | "remediation_reviewer" | "remediation_verifier" | "tool" | "sponsor" | "other";
 }
 export type AutoViewInput = AutoViewInputSubTypes.global_advisory;
 
@@ -151,157 +213,114 @@ export type AutoViewInput = AutoViewInputSubTypes.global_advisory;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const {
-    ghsa_id,
-    cve_id,
-    summary,
-    description,
-    severity,
-    type,
-    published_at,
-    updated_at,
-    github_reviewed_at,
-    cvss,
-    epss,
-    identifiers,
-    references,
-    vulnerabilities,
-    cwes,
-    credits,
-  } = value;
+  const publishedDate = new Date(value.published_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  const reviewedDate = value.github_reviewed_at
+    ? new Date(value.github_reviewed_at).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+  const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 
-  const formatDate = (dateStr?: string | null) =>
-    dateStr
-      ? new Date(dateStr).toLocaleString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "N/A";
-
-  const severityColors: Record<string, string> = {
+  const severityStyles: Record<AutoViewInput["severity"], string> = {
     critical: "bg-red-100 text-red-800",
-    high: "bg-yellow-100 text-yellow-800",
-    medium: "bg-amber-100 text-amber-800",
+    high: "bg-orange-100 text-orange-800",
+    medium: "bg-yellow-100 text-yellow-800",
     low: "bg-blue-100 text-blue-800",
     unknown: "bg-gray-100 text-gray-800",
   };
 
-  const typeColors: Record<string, string> = {
-    reviewed: "bg-green-100 text-green-800",
-    unreviewed: "bg-gray-100 text-gray-800",
-    malware: "bg-red-100 text-red-800",
-  };
-
-  const identCount = identifiers?.length ?? 0;
-  const refsCount = references?.length ?? 0;
-  const vulnCount = vulnerabilities?.length ?? 0;
-  const cweCount = cwes?.length ?? 0;
-  const creditCount = credits?.length ?? 0;
-
-  const cvssScore =
-    cvss?.score != null ? cvss.score.toFixed(1) : null;
-  const cvssVector = cvss?.vector_string ?? null;
-  const epssPct =
-    epss?.percentage != null
-      ? `${epss.percentage.toFixed(1)}%`
-      : null;
-  const epssPerc =
-    epss?.percentile != null
-      ? `${epss.percentile.toFixed(1)}th`
-      : null;
+  const affectedCount = value.vulnerabilities?.length ?? 0;
+  const cweCount = value.cwes?.length ?? 0;
+  const creditsCount = value.credits?.length ?? 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header */}
+      <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900">
-            {ghsa_id}
-          </h2>
-          {cve_id && (
-            <p className="text-sm text-gray-500">{cve_id}</p>
+          <h2 className="text-xl font-semibold text-gray-900">{value.ghsa_id}</h2>
+          {value.cve_id && (
+            <p className="mt-1 text-sm text-gray-500">CVE: {value.cve_id}</p>
           )}
         </div>
-        <div className="flex space-x-2 mt-2 sm:mt-0">
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded ${severityColors[severity]}`}
-          >
-            {severity.charAt(0).toUpperCase() + severity.slice(1)}
-          </span>
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded ${typeColors[type]}`}
-          >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </span>
-        </div>
-      </header>
+        <span
+          className={`px-3 py-1 text-sm font-medium rounded-full ${
+            severityStyles[value.severity]
+          }`}
+        >
+          {value.severity.charAt(0).toUpperCase() + value.severity.slice(1)}
+        </span>
+      </div>
 
-      <p className="mt-3 text-gray-800 font-medium">{summary}</p>
-      {description && (
-        <p className="mt-2 text-gray-600 line-clamp-3">
-          {description}
-        </p>
+      {/* Summary */}
+      {value.summary && (
+        <p className="text-gray-700 line-clamp-2">{value.summary}</p>
       )}
 
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
-        <div>
-          <span className="font-medium">Published:</span>{" "}
-          {formatDate(published_at)}
+      {/* Key Dates & CVSS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          Published: {publishedDate}
         </div>
-        <div>
-          <span className="font-medium">Updated:</span>{" "}
-          {formatDate(updated_at)}
+        {reviewedDate && (
+          <div className="flex items-center">
+            <LucideReact.CheckCircle size={16} className="mr-1 text-green-500" />
+            Reviewed: {reviewedDate}
+          </div>
+        )}
+        <div className="flex items-center">
+          <LucideReact.RefreshCw size={16} className="mr-1" />
+          Updated: {updatedDate}
         </div>
-        {github_reviewed_at && (
-          <div>
-            <span className="font-medium">Reviewed:</span>{" "}
-            {formatDate(github_reviewed_at)}
-          </div>
-        )}
-        {cvssScore && (
-          <div>
-            <span className="font-medium">CVSS Score:</span>{" "}
-            {cvssScore}
-            {cvssVector && (
-              <span className="ml-1 text-gray-500">
-                ({cvssVector})
-              </span>
-            )}
-          </div>
-        )}
-        {epssPct && (
-          <div>
-            <span className="font-medium">EPSS:</span> {epssPct} (
-            {epssPerc})
-          </div>
-        )}
-        <div>
-          <span className="font-medium">Identifiers:</span> {identCount}
+        <div className="flex items-center">
+          <LucideReact.Shield size={16} className="mr-1" />
+          CVSS: {value.cvss?.score != null ? value.cvss.score.toFixed(1) : "N/A"}
         </div>
-        <div>
-          <span className="font-medium">References:</span> {refsCount}
+      </div>
+
+      {/* Identifiers */}
+      {value.identifiers && (
+        <div className="flex flex-wrap gap-2">
+          {value.identifiers.map((id, idx) => (
+            <span
+              key={idx}
+              className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full"
+            >
+              {id.type}: {id.value}
+            </span>
+          ))}
         </div>
-        {vulnCount > 0 && (
-          <div>
-            <span className="font-medium">Vulnerabilities:</span>{" "}
-            {vulnCount}
-          </div>
-        )}
-        {cweCount > 0 && (
-          <div>
-            <span className="font-medium">CWEs:</span> {cweCount}
-          </div>
-        )}
-        {creditCount > 0 && (
-          <div>
-            <span className="font-medium">Contributors:</span>{" "}
-            {creditCount}
+      )}
+
+      {/* Counts */}
+      <div className="flex flex-wrap gap-6 text-gray-600">
+        <div className="flex items-center">
+          <LucideReact.Box size={16} className="mr-1" />
+          Affected: {affectedCount}
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Tag size={16} className="mr-1" />
+          CWEs: {cweCount}
+        </div>
+        {creditsCount > 0 && (
+          <div className="flex items-center">
+            <LucideReact.Users size={16} className="mr-1" />
+            Contributors: {creditsCount}
           </div>
         )}
       </div>
-    </article>
+    </div>
   );
 }

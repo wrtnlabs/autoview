@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposActionsVariables {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             variables: AutoViewInputSubTypes.actions_variable[];
-        };
+        }
     }
     /**
      * @title Actions Variable
     */
-    export type actions_variable = {
+    export interface actions_variable {
         /**
          * The name of the variable.
         */
@@ -27,7 +28,7 @@ export namespace AutoViewInputSubTypes {
          * The date and time at which the variable was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
         */
         updated_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsVariables.GetResponse;
 
@@ -37,60 +38,73 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsVariables.GetR
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const totalCount = value.total_count;
+  const formattedTotal = totalCount.toLocaleString();
   const variables = value.variables;
-  const formattedTotalCount = totalCount.toLocaleString();
+  const hasVariables = variables.length > 0;
 
   const formatDate = (iso: string): string => {
     const date = new Date(iso);
-    return (
-      date.toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      }) +
-      ', ' +
-      date.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    );
+    return date.toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const content = (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-900">Actions Variables</h2>
-        <p className="text-sm text-gray-600">Total: {formattedTotalCount}</p>
+  // 3. Return the React element.
+  return (
+    <div className="p-6 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-4">
+        <LucideReact.Code className="text-gray-500 mr-2" size={20} />
+        <h2 className="text-xl font-semibold text-gray-800">
+          Action Variables ({formattedTotal})
+        </h2>
       </div>
-      <div className="space-y-4">
-        {variables.length === 0 ? (
-          <p className="text-center text-gray-500">No variables available.</p>
-        ) : (
-          variables.map((variable, index) => (
+
+      {hasVariables ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {variables.map((variable) => (
             <div
-              key={index}
-              className="p-4 bg-gray-50 border border-gray-200 rounded-lg"
+              key={variable.name}
+              className="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm"
             >
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                <span className="text-lg font-medium text-gray-800">
+              <div className="flex items-center mb-2">
+                <LucideReact.Tag className="text-blue-500 mr-2" size={18} />
+                <h3 className="text-md font-medium text-gray-900 truncate">
                   {variable.name}
-                </span>
-                <span className="mt-2 sm:mt-0 text-sm font-mono text-gray-700 truncate">
+                </h3>
+              </div>
+              <div className="flex items-center mb-2">
+                <LucideReact.Key className="text-gray-500 mr-2" size={16} />
+                <span
+                  className="text-sm text-gray-800 truncate"
+                  title={variable.value}
+                >
                   {variable.value}
                 </span>
               </div>
-              <div className="mt-2 flex flex-wrap text-xs text-gray-500 space-x-4">
-                <div>Created: {formatDate(variable.created_at)}</div>
-                <div>Updated: {formatDate(variable.updated_at)}</div>
+              <div className="flex items-center text-sm text-gray-600">
+                <LucideReact.Calendar className="mr-1" size={14} />
+                <span>Created {formatDate(variable.created_at)}</span>
               </div>
+              {variable.updated_at !== variable.created_at && (
+                <div className="flex items-center text-sm text-gray-600 mt-1">
+                  <LucideReact.RefreshCw className="mr-1" size={14} />
+                  <span>Updated {formatDate(variable.updated_at)}</span>
+                </div>
+              )}
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2">No variables found.</span>
+        </div>
+      )}
     </div>
   );
-
-  // 3. Return the React element.
-  return content;
 }

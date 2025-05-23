@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A list of default code security configurations
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * A code security configuration
     */
-    export type code_security_configuration = {
+    export interface code_security_configuration {
         /**
          * The ID of the code security configuration
         */
@@ -145,7 +146,7 @@ export namespace AutoViewInputSubTypes {
         html_url?: string;
         created_at?: string & tags.Format<"date-time">;
         updated_at?: string & tags.Format<"date-time">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_default_configurations;
 
@@ -154,86 +155,121 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_default_configur
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatStatus = (
-    status?: string
-  ): { text: string; color: string } => {
-    switch (status) {
-      case "enabled":
-        return { text: "Enabled", color: "bg-green-100 text-green-800" };
-      case "disabled":
-        return { text: "Disabled", color: "bg-red-100 text-red-800" };
-      case "not_set":
-        return { text: "Not Set", color: "bg-gray-100 text-gray-800" };
-      case "enforced":
-        return { text: "Enforced", color: "bg-green-100 text-green-800" };
-      case "unenforced":
-        return { text: "Unenforced", color: "bg-red-100 text-red-800" };
-      default:
-        return { text: "Not Set", color: "bg-gray-100 text-gray-800" };
+  const getStatusIcon = (status?: "enabled" | "disabled" | "not_set") => {
+    if (status === "enabled") {
+      return <LucideReact.CheckCircle className="text-green-500" size={16} />;
     }
+    if (status === "disabled") {
+      return <LucideReact.XCircle className="text-red-500" size={16} />;
+    }
+    return <LucideReact.MinusCircle className="text-gray-400" size={16} />;
   };
+
+  const formatDate = (iso?: string) =>
+    iso ? new Date(iso).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : "—";
+
+  const truncate = (text: string | undefined, length = 100) =>
+    text && text.length > length ? text.substring(0, length) + "…" : text || "—";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {value.map((item, index) => {
-        const cfg = item.configuration;
-        const defaultScope = item.default_for_new_repos ?? "—";
-        const description =
-          cfg?.description
-            ? cfg.description.length > 100
-              ? cfg.description.slice(0, 100) + "…"
-              : cfg.description
-            : "No description available";
-        const statuses: [string, string | undefined][] = [
-          ["Advanced Security", cfg?.advanced_security],
-          ["Dependency Graph", cfg?.dependency_graph],
-          ["Dependabot Alerts", cfg?.dependabot_alerts],
-          ["Dependabot Security Updates", cfg?.dependabot_security_updates],
-          ["Code Scanning Setup", cfg?.code_scanning_default_setup],
-          ["Secret Scanning", cfg?.secret_scanning],
-          ["Enforcement", cfg?.enforcement],
-        ];
-
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {value.map((entry, idx) => {
+        const config = entry.configuration;
+        if (!config) return null;
         return (
-          <div
-            key={cfg?.id ?? index}
-            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition-shadow"
-          >
-            <div className="text-xs text-gray-500 mb-2">
-              Default for New Repos:{" "}
-              <span className="font-medium text-gray-700">
-                {String(defaultScope)}
-              </span>
+          <div key={idx} className="p-4 bg-white rounded-lg shadow-md flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-lg font-semibold text-gray-800 truncate">
+                {config.name || "Unnamed Configuration"}
+              </h2>
+              {config.html_url && (
+                <a
+                  href={config.html_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-gray-600"
+                  aria-label="View configuration"
+                >
+                  <LucideReact.Link2 size={20} />
+                </a>
+              )}
             </div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-1">
-              {cfg?.name ?? "Unnamed Configuration"}
-            </h3>
-            <p className="text-gray-600 text-sm mb-3">{description}</p>
-            <div className="space-y-2">
-              {statuses.map(([label, stat], idx) => {
-                const { text, color } = formatStatus(stat);
-                return (
-                  <div
-                    key={idx}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="text-sm text-gray-700">{label}</span>
-                    <span
-                      className={`px-2 py-0.5 rounded text-xs font-medium ${color}`}
-                    >
-                      {text}
-                    </span>
-                  </div>
-                );
-              })}
+
+            {/* Default for new repos */}
+            {entry.default_for_new_repos !== undefined && (
+              <div className="flex items-center text-sm text-gray-600 mb-2">
+                <LucideReact.GitBranch size={16} className="mr-1" />
+                <span>
+                  Default visibility:{" "}
+                  <span className="font-medium">{String(entry.default_for_new_repos)}</span>
+                </span>
+              </div>
+            )}
+
+            {/* Enforcement Badge */}
+            {config.enforcement && (
+              <div
+                className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full mb-3 ${
+                  config.enforcement === "enforced"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {config.enforcement.charAt(0).toUpperCase() + config.enforcement.slice(1)}
+              </div>
+            )}
+
+            {/* Description */}
+            {config.description && (
+              <p className="text-sm text-gray-700 mb-3 line-clamp-3">
+                {truncate(config.description, 120)}
+              </p>
+            )}
+
+            {/* Feature Status Grid */}
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 mb-4 flex-grow">
+              <div className="flex items-center text-sm text-gray-700">
+                {getStatusIcon(config.advanced_security)}
+                <span className="ml-2 truncate">Advanced Security</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-700">
+                {getStatusIcon(config.dependency_graph)}
+                <span className="ml-2 truncate">Dependency Graph</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-700">
+                {getStatusIcon(config.dependabot_alerts)}
+                <span className="ml-2 truncate">Dependabot Alerts</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-700">
+                {getStatusIcon(config.dependabot_security_updates)}
+                <span className="ml-2 truncate">Security Updates</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-700">
+                {getStatusIcon(config.code_scanning_default_setup)}
+                <span className="ml-2 truncate">Code Scanning</span>
+              </div>
+              <div className="flex items-center text-sm text-gray-700">
+                {getStatusIcon(config.secret_scanning)}
+                <span className="ml-2 truncate">Secret Scanning</span>
+              </div>
+            </div>
+
+            {/* Timestamps */}
+            <div className="flex items-center text-xs text-gray-500 justify-between">
+              <div className="flex items-center">
+                <LucideReact.Calendar size={14} className="mr-1" />
+                <span>Created: {formatDate(config.created_at)}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.RefreshCw size={14} className="mr-1" />
+                <span>Updated: {formatDate(config.updated_at)}</span>
+              </div>
             </div>
           </div>
         );
       })}
     </div>
   );
-
-  // 3. Return the React element.
-  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

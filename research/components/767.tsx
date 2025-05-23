@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Porter Author
      *
      * @title Porter Author
     */
-    export type porter_author = {
+    export interface porter_author {
         id: number & tags.Type<"int32">;
         remote_id: string;
         remote_name: string;
@@ -14,7 +15,7 @@ export namespace AutoViewInputSubTypes {
         name: string;
         url: string & tags.Format<"uri">;
         import_url: string & tags.Format<"uri">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.porter_author;
 
@@ -22,62 +23,50 @@ export type AutoViewInput = AutoViewInputSubTypes.porter_author;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const personalHost = React.useMemo(() => {
+  // Derived constant: extract hostname from profile URL for contextual display
+  const profileHost = (() => {
     try {
       return new URL(value.url).hostname;
     } catch {
       return value.url;
     }
-  }, [value.url]);
-
-  const importHost = React.useMemo(() => {
-    try {
-      return new URL(value.import_url).hostname;
-    } catch {
-      return value.import_url;
-    }
-  }, [value.import_url]);
+  })();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm mx-auto">
-      <h2 className="text-xl font-semibold text-gray-800 truncate">{value.name}</h2>
-      {value.remote_name && (
-        <p className="mt-1 text-sm text-gray-500 truncate">{value.remote_name}</p>
-      )}
-      <div className="mt-4 space-y-2 text-gray-700">
+    <div className="w-full max-w-md bg-white shadow-sm rounded-lg p-4">
+      {/* Author Name */}
+      <div className="flex items-center mb-3">
+        <LucideReact.User size={24} className="text-gray-700 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {value.name}
+        </h2>
+      </div>
+
+      {/* Details List */}
+      <div className="space-y-2 text-gray-600 text-sm">
+        {/* Email */}
         <div className="flex items-center">
-          <span className="font-medium w-24">Email:</span>
-          <a
-            href={`mailto:${value.email}`}
-            className="text-blue-600 hover:underline truncate"
-          >
-            {value.email}
-          </a>
+          <LucideReact.Mail size={16} className="text-gray-400 mr-1" />
+          <span className="truncate">{value.email}</span>
         </div>
+
+        {/* Remote Name */}
         <div className="flex items-center">
-          <span className="font-medium w-24">Website:</span>
-          <a
-            href={value.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline truncate"
-          >
-            {personalHost}
-          </a>
+          <LucideReact.UserCheck size={16} className="text-gray-400 mr-1" />
+          <span className="truncate">{value.remote_name}</span>
         </div>
+
+        {/* Profile URL */}
         <div className="flex items-center">
-          <span className="font-medium w-24">Import From:</span>
-          <a
-            href={value.import_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:underline truncate"
-          >
-            {importHost}
-          </a>
+          <LucideReact.Link size={16} className="text-gray-400 mr-1" />
+          <span className="truncate">{profileHost}</span>
+        </div>
+
+        {/* Import URL */}
+        <div className="flex items-center">
+          <LucideReact.Link size={16} className="text-gray-400 mr-1" />
+          <span className="truncate">{value.import_url}</span>
         </div>
       </div>
     </div>

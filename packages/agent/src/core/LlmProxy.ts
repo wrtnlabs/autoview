@@ -24,6 +24,22 @@ export type ToolHandler<I, O> = (
   toolInput: unknown,
 ) => PromiseOrValue<O>;
 
+export type PreGenerationCallback = (
+  api: OpenAI,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+  options: OpenAI.RequestOptions | undefined,
+  backoffStrategy: ILlmBackoffStrategy,
+) =>
+  | void
+  | PostGenerationCallback
+  | Promise<PostGenerationCallback | undefined | void>;
+
+export type PostGenerationCallback = (
+  completion: OpenAI.Chat.Completions.ChatCompletion & {
+    _request_id?: string | null;
+  },
+) => void | Promise<void>;
+
 /**
  * A strategy for retrying a request.
  */
@@ -90,6 +106,7 @@ async function createCompletion(
   body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
   options?: OpenAI.RequestOptions,
   backoffStrategy?: ILlmBackoffStrategy,
+  callback?: PreGenerationCallback,
 ): Promise<OpenAI.ChatCompletion> {
   const backoffStrategyOrDefault = backoffStrategy ?? {
     maximumAttempts: 5,
@@ -103,7 +120,26 @@ async function createCompletion(
 
   for (let i = 1; i <= backoffStrategyOrDefault.maximumAttempts; ++i) {
     try {
+      let postGenerationCallback: PostGenerationCallback | null = null;
+
+      if (callback) {
+        const result = await callback(
+          api,
+          body,
+          options,
+          backoffStrategyOrDefault,
+        );
+
+        if (typeof result === "function") {
+          postGenerationCallback = result;
+        }
+      }
+
       const completion = await api.chat.completions.create(body, options);
+
+      if (postGenerationCallback) {
+        postGenerationCallback(completion);
+      }
 
       if (completion.choices.length === 0) {
         continue;
@@ -166,6 +202,7 @@ export class LlmProxy<I, O> {
   private textHandler: TextHandler<I, O> | undefined;
   private readonly toolHandlers: Map<string, ToolHandler<I, O>> = new Map();
   private errorCallback: ((error: LlmFailure) => void) | undefined;
+  private preGenerationCallback: PreGenerationCallback | undefined;
 
   /**
    * Set the text handler.
@@ -196,6 +233,11 @@ export class LlmProxy<I, O> {
 
   withErrorCallback(callback: (error: LlmFailure) => void): this {
     this.errorCallback = callback;
+    return this;
+  }
+
+  withPreGenerationCallback(callback: PreGenerationCallback): this {
+    this.preGenerationCallback = callback;
     return this;
   }
 
@@ -242,9 +284,10 @@ export class LlmProxy<I, O> {
 
       const completion = await createCompletion(
         api,
-        body,
+        mergedBody,
         options,
         backoffStrategy,
+        this.preGenerationCallback,
       );
 
       const outputs: O[] = [];

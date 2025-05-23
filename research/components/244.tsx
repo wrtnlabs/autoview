@@ -1,15 +1,16 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type ManagersInfiniteScrollingView = {
+        export interface ManagersInfiniteScrollingView {
             next?: string;
             managers?: AutoViewInputSubTypes.Manager[];
             onlines?: AutoViewInputSubTypes.Online[];
             operatorStatuses?: AutoViewInputSubTypes.operator.OperatorStatus[];
-        };
+        }
     }
-    export type Manager = {
+    export interface Manager {
         id?: string;
         channelId?: string;
         accountId?: string;
@@ -74,25 +75,25 @@ export namespace AutoViewInputSubTypes {
         meetOperator?: boolean;
         emailForFront?: string;
         mobileNumberForFront?: string & tags.Default<"+18004424000">;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
-    export type Online = {
+    }
+    export interface Online {
         channelId?: string;
         personType?: string;
         personId?: string;
         id?: string;
-    };
+    }
     export namespace operator {
-        export type OperatorStatus = {
+        export interface OperatorStatus {
             id?: string;
             managerId: string;
             channelId: string;
@@ -102,136 +103,117 @@ export namespace AutoViewInputSubTypes {
             updatedAt?: number;
             typeUpdatedAt?: number;
             version?: number & tags.Type<"int32">;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.ManagersInfiniteScrollingView;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const managers = value.managers ?? [];
+  const statuses = value.operatorStatuses ?? [];
 
-  // Map operator statuses by managerId for quick lookup
-  const operatorStatusMap: Record<string, AutoViewInputSubTypes.operator.OperatorStatus> = {};
-  (value.operatorStatuses ?? []).forEach((status) => {
-    if (status.managerId) operatorStatusMap[status.managerId] = status;
-  });
-
-  // Count online entries per personId
-  const onlineCountMap: Record<string, number> = {};
-  (value.onlines ?? []).forEach((online) => {
-    const id = online.personId ?? "";
-    if (!onlineCountMap[id]) onlineCountMap[id] = 0;
-    onlineCountMap[id] += 1;
-  });
-
-  // Status color mapping
-  const statusColors: Record<string, string> = {
-    waiting: "bg-yellow-100 text-yellow-800",
-    chat: "bg-green-100 text-green-800",
-    call: "bg-blue-100 text-blue-800",
-    postCall: "bg-purple-100 text-purple-800",
-    meet: "bg-indigo-100 text-indigo-800",
-    eat: "bg-orange-100 text-orange-800",
-    rest: "bg-gray-100 text-gray-800",
-    off: "bg-red-100 text-red-800",
-    vacation: "bg-pink-100 text-pink-800",
-    otherWork: "bg-teal-100 text-teal-800",
-    inMeeting: "bg-indigo-100 text-indigo-800",
-    education: "bg-purple-100 text-purple-800",
+  const getStatusDetails = (
+    type?: AutoViewInputSubTypes.operator.OperatorStatus["operatorStatusType"],
+  ):
+    | { icon: React.ReactNode; color: string; label: string }
+    | null => {
+    switch (type) {
+      case "waiting":
+        return { icon: <LucideReact.Clock size={16} />, color: "text-amber-500", label: "Waiting" };
+      case "chat":
+        return { icon: <LucideReact.MessageSquare size={16} />, color: "text-green-500", label: "Chat" };
+      case "call":
+        return { icon: <LucideReact.PhoneCall size={16} />, color: "text-blue-500", label: "On Call" };
+      case "postCall":
+        return { icon: <LucideReact.PhoneOutgoing size={16} />, color: "text-purple-500", label: "Post Call" };
+      case "meet":
+        return { icon: <LucideReact.Video size={16} />, color: "text-indigo-500", label: "Meeting" };
+      case "eat":
+        return { icon: <LucideReact.Coffee size={16} />, color: "text-yellow-500", label: "Eating" };
+      case "rest":
+        return { icon: <LucideReact.Moon size={16} />, color: "text-gray-500", label: "Resting" };
+      case "inMeeting":
+        return { icon: <LucideReact.Users size={16} />, color: "text-blue-600", label: "In Meeting" };
+      case "education":
+        return { icon: <LucideReact.BookOpen size={16} />, color: "text-pink-500", label: "Education" };
+      case "otherWork":
+        return { icon: <LucideReact.Briefcase size={16} />, color: "text-gray-500", label: "Other Work" };
+      case "off":
+        return { icon: <LucideReact.XCircle size={16} />, color: "text-red-500", label: "Off" };
+      case "vacation":
+        return { icon: <LucideReact.Flag size={16} />, color: "text-green-300", label: "Vacation" };
+      default:
+        return null;
+    }
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      {managers.length === 0 ? (
-        <div className="p-4 text-center text-gray-500">
-          No managers available.
-        </div>
-      ) : (
-        <ul className="divide-y divide-gray-200">
-          {managers.map((manager) => {
-            const status = manager.id ? operatorStatusMap[manager.id] : undefined;
-            const onlineCount = manager.accountId ? onlineCountMap[manager.accountId] || 0 : 0;
-            const desc =
-              manager.showDescriptionToFront && manager.description
-                ? manager.description
-                : "";
-            const email =
-              manager.showEmailToFront && manager.email ? manager.email : "";
-            const mobile =
-              manager.showMobileNumberToFront && manager.mobileNumber
-                ? manager.mobileNumber
-                : "";
-            const avatarUrl = manager.avatarUrl;
-            const initials = manager.name
-              .split(" ")
-              .map((w) => w[0])
-              .join("")
-              .toUpperCase()
-              .slice(0, 2);
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {managers.map((manager) => {
+        const statusType = statuses.find((s) => s.managerId === manager.id)?.operatorStatusType;
+        const statusDetails = getStatusDetails(statusType);
+        const avatarSrc =
+          manager.avatarUrl ??
+          `https://ui-avatars.com/api/?name=${encodeURIComponent(manager.name)}&background=0D8ABC&color=fff`;
 
-            return (
-              <li key={manager.id ?? manager.accountId ?? Math.random()} className="flex items-start p-4">
-                <div className="flex-shrink-0">
-                  {avatarUrl ? (
-                    <img
-                      src={avatarUrl}
-                      alt={manager.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-medium">
-                      {initials}
-                    </div>
-                  )}
+        return (
+          <div
+            key={manager.id ?? manager.accountId ?? manager.name}
+            className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition"
+          >
+            <div className="flex items-center">
+              <img
+                src={avatarSrc}
+                alt={manager.name}
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    manager.name,
+                  )}&background=0D8ABC&color=fff`;
+                }}
+                className="w-10 h-10 rounded-full object-cover mr-3"
+              />
+              <h3 className="text-lg font-semibold text-gray-900 truncate">{manager.name}</h3>
+              {manager.operator && (
+                <LucideReact.Star
+                  className="ml-1 text-yellow-500"
+                  size={16}
+                  role="img"
+                  aria-label="Operator"
+                />
+              )}
+            </div>
+
+            {manager.showDescriptionToFront && manager.description && (
+              <p className="text-sm text-gray-500 line-clamp-2 mt-2">{manager.description}</p>
+            )}
+
+            <div className="flex flex-wrap gap-3 mt-3 items-center text-sm text-gray-600">
+              {manager.showEmailToFront && manager.email && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Mail size={16} />
+                  <span className="truncate">{manager.email}</span>
                 </div>
-                <div className="ml-4 flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
-                      {manager.name}
-                    </h3>
-                    {onlineCount > 0 && (
-                      <span className="flex items-center text-sm text-green-600">
-                        <span className="mr-1">●</span>
-                        {onlineCount}
-                      </span>
-                    )}
-                  </div>
-                  {desc && (
-                    <p className="mt-1 text-sm text-gray-500 line-clamp-2">
-                      {desc}
-                    </p>
-                  )}
-                  <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                    {status && status.operatorStatusType && (
-                      <span
-                        className={`px-2 py-0.5 rounded ${statusColors[status.operatorStatusType] || "bg-gray-100 text-gray-800"}`}
-                      >
-                        {status.operatorStatusType.charAt(0).toUpperCase() +
-                          status.operatorStatusType.slice(1)}
-                      </span>
-                    )}
-                    {email && (
-                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded truncate">
-                        {email}
-                      </span>
-                    )}
-                    {mobile && (
-                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded truncate">
-                        {mobile}
-                      </span>
-                    )}
-                  </div>
+              )}
+              {manager.showMobileNumberToFront && manager.mobileNumber && (
+                <div className="flex items-center gap-1">
+                  <LucideReact.Phone size={16} />
+                  <span>{manager.mobileNumber}</span>
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+              )}
+              {statusDetails && (
+                <div className={`flex items-center gap-1 ${statusDetails.color}`}>
+                  {statusDetails.icon}
+                  <span className="capitalize">{statusDetails.label}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

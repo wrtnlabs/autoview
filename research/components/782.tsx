@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Issues are a great way to keep track of tasks, enhancements, and bugs for your projects.
      *
      * @title Issue
     */
-    export type issue = {
+    export interface issue {
         id: number & tags.Type<"int32">;
         node_id: string;
         /**
@@ -52,7 +53,7 @@ export namespace AutoViewInputSubTypes {
             "default"?: boolean;
         })[];
         assignee: AutoViewInputSubTypes.nullable_simple_user;
-        assignees?: any[] | null;
+        assignees?: AutoViewInputSubTypes.simple_user[] | null;
         milestone: AutoViewInputSubTypes.nullable_milestone;
         locked: boolean;
         active_lock_reason?: string | null;
@@ -78,7 +79,7 @@ export namespace AutoViewInputSubTypes {
         author_association: AutoViewInputSubTypes.author_association;
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         sub_issues_summary?: AutoViewInputSubTypes.sub_issues_summary;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -113,7 +114,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -136,7 +137,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A collection of related issues and pull requests.
      *
@@ -161,7 +162,7 @@ export namespace AutoViewInputSubTypes {
         */
         title: string;
         description: string | null;
-        creator: any;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
         open_issues: number & tags.Type<"int32">;
         closed_issues: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
@@ -198,11 +199,11 @@ export namespace AutoViewInputSubTypes {
         /**
          * The time the issue type created.
         */
-        created_at?: string & tags.Format<"date-time">;
+        created_at?: string;
         /**
          * The time the issue type last updated.
         */
-        updated_at?: string & tags.Format<"date-time">;
+        updated_at?: string;
         /**
          * The enabled state of the issue type.
         */
@@ -213,7 +214,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -417,7 +418,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -447,7 +448,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -475,7 +476,38 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -485,7 +517,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -496,15 +528,15 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
     /**
      * @title Sub-issues Summary
     */
-    export type sub_issues_summary = {
+    export interface sub_issues_summary {
         total: number & tags.Type<"int32">;
         completed: number & tags.Type<"int32">;
         percent_completed: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.issue;
 
@@ -514,83 +546,159 @@ export type AutoViewInput = AutoViewInputSubTypes.issue;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
-  const stateLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
-  const stateColor = value.state === 'open'
-    ? 'bg-green-100 text-green-800'
-    : 'bg-red-100 text-red-800';
-  const labels = value.labels
-    .map((l) => (typeof l === 'string' ? l : l.name || ''))
-    .filter(Boolean);
-  const bodyPreview = value.body
-    ? value.body.length > 200
-      ? value.body.slice(0, 200) + '...'
-      : value.body
-    : null;
+  const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  const isClosed = value.state === "closed";
+
+  // Render a label badge, using inline styles for dynamic colors
+  const renderLabel = (label: any, idx: number) => {
+    if (typeof label === "string") {
+      return (
+        <span
+          key={idx}
+          className="bg-gray-200 text-gray-800 text-xs px-2 py-0.5 rounded"
+        >
+          {label}
+        </span>
+      );
+    } else {
+      const name = label.name ?? "Unnamed";
+      const bg = label.color ? `#${label.color}` : "#E5E7EB";
+      // default to dark text on light backgrounds
+      const color = label.color ? "#000" : "#374151";
+      return (
+        <span
+          key={idx}
+          className="text-xs px-2 py-0.5 rounded"
+          style={{ backgroundColor: bg, color }}
+        >
+          {name}
+        </span>
+      );
+    }
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow md:flex md:items-start md:space-x-4">
-      <div className="flex-shrink-0 mb-4 md:mb-0">
-        {value.user?.avatar_url && (
-          <img
-            src={value.user.avatar_url}
-            alt={value.user.login}
-            className="w-12 h-12 rounded-full"
-          />
-        )}
-      </div>
-      <div className="flex-1">
-        <header className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900 truncate">
-            {value.title}{' '}
-            <span className="text-sm text-gray-500">#{value.number}</span>
-          </h2>
-          <span className={`px-2 py-1 text-xs font-medium rounded ${stateColor}`}>
-            {stateLabel}
-          </span>
-        </header>
-        <div className="mt-2 text-sm text-gray-600 flex items-center space-x-2">
-          {value.user && (
-            <span>
-              By <span className="font-medium text-gray-800">{value.user.login}</span>
-            </span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto space-y-4">
+      {/* Header: state, number, date */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-1">
+          {isClosed ? (
+            <LucideReact.CheckCircle
+              className="text-green-500"
+              size={16}
+            />
+          ) : (
+            <LucideReact.Clock
+              className="text-amber-500"
+              size={16}
+            />
           )}
-          <span>·</span>
-          <time dateTime={value.created_at}>{createdDate}</time>
+          <span
+            className={`text-sm font-medium ${
+              isClosed ? "text-green-600" : "text-amber-600"
+            }`}
+          >
+            {isClosed ? "Closed" : "Open"}
+          </span>
+          <span className="text-gray-500 text-sm">#{value.number}</span>
         </div>
-        {labels.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {labels.map((label) => (
-              <span
-                key={label}
-                className="px-2 py-0.5 bg-gray-200 text-gray-700 text-xs rounded"
-              >
-                {label}
-              </span>
-            ))}
+        <span className="text-gray-400 text-xs">{createdDate}</span>
+      </div>
+
+      {/* Title */}
+      <h2 className="text-lg font-semibold text-gray-800">
+        {value.title}
+      </h2>
+
+      {/* Meta: author, assignee, milestone */}
+      <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+        {value.user && (
+          <div className="flex items-center space-x-1">
+            <img
+              src={value.user.avatar_url}
+              alt={value.user.login}
+              className="w-6 h-6 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  value.user!.login
+                )}&background=0D8ABC&color=fff`;
+              }}
+            />
+            <span>{value.user.login}</span>
           </div>
         )}
-        {bodyPreview && (
-          <p className="mt-3 text-gray-700 text-sm line-clamp-3">{bodyPreview}</p>
+        {value.assignee && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.User2
+              size={16}
+              className="text-gray-400"
+            />
+            <span>{value.assignee.login}</span>
+          </div>
         )}
-        <footer className="mt-4 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
-          <span>
-            {value.comments} comment{value.comments !== 1 ? 's' : ''}
-          </span>
-          {value.reactions && (
-            <span className="flex items-center space-x-3">
-              <span>👍 {value.reactions['+1']}</span>
-              <span>👎 {value.reactions['-1']}</span>
-              <span>🎉 {value.reactions.hooray}</span>
-              <span>❤️ {value.reactions.heart}</span>
-            </span>
-          )}
-        </footer>
+        {value.milestone && (
+          <div className="flex items-center space-x-1">
+            <LucideReact.Flag
+              size={16}
+              className="text-indigo-500"
+            />
+            <span>{value.milestone.title}</span>
+          </div>
+        )}
       </div>
-    </article>
+
+      {/* Labels */}
+      {value.labels.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {value.labels.map((lbl, idx) => renderLabel(lbl, idx))}
+        </div>
+      )}
+
+      {/* Body preview */}
+      <p className="text-gray-700 text-sm line-clamp-3">
+        {value.body_text ?? "No description provided."}
+      </p>
+
+      {/* Stats: comments, reactions, sub-issues */}
+      <div className="flex items-center justify-between text-gray-500 text-sm">
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            <LucideReact.MessageCircle size={16} />
+            <span>{value.comments}</span>
+          </div>
+          {value.reactions && (
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-1">
+                <LucideReact.ThumbsUp size={16} />
+                <span>{value.reactions["+1"]}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.ThumbsDown size={16} />
+                <span>{value.reactions["-1"]}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        {value.sub_issues_summary && (
+          <span>
+            {value.sub_issues_summary.completed}/
+            {value.sub_issues_summary.total} sub-issues
+          </span>
+        )}
+      </div>
+
+      {/* Footer: last updated */}
+      <div className="text-xs text-gray-400">Updated: {updatedDate}</div>
+    </div>
   );
 }

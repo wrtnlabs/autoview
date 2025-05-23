@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
@@ -37,86 +38,74 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derived/aggregated values
-  const users = value;
-  const userCount = users.length;
-  const formatDate = (dateString: string): string =>
-    new Date(dateString).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+  // Normalize input array
+  const users: AutoViewInputSubTypes.simple_user[] = Array.isArray(value) ? value : [];
 
-  // 2. Early return for empty data
-  if (userCount === 0) {
+  // Empty state
+  if (users.length === 0) {
     return (
-      <div className="p-4">
-        <p className="text-center text-gray-500">No users found.</p>
+      <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+        <LucideReact.AlertCircle size={48} className="animate-pulse" aria-label="No data" role="img" />
+        <p className="mt-2 text-sm">No users available.</p>
       </div>
     );
   }
 
-  // 3. Compose the visual structure using JSX and Tailwind CSS
+  // Render user grid
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        GitHub Users ({userCount})
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {users.map((user) => {
-          const displayName = user.name ?? user.login;
-          const starredAtLabel = user.starred_at
-            ? formatDate(user.starred_at)
-            : null;
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {users.map((user) => {
+        // Derive a display name, fallback to login
+        const displayName =
+          typeof user.name === "string" && user.name.trim().length > 0 ? user.name : user.login;
 
-          return (
-            <div
-              key={user.id}
-              className="bg-white rounded-lg shadow flex flex-col overflow-hidden"
-            >
-              <div className="flex items-center p-4 space-x-4">
-                <img
-                  src={user.avatar_url}
-                  alt={`${displayName} avatar`}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-                <div className="flex-1 min-w-0">
-                  <a
-                    href={user.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block text-lg font-medium text-blue-600 hover:underline truncate"
-                  >
-                    {displayName}
-                  </a>
-                  <p className="text-sm text-gray-500 truncate">
-                    @{user.login}
-                  </p>
-                </div>
+        return (
+          <div
+            key={user.id}
+            className="flex items-start p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          >
+            <img
+              src={user.avatar_url}
+              alt={`${displayName} avatar`}
+              className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  displayName,
+                )}&background=0D8ABC&color=fff`;
+              }}
+            />
+            <div className="flex-1 ml-4 min-w-0">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 truncate">{displayName}</h2>
                 {user.site_admin && (
-                  <span className="inline-block bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-                    Admin
-                  </span>
+                  <LucideReact.CheckCircle
+                    className="text-blue-500 flex-shrink-0"
+                    size={16}
+                    aria-label="Site Admin"
+                    role="img"
+                  />
                 )}
               </div>
+              <a
+                href={user.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 text-sm text-blue-600 hover:underline flex items-center gap-1 truncate"
+              >
+                <LucideReact.Link size={16} aria-hidden="true" />
+                <span className="truncate">{user.login}</span>
+              </a>
               {user.email && (
-                <div className="px-4 pb-4">
-                  <p className="text-sm text-gray-600 truncate">
-                    📧 {user.email}
-                  </p>
-                </div>
-              )}
-              {starredAtLabel && (
-                <div className="mt-auto px-4 pb-4">
-                  <p className="text-xs text-gray-400">
-                    Starred at {starredAtLabel}
-                  </p>
+                <div className="mt-1 text-sm text-gray-600 flex items-center gap-1 truncate">
+                  <LucideReact.Mail size={16} aria-hidden="true" />
+                  <span className="truncate">{user.email}</span>
                 </div>
               )}
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

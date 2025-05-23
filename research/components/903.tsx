@@ -1,19 +1,20 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiSearchRepositories {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             incomplete_results: boolean;
             items: AutoViewInputSubTypes.repo_search_result_item[];
-        };
+        }
     }
     /**
      * Repo Search Result Item
      *
      * @title Repo Search Result Item
     */
-    export type repo_search_result_item = {
+    export interface repo_search_result_item {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -115,7 +116,7 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         is_template?: boolean;
         web_commit_signoff_required?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -179,68 +180,81 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiSearchRepositories.GetResp
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { total_count, incomplete_results, items } = value;
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
+  const formattedTotal = value.total_count.toLocaleString();
+  const items = value.items ?? [];
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString(undefined, {
       month: 'short',
       day: 'numeric',
+      year: 'numeric',
     });
+  const placeholderAvatar = (username: string) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Repositories ({total_count})
-        </h2>
-        {incomplete_results && (
-          <p className="text-sm text-yellow-600">
-            Results may be incomplete
-          </p>
+    <div className="p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center text-gray-700 space-x-1">
+          <LucideReact.List size={20} />
+          <span className="text-lg font-semibold">{formattedTotal} repositories</span>
+        </div>
+        {value.incomplete_results && (
+          <div className="flex items-center text-amber-500 space-x-1">
+            <LucideReact.AlertTriangle size={20} />
+            <span className="text-sm">Incomplete results</span>
+          </div>
         )}
-      </header>
+      </div>
 
-      {items.length === 0 ? (
-        <p className="text-gray-500">No repositories found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {items.map((repo) => (
-            <li
-              key={repo.id}
-              className="p-4 bg-white rounded-lg shadow transition-shadow hover:shadow-md"
-            >
-              <div className="flex flex-col sm:flex-row sm:items-start">
-                <img
-                  src={repo.owner?.avatar_url ?? ''}
-                  alt={repo.owner?.login ?? 'Owner avatar'}
-                  className="h-12 w-12 rounded-full flex-shrink-0"
-                />
-                <div className="mt-2 sm:mt-0 sm:ml-4 flex-1">
-                  <div className="text-lg font-medium text-gray-900">
-                    {repo.full_name}
-                  </div>
-                  {repo.description && (
-                    <p className="mt-1 text-gray-600 text-sm line-clamp-2">
-                      {repo.description}
-                    </p>
-                  )}
-                  <div className="mt-2 flex flex-wrap items-center text-xs text-gray-500 space-x-4">
-                    <span>{formatDate(repo.updated_at)}</span>
-                    {repo.language && (
-                      <span className="px-2 py-0.5 bg-gray-200 rounded">
-                        {repo.language}
-                      </span>
-                    )}
-                    <span>★ {repo.stargazers_count}</span>
-                    <span>🔀 {repo.forks_count}</span>
-                  </div>
-                </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {items.map((item) => (
+          <div key={item.id} className="bg-white rounded-lg shadow p-4 flex flex-col h-full">
+            <div className="flex items-center mb-2 space-x-3">
+              <img
+                src={item.owner?.avatar_url ?? ''}
+                alt={`${item.owner?.login ?? 'User'} avatar`}
+                className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = placeholderAvatar(item.owner?.login ?? '');
+                }}
+              />
+              <span className="font-medium text-gray-800 truncate">{item.owner?.login}</span>
+            </div>
+
+            <h3 className="text-indigo-600 font-semibold text-lg truncate">{item.full_name}</h3>
+            <p className="mt-1 text-gray-600 text-sm line-clamp-2">
+              {item.description ?? 'No description'}
+            </p>
+
+            <div className="mt-auto pt-4 flex flex-wrap gap-3 text-sm text-gray-500">
+              <div className="flex items-center space-x-1">
+                <LucideReact.Star size={16} className="text-yellow-400" />
+                <span>{item.stargazers_count}</span>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+              <div className="flex items-center space-x-1">
+                <LucideReact.GitBranch size={16} className="text-gray-400" />
+                <span>{item.forks_count}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.GitPullRequest size={16} className="text-gray-400" />
+                <span>{item.open_issues_count}</span>
+              </div>
+              {item.language && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Code size={16} className="text-gray-400" />
+                  <span>{item.language}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-2 text-xs text-gray-400 flex items-center">
+              <LucideReact.Calendar size={14} />
+              <span className="ml-1">Updated {formatDate(item.updated_at)}</span>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

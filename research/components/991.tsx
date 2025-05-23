@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -29,7 +30,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
@@ -37,78 +38,101 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_user[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Here we sort users alphabetically by login for consistent display.
-  const users = React.useMemo(
-    () => [...value].sort((a, b) => a.login.localeCompare(b.login)),
-    [value]
-  );
+  // Derived values and helper functions
+  const users = value;
+  const userCount = users.length;
+  const formatDate = (iso?: string | null): string =>
+    iso
+      ? new Date(iso).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "";
+  const placeholderAvatar = (name: string | null | undefined, login: string): string => {
+    const label = name || login;
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(label)}&background=0D8ABC&color=fff`;
+  };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Empty state
+  if (userCount === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-4 text-lg">No users available</span>
+      </div>
+    );
+  }
+
+  // Main render
   return (
-    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {users.map((user) => {
-        const displayName = user.name?.trim() ? user.name! : user.login;
-        const userType =
-          user.type?.charAt(0).toUpperCase() + user.type.slice(1);
-        const starredDate = user.starred_at
-          ? new Date(user.starred_at).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          : null;
+    <div className="space-y-6">
+      {/* Header with total user count */}
+      <div className="flex items-center text-gray-700">
+        <LucideReact.Users size={20} className="mr-2" />
+        <span className="text-lg font-semibold">{userCount} Users</span>
+      </div>
 
-        return (
+      {/* User cards grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {users.map((user) => (
           <div
             key={user.id}
-            className="bg-white p-4 rounded-lg shadow transition-shadow hover:shadow-md"
+            className="bg-white p-4 rounded-lg shadow hover:shadow-md transition"
           >
+            {/* Avatar, name, login, admin badge */}
             <div className="flex items-center space-x-4">
               <img
                 src={user.avatar_url}
-                alt={`${displayName} avatar`}
-                className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                alt={user.name || user.login}
+                className="w-12 h-12 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = placeholderAvatar(user.name, user.login);
+                }}
               />
               <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-semibold text-gray-900 truncate">
-                  {displayName}
-                </h2>
-                <p className="text-sm text-gray-600 truncate">{user.login}</p>
-              </div>
-            </div>
-
-            <div className="mt-3 space-y-1">
-              {user.email && (
-                <p className="text-sm text-gray-700 truncate">
-                  <span className="font-medium">Email:</span> {user.email}
+                <p className="text-md font-medium text-gray-900 truncate">
+                  {user.name || user.login}
                 </p>
-              )}
-              <div className="flex flex-wrap gap-2">
-                {userType && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-gray-200 text-gray-800 rounded">
-                    {userType}
-                  </span>
-                )}
-                {user.site_admin && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-red-100 text-red-800 rounded">
-                    Admin
-                  </span>
-                )}
-                {starredDate && (
-                  <span className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">
-                    Starred: {starredDate}
-                  </span>
+                {user.name && (
+                  <p className="text-sm text-gray-500 truncate">
+                    @{user.login}
+                  </p>
                 )}
               </div>
+              {user.site_admin && (
+                <LucideReact.ShieldCheck
+                  size={20}
+                  className="text-blue-500"
+                  aria-label="Site Admin"
+                />
+              )}
             </div>
 
-            <p className="mt-2 text-xs text-gray-500 truncate">
-              <span className="font-medium">Profile URL:</span> {user.html_url}
-            </p>
+            {/* Optional email */}
+            {user.email && (
+              <div className="flex items-center mt-3 text-gray-600">
+                <LucideReact.Mail size={16} className="mr-1" />
+                <span className="text-sm truncate">{user.email}</span>
+              </div>
+            )}
+
+            {/* User type */}
+            <div className="flex items-center mt-2 text-gray-600 text-sm">
+              <LucideReact.Tag size={16} className="mr-1" />
+              <span className="capitalize">{user.type}</span>
+            </div>
+
+            {/* Optional starred date */}
+            {user.starred_at && (
+              <div className="flex items-center mt-2 text-gray-600 text-sm">
+                <LucideReact.Star size={16} className="mr-1 text-amber-400" />
+                <span>Starred on {formatDate(user.starred_at)}</span>
+              </div>
+            )}
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }

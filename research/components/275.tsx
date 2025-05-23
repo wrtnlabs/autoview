@@ -1,14 +1,15 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace desk {
-        export type UserView = {
+        export interface UserView {
             user?: AutoViewInputSubTypes.user.User;
             online?: AutoViewInputSubTypes.Online;
-        };
+        }
     }
     export namespace user {
-        export type User = {
+        export interface User {
             id?: string;
             channelId?: string;
             memberId?: string;
@@ -59,14 +60,14 @@ export namespace AutoViewInputSubTypes {
             landlineNumber?: string & tags.Default<"+18004424000">;
             constrainted?: boolean;
             systemLanguage?: string & tags.Default<"en">;
-        };
+        }
     }
     export namespace profile {
-        export type UserProfile = {
+        export interface UserProfile {
             [key: string]: {};
-        };
+        }
     }
-    export type WebInfo = {
+    export interface WebInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -74,8 +75,8 @@ export namespace AutoViewInputSubTypes {
         browserName?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type MobileInfo = {
+    }
+    export interface MobileInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -85,13 +86,13 @@ export namespace AutoViewInputSubTypes {
         sdkVersion?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type Online = {
+    }
+    export interface Online {
         channelId?: string;
         personType?: string;
         personId?: string;
         id?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.desk.UserView;
 
@@ -101,146 +102,162 @@ export type AutoViewInput = AutoViewInputSubTypes.desk.UserView;
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const user = value.user;
-  const isOnline = Boolean(value.online);
-  const displayName = user?.name?.trim() || "Unknown User";
-  const initials = displayName
-    .split(" ")
-    .filter((s) => s.length > 0)
-    .map((s) => s.charAt(0).toUpperCase())
-    .join("")
-    .slice(0, 2);
-  const userType = user?.type
-    ? user.type.charAt(0).toUpperCase() + user.type.slice(1)
-    : undefined;
-  const email = user?.email;
-  const phone = user?.mobileNumber;
-  const location = [user?.city, user?.country].filter(Boolean).join(", ");
-  const createdAt = user?.createdAt
-    ? new Date(user.createdAt).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : undefined;
-  const lastSeen = user?.lastSeenAt
-    ? new Date(user.lastSeenAt).toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "numeric",
-      })
-    : undefined;
-  const sessions = user?.sessionsCount;
-  const alertCount = user?.alert;
-  const unreadCount = user?.unread;
-  const tags = user?.tags || [];
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Fallback when no user data is provided
   if (!user) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-center text-gray-500">
-        No user data available.
+      <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" aria-label="No data" />
+        <span>No user information available</span>
       </div>
     );
   }
 
+  // Derive display name
+  const displayName = user.name ?? user.unifiedId ?? "Unknown User";
+  // Map user type to human-readable string
+  const typeMap: Record<string, string> = {
+    member: "Member",
+    lead: "Lead",
+    unified: "Unified",
+  };
+  const userType = user.type ? typeMap[user.type] : undefined;
+  // Online status
+  const isOnline = Boolean(value.online && value.online.id);
+  // Format dates
+  const formatDate = (ms?: number) =>
+    ms
+      ? new Date(ms).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : "N/A";
+  const lastSeen = isOnline ? "Online" : formatDate(user.lastSeenAt);
+  // Avatar handling
+  const [avatarError, setAvatarError] = React.useState(false);
+  const avatarSrc =
+    !avatarError && user.avatarUrl
+      ? user.avatarUrl
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          displayName,
+        )}&background=0D8ABC&color=fff`;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center">
-        {user.avatarUrl ? (
-          <img
-            src={user.avatarUrl}
-            alt={displayName}
-            className="w-12 h-12 rounded-full object-cover mr-4"
+    <div className="max-w-xs w-full p-4 bg-white rounded-lg shadow-md flex flex-col items-center">
+      {/* Avatar */}
+      <div className="w-24 h-24 mb-4">
+        <img
+          src={avatarSrc}
+          alt={displayName}
+          className="w-full h-full rounded-full object-cover"
+          onError={() => setAvatarError(true)}
+        />
+      </div>
+      {/* Name and Type */}
+      <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-1">
+        <LucideReact.User size={20} className="text-gray-700" aria-label="User" />
+        {displayName}
+      </h2>
+      {userType && (
+        <span className="mt-1 text-sm text-gray-500">{userType}</span>
+      )}
+      {/* Online Status */}
+      <div className="mt-2 flex items-center text-sm text-gray-600">
+        {isOnline ? (
+          <LucideReact.Circle
+            className="text-green-500 mr-1"
+            size={12}
+            strokeWidth={2}
+            aria-label="Online"
           />
         ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center mr-4">
-            <span className="text-gray-600 font-medium">{initials}</span>
-          </div>
+          <LucideReact.Circle
+            className="text-gray-400 mr-1"
+            size={12}
+            strokeWidth={2}
+            aria-label="Offline"
+          />
         )}
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">
-            {displayName}
-            <span
-              className={`inline-block ml-2 w-2 h-2 rounded-full ${
-                isOnline ? "bg-green-500" : "bg-gray-400"
-              }`}
-              title={isOnline ? "Online" : "Offline"}
-            />
-          </h2>
-          {userType && (
-            <p className="text-sm text-gray-500">{userType}</p>
-          )}
-        </div>
+        <span>{lastSeen}</span>
       </div>
-
-      <dl className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
-        {email && (
-          <div>
-            <dt className="font-medium">Email</dt>
-            <dd className="truncate">{email}</dd>
+      {/* Contact & Qualifications */}
+      <dl className="mt-4 w-full space-y-2 text-sm text-gray-700">
+        {user.email && (
+          <div className="flex items-center gap-2">
+            <LucideReact.Mail size={16} className="text-gray-400" aria-label="Email" />
+            <span className="flex-1 truncate">{user.email}</span>
+            {user.emailQualified ? (
+              <LucideReact.CheckCircle
+                size={16}
+                className="text-green-500"
+                aria-label="Email verified"
+              />
+            ) : (
+              <LucideReact.XCircle
+                size={16}
+                className="text-red-400"
+                aria-label="Email not verified"
+              />
+            )}
           </div>
         )}
-        {phone && (
-          <div>
-            <dt className="font-medium">Phone</dt>
-            <dd className="truncate">{phone}</dd>
+        {user.mobileNumber && (
+          <div className="flex items-center gap-2">
+            <LucideReact.Phone size={16} className="text-gray-400" aria-label="Phone" />
+            <span className="flex-1 truncate">{user.mobileNumber}</span>
+            {user.mobileNumberQualified ? (
+              <LucideReact.CheckCircle
+                size={16}
+                className="text-green-500"
+                aria-label="Mobile verified"
+              />
+            ) : (
+              <LucideReact.XCircle
+                size={16}
+                className="text-red-400"
+                aria-label="Mobile not verified"
+              />
+            )}
           </div>
         )}
-        {location && (
-          <div>
-            <dt className="font-medium">Location</dt>
-            <dd className="truncate">{location}</dd>
+        {typeof user.unread === "number" && (
+          <div className="flex items-center gap-2">
+            <LucideReact.MessageSquare
+              size={16}
+              className="text-gray-400"
+              aria-label="Messages"
+            />
+            <span>{user.unread} unread messages</span>
           </div>
         )}
-        {sessions !== undefined && (
-          <div>
-            <dt className="font-medium">Sessions</dt>
-            <dd>{sessions}</dd>
-          </div>
-        )}
-        {alertCount !== undefined && (
-          <div>
-            <dt className="font-medium">Alerts</dt>
-            <dd>{alertCount}</dd>
-          </div>
-        )}
-        {unreadCount !== undefined && (
-          <div>
-            <dt className="font-medium">Unread</dt>
-            <dd>{unreadCount}</dd>
-          </div>
-        )}
-        {createdAt && (
-          <div>
-            <dt className="font-medium">Joined</dt>
-            <dd>{createdAt}</dd>
-          </div>
-        )}
-        {!isOnline && lastSeen && (
-          <div>
-            <dt className="font-medium">Last Seen</dt>
-            <dd>{lastSeen}</dd>
+        {typeof user.alert === "number" && user.alert > 0 && (
+          <div className="flex items-center gap-2">
+            <LucideReact.AlertCircle
+              size={16}
+              className="text-amber-500"
+              aria-label="Alerts"
+            />
+            <span>{user.alert} alerts</span>
           </div>
         )}
       </dl>
-
-      {tags.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-700 mb-1">Tags</h3>
+      {/* Tags */}
+      {user.tags && user.tags.length > 0 && (
+        <div className="mt-4 w-full">
+          <h3 className="text-sm font-medium text-gray-800 mb-1">Tags</h3>
           <div className="flex flex-wrap gap-2">
-            {tags.slice(0, 5).map((tag, idx) => (
+            {user.tags.slice(0, 10).map((tag) => (
               <span
-                key={idx}
-                className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                key={tag}
+                className="flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded"
               >
+                <LucideReact.Tag size={12} className="text-blue-600" aria-label="Tag" />
                 {tag}
               </span>
             ))}
-            {tags.length > 5 && (
-              <span className="px-2 py-1 bg-gray-100 text-gray-500 text-xs rounded">
-                +{tags.length - 5} more
+            {user.tags.length > 10 && (
+              <span className="text-xs text-gray-500">
+                +{user.tags.length - 10} more
               </span>
             )}
           </div>
@@ -248,6 +265,4 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
       )}
     </div>
   );
-  // 3. Return the React element.
-  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

@@ -1,5 +1,6 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * API Insights usage time stats for an organization
@@ -16,107 +17,92 @@ export type AutoViewInput = AutoViewInputSubTypes.api_insights_time_stats;
 
 
 
-// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Filter out entries without timestamps
-  const stats = value.filter((item) => item.timestamp);
-  // Parse dates and sort ascending
-  const sortedStats = [...stats].sort(
-    (a, b) =>
-      new Date(a.timestamp as string).getTime() -
-      new Date(b.timestamp as string).getTime(),
-  );
-  // Take the last 5 entries for display
-  const latestStats = sortedStats.slice(-5).reverse();
+  // Normalize input array
+  const dataArray = Array.isArray(value) ? value : [];
 
-  // Compute overall totals
-  const totalRequests = stats.reduce(
-    (sum, item) => sum + (item.total_request_count ?? 0),
-    0,
-  );
-  const totalRateLimited = stats.reduce(
-    (sum, item) => sum + (item.rate_limited_request_count ?? 0),
-    0,
-  );
-  const rateLimitedPct =
-    totalRequests > 0 ? (totalRateLimited / totalRequests) * 100 : 0;
-
-  // Formatters
-  const nf = new Intl.NumberFormat();
-  const pf = new Intl.NumberFormat(undefined, {
-    style: "percent",
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  });
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (stats.length === 0) {
+  // Empty state
+  if (dataArray.length === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-md text-gray-700 text-center">
-        <p className="text-sm">No data available</p>
+      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <LucideReact.AlertCircle size={24} strokeWidth={1.5} />
+        <span className="mt-2 text-sm">No data available</span>
       </div>
     );
   }
 
+  // Derive clean data points
+  const points = dataArray.map((item) => {
+    const total = item.total_request_count ?? 0;
+    const rateLimited = item.rate_limited_request_count ?? 0;
+    const dateObj = item.timestamp ? new Date(item.timestamp) : null;
+    const label = dateObj
+      ? dateObj.toLocaleDateString("default", { month: "short", day: "numeric" })
+      : "";
+    return { total, rateLimited, label };
+  });
+
+  // Aggregate metrics
+  const totalRequests = points.reduce((sum, p) => sum + p.total, 0);
+  const totalRateLimited = points.reduce((sum, p) => sum + p.rateLimited, 0);
+  const rateLimitPerc = totalRequests
+    ? Math.round((totalRateLimited / totalRequests) * 100)
+    : 0;
+  const maxTotal = Math.max(...points.map((p) => p.total), 0) || 1;
+
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md text-gray-800">
-      <h2 className="text-xl font-semibold mb-4">API Insights: Time Stats</h2>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header with summary */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">API Usage Overview</h2>
+        <div className="flex flex-wrap gap-4 mt-2 sm:mt-0 text-sm text-gray-600">
+          <div className="flex items-center">
+            <LucideReact.BarChart2 className="text-blue-500" size={16} strokeWidth={2} />
+            <span className="ml-1">Total: {totalRequests.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center">
+            <LucideReact.AlertTriangle className="text-red-500" size={16} strokeWidth={2} />
+            <span className="ml-1">
+              Rate-Limited: {totalRateLimited.toLocaleString()} ({rateLimitPerc}%)
+            </span>
+          </div>
+        </div>
+      </div>
 
-      {/* Summary */}
-      <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div>
-          <dt className="text-sm text-gray-500">Total Requests</dt>
-          <dd className="text-lg font-medium">{nf.format(totalRequests)}</dd>
+      {/* Sparkline bar chart */}
+      <div className="relative w-full h-32">
+        <div className="flex items-end h-full space-x-1">
+          {points.map((p, idx) => {
+            const successHeight = ((p.total - p.rateLimited) / maxTotal) * 100;
+            const rateHeight = (p.rateLimited / maxTotal) * 100;
+            return (
+              <div
+                key={idx}
+                className="flex-1 flex flex-col justify-end"
+                aria-label={`${p.label}: ${p.total.toLocaleString()} total, ${p.rateLimited.toLocaleString()} rate-limited`}
+              >
+                <div
+                  className="bg-blue-500"
+                  style={{ height: `${successHeight}%` }}
+                />
+                <div
+                  className="bg-red-500"
+                  style={{ height: `${rateHeight}%` }}
+                />
+              </div>
+            );
+          })}
         </div>
-        <div>
-          <dt className="text-sm text-gray-500">Rate-Limited</dt>
-          <dd className="text-lg font-medium">
-            {nf.format(totalRateLimited)}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-sm text-gray-500">Rate-Limit %</dt>
-          <dd className="text-lg font-medium">
-            {pf.format(rateLimitedPct / 100)}
-          </dd>
-        </div>
-      </dl>
+      </div>
 
-      {/* Latest entries list */}
-      <ul className="divide-y divide-gray-200">
-        {latestStats.map((item, idx) => {
-          const time = new Date(item.timestamp as string);
-          const formattedTime = time.toLocaleString(undefined, {
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-          });
-          return (
-            <li
-              key={idx}
-              className="py-3 flex flex-col sm:flex-row sm:justify-between sm:items-center"
-            >
-              <span className="text-gray-600 text-sm sm:w-1/3">
-                {formattedTime}
-              </span>
-              <span className="text-gray-800 text-sm sm:w-1/3">
-                Requests:{" "}
-                <span className="font-medium">
-                  {nf.format(item.total_request_count ?? 0)}
-                </span>
-              </span>
-              <span className="text-gray-800 text-sm sm:w-1/3">
-                Rate-Limited:{" "}
-                <span className="font-medium">
-                  {nf.format(item.rate_limited_request_count ?? 0)}
-                </span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
+      {/* X-axis labels */}
+      <div className="flex justify-between mt-2 text-xs text-gray-500">
+        {points.map((p, idx) => (
+          <span key={idx} className="truncate">
+            {p.label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }

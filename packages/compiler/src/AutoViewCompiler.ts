@@ -39,9 +39,19 @@ export class AutoViewCompiler {
     );
 
     ctx.importer.external({
+      type: "instance",
+      library: "react",
+      name: "JSX",
+    });
+    ctx.importer.external({
       type: "default",
       library: "react",
       name: "React",
+    });
+    ctx.importer.external({
+      type: "star-import",
+      library: "lucide-react",
+      name: "LucideReact",
     });
 
     return FilePrinter.write({

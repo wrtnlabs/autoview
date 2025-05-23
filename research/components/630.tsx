@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Branch Protection
      *
      * @title Branch Protection
     */
-    export type branch_protection = {
+    export interface branch_protection {
         url?: string;
         enabled?: boolean;
         required_status_checks?: AutoViewInputSubTypes.protected_branch_required_status_check;
@@ -46,13 +47,13 @@ export namespace AutoViewInputSubTypes {
         allow_fork_syncing?: {
             enabled?: boolean;
         };
-    };
+    }
     /**
      * Protected Branch Required Status Check
      *
      * @title Protected Branch Required Status Check
     */
-    export type protected_branch_required_status_check = {
+    export interface protected_branch_required_status_check {
         url?: string;
         enforcement_level?: string;
         contexts: string[];
@@ -62,22 +63,22 @@ export namespace AutoViewInputSubTypes {
         }[];
         contexts_url?: string;
         strict?: boolean;
-    };
+    }
     /**
      * Protected Branch Admin Enforced
      *
      * @title Protected Branch Admin Enforced
     */
-    export type protected_branch_admin_enforced = {
+    export interface protected_branch_admin_enforced {
         url: string & tags.Format<"uri">;
         enabled: boolean;
-    };
+    }
     /**
      * Protected Branch Pull Request Review
      *
      * @title Protected Branch Pull Request Review
     */
-    export type protected_branch_pull_request_review = {
+    export interface protected_branch_pull_request_review {
         url?: string & tags.Format<"uri">;
         dismissal_restrictions?: {
             /**
@@ -120,13 +121,13 @@ export namespace AutoViewInputSubTypes {
          * Whether the most recent push must be approved by someone other than the person who pushed it.
         */
         require_last_push_approval?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -149,13 +150,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -176,7 +177,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -191,7 +192,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -237,7 +238,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -265,13 +266,44 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type enterprise = any;
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
     /**
      * Branch Restriction Policy
      *
      * @title Branch Restriction Policy
     */
-    export type branch_restriction_policy = {
+    export interface branch_restriction_policy {
         url: string & tags.Format<"uri">;
         users_url: string & tags.Format<"uri">;
         teams_url: string & tags.Format<"uri">;
@@ -357,7 +389,7 @@ export namespace AutoViewInputSubTypes {
             };
             events?: string[];
         }[];
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.branch_protection;
 
@@ -366,156 +398,190 @@ export type AutoViewInput = AutoViewInputSubTypes.branch_protection;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const branchName = value.name || 'Unnamed Branch';
-  const isProtected = Boolean(value.enabled);
-
-  // Status Checks
+  const branchName = value.name ?? "Unnamed branch";
+  const isEnabled = value.enabled ?? false;
   const statusChecks = value.required_status_checks;
-  const statusCount = statusChecks?.contexts.length ?? 0;
-  const strictChecks = statusChecks?.strict;
-  const displayedContexts = statusChecks?.contexts.slice(0, 3) ?? [];
-  const remainingContexts = statusCount - displayedContexts.length;
-
-  // Admin enforcement
-  const enforceAdmins = Boolean(value.enforce_admins?.enabled);
-
-  // Pull request reviews
+  const enforceAdmins = value.enforce_admins?.enabled ?? false;
   const prReviews = value.required_pull_request_reviews;
-  const requiredApprovals = prReviews?.required_approving_review_count;
-  const dismissStale = prReviews?.dismiss_stale_reviews;
-  const codeOwner = prReviews?.require_code_owner_reviews;
-
-  // Restrictions
   const restrictions = value.restrictions;
-  const restrictUsers = restrictions?.users.length ?? 0;
-  const restrictTeams = restrictions?.teams.length ?? 0;
-  const restrictApps = restrictions?.apps.length ?? 0;
-
-  // Other boolean settings
-  const otherSettings = [
-    { label: 'Linear History', flag: value.required_linear_history?.enabled },
-    { label: 'Force Pushes', flag: value.allow_force_pushes?.enabled },
-    { label: 'Deletions', flag: value.allow_deletions?.enabled },
-    { label: 'New Branches', flag: value.block_creations?.enabled },
-    { label: 'Conversation Resolution', flag: value.required_conversation_resolution?.enabled },
-    { label: 'Lock Branch', flag: value.lock_branch?.enabled },
-    { label: 'Fork Syncing', flag: value.allow_fork_syncing?.enabled },
-    { label: 'Signatures', flag: value.required_signatures?.enabled },
-  ].filter(item => item.flag !== undefined) as { label: string; flag: boolean }[];
+  const reqLinear = value.required_linear_history?.enabled ?? false;
+  const allowForce = value.allow_force_pushes?.enabled ?? false;
+  const allowDeletions = value.allow_deletions?.enabled ?? false;
+  const blockCreations = value.block_creations?.enabled ?? false;
+  const reqConversation = value.required_conversation_resolution?.enabled ?? false;
+  const reqSignatures = value.required_signatures?.enabled ?? false;
+  const lockBranch = value.lock_branch?.enabled ?? false;
+  const allowForkSync = value.allow_fork_syncing?.enabled ?? false;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
-      {/* Header */}
+    <div className="p-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{branchName}</h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${
-            isProtected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {isProtected ? 'Protected' : 'Unprotected'}
-        </span>
-      </div>
-
-      {/* Status Checks */}
-      {statusChecks && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Status Checks</h3>
-          <p className="mt-1 text-sm text-gray-600">
-            {statusCount} required context{statusCount !== 1 ? 's' : ''}{strictChecks ? ' (Strict)' : ''}
-          </p>
-          {statusCount > 0 && (
-            <ul className="mt-2 flex flex-wrap gap-2">
-              {displayedContexts.map((ctx, idx) => (
-                <li
-                  key={idx}
-                  className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded truncate"
-                  title={ctx}
-                >
-                  {ctx}
-                </li>
-              ))}
-              {remainingContexts > 0 && (
-                <li className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded">
-                  +{remainingContexts} more
-                </li>
-              )}
-            </ul>
-          )}
+        <div className="flex items-center gap-2">
+          <LucideReact.ShieldCheck className="text-blue-500" size={20} />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">{branchName}</h2>
         </div>
-      )}
-
-      {/* Enforce Admins */}
-      {'enabled' in (value.enforce_admins || {}) && (
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-700">Enforce Admins</span>
-          <span
-            className={`px-2 py-1 text-xs font-medium rounded ${
-              enforceAdmins ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}
-          >
-            {enforceAdmins ? 'On' : 'Off'}
+        <div className="flex items-center gap-1">
+          {isEnabled ? (
+            <LucideReact.CheckCircle className="text-green-500" size={20} />
+          ) : (
+            <LucideReact.XCircle className="text-red-500" size={20} />
+          )}
+          <span className={`text-sm ${isEnabled ? "text-green-600" : "text-red-600"}`}>
+            {isEnabled ? "Enabled" : "Disabled"}
           </span>
         </div>
-      )}
+      </div>
 
-      {/* Pull Request Reviews */}
-      {prReviews && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Pull Request Reviews</h3>
-          <dl className="mt-2 space-y-1 text-sm text-gray-600">
-            {requiredApprovals != null && (
-              <div className="flex justify-between">
-                <dt className="font-medium">Approvals:</dt>
-                <dd>{requiredApprovals}</dd>
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {statusChecks && (
+          <div className="flex items-center gap-2">
+            <LucideReact.CheckSquare className="text-gray-600" size={16} />
+            <span className="text-sm text-gray-700">
+              Required status checks ({statusChecks.contexts.length}
+              {statusChecks.strict ? ", strict" : ""})
+            </span>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2">
+          {enforceAdmins ? (
+            <LucideReact.UserCheck className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.UserX className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${enforceAdmins ? "text-gray-700" : "text-gray-500"}`}>
+            Enforce for admins
+          </span>
+        </div>
+
+        {prReviews && (
+          <div className="col-span-1 sm:col-span-2 flex items-start gap-2">
+            <LucideReact.MessageSquare className="text-gray-600 mt-1" size={16} />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Pull Request Reviews:</span>
+              <ul className="mt-1 space-y-1 text-sm text-gray-600 list-disc list-inside">
+                <li>Dismiss stale reviews: {prReviews.dismiss_stale_reviews ? "Yes" : "No"}</li>
+                <li>
+                  Require code owner reviews: {prReviews.require_code_owner_reviews ? "Yes" : "No"}
+                </li>
+                {prReviews.required_approving_review_count != null && (
+                  <li>Required approvals: {prReviews.required_approving_review_count}</li>
+                )}
+                {prReviews.bypass_pull_request_allowances && (
+                  <li>
+                    Bypass allowances: users{" "}
+                    {prReviews.bypass_pull_request_allowances.users?.length ?? 0}, teams{" "}
+                    {prReviews.bypass_pull_request_allowances.teams?.length ?? 0}, apps{" "}
+                    {prReviews.bypass_pull_request_allowances.apps?.length ?? 0}
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {restrictions && (
+          <div className="col-span-1 sm:col-span-2 flex items-start gap-2">
+            <LucideReact.Lock className="text-gray-600 mt-1" size={16} />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Restrictions:</span>
+              <div className="mt-1 text-sm text-gray-600">
+                {restrictions.users.length} users, {restrictions.teams.length} teams,{" "}
+                {restrictions.apps.length} apps
               </div>
-            )}
-            <div className="flex justify-between">
-              <dt className="font-medium">Require Code Owner:</dt>
-              <dd>{codeOwner ? 'Yes' : 'No'}</dd>
             </div>
-            <div className="flex justify-between">
-              <dt className="font-medium">Dismiss Stale Reviews:</dt>
-              <dd>{dismissStale ? 'Yes' : 'No'}</dd>
-            </div>
-          </dl>
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Restrictions */}
-      {restrictions && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Restrictions</h3>
-          <p className="mt-1 text-sm text-gray-600">
-            Users: {restrictUsers}, Teams: {restrictTeams}, Apps: {restrictApps}
-          </p>
+        <div className="flex items-center gap-2">
+          {reqLinear ? (
+            <LucideReact.ArrowUp className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.ArrowDown className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${reqLinear ? "text-gray-700" : "text-gray-500"}`}>
+            Linear history required
+          </span>
         </div>
-      )}
 
-      {/* Other Settings */}
-      {otherSettings.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700">Other Settings</h3>
-          <ul className="mt-2 grid grid-cols-2 gap-3">
-            {otherSettings.map((setting) => (
-              <li
-                key={setting.label}
-                className="flex items-center justify-between text-sm text-gray-700"
-              >
-                <span className="truncate">{setting.label}</span>
-                <span
-                  className={`px-2 py-1 text-xs font-medium rounded ${
-                    setting.flag ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}
-                >
-                  {setting.flag ? 'On' : 'Off'}
-                </span>
-              </li>
-            ))}
-          </ul>
+        <div className="flex items-center gap-2">
+          {allowForce ? (
+            <LucideReact.ArrowRightCircle className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.ArrowRightCircle className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${allowForce ? "text-gray-700" : "text-gray-500"}`}>
+            Force pushes allowed
+          </span>
         </div>
-      )}
+
+        <div className="flex items-center gap-2">
+          {allowDeletions ? (
+            <LucideReact.Trash2 className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.Trash2 className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${allowDeletions ? "text-gray-700" : "text-gray-500"}`}>
+            Deletions allowed
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {blockCreations ? (
+            <LucideReact.Lock className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.Unlock className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${blockCreations ? "text-gray-700" : "text-gray-500"}`}>
+            Block branch creation
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {reqConversation ? (
+            <LucideReact.MessageCircle className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.MessageCircle className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${reqConversation ? "text-gray-700" : "text-gray-500"}`}>
+            Conversation resolution required
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {reqSignatures ? (
+            <LucideReact.FileSignature className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.FileSignature className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${reqSignatures ? "text-gray-700" : "text-gray-500"}`}>
+            Signatures required
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {lockBranch ? (
+            <LucideReact.Lock className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.Unlock className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${lockBranch ? "text-gray-700" : "text-gray-500"}`}>
+            Branch locked
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {allowForkSync ? (
+            <LucideReact.GitBranchPlus className="text-gray-600" size={16} />
+          ) : (
+            <LucideReact.GitBranch className="text-gray-400" size={16} />
+          )}
+          <span className={`text-sm ${allowForkSync ? "text-gray-700" : "text-gray-500"}`}>
+            Fork syncing allowed
+          </span>
+        </div>
+      </div>
     </div>
   );
 }

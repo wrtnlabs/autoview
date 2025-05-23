@@ -1,9 +1,24 @@
-import React from "react";
+import { tags } from "typia";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiUserInteractionLimits {
-        export type GetResponse = any | {};
+        export type GetResponse = AutoViewInputSubTypes.interaction_limit_response | {};
     }
-    export type interaction_limit_response = any;
+    /**
+     * Interaction limit settings.
+     *
+     * @title Interaction Limits
+    */
+    export interface interaction_limit_response {
+        limit: AutoViewInputSubTypes.interaction_group;
+        origin: string;
+        expires_at: string & tags.Format<"date-time">;
+    }
+    /**
+     * The type of GitHub user that can comment, open issues, or create pull requests while the interaction limit is in effect.
+    */
+    export type interaction_group = "existing_users" | "contributors_only" | "collaborators_only";
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiUserInteractionLimits.GetResponse;
 
@@ -12,97 +27,73 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiUserInteractionLimits.GetR
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const entries = React.useMemo(
-    () =>
-      value && typeof value === 'object' && !Array.isArray(value)
-        ? Object.entries(value as Record<string, any>)
-        : [],
-    [value]
-  );
+  const hasLimit =
+    value &&
+    typeof value === "object" &&
+    "limit" in value &&
+    typeof (value as any).limit === "string";
 
-  const formatKey = (key: string): string =>
-    key
-      .replace(/([A-Z])/g, ' $1')
-      .replace(/[_-]/g, ' ')
-      .replace(/^./, str => str.toUpperCase());
-
-  const isIsoDate = (str: string): boolean =>
-    typeof str === 'string' &&
-    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?$/.test(str);
-
-  const formatDate = (str: string): string =>
-    new Date(str).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    });
-
-  const truncate = (str: string, length: number = 60): string =>
-    str.length > length ? str.slice(0, length) + '…' : str;
-
-  const renderValue = (val: any): React.ReactNode => {
-    if (val == null) {
-      return <span className="text-gray-400">—</span>;
-    }
-    if (typeof val === 'string') {
-      if (isIsoDate(val)) {
-        return <span>{formatDate(val)}</span>;
-      }
-      return (
-        <span title={val} className="block truncate">
-          {truncate(val)}
-        </span>
-      );
-    }
-    if (typeof val === 'number') {
-      return <span>{val.toLocaleString()}</span>;
-    }
-    if (typeof val === 'boolean') {
-      return val ? (
-        <span className="text-green-600 font-semibold">True</span>
-      ) : (
-        <span className="text-red-600 font-semibold">False</span>
-      );
-    }
-    if (Array.isArray(val)) {
-      return (
-        <span>
-          {val.length} item{val.length !== 1 ? 's' : ''}
-        </span>
-      );
-    }
-    if (typeof val === 'object') {
-      const keys = Object.keys(val);
-      return (
-        <span>
-          {keys.length} key{keys.length !== 1 ? 's' : ''}
-        </span>
-      );
-    }
-    return <span>{String(val)}</span>;
+  // Mapping for human-readable labels
+  const limitLabels: Record<AutoViewInputSubTypes.interaction_group, string> = {
+    existing_users: "Existing Users",
+    contributors_only: "Contributors Only",
+    collaborators_only: "Collaborators Only",
   };
 
+  // Icon selector based on limit type
+  function getLimitIcon(group: AutoViewInputSubTypes.interaction_group): JSX.Element {
+    switch (group) {
+      case "existing_users":
+        return <LucideReact.Users size={20} className="text-blue-500" aria-label="Existing Users" />;
+      case "contributors_only":
+        return <LucideReact.UserCheck size={20} className="text-green-500" aria-label="Contributors Only" />;
+      case "collaborators_only":
+        return <LucideReact.UserPlus size={20} className="text-purple-500" aria-label="Collaborators Only" />;
+    }
+  }
+
+  // Format expiration date
+  let formattedExpiry = "";
+  if (hasLimit) {
+    const resp = value as AutoViewInputSubTypes.interaction_limit_response;
+    const date = new Date(resp.expires_at);
+    formattedExpiry = date.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  }
+
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
-  if (!entries.length) {
+  if (!hasLimit) {
+    // Empty or no data state
     return (
-      <div className="p-4 bg-white rounded-lg shadow-sm">
-        <p className="text-center text-gray-500">No data available</p>
+      <div className="py-6 px-4 flex flex-col items-center text-gray-400">
+        <LucideReact.AlertCircle size={24} />
+        <span className="mt-2 text-sm">No interaction limits set.</span>
       </div>
     );
   }
 
+  // Safe cast now that we know the shape
+  const { limit, origin } = value as AutoViewInputSubTypes.interaction_limit_response;
+
   // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm max-w-full">
-      <h2 className="text-xl font-semibold text-gray-800 mb-3">Details</h2>
-      <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-        {entries.map(([key, val]) => (
-          <React.Fragment key={key}>
-            <dt className="text-sm font-medium text-gray-500">{formatKey(key)}</dt>
-            <dd className="text-sm text-gray-900">{renderValue(val)}</dd>
-          </React.Fragment>
-        ))}
-      </dl>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full mx-auto">
+      <div className="flex items-center gap-2">
+        {getLimitIcon(limit)}
+        <h2 className="text-lg font-semibold text-gray-800">
+          {limitLabels[limit]}
+        </h2>
+      </div>
+      <div className="mt-3 flex items-center text-gray-600 gap-1">
+        <LucideReact.Globe size={16} className="text-gray-400" aria-label="Origin" />
+        <span className="truncate">{origin}</span>
+      </div>
+      <div className="mt-2 flex items-center text-gray-600 gap-1">
+        <LucideReact.Calendar size={16} className="text-gray-400" aria-label="Expires At" />
+        <span className="truncate">Expires: {formattedExpiry}</span>
+      </div>
     </div>
   );
 }

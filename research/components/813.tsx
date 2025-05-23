@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The configuration for GitHub Pages for a repository.
      *
      * @title GitHub Pages
     */
-    export type page = {
+    export interface page {
         /**
          * The API address for accessing this Page resource.
         */
@@ -49,18 +50,18 @@ export namespace AutoViewInputSubTypes {
          * Whether https is enabled on the domain
         */
         https_enforced?: boolean;
-    };
+    }
     /**
      * @title Pages Source Hash
     */
-    export type pages_source_hash = {
+    export interface pages_source_hash {
         branch: string;
         path: string;
-    };
+    }
     /**
      * @title Pages Https Certificate
     */
-    export type pages_https_certificate = {
+    export interface pages_https_certificate {
         state: "new" | "authorization_created" | "authorization_pending" | "authorized" | "authorization_revoked" | "issued" | "uploaded" | "approved" | "errored" | "bad_authz" | "destroy_pending" | "dns_changed";
         description: string;
         /**
@@ -68,7 +69,7 @@ export namespace AutoViewInputSubTypes {
         */
         domains: string[];
         expires_at?: string & tags.Format<"date">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.page;
 
@@ -77,162 +78,136 @@ export type AutoViewInput = AutoViewInputSubTypes.page;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const displayDomain = value.cname ?? value.html_url ?? value.url;
-  const statusMap: Record<string, { label: string; color: string }> = {
-    built: { label: "Built", color: "green" },
-    building: { label: "Building", color: "yellow" },
-    errored: { label: "Errored", color: "red" },
-    null: { label: "Unknown", color: "gray" },
-  };
-  const statusKey = value.status ?? "null";
-  const { label: statusLabel, color: statusColor } = statusMap[statusKey] ?? statusMap.null;
-  const buildTypeLabel = value.build_type
-    ? value.build_type.charAt(0).toUpperCase() + value.build_type.slice(1)
-    : null;
-  const publicLabel = value.public ? "Public" : "Private";
-  const publicColor = value.public ? "green" : "gray";
-  const custom404Label = value.custom_404 ? "Enabled" : "Disabled";
-  const custom404Color = value.custom_404 ? "green" : "gray";
-  const domainStateLabel = value.protected_domain_state
-    ? value.protected_domain_state === "pending"
-      ? "Pending Verification"
-      : value.protected_domain_state === "verified"
-      ? "Verified"
-      : "Unverified"
-    : null;
-  const domainStateColor =
-    value.protected_domain_state === "verified"
-      ? "green"
-      : value.protected_domain_state === "unverified"
-      ? "red"
-      : "yellow";
+  const formatDateTime = (iso?: string | null): string =>
+    iso ? new Date(iso).toLocaleString() : 'N/A';
 
-  const formatDateTime = (iso: string) =>
-    new Date(iso).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const renderStatusIcon = (): JSX.Element => {
+    switch (value.status) {
+      case 'built':
+        return <LucideReact.CheckCircle className="text-green-500" size={16} aria-label="Built" />;
+      case 'building':
+        return <LucideReact.Loader className="animate-spin text-amber-500" size={16} aria-label="Building" />;
+      case 'errored':
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} aria-label="Errored" />;
+      default:
+        return <LucideReact.AlertCircle className="text-gray-400" size={16} aria-label="Unknown" />;
+    }
+  };
+
+  const buildType = value.build_type ?? 'N/A';
+  const domain = value.cname ?? 'Default GitHub Pages domain';
+  const protectedState = value.protected_domain_state ?? 'N/A';
+  const hasCustom404 = value.custom_404;
+  const publicState = value['public'];
+  const httpsEnforced = value.https_enforced ?? false;
+  const sourceBranch = value.source?.branch;
+  const sourcePath = value.source?.path;
+  const cert = value.https_certificate;
+  const certState = cert?.state;
+  const certDomains = cert?.domains;
+  const certExpires = cert?.expires_at;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm max-w-md mx-auto">
-      <div className="flex justify-between items-start">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {displayDomain}
-        </h2>
-        <div className="flex space-x-2">
-          <span
-            className={`px-2 py-0.5 text-xs font-medium bg-${statusColor}-100 text-${statusColor}-800 rounded-full`}
-          >
-            {statusLabel}
-          </span>
-          <span
-            className={`px-2 py-0.5 text-xs font-medium bg-${publicColor}-100 text-${publicColor}-800 rounded-full`}
-          >
-            {publicLabel}
-          </span>
-        </div>
-      </div>
-
-      <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
-        <div>
-          <dt className="font-medium text-gray-700">URL</dt>
-          <dd className="truncate">{value.url}</dd>
-        </div>
-        {buildTypeLabel && (
-          <div>
-            <dt className="font-medium text-gray-700">Build Type</dt>
-            <dd>{buildTypeLabel}</dd>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
+      <h2 className="text-lg font-semibold text-gray-800 mb-4">GitHub Pages Configuration</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Overview */}
+        <section className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-600 uppercase">Overview</h3>
+          <div className="flex items-center space-x-2 text-gray-700">
+            {renderStatusIcon()}
+            <span>Status: {value.status ?? 'Unknown'}</span>
           </div>
-        )}
-        <div>
-          <dt className="font-medium text-gray-700">Custom 404</dt>
-          <dd>
-            <span
-              className={`px-2 py-0.5 text-xs font-medium bg-${custom404Color}-100 text-${custom404Color}-800 rounded-full`}
-            >
-              {custom404Label}
-            </span>
-          </dd>
-        </div>
-        {domainStateLabel && (
-          <div>
-            <dt className="font-medium text-gray-700">Domain State</dt>
-            <dd>
-              <span
-                className={`px-2 py-0.5 text-xs font-medium bg-${domainStateColor}-100 text-${domainStateColor}-800 rounded-full`}
-              >
-                {domainStateLabel}
-              </span>
-            </dd>
+          <div className="flex items-center space-x-2 text-gray-700">
+            <LucideReact.Link size={16} className="text-gray-400" aria-hidden="true" />
+            <span className="truncate">API URL: {value.url}</span>
           </div>
-        )}
-        {value.pending_domain_unverified_at && (
-          <div className="sm:col-span-2">
-            <dt className="font-medium text-gray-700">
-              Verification Expires At
-            </dt>
-            <dd>{formatDateTime(value.pending_domain_unverified_at)}</dd>
-          </div>
-        )}
-        {value.source && (
-          <div className="sm:col-span-2">
-            <dt className="font-medium text-gray-700">Source</dt>
-            <dd>
-              <span className="font-mono">
-                {value.source.branch}:{value.source.path}
-              </span>
-            </dd>
-          </div>
-        )}
-        {value.https_enforced != null && (
-          <div>
-            <dt className="font-medium text-gray-700">HTTPS Enforced</dt>
-            <dd>{value.https_enforced ? "Yes" : "No"}</dd>
-          </div>
-        )}
-      </dl>
-
-      {value.https_certificate && (
-        <div className="mt-6 border-t pt-4">
-          <h3 className="text-md font-semibold text-gray-800">
-            HTTPS Certificate
-          </h3>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span className="px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-              {value.https_certificate.state}
-            </span>
-            <span className="text-sm text-gray-600">
-              {value.https_certificate.description}
-            </span>
-          </div>
-          <div className="mt-3">
-            <dt className="font-medium text-gray-700">Domains</dt>
-            <dd className="mt-1 flex flex-wrap gap-2">
-              {value.https_certificate.domains.map((d) => (
-                <span
-                  key={d}
-                  className="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded"
-                >
-                  {d}
-                </span>
-              ))}
-            </dd>
-          </div>
-          {value.https_certificate.expires_at && (
-            <div className="mt-2 text-sm text-gray-600">
-              Expires at:{" "}
-              {new Date(
-                value.https_certificate.expires_at
-              ).toLocaleDateString()}
+          {value.html_url && (
+            <div className="flex items-center space-x-2 text-gray-700">
+              <LucideReact.Link size={16} className="text-gray-400" aria-hidden="true" />
+              <span className="truncate">HTML URL: {value.html_url}</span>
             </div>
           )}
-        </div>
-      )}
+          <div className="flex items-center space-x-2 text-gray-700">
+            <LucideReact.Lock size={16} className="text-gray-400" aria-hidden="true" />
+            <span>Public: {publicState ? 'Yes' : 'No'}</span>
+          </div>
+        </section>
+
+        {/* Domain & Build */}
+        <section className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-600 uppercase">Domain & Build</h3>
+          <div className="flex items-center space-x-2 text-gray-700">
+            <LucideReact.Globe size={16} className="text-gray-400" aria-hidden="true" />
+            <span>Custom Domain: {domain}</span>
+          </div>
+          <div className="flex items-center space-x-2 text-gray-700">
+            <LucideReact.ShieldCheck size={16} className="text-gray-400" aria-hidden="true" />
+            <span>Protected State: {protectedState}</span>
+          </div>
+          {value.pending_domain_unverified_at && (
+            <div className="flex items-center space-x-2 text-gray-700">
+              <LucideReact.Clock size={16} className="text-amber-500" aria-hidden="true" />
+              <span>Unverified At: {formatDateTime(value.pending_domain_unverified_at)}</span>
+            </div>
+          )}
+          <div className="flex items-center space-x-2 text-gray-700">
+            <LucideReact.GitBranch size={16} className="text-gray-400" aria-hidden="true" />
+            <span>Build Type: {buildType}</span>
+          </div>
+          {sourceBranch && sourcePath && (
+            <div className="flex items-center space-x-2 text-gray-700">
+              <LucideReact.Code size={16} className="text-gray-400" aria-hidden="true" />
+              <span>Source: {sourceBranch}/{sourcePath}</span>
+            </div>
+          )}
+          <div className="flex items-center space-x-2 text-gray-700">
+            {hasCustom404 ? (
+              <LucideReact.CheckCircle size={16} className="text-green-500" aria-hidden="true" />
+            ) : (
+              <LucideReact.XCircle size={16} className="text-red-500" aria-hidden="true" />
+            )}
+            <span>Custom 404: {hasCustom404 ? 'Enabled' : 'Disabled'}</span>
+          </div>
+        </section>
+
+        {/* Security */}
+        <section className="space-y-2">
+          <h3 className="text-sm font-medium text-gray-600 uppercase">Security</h3>
+          <div className="flex items-center space-x-2 text-gray-700">
+            {httpsEnforced ? (
+              <LucideReact.Lock className="text-green-500" size={16} aria-hidden="true" />
+            ) : (
+              <LucideReact.Unlock className="text-red-500" size={16} aria-hidden="true" />
+            )}
+            <span>HTTPS Enforced: {httpsEnforced ? 'Yes' : 'No'}</span>
+          </div>
+          {cert && (
+            <>
+              <div className="flex items-center space-x-2 text-gray-700">
+                {certState === 'issued' ? (
+                  <LucideReact.BadgeCheck className="text-green-500" size={16} aria-hidden="true" />
+                ) : (
+                  <LucideReact.AlertTriangle className="text-amber-500" size={16} aria-hidden="true" />
+                )}
+                <span>Cert State: {certState}</span>
+              </div>
+              <div className="flex items-center space-x-2 text-gray-700">
+                <LucideReact.Users size={16} className="text-gray-400" aria-hidden="true" />
+                <span>Domains: {certDomains?.join(', ')}</span>
+              </div>
+              {certExpires && (
+                <div className="flex items-center space-x-2 text-gray-700">
+                  <LucideReact.Calendar size={16} className="text-gray-400" aria-hidden="true" />
+                  <span>Expires: {formatDateTime(certExpires)}</span>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

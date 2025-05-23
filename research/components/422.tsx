@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The campaign metadata and alert stats.
      *
      * @title Campaign summary
     */
-    export type campaign_summary = {
+    export interface campaign_summary {
         /**
          * The number of the newly created campaign
         */
@@ -66,13 +67,13 @@ export namespace AutoViewInputSubTypes {
             */
             in_progress_count: number & tags.Type<"int32">;
         };
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -95,13 +96,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -122,7 +123,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -137,7 +138,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -181,126 +182,149 @@ export type AutoViewInput = AutoViewInputSubTypes.campaign_summary;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
+  const title = value.name?.trim() || `Campaign #${value.number}`;
+  const description = value.description || "";
+  const formatDateTime = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
     });
-
-  const createdAt = formatDate(value.created_at);
-  const updatedAt = formatDate(value.updated_at);
-  const endsAt = formatDate(value.ends_at);
-  const publishedAt = value.published_at ? formatDate(value.published_at) : null;
-  const closedAt = value.closed_at ? formatDate(value.closed_at) : null;
-
-  const stateMap = {
-    open: { label: "Open", bg: "bg-green-100", text: "text-green-800" },
-    closed: { label: "Closed", bg: "bg-red-100", text: "text-red-800" },
-  } as const;
-  const stateBadge = stateMap[value.state];
-
-  const descriptionSnippet =
-    value.description.length > 150
-      ? value.description.slice(0, 150) + "…"
-      : value.description;
-
-  const managers = value.managers;
-  const maxAvatars = 5;
-  const visibleManagers = managers.slice(0, maxAvatars);
-  const extraManagers = managers.length - maxAvatars;
-
-  const teamCount = value.team_managers?.length ?? 0;
-
-  const contactLinkDisplay = value.contact_link
-    ? value.contact_link.length > 40
-      ? value.contact_link.slice(0, 40) + "…"
-      : value.contact_link
-    : null;
-
+  const createdAt = formatDateTime(value.created_at);
+  const updatedAt = formatDateTime(value.updated_at);
+  const publishedAt = value.published_at ? formatDateTime(value.published_at) : null;
+  const endsAt = formatDateTime(value.ends_at);
+  const closedAt = value.closed_at ? formatDateTime(value.closed_at) : null;
+  const daysRemaining = Math.ceil(
+    (new Date(value.ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+  );
+  const statusLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1);
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-semibold text-gray-800">
-          {value.name ? value.name : `Campaign #${value.number}`}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${stateBadge.bg} ${stateBadge.text}`}
-        >
-          {stateBadge.label}
-        </span>
-      </div>
-
-      {value.name && (
-        <p className="text-xs text-gray-500 mb-2">ID: #{value.number}</p>
-      )}
-
-      <p className="text-sm text-gray-600 mb-4">{descriptionSnippet}</p>
-
-      <div className="grid grid-cols-2 gap-2 text-xs text-gray-600 mb-4">
-        <div>
-          <span className="font-medium">Created:</span> {createdAt}
+    <div className="bg-white rounded-lg shadow p-6 max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold text-gray-800 truncate">{title}</h2>
+        <div className="flex items-center space-x-1">
+          {value.state === "open" ? (
+            <LucideReact.CheckCircle className="text-green-500" size={20} />
+          ) : (
+            <LucideReact.XCircle className="text-red-500" size={20} />
+          )}
+          <span
+            className={`text-sm ${
+              value.state === "open" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {statusLabel}
+          </span>
         </div>
-        <div>
-          <span className="font-medium">Updated:</span> {updatedAt}
+      </div>
+      {/* Description */}
+      <p className="mt-2 text-gray-600 line-clamp-3">{description}</p>
+      {/* Dates and Links */}
+      <div className="mt-4 grid grid-cols-1 gap-2 text-sm text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} />
+          <span className="ml-1">Created:</span>
+          <span className="ml-auto">{createdAt}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} />
+          <span className="ml-1">Updated:</span>
+          <span className="ml-auto">{updatedAt}</span>
         </div>
         {publishedAt && (
-          <div>
-            <span className="font-medium">Published:</span> {publishedAt}
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} />
+            <span className="ml-1">Published:</span>
+            <span className="ml-auto">{publishedAt}</span>
           </div>
         )}
-        <div>
-          <span className="font-medium">Ends:</span> {endsAt}
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} />
+          <span className="ml-1">Ends:</span>
+          <span className="ml-auto">
+            {endsAt}{" "}
+            <span className="italic">
+              ({daysRemaining > 0 ? `${daysRemaining} days left` : "Ended"})
+            </span>
+          </span>
         </div>
         {closedAt && (
-          <div className="col-span-2">
-            <span className="font-medium">Closed:</span> {closedAt}
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} />
+            <span className="ml-1">Closed:</span>
+            <span className="ml-auto">{closedAt}</span>
+          </div>
+        )}
+        {value.contact_link && (
+          <div className="flex items-center break-all">
+            <LucideReact.Link size={16} />
+            <span className="ml-1 text-blue-600">{value.contact_link}</span>
           </div>
         )}
       </div>
-
-      <div className="flex items-center mb-4">
-        <div className="flex -space-x-2">
-          {visibleManagers.map((mgr) => (
-            <img
-              key={mgr.id}
-              src={mgr.avatar_url}
-              alt={mgr.login}
-              title={mgr.name ?? mgr.login}
-              className="w-8 h-8 rounded-full border-2 border-white"
-            />
-          ))}
-          {extraManagers > 0 && (
-            <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-600 text-xs flex items-center justify-center border-2 border-white">
-              +{extraManagers}
+      {/* Alert Stats */}
+      {value.alert_stats && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700">Alert Stats</h3>
+          <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+            <div className="flex items-center">
+              <LucideReact.Clock className="text-amber-500" size={16} />
+              <span className="ml-1">{value.alert_stats.in_progress_count} In Progress</span>
             </div>
-          )}
-        </div>
-        {teamCount > 0 && (
-          <span className="ml-3 text-xs text-gray-600">
-            {teamCount} Team{teamCount > 1 ? "s" : ""}
-          </span>
-        )}
-      </div>
-
-      {contactLinkDisplay && (
-        <div className="text-xs text-blue-600 mb-4 break-all">
-          {contactLinkDisplay}
+            <div className="flex items-center">
+              <LucideReact.CheckCircle className="text-green-500" size={16} />
+              <span className="ml-1">{value.alert_stats.closed_count} Closed</span>
+            </div>
+            <div className="flex items-center">
+              <LucideReact.AlertTriangle className="text-red-500" size={16} />
+              <span className="ml-1">{value.alert_stats.open_count} Open</span>
+            </div>
+          </div>
         </div>
       )}
-
-      {value.alert_stats && (
-        <div className="flex flex-wrap gap-2">
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-            {value.alert_stats.open_count} Open
-          </span>
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-            {value.alert_stats.in_progress_count} In Progress
-          </span>
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-            {value.alert_stats.closed_count} Closed
-          </span>
+      {/* Managers */}
+      {value.managers.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700">Managers</h3>
+          <div className="mt-2 flex -space-x-2">
+            {value.managers.map((mgr) => {
+              const label = mgr.name || mgr.login;
+              return (
+                <img
+                  key={mgr.id}
+                  src={mgr.avatar_url}
+                  alt={label}
+                  className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      label
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {/* Team Managers */}
+      {value.team_managers && value.team_managers.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700">Team Managers</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {value.team_managers.map((team) => (
+              <span
+                key={team.id}
+                className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded"
+              >
+                {team.name}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>

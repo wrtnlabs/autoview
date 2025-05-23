@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Full Team
     */
-    export type team_full = {
+    export interface team_full {
         /**
          * Unique identifier of the team
         */
@@ -47,7 +48,7 @@ export namespace AutoViewInputSubTypes {
          * Distinguished Name (DN) that team maps to within LDAP environment
         */
         ldap_dn?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -62,7 +63,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -97,7 +98,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Team Organization
     */
-    export type team_organization = {
+    export interface team_organization {
         login: string;
         id: number & tags.Type<"int32">;
         node_id: string;
@@ -153,7 +154,7 @@ export namespace AutoViewInputSubTypes {
         web_commit_signoff_required?: boolean;
         updated_at: string & tags.Format<"date-time">;
         archived_at: (string & tags.Format<"date-time">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_full;
 
@@ -162,98 +163,121 @@ export type AutoViewInput = AutoViewInputSubTypes.team_full;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-  const updatedDate = new Date(value.updated_at).toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
-  const privacyLabel = value.privacy
-    ? value.privacy === 'secret'
-      ? 'Secret'
-      : 'Closed'
-    : 'Default';
-  const notificationLabel = value.notification_setting
-    ? value.notification_setting === 'notifications_enabled'
-      ? 'Notifications On'
-      : 'Notifications Off'
-    : 'Default';
+  const privacyBadge = value.privacy && (
+    <span
+      className={`inline-block text-xs font-medium px-2 py-0.5 rounded ${
+        value.privacy === "secret"
+          ? "bg-blue-100 text-blue-800"
+          : "bg-gray-100 text-gray-800"
+      }`}
+    >
+      {value.privacy.charAt(0).toUpperCase() + value.privacy.slice(1)}
+    </span>
+  );
 
-  const descriptionText = value.description ?? 'No description provided';
-  const shortDescription =
-    descriptionText.length > 120
-      ? descriptionText.slice(0, 120).trimEnd() + '…'
-      : descriptionText;
+  const notificationBadge = value.notification_setting && (
+    <span
+      className={`inline-block text-xs font-medium px-2 py-0.5 rounded ${
+        value.notification_setting === "notifications_enabled"
+          ? "bg-green-100 text-green-800"
+          : "bg-gray-100 text-gray-800"
+      }`}
+    >
+      {value.notification_setting === "notifications_enabled"
+        ? "Notifications On"
+        : "Notifications Off"}
+    </span>
+  );
+
+  const parentTeam = value.parent ? (
+    <div className="flex items-center text-sm text-gray-600 mt-2">
+      <LucideReact.ArrowUpRight size={16} className="text-gray-400 mr-1" />
+      <span className="truncate">{value.parent.name}</span>
+    </div>
+  ) : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-2xl font-semibold text-gray-800 truncate">
-        {value.name}
-      </h2>
-      <p className="mt-2 text-gray-600 text-sm line-clamp-2">
-        {shortDescription}
-      </p>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
-          {privacyLabel}
-        </span>
-        <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded">
-          {notificationLabel}
-        </span>
-        <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded">
-          {value.permission}
-        </span>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-4 text-center">
-        <div>
-          <p className="text-xl font-bold text-gray-800">
-            {value.members_count}
-          </p>
-          <p className="text-sm text-gray-500">Members</p>
-        </div>
-        <div>
-          <p className="text-xl font-bold text-gray-800">
-            {value.repos_count}
-          </p>
-          <p className="text-sm text-gray-500">Repositories</p>
+    <div className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-3">
+        <LucideReact.Users size={24} className="text-indigo-600 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-900 truncate">
+          {value.name}
+        </h2>
+        <div className="ml-auto flex items-center space-x-1">
+          {privacyBadge}
+          {notificationBadge}
         </div>
       </div>
 
-      <div className="mt-4 text-sm text-gray-500 space-y-1">
-        <p>Created: {createdDate}</p>
-        <p>Updated: {updatedDate}</p>
-      </div>
-
-      {value.parent && (
-        <div className="mt-4 text-sm text-gray-500">
-          Parent Team:{' '}
-          <span className="text-gray-800 font-medium">
-            {value.parent.name}
-          </span>
-        </div>
+      {value.description && (
+        <p className="text-gray-700 text-sm mb-3 line-clamp-3">
+          {value.description}
+        </p>
       )}
 
-      <div className="mt-6 border-t pt-4 flex items-center">
+      {parentTeam}
+
+      <div className="grid grid-cols-2 gap-4 mt-3 text-sm">
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Users size={16} className="text-gray-500 mr-1" />
+          <span>{value.members_count.toLocaleString()} members</span>
+        </div>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.GitBranch size={16} className="text-gray-500 mr-1" />
+          <span>{value.repos_count.toLocaleString()} repos</span>
+        </div>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Key size={16} className="text-gray-500 mr-1" />
+          <span className="capitalize">{value.permission}</span>
+        </div>
+        {value.ldap_dn && (
+          <div className="flex items-center text-gray-600 col-span-2">
+            <LucideReact.Hash size={16} className="text-gray-500 mr-1" />
+            <span className="truncate">{value.ldap_dn}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="border-t border-gray-100 mt-4 pt-3 text-xs text-gray-500 space-y-1">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={14} className="mr-1" />
+          <span>Created: {formatDate(value.created_at)}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.RefreshCw size={14} className="mr-1" />
+          <span>Updated: {formatDate(value.updated_at)}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center mt-4">
         <img
           src={value.organization.avatar_url}
-          alt={value.organization.login}
-          className="w-10 h-10 rounded-full object-cover"
+          alt={`${value.organization.login} avatar`}
+          className="w-8 h-8 rounded-full object-cover mr-2 flex-shrink-0"
+          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+            const target = e.currentTarget;
+            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              value.organization.login
+            )}&background=ddd&color=555`;
+          }}
         />
-        <div className="ml-3 flex-1">
-          <p className="text-gray-800 font-medium truncate">
-            {value.organization.name ?? value.organization.login}
-          </p>
-          <p className="text-sm text-gray-500 truncate">
-            @{value.organization.login}
-          </p>
+        <div className="text-sm">
+          <div className="font-medium text-gray-800 truncate">
+            {value.organization.login}
+          </div>
+          {value.organization.name && (
+            <div className="text-gray-500 truncate">
+              {value.organization.name}
+            </div>
+          )}
         </div>
       </div>
     </div>

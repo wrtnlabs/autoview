@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
      *
      * @title Reaction
     */
-    export type reaction = {
+    export interface reaction {
         id: number & tags.Type<"int32">;
         node_id: string;
         user: AutoViewInputSubTypes.nullable_simple_user;
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
         */
         content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -52,75 +53,65 @@ export type AutoViewInput = AutoViewInputSubTypes.reaction[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalReactions = value.length;
-  const reactionCounts: Record<string, number> = {};
-  value.forEach((r) => {
-    reactionCounts[r.content] = (reactionCounts[r.content] || 0) + 1;
-  });
+  type Reaction = AutoViewInputSubTypes.reaction;
+  type ReactionContent = Reaction["content"];
 
-  const sortedReactions = Object.entries(reactionCounts).sort(
-    (a, b) => b[1] - a[1]
-  ) as [string, number][];
+  // 1. Group reactions by their content type
+  const groups = (value ?? []).reduce((acc, reaction) => {
+    const key = reaction.content as ReactionContent;
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {} as Record<ReactionContent, number>);
 
-  const iconMap: Record<string, string> = {
-    "+1": "👍",
-    "-1": "👎",
-    laugh: "😄",
-    confused: "😕",
-    heart: "❤️",
-    hooray: "🎉",
-    rocket: "🚀",
-    eyes: "👀",
+  // 2. Map each content type to an icon, color, and label
+  const contentConfig: Record<ReactionContent, {
+    Icon: React.ComponentType<any>;
+    color: string;
+    label: string;
+  }> = {
+    "+1":     { Icon: LucideReact.ThumbsUp,    color: "text-green-500",  label: "Like" },
+    "-1":     { Icon: LucideReact.ThumbsDown,  color: "text-red-500",    label: "Dislike" },
+    laugh:    { Icon: LucideReact.Smile,       color: "text-yellow-500", label: "Laugh" },
+    confused: { Icon: LucideReact.Frown,       color: "text-orange-500", label: "Confused" },
+    heart:    { Icon: LucideReact.Heart,       color: "text-red-500",    label: "Heart" },
+    hooray:   { Icon: LucideReact.Star,        color: "text-amber-500",  label: "Hooray" },
+    rocket:   { Icon: LucideReact.Rocket,      color: "text-purple-500", label: "Rocket" },
+    eyes:     { Icon: LucideReact.Eye,         color: "text-blue-500",   label: "Eyes" },
   };
 
-  // Determine the most recent reaction date
-  const lastReactionDate =
-    value.length > 0
-      ? new Date(
-          Math.max(...value.map((r) => new Date(r.created_at).getTime()))
-        )
-      : null;
-  const formattedLastDate = lastReactionDate
-    ? lastReactionDate.toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : "";
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex flex-col md:flex-row md:justify-between mb-4">
-        <div className="text-gray-700 font-semibold">
-          Total Reactions: <span className="text-blue-600">{totalReactions}</span>
-        </div>
-        {lastReactionDate && (
-          <div className="text-gray-500 text-sm mt-2 md:mt-0">
-            Last: <span className="font-medium">{formattedLastDate}</span>
-          </div>
-        )}
+  // 3. Render empty state if there are no reactions
+  if (!value || value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-4 text-gray-400">
+        <LucideReact.AlertCircle size={24} className="mb-1" />
+        <span className="text-sm">No reactions</span>
       </div>
-      {totalReactions > 0 ? (
-        <ul className="flex flex-wrap gap-2">
-          {sortedReactions.map(([type, count]) => (
-            <li key={type} className="inline-flex items-center">
-              <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-full">
-                <span className="mr-1">{iconMap[type] || "❓"}</span>
-                <span>{type}</span>
-                <span className="ml-2 bg-blue-600 text-white rounded-full px-2 py-0.5 text-xs">
-                  {count}
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="text-gray-500 italic text-center py-4">
-          No reactions yet
-        </div>
-      )}
+    );
+  }
+
+  // 4. Render the grouped reaction summary
+  return (
+    <div className="flex flex-wrap items-center gap-4 p-2">
+      {Object.entries(groups).map(([content, count]) => {
+        const key = content as ReactionContent;
+        const { Icon, color, label } = contentConfig[key];
+        return (
+          <div
+            key={key}
+            className="flex items-center gap-1"
+            role="group"
+            aria-label={`${label} reactions`}
+          >
+            <Icon
+              size={16}
+              className={color}
+              aria-label={label}
+              title={label}
+            />
+            <span className="text-sm text-gray-700">{count}</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiReposCodespaces {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             codespaces: AutoViewInputSubTypes.codespace[];
-        };
+        }
     }
     /**
      * A codespace.
      *
      * @title Codespace
     */
-    export type codespace = {
+    export interface codespace {
         id: number & tags.Type<"int32">;
         /**
          * Automatically generated name of this codespace.
@@ -140,13 +141,13 @@ export namespace AutoViewInputSubTypes {
          * The text to display to a user when a codespace has been stopped for a potentially actionable reason.
         */
         last_known_stop_notice?: string | null;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -169,13 +170,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -278,19 +279,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -362,90 +363,79 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiReposCodespaces.GetRespons
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDateTime = (dateStr: string): string =>
-    new Date(dateStr).toLocaleString([], {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  // Helper: format ISO date to "Mon DD, YYYY"
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 
-  const getStateClasses = (state: string): string => {
-    switch (state) {
-      case "Available":
-        return "bg-green-100 text-green-800";
-      case "Provisioning":
-      case "Queued":
-      case "Created":
-      case "Starting":
-      case "Rebuilding":
-      case "Updating":
-        return "bg-yellow-100 text-yellow-800";
-      case "Shutdown":
-      case "ShuttingDown":
-      case "Unavailable":
-      case "Deleted":
-      case "Failed":
-      case "Archived":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  // Render state badge with color and icon
+  const renderState = (state: string) => {
+    let bgClass = "bg-gray-100 text-gray-800";
+    let Icon = LucideReact.Circle;
+    if (state === "Available") {
+      bgClass = "bg-green-100 text-green-800";
+      Icon = LucideReact.CheckCircle;
+    } else if (["Queued", "Provisioning", "Starting", "Awaiting", "Updating", "Rebuilding", "Exporting"].includes(state)) {
+      bgClass = "bg-amber-100 text-amber-800";
+      Icon = LucideReact.Clock;
+    } else if (["Failed", "Unavailable", "Deleted", "Shutdown", "ShuttingDown", "Archived", "Moved"].includes(state)) {
+      bgClass = "bg-red-100 text-red-800";
+      Icon = LucideReact.AlertTriangle;
     }
+    return (
+      <span className={`flex items-center px-2 py-0.5 rounded ${bgClass} text-sm font-medium`}>
+        <Icon size={14} className="mr-1" />
+        {state}
+      </span>
+    );
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 max-w-full">
-      <h2 className="text-xl font-semibold mb-4">
-        Codespaces <span className="text-gray-500">({value.total_count})</span>
-      </h2>
-      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {value.codespaces.map((cs) => {
-          const title = cs.display_name ?? cs.name;
-          return (
-            <div key={cs.id} className="bg-white p-4 rounded-lg shadow">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-medium truncate">{title}</h3>
-                <span
-                  className={`px-2 py-1 text-xs font-semibold rounded ${getStateClasses(
-                    cs.state,
-                  )}`}
-                >
-                  {cs.state}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 truncate">
-                {cs.owner.login} / {cs.repository.full_name}
-              </p>
-              <div className="mt-3 space-y-1 text-sm text-gray-700">
-                <p>
-                  <span className="font-semibold">Last Used:</span>{" "}
-                  {formatDateTime(cs.last_used_at)}
-                </p>
-                <p>
-                  <span className="font-semibold">Machine:</span>{" "}
-                  {cs.machine?.display_name ?? "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Idle Timeout:</span>{" "}
-                  {cs.idle_timeout_minutes != null
-                    ? `${cs.idle_timeout_minutes} min`
-                    : "N/A"}
-                </p>
-                <p>
-                  <span className="font-semibold">Prebuild:</span>{" "}
-                  {cs.prebuild != null
-                    ? cs.prebuild
-                      ? "Yes"
-                      : "No"
-                    : "N/A"}
-                </p>
+    <div className="p-4 bg-gray-50 rounded-lg">
+      <div className="flex items-baseline justify-between">
+        <h2 className="text-xl font-semibold text-gray-800">Codespaces</h2>
+        <span className="text-sm text-gray-600">Total: {value.total_count}</span>
+      </div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {value.codespaces.map((cs) => (
+          <div key={cs.id} className="flex flex-col p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+            <div className="flex items-center">
+              <img
+                src={cs.owner.avatar_url}
+                alt={`${cs.owner.login} avatar`}
+                className="w-8 h-8 rounded-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    cs.owner.login,
+                  )}&background=ccc&color=fff`;
+                }}
+              />
+              <div className="ml-3 flex-1">
+                <h3 className="text-lg font-medium text-gray-900">{cs.display_name || cs.name}</h3>
+                <p className="text-sm text-gray-500">@{cs.owner.login}</p>
               </div>
             </div>
-          );
-        })}
+            <p className="mt-2 text-sm text-gray-600 truncate">{cs.repository.full_name}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {renderState(cs.state)}
+              <div className="flex items-center text-gray-500 text-sm">
+                <LucideReact.Calendar size={16} />
+                <span className="ml-1">{formatDate(cs.last_used_at)}</span>
+              </div>
+              {cs.idle_timeout_minutes != null && (
+                <div className="flex items-center text-gray-500 text-sm">
+                  <LucideReact.Timer size={16} />
+                  <span className="ml-1">{cs.idle_timeout_minutes}m</span>
+                </div>
+              )}
+              {cs.machine && (
+                <div className="flex items-center text-gray-500 text-sm">
+                  <LucideReact.Server size={16} />
+                  <span className="ml-1 truncate">{cs.machine.display_name}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

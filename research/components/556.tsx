@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Project cards represent a scope of work.
      *
      * @title Project Card
     */
-    export type project_card = {
+    export interface project_card {
         url: string & tags.Format<"uri">;
         /**
          * The project card's ID
@@ -26,7 +27,7 @@ export namespace AutoViewInputSubTypes {
         column_url: string & tags.Format<"uri">;
         content_url?: string & tags.Format<"uri">;
         project_url: string & tags.Format<"uri">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -64,72 +65,95 @@ export type AutoViewInput = AutoViewInputSubTypes.project_card;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdAt = new Date(value.created_at);
-  const updatedAt = new Date(value.updated_at);
+  const {
+    note,
+    created_at,
+    updated_at,
+    creator,
+    archived = false,
+    column_name,
+    content_url,
+  } = value;
 
-  const formattedCreatedAt = createdAt.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  const displayNote = note?.trim() ? note : 'No description available.';
+  const createdAtFormatted = new Date(created_at).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
   });
-  const formattedUpdatedAt = updatedAt.toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  const updatedAtFormatted = new Date(updated_at).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
   });
 
-  const creator = value.creator;
-  const creatorName = creator
-    ? creator.name ?? creator.login
-    : 'Unknown User';
+  const creatorName = creator?.name?.trim() || creator?.login || 'Unknown User';
+  const fallbackAvatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    creatorName,
+  )}&background=0D8ABC&color=fff`;
+
+  const [avatarSrc, setAvatarSrc] = React.useState<string>(
+    creator?.avatar_url || fallbackAvatarUrl,
+  );
+  const handleAvatarError = () => {
+    if (avatarSrc !== fallbackAvatarUrl) setAvatarSrc(fallbackAvatarUrl);
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow-md p-4 flex flex-col space-y-3">
-      {/* Card Note */}
-      {value.note ? (
-        <p className="text-gray-900 font-medium text-base line-clamp-2">
-          {value.note}
-        </p>
-      ) : (
-        <p className="text-gray-500 italic text-sm">No description.</p>
-      )}
-
-      {/* Tags: Column & Archived Status */}
-      <div className="flex flex-wrap gap-2">
-        {value.column_name && (
-          <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
-            {value.column_name}
-          </span>
-        )}
-        {value.archived && (
-          <span className="bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">
-            Archived
-          </span>
-        )}
-      </div>
-
-      {/* Creator Info & Timestamps */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          {creator && (
-            <img
-              src={creator.avatar_url}
-              alt={creatorName}
-              className="w-8 h-8 rounded-full object-cover"
-            />
+    <div className="max-w-md w-full bg-white p-4 rounded-lg shadow-md">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-1">
+          {archived ? (
+            <LucideReact.Archive className="text-gray-500" size={16} />
+          ) : (
+            <LucideReact.CheckCircle className="text-green-500" size={16} />
           )}
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold text-gray-700">
-              {creatorName}
-            </span>
-            <span className="text-xs text-gray-500">
-              Created: {formattedCreatedAt}
-            </span>
-          </div>
+          <span
+            className={`text-sm font-medium ${
+              archived ? 'text-gray-500' : 'text-green-600'
+            }`}
+          >
+            {archived ? 'Archived' : 'Active'}
+          </span>
         </div>
-        <span className="text-xs text-gray-400">Updated: {formattedUpdatedAt}</span>
+        {column_name && (
+          <div className="flex items-center gap-1 text-sm text-gray-500">
+            <LucideReact.Tag size={16} />
+            <span className="truncate">{column_name}</span>
+          </div>
+        )}
       </div>
+
+      <div className="mb-4">
+        <p className="text-gray-800 text-base line-clamp-3">{displayNote}</p>
+      </div>
+
+      <div className="flex items-center mb-4">
+        <img
+          src={avatarSrc}
+          alt={creatorName}
+          onError={handleAvatarError}
+          className="w-8 h-8 rounded-full object-cover mr-2"
+        />
+        <span className="text-sm text-gray-700 font-medium">{creatorName}</span>
+      </div>
+
+      <div className="flex items-center text-sm text-gray-500 space-x-4">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <time dateTime={created_at}>{createdAtFormatted}</time>
+        </div>
+        <div className="flex items-center gap-1">
+          <LucideReact.Clock size={16} />
+          <time dateTime={updated_at}>{updatedAtFormatted}</time>
+        </div>
+      </div>
+
+      {content_url && (
+        <div className="mt-4 flex items-center gap-1 text-sm text-blue-600">
+          <LucideReact.Link size={16} />
+          <span className="truncate">{content_url}</span>
+        </div>
+      )}
     </div>
   );
 }

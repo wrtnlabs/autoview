@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Reviews are reviews on pull requests.
      *
      * @title Pull Request Review
     */
-    export type pull_request_review = {
+    export interface pull_request_review {
         /**
          * Unique identifier of the review
         */
@@ -36,7 +37,7 @@ export namespace AutoViewInputSubTypes {
         body_html?: string;
         body_text?: string;
         author_association: AutoViewInputSubTypes.author_association;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -80,84 +81,100 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_review;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const user = value.user;
-  const displayName = user
-    ? user.name?.trim() || user.login
-    : 'Unknown Reviewer';
-
-  const submittedDate = value.submitted_at
-    ? new Date(value.submitted_at)
-    : null;
-  const formattedDate = submittedDate
-    ? submittedDate.toLocaleDateString(undefined, {
+  const reviewerName = value.user?.login || 'Unknown Reviewer';
+  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    reviewerName,
+  )}&background=0D8ABC&color=fff`;
+  const avatarUrl = value.user?.avatar_url || avatarPlaceholder;
+  const formattedDate = value.submitted_at
+    ? new Date(value.submitted_at).toLocaleString(undefined, {
         year: 'numeric',
         month: 'short',
-        day: 'numeric'
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       })
-    : 'Date Unknown';
+    : 'Date N/A';
+  const commitShort = value.commit_id ? value.commit_id.slice(0, 7) : null;
 
-  const commitShortId = value.commit_id
-    ? value.commit_id.slice(0, 7)
-    : 'N/A';
+  // Map review state to icon, color, and label
+  const stateLower = value.state.toLowerCase();
+  let stateIcon: JSX.Element;
+  let stateLabel: string;
+  let stateColorClass: string;
+  if (stateLower.includes('approved')) {
+    stateIcon = <LucideReact.CheckCircle className="text-green-500" size={16} />;
+    stateLabel = 'Approved';
+    stateColorClass = 'text-green-500';
+  } else if (stateLower.includes('changes_requested')) {
+    stateIcon = <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+    stateLabel = 'Changes Requested';
+    stateColorClass = 'text-red-500';
+  } else if (stateLower.includes('commented')) {
+    stateIcon = <LucideReact.MessageCircle className="text-gray-500" size={16} />;
+    stateLabel = 'Commented';
+    stateColorClass = 'text-gray-500';
+  } else {
+    stateIcon = <LucideReact.Clock className="text-amber-500" size={16} />;
+    stateLabel = value.state;
+    stateColorClass = 'text-amber-500';
+  }
 
-  const bodyPreview = (value.body_text || value.body || '')
-    .trim();
-
-  // Map review state to a badge color
-  const stateColorMap: Record<string, string> = {
-    approved: 'bg-green-100 text-green-800',
-    changes_requested: 'bg-red-100 text-red-800',
-    commented: 'bg-blue-100 text-blue-800'
-  };
-  const normalizedState = value.state.toLowerCase().replace(' ', '_');
-  const stateBadgeClasses =
-    stateColorMap[normalizedState] ||
-    'bg-gray-100 text-gray-800';
-
-  // Map author association to a human-friendly label
+  // Transform author association to human-readable
   const associationLabel = value.author_association
+    .toLowerCase()
     .split('_')
-    .map((word) => word[0] + word.slice(1).toLowerCase())
+    .map((w) => w[0].toUpperCase() + w.slice(1))
     .join(' ');
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-      <header className="flex items-center p-4">
-        <div className="flex-shrink-0">
-          <img
-            src={user?.avatar_url}
-            alt={displayName}
-            className="w-10 h-10 rounded-full object-cover bg-gray-100"
-          />
+    <div className="max-w-md mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex items-start">
+        <img
+          src={avatarUrl}
+          alt={reviewerName}
+          className="h-12 w-12 rounded-full object-cover flex-shrink-0"
+          onError={(e) => {
+            const target = e.currentTarget as HTMLImageElement;
+            target.onerror = null;
+            target.src = avatarPlaceholder;
+          }}
+        />
+        <div className="ml-4 flex-1">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-medium text-gray-900 truncate">
+              {reviewerName}
+            </h3>
+            <span className="text-xs uppercase bg-gray-100 text-gray-500 px-2 py-0.5 rounded">
+              {associationLabel}
+            </span>
+          </div>
+          <div className="mt-1 flex flex-wrap items-center text-sm text-gray-500 space-x-3">
+            <div className="flex items-center space-x-1">
+              {stateIcon}
+              <span className={stateColorClass}>{stateLabel}</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <LucideReact.Calendar className="text-gray-400" size={16} />
+              <span>{formattedDate}</span>
+            </div>
+            {commitShort && (
+              <div className="flex items-center space-x-1">
+                <LucideReact.Code className="text-gray-400" size={16} />
+                <span className="font-mono text-gray-700">{commitShort}</span>
+              </div>
+            )}
+          </div>
+          {value.body && (
+            <p className="mt-3 text-gray-700 line-clamp-3">{value.body}</p>
+          )}
+          <div className="mt-3 flex items-center text-sm text-indigo-600 space-x-1">
+            <LucideReact.Link size={16} />
+            <span className="truncate">{value.html_url}</span>
+          </div>
         </div>
-        <div className="ml-3 flex-1 min-w-0">
-          <p className="text-sm font-medium text-gray-900 truncate">
-            {displayName}
-          </p>
-          <p className="text-xs text-gray-500">
-            {formattedDate}
-          </p>
-        </div>
-        <div className="ml-2 flex flex-col items-end space-y-1">
-          <span
-            className={`px-2 py-1 text-xs font-semibold rounded-full ${stateBadgeClasses}`}
-          >
-            {value.state.replace('_', ' ')}
-          </span>
-          <span className="px-2 py-0.5 text-xs text-gray-600 rounded bg-gray-50">
-            {associationLabel}
-          </span>
-        </div>
-      </header>
-      <section className="px-4 pb-4">
-        <div className="text-xs text-gray-500">
-          Commit <span className="font-medium text-gray-700">{commitShortId}</span>
-        </div>
-        <p className="mt-2 text-sm text-gray-700 line-clamp-3">
-          {bodyPreview || <span className="text-gray-400 italic">No review comments.</span>}
-        </p>
-      </section>
-    </article>
+      </div>
+    </div>
   );
 }

@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsActionsRunnerGroupsRepositories {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number;
             repositories: AutoViewInputSubTypes.minimal_repository[];
-        };
+        }
     }
     /**
      * Minimal Repository
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -115,13 +116,13 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -144,19 +145,19 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -194,96 +195,123 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnerGroupsRep
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { total_count, repositories } = value;
+  const totalCount = value.total_count;
+  const repos = value.repositories ?? [];
 
-  // Format large numbers into human-readable strings (e.g., 1.5k, 2.3M)
-  const formatCount = (n: number): string => {
-    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
-    return n.toString();
+  // Format large numbers (e.g., 1500 → "1.5k")
+  const formatCount = (num: number): string => {
+    if (num >= 1000) {
+      const k = (num / 1000).toFixed(1).replace(/\.0$/, "");
+      return `${k}k`;
+    }
+    return num.toString();
   };
+
+  // Format ISO date as "Jan 1, 2023"
+  const formatDate = (iso?: string | null): string => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Fallback avatar generator
+  const avatarFallback = (login: string) =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      login,
+    )}&background=0D8ABC&color=fff`;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">
-        Repositories ({total_count})
-      </h2>
-      <div className="space-y-4">
-        {repositories.map((repo) => (
-          <div
-            key={repo.id}
-            className="bg-white rounded-lg shadow p-4 flex flex-col sm:flex-row sm:items-center"
-          >
-            <img
-              src={repo.owner.avatar_url}
-              alt={repo.owner.login}
-              className="w-12 h-12 rounded-full mb-3 sm:mb-0 sm:mr-4 flex-shrink-0"
-            />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="text-lg font-semibold text-blue-600 truncate">
-                  {repo.full_name}
-                </span>
-                <span
-                  className={`text-xs px-2 py-0.5 rounded ${
-                    repo.private
-                      ? "bg-red-100 text-red-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {repo.private ? "Private" : "Public"}
-                </span>
-              </div>
-              {repo.description && (
-                <p className="text-gray-600 text-sm line-clamp-2 mb-2">
-                  {repo.description}
-                </p>
-              )}
-              <div className="flex flex-wrap items-center text-gray-500 text-xs space-x-4">
-                {typeof repo.stargazers_count === "number" && (
-                  <div className="flex items-center">
-                    <span className="mr-1">★</span>
-                    <span>{formatCount(repo.stargazers_count)}</span>
-                  </div>
-                )}
-                {typeof repo.forks_count === "number" && (
-                  <div className="flex items-center">
-                    <span className="mr-1">🔀</span>
-                    <span>{formatCount(repo.forks_count)}</span>
-                  </div>
-                )}
-                {typeof repo.open_issues_count === "number" && (
-                  <div className="flex items-center">
-                    <span className="mr-1">⚠️</span>
-                    <span>{formatCount(repo.open_issues_count)}</span>
-                  </div>
-                )}
-                <div className="flex items-center">
-                  <img
-                    src={repo.owner.avatar_url}
-                    alt={repo.owner.login}
-                    className="w-4 h-4 rounded-full mr-1"
-                  />
-                  <span>{repo.owner.login}</span>
-                </div>
-              </div>
-              {Array.isArray(repo.topics) && repo.topics.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {repo.topics.map((topic, i) => (
-                    <span
-                      key={i}
-                      className="bg-gray-100 text-gray-700 text-xs px-2 py-0.5 rounded"
-                    >
-                      {topic}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="mb-4 flex items-center">
+        <LucideReact.Github size={20} className="text-gray-700 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800">
+          Repositories ({totalCount})
+        </h2>
       </div>
+
+      {/* Empty State */}
+      {repos.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-gray-500">
+          <LucideReact.AlertCircle size={48} className="mb-2" />
+          <span>No repositories found</span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {repos.map((repo) => {
+            const stars = repo.stargazers_count ?? 0;
+            const forks = repo.forks ?? 0;
+            return (
+              <div
+                key={repo.id}
+                className="flex flex-col p-4 bg-gray-50 rounded-md hover:shadow-lg transition-shadow"
+              >
+                {/* Title & Owner */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center overflow-hidden">
+                    <div className="w-6 h-6 mr-2 rounded-full overflow-hidden">
+                      <img
+                        src={repo.owner.avatar_url}
+                        alt={repo.owner.login}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).src = avatarFallback(
+                            repo.owner.login,
+                          );
+                        }}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <span className="font-medium text-gray-800 truncate">
+                      {repo.name}
+                    </span>
+                  </div>
+                  {repo.private && (
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">
+                      Private
+                    </span>
+                  )}
+                </div>
+
+                {/* Description */}
+                {repo.description && (
+                  <p className="text-sm text-gray-600 line-clamp-2 mb-4">
+                    {repo.description}
+                  </p>
+                )}
+
+                {/* Stats */}
+                <div className="mt-auto flex flex-wrap items-center text-sm text-gray-500 gap-3">
+                  <div className="flex items-center">
+                    <LucideReact.Star size={16} className="text-yellow-500 mr-1" />
+                    <span>{formatCount(stars)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.GitBranch size={16} className="mr-1" />
+                    <span>{formatCount(forks)}</span>
+                  </div>
+                  {repo.language && (
+                    <div className="flex items-center">
+                      <LucideReact.Tag size={16} className="text-blue-500 mr-1" />
+                      <span>{repo.language}</span>
+                    </div>
+                  )}
+                  {repo.updated_at && (
+                    <div className="flex items-center ml-auto">
+                      <LucideReact.Calendar size={16} className="mr-1" />
+                      <span>{formatDate(repo.updated_at)}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

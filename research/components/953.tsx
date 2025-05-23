@@ -1,19 +1,20 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiUserInstallationsRepositories {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             repository_selection?: string;
             repositories: AutoViewInputSubTypes.repository[];
-        };
+        }
     }
     /**
      * A repository on GitHub.
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -217,7 +218,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -236,7 +237,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -259,7 +260,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiUserInstallationsRepositories.GetResponse;
 
@@ -267,103 +268,84 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiUserInstallationsRepositor
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and derived constants
-  const formatDate = (iso: string | null): string => {
-    if (!iso) return "Unknown";
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const totalRepos = value.total_count;
+  const selection = value.repository_selection ?? 'All repositories';
+
+  const formatDate = (iso?: string | null): string => {
+    if (!iso) return 'Unknown';
     const date = new Date(iso);
     return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
     });
   };
 
-  const selectionLabel = value.repository_selection
-    ? value.repository_selection.charAt(0).toUpperCase() +
-      value.repository_selection.slice(1)
-    : null;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
-      <header className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Repositories ({value.total_count})
+    <div className="p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          <LucideReact.Package size={20} className="text-gray-600" />
+          <span>Repositories ({totalRepos})</span>
         </h2>
-        {selectionLabel && (
-          <span className="text-sm text-gray-500 capitalize">
-            {selectionLabel}
-          </span>
+        {value.repository_selection && (
+          <span className="text-sm text-gray-500">Selection: {selection}</span>
         )}
-      </header>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      </div>
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {value.repositories.map((repo) => (
           <div
             key={repo.id}
-            className="flex flex-col p-4 bg-gray-50 rounded-lg border border-gray-200 hover:shadow-lg transition"
+            className="bg-white rounded-lg shadow hover:shadow-md transition p-4 flex flex-col"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <img
-                  src={repo.owner.avatar_url}
-                  alt={repo.owner.login ?? "owner avatar"}
-                  className="w-8 h-8 rounded-full"
-                />
-                <h3 className="text-md font-medium text-gray-900 truncate">
-                  {repo.name}
-                </h3>
-              </div>
-              <span
-                className={`text-xs px-1.5 py-0.5 rounded ${
-                  repo.private
-                    ? "bg-red-100 text-red-800"
-                    : "bg-green-100 text-green-800"
-                }`}
-              >
-                {repo.private ? "Private" : "Public"}
-              </span>
+            <h3 className="text-md font-medium text-blue-600 truncate">
+              {repo.full_name}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+              {repo.description ?? 'No description'}
+            </p>
+            <div className="flex items-center mt-3 text-xs text-gray-500">
+              <img
+                src={repo.owner.avatar_url}
+                alt={`${repo.owner.login} avatar`}
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    repo.owner.login,
+                  )}&background=0D8ABC&color=fff`;
+                }}
+                className="w-4 h-4 rounded-full mr-1 object-cover"
+              />
+              <span className="mr-2">{repo.owner.login}</span>
+              <LucideReact.Calendar size={12} className="mr-1" />
+              <span>{formatDate(repo.updated_at)}</span>
             </div>
-            {repo.description && (
-              <p className="mt-2 text-sm text-gray-700 line-clamp-2">
-                {repo.description}
-              </p>
-            )}
-            <div className="mt-3 flex flex-wrap items-center text-xs text-gray-500 space-x-2">
+            <div className="flex items-center mt-3 gap-4 text-sm text-gray-600">
+              <div className="flex items-center gap-1">
+                <LucideReact.Star size={16} className="text-amber-400" />
+                <span>{repo.stargazers_count}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <LucideReact.GitBranch size={16} className="text-gray-500" />
+                <span>{repo.forks_count}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <LucideReact.Eye size={16} className="text-gray-500" />
+                <span>{repo.watchers_count}</span>
+              </div>
               {repo.language && (
-                <span className="px-1.5 py-0.5 bg-gray-200 rounded">
-                  {repo.language}
-                </span>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Code size={16} className="text-gray-500" />
+                  <span>{repo.language}</span>
+                </div>
               )}
               {repo.license?.name && (
-                <span className="px-1.5 py-0.5 bg-gray-200 rounded">
-                  {repo.license.name}
-                </span>
+                <div className="flex items-center gap-1">
+                  <LucideReact.Tag size={16} className="text-gray-500" />
+                  <span>{repo.license.name}</span>
+                </div>
               )}
-            </div>
-            <div className="mt-4 flex items-center justify-between text-sm text-gray-600">
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center space-x-1">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927C9.349 2.05 10.651 2.05 10.951 2.927l.735 2.49a1 1 0 00.95.69h2.62c.969 0 1.371 1.24.588 1.81l-2.12 1.54a1 1 0 00-.364 1.118l.735 2.49c.3.877-.755 1.603-1.54 1.118l-2.12-1.54a1 1 0 00-1.176 0l-2.12 1.54c-.785.485-1.84-.241-1.54-1.118l.735-2.49a1 1 0 00-.364-1.118L2.156 7.917c-.783-.57-.38-1.81.588-1.81h2.62a1 1 0 00.95-.69l.735-2.49z" />
-                  </svg>
-                  <span>{repo.stargazers_count}</span>
-                </span>
-                <span className="flex items-center space-x-1">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-4.414-4.414A1 1 0 0012.586 4H5zm7 2H6v2h6V5z" />
-                  </svg>
-                  <span>{repo.forks_count}</span>
-                </span>
-              </div>
-              <span>Updated {formatDate(repo.updated_at)}</span>
             </div>
           </div>
         ))}

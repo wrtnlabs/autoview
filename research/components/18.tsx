@@ -1,14 +1,15 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-    export type IShoppingMileageDonation = {
+    export interface IShoppingMileageDonation {
         id: string & tags.Format<"uuid">;
         administrator: AutoViewInputSubTypes.IShoppingAdministrator.IInvert;
         citizen: AutoViewInputSubTypes.IShoppingCitizen;
         value: number;
         reason: string;
         created_at: string & tags.Format<"date-time">;
-    };
+    }
     export namespace IShoppingAdministrator {
         /**
          * Invert information starting from administrator info.
@@ -19,7 +20,7 @@ export namespace AutoViewInputSubTypes {
          * and access to the customer, member and {@link IShoppingCitizen citizen}
          * information inversely.
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Discriminant for the type of customer.
              *
@@ -58,7 +59,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     export namespace IShoppingMember {
         /**
@@ -70,7 +71,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -97,7 +98,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Email address of member.
@@ -106,7 +107,7 @@ export namespace AutoViewInputSubTypes {
      * registered for one {@link IShoppingMember member}. If you don't have to
      * plan such multiple email addresses, just use only one.
     */
-    export type IShoppingMemberEmail = {
+    export interface IShoppingMemberEmail {
         /**
          * Primary Key.
          *
@@ -125,7 +126,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
     export namespace IShoppingCustomer {
         /**
          * Inverted customer information.
@@ -136,7 +137,7 @@ export namespace AutoViewInputSubTypes {
          * - {@link IShoppingSeller.IInvert}
          * - {@link IShoppingAdministrator.IInvert}
         */
-        export type IInvert = {
+        export interface IInvert {
             /**
              * Primary Key.
              *
@@ -156,7 +157,7 @@ export namespace AutoViewInputSubTypes {
              *
              * @title External user information
             */
-            external_user: null | any;
+            external_user: null | AutoViewInputSubTypes.IShoppingExternalUser;
             /**
              * Connection address.
              *
@@ -185,7 +186,7 @@ export namespace AutoViewInputSubTypes {
              * @title Creation time of the connection record
             */
             created_at: string;
-        };
+        }
     }
     /**
      * Channel information.
@@ -197,7 +198,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -222,8 +223,80 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
-    export type IShoppingExternalUser = any;
+    }
+    /**
+     * External user information.
+     *
+     * `IShoppingExternalUser` is an entity dsigned for when this system needs
+     * to connect with external services and welcome their users as
+     * {@link IShoppingCustomer customers} of this service.
+     *
+     * For reference, customers who connect from an external service must have
+     * this record, and the external service user is identified through the two
+     * attributes {@link application} and {@link uid}. If a customer connected
+     * from an external service completes
+     * {@link IShoppingCitizen real-name authentication} from this service, each
+     * time the external service user reconnects to this service and issues a
+     * new customer authentication token, real-name authentication begins with
+     * completed.
+     *
+     * And {@link password} is the password issued to the user by the external
+     * service system (the so-called permanent user authentication token), and
+     * is never the actual user password. However, for customers who entered the
+     * same application and uid as the current external system user, this is to
+     * determine whether to view this as a correct external system user or a
+     * violation.
+     *
+     * In addition, additional information received from external services can
+     * be recorded in the data field in JSON format.
+    */
+    export interface IShoppingExternalUser {
+        /**
+         * Primary Key.
+         *
+         * @title Primary Key
+        */
+        id: string;
+        /**
+         * Citizen activation info.
+         *
+         * @title Citizen activation info
+        */
+        citizen: null | AutoViewInputSubTypes.IShoppingCitizen;
+        /**
+         * Creation time of record.
+         *
+         * Another word, first time when the external user connected.
+         *
+         * @title Creation time of record
+        */
+        created_at: string;
+        /**
+         * Identifier key of external user from the external system.
+         *
+         * @title Identifier key of external user from the external system
+        */
+        uid: string;
+        /**
+         * Identifier code of the external service.
+         *
+         * It can be same with {@link IShoppingChannel.code} in common.
+         *
+         * @title Identifier code of the external service
+        */
+        application: string;
+        /**
+         * Nickname of external user in the external system.
+         *
+         * @title Nickname of external user in the external system
+        */
+        nickname: string;
+        /**
+         * Additional information about external user from the external
+         * system.
+        */
+        data: any;
+    }
     /**
      * Citizen verification information.
      *
@@ -239,7 +312,7 @@ export namespace AutoViewInputSubTypes {
      * Of course, real name and mobile phone authentication information are
      * encrypted and stored.
     */
-    export type IShoppingCitizen = {
+    export interface IShoppingCitizen {
         /**
          * Primary Key.
          *
@@ -264,74 +337,85 @@ export namespace AutoViewInputSubTypes {
          * @title Real name, or equivalent nickname
         */
         name: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingMileageDonation;
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Derived and formatted values
-  const formattedValue = `${value.value.toLocaleString()} miles`;
-  const formattedDate = new Date(value.created_at).toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  });
-  const adminNickname = value.administrator.member.nickname;
-  const adminName = value.administrator.citizen.name;
-  const adminEmails = value.administrator.member.emails
-    .map((e) => e.value)
-    .join(", ");
-  const receiverName = value.citizen.name;
-  const receiverMobile = (() => {
-    const m = value.citizen.mobile.replace(/\D/g, "");
-    const last4 = m.slice(-4);
-    return `•••${last4}`;
-  })();
-  const channelName = value.administrator.customer.channel.name;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const donationDate = new Date(value.created_at).toLocaleString();
+  const donationPoints = value.value.toLocaleString();
 
+  const admin = value.administrator;
+  const adminNickname = admin.member.nickname;
+  const adminEmails = admin.member.emails.map((e) => e.value);
+  const adminJoinDate = new Date(admin.member.created_at).toLocaleDateString();
+
+  const citizenInfo = value.citizen;
+  const citizenName = citizenInfo.name;
+  const citizenMobile = citizenInfo.mobile;
+  const citizenVerifiedDate = new Date(citizenInfo.created_at).toLocaleDateString();
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6 space-y-6">
-      <h2 className="text-xl font-semibold text-gray-800">Mileage Donation</h2>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+    <article className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md space-y-4">
+      <header className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800">Mileage Donation</h2>
+        <time dateTime={value.created_at} className="flex items-center text-sm text-gray-500">
+          <LucideReact.Calendar size={16} className="mr-1" />
+          {donationDate}
+        </time>
+      </header>
+
+      <section className="flex items-center text-indigo-600 font-medium">
+        <LucideReact.Gift size={20} className="mr-2" />
+        <span>{donationPoints} Points</span>
+      </section>
+
+      <section>
+        <h3 className="flex items-center text-gray-700 font-semibold mb-1">
+          <LucideReact.Tag size={16} className="mr-1 text-gray-500" />
+          Reason
+        </h3>
+        <p className="text-gray-600 line-clamp-2">{value.reason}</p>
+      </section>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <dt className="text-sm font-medium text-gray-500">Amount</dt>
-          <dd className="mt-1 text-lg font-semibold text-green-600">{formattedValue}</dd>
+          <h4 className="flex items-center text-gray-700 font-semibold mb-1">
+            <LucideReact.User size={16} className="mr-1 text-gray-500" />
+            Administrator
+          </h4>
+          <p className="text-gray-800">{adminNickname}</p>
+          <div className="flex items-center text-gray-600 mt-1">
+            <LucideReact.Mail size={14} className="mr-1" />
+            <span>{adminEmails[0]}</span>
+          </div>
+          <div className="flex items-center text-gray-500 text-sm mt-1">
+            <LucideReact.Calendar size={14} className="mr-1" />
+            <span>Joined: {adminJoinDate}</span>
+          </div>
         </div>
+
         <div>
-          <dt className="text-sm font-medium text-gray-500">Date</dt>
-          <dd className="mt-1 text-sm text-gray-700">{formattedDate}</dd>
+          <h4 className="flex items-center text-gray-700 font-semibold mb-1">
+            <LucideReact.User size={16} className="mr-1 text-gray-500" />
+            Citizen
+          </h4>
+          <p className="text-gray-800">{citizenName}</p>
+          <div className="flex items-center text-gray-600 mt-1">
+            <LucideReact.Phone size={14} className="mr-1" />
+            <span>{citizenMobile}</span>
+          </div>
+          <div className="flex items-center text-gray-500 text-sm mt-1">
+            <LucideReact.Calendar size={14} className="mr-1" />
+            <span>Verified: {citizenVerifiedDate}</span>
+          </div>
         </div>
-        <div className="sm:col-span-2">
-          <dt className="text-sm font-medium text-gray-500">Reason</dt>
-          <dd className="mt-1 text-sm text-gray-700 line-clamp-2">{value.reason}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Administrator</dt>
-          <dd className="mt-1 text-sm text-gray-700">
-            {adminNickname} ({adminName})
-          </dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Admin Email</dt>
-          <dd className="mt-1 text-sm text-gray-700">{adminEmails}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Receiver</dt>
-          <dd className="mt-1 text-sm text-gray-700">{receiverName}</dd>
-        </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Mobile</dt>
-          <dd className="mt-1 text-sm text-gray-700">{receiverMobile}</dd>
-        </div>
-        <div className="sm:col-span-2">
-          <dt className="text-sm font-medium text-gray-500">Channel</dt>
-          <dd className="mt-1 text-sm text-gray-700">{channelName}</dd>
-        </div>
-      </dl>
-    </div>
+      </div>
+    </article>
   );
 }

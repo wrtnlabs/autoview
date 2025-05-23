@@ -4,5 +4,5 @@ import Component from "../components/217";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"webhooks":[{"id":"whk_001_sample","channelId":"chan_123_test","name":"Sample Webhook V4 (Test)","url":"https://api.example.com/webhooks/sample-webhook-v4","token":"sample_token_abc123","keywords":["alert","notification","test-case"],"createdAt":1716239023,"watchUserChats":true,"watchGroups":false,"apiVersion":"v4.0","lastBlockedAt":1716833823,"blocked":false},{"name":"Minimal Webhook Sample","url":"https://example.org/hooks/minimal-test","apiVersion":"v4.0"}],"next":2};
+  return {"webhooks":[{"id":"wh_001_test","channelId":"ch_001_test","name":"Sample Webhook 1 (Test)","url":"https://api.example.com/webhook/sample-1","token":"token_sample_001","keywords":["update","test-case"],"createdAt":1753000000000,"watchUserChats":true,"watchGroups":false,"apiVersion":"v4","blocked":false,"lastBlockedAt":1753600000000},{"name":"Secondary Webhook (Sample)","url":"https://hooks.example.org/test-webhook-secondary","apiVersion":"1.2","keywords":["alert"],"createdAt":1752000000000,"watchUserChats":false,"watchGroups":true,"blocked":true,"lastBlockedAt":1752600000000}],"next":2};
 }

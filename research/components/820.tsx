@@ -1,14 +1,15 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * @title GitHub Pages deployment status
     */
-    export type pages_deployment_status = {
+    export interface pages_deployment_status {
         /**
          * The current status of the deployment.
         */
         status?: "deployment_in_progress" | "syncing_files" | "finished_file_sync" | "updating_pages" | "purging_cdn" | "deployment_cancelled" | "deployment_failed" | "deployment_content_failed" | "deployment_attempt_error" | "deployment_lost" | "succeed";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.pages_deployment_status;
 
@@ -17,65 +18,98 @@ export type AutoViewInput = AutoViewInputSubTypes.pages_deployment_status;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Map raw status keys to human-readable labels
-  const statusLabels: Record<string, string> = {
-    deployment_in_progress: "Deployment in Progress",
-    syncing_files: "Syncing Files",
-    finished_file_sync: "Finished File Sync",
-    updating_pages: "Updating Pages",
-    purging_cdn: "Purging CDN",
-    deployment_cancelled: "Cancelled",
-    deployment_failed: "Failed",
-    deployment_content_failed: "Content Failed",
-    deployment_attempt_error: "Attempt Error",
-    deployment_lost: "Lost",
-    succeed: "Succeeded",
-  };
+  type StatusKey = NonNullable<AutoViewInputSubTypes.pages_deployment_status["status"]>;
 
-  // Define status categories for styling
-  const inProgressStatuses = new Set([
-    "deployment_in_progress",
-    "syncing_files",
-    "finished_file_sync",
-    "updating_pages",
-    "purging_cdn",
-  ]);
-  const errorStatuses = new Set([
-    "deployment_failed",
-    "deployment_content_failed",
-    "deployment_attempt_error",
-    "deployment_lost",
-  ]);
-  const successStatuses = new Set(["succeed"]);
-  const cancelledStatuses = new Set(["deployment_cancelled"]);
-
-  // Derive display label
-  const rawStatus = value.status;
-  const displayLabel = rawStatus && statusLabels[rawStatus] ? statusLabels[rawStatus] : "Unknown";
-
-  // Derive badge color classes based on status category
-  const badgeBase = "px-2 py-1 text-sm font-medium rounded-full";
-  let badgeColorClass = "bg-gray-100 text-gray-800";
-  if (rawStatus) {
-    if (inProgressStatuses.has(rawStatus)) {
-      badgeColorClass = "bg-yellow-100 text-yellow-800";
-    } else if (successStatuses.has(rawStatus)) {
-      badgeColorClass = "bg-green-100 text-green-800";
-    } else if (errorStatuses.has(rawStatus)) {
-      badgeColorClass = "bg-red-100 text-red-800";
-    } else if (cancelledStatuses.has(rawStatus)) {
-      badgeColorClass = "bg-gray-100 text-gray-800";
-    }
+  interface StatusConfig {
+    label: string;
+    Icon: React.FC<any>;
+    colorClass: string;
+    spin?: boolean;
   }
 
+  const statusMap: Record<StatusKey, StatusConfig> = {
+    deployment_in_progress: {
+      label: "Deployment In Progress",
+      Icon: LucideReact.Loader,
+      colorClass: "text-blue-500",
+      spin: true,
+    },
+    syncing_files: {
+      label: "Syncing Files",
+      Icon: LucideReact.RefreshCw,
+      colorClass: "text-indigo-500",
+      spin: true,
+    },
+    finished_file_sync: {
+      label: "Files Synced",
+      Icon: LucideReact.CheckCircle,
+      colorClass: "text-green-500",
+    },
+    updating_pages: {
+      label: "Updating Pages",
+      Icon: LucideReact.RefreshCw,
+      colorClass: "text-blue-400",
+      spin: true,
+    },
+    purging_cdn: {
+      label: "Purging CDN",
+      Icon: LucideReact.Trash2,
+      colorClass: "text-orange-500",
+    },
+    deployment_cancelled: {
+      label: "Deployment Cancelled",
+      Icon: LucideReact.XCircle,
+      colorClass: "text-gray-500",
+    },
+    deployment_failed: {
+      label: "Deployment Failed",
+      Icon: LucideReact.AlertTriangle,
+      colorClass: "text-red-500",
+    },
+    deployment_content_failed: {
+      label: "Content Sync Failed",
+      Icon: LucideReact.AlertTriangle,
+      colorClass: "text-red-500",
+    },
+    deployment_attempt_error: {
+      label: "Attempt Error",
+      Icon: LucideReact.AlertTriangle,
+      colorClass: "text-red-500",
+    },
+    deployment_lost: {
+      label: "Deployment Lost",
+      Icon: LucideReact.HelpCircle,
+      colorClass: "text-yellow-500",
+    },
+    succeed: {
+      label: "Deployment Succeeded",
+      Icon: LucideReact.CheckCircle,
+      colorClass: "text-green-500",
+    },
+  };
+
+  // Determine configuration for the current status, or default if unknown
+  const key = value.status as StatusKey | undefined;
+  const cfg: StatusConfig = key && statusMap[key]
+    ? statusMap[key]
+    : {
+        label: "Unknown Status",
+        Icon: LucideReact.AlertCircle,
+        colorClass: "text-gray-400",
+      };
+
+  const StatusIcon = cfg.Icon;
+
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex items-center justify-between">
-      <div className="text-sm font-medium text-gray-700">Deployment Status</div>
-      <span className={`${badgeBase} ${badgeColorClass}`} aria-label={`Status: ${displayLabel}`}>
-        {displayLabel}
-      </span>
+    <div className="flex items-center gap-2 p-4 bg-white rounded-lg shadow-sm">
+      <StatusIcon
+        size={20}
+        strokeWidth={2}
+        className={`${cfg.colorClass} ${cfg.spin ? "animate-spin" : ""}`}
+        aria-label={cfg.label}
+      />
+      <span className="text-sm font-medium text-gray-700">{cfg.label}</span>
     </div>
   );
 }

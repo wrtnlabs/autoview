@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Org Hook
      *
      * @title Org Hook
     */
-    export type org_hook = {
+    export interface org_hook {
         id: number & tags.Type<"int32">;
         url: string & tags.Format<"uri">;
         ping_url: string & tags.Format<"uri">;
@@ -23,7 +24,7 @@ export namespace AutoViewInputSubTypes {
         updated_at: string & tags.Format<"date-time">;
         created_at: string & tags.Format<"date-time">;
         type: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.org_hook;
 
@@ -31,97 +32,104 @@ export type AutoViewInput = AutoViewInputSubTypes.org_hook;
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isActive = value.active;
-  const statusLabel = isActive ? "Active" : "Inactive";
-  const statusColor = isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
+  // 1. Derived and formatted values
+  const createdAt = new Date(value.created_at).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+  const updatedAt = new Date(value.updated_at).toLocaleString(undefined, {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+  // Use config.url if present, otherwise fallback to the top‐level url
+  const endpoint = value.config.url ?? value.url;
 
-  const createdAt = new Date(value.created_at).toLocaleString();
-  const updatedAt = new Date(value.updated_at).toLocaleString();
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. JSX structure with Tailwind CSS
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto border border-gray-200">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white rounded-lg shadow p-4 max-w-md mx-auto">
+      {/* Header: Name and Active Status */}
+      <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
-        <span className={`px-2 py-1 text-sm font-medium rounded ${statusColor}`}>{statusLabel}</span>
+        <div className="flex items-center space-x-1">
+          {value.active ? (
+            <LucideReact.CheckCircle className="text-green-500" size={20} />
+          ) : (
+            <LucideReact.XCircle className="text-red-500" size={20} />
+          )}
+          <span className={value.active ? 'text-sm text-green-600' : 'text-sm text-red-600'}>
+            {value.active ? 'Active' : 'Inactive'}
+          </span>
+        </div>
       </div>
 
-      {/* Type */}
-      <div className="mb-4">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase">Hook Type</h3>
-        <p className="text-gray-700 mt-1 truncate">{value.type}</p>
+      {/* Hook Type */}
+      <div className="mt-3 flex items-center text-sm text-gray-600 space-x-2">
+        <LucideReact.Tag className="text-gray-400" size={16} />
+        <span className="truncate">{value.type}</span>
       </div>
 
-      {/* Events */}
-      <div className="mb-4">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase">Events</h3>
+      {/* Endpoint URL */}
+      <div className="mt-3 flex items-center text-sm text-gray-600">
+        <LucideReact.Link className="text-gray-400" size={16} />
+        <a
+          href={endpoint}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-1 truncate block max-w-full text-blue-600 hover:underline"
+        >
+          {endpoint}
+        </a>
+      </div>
+
+      {/* Subscribed Events */}
+      <div className="mt-3">
+        <span className="text-sm font-medium text-gray-700">Subscribed Events:</span>
         <div className="mt-1 flex flex-wrap gap-1">
-          {value.events.map((evt, idx) => (
+          {value.events.map((event) => (
             <span
-              key={idx}
-              className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full truncate"
+              key={event}
+              className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded truncate"
             >
-              {evt}
+              {event}
             </span>
           ))}
         </div>
       </div>
 
-      {/* URLs */}
-      <div className="mb-4">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase">Endpoints</h3>
-        <div className="mt-1 space-y-2">
-          <div>
-            <p className="text-[10px] text-gray-400">URL</p>
-            <p className="text-sm text-gray-700 break-all">{value.url}</p>
-          </div>
-          <div>
-            <p className="text-[10px] text-gray-400">Ping URL</p>
-            <p className="text-sm text-gray-700 break-all">{value.ping_url}</p>
-          </div>
-          {value.deliveries_url && (
-            <div>
-              <p className="text-[10px] text-gray-400">Deliveries URL</p>
-              <p className="text-sm text-gray-700 break-all">{value.deliveries_url}</p>
+      {/* Config Details */}
+      {(value.config.content_type || value.config.insecure_ssl != null) && (
+        <div className="mt-3 space-y-1 text-sm text-gray-600">
+          {value.config.content_type && (
+            <div className="flex items-center">
+              <LucideReact.FileText className="text-gray-400" size={16} />
+              <span className="ml-1">Content Type: {value.config.content_type}</span>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Config */}
-      <div className="mb-4">
-        <h3 className="text-xs font-semibold text-gray-500 uppercase">Configuration</h3>
-        <div className="mt-1 space-y-1 text-gray-700 text-sm">
-          {value.config.content_type && (
-            <p>
-              <span className="font-medium">Content Type:</span> {value.config.content_type}
-            </p>
-          )}
-          {value.config.url && (
-            <p>
-              <span className="font-medium">Config URL:</span> {value.config.url}
-            </p>
-          )}
-          {typeof value.config.insecure_ssl === "string" && (
-            <p>
-              <span className="font-medium">Insecure SSL:</span>{" "}
-              {value.config.insecure_ssl === "1" ? "Enabled" : "Disabled"}
-            </p>
+          {value.config.insecure_ssl != null && (
+            value.config.insecure_ssl === '1' ? (
+              <div className="flex items-center">
+                <LucideReact.AlertTriangle className="text-amber-500" size={16} />
+                <span className="ml-1">Insecure SSL Enabled</span>
+              </div>
+            ) : (
+              <div className="flex items-center">
+                <LucideReact.Lock className="text-green-500" size={16} />
+                <span className="ml-1">SSL Verified</span>
+              </div>
+            )
           )}
         </div>
-      </div>
+      )}
 
       {/* Timestamps */}
-      <div className="grid grid-cols-2 gap-4 text-gray-600 text-xs">
-        <div>
-          <p className="font-medium">Created At</p>
-          <p className="mt-0.5">{createdAt}</p>
+      <div className="mt-4 text-sm text-gray-500 space-y-1">
+        <div className="flex items-center">
+          <LucideReact.Calendar className="text-gray-400" size={16} />
+          <span className="ml-1">Created: {createdAt}</span>
         </div>
-        <div>
-          <p className="font-medium">Updated At</p>
-          <p className="mt-0.5">{updatedAt}</p>
+        <div className="flex items-center">
+          <LucideReact.Calendar className="text-gray-400" size={16} />
+          <span className="ml-1">Updated: {updatedAt}</span>
         </div>
       </div>
     </div>

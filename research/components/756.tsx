@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Webhooks for repositories.
      *
      * @title Webhook
     */
-    export type hook = {
+    export interface hook {
         type: string;
         /**
          * Unique identifier of the webhook.
@@ -32,18 +33,18 @@ export namespace AutoViewInputSubTypes {
         ping_url: string & tags.Format<"uri">;
         deliveries_url?: string & tags.Format<"uri">;
         last_response: AutoViewInputSubTypes.hook_response;
-    };
+    }
     /**
      * Configuration object of the webhook
      *
      * @title Webhook Configuration
     */
-    export type webhook_config = {
+    export interface webhook_config {
         url?: AutoViewInputSubTypes.webhook_config_url;
         content_type?: AutoViewInputSubTypes.webhook_config_content_type;
         secret?: AutoViewInputSubTypes.webhook_config_secret;
         insecure_ssl?: AutoViewInputSubTypes.webhook_config_insecure_ssl;
-    };
+    }
     /**
      * The URL to which the payloads will be delivered.
     */
@@ -60,11 +61,11 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Hook Response
     */
-    export type hook_response = {
+    export interface hook_response {
         code: (number & tags.Type<"int32">) | null;
         status: string | null;
         message: string | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.hook[];
 
@@ -73,104 +74,186 @@ export type AutoViewInput = AutoViewInputSubTypes.hook[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateStr: string): string =>
-    new Date(dateStr).toLocaleString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+  const hooks = value;
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const hooks = value;
+  if (!hooks || hooks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-4 text-lg">No webhooks available.</p>
+      </div>
+    );
+  }
 
+  // 3. Return the React element.
   return (
     <div className="space-y-4">
       {hooks.map((hook) => {
-        const createdAt = formatDate(hook.created_at);
-        const updatedAt = formatDate(hook.updated_at);
-        const isSuccessResponse =
-          hook.last_response.code !== null &&
-          hook.last_response.code >= 200 &&
-          hook.last_response.code < 300;
-        const hasResponse =
-          hook.last_response.status !== null && hook.last_response.code !== null;
-        const responseText = hasResponse
-          ? `${hook.last_response.status} (${hook.last_response.code})`
-          : 'No Response';
+        const statusCode = hook.last_response?.code;
+        const statusText = hook.last_response?.status ?? "Unknown";
+        const isSuccess =
+          statusCode != null && statusCode >= 200 && statusCode < 300;
 
         return (
-          <div
-            key={hook.id}
-            className="p-4 bg-white rounded-lg shadow border border-gray-200"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-900 truncate">
-                  {hook.name}
-                </h2>
-                <p className="text-sm text-gray-500 mt-1 capitalize">
-                  {hook.type}
-                </p>
+          <div key={hook.id} className="p-4 bg-white rounded-lg shadow">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {hook.name}
+              </h3>
+              {hook.active ? (
+                <LucideReact.CheckCircle
+                  className="text-green-500"
+                  size={20}
+                  aria-label="Active"
+                />
+              ) : (
+                <LucideReact.XCircle
+                  className="text-red-500"
+                  size={20}
+                  aria-label="Inactive"
+                />
+              )}
+            </div>
+
+            {/* Timestamps */}
+            <div className="mt-2 flex flex-wrap items-center text-sm text-gray-600 space-x-2">
+              <LucideReact.Calendar size={16} />
+              <span>Created: {formatDate(hook.created_at)}</span>
+              <span>·</span>
+              <span>Updated: {formatDate(hook.updated_at)}</span>
+            </div>
+
+            {/* URLs */}
+            <div className="mt-3 space-y-2 text-sm text-gray-700">
+              <div className="flex items-center space-x-1">
+                <LucideReact.Link
+                  size={16}
+                  className="text-gray-400 flex-shrink-0"
+                />
+                <span className="truncate">{hook.url}</span>
               </div>
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                  hook.active
-                    ? 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                }`}
-              >
-                {hook.active ? 'Active' : 'Inactive'}
-              </span>
+              <div className="flex items-center space-x-1">
+                <LucideReact.Link
+                  size={16}
+                  className="text-gray-400 flex-shrink-0"
+                />
+                <span className="truncate">{hook.test_url}</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <LucideReact.Link
+                  size={16}
+                  className="text-gray-400 flex-shrink-0"
+                />
+                <span className="truncate">{hook.ping_url}</span>
+              </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center">
-              {hook.events.map((evt) => (
-                <span
-                  key={evt}
-                  className="inline-block bg-blue-100 text-blue-800 text-xs font-medium mr-2 mb-2 px-2 py-0.5 rounded"
-                >
-                  {evt}
-                </span>
-              ))}
+            {/* Events */}
+            <div className="mt-3">
+              <h4 className="text-sm font-medium text-gray-800">Events</h4>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {hook.events.map((evt) => (
+                  <span
+                    key={evt}
+                    className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded"
+                  >
+                    {evt}
+                  </span>
+                ))}
+              </div>
             </div>
 
-            {hook.config.url && (
+            {/* Config */}
+            {hook.config && (
               <div className="mt-3">
-                <p className="text-sm font-medium text-gray-700">Target URL:</p>
-                <p className="text-sm text-gray-500 truncate">{hook.config.url}</p>
+                <h4 className="text-sm font-medium text-gray-800">Config</h4>
+                <ul className="mt-1 text-sm text-gray-700 space-y-1">
+                  {hook.config.url && (
+                    <li className="flex items-center space-x-1">
+                      <LucideReact.Link
+                        size={16}
+                        className="text-gray-400 flex-shrink-0"
+                      />
+                      <span className="truncate">{hook.config.url}</span>
+                    </li>
+                  )}
+                  {hook.config.content_type && (
+                    <li className="flex items-center space-x-1">
+                      <LucideReact.Tag
+                        size={16}
+                        className="text-gray-400 flex-shrink-0"
+                      />
+                      <span>{hook.config.content_type}</span>
+                    </li>
+                  )}
+                  {hook.config.secret && (
+                    <li className="flex items-center space-x-1">
+                      <LucideReact.Key
+                        size={16}
+                        className="text-gray-400 flex-shrink-0"
+                      />
+                      <span className="truncate">••••••••</span>
+                    </li>
+                  )}
+                  {hook.config.insecure_ssl != null && (
+                    <li className="flex items-center space-x-1">
+                      <LucideReact.ShieldOff
+                        size={16}
+                        className="text-gray-400 flex-shrink-0"
+                      />
+                      <span>{hook.config.insecure_ssl}</span>
+                    </li>
+                  )}
+                </ul>
               </div>
             )}
 
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
-              <div>
-                <p className="font-medium text-gray-700">Created:</p>
-                <p>{createdAt}</p>
+            {/* Last Response */}
+            <div className="mt-3">
+              <h4 className="text-sm font-medium text-gray-800">
+                Last Response
+              </h4>
+              <div className="flex items-center mt-1 space-x-2 text-sm">
+                {statusCode != null ? (
+                  isSuccess ? (
+                    <LucideReact.CheckCircle
+                      className="text-green-500 flex-shrink-0"
+                      size={16}
+                      aria-label="Success"
+                    />
+                  ) : (
+                    <LucideReact.AlertTriangle
+                      className="text-red-500 flex-shrink-0"
+                      size={16}
+                      aria-label="Error"
+                    />
+                  )
+                ) : (
+                  <LucideReact.HelpCircle
+                    className="text-gray-400 flex-shrink-0"
+                    size={16}
+                    aria-label="Unknown"
+                  />
+                )}
+                <span>
+                  {statusCode ?? "—"} {statusText}
+                </span>
               </div>
-              <div>
-                <p className="font-medium text-gray-700">Updated:</p>
-                <p>{updatedAt}</p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex items-center text-sm">
-              <span
-                className={`inline-flex items-center px-2 py-0.5 rounded-full mr-2 text-xs font-medium ${
-                  hasResponse
-                    ? isSuccessResponse
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}
-              >
-                {hasResponse
-                  ? isSuccessResponse
-                    ? 'Success'
-                    : 'Error'
-                  : 'No Response'}
-              </span>
-              <p className="text-gray-600">{responseText}</p>
+              {hook.last_response.message && (
+                <p className="mt-1 text-xs text-gray-600 truncate">
+                  {hook.last_response.message}
+                </p>
+              )}
             </div>
           </div>
         );

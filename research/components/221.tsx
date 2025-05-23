@@ -1,10 +1,11 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace shared {
-        export type IntegerView = {
+        export interface IntegerView {
             result?: number & tags.Type<"int32">;
-        };
+        }
     }
 }
 export type AutoViewInput = AutoViewInputSubTypes.shared.IntegerView;
@@ -14,30 +15,40 @@ export type AutoViewInput = AutoViewInputSubTypes.shared.IntegerView;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { result } = value;
-  const displayResult =
-    result != null ? new Intl.NumberFormat().format(result) : "N/A";
-  const resultColor =
-    result == null
-      ? "text-gray-400"
-      : result >= 0
-      ? "text-green-600"
-      : "text-red-600";
+  const hasResult = typeof value.result === "number";
+  const formattedResult = hasResult
+    ? new Intl.NumberFormat().format(value.result as number)
+    : "N/A";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   //    Utilize semantic HTML elements where appropriate.
-  // 3. Return the React element.
   return (
-    <div className="max-w-xs mx-auto p-4 bg-white rounded-lg shadow-md">
-      <h2 className="text-sm font-medium text-gray-500 mb-2 text-center">
-        Result
-      </h2>
-      <p
-        className={`text-3xl font-semibold text-center ${resultColor}`}
-        title={result != null ? String(result) : undefined}
+    <div className="w-full max-w-xs mx-auto p-4 bg-white rounded-lg shadow-md text-center">
+      <div className="flex items-center justify-center mb-2">
+        {hasResult ? (
+          <LucideReact.Hash
+            className="text-indigo-500"
+            size={24}
+            aria-label="Integer Value Icon"
+          />
+        ) : (
+          <LucideReact.AlertCircle
+            className="text-gray-400"
+            size={24}
+            aria-label="No Data Available"
+          />
+        )}
+      </div>
+      <div
+        className={
+          hasResult
+            ? "text-3xl font-semibold text-gray-900"
+            : "text-xl font-medium text-gray-500"
+        }
       >
-        {displayResult}
-      </p>
+        {formattedResult}
+      </div>
+      <div className="mt-1 text-sm text-gray-500">Integer Result</div>
     </div>
   );
 }

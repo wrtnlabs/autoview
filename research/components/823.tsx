@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Projects are a way to organize columns and cards of work.
      *
      * @title Project
     */
-    export type project = {
+    export interface project {
         owner_url: string & tags.Format<"uri">;
         url: string & tags.Format<"uri">;
         html_url: string & tags.Format<"uri">;
@@ -37,7 +38,7 @@ export namespace AutoViewInputSubTypes {
          * Whether or not this project can be seen by everyone. Only present if owner is an organization.
         */
         "private"?: boolean;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -74,85 +75,114 @@ export type AutoViewInput = AutoViewInputSubTypes.project[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation & formatting functions
-  const projects = value;
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  
+
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      {projects.map((project) => {
-        const isOpen = project.state === "open";
-        const stateClasses = isOpen
-          ? "bg-green-100 text-green-800"
-          : "bg-red-100 text-red-800";
-        const creator = project.creator;
-        const creatorName =
-          creator?.name ?? creator?.login ?? "Unknown";
-        const createdAt = formatDate(project.created_at);
-        const updatedAt = formatDate(project.updated_at);
-
-        return (
+    <div className="space-y-4">
+      {value.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2 text-sm">No projects available</span>
+        </div>
+      ) : (
+        value.map((project) => (
           <div
             key={project.id}
-            className="flex flex-col justify-between p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-colors flex flex-col md:flex-row md:items-center md:justify-between gap-4"
           >
-            <header className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-gray-800 truncate">
-                {project.name}
-              </h2>
-              <span
-                className={`px-2 py-0.5 text-sm font-medium rounded ${stateClasses}`}
-              >
-                {project.state.charAt(0).toUpperCase() +
-                  project.state.slice(1)}
-              </span>
-            </header>
+            <div className="flex items-start md:items-center space-x-3 flex-1">
+              {project.private ? (
+                <LucideReact.Lock className="text-gray-500" size={20} />
+              ) : (
+                <LucideReact.Folder className="text-gray-500" size={20} />
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  {project.name}
+                </h3>
+                <div className="flex flex-wrap items-center text-sm text-gray-500 space-x-4 mt-1">
+                  <div className="flex items-center">
+                    <LucideReact.Calendar size={14} className="mr-1" />
+                    <span>{formatDate(project.created_at)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Edit3 size={14} className="mr-1" />
+                    <span>{formatDate(project.updated_at)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-              {project.body ?? "No description provided."}
-            </p>
-
-            <footer className="mt-4 space-y-2 text-xs text-gray-500">
-              <div className="flex items-center space-x-2">
-                {creator?.avatar_url && (
-                  <img
-                    src={creator.avatar_url}
-                    alt={creatorName}
-                    className="w-5 h-5 rounded-full"
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center text-sm text-gray-700">
+                <LucideReact.Hash
+                  className="mr-1 text-gray-500"
+                  size={14}
+                />
+                <span>#{project.number}</span>
+              </div>
+              <div className="flex items-center text-sm">
+                {project.state === "open" ? (
+                  <LucideReact.CheckCircle
+                    className="mr-1 text-green-500"
+                    size={14}
+                  />
+                ) : (
+                  <LucideReact.XCircle
+                    className="mr-1 text-red-500"
+                    size={14}
                   />
                 )}
-                <span>{creatorName}</span>
+                <span
+                  className={
+                    project.state === "open"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
+                  {project.state.charAt(0).toUpperCase() +
+                    project.state.slice(1)}
+                </span>
               </div>
-              <div className="flex flex-wrap gap-4">
-                <span className="font-medium">#{project.number}</span>
-                <span>Created: {createdAt}</span>
-                <span>Updated: {updatedAt}</span>
+              <div className="flex items-center text-sm">
+                {project.creator && project.creator.avatar_url ? (
+                  <img
+                    src={project.creator.avatar_url}
+                    alt={project.creator.login}
+                    className="w-6 h-6 rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        project.creator?.login || ""
+                      )}&background=cccccc&color=ffffff`;
+                    }}
+                  />
+                ) : (
+                  <LucideReact.User
+                    className="text-gray-500"
+                    size={16}
+                  />
+                )}
+                <span className="ml-1 text-gray-700">
+                  {project.creator?.login || "Unknown"}
+                </span>
               </div>
-              {(project.organization_permission ||
-                typeof project.private === "boolean") && (
-                <div className="flex flex-wrap gap-4">
-                  {project.organization_permission && (
-                    <span>
-                      Permission: {project.organization_permission}
-                    </span>
-                  )}
-                  {typeof project.private === "boolean" && (
-                    <span>
-                      Private: {project.private ? "Yes" : "No"}
-                    </span>
-                  )}
-                </div>
-              )}
-            </footer>
+            </div>
+
+            {project.body ? (
+              <p className="mt-2 md:mt-0 md:ml-6 text-sm text-gray-600 line-clamp-2">
+                {project.body}
+              </p>
+            ) : null}
           </div>
-        );
-      })}
+        ))
+      )}
     </div>
   );
 }

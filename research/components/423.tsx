@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * The campaign metadata and alert stats.
      *
      * @title Campaign summary
     */
-    export type campaign_summary = {
+    export interface campaign_summary {
         /**
          * The number of the newly created campaign
         */
@@ -66,13 +67,13 @@ export namespace AutoViewInputSubTypes {
             */
             in_progress_count: number & tags.Type<"int32">;
         };
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -95,13 +96,13 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
      * @title Team
     */
-    export type team = {
+    export interface team {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -122,7 +123,7 @@ export namespace AutoViewInputSubTypes {
         members_url: string;
         repositories_url: string & tags.Format<"uri">;
         parent: AutoViewInputSubTypes.nullable_team_simple;
-    };
+    }
     /**
      * Groups of organization members that gives permissions on specified repositories.
      *
@@ -137,7 +138,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * URL for the team
         */
-        url: string & tags.Format<"uri">;
+        url: string;
         members_url: string;
         /**
          * Name of the team
@@ -181,128 +182,159 @@ export type AutoViewInput = AutoViewInputSubTypes.campaign_summary;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const title = value.name ?? `Campaign #${value.number}`;
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  const publishedDate = value.published_at ? formatDate(value.published_at) : null;
-  const endDate = formatDate(value.ends_at);
-  const closedDate = value.closed_at ? formatDate(value.closed_at) : null;
-  const managers = value.managers;
-  const teams = value.team_managers ?? [];
-  const stats = value.alert_stats;
+  const createdDate = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  const publishedDate = value.published_at
+    ? new Date(value.published_at).toLocaleDateString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : undefined;
+  const endsDate = new Date(value.ends_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  const closedDate =
+    value.closed_at && value.closed_at !== null
+      ? new Date(value.closed_at).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : undefined;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Header: Title and State Badge */}
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xl font-semibold text-gray-800 truncate">{title}</h2>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900">
+            Campaign #{value.number}
+          </h2>
+          {value.name && (
+            <p className="text-sm text-gray-600 truncate">{value.name}</p>
+          )}
+        </div>
         <span
-          className={`px-2 py-1 text-xs font-medium rounded ${
+          className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded ${
             value.state === "open"
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}
         >
-          {value.state === "open" ? "Open" : "Closed"}
+          {value.state.charAt(0).toUpperCase() + value.state.slice(1)}
         </span>
       </div>
 
       {/* Description */}
-      {value.description && (
-        <p className="text-gray-600 text-sm line-clamp-2 mb-4">{value.description}</p>
-      )}
+      <p className="mt-2 text-gray-700 text-sm line-clamp-3">
+        {value.description}
+      </p>
 
-      {/* Dates Grid */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-500 mb-4">
-        <div>
-          <span className="font-medium text-gray-700">Created:</span>{" "}
-          {formatDate(value.created_at)}
-        </div>
-        <div>
-          <span className="font-medium text-gray-700">Updated:</span>{" "}
-          {formatDate(value.updated_at)}
+      {/* Dates */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Created: {createdDate}</span>
         </div>
         {publishedDate && (
-          <div>
-            <span className="font-medium text-gray-700">Published:</span>{" "}
-            {publishedDate}
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span>Published: {publishedDate}</span>
           </div>
         )}
-        <div>
-          <span className="font-medium text-gray-700">
-            {value.state === "closed" ? "Ended:" : "Ends:"}
-          </span>{" "}
-          {endDate}
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} className="text-gray-400" />
+          <span>Ends: {endsDate}</span>
         </div>
         {closedDate && (
-          <div className="col-span-2">
-            <span className="font-medium text-gray-700">Closed At:</span>{" "}
-            {closedDate}
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span>Closed: {closedDate}</span>
           </div>
         )}
       </div>
 
-      {/* Managers Avatars */}
-      <div className="mb-4">
-        <span className="font-medium text-gray-700">Managers:</span>
-        <div className="flex items-center mt-2 -space-x-2">
-          {managers.map((mgr) => (
+      {/* Managers */}
+      <div className="mt-4">
+        <h3 className="text-sm font-medium text-gray-900 mb-2">Managers</h3>
+        <div className="flex items-center -space-x-2">
+          {value.managers.map((mgr) => (
             <img
               key={mgr.id}
               src={mgr.avatar_url}
-              alt={mgr.login}
-              title={mgr.name ?? mgr.login}
-              className="w-8 h-8 rounded-full border-2 border-white"
+              alt={mgr.name ?? mgr.login}
+              className="w-8 h-8 rounded-full border-2 border-white object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  (mgr.name ?? mgr.login).trim()
+                )}&background=0D8ABC&color=fff`;
+              }}
             />
           ))}
         </div>
       </div>
 
       {/* Team Managers */}
-      {teams.length > 0 && (
-        <div className="mb-4">
-          <span className="font-medium text-gray-700">Teams:</span>
-          <p className="text-gray-600 text-sm mt-1 truncate">
-            {teams.map((t) => t.name).join(", ")}
-          </p>
+      {value.team_managers && value.team_managers.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-900 mb-2">
+            Team Managers
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {value.team_managers.map((team) => (
+              <span
+                key={team.id}
+                className="bg-gray-100 text-gray-800 text-xs font-medium px-2 py-1 rounded"
+              >
+                {team.name}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Contact Link */}
       {value.contact_link && (
-        <div className="mb-4">
-          <span className="font-medium text-gray-700">Contact:</span>
-          <p className="text-blue-600 text-sm truncate mt-1">
-            {(() => {
-              try {
-                return new URL(value.contact_link!).host;
-              } catch {
-                return value.contact_link;
-              }
-            })()}
-          </p>
+        <div className="mt-4 flex items-center gap-1 text-sm text-gray-500">
+          <LucideReact.Link size={16} className="text-gray-400" />
+          <span className="truncate">{value.contact_link}</span>
         </div>
       )}
 
-      {/* Alert Statistics */}
-      {stats && (
-        <div className="flex items-center justify-between text-sm text-gray-700">
-          <div className="flex items-center">
-            <span className="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span>
-            <span>Open: {stats.open_count}</span>
+      {/* Alert Stats */}
+      {value.alert_stats && (
+        <div className="mt-4 grid grid-cols-3 gap-4 text-sm text-gray-500">
+          <div className="flex items-center gap-1">
+            <LucideReact.AlertTriangle
+              size={16}
+              className="text-amber-500"
+            />
+            <span>Open:</span>
+            <span className="font-semibold">
+              {value.alert_stats.open_count}
+            </span>
           </div>
-          <div className="flex items-center">
-            <span className="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
-            <span>In Progress: {stats.in_progress_count}</span>
+          <div className="flex items-center gap-1">
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+            <span>Closed:</span>
+            <span className="font-semibold">
+              {value.alert_stats.closed_count}
+            </span>
           </div>
-          <div className="flex items-center">
-            <span className="w-2 h-2 bg-gray-500 rounded-full mr-1"></span>
-            <span>Closed: {stats.closed_count}</span>
+          <div className="flex items-center gap-1">
+            <LucideReact.Clock size={16} className="text-blue-500" />
+            <span>In Progress:</span>
+            <span className="font-semibold">
+              {value.alert_stats.in_progress_count}
+            </span>
           </div>
         </div>
       )}

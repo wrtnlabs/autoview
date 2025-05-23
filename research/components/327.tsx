@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A GitHub Classroom assignment
      *
      * @title Simple Classroom Assignment
     */
-    export type simple_classroom_assignment = {
+    export interface simple_classroom_assignment {
         /**
          * Unique identifier of the repository.
         */
@@ -76,13 +77,13 @@ export namespace AutoViewInputSubTypes {
         */
         deadline: (string & tags.Format<"date-time">) | null;
         classroom: AutoViewInputSubTypes.simple_classroom;
-    };
+    }
     /**
      * A GitHub Classroom classroom
      *
      * @title Simple Classroom
     */
-    export type simple_classroom = {
+    export interface simple_classroom {
         /**
          * Unique identifier of the classroom.
         */
@@ -99,7 +100,7 @@ export namespace AutoViewInputSubTypes {
          * The url of the classroom on GitHub Classroom.
         */
         url: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.simple_classroom_assignment[];
 
@@ -107,135 +108,162 @@ export type AutoViewInput = AutoViewInputSubTypes.simple_classroom_assignment[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateStr: string | null): string => {
-    if (!dateStr) return "No deadline";
-    const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return "Invalid date";
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // 1. Data grouping by classroom name
+  const assignmentsByClassroom = value.reduce(
+    (groups, assignment) => {
+      const className = assignment.classroom.name;
+      if (!groups[className]) groups[className] = [];
+      groups[className].push(assignment);
+      return groups;
+    },
+    {} as Record<string, AutoViewInputSubTypes.simple_classroom_assignment[]>,
+  );
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Empty state
+  if (value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <p className="mt-4 text-lg">No assignments available</p>
+      </div>
+    );
+  }
+
+  // 3. JSX output
   return (
-    <div className="space-y-4">
-      {value.length === 0 ? (
-        <div className="text-center text-gray-500">No assignments available.</div>
-      ) : (
-        value.map((assignment) => {
-          const {
-            id,
-            title,
-            type,
-            public_repo,
-            invitations_enabled,
-            accepted,
-            submitted,
-            passing,
-            max_teams,
-            max_members,
-            editor,
-            language,
-            deadline,
-            classroom,
-          } = assignment;
-          const invitationStatus = invitations_enabled ? "Open" : "Closed";
-          const deadlineText = formatDate(deadline);
+    <div className="space-y-10">
+      {Object.entries(assignmentsByClassroom).map(([className, assignments]) => (
+        <section key={className}>
+          <header className="mb-4 flex items-center">
+            <LucideReact.ClipboardList className="text-gray-600" size={24} />
+            <h2 className="ml-2 text-2xl font-semibold text-gray-800">
+              {className}
+            </h2>
+          </header>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {assignments.map((a) => {
+              const formattedDeadline = a.deadline
+                ? new Date(a.deadline).toLocaleString(undefined, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "No deadline";
+              const teamsLimit =
+                a.max_teams == null ? "Unlimited" : a.max_teams;
+              const membersLimit =
+                a.max_members == null ? "Unlimited" : a.max_members;
 
-          return (
-            <div
-              key={id}
-              className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-            >
-              {/* Header: Title and Type */}
-              <div className="flex justify-between items-start">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">
-                  {title}
-                </h3>
-                <span
-                  className={
-                    "text-xs font-medium px-2 py-1 rounded " +
-                    (type === "group"
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-indigo-100 text-indigo-800")
-                  }
+              return (
+                <div
+                  key={a.id}
+                  className="bg-white p-5 rounded-lg shadow-md hover:shadow-lg transition-shadow"
                 >
-                  {type === "group" ? "Group" : "Individual"}
-                </span>
-              </div>
-
-              {/* Classroom Name */}
-              <div className="mt-1 text-sm text-gray-600 truncate">
-                Classroom: {classroom.name}
-              </div>
-
-              {/* Badges */}
-              <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                <span
-                  className={
-                    "px-2 py-1 rounded " +
-                    (public_repo
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-600")
-                  }
-                >
-                  {public_repo ? "Public Repo" : "Private Repo"}
-                </span>
-                <span
-                  className={
-                    "px-2 py-1 rounded " +
-                    (invitations_enabled
-                      ? "bg-green-100 text-green-800"
-                      : "bg-red-100 text-red-800")
-                  }
-                >
-                  Invitations {invitationStatus}
-                </span>
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                  Editor: {editor}
-                </span>
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                  Lang: {language}
-                </span>
-                {max_teams !== undefined && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                    Max Teams: {max_teams === null ? "∞" : max_teams}
-                  </span>
-                )}
-                {max_members !== undefined && (
-                  <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                    Max Members: {max_members === null ? "∞" : max_members}
-                  </span>
-                )}
-                <span className="px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                  Due: {deadlineText}
-                </span>
-              </div>
-
-              {/* Statistics */}
-              <div className="mt-4 grid grid-cols-3 text-center text-sm font-medium">
-                <div>
-                  <div className="text-gray-900">{accepted}</div>
-                  <div className="text-gray-500">Accepted</div>
+                  <h3 className="text-lg font-medium text-gray-800 mb-3 truncate">
+                    {a.title}
+                  </h3>
+                  <div className="flex flex-wrap gap-3 text-sm text-gray-600 mb-4">
+                    <div className="flex items-center">
+                      <LucideReact.Edit2
+                        className="text-gray-500"
+                        size={16}
+                      />
+                      <span className="ml-1">{a.editor}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <LucideReact.Globe
+                        className={
+                          a.public_repo
+                            ? "text-green-500"
+                            : "text-gray-400"
+                        }
+                        size={16}
+                      />
+                      <span className="ml-1">
+                        {a.public_repo ? "Public repo" : "Private repo"}
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <LucideReact.Clock className="text-amber-500" size={16} />
+                      <span className="ml-1 capitalize">{a.type}</span>
+                    </div>
+                    {a.type === "group" && (
+                      <>
+                        <div className="flex items-center">
+                          <LucideReact.Users
+                            className="text-gray-500"
+                            size={16}
+                          />
+                          <span className="ml-1">Teams: {teamsLimit}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <LucideReact.User
+                            className="text-gray-500"
+                            size={16}
+                          />
+                          <span className="ml-1">
+                            Members/team: {membersLimit}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                    <div className="flex items-center">
+                      <LucideReact.Calendar
+                        className="text-gray-500"
+                        size={16}
+                      />
+                      <span className="ml-1">{formattedDeadline}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <LucideReact.Code className="text-gray-500" size={16} />
+                      <span className="ml-1">{a.language}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-700 mb-4 space-x-4">
+                    <div className="flex items-center">
+                      <LucideReact.UserCheck
+                        className="text-indigo-500"
+                        size={16}
+                      />
+                      <span className="ml-1">Accepted: {a.accepted}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <LucideReact.Upload
+                        className="text-blue-500"
+                        size={16}
+                      />
+                      <span className="ml-1">Submitted: {a.submitted}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <LucideReact.CheckCircle
+                        className="text-green-500"
+                        size={16}
+                      />
+                      <span className="ml-1">Passing: {a.passing}</span>
+                    </div>
+                  </div>
+                  <div className="text-sm">
+                    <a
+                      href={a.invite_link}
+                      className="block truncate text-indigo-600 hover:underline"
+                      title={a.invite_link}
+                    >
+                      Invite Link
+                    </a>
+                    <p className="mt-1 text-xs text-gray-500">
+                      {a.invitations_enabled
+                        ? "Invitations enabled"
+                        : "Invitations disabled"}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <div className="text-gray-900">{submitted}</div>
-                  <div className="text-gray-500">Submitted</div>
-                </div>
-                <div>
-                  <div className="text-gray-900">{passing}</div>
-                  <div className="text-gray-500">Passed</div>
-                </div>
-              </div>
-            </div>
-          );
-        })
-      )}
+              );
+            })}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }

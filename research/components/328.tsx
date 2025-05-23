@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_of_conduct[];
 
@@ -20,53 +21,55 @@ export type AutoViewInput = AutoViewInputSubTypes.code_of_conduct[];
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const count = value.length;
-  // Sort entries alphabetically by name for consistent ordering
-  const sortedEntries = [...value].sort((a, b) => a.name.localeCompare(b.name));
+  // 1. Data transformation: ensure we have an array to render
+  const items = Array.isArray(value) ? value : [];
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Empty state
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="text-gray-300 mb-2" />
+        <p className="text-lg">No code of conduct available</p>
+      </div>
+    );
+  }
+
+  // 3. Compose the visual structure
   return (
-    <section className="p-4 bg-gray-50 rounded-lg">
-      <h2 className="text-lg font-semibold mb-4 text-gray-800">
-        Code of Conduct{count > 0 && ` (${count})`}
-      </h2>
-
-      {count === 0 ? (
-        <p className="text-gray-500">No code of conduct entries available.</p>
-      ) : (
-        <ul className="space-y-4">
-          {sortedEntries.map((entry) => (
-            <li
-              key={entry.key}
-              className="p-4 bg-white shadow-sm rounded-lg border border-gray-200"
+    <div className="space-y-4">
+      {items.map((item) => (
+        <div key={item.key} className="p-4 bg-white rounded-lg shadow-md">
+          <div className="flex items-center gap-2 mb-2">
+            <LucideReact.FileText size={20} className="text-blue-500" />
+            <h3 className="text-lg font-semibold text-gray-800 truncate">{item.name}</h3>
+          </div>
+          {item.body && (
+            <p className="text-sm text-gray-600 line-clamp-3 mb-2">{item.body}</p>
+          )}
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-blue-600 hover:underline"
             >
-              <h3 className="text-md font-medium text-gray-900 truncate">
-                {entry.name}
-              </h3>
-
-              {entry.body && (
-                <p className="mt-2 text-sm text-gray-600 line-clamp-3">
-                  {entry.body}
-                </p>
-              )}
-
-              <div className="mt-3 space-y-1 text-xs text-gray-500">
-                <div>
-                  <span className="font-semibold">Document URL:</span>{' '}
-                  <code className="break-all">{entry.url}</code>
-                </div>
-                {entry.html_url && (
-                  <div>
-                    <span className="font-semibold">HTML URL:</span>{' '}
-                    <code className="break-all">{entry.html_url}</code>
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+              <LucideReact.Link size={16} className="mr-1" aria-label="Raw URL" />
+              <span>Raw</span>
+            </a>
+            {item.html_url && (
+              <a
+                href={item.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-600 hover:underline"
+              >
+                <LucideReact.Link size={16} className="mr-1" aria-label="HTML URL" />
+                <span>HTML</span>
+              </a>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }

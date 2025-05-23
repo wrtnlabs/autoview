@@ -1,22 +1,23 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4MessagesView = {
+                export interface LegacyV4MessagesView {
                     messages?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Message[];
                     bots?: AutoViewInputSubTypes.legacy.v4.LegacyV4Bot[];
                     users?: AutoViewInputSubTypes.legacy.v4.LegacyV4User[];
                     supportBots?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBot[];
                     prev?: string;
                     next?: string;
-                };
+                }
             }
         }
         export namespace v4 {
             export namespace message {
-                export type LegacyV4Message = {
+                export interface LegacyV4Message {
                     chatKey?: string;
                     id?: string;
                     mainKey?: string;
@@ -47,19 +48,19 @@ export namespace AutoViewInputSubTypes {
                     threadMsg?: boolean;
                     broadcastedMsg?: boolean;
                     rootMessageId?: string;
-                };
-                export type LegacyV4Block = {
+                }
+                export interface LegacyV4Block {
                     type: "bullets" | "code" | "text";
                     language?: string;
                     value?: string;
                     blocks?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block[];
-                };
-                export type LegacyV4Button = {
+                }
+                export interface LegacyV4Button {
                     title: string;
                     colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
                     url: string;
-                };
-                export type LegacyV4File = {
+                }
+                export interface LegacyV4File {
                     id: string;
                     type?: string;
                     name: string;
@@ -76,41 +77,41 @@ export namespace AutoViewInputSubTypes {
                     channelId?: string;
                     chatType?: string;
                     chatId?: string;
-                };
-                export type LegacyV4Log = {
+                }
+                export interface LegacyV4Log {
                     action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
                     values?: string[];
-                };
-                export type LegacyV4Reaction = {
+                }
+                export interface LegacyV4Reaction {
                     emojiName: string;
                     personKeys?: string[] & tags.UniqueItems;
                     empty?: boolean;
-                };
-                export type LegacyV4ProfileBotInput = {
+                }
+                export interface LegacyV4ProfileBotInput {
                     id?: string;
                     key?: string;
                     type?: string;
                     name?: string;
                     value?: AutoViewInputSubTypes.AttributeValue;
-                };
-                export type LegacyV4MessageMarketing = {
+                }
+                export interface LegacyV4MessageMarketing {
                     type?: string;
                     id?: string;
                     advertising?: boolean;
                     sendToOfflineXms?: boolean;
                     sendToOfflineEmail?: boolean;
                     exposureType?: "fullScreen";
-                };
-                export type LegacyV4MessageSupportBot = {
+                }
+                export interface LegacyV4MessageSupportBot {
                     id?: string;
                     revisionId?: string;
                     sectionId?: string;
                     stepIndex?: number & tags.Type<"int32">;
                     buttons?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
                     submitButtonIndex?: number & tags.Type<"int32">;
-                };
+                }
             }
-            export type LegacyV4WebPage = {
+            export interface LegacyV4WebPage {
                 id: string;
                 url: string;
                 title?: string;
@@ -125,12 +126,12 @@ export namespace AutoViewInputSubTypes {
                 previewKey?: string;
                 logo?: string;
                 name?: string;
-            };
-            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+            }
+            export interface LegacyV4SupportBotRouteSection_dollar_LegacyV4Button {
                 text: string;
                 nextSectionId: string;
-            };
-            export type LegacyV4Bot = {
+            }
+            export interface LegacyV4Bot {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -138,14 +139,14 @@ export namespace AutoViewInputSubTypes {
                 avatar?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
                 avatarUrl?: string;
                 color: string & tags.Default<"#123456">;
-            };
-            export type LegacyV4TinyFile = {
+            }
+            export interface LegacyV4TinyFile {
                 bucket: string;
                 key: string;
                 width?: number & tags.Type<"int32">;
                 height?: number & tags.Type<"int32">;
-            };
-            export type LegacyV4User = {
+            }
+            export interface LegacyV4User {
                 id?: string;
                 channelId?: string;
                 memberId?: string;
@@ -185,8 +186,8 @@ export namespace AutoViewInputSubTypes {
                 managed?: boolean;
                 mobileNumber?: string & tags.Default<"+18004424000">;
                 systemLanguage?: string & tags.Default<"en">;
-            };
-            export type LegacyV4SupportBot = {
+            }
+            export interface LegacyV4SupportBot {
                 id?: string;
                 channelId: string;
                 pluginId?: string;
@@ -206,10 +207,10 @@ export namespace AutoViewInputSubTypes {
                 updatedAt?: number;
                 userChatExpireDuration?: string;
                 managerId?: string;
-            };
+            }
         }
     }
-    export type AttributeValue = {
+    export interface AttributeValue {
         s?: string;
         n?: string;
         b?: {
@@ -240,13 +241,13 @@ export namespace AutoViewInputSubTypes {
         }[];
         "null"?: boolean;
         bool?: boolean;
-    };
-    export namespace profile {
-        export type UserProfile = {
-            [key: string]: {};
-        };
     }
-    export type WebInfo = {
+    export namespace profile {
+        export interface UserProfile {
+            [key: string]: {};
+        }
+    }
+    export interface WebInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -254,8 +255,8 @@ export namespace AutoViewInputSubTypes {
         browserName?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type MobileInfo = {
+    }
+    export interface MobileInfo {
         device?: string;
         os?: string;
         osName?: string;
@@ -265,22 +266,23 @@ export namespace AutoViewInputSubTypes {
         sdkVersion?: string;
         sessionsCount?: number & tags.Type<"int32">;
         lastSeenAt?: number;
-    };
-    export type Expression = {
+    }
+    export interface Expression {
         key?: string;
         type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
         operator?: AutoViewInputSubTypes.Operator;
         values?: {}[];
         and?: AutoViewInputSubTypes.Expression[];
         or?: AutoViewInputSubTypes.Expression[];
-    };
-    export type Operator = {};
+    }
+    export interface Operator {
+    }
     export namespace supportbot {
-        export type SupportBotDraft = {
+        export interface SupportBotDraft {
             supportBot?: AutoViewInputSubTypes.supportbot.SupportBot;
             sections?: AutoViewInputSubTypes.supportbot.SupportBotSection[];
-        };
-        export type SupportBot = {
+        }
+        export interface SupportBot {
             id?: string;
             channelId: string;
             botName: string;
@@ -299,38 +301,38 @@ export namespace AutoViewInputSubTypes {
             updatedAt?: number;
             userChatExpireDuration?: string;
             managerId?: string;
-        };
-        export type SupportBotSection = {
+        }
+        export interface SupportBotSection {
             name?: string;
             actions?: AutoViewInputSubTypes.userchat.UserChatStaticAction[];
             id?: string;
             steps?: AutoViewInputSubTypes.supportbot.SupportBotSection_dollar_Step[];
             type: string;
-        };
-        export type SupportBotSection_dollar_Step = {
+        }
+        export interface SupportBotSection_dollar_Step {
             message: AutoViewInputSubTypes.message.NestedMessage;
-        };
+        }
     }
     export namespace userchat {
-        export type UserChatStaticAction = {
+        export interface UserChatStaticAction {
             type: string;
-        };
+        }
     }
     export namespace message {
-        export type NestedMessage = {
+        export interface NestedMessage {
             blocks?: AutoViewInputSubTypes.message.Block[];
             buttons?: AutoViewInputSubTypes.message.Button[] & tags.MinItems<1> & tags.MaxItems<2>;
             files?: AutoViewInputSubTypes.message.File[] & tags.MinItems<1> & tags.MaxItems<30>;
             webPage?: AutoViewInputSubTypes.message.WebPage;
             form?: AutoViewInputSubTypes.message.form.Form;
-        };
-        export type Block = {
+        }
+        export interface Block {
             type: "bullets" | "code" | "text";
             language?: string;
             value?: string;
             blocks?: AutoViewInputSubTypes.message.Block[];
-        };
-        export type Button = {
+        }
+        export interface Button {
             title: string;
             colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
             action: AutoViewInputSubTypes.message.action.Action;
@@ -338,15 +340,16 @@ export namespace AutoViewInputSubTypes {
              * @deprecated
             */
             url?: string;
-        };
+        }
         export namespace action {
-            export type Action = {
+            export interface Action {
                 attributes?: AutoViewInputSubTypes.message.action.Attributes;
                 type: string;
-            };
-            export type Attributes = {};
+            }
+            export interface Attributes {
+            }
         }
-        export type File = {
+        export interface File {
             id: string;
             type?: string;
             name: string;
@@ -363,8 +366,8 @@ export namespace AutoViewInputSubTypes {
             channelId?: string;
             chatType?: string;
             chatId?: string;
-        };
-        export type WebPage = {
+        }
+        export interface WebPage {
             id: string;
             url: string;
             title?: string;
@@ -379,14 +382,14 @@ export namespace AutoViewInputSubTypes {
             previewKey?: string;
             logo?: string;
             name?: string;
-        };
+        }
         export namespace form {
-            export type Form = {
+            export interface Form {
                 submittedAt?: number;
                 inputs?: AutoViewInputSubTypes.message.form.FormInput[];
                 type: string;
-            };
-            export type FormInput = {
+            }
+            export interface FormInput {
                 value?: {};
                 readOnly?: boolean;
                 type?: "text" | "number" | "bool" | "date" | "datetime" | "radio" | "singleSelect" | "checkbox" | "multiSelect";
@@ -395,7 +398,7 @@ export namespace AutoViewInputSubTypes {
                 dataType?: "string" | "date" | "list" | "listOfNumber" | "number" | "datetime" | "boolean";
                 userChatProfileBindingKey?: boolean;
                 userProfileBindingKey?: boolean;
-            };
+            }
         }
     }
 }
@@ -406,87 +409,79 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4Message
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Build lookup maps for users and bots to resolve names.
-  const userMap: Record<string, AutoViewInputSubTypes.legacy.v4.LegacyV4User> = {};
-  const botMap: Record<string, AutoViewInputSubTypes.legacy.v4.LegacyV4Bot> = {};
-  value.users?.forEach((u) => { if (u.id) userMap[u.id] = u; });
-  value.bots?.forEach((b) => { if (b.id) botMap[b.id] = b; });
-
-  //    Sort messages by creation time ascending
-  const messages = (value.messages ?? []).slice().sort((a, b) => {
-    const ta = a.createdAt ?? 0;
-    const tb = b.createdAt ?? 0;
-    return ta - tb;
-  });
-
-  //    Date formatting helper
-  const formatDate = (ts?: number): string => {
-    if (!ts) return "";
-    const d = new Date(ts);
-    return d.toLocaleString(undefined, { 
-      year: "numeric", month: "short", day: "numeric",
-      hour: "2-digit", minute: "2-digit"
-    });
-  };
+  const messageCount = value.messages?.length ?? 0;
+  const userCount = value.users?.length ?? 0;
+  const botCount =
+    (value.bots?.length ?? 0) + (value.supportBots?.length ?? 0);
+  const hasPrev = Boolean(value.prev);
+  const hasNext = Boolean(value.next);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {/* Header */}
-      <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-800">Chat History</h2>
-        <span className="text-sm text-gray-500">{messages.length} message{messages.length !== 1 ? "s" : ""}</span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <h2 className="flex items-center text-lg font-semibold text-gray-800 mb-4">
+        <LucideReact.MessageSquare
+          className="mr-2 text-gray-500"
+          size={20}
+          aria-hidden="true"
+        />
+        Conversation Overview
+      </h2>
+
+      <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="flex flex-col items-center">
+          <LucideReact.MessageSquare
+            className="text-blue-500"
+            size={24}
+            aria-hidden="true"
+          />
+          <span className="mt-1 text-xl font-medium text-gray-900">
+            {messageCount}
+          </span>
+          <span className="text-sm text-gray-500">Messages</span>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <LucideReact.Users
+            className="text-green-500"
+            size={24}
+            aria-hidden="true"
+          />
+          <span className="mt-1 text-xl font-medium text-gray-900">
+            {userCount}
+          </span>
+          <span className="text-sm text-gray-500">Users</span>
+        </div>
+
+        <div className="flex flex-col items-center">
+          <LucideReact.Cpu
+            className="text-purple-500"
+            size={24}
+            aria-hidden="true"
+          />
+          <span className="mt-1 text-xl font-medium text-gray-900">
+            {botCount}
+          </span>
+          <span className="text-sm text-gray-500">Bots</span>
+        </div>
       </div>
 
-      {/* Message List */}
-      <div className="space-y-4">
-        {messages.map((msg, idx) => {
-          // Derive author name
-          const pid = msg.personId ?? "";
-          const type = msg.personType ?? "";
-          let authorName = type;
-          if (type.toLowerCase() === "bot" && botMap[pid]) authorName = botMap[pid].name;
-          else if (type.toLowerCase() === "user" && userMap[pid]?.name) authorName = userMap[pid].name;
-          // Fallback
-          if (!authorName) authorName = "Unknown";
-
-          return (
-            <div key={idx} className="flex items-start space-x-3">
-              {/* Avatar / Initial */}
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-500 uppercase">
-                  {authorName.charAt(0)}
-                </div>
-              </div>
-              {/* Message Content */}
-              <div className="flex-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900">{authorName}</span>
-                  <span className="text-xs text-gray-400">{formatDate(msg.createdAt)}</span>
-                </div>
-                {msg.plainText && (
-                  <p className="mt-1 text-gray-700 text-sm line-clamp-3 whitespace-pre-wrap">
-                    {msg.plainText}
-                  </p>
-                )}
-                {msg.files && msg.files.length > 0 && (
-                  <div className="mt-1">
-                    <span className="text-xs text-blue-600">
-                      {msg.files.length} attachment{msg.files.length > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Pagination Info */}
-      {(value.prev || value.next) && (
-        <div className="mt-6 flex justify-between text-sm text-gray-500">
-          <span>Prev Page Key: {value.prev ?? "-"}</span>
-          <span>Next Page Key: {value.next ?? "-"}</span>
+      {(hasPrev || hasNext) && (
+        <div className="mt-4 flex justify-center space-x-6">
+          {hasPrev && (
+            <LucideReact.ArrowLeft
+              className="text-gray-500 hover:text-gray-700"
+              size={20}
+              aria-hidden="true"
+            />
+          )}
+          {hasNext && (
+            <LucideReact.ArrowRight
+              className="text-gray-500 hover:text-gray-700"
+              size={20}
+              aria-hidden="true"
+            />
+          )}
         </div>
       )}
     </div>

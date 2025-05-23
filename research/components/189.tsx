@@ -1,27 +1,28 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace legacy {
         export namespace open {
             export namespace v4 {
-                export type LegacyV4ThreadView = {
+                export interface LegacyV4ThreadView {
                     chat?: AutoViewInputSubTypes.legacy.v4.LegacyV4Chat;
                     message?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Message;
                     bot?: AutoViewInputSubTypes.legacy.v4.LegacyV4Bot;
                     managers?: AutoViewInputSubTypes.legacy.v4.LegacyV4Manager[];
                     thread?: AutoViewInputSubTypes.legacy.v4.LegacyV4Thread;
-                };
+                }
             }
         }
         export namespace v4 {
-            export type LegacyV4Chat = {
+            export interface LegacyV4Chat {
                 active?: boolean;
                 channelId?: string;
                 id?: string;
                 managerIds?: string[] & tags.UniqueItems;
-            };
+            }
             export namespace message {
-                export type LegacyV4Message = {
+                export interface LegacyV4Message {
                     chatKey?: string;
                     id?: string;
                     mainKey?: string;
@@ -52,19 +53,19 @@ export namespace AutoViewInputSubTypes {
                     threadMsg?: boolean;
                     broadcastedMsg?: boolean;
                     rootMessageId?: string;
-                };
-                export type LegacyV4Block = {
+                }
+                export interface LegacyV4Block {
                     type: "bullets" | "code" | "text";
                     language?: string;
                     value?: string;
                     blocks?: AutoViewInputSubTypes.legacy.v4.message.LegacyV4Block[];
-                };
-                export type LegacyV4Button = {
+                }
+                export interface LegacyV4Button {
                     title: string;
                     colorVariant?: "cobalt" | "green" | "orange" | "red" | "black" | "pink" | "purple";
                     url: string;
-                };
-                export type LegacyV4File = {
+                }
+                export interface LegacyV4File {
                     id: string;
                     type?: string;
                     name: string;
@@ -81,41 +82,41 @@ export namespace AutoViewInputSubTypes {
                     channelId?: string;
                     chatType?: string;
                     chatId?: string;
-                };
-                export type LegacyV4Log = {
+                }
+                export interface LegacyV4Log {
                     action?: "changeName" | "changeScope" | "close" | "create" | "invite" | "join" | "assign" | "unassign" | "leave" | "open" | "remove" | "snooze" | "addTags" | "removeTags";
                     values?: string[];
-                };
-                export type LegacyV4Reaction = {
+                }
+                export interface LegacyV4Reaction {
                     emojiName: string;
                     personKeys?: string[] & tags.UniqueItems;
                     empty?: boolean;
-                };
-                export type LegacyV4ProfileBotInput = {
+                }
+                export interface LegacyV4ProfileBotInput {
                     id?: string;
                     key?: string;
                     type?: string;
                     name?: string;
                     value?: AutoViewInputSubTypes.AttributeValue;
-                };
-                export type LegacyV4MessageMarketing = {
+                }
+                export interface LegacyV4MessageMarketing {
                     type?: string;
                     id?: string;
                     advertising?: boolean;
                     sendToOfflineXms?: boolean;
                     sendToOfflineEmail?: boolean;
                     exposureType?: "fullScreen";
-                };
-                export type LegacyV4MessageSupportBot = {
+                }
+                export interface LegacyV4MessageSupportBot {
                     id?: string;
                     revisionId?: string;
                     sectionId?: string;
                     stepIndex?: number & tags.Type<"int32">;
                     buttons?: AutoViewInputSubTypes.legacy.v4.LegacyV4SupportBotRouteSection_dollar_LegacyV4Button[];
                     submitButtonIndex?: number & tags.Type<"int32">;
-                };
+                }
             }
-            export type LegacyV4WebPage = {
+            export interface LegacyV4WebPage {
                 id: string;
                 url: string;
                 title?: string;
@@ -130,12 +131,12 @@ export namespace AutoViewInputSubTypes {
                 previewKey?: string;
                 logo?: string;
                 name?: string;
-            };
-            export type LegacyV4SupportBotRouteSection_dollar_LegacyV4Button = {
+            }
+            export interface LegacyV4SupportBotRouteSection_dollar_LegacyV4Button {
                 text: string;
                 nextSectionId: string;
-            };
-            export type LegacyV4Bot = {
+            }
+            export interface LegacyV4Bot {
                 id?: string;
                 channelId?: string;
                 name: string;
@@ -143,14 +144,14 @@ export namespace AutoViewInputSubTypes {
                 avatar?: AutoViewInputSubTypes.legacy.v4.LegacyV4TinyFile;
                 avatarUrl?: string;
                 color: string & tags.Default<"#123456">;
-            };
-            export type LegacyV4TinyFile = {
+            }
+            export interface LegacyV4TinyFile {
                 bucket: string;
                 key: string;
                 width?: number & tags.Type<"int32">;
                 height?: number & tags.Type<"int32">;
-            };
-            export type LegacyV4Manager = {
+            }
+            export interface LegacyV4Manager {
                 id?: string;
                 channelId?: string;
                 accountId?: string;
@@ -186,8 +187,8 @@ export namespace AutoViewInputSubTypes {
                 avatarUrl?: string;
                 emailForFront?: string;
                 mobileNumberForFront?: string & tags.Default<"+18004424000">;
-            };
-            export type LegacyV4Thread = {
+            }
+            export interface LegacyV4Thread {
                 id?: string;
                 channelId?: string;
                 managerIds?: string[] & tags.UniqueItems;
@@ -201,10 +202,10 @@ export namespace AutoViewInputSubTypes {
                 chatId?: string;
                 chatKey?: string;
                 rootMessageId?: string;
-            };
+            }
         }
     }
-    export type AttributeValue = {
+    export interface AttributeValue {
         s?: string;
         n?: string;
         b?: {
@@ -235,17 +236,17 @@ export namespace AutoViewInputSubTypes {
         }[];
         "null"?: boolean;
         bool?: boolean;
-    };
-    export type NameDesc = {
+    }
+    export interface NameDesc {
         name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
         description?: string;
-    };
-    export type TinyFile = {
+    }
+    export interface TinyFile {
         bucket: string;
         key: string;
         width?: number & tags.Type<"int32">;
         height?: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ThreadView;
 
@@ -254,98 +255,90 @@ export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4ThreadV
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const chatChannel = value.chat?.channelId ?? value.chat?.id ?? "Unknown Chat";
-  const chatStatus = value.chat?.active === true ? "Active" : "Inactive";
-  const managerNames =
-    value.managers && value.managers.length > 0
-      ? value.managers.map((m) => m.name).join(", ")
-      : null;
-  const threadReplies =
-    value.thread?.replyCount != null ? value.thread.replyCount : null;
-  const threadUpdatedAt =
-    value.thread?.updatedAt != null
-      ? new Date(value.thread.updatedAt).toLocaleString()
-      : null;
-  const msg = value.message;
-  const messageText =
-    msg?.plainText?.trim() ||
-    msg?.blocks?.[0]?.value?.trim() ||
-    "No message content.";
-  const messageDate =
-    msg?.createdAt != null
-      ? new Date(msg.createdAt).toLocaleString()
-      : null;
-  const botName = value.bot?.name ?? null;
-  const btnCount = msg?.buttons?.length ?? 0;
-  const fileCount = msg?.files?.length ?? 0;
+  const { chat, thread, bot, managers = [], message } = value;
+  const chatStatus = chat?.active ? "Active" : "Inactive";
+  const replyCount = thread?.replyCount ?? 0;
+  const managerNames = managers.map((m) => m.name).filter(Boolean) as string[];
+  const lastMsgText = message?.plainText ?? "No content";
+  const truncatedMsg =
+    lastMsgText.length > 100 ? `${lastMsgText.slice(0, 100)}…` : lastMsgText;
+  const lastMsgDate = message?.createdAt
+    ? new Date(message.createdAt).toLocaleString()
+    : null;
+  const updatedDate = thread?.updatedAt
+    ? new Date(thread.updatedAt).toLocaleString()
+    : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      {/* Chat Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          Chat: {chatChannel}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-            chatStatus === "Active"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
-          }`}
-        >
-          {chatStatus}
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-4">
+      {/* Chat Status */}
+      <div className="flex items-center space-x-2">
+        {chat?.active ? (
+          <LucideReact.CheckCircle size={16} className="text-green-500" />
+        ) : (
+          <LucideReact.XCircle size={16} className="text-red-500" />
+        )}
+        <span className="text-sm font-medium text-gray-700">
+          Chat is {chatStatus}
         </span>
       </div>
 
-      {/* Managers */}
-      {managerNames && (
-        <p className="mt-2 text-sm text-gray-700 truncate">
-          Managers: {managerNames}
-        </p>
-      )}
-
-      {/* Thread Info */}
-      {(threadReplies != null || threadUpdatedAt) && (
-        <div className="mt-3 text-sm text-gray-600 space-y-1">
-          {threadReplies != null && (
-            <p>
-              <span className="font-medium">Replies:</span> {threadReplies}
-            </p>
-          )}
-          {threadUpdatedAt && (
-            <p>
-              <span className="font-medium">Last Updated:</span>{" "}
-              {threadUpdatedAt}
-            </p>
-          )}
+      {/* Bot Info */}
+      {bot?.name && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.Bot size={16} className="text-gray-500" />
+          <span className="text-sm text-gray-700">Bot: {bot.name}</span>
         </div>
       )}
 
-      {/* Message Preview */}
-      {msg && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-          <p className="text-gray-800 text-sm line-clamp-2">{messageText}</p>
-          <div className="mt-2 flex flex-wrap items-center text-xs text-gray-600 space-x-4">
-            {messageDate && <span>{messageDate}</span>}
-            {btnCount > 0 && (
-              <span>
-                <strong>{btnCount}</strong> button{btnCount > 1 ? "s" : ""}
+      {/* Managers */}
+      {managerNames.length > 0 && (
+        <div>
+          <div className="flex items-center space-x-2">
+            <LucideReact.Users size={16} className="text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">
+              Managers ({managerNames.length})
+            </span>
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {managerNames.map((name, idx) => (
+              <span
+                key={idx}
+                className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded"
+              >
+                {name}
               </span>
-            )}
-            {fileCount > 0 && (
-              <span>
-                <strong>{fileCount}</strong> file{fileCount > 1 ? "s" : ""}
-              </span>
-            )}
+            ))}
           </div>
         </div>
       )}
 
-      {/* Bot Info */}
-      {botName && (
-        <div className="mt-4 text-sm text-gray-700">
-          <span className="font-medium">Bot:</span> {botName}
+      {/* Thread Replies */}
+      <div className="flex items-center space-x-2">
+        <LucideReact.MessageSquare size={16} className="text-gray-500" />
+        <span className="text-sm text-gray-700">Replies: {replyCount}</span>
+      </div>
+
+      {/* Last Message Preview */}
+      <div>
+        <div className="text-sm font-medium text-gray-700">Last Message</div>
+        <div className="text-sm text-gray-600 line-clamp-2 mt-1">
+          {truncatedMsg}
+        </div>
+        {lastMsgDate && (
+          <div className="flex items-center text-xs text-gray-500 mt-1 space-x-1">
+            <LucideReact.Calendar size={12} className="text-gray-400" />
+            <span>{lastMsgDate}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Thread Updated Date */}
+      {updatedDate && (
+        <div className="flex items-center space-x-2">
+          <LucideReact.RefreshCw size={16} className="text-gray-500" />
+          <span className="text-xs text-gray-500">Updated: {updatedDate}</span>
         </div>
       )}
     </div>

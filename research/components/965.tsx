@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A migration.
      *
      * @title Migration
     */
-    export type migration = {
+    export interface migration {
         id: number & tags.Type<"int32">;
         owner: AutoViewInputSubTypes.nullable_simple_user;
         guid: string;
@@ -31,7 +32,7 @@ export namespace AutoViewInputSubTypes {
          * Exclude related items from being returned in the response in order to improve performance of the request. The array can include any of: `"repositories"`.
         */
         exclude?: string[];
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -66,7 +67,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Repository
     */
-    export type repository = {
+    export interface repository {
         /**
          * Unique identifier of the repository
         */
@@ -270,7 +271,7 @@ export namespace AutoViewInputSubTypes {
          * Whether anonymous git access is enabled for this repository
         */
         anonymous_access_enabled?: boolean;
-    };
+    }
     /**
      * License Simple
      *
@@ -289,7 +290,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -312,7 +313,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.migration;
 
@@ -321,102 +322,125 @@ export type AutoViewInput = AutoViewInputSubTypes.migration;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const created = new Date(value.created_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-  const updated = new Date(value.updated_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const owner = value.owner;
+  const ownerLogin = owner?.login || "Unknown";
+  const formattedCreated = new Date(value.created_at).toLocaleString();
+  const formattedUpdated = new Date(value.updated_at).toLocaleString();
   const repoCount = value.repositories.length;
-
-  // Determine which data components are included based on exclude flags
-  const includedComponents: string[] = [];
-  if (!value.exclude_metadata) includedComponents.push("Metadata");
-  if (!value.exclude_git_data) includedComponents.push("Git Data");
-  if (!value.exclude_attachments) includedComponents.push("Attachments");
-  if (!value.exclude_releases) includedComponents.push("Releases");
-  if (!value.exclude_owner_projects) includedComponents.push("Owner Projects");
-  if (value.lock_repositories) includedComponents.push("Lock Repositories");
-  if (value.org_metadata_only) includedComponents.push("Org Metadata Only");
-
-  // Map migration state to a badge color
-  const stateColor =
-    value.state.toLowerCase().includes("fail")
-      ? "bg-red-100 text-red-800"
-      : value.state.toLowerCase().includes("complete") ||
-        value.state.toLowerCase().includes("export")
-      ? "bg-green-100 text-green-800"
-      : value.state.toLowerCase().includes("pending") ||
-        value.state.toLowerCase().includes("queued")
-      ? "bg-yellow-100 text-yellow-800"
-      : value.state.toLowerCase().includes("in_progress") ||
-        value.state.toLowerCase().includes("exporting")
-      ? "bg-blue-100 text-blue-800"
-      : "bg-gray-100 text-gray-800";
+  const primaryRepos = value.repositories.slice(0, 3);
+  const moreRepos = repoCount - primaryRepos.length;
+  const excludeList = value.exclude || [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          Migration #{value.id}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${stateColor}`}
-        >
-          {value.state}
-        </span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto text-sm text-gray-700">
+      {/* Header: Owner & Migration ID */}
+      <div className="flex items-center">
+        {owner?.avatar_url ? (
+          <img
+            src={owner.avatar_url}
+            alt={ownerLogin}
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              img.onerror = null;
+              img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                ownerLogin
+              )}&background=0D8ABC&color=fff`;
+            }}
+            className="w-10 h-10 rounded-full object-cover"
+          />
+        ) : (
+          <LucideReact.User className="w-10 h-10 text-gray-400" size={40} />
+        )}
+        <div className="ml-3">
+          <div className="text-lg font-semibold text-gray-900">{ownerLogin}</div>
+          <div className="text-xs text-gray-500">Migration #{value.id}</div>
+        </div>
       </div>
 
-      {value.owner && (
-        <div className="flex items-center mt-3">
-          <img
-            src={value.owner.avatar_url}
-            alt={value.owner.login}
-            className="w-8 h-8 rounded-full flex-shrink-0"
-          />
-          <span className="ml-2 text-sm text-gray-700 truncate">
-            {value.owner.login}
-          </span>
+      {/* Core details grid */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div className="flex items-center text-gray-600">
+          <LucideReact.ClipboardList className="mr-1" size={16} />
+          <span className="capitalize">{value.state}</span>
+        </div>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Link className="mr-1" size={16} />
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="truncate hover:underline"
+          >
+            {value.url}
+          </a>
+        </div>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Calendar className="mr-1" size={16} />
+          <span>{formattedCreated}</span>
+        </div>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.Calendar className="mr-1" size={16} />
+          <span>{formattedUpdated}</span>
+        </div>
+        <div className="flex items-center text-gray-600">
+          <LucideReact.GitBranch className="mr-1" size={16} />
+          <span>{repoCount} repos</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Lock className="mr-1 text-gray-600" size={16} />
+          {value.lock_repositories ? (
+            <LucideReact.CheckCircle className="text-green-500" size={16} />
+          ) : (
+            <LucideReact.XCircle className="text-red-500" size={16} />
+          )}
+        </div>
+      </div>
+
+      {/* Repository list preview */}
+      {primaryRepos.length > 0 && (
+        <div className="mt-4">
+          <div className="text-sm font-medium text-gray-800">Repositories</div>
+          <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+            {primaryRepos.map((repo) => (
+              <li key={repo.id} className="truncate">
+                {repo.name}
+              </li>
+            ))}
+            {moreRepos > 0 && <li>+{moreRepos} more</li>}
+          </ul>
         </div>
       )}
 
-      <div className="mt-4 space-y-1 text-sm text-gray-600">
-        <div>
-          <span className="font-medium text-gray-800">GUID:</span>{" "}
-          <span className="truncate">{value.guid}</span>
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Repositories:</span>{" "}
-          {repoCount}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Created:</span> {created}
-        </div>
-        <div>
-          <span className="font-medium text-gray-800">Updated:</span> {updated}
-        </div>
-      </div>
-
-      {includedComponents.length > 0 && (
+      {/* Excluded items */}
+      {excludeList.length > 0 && (
         <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-800 mb-1">
-            Included Data
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {includedComponents.map((comp) => (
-              <span
-                key={comp}
-                className="px-2 py-1 bg-blue-50 text-blue-800 text-xs rounded-full"
-              >
-                {comp}
-              </span>
+          <div className="text-sm font-medium text-gray-800">Excluded</div>
+          <ul className="list-disc list-inside text-sm text-gray-600 space-y-1">
+            {excludeList.map((item, idx) => (
+              <li key={idx} className="capitalize">
+                {item}
+              </li>
             ))}
-          </div>
+          </ul>
+        </div>
+      )}
+
+      {/* Archive link if present */}
+      {value.archive_url && (
+        <div className="mt-4 flex items-center text-gray-600">
+          <LucideReact.Archive className="mr-1" size={16} />
+          <a
+            href={value.archive_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="truncate hover:underline"
+          >
+            {value.archive_url}
+          </a>
         </div>
       )}
     </div>
   );
+  // 3. Return the React element.
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A request for a specific ref(branch,sha,tag) to be deployed
      *
      * @title Deployment
     */
-    export type deployment = {
+    export interface deployment {
         url: string & tags.Format<"uri">;
         /**
          * Unique identifier of the deployment
@@ -43,7 +44,7 @@ export namespace AutoViewInputSubTypes {
         */
         production_environment?: boolean;
         performed_via_github_app?: AutoViewInputSubTypes.nullable_integration;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -89,7 +90,7 @@ export namespace AutoViewInputSubTypes {
         slug?: string;
         node_id: string;
         client_id?: string;
-        owner: any | any;
+        owner: AutoViewInputSubTypes.simple_user | AutoViewInputSubTypes.enterprise;
         /**
          * The name of the GitHub app
         */
@@ -117,129 +118,225 @@ export namespace AutoViewInputSubTypes {
         webhook_secret?: string | null;
         pem?: string;
     } | null;
-    export type simple_user = any;
-    export type enterprise = any;
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
+    /**
+     * An enterprise on GitHub.
+     *
+     * @title Enterprise
+    */
+    export interface enterprise {
+        /**
+         * A short description of the enterprise.
+        */
+        description?: string | null;
+        html_url: string & tags.Format<"uri">;
+        /**
+         * The enterprise's website URL.
+        */
+        website_url?: (string & tags.Format<"uri">) | null;
+        /**
+         * Unique identifier of the enterprise
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * The name of the enterprise.
+        */
+        name: string;
+        /**
+         * The slug url identifier for the enterprise.
+        */
+        slug: string;
+        created_at: (string & tags.Format<"date-time">) | null;
+        updated_at: (string & tags.Format<"date-time">) | null;
+        avatar_url: string & tags.Format<"uri">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.deployment[];
 
 
 
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  const deployments = value;
-  const formatDate = (dateStr: string): string =>
-    new Date(dateStr).toLocaleString();
-  const truncate = (text: string, length = 120): string =>
-    text.length > length ? text.slice(0, length) + "…" : text;
+  // 1. Derived constants and helper functions
+  const totalDeployments = value.length;
+  const formatDate = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  const shortSha = (sha: string) => sha.slice(0, 7);
 
-  if (!deployments || deployments.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-500">
-        No deployments available.
-      </div>
-    );
-  }
-
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="space-y-4">
-      {deployments.map((d) => {
-        const {
-          id,
-          environment,
-          original_environment,
-          created_at,
-          ref,
-          sha,
-          task,
-          description,
-          production_environment,
-          transient_environment,
-          creator,
-          performed_via_github_app,
-        } = d;
-        const badges: React.ReactNode[] = [];
-        if (production_environment) {
-          badges.push(
-            <span
-              key="prod"
-              className="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded-full"
+    <div className="space-y-6">
+      {/* Summary */}
+      <div className="text-sm text-gray-500">
+        Total Deployments: {totalDeployments}
+      </div>
+      {/* Deployment List */}
+      <div className="space-y-4">
+        {value.map((deployment) => {
+          const creator = deployment.creator;
+          const creatorName = creator?.login || 'Unknown';
+          const avatarSrc =
+            creator?.avatar_url ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              creatorName
+            )}&background=random`;
+          return (
+            <div
+              key={deployment.id}
+              className="p-4 bg-white rounded-lg shadow-sm border border-gray-200"
             >
-              Production
-            </span>
-          );
-        }
-        if (transient_environment) {
-          badges.push(
-            <span
-              key="trans"
-              className="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full"
-            >
-              Transient
-            </span>
-          );
-        }
-
-        return (
-          <div key={id} className="p-4 bg-white rounded-lg shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-lg font-semibold text-gray-800">
-                #{id} {environment}
-              </h2>
-              <div className="flex space-x-1">{badges}</div>
-            </div>
-
-            <div className="text-sm text-gray-500 mb-2">
-              Created: {formatDate(created_at)}
-            </div>
-
-            <div className="flex flex-wrap items-center text-sm text-gray-700 mb-2 space-x-2">
-              <span className="font-medium">Ref:</span>
-              <span>{ref}</span>
-              <span className="font-medium">SHA:</span>
-              <span className="font-mono">{sha.slice(0, 7)}</span>
-            </div>
-
-            {task && (
-              <div className="text-sm text-gray-700 mb-2">
-                <span className="font-medium">Task:</span> {task}
-              </div>
-            )}
-
-            {original_environment && (
-              <div className="text-sm text-gray-700 mb-2">
-                <span className="font-medium">From:</span> {original_environment}
-              </div>
-            )}
-
-            {description && (
-              <p className="text-sm text-gray-700 mb-2">
-                {truncate(description)}
-              </p>
-            )}
-
-            {creator && (
-              <div className="flex items-center mt-2">
-                {'avatar_url' in creator && creator.avatar_url && (
-                  <img
-                    src={creator.avatar_url}
-                    alt={creator.login}
-                    className="w-6 h-6 rounded-full mr-2"
-                  />
-                )}
-                <span className="text-sm text-gray-600">
-                  {creator.name ?? creator.login}
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {deployment.production_environment ? (
+                    <LucideReact.CheckCircle
+                      className="text-green-500"
+                      size={20}
+                    />
+                  ) : deployment.transient_environment ? (
+                    <LucideReact.Clock
+                      className="text-amber-500"
+                      size={20}
+                    />
+                  ) : (
+                    <LucideReact.Tag
+                      className="text-gray-500"
+                      size={20}
+                    />
+                  )}
+                  <span className="text-lg font-semibold text-gray-800">
+                    {deployment.environment}
+                  </span>
+                </div>
+                <span className="text-sm text-gray-500">
+                  #{deployment.id}
                 </span>
               </div>
-            )}
 
-            {performed_via_github_app && (
-              <div className="text-sm text-gray-700 mt-2">
-                <span className="font-medium">Via App:</span>{" "}
-                {performed_via_github_app.name}
+              {/* Core Details */}
+              <div className="mt-2 text-sm text-gray-700 flex flex-wrap gap-4">
+                <div className="flex items-center">
+                  <LucideReact.GitBranch
+                    className="text-gray-400"
+                    size={16}
+                  />
+                  <span className="ml-1">Ref: {deployment.ref}</span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Code
+                    className="text-gray-400"
+                    size={16}
+                  />
+                  <span className="ml-1">
+                    SHA: {shortSha(deployment.sha)}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <LucideReact.Terminal
+                    className="text-gray-400"
+                    size={16}
+                  />
+                  <span className="ml-1">Task: {deployment.task}</span>
+                </div>
               </div>
-            )}
-          </div>
-        );
-      })}
+
+              {/* Description */}
+              {deployment.description && (
+                <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+                  {deployment.description}
+                </p>
+              )}
+
+              {/* Footer: Creator & Dates */}
+              <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between text-sm text-gray-500">
+                <div className="flex items-center space-x-2 mb-2 md:mb-0">
+                  <img
+                    src={avatarSrc}
+                    alt={creatorName}
+                    className="w-6 h-6 rounded-full object-cover"
+                    onError={(e) => {
+                      (
+                        e.target as HTMLImageElement
+                      ).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        creatorName
+                      )}&background=random`;
+                    }}
+                  />
+                  <span>{creatorName}</span>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <div className="flex items-center">
+                    <LucideReact.Calendar
+                      className="text-gray-400"
+                      size={16}
+                    />
+                    <span className="ml-1">
+                      Created: {formatDate(deployment.created_at)}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Calendar
+                      className="text-gray-400"
+                      size={16}
+                    />
+                    <span className="ml-1">
+                      Updated: {formatDate(deployment.updated_at)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Performed via GitHub App */}
+              {deployment.performed_via_github_app?.name && (
+                <div className="mt-3 flex items-center space-x-2 text-sm text-gray-500">
+                  <LucideReact.AppWindow
+                    className="text-gray-400"
+                    size={16}
+                  />
+                  <span>
+                    Performed via: {deployment.performed_via_github_app.name}
+                  </span>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

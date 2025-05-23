@@ -4,5 +4,5 @@ import Component from "../components/13";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"pagination":{"current":2,"limit":3,"records":7,"pages":3},"data":[{"id":"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11","value":150,"created_at":"2025-05-18T14:30:00Z","code":"MILEAGE_PURCHASE_SAMPLE","source":"TestOrder (Sample)","direction":1},{"id":"b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22","value":null,"created_at":"2025-05-15T08:00:00Z","code":"MILEAGE_EXPIRATION_DUMMY","source":"SampleExpiry","direction":-1},{"id":"c2eebc99-9c0b-4ef8-bb6d-6bb9bd380a33","value":75.5,"created_at":"2025-05-16T12:45:30Z","code":"MILEAGE_BONUS_TEST","source":"SurveySample","direction":1}]};
+  return {"pagination":{"current":1,"limit":10,"records":25,"pages":3},"data":[{"id":"d3c1f8a2-4e0d-4cbb-8491-abcdef123456","value":1500,"created_at":"2025-05-19T08:30:00Z","code":"MILG_SAMPLE_001","source":"online_purchase_sample","direction":1},{"id":"a1b2c3d4-e5f6-47a8-1234-abcdef789012","value":null,"created_at":"2025-05-18T16:45:30Z","code":"MILG_SAMPLE_002","source":"promotional_offer_sample","direction":-1},{"id":"9f8e7d6c-5b4a-3210-fedc-ba9876543210","value":750,"created_at":"2025-05-17T12:00:00Z","code":"MILG_SAMPLE_003","source":"refund_adjustment_sample","direction":1}]};
 }

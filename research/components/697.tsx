@@ -1,16 +1,17 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repository Collaborator Permission
      *
      * @title Repository Collaborator Permission
     */
-    export type repository_collaborator_permission = {
+    export interface repository_collaborator_permission {
         permission: string;
         role_name: string;
         user: AutoViewInputSubTypes.nullable_collaborator;
-    };
+    }
     /**
      * Collaborator
      *
@@ -55,91 +56,91 @@ export type AutoViewInput = AutoViewInputSubTypes.repository_collaborator_permis
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { permission, role_name: topRole, user } = value;
-  const hasUser = user !== null;
-
-  // User display name: prefer full name, otherwise login; fallback "Unknown User"
-  const displayName = hasUser
+  const user = value.user;
+  const displayName = user
     ? user.name?.trim() || user.login
-    : "Unknown User";
-
-  // Email if available
-  const email = hasUser && user.email ? user.email : "";
-
-  // Site admin status
-  const isSiteAdmin = hasUser && user.site_admin;
-
-  // Capitalize permission label
+    : "Unknown Collaborator";
   const permissionLabel =
-    permission.charAt(0).toUpperCase() + permission.slice(1);
-
-  // Map permission to badge colors
-  const permissionColorMap: Record<string, string> = {
-    admin: "bg-red-100 text-red-800",
-    push: "bg-yellow-100 text-yellow-800",
-    maintain: "bg-green-100 text-green-800",
-    triage: "bg-indigo-100 text-indigo-800",
-    pull: "bg-blue-100 text-blue-800",
-    read: "bg-blue-100 text-blue-800",
-  };
-  const permissionBadgeClasses =
-    permissionColorMap[permission] || "bg-gray-100 text-gray-800";
-
-  // Aggregate finer-grained scopes from user.permissions if present
-  const scopes = hasUser && user.permissions
-    ? (Object.entries(user.permissions)
-        .filter(([, enabled]) => enabled)
-        .map(([scope]) => scope) as string[])
-    : [];
-  const scopesDisplay = scopes.length > 0 ? scopes.join(", ") : "";
+    value.permission.charAt(0).toUpperCase() + value.permission.slice(1);
+  const repoRoleLabel =
+    value.role_name
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  // Avatar and fallback
+  const rawAvatar = user?.avatar_url || "";
+  const fallbackAvatar =
+    user === null
+      ? "https://placehold.co/48x48/e2e8f0/1e293b?text=?"
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          displayName
+        )}&background=0D8ABC&color=fff`;
+  const email = user?.email;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="flex flex-col items-center sm:flex-row sm:items-start p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      {hasUser ? (
-        <img
-          src={user.avatar_url}
-          alt={`${displayName} avatar`}
-          className="w-16 h-16 rounded-full object-cover shrink-0"
-        />
-      ) : (
-        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 shrink-0">
-          ?
+    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow border border-gray-200">
+      <div className="flex items-center space-x-4">
+        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+          <img
+            src={rawAvatar || fallbackAvatar}
+            alt={displayName}
+            className="w-full h-full object-cover"
+            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = fallbackAvatar;
+            }}
+          />
         </div>
-      )}
-      <div className="mt-3 sm:mt-0 sm:ml-4 flex-1 min-w-0 text-center sm:text-left">
-        <div className="text-lg font-medium text-gray-900 truncate">
-          {displayName}
-        </div>
-        {hasUser && (
-          <div className="mt-1 text-sm text-gray-500 truncate">
-            @{user.login}
-          </div>
-        )}
-        {email && (
-          <div className="mt-1 text-sm text-gray-500">{email}</div>
-        )}
-        {isSiteAdmin && (
-          <div className="mt-2 inline-block text-xs font-medium bg-gray-100 text-gray-800 rounded-full px-2 py-0.5">
-            Site Admin
-          </div>
-        )}
-        <div className="mt-3 flex flex-wrap gap-2 justify-center sm:justify-start">
-          <span
-            className={`text-xs font-semibold ${permissionBadgeClasses} rounded-full px-2 py-0.5`}
-          >
-            {permissionLabel}
-          </span>
-          <span className="text-xs font-semibold bg-purple-100 text-purple-800 rounded-full px-2 py-0.5">
-            {topRole}
-          </span>
-          {scopesDisplay && (
-            <span className="text-xs font-semibold bg-gray-100 text-gray-800 rounded-full px-2 py-0.5">
-              Scopes: {scopesDisplay}
-            </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-lg font-semibold text-gray-900 truncate">
+            {displayName}
+          </p>
+          {user?.login && (
+            <p className="text-sm text-gray-500 truncate">
+              @{user.login}
+            </p>
           )}
         </div>
       </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+          <LucideReact.Shield size={12} className="mr-1" />
+          {permissionLabel}
+        </span>
+        <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded">
+          <LucideReact.User size={12} className="mr-1" />
+          {repoRoleLabel}
+        </span>
+      </div>
+
+      {email && (
+        <div className="mt-3 flex items-center text-sm text-gray-500">
+          <LucideReact.Mail size={14} className="mr-1" />
+          <span className="truncate">{email}</span>
+        </div>
+      )}
+
+      {user && (
+        <div className="mt-2 flex items-center text-sm text-gray-500">
+          {user.site_admin ? (
+            <LucideReact.CheckCircle
+              size={14}
+              className="text-green-500 mr-1"
+              aria-label="Site Admin"
+            />
+          ) : (
+            <LucideReact.XCircle
+              size={14}
+              className="text-red-500 mr-1"
+              aria-label="Not Site Admin"
+            />
+          )}
+          <span>
+            {user.site_admin ? "Site Admin" : "Regular User"}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

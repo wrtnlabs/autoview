@@ -1,4 +1,5 @@
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Section information.
@@ -15,7 +16,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one section, then just
      * use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingSection = {
+    export interface IShoppingSection {
         /**
          * Primary Key.
          *
@@ -40,7 +41,7 @@ export namespace AutoViewInputSubTypes {
          * @title Creation time of record
         */
         created_at: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 
@@ -49,30 +50,41 @@ export type AutoViewInput = AutoViewInputSubTypes.IShoppingSection;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdDate = new Date(value.created_at);
-  const formattedCreatedAt = createdDate.toLocaleDateString(undefined, {
+  //    Here, we format the creation timestamp into a human-readable date.
+  const formattedDate: string = new Date(value.created_at).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Semantic elements: heading for name, time for date.
-  return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md flex flex-col space-y-2">
-      <h2 className="text-xl font-semibold text-gray-900 truncate">
-        {value.name}
-      </h2>
-      <div className="flex items-center space-x-2">
-        <span className="text-sm font-medium text-gray-600">Section Code:</span>
-        <span className="text-sm text-gray-800 bg-gray-100 px-2 py-1 rounded">
+  //    We display the section's name, code, and creation date with appropriate icons.
+  const content = (
+    <div className="w-full max-w-sm p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-2">
+        <LucideReact.Layers size={20} className="text-indigo-500" aria-label="Section icon" />
+        <h2
+          className="ml-2 text-lg font-semibold text-gray-800 truncate"
+          title={value.name}
+        >
+          {value.name}
+        </h2>
+      </div>
+      <div className="flex items-center text-sm text-gray-500 mb-1">
+        <LucideReact.Tag size={16} className="text-gray-400" aria-label="Code icon" />
+        <span className="ml-1 truncate" title={value.code}>
           {value.code}
         </span>
       </div>
-      <div className="text-sm text-gray-500">
-        Created on{' '}
-        <time dateTime={value.created_at}>{formattedCreatedAt}</time>
+      <div className="flex items-center text-sm text-gray-500">
+        <LucideReact.Calendar size={16} className="text-gray-400" aria-label="Calendar icon" />
+        <time dateTime={value.created_at} className="ml-1">
+          {formattedDate}
+        </time>
       </div>
     </div>
   );
+
+  // 3. Return the React element.
+  return content;
 }

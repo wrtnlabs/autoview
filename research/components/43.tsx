@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A page.
      *
      * Collection of records with pagination indformation.
     */
-    export type IPageIShoppingChannel = {
+    export interface IPageIShoppingChannel {
         /**
          * Page information.
          *
@@ -19,12 +20,12 @@ export namespace AutoViewInputSubTypes {
          * @title List of records
         */
         data: AutoViewInputSubTypes.IShoppingChannel[];
-    };
+    }
     export namespace IPage {
         /**
          * Page information.
         */
-        export type IPagination = {
+        export interface IPagination {
             /**
              * Current page number.
              *
@@ -51,7 +52,7 @@ export namespace AutoViewInputSubTypes {
              * @title Total pages
             */
             pages: number & tags.Type<"int32">;
-        };
+        }
     }
     /**
      * Channel information.
@@ -63,7 +64,7 @@ export namespace AutoViewInputSubTypes {
      * By the way, if your shopping mall system requires only one channel, then
      * just use only one. This concept is designed to be expandable in the future.
     */
-    export type IShoppingChannel = {
+    export interface IShoppingChannel {
         /**
          * Primary Key.
          *
@@ -88,7 +89,7 @@ export namespace AutoViewInputSubTypes {
          * @title Name of the channel
         */
         name: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingChannel;
 
@@ -97,51 +98,61 @@ export type AutoViewInput = AutoViewInputSubTypes.IPageIShoppingChannel;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { pagination, data } = value;
-  const { current, limit, records, pages } = pagination;
-  const startIndex = (current - 1) * limit + 1;
-  const endIndex = Math.min(current * limit, records);
-
-  const formatDate = (isoString: string): string => {
-    const date = new Date(isoString);
-    return date.toLocaleDateString(undefined, {
-      year: "numeric",
+  const { current, limit, pages, records } = value.pagination;
+  const channelCount = value.data.length;
+  const formattedDate = (dateString: string): string =>
+    new Date(dateString).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
+      year: "numeric",
     });
-  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      <div className="mb-4 text-sm text-gray-600">
-        Showing {startIndex}–{endIndex} of {records} channels
+      {/* Pagination Summary */}
+      <div className="mb-4 text-gray-700 text-sm flex flex-wrap items-center gap-x-2">
+        <span className="font-semibold">Page {current} of {pages}</span>
+        <span>•</span>
+        <span>{channelCount} channels shown</span>
+        <span>•</span>
+        <span>{records} total channels</span>
       </div>
-      <ul className="space-y-4">
-        {data.map((channel) => {
-          const { id, name, code, created_at } = channel;
-          return (
+
+      {/* Empty State */}
+      {channelCount === 0 ? (
+        <div className="flex flex-col items-center py-10 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2">No channels available.</span>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {value.data.map((channel) => (
             <li
-              key={id}
-              className="p-4 bg-gray-50 rounded-lg flex flex-col sm:flex-row sm:justify-between"
+              key={channel.id}
+              className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between"
             >
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-semibold text-gray-800 truncate">{name}</h3>
-                <p className="text-sm text-gray-500 truncate">Code: {code}</p>
+              {/* Channel Name */}
+              <div className="flex items-center space-x-2 truncate">
+                <LucideReact.FileText className="text-gray-500" size={20} />
+                <span className="font-medium text-gray-800 truncate">{channel.name}</span>
               </div>
-              <time
-                dateTime={created_at}
-                className="text-sm text-gray-500 mt-2 sm:mt-0"
-              >
-                {formatDate(created_at)}
-              </time>
+
+              {/* Channel Metadata */}
+              <div className="mt-2 sm:mt-0 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+                <div className="flex items-center space-x-1 truncate">
+                  <LucideReact.Code className="text-gray-400" size={16} />
+                  <span className="truncate">{channel.code}</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Calendar className="text-gray-400" size={16} />
+                  <time dateTime={channel.created_at}>{formattedDate(channel.created_at)}</time>
+                </div>
+              </div>
             </li>
-          );
-        })}
-      </ul>
-      <div className="mt-4 text-sm text-gray-600">
-        Page {current} of {pages}
-      </div>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

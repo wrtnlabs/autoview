@@ -1,22 +1,23 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Repositories associated with a code security configuration and attachment status
     */
-    export type code_security_configuration_repositories = {
+    export interface code_security_configuration_repositories {
         /**
          * The attachment status of the code security configuration on the repository.
         */
         status?: "attached" | "attaching" | "detached" | "removed" | "enforced" | "failed" | "updating" | "removed_by_enterprise";
         repository?: AutoViewInputSubTypes.simple_repository;
-    };
+    }
     /**
      * A GitHub repository.
      *
      * @title Simple Repository
     */
-    export type simple_repository = {
+    export interface simple_repository {
         /**
          * A unique identifier of the repository.
         */
@@ -198,13 +199,13 @@ export namespace AutoViewInputSubTypes {
          * The API URL to list the hooks on the repository.
         */
         hooks_url: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -227,7 +228,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration_repositories[];
 
@@ -236,86 +237,104 @@ export type AutoViewInput = AutoViewInputSubTypes.code_security_configuration_re
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // Map each status to a consistent badge style
-  const statusStyles: Record<string, string> = {
-    attached: "bg-green-100 text-green-800",
-    enforced: "bg-green-100 text-green-800",
-    attaching: "bg-blue-100 text-blue-800",
-    updating: "bg-yellow-100 text-yellow-800",
-    detached: "bg-gray-100 text-gray-800",
-    removed: "bg-red-100 text-red-800",
-    removed_by_enterprise: "bg-red-100 text-red-800",
-    failed: "bg-red-100 text-red-800",
+  const items = value.filter(item => item.repository);
+
+  const getStatusIcon = (
+    status?: AutoViewInputSubTypes.code_security_configuration_repositories["status"]
+  ): JSX.Element => {
+    switch (status) {
+      case "attached":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "attaching":
+      case "updating":
+        return <LucideReact.Loader className="animate-spin text-amber-500" size={16} />;
+      case "detached":
+        return <LucideReact.XCircle className="text-gray-500" size={16} />;
+      case "removed":
+      case "removed_by_enterprise":
+        return <LucideReact.Trash className="text-red-500" size={16} />;
+      case "enforced":
+        return <LucideReact.ShieldCheck className="text-blue-500" size={16} />;
+      case "failed":
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400" size={16} />;
+    }
   };
 
-  const totalRepos = value.length;
+  const formatStatus = (status?: string): string => {
+    if (!status) return "Unknown";
+    return status
+      .split("_")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const img = e.currentTarget;
+    img.onerror = null;
+    const name = img.getAttribute("data-owner") || "User";
+    img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (totalRepos === 0) {
+  if (items.length === 0) {
     return (
-      <div className="w-full py-6 text-center text-gray-500">
-        No repositories found.
+      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle size={48} />
+        <span className="mt-4 text-lg">No repositories available.</span>
       </div>
     );
   }
 
   return (
-    <div className="w-full space-y-6">
-      <div className="text-sm text-gray-700">
-        Total Repositories: <span className="font-semibold">{totalRepos}</span>
-      </div>
-      {value.map((item, idx) => {
-        const repo = item.repository;
-        if (!repo) return null;
-
-        // Derive human-readable status label
-        const rawStatus = item.status ?? "unknown";
-        const statusLabel = rawStatus
-          .replace(/_/g, " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase());
-        const badgeStyle = statusStyles[rawStatus] || "bg-gray-100 text-gray-800";
-
-        const owner = repo.owner;
-        const isPrivate = repo["private"];
-
+    <div className="grid grid-cols-1 gap-4">
+      {items.map((item, idx) => {
+        const repo = item.repository!;
+        const status = item.status;
+        const formattedStatus = formatStatus(status);
         return (
           <div
-            key={`${repo.id}-${idx}`}
-            className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:justify-between"
+            key={repo.id}
+            className="flex flex-col sm:flex-row items-start sm:items-center bg-white rounded-lg shadow p-4 gap-4"
           >
-            <div className="flex-1">
-              <div className="text-lg font-semibold text-gray-900 truncate">
-                {repo.full_name}
+            <img
+              src={repo.owner.avatar_url}
+              data-owner={repo.owner.login}
+              onError={handleImageError}
+              alt={`${repo.owner.login} avatar`}
+              className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+            />
+            <div className="flex-1 flex flex-col">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-lg font-semibold text-gray-900 truncate">
+                    {repo.full_name}
+                  </span>
+                  <div className="flex items-center gap-1 text-sm text-gray-500 mt-1">
+                    {repo.private ? (
+                      <>
+                        <LucideReact.Lock size={16} /> Private
+                      </>
+                    ) : (
+                      <>
+                        <LucideReact.Unlock size={16} /> Public
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {getStatusIcon(status)}
+                  <span className="text-sm font-medium text-gray-700">{formattedStatus}</span>
+                </div>
               </div>
               {repo.description && (
-                <p className="text-gray-600 mt-1 line-clamp-2">
-                  {repo.description}
-                </p>
+                <p className="mt-2 text-sm text-gray-600 line-clamp-2">{repo.description}</p>
               )}
-              <div className="flex items-center space-x-2 mt-3">
-                <img
-                  src={owner.avatar_url}
-                  alt={owner.login}
-                  className="w-6 h-6 rounded-full"
-                />
-                <span className="text-gray-500 text-sm">{owner.login}</span>
-                <span
-                  className={`ml-2 px-2 py-0.5 text-xs font-medium rounded ${
-                    isPrivate
-                      ? "bg-yellow-100 text-yellow-800"
-                      : "bg-green-100 text-green-800"
-                  }`}
-                >
-                  {isPrivate ? "Private" : "Public"}
-                </span>
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-500 truncate">
+                <LucideReact.Link size={16} />
+                <span className="truncate">{repo.html_url}</span>
               </div>
-            </div>
-            <div className="mt-4 sm:mt-0 flex-shrink-0">
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-medium ${badgeStyle}`}
-              >
-                {statusLabel}
-              </span>
             </div>
           </div>
         );

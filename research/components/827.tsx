@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Review Comments are comments on a portion of the Pull Request's diff.
      *
      * @title Pull Request Review Comment
     */
-    export type pull_request_review_comment = {
+    export interface pull_request_review_comment {
         /**
          * URL for the pull request review comment
         */
@@ -109,13 +110,13 @@ export namespace AutoViewInputSubTypes {
         reactions?: AutoViewInputSubTypes.reaction_rollup;
         body_html?: string;
         body_text?: string;
-    };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -138,7 +139,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * How the author is associated with the repository.
      *
@@ -148,7 +149,7 @@ export namespace AutoViewInputSubTypes {
     /**
      * @title Reaction Rollup
     */
-    export type reaction_rollup = {
+    export interface reaction_rollup {
         url: string & tags.Format<"uri">;
         total_count: number & tags.Type<"int32">;
         "+1": number & tags.Type<"int32">;
@@ -159,7 +160,7 @@ export namespace AutoViewInputSubTypes {
         hooray: number & tags.Type<"int32">;
         eyes: number & tags.Type<"int32">;
         rocket: number & tags.Type<"int32">;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.pull_request_review_comment;
 
@@ -168,77 +169,113 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_review_comment;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const createdAt = new Date(value.created_at);
-  const formattedDate = createdAt.toLocaleString(undefined, {
+  const { user, created_at, body_text, body, body_html, path, line, position, reactions } = value;
+
+  // Derive the comment text: prefer body_text, then body, then strip HTML tags from body_html
+  const displayBody = body_text
+    ?? body
+    ?? (body_html ? body_html.replace(/<[^>]+>/g, "") : "");
+
+  // Format created_at into a human-friendly string
+  const formattedDate = new Date(created_at).toLocaleString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    hour: "numeric",
+    minute: "numeric",
   });
 
-  const commentText = value.body_text ?? value.body;
-  const lineNumber =
-    value.line ??
-    value.position ??
-    value.original_line ??
-    value.original_position;
-  const fileInfo = lineNumber
-    ? `${value.path}:${lineNumber}`
-    : value.path;
+  // Determine the line number for the comment (use `line` if available, otherwise `position`)
+  const commentLine = line ?? position;
+
+  // Map reaction types to LucideReact icons
+  const reactionIcons: Record<string, React.FC<any>> = {
+    "+1": LucideReact.ThumbsUp,
+    "-1": LucideReact.ThumbsDown,
+    laugh: LucideReact.Smile,
+    heart: LucideReact.Heart,
+    rocket: LucideReact.Rocket,
+    eyes: LucideReact.Eye,
+  };
+
+  // Build an array of rendered reaction items (filter out url and total_count)
+  const reactionItems = reactions
+    ? (Object.entries(reactions) as [string, number][])
+        .filter(
+          ([type, count]) =>
+            type !== "url" && type !== "total_count" && count > 0
+        )
+        .map(([type, count]) => {
+          const Icon = reactionIcons[type];
+          return Icon ? (
+            <div
+              key={type}
+              className="flex items-center text-sm text-gray-500 gap-0.5"
+            >
+              <Icon size={16} />
+              <span>{count}</span>
+            </div>
+          ) : null;
+        })
+        .filter(Boolean)
+    : [];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="flex items-center mb-3">
-        <img
-          className="w-10 h-10 rounded-full object-cover"
-          src={value.user.avatar_url}
-          alt={`${value.user.login} avatar`}
-        />
-        <div className="ml-3 flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-900 truncate">
-            {value.user.login}
-            {value.user.name ? ` (${value.user.name})` : ""}
-          </p>
-          <p className="text-xs text-gray-500">{formattedDate}</p>
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-4">
+      {/* Header: Avatar, username, association, date, file/line info */}
+      <div className="flex items-start space-x-4">
+        <div className="w-10 h-10 flex-shrink-0">
+          <img
+            src={user.avatar_url}
+            alt={`${user.login} avatar`}
+            className="w-10 h-10 rounded-full object-cover"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = 
+                `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  user.login
+                )}&background=random`;
+            }}
+          />
         </div>
-        {value.author_association && (
-          <span className="ml-2 text-xs font-medium text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-            {value.author_association}
-          </span>
-        )}
+        <div className="flex-1">
+          <div className="flex items-center flex-wrap space-x-2">
+            <div className="flex items-center text-gray-900 font-medium space-x-1">
+              <LucideReact.User size={16} />
+              <span>{user.login}</span>
+            </div>
+            {value.author_association && (
+              <span className="text-xs uppercase bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                {value.author_association.replace("_", " ")}
+              </span>
+            )}
+            <div className="flex items-center text-sm text-gray-500 space-x-1">
+              <LucideReact.Calendar size={16} />
+              <span>{formattedDate}</span>
+            </div>
+          </div>
+          {path && commentLine != null && (
+            <div className="mt-1 flex items-center text-sm text-gray-500 space-x-1">
+              <LucideReact.FileText size={16} />
+              <span className="font-mono">
+                {path}:{commentLine}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="mb-2 text-xs text-gray-500 truncate">{fileInfo}</div>
-      <div className="mb-3 text-gray-800 text-sm whitespace-pre-wrap line-clamp-3">
-        {commentText}
+
+      {/* Body text (truncated to 4 lines on small screens) */}
+      <div>
+        <p className="text-gray-800 text-sm whitespace-pre-wrap line-clamp-4">
+          {displayBody}
+        </p>
       </div>
-      {value.reactions && value.reactions.total_count > 0 && (
-        <div className="flex flex-wrap gap-2 text-xs text-gray-600">
-          <span className="inline-flex items-center">
-            👍 <span className="ml-1">{value.reactions["+1"]}</span>
-          </span>
-          <span className="inline-flex items-center">
-            👎 <span className="ml-1">{value.reactions["-1"]}</span>
-          </span>
-          <span className="inline-flex items-center">
-            😂 <span className="ml-1">{value.reactions.laugh}</span>
-          </span>
-          <span className="inline-flex items-center">
-            😕 <span className="ml-1">{value.reactions.confused}</span>
-          </span>
-          <span className="inline-flex items-center">
-            ❤️ <span className="ml-1">{value.reactions.heart}</span>
-          </span>
-          <span className="inline-flex items-center">
-            🎉 <span className="ml-1">{value.reactions.hooray}</span>
-          </span>
-          <span className="inline-flex items-center">
-            👀 <span className="ml-1">{value.reactions.eyes}</span>
-          </span>
-          <span className="inline-flex items-center">
-            🚀 <span className="ml-1">{value.reactions.rocket}</span>
-          </span>
+
+      {/* Reactions */}
+      {reactionItems.length > 0 && (
+        <div className="flex items-center space-x-4 pt-2 border-t border-gray-100">
+          {reactionItems}
         </div>
       )}
     </div>

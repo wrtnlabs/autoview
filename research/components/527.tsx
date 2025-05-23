@@ -1,18 +1,19 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     export namespace IApiOrgsSettingsNetworkConfigurations {
-        export type GetResponse = {
+        export interface GetResponse {
             total_count: number & tags.Type<"int32">;
             network_configurations: AutoViewInputSubTypes.network_configuration[];
-        };
+        }
     }
     /**
      * A hosted compute network configuration.
      *
      * @title Hosted compute network configuration
     */
-    export type network_configuration = {
+    export interface network_configuration {
         /**
          * The unique identifier of the network configuration.
         */
@@ -33,7 +34,7 @@ export namespace AutoViewInputSubTypes {
          * The time at which the network configuration was created, in ISO 8601 format.
         */
         created_on: (string & tags.Format<"date-time">) | null;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsSettingsNetworkConfigurations.GetResponse;
 
@@ -41,57 +42,85 @@ export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsSettingsNetworkConfigu
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalCount = value.total_count;
-  const configurations = value.network_configurations;
-
-  const serviceLabels: Record<string, string> = {
-    none: "None",
-    actions: "Actions",
-    codespaces: "Codespaces",
+  // 1. Data transformation and derived constants
+  const { total_count, network_configurations } = value;
+  const serviceMeta: Record<"none" | "actions" | "codespaces", { label: string; icon: JSX.Element }> = {
+    none: {
+      label: "None",
+      icon: <LucideReact.Slash className="text-gray-400" size={16} />
+    },
+    actions: {
+      label: "Actions",
+      icon: <LucideReact.Activity className="text-blue-500" size={16} />
+    },
+    codespaces: {
+      label: "Codespaces",
+      icon: <LucideReact.Code className="text-purple-500" size={16} />
+    }
   };
 
-  const formatDate = (date: string | null): string =>
-    date
-      ? new Date(date).toLocaleString(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        })
-      : "N/A";
+  const formatDate = (iso: string | null): string => {
+    if (!iso) return "Unknown";
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Compose the visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        Network Configurations ({totalCount})
-      </h2>
+    <div className="bg-white p-4 rounded-lg shadow-sm">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900">
+          Network Configurations
+        </h2>
+        <div className="flex items-center text-sm text-gray-500">
+          <LucideReact.Server size={16} className="mr-1" />
+          <span>{total_count}</span>
+        </div>
+      </div>
 
-      {configurations.length === 0 ? (
-        <p className="text-gray-600">No network configurations available.</p>
+      {network_configurations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <p className="mt-2">No configurations available</p>
+        </div>
       ) : (
-        <ul className="space-y-4">
-          {configurations.map((config) => {
-            const created = formatDate(config.created_on);
-            const service = config.compute_service
-              ? serviceLabels[config.compute_service]
-              : "N/A";
-            const settingsCount = config.network_settings_ids?.length ?? 0;
-            const settingsLabel =
-              settingsCount > 0
-                ? `${settingsCount} setting${settingsCount === 1 ? "" : "s"}`
-                : "No settings";
-
+        <ul className="mt-4 space-y-4">
+          {network_configurations.map((cfg) => {
+            const meta = serviceMeta[cfg.compute_service ?? "none"];
+            const settingsCount = cfg.network_settings_ids?.length ?? 0;
             return (
-              <li key={config.id} className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex justify-between items-center">
+              <li
+                key={cfg.id}
+                className="flex flex-col md:flex-row md:justify-between p-4 border border-gray-200 rounded-lg hover:shadow transition-shadow"
+              >
+                <div className="min-w-0">
                   <h3 className="text-md font-medium text-gray-900 truncate">
-                    {config.name}
+                    {cfg.name}
                   </h3>
-                  <span className="text-sm text-gray-500">{service}</span>
+                  <div className="flex items-center text-sm text-gray-500 mt-1 space-x-1">
+                    {meta.icon}
+                    <span>{meta.label}</span>
+                  </div>
                 </div>
-                <div className="mt-2 flex text-sm text-gray-600 space-x-4">
-                  <span>{settingsLabel}</span>
-                  <span>{created}</span>
+                <div className="mt-3 md:mt-0 flex items-center text-sm text-gray-500 space-x-4">
+                  <div className="flex items-center">
+                    <LucideReact.Calendar size={16} className="text-gray-400" />
+                    <span className="ml-1">
+                      {formatDate(cfg.created_on)}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.List size={16} className="text-gray-400" />
+                    <span className="ml-1">
+                      {settingsCount} setting{settingsCount !== 1 ? "s" : ""}
+                    </span>
+                  </div>
                 </div>
               </li>
             );

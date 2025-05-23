@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * A self hosted runner
      *
      * @title Self hosted runners
     */
-    export type runner = {
+    export interface runner {
         /**
          * The ID of the runner.
         */
@@ -30,13 +31,13 @@ export namespace AutoViewInputSubTypes {
         busy: boolean;
         labels: AutoViewInputSubTypes.runner_label[];
         ephemeral?: boolean;
-    };
+    }
     /**
      * A label for a self hosted runner
      *
      * @title Self hosted runner label
     */
-    export type runner_label = {
+    export interface runner_label {
         /**
          * Unique identifier of the label.
         */
@@ -49,7 +50,7 @@ export namespace AutoViewInputSubTypes {
          * The type of label. Read-only labels are applied automatically when the runner is configured.
         */
         type?: "read-only" | "custom";
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner;
 
@@ -58,44 +59,82 @@ export type AutoViewInput = AutoViewInputSubTypes.runner;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const status = value.status.toLowerCase();
-  const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
-  let statusClass = "bg-blue-100 text-blue-800";
-  if (status === "online") statusClass = "bg-green-100 text-green-800";
-  else if (status === "offline") statusClass = "bg-gray-100 text-gray-800";
-  else if (status === "idle") statusClass = "bg-yellow-100 text-yellow-800";
+  const {
+    name,
+    os,
+    status,
+    busy,
+    labels,
+    ephemeral,
+  } = value;
+
+  // Derive a clean, capitalized status text
+  const statusText = busy
+    ? "Busy"
+    : status.charAt(0).toUpperCase() + status.slice(1);
+
+  // Select an icon based on runner status (busy overrides)
+  const statusIcon = busy ? (
+    <LucideReact.Loader className="animate-spin text-amber-500" size={20} />
+  ) : (() => {
+    const s = status.toLowerCase();
+    if (["online", "active"].includes(s)) {
+      return <LucideReact.CheckCircle className="text-green-500" size={20} />;
+    }
+    if (["offline", "stopped", "inactive"].includes(s)) {
+      return <LucideReact.XCircle className="text-red-500" size={20} />;
+    }
+    if (["idle", "pending", "paused"].includes(s)) {
+      return <LucideReact.Clock className="text-amber-500" size={20} />;
+    }
+    return <LucideReact.Circle className="text-gray-400" size={20} />;
+  })();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow flex flex-col space-y-3">
+    <div className="max-w-sm w-full bg-white rounded-lg shadow-md p-4 flex flex-col">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{value.name}</h2>
-        <div className="flex items-center space-x-2">
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusClass}`}>
-            {statusLabel}
+        <div className="flex items-center gap-2">
+          {statusIcon}
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {name}
+          </h2>
+        </div>
+        {ephemeral && (
+          <span className="text-xs font-medium text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
+            Ephemeral
           </span>
-          {value.busy && (
-            <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-              Busy
-            </span>
-          )}
-          {value.ephemeral && (
-            <span className="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">
-              Ephemeral
-            </span>
+        )}
+      </div>
+      <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-gray-600">
+        <div className="flex items-center gap-1">
+          <LucideReact.Monitor size={16} />
+          <span className="truncate">{os}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          {busy ? (
+            <>
+              <LucideReact.Loader className="animate-spin text-amber-500" size={16} />
+              <span>{statusText}</span>
+            </>
+          ) : (
+            <>
+              {statusText === "Busy" ? null : statusIcon}
+              <span>{statusText}</span>
+            </>
           )}
         </div>
       </div>
-      <div className="flex flex-wrap text-sm text-gray-600 space-x-4">
-        <span>OS: {value.os}</span>
-        {value.runner_group_id != null && <span>Group #{value.runner_group_id}</span>}
-      </div>
-      {value.labels.length > 0 && (
-        <div className="flex flex-wrap mt-2">
-          {value.labels.map((label) => (
+      {labels && labels.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-4">
+          {labels.map((label) => (
             <span
-              key={label.id != null ? label.id : label.name}
-              className="mr-2 mb-2 px-2 py-1 text-xs text-gray-800 bg-gray-200 rounded-full truncate"
+              key={label.id ?? label.name}
+              className={`text-xs font-medium px-2 py-1 rounded-full ${
+                label.type === "read-only"
+                  ? "bg-gray-100 text-gray-800"
+                  : "bg-blue-100 text-blue-800"
+              }`}
             >
               {label.name}
             </span>

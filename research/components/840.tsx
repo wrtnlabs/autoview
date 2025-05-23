@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Pull Request Reviews are reviews on pull requests.
      *
      * @title Pull Request Review
     */
-    export type pull_request_review = {
+    export interface pull_request_review {
         /**
          * Unique identifier of the review
         */
@@ -36,7 +37,7 @@ export namespace AutoViewInputSubTypes {
         body_html?: string;
         body_text?: string;
         author_association: AutoViewInputSubTypes.author_association;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -80,92 +81,100 @@ export type AutoViewInput = AutoViewInputSubTypes.pull_request_review;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const username = value.user?.login ?? "Unknown User";
-  const avatarUrl = value.user?.avatar_url;
+  const user = value.user;
+  const displayName = user?.name || user?.login || "Unknown User";
+  const avatarSrc = user?.avatar_url;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName
+  )}&background=0D8ABC&color=fff`;
+
+  // Humanize author association: e.g. "FIRST_TIMER" → "First timer"
+  const assocRaw = value.author_association;
+  const association = assocRaw
+    .toLowerCase()
+    .split("_")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
+  // Format submitted date
   const submittedAt = value.submitted_at
     ? new Date(value.submitted_at).toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
+        dateStyle: "medium",
+        timeStyle: "short",
       })
-    : "Unknown date";
+    : null;
+
+  // Shorten commit id
   const commitShort =
-    typeof value.commit_id === "string" && value.commit_id.length > 7
-      ? value.commit_id.substring(0, 7)
-      : value.commit_id ?? "—";
-  // State badge styling
-  const stateKey = value.state.toLowerCase();
-  const stateStyles =
-    stateKey === "approved"
-      ? "bg-green-100 text-green-800"
-      : stateKey === "changes_requested" || stateKey === "changes-requested"
-      ? "bg-red-100 text-red-800"
-      : stateKey === "commented" || stateKey === "pending"
-      ? "bg-yellow-100 text-yellow-800"
-      : "bg-gray-100 text-gray-800";
-  const stateLabel = value.state
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-  // Author association display
-  const assocLabel = value.author_association
-    .replace(/_/g, " ")
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-  // Body text fallback
-  const bodyText = value.body_text
-    ? value.body_text
-    : value.body
-    ? value.body
-    : "No review content.";
+    typeof value.commit_id === "string" && value.commit_id.length > 0
+      ? value.commit_id.slice(0, 7)
+      : null;
+
+  // Map state to label and icon
+  let statusLabel = value.state.charAt(0).toUpperCase() + value.state.slice(1).toLowerCase();
+  let statusIcon = <LucideReact.MessageSquare className="text-gray-500" size={16} />;
+  if (value.state.toUpperCase() === "APPROVED") {
+    statusLabel = "Approved";
+    statusIcon = <LucideReact.CheckCircle className="text-green-500" size={16} />;
+  } else if (value.state.toUpperCase() === "CHANGES_REQUESTED") {
+    statusLabel = "Changes Requested";
+    statusIcon = <LucideReact.XCircle className="text-red-500" size={16} />;
+  } else if (value.state.toUpperCase() === "COMMENTED") {
+    statusLabel = "Commented";
+    statusIcon = <LucideReact.MessageSquare className="text-blue-500" size={16} />;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="max-w-md mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      {/* Header: Avatar, Username, Association, Date */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={`${username} avatar`}
-              className="w-10 h-10 rounded-full object-cover border"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-              ?
-            </div>
+    <div className="max-w-md w-full bg-white rounded-lg shadow-md p-4">
+      {/* Header: Avatar and user info */}
+      <div className="flex items-center">
+        <img
+          src={avatarSrc || fallbackAvatar}
+          alt={`${displayName} avatar`}
+          onError={(e) => {
+            const img = e.currentTarget as HTMLImageElement;
+            if (img.src !== fallbackAvatar) img.src = fallbackAvatar;
+          }}
+          className="w-10 h-10 rounded-full object-cover"
+        />
+        <div className="ml-3 flex flex-col">
+          <span className="text-sm font-medium text-gray-900">{displayName}</span>
+          {user?.login && (
+            <span className="text-xs text-gray-500">@{user.login}</span>
           )}
-          <div className="flex flex-col">
-            <span className="text-sm font-medium text-gray-900 truncate">
-              {username}
-            </span>
-            <span className="text-xs text-gray-500">{assocLabel}</span>
-          </div>
         </div>
-        <span className="text-xs text-gray-400 whitespace-nowrap">
-          {submittedAt}
+        <span className="ml-auto px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded">
+          {association}
         </span>
       </div>
 
-      {/* Review State and Commit */}
-      <div className="mt-3 flex items-center justify-between">
-        <span
-          className={`px-2 py-1 text-xs font-semibold rounded ${stateStyles}`}
-        >
-          {stateLabel}
-        </span>
-        <span className="text-xs text-gray-500 font-mono">
-          {commitShort}
-        </span>
+      {/* Status, Date, Commit */}
+      <div className="mt-4 flex flex-wrap items-center text-sm text-gray-700 gap-x-4 gap-y-2">
+        <div className="flex items-center gap-1">
+          {statusIcon}
+          <span>{statusLabel}</span>
+        </div>
+        {submittedAt && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar className="text-gray-400" size={16} />
+            <span>{submittedAt}</span>
+          </div>
+        )}
+        {commitShort && (
+          <div className="flex items-center gap-1">
+            <LucideReact.GitCommit className="text-gray-400" size={16} />
+            <span>{commitShort}</span>
+          </div>
+        )}
       </div>
 
-      {/* Body Preview */}
-      <p className="mt-4 text-gray-700 text-sm line-clamp-3">
-        {bodyText}
-      </p>
+      {/* Review Body */}
+      {(value.body_text || value.body) && (
+        <p className="mt-3 text-sm text-gray-700 line-clamp-3">
+          {value.body_text || value.body}
+        </p>
+      )}
     </div>
   );
 }

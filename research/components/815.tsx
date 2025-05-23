@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Page Build
      *
      * @title Page Build
     */
-    export type page_build = {
+    export interface page_build {
         url: string & tags.Format<"uri">;
         status: string;
         error: {
@@ -17,7 +18,7 @@ export namespace AutoViewInputSubTypes {
         duration: number & tags.Type<"int32">;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
-    };
+    }
     /**
      * A GitHub user.
      *
@@ -56,99 +57,172 @@ export type AutoViewInput = AutoViewInputSubTypes.page_build[];
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const builds = value;
-  const totalBuilds = builds.length;
-  const successfulBuilds = builds.filter(b => b.status.toLowerCase() === 'success').length;
-  const failedBuilds = builds.filter(b => b.status.toLowerCase() !== 'success').length;
-  const averageDuration =
-    totalBuilds > 0
-      ? builds.reduce((acc, b) => acc + b.duration, 0) / totalBuilds
-      : 0;
-  const formattedAvgDuration = `${averageDuration.toFixed(2)}s`;
-
   const formatDate = (iso: string): string =>
     new Date(iso).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
-
-  const getStatusClasses = (status: string): string => {
-    const s = status.toLowerCase();
-    if (s === 'success') return 'bg-green-100 text-green-800';
-    if (s === 'failure' || s === 'error') return 'bg-red-100 text-red-800';
-    if (s === 'running' || s === 'in_progress') return 'bg-blue-100 text-blue-800';
-    return 'bg-gray-100 text-gray-800';
+  const formatDuration = (seconds: number): string => {
+    if (seconds >= 3600) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      return `${h}h ${m}m`;
+    } else if (seconds >= 60) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${m}m ${s}s`;
+    }
+    return `${seconds}s`;
   };
 
-  const capitalize = (str: string): string =>
-    str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <div className="p-4 space-y-6 bg-white rounded-lg shadow-sm">
-      {/* Summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-        <div className="flex space-x-6 text-sm text-gray-700">
-          <div>
-            <span className="font-semibold text-gray-900">{totalBuilds}</span> Builds
-          </div>
-          <div>
-            <span className="font-semibold text-green-600">{successfulBuilds}</span> Success
-          </div>
-          <div>
-            <span className="font-semibold text-red-600">{failedBuilds}</span> Failures
-          </div>
-        </div>
-        <div className="text-sm text-gray-700">
-          ⌀ Duration: <span className="font-medium text-gray-900">{formattedAvgDuration}</span>
-        </div>
+  if (builds.length === 0) {
+    return (
+      <div className="flex flex-col items-center text-gray-500 p-6">
+        <LucideReact.AlertCircle size={24} className="mb-2" />
+        <span>No builds available</span>
       </div>
+    );
+  }
 
-      {/* Build List */}
-      <div className="divide-y divide-gray-200">
-        {builds.map((b, idx) => (
-          <div key={idx} className="py-4 flex items-start space-x-4">
-            {/* Avatar */}
-            {b.pusher?.avatar_url && (
-              <img
-                src={b.pusher.avatar_url}
-                alt={b.pusher.login}
-                className="w-10 h-10 rounded-full flex-shrink-0"
+  return (
+    <div className="space-y-4">
+      {builds.map((b, idx) => {
+        const user = b.pusher;
+        const login = user?.login ?? "Unknown";
+        const avatarUrl = user?.avatar_url ?? "";
+        return (
+          <div
+            key={idx}
+            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-colors"
+          >
+            {/* Status & Duration */}
+            <div className="flex justify-between items-center mb-2">
+              <div className="flex items-center space-x-2">
+                {b.status === "success" && (
+                  <LucideReact.CheckCircle
+                    size={16}
+                    className="text-green-500"
+                    aria-label="Success"
+                  />
+                )}
+                {b.status === "failure" && (
+                  <LucideReact.XCircle
+                    size={16}
+                    className="text-red-500"
+                    aria-label="Failure"
+                  />
+                )}
+                {b.status === "running" && (
+                  <LucideReact.Clock
+                    size={16}
+                    className="text-amber-500"
+                    aria-label="Running"
+                  />
+                )}
+                {!["success", "failure", "running"].includes(b.status) && (
+                  <LucideReact.Circle
+                    size={16}
+                    className="text-gray-400"
+                    aria-label={b.status}
+                  />
+                )}
+                <span className="font-medium capitalize">{b.status}</span>
+              </div>
+              <span className="text-sm text-gray-500">
+                {formatDuration(b.duration)}
+              </span>
+            </div>
+
+            {/* URL */}
+            <div className="text-sm text-gray-600 truncate mb-2">
+              <LucideReact.Link
+                size={16}
+                className="inline-block mr-1 text-gray-400"
               />
-            )}
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-gray-900">
-                    {b.pusher?.login ?? 'Unknown User'}
-                  </span>
-                </div>
-                <span
-                  className={`px-2 inline-flex text-xs font-semibold rounded-full ${getStatusClasses(
-                    b.status
-                  )}`}
-                >
-                  {capitalize(b.status)}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 truncate">{b.commit}</p>
-              <div className="flex flex-wrap text-xs text-gray-500 space-x-2">
-                <time dateTime={b.created_at}>{formatDate(b.created_at)}</time>
-                <span>· {b.duration.toFixed(2)}s</span>
-              </div>
-              {b.error.message && (
-                <p className="text-sm text-red-600 truncate">
-                  Error: {b.error.message}
-                </p>
+              <a
+                href={b.url}
+                title={b.url}
+                className="hover:underline break-all"
+              >
+                {b.url}
+              </a>
+            </div>
+
+            {/* Commit */}
+            <div className="flex items-center text-sm text-gray-600 mb-2">
+              <LucideReact.Code
+                size={16}
+                className="inline-block mr-1 text-gray-400"
+              />
+              <span title={b.commit}>{b.commit.slice(0, 7)}</span>
+            </div>
+
+            {/* Pusher */}
+            <div className="flex items-center text-sm text-gray-600 mb-2">
+              {user ? (
+                <>
+                  <img
+                    src={avatarUrl}
+                    alt={login}
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        login,
+                      )}&background=0D8ABC&color=fff`;
+                    }}
+                    className="w-6 h-6 rounded-full object-cover mr-2"
+                  />
+                  <span className="truncate">{login}</span>
+                </>
+              ) : (
+                <>
+                  <LucideReact.User
+                    size={16}
+                    className="text-gray-400 mr-1"
+                    aria-label="Unknown user"
+                  />
+                  <span>Unknown</span>
+                </>
               )}
             </div>
+
+            {/* Timestamps */}
+            <div className="flex flex-wrap text-xs text-gray-500 space-x-4 mb-2">
+              <div className="flex items-center">
+                <LucideReact.Calendar
+                  size={12}
+                  className="mr-1 text-gray-400"
+                />
+                <span>Created: {formatDate(b.created_at)}</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Calendar
+                  size={12}
+                  className="mr-1 text-gray-400"
+                />
+                <span>Updated: {formatDate(b.updated_at)}</span>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {b.error?.message && (
+              <div className="flex items-center text-red-600 text-sm">
+                <LucideReact.AlertTriangle
+                  size={16}
+                  className="mr-1"
+                  aria-label="Error"
+                />
+                <span>{b.error.message}</span>
+              </div>
+            )}
           </div>
-        ))}
-        {totalBuilds === 0 && (
-          <div className="py-4 text-center text-gray-500">
-            No builds available.
-          </div>
-        )}
-      </div>
+        );
+      })}
     </div>
   );
+  // 3. Return the React element.
+  //    Ensure all displayed data is appropriately filtered, transformed, and formatted according to the guidelines.
 }

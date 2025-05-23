@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * An invocation of a workflow
      *
      * @title Workflow Run
     */
-    export type workflow_run = {
+    export interface workflow_run {
         /**
          * The ID of the workflow run.
         */
@@ -41,7 +42,7 @@ export namespace AutoViewInputSubTypes {
          * Attempt number of the run, 1 for first attempt and higher if the workflow was re-run.
         */
         run_attempt?: number & tags.Type<"int32">;
-        referenced_workflows?: any[] | null;
+        referenced_workflows?: AutoViewInputSubTypes.referenced_workflow[] | null;
         event: string;
         status: string | null;
         conclusion: string | null;
@@ -57,7 +58,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * Pull requests that are open with a `head_sha` or `head_branch` that matches the workflow run. The returned pull requests do not necessarily indicate pull requests that triggered the run.
         */
-        pull_requests: any[] | null;
+        pull_requests: AutoViewInputSubTypes.pull_request_minimal[] | null;
         created_at: string & tags.Format<"date-time">;
         updated_at: string & tags.Format<"date-time">;
         actor?: AutoViewInputSubTypes.simple_user;
@@ -106,15 +107,49 @@ export namespace AutoViewInputSubTypes {
          * The event-specific title associated with the run or the run-name if set, or the value of `run-name` if it is set in the workflow.
         */
         display_title: string;
-    };
-    export type referenced_workflow = any;
-    export type pull_request_minimal = any;
+    }
+    /**
+     * A workflow referenced/reused by the initial caller workflow
+     *
+     * @title Referenced workflow
+    */
+    export interface referenced_workflow {
+        path: string;
+        sha: string;
+        ref?: string;
+    }
+    /**
+     * @title Pull Request Minimal
+    */
+    export interface pull_request_minimal {
+        id: number & tags.Type<"int32">;
+        number: number & tags.Type<"int32">;
+        url: string;
+        head: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+        base: {
+            ref: string;
+            sha: string;
+            repo: {
+                id: number & tags.Type<"int32">;
+                url: string;
+                name: string;
+            };
+        };
+    }
     /**
      * A GitHub user.
      *
      * @title Simple User
     */
-    export type simple_user = {
+    export interface simple_user {
         name?: string | null;
         email?: string | null;
         login: string;
@@ -137,7 +172,7 @@ export namespace AutoViewInputSubTypes {
         site_admin: boolean;
         starred_at?: string;
         user_view_type?: string;
-    };
+    }
     /**
      * A commit.
      *
@@ -159,7 +194,7 @@ export namespace AutoViewInputSubTypes {
         /**
          * Timestamp of the commit
         */
-        timestamp: string & tags.Format<"date-time">;
+        timestamp: string;
         /**
          * Information about the Git author
         */
@@ -171,7 +206,7 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's author
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
         /**
          * Information about the Git committer
@@ -184,7 +219,7 @@ export namespace AutoViewInputSubTypes {
             /**
              * Git email address of the commit's committer
             */
-            email: string & tags.Format<"email">;
+            email: string;
         } | null;
     } | null;
     /**
@@ -192,7 +227,7 @@ export namespace AutoViewInputSubTypes {
      *
      * @title Minimal Repository
     */
-    export type minimal_repository = {
+    export interface minimal_repository {
         id: number & tags.Type<"int32">;
         node_id: string;
         name: string;
@@ -295,19 +330,19 @@ export namespace AutoViewInputSubTypes {
         allow_forking?: boolean;
         web_commit_signoff_required?: boolean;
         security_and_analysis?: AutoViewInputSubTypes.security_and_analysis;
-    };
+    }
     /**
      * Code Of Conduct
      *
      * @title Code Of Conduct
     */
-    export type code_of_conduct = {
+    export interface code_of_conduct {
         key: string;
         name: string;
         url: string & tags.Format<"uri">;
         body?: string;
         html_url: (string & tags.Format<"uri">) | null;
-    };
+    }
     export type security_and_analysis = {
         advanced_security?: {
             status?: "enabled" | "disabled";
@@ -345,92 +380,127 @@ export type AutoViewInput = AutoViewInputSubTypes.workflow_run;
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const title =
-    value.display_title ||
-    value.name ||
-    value.repository?.name ||
-    "Workflow Run";
-  const runAttempt =
-    value.run_attempt && value.run_attempt > 1
-      ? ` (Attempt ${value.run_attempt})`
-      : "";
-  const runNumber = `#${value.run_number}${runAttempt}`;
+  const startTime = value.run_started_at ?? value.created_at;
+  const startDate = new Date(startTime);
+  const endDate = new Date(value.updated_at);
+  const durationMs = endDate.getTime() - startDate.getTime();
 
-  const rawStatus =
-    value.status === "completed"
-      ? value.conclusion || "completed"
-      : value.status || "unknown";
-  const statusLabel = rawStatus
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  function formatDuration(ms: number): string {
+    const totalSeconds = Math.floor(ms / 1000);
+    const seconds = totalSeconds % 60;
+    const totalMinutes = Math.floor(totalSeconds / 60);
+    const minutes = totalMinutes % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m ${seconds}s`;
+    return `${seconds}s`;
+  }
 
-  const badgeColors: Record<string, string> = {
-    success: "bg-green-100 text-green-800",
-    failure: "bg-red-100 text-red-800",
-    cancelled: "bg-gray-100 text-gray-800",
-    "timed out": "bg-red-100 text-red-800",
-    "action required": "bg-yellow-100 text-yellow-800",
-    "in progress": "bg-yellow-100 text-yellow-800",
-    queued: "bg-blue-100 text-blue-800",
-    requested: "bg-blue-100 text-blue-800",
-  };
-  const badgeColorClass =
-    badgeColors[statusLabel.toLowerCase()] ||
-    "bg-gray-100 text-gray-800";
+  const duration = formatDuration(durationMs);
+  const formattedStart = startDate.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric'
+  });
 
-  const createdDate = new Date(value.created_at).toLocaleString(
-    undefined,
-    {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }
-  );
-  const shortSha = value.head_sha.substring(0, 7);
-  const actor = value.actor;
+  const statusKey = value.conclusion ?? value.status ?? 'unknown';
+  const displayStatus = statusKey.charAt(0).toUpperCase() + statusKey.slice(1);
+
+  // Determine appropriate status icon
+  let statusIcon: React.ReactNode;
+  if (value.conclusion === 'success') {
+    statusIcon = <LucideReact.CheckCircle className="text-green-500" size={20} aria-label="Success" />;
+  } else if (value.conclusion === 'failure') {
+    statusIcon = <LucideReact.AlertTriangle className="text-red-500" size={20} aria-label="Failure" />;
+  } else if (value.conclusion === 'cancelled') {
+    statusIcon = <LucideReact.XCircle className="text-amber-500" size={20} aria-label="Cancelled" />;
+  } else if (value.status === 'in_progress') {
+    statusIcon = <LucideReact.Loader className="animate-spin text-blue-500" size={20} aria-label="In Progress" />;
+  } else if (value.status === 'queued') {
+    statusIcon = <LucideReact.Clock className="text-amber-500" size={20} aria-label="Queued" />;
+  } else {
+    statusIcon = <LucideReact.Info className="text-gray-500" size={20} aria-label={displayStatus} />;
+  }
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <article className="max-w-md w-full mx-auto p-4 bg-white rounded-lg shadow-md">
-      <header className="flex items-start justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 line-clamp-1">
-          {title}
-        </h2>
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded ${badgeColorClass}`}
-        >
-          {statusLabel}
-        </span>
-      </header>
-      <div className="mt-2 text-sm text-gray-600 space-y-1">
-        <p>
-          <span className="font-medium text-gray-700">Run:</span>{" "}
-          {runNumber}
-        </p>
-        <p>
-          <span className="font-medium text-gray-700">Event:</span>{" "}
-          {value.event}
-        </p>
-        <p>
-          <span className="font-medium text-gray-700">Branch:</span>{" "}
-          {value.head_branch || "N/A"}
-        </p>
-        <p>
-          <span className="font-medium text-gray-700">SHA:</span>{" "}
-          <code className="font-mono text-gray-800">{shortSha}</code>
-        </p>
+    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
+      {/* Header: Title and Status */}
+      <div className="flex justify-between items-start">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-800 truncate">
+            {value.display_title || value.name || `Run #${value.run_number}`}
+          </h3>
+          {value.path && (
+            <p className="text-sm text-gray-500 truncate">{value.path}</p>
+          )}
+        </div>
+        <div className="ml-4 flex-shrink-0">{statusIcon}</div>
       </div>
-      <footer className="mt-4 flex items-center space-x-2">
-        {actor?.avatar_url && (
-          <img
-            src={actor.avatar_url}
-            alt={actor.login}
-            className="w-6 h-6 rounded-full flex-shrink-0"
-          />
+
+      {/* Repository Info */}
+      <div className="flex items-center text-sm text-gray-500">
+        <LucideReact.GitBranch size={16} className="mr-1" />
+        <span className="truncate">{value.repository.full_name}</span>
+      </div>
+
+      {/* Details Grid */}
+      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-600">
+        <div>
+          <dt className="font-medium text-gray-700">Run</dt>
+          <dd>#{value.run_number}{value.run_attempt && value.run_attempt > 1 ? ` (Attempt ${value.run_attempt})` : ''}</dd>
+        </div>
+        <div>
+          <dt className="font-medium text-gray-700">Event</dt>
+          <dd className="flex items-center gap-1">
+            <LucideReact.Tag size={16} className="text-gray-400" />
+            <span>{value.event}</span>
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium text-gray-700">Branch</dt>
+          <dd className="flex items-center gap-1">
+            <LucideReact.GitBranch size={16} className="text-gray-400" />
+            <span>{value.head_branch || value.head_sha.slice(0, 7)}</span>
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium text-gray-700">Pull Requests</dt>
+          <dd className="flex items-center gap-1">
+            <LucideReact.GitPullRequest size={16} className="text-gray-400" />
+            <span>{value.pull_requests?.length ?? 0}</span>
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium text-gray-700">Started</dt>
+          <dd className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} className="text-gray-400" />
+            <span>{formattedStart}</span>
+          </dd>
+        </div>
+        <div>
+          <dt className="font-medium text-gray-700">Duration</dt>
+          <dd className="flex items-center gap-1">
+            <LucideReact.Clock size={16} className="text-gray-400" />
+            <span>{duration}</span>
+          </dd>
+        </div>
+        {value.actor && (
+          <div className="sm:col-span-2">
+            <dt className="font-medium text-gray-700">Actor</dt>
+            <dd className="flex items-center gap-2">
+              <img
+                src={value.actor.avatar_url}
+                onError={({ currentTarget }) => { currentTarget.onerror = null; currentTarget.src = 'https://ui-avatars.com/api/?name=Unknown&background=CCCCCC&color=ffffff'; }}
+                alt={value.actor.login}
+                className="w-6 h-6 rounded-full object-cover"
+              />
+              <span>{value.actor.login}</span>
+            </dd>
+          </div>
         )}
-        <span className="text-sm text-gray-700">{actor?.login}</span>
-        <span className="text-gray-300">•</span>
-        <time className="text-sm text-gray-500">{createdDate}</time>
-      </footer>
-    </article>
+      </dl>
+    </div>
   );
 }

@@ -1,12 +1,13 @@
 import { tags } from "typia";
-import React from "react";
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
     /**
      * Grade for a student or groups GitHub Classroom assignment
      *
      * @title Classroom Assignment Grade
     */
-    export type classroom_assignment_grade = {
+    export interface classroom_assignment_grade {
         /**
          * Name of the assignment
         */
@@ -51,7 +52,7 @@ export namespace AutoViewInputSubTypes {
          * If a group assignment, name of the group the student is in
         */
         group_name?: string;
-    };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.classroom_assignment_grade[];
 
@@ -60,88 +61,124 @@ export type AutoViewInput = AutoViewInputSubTypes.classroom_assignment_grade[];
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    - Sort submissions by most recent
-  //    - Format date and calculate percentage score
-  const submissions = [...value].sort(
-    (a, b) =>
-      new Date(b.submission_timestamp).getTime() -
-      new Date(a.submission_timestamp).getTime()
-  );
+  const totalCount = value.length;
+  const averagePercent = totalCount > 0
+    ? (
+        value.reduce(
+          (sum, item) =>
+            sum + (item.points_available > 0
+              ? item.points_awarded / item.points_available
+              : 0),
+          0,
+        ) /
+        totalCount
+      ) * 100
+    : 0;
+  const formattedAverage = averagePercent.toFixed(1);
 
-  const formatDate = (iso: string): string =>
+  // Helper to format timestamps
+  const formatDate = (iso: string) =>
     new Date(iso).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    - Card list of classroom assignment grades
-  //    - Mobile-first responsive design
+  if (totalCount === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span className="text-lg">No assignments to display</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      {submissions.map((item, index) => {
-        const percent =
-          item.points_available > 0
-            ? Math.round(
-                (item.points_awarded / item.points_available) * 100
-              )
-            : 0;
-        return (
-          <div
-            key={index}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800 truncate">
-                {item.assignment_name}
-              </h3>
-              <span className="mt-1 sm:mt-0 text-sm text-gray-500">
-                {formatDate(item.submission_timestamp)}
-              </span>
+    <div className="p-4 bg-white rounded-lg shadow-sm space-y-4">
+      {/* Header with summary */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xl font-semibold text-gray-800">
+          Classroom Assignment Grades
+        </h2>
+        <div className="mt-2 sm:mt-0 text-sm text-gray-600">
+          {totalCount} {totalCount === 1 ? 'Assignment' : 'Assignments'} · Avg. {formattedAverage}%
+        </div>
+      </div>
+
+      {/* List of assignments */}
+      <div className="divide-y divide-gray-200">
+        {value.map((item, idx) => {
+          const submission = formatDate(item.submission_timestamp);
+          const percent = item.points_available
+            ? ((item.points_awarded / item.points_available) * 100).toFixed(1)
+            : '0.0';
+          const isPerfect = item.points_awarded === item.points_available;
+
+          return (
+            <div
+              key={idx}
+              className="py-4 flex flex-col sm:flex-row sm:justify-between sm:items-center"
+            >
+              {/* Left: Assignment title and optional group */}
+              <div className="flex items-center space-x-2 truncate">
+                <LucideReact.Link size={16} className="text-blue-500 flex-shrink-0" />
+                <a
+                  href={item.assignment_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-blue-600 hover:underline truncate"
+                  title={item.assignment_name}
+                >
+                  {item.assignment_name}
+                </a>
+                {item.group_name && (
+                  <span className="ml-2 inline-block bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded">
+                    {item.group_name}
+                  </span>
+                )}
+              </div>
+
+              {/* Right: Details */}
+              <div className="mt-3 sm:mt-0 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+                {/* Submission date */}
+                <div className="flex items-center gap-1">
+                  <LucideReact.Calendar size={16} className="flex-shrink-0" />
+                  <span className="truncate">{submission}</span>
+                </div>
+
+                {/* Score */}
+                <div className="flex items-center gap-1">
+                  {isPerfect ? (
+                    <LucideReact.CheckCircle className="text-green-500" size={16} />
+                  ) : (
+                    <LucideReact.AlertTriangle className="text-amber-500" size={16} />
+                  )}
+                  <span>
+                    {item.points_awarded}/{item.points_available} ({percent}%)
+                  </span>
+                </div>
+
+                {/* Student repo link */}
+                <div className="flex items-center gap-1 max-w-xs truncate">
+                  <LucideReact.Code size={16} className="text-gray-400 flex-shrink-0" />
+                  <a
+                    href={item.student_repository_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline truncate"
+                    title={item.student_repository_name}
+                  >
+                    {item.student_repository_name}
+                  </a>
+                </div>
+              </div>
             </div>
-            <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
-              <div>
-                <span className="font-medium">Student:</span>{" "}
-                {item.github_username} ({item.roster_identifier})
-              </div>
-              {item.group_name && (
-                <div>
-                  <span className="font-medium">Group:</span>{" "}
-                  {item.group_name}
-                </div>
-              )}
-              <div>
-                <span className="font-medium">Score:</span>{" "}
-                {item.points_awarded}/{item.points_available} (
-                {percent}%)
-              </div>
-              <div className="col-span-1 sm:col-span-2 flex flex-col space-y-1">
-                <div>
-                  <span className="font-medium">Assignment URL:</span>
-                </div>
-                <div className="truncate text-blue-600">
-                  {item.assignment_url}
-                </div>
-                <div>
-                  <span className="font-medium">Starter Code:</span>
-                </div>
-                <div className="truncate text-blue-600">
-                  {item.starter_code_url}
-                </div>
-                <div>
-                  <span className="font-medium">Repo URL:</span>
-                </div>
-                <div className="truncate text-blue-600">
-                  {item.student_repository_url}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
