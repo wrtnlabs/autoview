@@ -242,7 +242,7 @@ export class LlmProxy<I, O> {
 
       const completion = await createCompletion(
         api,
-        body,
+        mergedBody,
         options,
         backoffStrategy,
       );
