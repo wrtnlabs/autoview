@@ -1,124 +1,107 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * API Insights usage time stats for an organization
-   *
-   * @title Time Stats
-   */
-  export type api_insights_time_stats = {
-    timestamp?: string;
-    total_request_count?: number & tags.Type<"int32">;
-    rate_limited_request_count?: number & tags.Type<"int32">;
-  }[];
+    /**
+     * API Insights usage time stats for an organization
+     *
+     * @title Time Stats
+    */
+    export type api_insights_time_stats = {
+        timestamp?: string;
+        total_request_count?: number & tags.Type<"int32">;
+        rate_limited_request_count?: number & tags.Type<"int32">;
+    }[];
 }
 export type AutoViewInput = AutoViewInputSubTypes.api_insights_time_stats;
 
-// The component name must always be "VisualComponent"
+
+
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data transformation and aggregation
-  const totalRequests = value.reduce(
-    (sum, e) => sum + (e.total_request_count ?? 0),
-    0,
-  );
-  const totalRateLimited = value.reduce(
-    (sum, e) => sum + (e.rate_limited_request_count ?? 0),
-    0,
-  );
-  const rateLimitedPercent =
-    totalRequests > 0 ? (totalRateLimited / totalRequests) * 100 : 0;
-  const numberFormatter = new Intl.NumberFormat();
+  // Normalize input array
+  const dataArray = Array.isArray(value) ? value : [];
 
-  // Prepare entries with valid timestamps, calculate per-entry rate limit percentage
-  const entries = value
-    .filter((e) => e.timestamp)
-    .map((e) => {
-      const date = new Date(e.timestamp!);
-      const total = e.total_request_count ?? 0;
-      const rateLimited = e.rate_limited_request_count ?? 0;
-      const percent = total > 0 ? (rateLimited / total) * 100 : 0;
-      return { date, total, percent };
-    })
-    .filter((e) => !isNaN(e.date.getTime()))
-    .sort((a, b) => b.date.getTime() - a.date.getTime());
-
-  const recent = entries.slice(0, 5);
-
-  // 2. Handle empty data state
-  if (value.length === 0) {
+  // Empty state
+  if (dataArray.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-4 text-gray-400">
-        <LucideReact.AlertCircle size={24} />
-        <span className="mt-2">No data available</span>
+      <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+        <LucideReact.AlertCircle size={24} strokeWidth={1.5} />
+        <span className="mt-2 text-sm">No data available</span>
       </div>
     );
   }
 
-  // 3. Compose the visual structure
+  // Derive clean data points
+  const points = dataArray.map((item) => {
+    const total = item.total_request_count ?? 0;
+    const rateLimited = item.rate_limited_request_count ?? 0;
+    const dateObj = item.timestamp ? new Date(item.timestamp) : null;
+    const label = dateObj
+      ? dateObj.toLocaleDateString("default", { month: "short", day: "numeric" })
+      : "";
+    return { total, rateLimited, label };
+  });
+
+  // Aggregate metrics
+  const totalRequests = points.reduce((sum, p) => sum + p.total, 0);
+  const totalRateLimited = points.reduce((sum, p) => sum + p.rateLimited, 0);
+  const rateLimitPerc = totalRequests
+    ? Math.round((totalRateLimited / totalRequests) * 100)
+    : 0;
+  const maxTotal = Math.max(...points.map((p) => p.total), 0) || 1;
+
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
-      {/* Summary Cards */}
-      <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-4 sm:space-y-0">
-        <div className="flex-1 bg-gray-50 p-4 rounded-lg flex items-center space-x-3">
-          <LucideReact.Server className="text-indigo-500" size={24} />
-          <div>
-            <p className="text-sm text-gray-500">Total Requests</p>
-            <p className="text-xl font-semibold text-gray-900">
-              {numberFormatter.format(totalRequests)}
-            </p>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header with summary */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">API Usage Overview</h2>
+        <div className="flex flex-wrap gap-4 mt-2 sm:mt-0 text-sm text-gray-600">
+          <div className="flex items-center">
+            <LucideReact.BarChart2 className="text-blue-500" size={16} strokeWidth={2} />
+            <span className="ml-1">Total: {totalRequests.toLocaleString()}</span>
           </div>
-        </div>
-        <div className="flex-1 bg-gray-50 p-4 rounded-lg flex items-center space-x-3">
-          <LucideReact.AlertTriangle className="text-red-500" size={24} />
-          <div>
-            <p className="text-sm text-gray-500">Rate-Limited</p>
-            <p className="text-xl font-semibold text-gray-900">
-              {numberFormatter.format(totalRateLimited)}
-            </p>
-          </div>
-        </div>
-        <div className="flex-1 bg-gray-50 p-4 rounded-lg flex items-center space-x-3">
-          <LucideReact.Percent className="text-green-500" size={24} />
-          <div>
-            <p className="text-sm text-gray-500">Rate-Limit %</p>
-            <p className="text-xl font-semibold text-gray-900">
-              {rateLimitedPercent.toFixed(1)}%
-            </p>
+          <div className="flex items-center">
+            <LucideReact.AlertTriangle className="text-red-500" size={16} strokeWidth={2} />
+            <span className="ml-1">
+              Rate-Limited: {totalRateLimited.toLocaleString()} ({rateLimitPerc}%)
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Recent Entries List */}
-      <div>
-        <h3 className="text-lg font-medium text-gray-700 mb-2">Recent Stats</h3>
-        {recent.length === 0 ? (
-          <div className="text-gray-400 text-sm">
-            No recent timestamped data
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-200 overflow-y-auto max-h-48">
-            {recent.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center py-2">
-                <div className="flex items-center space-x-1">
-                  <LucideReact.Clock className="text-gray-400" size={16} />
-                  <span className="text-sm text-gray-600">
-                    {item.date.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <span className="text-sm text-gray-800">
-                    {numberFormatter.format(item.total)}
-                  </span>
-                  <span className="text-sm text-gray-800">
-                    {item.percent.toFixed(1)}%
-                  </span>
-                </div>
+      {/* Sparkline bar chart */}
+      <div className="relative w-full h-32">
+        <div className="flex items-end h-full space-x-1">
+          {points.map((p, idx) => {
+            const successHeight = ((p.total - p.rateLimited) / maxTotal) * 100;
+            const rateHeight = (p.rateLimited / maxTotal) * 100;
+            return (
+              <div
+                key={idx}
+                className="flex-1 flex flex-col justify-end"
+                aria-label={`${p.label}: ${p.total.toLocaleString()} total, ${p.rateLimited.toLocaleString()} rate-limited`}
+              >
+                <div
+                  className="bg-blue-500"
+                  style={{ height: `${successHeight}%` }}
+                />
+                <div
+                  className="bg-red-500"
+                  style={{ height: `${rateHeight}%` }}
+                />
               </div>
-            ))}
-          </div>
-        )}
+            );
+          })}
+        </div>
+      </div>
+
+      {/* X-axis labels */}
+      <div className="flex justify-between mt-2 text-xs text-gray-500">
+        {points.map((p, idx) => (
+          <span key={idx} className="truncate">
+            {p.label}
+          </span>
+        ))}
       </div>
     </div>
   );

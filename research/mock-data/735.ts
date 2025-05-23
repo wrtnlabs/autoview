@@ -4,5 +4,5 @@ import Component from "../components/735";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"id":42,"node_id":"DEPLOY_POLICY_42_sample","name":"release/v1.*","type":"branch"};
+  return {"id":202,"node_id":"NODEID_deployment_policy_202xyzTest","name":"v1.* (Sample Tag Policy)","type":"tag"};
 }

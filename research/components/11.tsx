@@ -1,53 +1,59 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type IShoppingDeposit = {
-    id: string & tags.Format<"uuid">;
-    created_at: string & tags.Format<"date-time">;
-    code: string;
-    source: string;
-    direction: -1 | 1;
-  };
+    export interface IShoppingDeposit {
+        id: string & tags.Format<"uuid">;
+        created_at: string & tags.Format<"date-time">;
+        code: string;
+        source: string;
+        direction: -1 | 1;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.IShoppingDeposit;
 
+
+
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { created_at, code, source, direction } = value;
-  const date = new Date(created_at);
-  const formattedDate = date.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+  const dateObj = new Date(created_at);
+  const formattedDate = dateObj.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
   const isDeposit = direction === 1;
-  const directionLabel = isDeposit ? "Deposit" : "Withdrawal";
-  const IconComponent = isDeposit ? LucideReact.ArrowUp : LucideReact.ArrowDown;
-  const iconColorClass = isDeposit ? "text-green-500" : "text-red-500";
-  const iconBgClass = isDeposit ? "bg-green-100" : "bg-red-100";
+  const directionLabel = isDeposit ? 'Deposit' : 'Withdrawal';
+  const directionIcon = isDeposit
+    ? <LucideReact.ArrowDownCircle className="text-green-500" size={20} />
+    : <LucideReact.ArrowUpCircle className="text-red-500" size={20} />;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="flex items-center p-4 bg-white rounded-lg shadow-md">
-      <div
-        className={`flex items-center justify-center w-10 h-10 rounded-full ${iconBgClass}`}
-      >
-        <IconComponent className={iconColorClass} size={20} strokeWidth={2} />
-      </div>
-      <div className="flex-1 min-w-0 px-4">
-        <div className="text-sm font-medium text-gray-900 truncate">{code}</div>
-        <div className="mt-1 text-sm text-gray-500 truncate">{source}</div>
-      </div>
-      <div className="text-right whitespace-nowrap">
-        <div className={`text-sm font-semibold ${iconColorClass}`}>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm mx-auto">
+      <div className="flex items-center mb-4">
+        {directionIcon}
+        <h2 className={`text-lg font-semibold ml-2 ${isDeposit ? 'text-green-600' : 'text-red-600'}`}>
           {directionLabel}
+        </h2>
+      </div>
+      <div className="space-y-2 text-gray-700 text-sm">
+        <div>
+          <span className="font-medium">Code:</span>{' '}
+          <span className="font-mono text-gray-800">{code}</span>
         </div>
-        <div className="mt-1 text-xs text-gray-400">{formattedDate}</div>
+        <div>
+          <span className="font-medium">Source:</span>{' '}
+          <span className="text-gray-800">{source}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar className="text-gray-400" size={16} />
+          <span className="ml-1">{formattedDate}</span>
+        </div>
       </div>
     </div>
   );

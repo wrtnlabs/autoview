@@ -1,292 +1,234 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * A Github-hosted hosted runner.
-   *
-   * @title GitHub-hosted hosted runner
-   */
-  export type actions_hosted_runner = {
     /**
-     * The unique identifier of the hosted runner.
-     */
-    id: number & tags.Type<"int32">;
+     * A Github-hosted hosted runner.
+     *
+     * @title GitHub-hosted hosted runner
+    */
+    export interface actions_hosted_runner {
+        /**
+         * The unique identifier of the hosted runner.
+        */
+        id: number & tags.Type<"int32">;
+        /**
+         * The name of the hosted runner.
+        */
+        name: string;
+        /**
+         * The unique identifier of the group that the hosted runner belongs to.
+        */
+        runner_group_id?: number & tags.Type<"int32">;
+        image_details: AutoViewInputSubTypes.nullable_actions_hosted_runner_pool_image;
+        machine_size_details: AutoViewInputSubTypes.actions_hosted_runner_machine_spec;
+        /**
+         * The status of the runner.
+        */
+        status: "Ready" | "Provisioning" | "Shutdown" | "Deleting" | "Stuck";
+        /**
+         * The operating system of the image.
+        */
+        platform: string;
+        /**
+         * The maximum amount of hosted runners. Runners will not scale automatically above this number. Use this setting to limit your cost.
+        */
+        maximum_runners?: number & tags.Type<"int32"> & tags.Default<10>;
+        /**
+         * Whether public IP is enabled for the hosted runners.
+        */
+        public_ip_enabled: boolean;
+        /**
+         * The public IP ranges when public IP is enabled for the hosted runners.
+        */
+        public_ips?: AutoViewInputSubTypes.public_ip[];
+        /**
+         * The time at which the runner was last used, in ISO 8601 format.
+        */
+        last_active_on?: (string & tags.Format<"date-time">) | null;
+    }
     /**
-     * The name of the hosted runner.
-     */
-    name: string;
+     * Provides details of a hosted runner image
+     *
+     * @title GitHub-hosted runner image details.
+    */
+    export type nullable_actions_hosted_runner_pool_image = {
+        /**
+         * The ID of the image. Use this ID for the `image` parameter when creating a new larger runner.
+        */
+        id: string;
+        /**
+         * Image size in GB.
+        */
+        size_gb: number & tags.Type<"int32">;
+        /**
+         * Display name for this image.
+        */
+        display_name: string;
+        /**
+         * The image provider.
+        */
+        source: "github" | "partner" | "custom";
+    } | null;
     /**
-     * The unique identifier of the group that the hosted runner belongs to.
-     */
-    runner_group_id?: number & tags.Type<"int32">;
-    image_details: AutoViewInputSubTypes.nullable_actions_hosted_runner_pool_image;
-    machine_size_details: AutoViewInputSubTypes.actions_hosted_runner_machine_spec;
+     * Provides details of a particular machine spec.
+     *
+     * @title Github-owned VM details.
+    */
+    export interface actions_hosted_runner_machine_spec {
+        /**
+         * The ID used for the `size` parameter when creating a new runner.
+        */
+        id: string;
+        /**
+         * The number of cores.
+        */
+        cpu_cores: number & tags.Type<"int32">;
+        /**
+         * The available RAM for the machine spec.
+        */
+        memory_gb: number & tags.Type<"int32">;
+        /**
+         * The available SSD storage for the machine spec.
+        */
+        storage_gb: number & tags.Type<"int32">;
+    }
     /**
-     * The status of the runner.
-     */
-    status: "Ready" | "Provisioning" | "Shutdown" | "Deleting" | "Stuck";
-    /**
-     * The operating system of the image.
-     */
-    platform: string;
-    /**
-     * The maximum amount of hosted runners. Runners will not scale automatically above this number. Use this setting to limit your cost.
-     */
-    maximum_runners?: number & tags.Type<"int32"> & tags.Default<10>;
-    /**
-     * Whether public IP is enabled for the hosted runners.
-     */
-    public_ip_enabled: boolean;
-    /**
-     * The public IP ranges when public IP is enabled for the hosted runners.
-     */
-    public_ips?: AutoViewInputSubTypes.public_ip[];
-    /**
-     * The time at which the runner was last used, in ISO 8601 format.
-     */
-    last_active_on?: (string & tags.Format<"date-time">) | null;
-  };
-  /**
-   * Provides details of a hosted runner image
-   *
-   * @title GitHub-hosted runner image details.
-   */
-  export type nullable_actions_hosted_runner_pool_image = {
-    /**
-     * The ID of the image. Use this ID for the `image` parameter when creating a new larger runner.
-     */
-    id: string;
-    /**
-     * Image size in GB.
-     */
-    size_gb: number & tags.Type<"int32">;
-    /**
-     * Display name for this image.
-     */
-    display_name: string;
-    /**
-     * The image provider.
-     */
-    source: "github" | "partner" | "custom";
-  } | null;
-  /**
-   * Provides details of a particular machine spec.
-   *
-   * @title Github-owned VM details.
-   */
-  export type actions_hosted_runner_machine_spec = {
-    /**
-     * The ID used for the `size` parameter when creating a new runner.
-     */
-    id: string;
-    /**
-     * The number of cores.
-     */
-    cpu_cores: number & tags.Type<"int32">;
-    /**
-     * The available RAM for the machine spec.
-     */
-    memory_gb: number & tags.Type<"int32">;
-    /**
-     * The available SSD storage for the machine spec.
-     */
-    storage_gb: number & tags.Type<"int32">;
-  };
-  /**
-   * Provides details of Public IP for a GitHub-hosted larger runners
-   *
-   * @title Public IP for a GitHub-hosted larger runners.
-   */
-  export type public_ip = {
-    /**
-     * Whether public IP is enabled.
-     */
-    enabled?: boolean;
-    /**
-     * The prefix for the public IP.
-     */
-    prefix?: string;
-    /**
-     * The length of the IP prefix.
-     */
-    length?: number & tags.Type<"int32">;
-  };
+     * Provides details of Public IP for a GitHub-hosted larger runners
+     *
+     * @title Public IP for a GitHub-hosted larger runners.
+    */
+    export interface public_ip {
+        /**
+         * Whether public IP is enabled.
+        */
+        enabled?: boolean;
+        /**
+         * The prefix for the public IP.
+        */
+        prefix?: string;
+        /**
+         * The length of the IP prefix.
+        */
+        length?: number & tags.Type<"int32">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_hosted_runner;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const statusMap = {
-    Ready: {
-      icon: (
-        <LucideReact.CheckCircle
-          className="text-green-500"
-          size={16}
-          aria-label="Ready"
-        />
-      ),
-      label: "Ready",
-    },
-    Provisioning: {
-      icon: (
-        <LucideReact.Loader
-          className="animate-spin text-blue-500"
-          size={16}
-          aria-label="Provisioning"
-        />
-      ),
-      label: "Provisioning",
-    },
-    Shutdown: {
-      icon: (
-        <LucideReact.Power
-          className="text-gray-500"
-          size={16}
-          aria-label="Shutdown"
-        />
-      ),
-      label: "Shutdown",
-    },
-    Deleting: {
-      icon: (
-        <LucideReact.Trash2
-          className="text-red-500"
-          size={16}
-          aria-label="Deleting"
-        />
-      ),
-      label: "Deleting",
-    },
-    Stuck: {
-      icon: (
-        <LucideReact.AlertTriangle
-          className="text-yellow-500"
-          size={16}
-          aria-label="Stuck"
-        />
-      ),
-      label: "Stuck",
-    },
-  } as const;
+  const statusIcon: React.ReactNode = (() => {
+    switch (value.status) {
+      case "Ready":
+        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
+      case "Provisioning":
+        return <LucideReact.Loader className="animate-spin text-amber-500" size={16} />;
+      case "Shutdown":
+        return <LucideReact.XCircle className="text-gray-500" size={16} />;
+      case "Deleting":
+        return <LucideReact.Trash2 className="text-red-500" size={16} />;
+      case "Stuck":
+        return <LucideReact.AlertTriangle className="text-red-500" size={16} />;
+      default:
+        return null;
+    }
+  })();
 
-  const currentStatus = statusMap[value.status];
   const formattedLastActive = value.last_active_on
     ? new Date(value.last_active_on).toLocaleString()
-    : "Never used";
+    : null;
+
+  const maxRunners = value.maximum_runners ?? 10;
+  const imageDetails = value.image_details;
+  const machine = value.machine_size_details;
+
+  const sourceLabel = imageDetails?.source
+    ? imageDetails.source.charAt(0).toUpperCase() + imageDetails.source.slice(1)
+    : "";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-md w-full p-4 bg-white rounded-lg shadow-md space-y-4">
-      {/* Header: Name & Status */}
+    <div className="p-4 bg-white rounded-lg shadow-md w-full">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.name}
-        </h2>
-        <div className="flex items-center space-x-1">
-          {currentStatus.icon}
-          <span className="text-sm text-gray-600">{currentStatus.label}</span>
-        </div>
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
+        {statusIcon}
       </div>
 
-      {/* Details Grid */}
-      <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
-        {/* Platform */}
-        <div className="flex items-center space-x-1">
-          <LucideReact.Server
-            size={16}
-            className="text-gray-500"
-            aria-label="Platform"
-          />
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center text-sm text-gray-600">
+          <LucideReact.Server size={16} className="text-gray-500 mr-1" />
           <span>{value.platform}</span>
         </div>
 
-        {/* Last Active */}
-        <div className="flex items-center space-x-1">
-          <LucideReact.Calendar
-            size={16}
-            className="text-gray-500"
-            aria-label="Last Active On"
-          />
-          <span>{formattedLastActive}</span>
-        </div>
-
-        {/* Machine Specs */}
-        <div className="flex items-center space-x-1 col-span-2">
-          <LucideReact.Cpu
-            size={16}
-            className="text-gray-500"
-            aria-label="Machine Spec"
-          />
-          <span>
-            {value.machine_size_details.cpu_cores} CPU ·{" "}
-            {value.machine_size_details.memory_gb}GB RAM ·{" "}
-            {value.machine_size_details.storage_gb}GB SSD
-          </span>
-        </div>
-
-        {/* Image Details */}
-        {value.image_details && (
-          <div className="flex items-center space-x-1 col-span-2">
-            <LucideReact.Image
-              size={16}
-              className="text-gray-500"
-              aria-label="Runner Image"
-            />
+        {imageDetails && (
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Image size={16} className="text-gray-500 mr-1" />
             <span>
-              {value.image_details.display_name} ({value.image_details.size_gb}
-              GB, {value.image_details.source})
+              {imageDetails.display_name} ({imageDetails.size_gb} GB, {sourceLabel})
             </span>
           </div>
         )}
 
-        {/* Maximum Runners */}
-        {typeof value.maximum_runners === "number" && (
-          <div className="flex items-center space-x-1">
-            <LucideReact.Users
-              size={16}
-              className="text-gray-500"
-              aria-label="Maximum Runners"
-            />
-            <span>Max runners: {value.maximum_runners}</span>
+        <div className="flex flex-wrap gap-4 mt-2">
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Cpu size={16} className="text-gray-500 mr-1" />
+            <span>{machine.cpu_cores} cores</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Server size={16} className="text-gray-500 mr-1" />
+            <span>{machine.memory_gb} GB RAM</span>
+          </div>
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.HardDrive size={16} className="text-gray-500 mr-1" />
+            <span>{machine.storage_gb} GB Storage</span>
+          </div>
+        </div>
+
+        <div className="flex items-center text-sm text-gray-600 mt-2">
+          <LucideReact.Users size={16} className="text-gray-500 mr-1" />
+          <span>Max Runners: {maxRunners}</span>
+        </div>
+
+        <div className="flex items-center text-sm mt-2">
+          <span className="font-medium text-gray-700 mr-1">Public IP:</span>
+          {value.public_ip_enabled ? (
+            <span className="flex items-center text-green-600 gap-1">
+              <LucideReact.CheckCircle size={16} /> Enabled
+            </span>
+          ) : (
+            <span className="flex items-center text-red-500 gap-1">
+              <LucideReact.XCircle size={16} /> Disabled
+            </span>
+          )}
+        </div>
+
+        {value.public_ip_enabled && value.public_ips && value.public_ips.length > 0 && (
+          <div className="mt-2 text-sm text-gray-600">
+            <span className="font-medium text-gray-700">IP Ranges:</span>
+            <ul className="list-disc list-inside ml-5 mt-1">
+              {value.public_ips.map((ip, idx) => {
+                const prefix = ip.prefix ?? "―";
+                const length = ip.length != null ? ip.length : "―";
+                return (
+                  <li key={idx}>
+                    {prefix}/{length}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
         )}
 
-        {/* Public IP Enabled */}
-        <div className="flex items-center space-x-1">
-          <LucideReact.Globe
-            size={16}
-            className="text-gray-500"
-            aria-label="Public IP Status"
-          />
-          <span>
-            {value.public_ip_enabled ? "Public IP enabled" : "No public IP"}
-          </span>
-        </div>
-
-        {/* Public IP List */}
-        {value.public_ip_enabled &&
-          value.public_ips &&
-          value.public_ips.length > 0 && (
-            <div className="col-span-2 text-gray-600">
-              <div className="font-medium text-gray-700">Public IPs:</div>
-              <ul className="list-disc list-inside space-y-0.5">
-                {value.public_ips.map((ip, idx) => (
-                  <li key={idx}>
-                    {ip.prefix
-                      ? `${ip.prefix}${ip.length != null ? `/${ip.length}` : ""}`
-                      : "—"}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+        {formattedLastActive && (
+          <div className="mt-3 flex items-center text-sm text-gray-600">
+            <LucideReact.Calendar size={16} className="text-gray-500 mr-1" />
+            <span>Last Active: {formattedLastActive}</span>
+          </div>
+        )}
       </div>
     </div>
   );
-  // 3. Return the React element.
-  //    All displayed data is appropriately filtered, transformed, and formatted.
 }

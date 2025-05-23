@@ -1,125 +1,111 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace legacy {
-    export namespace open {
-      export namespace v4 {
-        export type LegacyV4WebhooksView = {
-          webhooks?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook[];
-          next?: number;
-        };
-      }
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export interface LegacyV4WebhooksView {
+                    webhooks?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook[];
+                    next?: number;
+                }
+            }
+        }
+        export namespace v4 {
+            export interface LegacyV4Webhook {
+                id?: string;
+                channelId?: string;
+                name: string;
+                url: string;
+                token?: string;
+                keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
+                createdAt?: number;
+                watchUserChats?: boolean;
+                watchGroups?: boolean;
+                apiVersion: string;
+                lastBlockedAt?: number;
+                blocked?: boolean;
+            }
+        }
     }
-    export namespace v4 {
-      export type LegacyV4Webhook = {
-        id?: string;
-        channelId?: string;
-        name: string;
-        url: string;
-        token?: string;
-        keywords?: string[] &
-          tags.MinItems<1> &
-          tags.MaxItems<20> &
-          tags.UniqueItems;
-        createdAt?: number;
-        watchUserChats?: boolean;
-        watchGroups?: boolean;
-        apiVersion: string;
-        lastBlockedAt?: number;
-        blocked?: boolean;
-      };
-    }
-  }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.legacy.open.v4.LegacyV4WebhooksView;
+export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4WebhooksView;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
+  // Derived data
   const webhooks = value.webhooks ?? [];
+  const hasWebhooks = webhooks.length > 0;
   const formatDate = (timestamp?: number): string =>
     timestamp ? new Date(timestamp).toLocaleString() : "—";
 
-  if (webhooks.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-gray-500">
-        <LucideReact.AlertCircle size={48} />
-        <p className="mt-4 text-lg">No webhooks configured</p>
-      </div>
-    );
-  }
-
+  // Render
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {webhooks.map((wh, idx) => (
-          <div key={idx} className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                <LucideReact.Link2 size={20} />
+      {hasWebhooks ? (
+        webhooks.map((wh, idx) => (
+          <div
+            key={idx}
+            className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row sm:items-start sm:justify-between"
+          >
+            {/* Main Info */}
+            <div className="flex-1">
+              <div className="text-lg font-semibold text-gray-800 truncate">
                 {wh.name}
-              </h3>
-              {wh.blocked && (
-                <div className="flex items-center text-red-500 text-sm">
-                  <LucideReact.AlertTriangle size={16} />
-                  <span className="ml-1">Blocked</span>
-                </div>
-              )}
-            </div>
-            <div className="space-y-1 text-gray-600 text-sm">
-              <div className="flex items-center gap-1 truncate">
-                <LucideReact.Link size={16} />
-                <span className="truncate">{wh.url}</span>
               </div>
-              {wh.channelId && (
-                <div className="flex items-center gap-1">
-                  <LucideReact.Hash size={16} />
-                  <span>{wh.channelId}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-1">
-                <LucideReact.Calendar size={16} />
-                <span>Created: {formatDate(wh.createdAt)}</span>
+              <div className="mt-1 flex items-center text-gray-600 text-sm space-x-2">
+                <LucideReact.Link
+                  size={16}
+                  className="text-gray-400"
+                  aria-label="Webhook URL"
+                />
+                <a
+                  href={wh.url}
+                  title={wh.url}
+                  className="truncate hover:underline"
+                >
+                  {wh.url}
+                </a>
               </div>
-              {wh.blocked && wh.lastBlockedAt && (
-                <div className="flex items-center gap-1 text-red-500">
-                  <LucideReact.AlertTriangle size={16} />
-                  <span>Last blocked: {formatDate(wh.lastBlockedAt)}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-3 mt-2">
-                <div className="flex items-center gap-1 text-sm">
-                  <LucideReact.UserCheck
-                    size={16}
-                    className={
-                      wh.watchUserChats ? "text-green-500" : "text-gray-300"
-                    }
+              <div className="mt-2 flex flex-wrap items-center text-gray-500 text-sm gap-4">
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Calendar
+                    size={14}
+                    className="text-gray-400"
+                    aria-label="Created at"
                   />
-                  <span className="text-gray-600">Users</span>
+                  <span>{formatDate(wh.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-1 text-sm">
-                  <LucideReact.Users
-                    size={16}
-                    className={
-                      wh.watchGroups ? "text-green-500" : "text-gray-300"
-                    }
-                  />
-                  <span className="text-gray-600">Groups</span>
+                <div className="flex items-center space-x-1">
+                  {wh.blocked ? (
+                    <>
+                      <LucideReact.AlertTriangle
+                        size={14}
+                        className="text-red-500"
+                        aria-label="Blocked"
+                      />
+                      <span>Blocked</span>
+                    </>
+                  ) : (
+                    <>
+                      <LucideReact.CheckCircle
+                        size={14}
+                        className="text-green-500"
+                        aria-label="Active"
+                      />
+                      <span>Active</span>
+                    </>
+                  )}
                 </div>
               </div>
-              <div className="mt-2">
-                <span className="text-xs text-gray-500">
-                  API v{wh.apiVersion}
-                </span>
-              </div>
-              {wh.keywords && wh.keywords.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {wh.keywords.map((kw, i) => (
+              {wh.keywords && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {wh.keywords.map((kw, kidx) => (
                     <span
-                      key={i}
-                      className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded"
+                      key={kidx}
+                      className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded"
                     >
                       {kw}
                     </span>
@@ -127,12 +113,46 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
                 </div>
               )}
             </div>
+
+            {/* Metadata */}
+            <div className="mt-4 sm:mt-0 flex flex-wrap gap-4 text-gray-600 text-sm">
+              {wh.watchUserChats != null && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.MessageSquare
+                    size={16}
+                    className="text-gray-400"
+                    aria-label="User chats"
+                  />
+                  <span>
+                    {wh.watchUserChats ? "Watching Chats" : "Chats Off"}
+                  </span>
+                </div>
+              )}
+              {wh.watchGroups != null && (
+                <div className="flex items-center space-x-1">
+                  <LucideReact.Users
+                    size={16}
+                    className="text-gray-400"
+                    aria-label="Groups"
+                  />
+                  <span>{wh.watchGroups ? "Watching Groups" : "Groups Off"}</span>
+                </div>
+              )}
+              <div className="flex items-center space-x-1">
+                <LucideReact.Code
+                  size={16}
+                  className="text-gray-400"
+                  aria-label="API Version"
+                />
+                <span>{wh.apiVersion}</span>
+              </div>
+            </div>
           </div>
-        ))}
-      </div>
-      {value.next !== undefined && (
-        <div className="text-right text-sm text-gray-500">
-          Next token: {value.next}
+        ))
+      ) : (
+        <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+          <LucideReact.AlertCircle size={48} aria-label="No data" />
+          <span className="mt-4 text-sm">No webhooks configured</span>
         </div>
       )}
     </div>

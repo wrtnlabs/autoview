@@ -1,105 +1,82 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * The public key used for setting Actions Secrets.
-   *
-   * @title ActionsPublicKey
-   */
-  export type actions_public_key = {
     /**
-     * The identifier for the key.
-     */
-    key_id: string;
-    /**
-     * The Base64 encoded public key.
-     */
-    key: string;
-    id?: number & tags.Type<"int32">;
-    url?: string;
-    title?: string;
-    created_at?: string;
-  };
+     * The public key used for setting Actions Secrets.
+     *
+     * @title ActionsPublicKey
+    */
+    export interface actions_public_key {
+        /**
+         * The identifier for the key.
+        */
+        key_id: string;
+        /**
+         * The Base64 encoded public key.
+        */
+        key: string;
+        id?: number & tags.Type<"int32">;
+        url?: string;
+        title?: string;
+        created_at?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_public_key;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { key_id, key, title, url, created_at } = value;
-
-  // Format creation date
-  const formattedDate = created_at
-    ? new Date(created_at).toLocaleString(undefined, {
+  const displayTitle = value.title ?? "Public Key";
+  const formattedDate = value.created_at
+    ? new Date(value.created_at).toLocaleDateString(undefined, {
         year: "numeric",
-        month: "short",
+        month: "long",
         day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
       })
-    : "N/A";
-
-  // Truncate long strings
-  const truncateMiddle = (str: string, length = 30): string => {
-    if (str.length <= length * 2) return str;
-    return `${str.slice(0, length)}…${str.slice(-length)}`;
-  };
-  const displayKey = truncateMiddle(key, 20);
-  const displayUrl = url ? truncateMiddle(url, 30) : null;
+    : "";
+  const truncatedKey =
+    value.key.length > 32
+      ? `${value.key.slice(0, 16)}...${value.key.slice(-16)}`
+      : value.key;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md max-w-full">
-      <div className="flex items-center mb-4">
-        <LucideReact.Key
-          size={20}
-          className="text-gray-500 mr-2"
-          aria-hidden="true"
-        />
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {title ?? "Actions Public Key"}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <div className="flex items-center mb-3">
+        <LucideReact.Key className="text-blue-500" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          {displayTitle}
         </h2>
       </div>
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Key ID</dt>
-          <dd className="mt-1 text-sm text-gray-900 break-all">
-            <code className="font-mono">{key_id}</code>
-          </dd>
+      <div className="space-y-2">
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Hash className="text-gray-500" size={16} />
+          <span className="ml-2 font-medium">Key ID:</span>
+          <span className="ml-1 font-mono truncate">{value.key_id}</span>
         </div>
-        <div>
-          <dt className="text-sm font-medium text-gray-500">Created</dt>
-          <dd className="mt-1 text-sm text-gray-900 flex items-center">
-            <LucideReact.Calendar
-              size={16}
-              className="text-gray-400 mr-1"
-              aria-hidden="true"
-            />
-            <span>{formattedDate}</span>
-          </dd>
+        <div className="flex items-center text-gray-700">
+          <LucideReact.Clipboard className="text-gray-500" size={16} />
+          <span className="ml-2 font-medium">Public Key:</span>
+          <span className="ml-1 font-mono truncate">{truncatedKey}</span>
         </div>
-        <div className="sm:col-span-2">
-          <dt className="text-sm font-medium text-gray-500">Public Key</dt>
-          <dd className="mt-1 text-sm text-gray-900 font-mono bg-gray-50 p-2 rounded overflow-x-auto">
-            {displayKey}
-          </dd>
-        </div>
-        {displayUrl && (
-          <div className="sm:col-span-2">
-            <dt className="text-sm font-medium text-gray-500">URL</dt>
-            <dd className="mt-1 text-sm text-gray-900 flex items-center break-all">
-              <LucideReact.Link
-                size={16}
-                className="text-gray-400 mr-1"
-                aria-hidden="true"
-              />
-              <span>{displayUrl}</span>
-            </dd>
+        {formattedDate && (
+          <div className="flex items-center text-gray-700">
+            <LucideReact.Calendar className="text-gray-500" size={16} />
+            <span className="ml-2">{formattedDate}</span>
           </div>
         )}
-      </dl>
+        {value.url && (
+          <div className="flex items-center text-gray-700">
+            <LucideReact.Link className="text-gray-500" size={16} />
+            <span className="ml-2 truncate break-all">{value.url}</span>
+          </div>
+        )}
+      </div>
     </div>
   );
+  // 3. Return the React element.
 }

@@ -1,91 +1,77 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Team Membership
-   *
-   * @title Team Membership
-   */
-  export type team_membership = {
-    url: string & tags.Format<"uri">;
     /**
-     * The role of the user in the team.
-     */
-    role: "member" | "maintainer";
-    /**
-     * The state of the user's membership in the team.
-     */
-    state: "active" | "pending";
-  };
+     * Team Membership
+     *
+     * @title Team Membership
+    */
+    export interface team_membership {
+        url: string & tags.Format<"uri">;
+        /**
+         * The role of the user in the team.
+        */
+        role: "member" | "maintainer";
+        /**
+         * The state of the user's membership in the team.
+        */
+        state: "active" | "pending";
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.team_membership;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    Derive a displayable host from the URL
-  let host: string;
+  //    Extract hostname for a cleaner URL display.
+  let hostname: string;
   try {
-    host = new URL(value.url).host;
+    hostname = new URL(value.url).hostname;
   } catch {
-    host = value.url;
+    hostname = value.url;
   }
-
-  //    Map membership state to icon and label
-  const stateInfo = (() => {
-    if (value.state === "active") {
-      return {
-        icon: <LucideReact.CheckCircle className="text-green-500" size={16} />,
-        label: "Active",
-        textColor: "text-green-700",
-      };
-    }
-    return {
-      icon: <LucideReact.Clock className="text-amber-500" size={16} />,
-      label: "Pending",
-      textColor: "text-amber-700",
-    };
-  })();
-
-  //    Map role to icon and label
-  const roleInfo = (() => {
-    if (value.role === "maintainer") {
-      return {
-        icon: <LucideReact.ShieldCheck className="text-blue-500" size={16} />,
-        label: "Maintainer",
-      };
-    }
-    return {
-      icon: <LucideReact.User className="text-gray-500" size={16} />,
-      label: "Member",
-    };
-  })();
+  const roleLabel = value.role === "maintainer" ? "Maintainer" : "Member";
+  const stateLabel = value.state === "active" ? "Active" : "Pending";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    The card displays the team URL host, role, and membership state.
   return (
-    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow-md flex flex-col space-y-3">
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       {/* URL Display */}
-      <div className="flex items-center gap-2">
-        <LucideReact.Link className="text-gray-500" size={16} />
-        <span className="text-sm font-medium text-gray-800 break-all">
-          {host}
+      <div className="flex items-center gap-2 text-gray-700 truncate">
+        <LucideReact.Link size={16} className="text-gray-400" aria-hidden="true" />
+        <span title={value.url} className="truncate">{hostname}</span>
+      </div>
+
+      {/* Role Badge */}
+      <div>
+        <span
+          className={
+            value.role === "maintainer"
+              ? "inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-sm font-medium"
+              : "inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-800 text-sm font-medium"
+          }
+        >
+          {value.role === "maintainer" ? (
+            <LucideReact.Star size={16} className="mr-1" aria-hidden="true" />
+          ) : (
+            <LucideReact.User size={16} className="mr-1" aria-hidden="true" />
+          )}
+          {roleLabel}
         </span>
       </div>
 
-      {/* Role Display */}
-      <div className="flex items-center gap-2">
-        {roleInfo.icon}
-        <span className="text-sm text-gray-700">{roleInfo.label}</span>
-      </div>
-
-      {/* State Display */}
-      <div className="flex items-center gap-2">
-        {stateInfo.icon}
-        <span className={`text-sm ${stateInfo.textColor}`}>
-          {stateInfo.label}
+      {/* State Indicator */}
+      <div className="flex items-center gap-1 text-sm font-medium">
+        {value.state === "active" ? (
+          <LucideReact.CheckCircle size={16} className="text-green-500" aria-label="Active" />
+        ) : (
+          <LucideReact.Clock size={16} className="text-amber-500" aria-label="Pending" />
+        )}
+        <span className={value.state === "active" ? "text-green-600" : "text-amber-600"}>
+          {stateLabel}
         </span>
       </div>
     </div>

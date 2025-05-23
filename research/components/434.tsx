@@ -1,35 +1,37 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * The public key used for setting Codespaces secrets.
-   *
-   * @title CodespacesPublicKey
-   */
-  export type codespaces_public_key = {
     /**
-     * The identifier for the key.
-     */
-    key_id: string;
-    /**
-     * The Base64 encoded public key.
-     */
-    key: string;
-    id?: number & tags.Type<"int32">;
-    url?: string;
-    title?: string;
-    created_at?: string;
-  };
+     * The public key used for setting Codespaces secrets.
+     *
+     * @title CodespacesPublicKey
+    */
+    export interface codespaces_public_key {
+        /**
+         * The identifier for the key.
+        */
+        key_id: string;
+        /**
+         * The Base64 encoded public key.
+        */
+        key: string;
+        id?: number & tags.Type<"int32">;
+        url?: string;
+        title?: string;
+        created_at?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.codespaces_public_key;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const title = value.title ?? "Codespaces Public Key";
-  const createdAt = value.created_at
+  const keyId = value.key_id;
+  const formattedDate = value.created_at
     ? new Date(value.created_at).toLocaleString(undefined, {
         year: "numeric",
         month: "short",
@@ -38,56 +40,34 @@ export default function VisualComponent(value: AutoViewInput): React.ReactNode {
         minute: "2-digit",
       })
     : null;
-  // Mask the key for display: show first 6 and last 6 characters
-  const maskedKey =
-    value.key.length > 12
-      ? `${value.key.slice(0, 6)}...${value.key.slice(-6)}`
-      : value.key;
+  const truncateKey = (raw: string): string => {
+    const max = 20;
+    if (raw.length <= max * 2 + 3) return raw;
+    return `${raw.slice(0, max)}...${raw.slice(-max)}`;
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white rounded-lg shadow-md p-4 space-y-4">
-      {/* Header */}
-      <div className="flex items-center space-x-2">
-        <LucideReact.Key size={20} className="text-indigo-500" />
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {title}
-        </h2>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm w-full mx-auto">
+      <div className="flex flex-col space-y-1">
+        <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <p className="text-sm text-gray-500 truncate">ID: {keyId}</p>
       </div>
 
-      <div className="divide-y divide-gray-200">
-        {/* Key ID */}
-        <div className="py-2 flex items-center text-sm text-gray-600">
-          <LucideReact.Hash size={16} className="mr-1 text-gray-500" />
-          <span className="truncate">{value.key_id}</span>
+      <pre className="mt-4 bg-gray-100 p-2 rounded-md overflow-x-auto text-xs font-mono text-gray-800">
+        {truncateKey(value.key)}
+      </pre>
+
+      {formattedDate && (
+        <div className="mt-3 flex items-center text-sm text-gray-600">
+          <LucideReact.Calendar
+            size={16}
+            className="mr-1 text-gray-500"
+            aria-hidden="true"
+          />
+          <span>{formattedDate}</span>
         </div>
-
-        {/* Created At */}
-        {createdAt && (
-          <div className="py-2 flex items-center text-sm text-gray-600">
-            <LucideReact.Calendar size={16} className="mr-1 text-gray-500" />
-            <span>{createdAt}</span>
-          </div>
-        )}
-
-        {/* URL */}
-        {value.url && (
-          <div className="py-2 flex items-center text-sm text-gray-600">
-            <LucideReact.Link size={16} className="mr-1 text-gray-500" />
-            <span className="truncate">{value.url}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Public Key Display */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Public Key
-        </label>
-        <pre className="bg-gray-100 text-gray-800 text-xs rounded p-2 overflow-x-auto">
-          <code>{maskedKey}</code>
-        </pre>
-      </div>
+      )}
     </div>
   );
 }

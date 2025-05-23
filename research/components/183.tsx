@@ -1,144 +1,160 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace legacy {
-    export namespace open {
-      export namespace v4 {
-        export type LegacyV4SessionsView = {
-          sessions?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession[];
-        };
-      }
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export interface LegacyV4SessionsView {
+                    sessions?: AutoViewInputSubTypes.legacy.v4.LegacyV4ChatSession[];
+                }
+            }
+        }
+        export namespace v4 {
+            export interface LegacyV4ChatSession {
+                key?: string;
+                chatId?: string;
+                chatKey?: string;
+                updatedKey?: string;
+                unreadKey?: string;
+                channelId?: string;
+                alert?: number & tags.Type<"int32">;
+                unread?: number & tags.Type<"int32">;
+                watch?: "all" | "info" | "none";
+                readAt?: number;
+                receivedAt?: number;
+                postedAt?: number;
+                updatedAt?: number;
+                createdAt?: number;
+                version?: number & tags.Type<"int32">;
+                id?: string;
+                chatType?: string;
+                personType?: string;
+                personId?: string;
+            }
+        }
     }
-    export namespace v4 {
-      export type LegacyV4ChatSession = {
-        key?: string;
-        chatId?: string;
-        chatKey?: string;
-        updatedKey?: string;
-        unreadKey?: string;
-        channelId?: string;
-        alert?: number & tags.Type<"int32">;
-        unread?: number & tags.Type<"int32">;
-        watch?: "all" | "info" | "none";
-        readAt?: number;
-        receivedAt?: number;
-        postedAt?: number;
-        updatedAt?: number;
-        createdAt?: number;
-        version?: number & tags.Type<"int32">;
-        id?: string;
-        chatType?: string;
-        personType?: string;
-        personId?: string;
-      };
-    }
-  }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.legacy.open.v4.LegacyV4SessionsView;
+export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4SessionsView;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const sessions = value.sessions ?? [];
-  const sessionCount = sessions.length;
 
-  // Helper to format timestamps
-  const formatTimestamp = (ts?: number): string => {
-    if (!ts) return "—";
-    try {
-      return new Date(ts).toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    } catch {
-      return "—";
-    }
-  };
+  const processed = sessions
+    .map((s) => {
+      const last = Math.max(
+        s.postedAt ?? 0,
+        s.receivedAt ?? 0,
+        s.updatedAt ?? 0,
+        s.readAt ?? 0
+      );
+      return { ...s, lastActivity: last };
+    })
+    .sort((a, b) => b.lastActivity - a.lastActivity);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">
-          Chat Sessions ({sessionCount})
-        </h2>
+  if (processed.length === 0) {
+    return (
+      <div className="p-6 flex flex-col items-center text-gray-400">
+        <LucideReact.AlertCircle size={48} aria-label="No data" />
+        <p className="mt-3 text-sm">No sessions available.</p>
       </div>
+    );
+  }
 
-      {/* Body */}
-      {sessionCount > 0 ? (
-        <ul className="space-y-2">
-          {sessions.map((session, idx) => {
-            const name =
-              session.chatId ?? session.id ?? session.key ?? "Unknown Session";
-            const updated = formatTimestamp(
-              session.updatedAt ?? session.createdAt,
-            );
-            const unreadCount = session.unread ?? 0;
-            const alertCount = session.alert ?? 0;
-            const watchMode = session.watch ?? "none";
+  return (
+    <ul className="bg-white rounded-lg shadow-sm divide-y divide-gray-200">
+      {processed.map((session, idx) => {
+        const title =
+          session.chatId ||
+          session.chatKey ||
+          session.id ||
+          session.key ||
+          "Session";
 
-            return (
-              <li
-                key={idx}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-md"
-              >
-                {/* Session Info */}
-                <div className="flex items-center space-x-3">
-                  <LucideReact.MessageSquare
-                    className="text-gray-500"
-                    size={20}
+        const hasDate = session.lastActivity > 0;
+        const formattedDate = hasDate
+          ? new Date(session.lastActivity).toLocaleString([], {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })
+          : "";
+
+        let watchIcon = (
+          <LucideReact.BellOff
+            className="text-gray-400"
+            size={16}
+            aria-label="Not watching"
+          />
+        );
+        if (session.watch === "all") {
+          watchIcon = (
+            <LucideReact.Bell
+              className="text-blue-500"
+              size={16}
+              aria-label="Watching all"
+            />
+          );
+        } else if (session.watch === "info") {
+          watchIcon = (
+            <LucideReact.Info
+              className="text-blue-500"
+              size={16}
+              aria-label="Watching info"
+            />
+          );
+        }
+
+        return (
+          <li
+            key={idx}
+            className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between hover:bg-gray-50"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 truncate">
+              <span className="font-medium text-gray-900 truncate">
+                {title}
+              </span>
+              {hasDate && (
+                <span className="flex items-center text-sm text-gray-500 mt-1 sm:mt-0">
+                  <LucideReact.Calendar
+                    className="mr-1"
+                    size={14}
+                    aria-label="Date"
                   />
-                  <div className="flex flex-col">
-                    <span
-                      className="font-medium text-gray-800 truncate w-48"
-                      title={name}
-                    >
-                      {name}
-                    </span>
-                    <div className="flex items-center space-x-1 text-sm text-gray-500">
-                      <LucideReact.Calendar size={14} />
-                      <span>{updated}</span>
-                    </div>
-                  </div>
+                  {formattedDate}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center space-x-4 mt-3 sm:mt-0">
+              {session.alert != null && session.alert > 0 && (
+                <div className="flex items-center text-red-500 text-sm">
+                  <LucideReact.AlertTriangle
+                    className="mr-1"
+                    size={16}
+                    aria-label="Alerts"
+                  />
+                  <span>{session.alert}</span>
                 </div>
-
-                {/* Session Stats */}
-                <div className="flex items-center space-x-4">
-                  {unreadCount > 0 && (
-                    <div className="flex items-center text-red-500 text-sm">
-                      <LucideReact.Mail size={16} />
-                      <span className="ml-1">{unreadCount}</span>
-                    </div>
-                  )}
-                  {alertCount > 0 && (
-                    <div className="flex items-center text-yellow-500 text-sm">
-                      <LucideReact.AlertTriangle size={16} />
-                      <span className="ml-1">{alertCount}</span>
-                    </div>
-                  )}
-                  <div className="text-gray-500" title={`Watch: ${watchMode}`}>
-                    {watchMode === "all" && <LucideReact.Eye size={16} />}
-                    {watchMode === "info" && <LucideReact.Info size={16} />}
-                    {watchMode === "none" && <LucideReact.EyeOff size={16} />}
-                  </div>
+              )}
+              {session.unread != null && session.unread > 0 && (
+                <div className="flex items-center text-blue-500 text-sm">
+                  <LucideReact.MessageSquare
+                    className="mr-1"
+                    size={16}
+                    aria-label="Unread"
+                  />
+                  <span>{session.unread}</span>
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-          <LucideReact.AlertCircle size={36} />
-          <span className="mt-2">No sessions available</span>
-        </div>
-      )}
-    </div>
+              )}
+              <div>{watchIcon}</div>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }

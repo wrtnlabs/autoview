@@ -4,5 +4,5 @@ import Component from "../components/718";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"key_id":"dependabot-test-key-001","key":"UHVibGljS2V5U2FtcGxlRm9yRGVwZW5kYWJvdA=="};
+  return {"key_id":"test-dependabot-key-id-001","key":"MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBALeVXzYX7ZQOvanziR+2Gp1gf1YkF0p=="};
 }

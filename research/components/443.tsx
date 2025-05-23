@@ -1,52 +1,69 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * The public key used for setting Dependabot Secrets.
-   *
-   * @title DependabotPublicKey
-   */
-  export type dependabot_public_key = {
     /**
-     * The identifier for the key.
-     */
-    key_id: string;
-    /**
-     * The Base64 encoded public key.
-     */
-    key: string;
-  };
+     * The public key used for setting Dependabot Secrets.
+     *
+     * @title DependabotPublicKey
+    */
+    export interface dependabot_public_key {
+        /**
+         * The identifier for the key.
+        */
+        key_id: string;
+        /**
+         * The Base64 encoded public key.
+        */
+        key: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.dependabot_public_key;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  // No complex transformations needed for dependabot_public_key; destructure for clarity.
   const { key_id, key } = value;
+  // Truncate the public key for compact display; full key is available on hover (title attribute)
+  const truncatedKey =
+    key.length > 64 ? `${key.slice(0, 32)}…${key.slice(-32)}` : key;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      {/* Key ID Section */}
-      <div className="flex items-center text-gray-700 mb-1">
-        <LucideReact.Key size={18} className="mr-2 text-indigo-500" />
-        <span className="font-medium">Key ID</span>
+    <div className="w-full max-w-full p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4">
+        <LucideReact.Key size={20} className="text-gray-500" />
+        <h2 className="text-lg font-semibold text-gray-800">
+          Dependabot Public Key
+        </h2>
       </div>
-      <div className="text-gray-800 mb-4 truncate">{key_id}</div>
 
-      {/* Public Key Section */}
-      <div className="flex items-center text-gray-700 mb-1">
-        <LucideReact.Code size={18} className="mr-2 text-gray-500" />
-        <span className="font-medium">Public Key</span>
+      {/* Content Rows */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:gap-6">
+        {/* Key ID */}
+        <div className="flex items-center gap-2 mb-4 sm:mb-0">
+          <LucideReact.Hash size={16} className="text-gray-400" />
+          <span className="font-medium text-gray-700 break-all">
+            {key_id}
+          </span>
+        </div>
+
+        {/* Public Key Block */}
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <LucideReact.Code size={16} className="text-gray-400" />
+            <span className="font-medium text-gray-700">Public Key</span>
+          </div>
+          <pre
+            className="p-3 bg-gray-50 rounded overflow-x-auto text-sm font-mono text-gray-800"
+            title={key}
+          >
+            {truncatedKey}
+          </pre>
+        </div>
       </div>
-      <pre
-        className="bg-gray-50 text-sm font-mono text-gray-800 p-3 rounded overflow-x-auto"
-        aria-label="Dependabot public key"
-      >
-        {key}
-      </pre>
     </div>
   );
 }

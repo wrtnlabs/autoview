@@ -4,5 +4,5 @@ import Component from "../components/269";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"result":"Sample output for StringView (Test):\n- Item 1: This is a dummy entry\n- Item 2: Multi-line sample text\nEnd of sample result."};
+  return {"result":"Test result summary (Sample): All operations completed successfully. Use this dummy data for UI layout verification.\nAdditional details are included here as a second line to test multi-line rendering."};
 }

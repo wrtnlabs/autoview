@@ -1,101 +1,83 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Runner Application
-   *
-   * @title Runner Application
-   */
-  export type runner_application = {
-    os: string;
-    architecture: string;
-    download_url: string;
-    filename: string;
     /**
-     * A short lived bearer token used to download the runner, if needed.
-     */
-    temp_download_token?: string;
-    sha256_checksum?: string;
-  };
+     * Runner Application
+     *
+     * @title Runner Application
+    */
+    export interface runner_application {
+        os: string;
+        architecture: string;
+        download_url: string;
+        filename: string;
+        /**
+         * A short lived bearer token used to download the runner, if needed.
+        */
+        temp_download_token?: string;
+        sha256_checksum?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner_application[];
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const truncate = (str: string, front = 30, back = 10): string =>
-    str.length > front + back
-      ? `${str.slice(0, front)}…${str.slice(-back)}`
-      : str;
+  const runners = value;
+  const count = runners.length;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!value || value.length === 0) {
+  // Handle empty state
+  if (count === 0) {
     return (
-      <div className="flex items-center justify-center py-8 text-gray-500">
-        <LucideReact.AlertCircle size={24} />
-        <span className="ml-2">No runner applications available</span>
+      <div className="flex items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mr-2" />
+        <span>No runner downloads available.</span>
       </div>
     );
   }
 
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="space-y-4">
-      {value.map((runner, idx) => {
-        const { os, architecture, filename, download_url, sha256_checksum } =
-          runner;
-        const formattedUrl = truncate(download_url, 30, 10);
-        const formattedChecksum = sha256_checksum
-          ? truncate(sha256_checksum, 8, 8)
-          : "";
-
-        return (
-          <div
-            key={idx}
-            className="p-4 bg-white rounded-lg shadow-sm border border-gray-100"
-          >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-              {/* Left: OS & Architecture */}
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-1 text-gray-700">
-                  <LucideReact.Server size={16} />
-                  <span className="font-medium">{os}</span>
-                </div>
-                <div className="flex items-center gap-1 text-gray-700">
-                  <LucideReact.Cpu size={16} />
-                  <span className="font-medium">{architecture}</span>
-                </div>
-              </div>
-              {/* Right: filename, url, checksum */}
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mt-3 sm:mt-0">
-                <div className="flex items-center gap-1 text-gray-700">
-                  <LucideReact.FileText size={16} />
-                  <span className="font-medium truncate" title={filename}>
-                    {filename}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 text-gray-700 max-w-xs">
-                  <LucideReact.Link size={16} />
-                  <span className="truncate text-sm" title={download_url}>
-                    {formattedUrl}
-                  </span>
-                </div>
-                {sha256_checksum && (
-                  <div className="flex items-center gap-1 text-gray-700 max-w-xs">
-                    <LucideReact.ShieldCheck size={16} />
-                    <span
-                      className="font-mono text-sm truncate"
-                      title={sha256_checksum}
-                    >
-                      {formattedChecksum}
-                    </span>
-                  </div>
-                )}
-              </div>
+    <div className="p-4 bg-gray-50 rounded-lg">
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        Available Runner Downloads ({count})
+      </h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        {runners.map((app, idx) => (
+          <div key={idx} className="p-4 bg-white rounded-lg shadow">
+            {/* OS and Architecture */}
+            <div className="flex items-center gap-2 mb-2">
+              <LucideReact.Computer size={20} className="text-gray-500" />
+              <span className="font-medium text-gray-800">{app.os}</span>
+              <span className="ml-auto flex items-center text-gray-600 text-sm">
+                <LucideReact.Cpu size={14} className="mr-1" />
+                {app.architecture}
+              </span>
             </div>
+            {/* Filename */}
+            <div className="flex items-center text-gray-700 text-sm mb-1">
+              <LucideReact.FileText size={16} className="text-indigo-500 mr-2" />
+              <span className="truncate">{app.filename}</span>
+            </div>
+            {/* Download URL */}
+            <div className="flex items-start text-gray-700 text-sm mb-1">
+              <LucideReact.Link size={16} className="text-gray-400 mt-0.5 mr-2" />
+              <span className="break-all">{app.download_url}</span>
+            </div>
+            {/* SHA-256 Checksum */}
+            {app.sha256_checksum && (
+              <div className="flex items-center text-gray-700 text-sm">
+                <LucideReact.Hash size={16} className="text-gray-400 mr-2" />
+                <span className="font-mono text-xs break-all">
+                  {app.sha256_checksum}
+                </span>
+              </div>
+            )}
           </div>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }

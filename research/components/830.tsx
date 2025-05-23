@@ -1,147 +1,115 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
-   *
-   * @title Reaction
-   */
-  export type reaction = {
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    user: AutoViewInputSubTypes.nullable_simple_user;
     /**
-     * The reaction to use
-     */
-    content:
-      | "+1"
-      | "-1"
-      | "laugh"
-      | "confused"
-      | "heart"
-      | "hooray"
-      | "rocket"
-      | "eyes";
-    created_at: string & tags.Format<"date-time">;
-  };
-  /**
-   * A GitHub user.
-   *
-   * @title Simple User
-   */
-  export type nullable_simple_user = {
-    name?: string | null;
-    email?: string | null;
-    login: string;
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    avatar_url: string & tags.Format<"uri">;
-    gravatar_id: string | null;
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    followers_url: string & tags.Format<"uri">;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string & tags.Format<"uri">;
-    organizations_url: string & tags.Format<"uri">;
-    repos_url: string & tags.Format<"uri">;
-    events_url: string;
-    received_events_url: string & tags.Format<"uri">;
-    type: string;
-    site_admin: boolean;
-    starred_at?: string;
-    user_view_type?: string;
-  } | null;
+     * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
+     *
+     * @title Reaction
+    */
+    export interface reaction {
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        user: AutoViewInputSubTypes.nullable_simple_user;
+        /**
+         * The reaction to use
+        */
+        content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
+        created_at: string & tags.Format<"date-time">;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export type nullable_simple_user = {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes.reaction;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const user = value.user;
-  const displayName = user ? user.name?.trim() || user.login : "Unknown User";
-  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    displayName,
-  )}&background=0D8ABC&color=fff`;
-  const [avatarSrc, setAvatarSrc] = React.useState<string>(
-    user?.avatar_url || avatarPlaceholder,
-  );
+  // Derived display name and avatar URL (with fallback)
+  const displayName = value.user ? (value.user.name ?? value.user.login) : "Unknown User";
+  const avatarUrl = value.user?.avatar_url ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
+  const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random`;
 
-  // Format creation date
-  const createdDate = new Date(value.created_at);
-  const formattedDate = createdDate.toLocaleString(undefined, {
-    year: "numeric",
+  // Format the creation date
+  const date = new Date(value.created_at);
+  const formattedDate = date.toLocaleString(undefined, {
     month: "short",
     day: "numeric",
+    year: "numeric",
     hour: "numeric",
-    minute: "2-digit",
+    minute: "numeric",
   });
 
-  // Map reaction content to human label and icon
-  const contentMap: Record<AutoViewInput["content"], string> = {
-    "+1": "Thumbs Up",
-    "-1": "Thumbs Down",
-    laugh: "Laugh",
-    confused: "Confused",
-    heart: "Heart",
-    hooray: "Hooray",
-    rocket: "Rocket",
-    eyes: "Eyes",
-  };
-  const contentLabel = contentMap[value.content] || value.content;
-
-  const ReactionIcon = (() => {
+  // Map reaction content to a semantically appropriate icon
+  function renderReactionIcon(): JSX.Element {
     switch (value.content) {
       case "+1":
-        return <LucideReact.ThumbsUp className="text-green-500" size={20} />;
+        return <LucideReact.ThumbsUp className="text-green-500" size={16} strokeWidth={1.5} aria-label="+1" />;
       case "-1":
-        return <LucideReact.ThumbsDown className="text-red-500" size={20} />;
+        return <LucideReact.ThumbsDown className="text-red-500" size={16} strokeWidth={1.5} aria-label="-1" />;
       case "laugh":
-        return <LucideReact.Smile className="text-yellow-500" size={20} />;
+        return <LucideReact.Smile className="text-yellow-500" size={16} strokeWidth={1.5} aria-label="laugh" />;
       case "confused":
-        return <LucideReact.Frown className="text-amber-500" size={20} />;
+        return <LucideReact.HelpCircle className="text-amber-500" size={16} strokeWidth={1.5} aria-label="confused" />;
       case "heart":
-        return <LucideReact.Heart className="text-pink-500" size={20} />;
+        return <LucideReact.Heart className="text-red-500" size={16} strokeWidth={1.5} aria-label="heart" />;
       case "hooray":
-        return (
-          <LucideReact.PartyPopper className="text-purple-500" size={20} />
-        );
+        return <LucideReact.Gift className="text-purple-500" size={16} strokeWidth={1.5} aria-label="hooray" />;
       case "rocket":
-        return <LucideReact.Rocket className="text-indigo-500" size={20} />;
+        return <LucideReact.Rocket className="text-blue-500" size={16} strokeWidth={1.5} aria-label="rocket" />;
       case "eyes":
-        return <LucideReact.Eye className="text-gray-500" size={20} />;
+        return <LucideReact.Eye className="text-gray-600" size={16} strokeWidth={1.5} aria-label="eyes" />;
       default:
-        return null;
+        return <LucideReact.Star className="text-gray-400" size={16} strokeWidth={1.5} aria-label="reaction" />;
     }
-  })();
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Compose the visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md flex items-start space-x-4">
+    <div className="p-4 bg-white rounded-lg shadow flex items-start space-x-4 max-w-full">
       <img
-        src={avatarSrc}
-        alt={`${displayName} avatar`}
+        src={avatarUrl}
+        alt={displayName}
         className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-        onError={() => setAvatarSrc(avatarPlaceholder)}
+        onError={(e) => { e.currentTarget.src = fallbackAvatar; }}
       />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-gray-900 truncate">
-            {displayName}
-          </h4>
-          <div className="flex items-center space-x-1">
-            {ReactionIcon}
-            <span className="text-xs text-gray-500">{contentLabel}</span>
-          </div>
+        <div className="flex flex-wrap items-center gap-1">
+          <span className="font-medium text-gray-800 truncate">{displayName}</span>
+          <span className="text-gray-500 text-sm">reacted with</span>
+          {renderReactionIcon()}
         </div>
-        <div className="flex items-center mt-1 text-xs text-gray-400">
-          <LucideReact.Calendar size={14} className="flex-shrink-0" />
-          <time dateTime={value.created_at} className="ml-1 truncate">
-            {formattedDate}
-          </time>
+        <div className="flex items-center text-gray-400 text-sm mt-1">
+          <LucideReact.Calendar className="mr-1" size={14} />
+          <span className="truncate">{formattedDate}</span>
         </div>
       </div>
     </div>

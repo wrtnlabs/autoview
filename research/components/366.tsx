@@ -1,230 +1,237 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Api Overview
-   *
-   * @title Api Overview
-   */
-  export type api_overview = {
-    verifiable_password_authentication: boolean;
-    ssh_key_fingerprints?: {
-      SHA256_RSA?: string;
-      SHA256_DSA?: string;
-      SHA256_ECDSA?: string;
-      SHA256_ED25519?: string;
-    };
-    ssh_keys?: string[];
-    hooks?: string[];
-    github_enterprise_importer?: string[];
-    web?: string[];
-    api?: string[];
-    git?: string[];
-    packages?: string[];
-    pages?: string[];
-    importer?: string[];
-    actions?: string[];
-    actions_macos?: string[];
-    codespaces?: string[];
-    dependabot?: string[];
-    copilot?: string[];
-    domains?: {
-      website?: string[];
-      codespaces?: string[];
-      copilot?: string[];
-      packages?: string[];
-      actions?: string[];
-      actions_inbound?: {
-        full_domains?: string[];
-        wildcard_domains?: string[];
-      };
-      artifact_attestations?: {
-        trust_domain?: string;
-        services?: string[];
-      };
-    };
-  };
+    /**
+     * Api Overview
+     *
+     * @title Api Overview
+    */
+    export interface api_overview {
+        verifiable_password_authentication: boolean;
+        ssh_key_fingerprints?: {
+            SHA256_RSA?: string;
+            SHA256_DSA?: string;
+            SHA256_ECDSA?: string;
+            SHA256_ED25519?: string;
+        };
+        ssh_keys?: string[];
+        hooks?: string[];
+        github_enterprise_importer?: string[];
+        web?: string[];
+        api?: string[];
+        git?: string[];
+        packages?: string[];
+        pages?: string[];
+        importer?: string[];
+        actions?: string[];
+        actions_macos?: string[];
+        codespaces?: string[];
+        dependabot?: string[];
+        copilot?: string[];
+        domains?: {
+            website?: string[];
+            codespaces?: string[];
+            copilot?: string[];
+            packages?: string[];
+            actions?: string[];
+            actions_inbound?: {
+                full_domains?: string[];
+                wildcard_domains?: string[];
+            };
+            artifact_attestations?: {
+                trust_domain?: string;
+                services?: string[];
+            };
+        };
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.api_overview;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const authSupported = value.verifiable_password_authentication;
-  const fingerprintTypes = value.ssh_key_fingerprints
-    ? (
-        Object.entries(value.ssh_key_fingerprints) as [
-          keyof typeof value.ssh_key_fingerprints,
-          string?,
-        ][]
-      )
-        .filter(([, v]) => !!v)
-        .map(([k]) => k)
+  const fingerprintEntries = value.ssh_key_fingerprints
+    ? (Object.entries(value.ssh_key_fingerprints) as [string, string][]).filter(([, fp]) => Boolean(fp))
     : [];
 
-  // Define endpoint-based features and their display labels
-  const endpointFeatures = [
-    { key: "ssh_keys" as const, label: "SSH Keys" },
-    { key: "hooks" as const, label: "Webhooks" },
-    {
-      key: "github_enterprise_importer" as const,
-      label: "Enterprise Importer",
-    },
-    { key: "web" as const, label: "Web Endpoints" },
-    { key: "api" as const, label: "API Endpoints" },
-    { key: "git" as const, label: "Git Endpoints" },
-    { key: "packages" as const, label: "Packages" },
-    { key: "pages" as const, label: "Pages" },
-    { key: "importer" as const, label: "Importer" },
-    { key: "actions" as const, label: "Actions" },
-    { key: "actions_macos" as const, label: "Actions (macOS)" },
-    { key: "codespaces" as const, label: "Codespaces" },
-    { key: "dependabot" as const, label: "Dependabot" },
-    { key: "copilot" as const, label: "Copilot" },
+  const categoryProps: {
+    key: keyof AutoViewInput;
+    label: string;
+    Icon: React.FC<React.SVGProps<SVGSVGElement>>;
+  }[] = [
+    { key: 'ssh_keys', label: 'SSH Keys', Icon: LucideReact.Key },
+    { key: 'hooks', label: 'Hooks', Icon: LucideReact.GitPullRequest },
+    { key: 'github_enterprise_importer', label: 'Enterprise Importer', Icon: LucideReact.GitMerge },
+    { key: 'web', label: 'Web Endpoints', Icon: LucideReact.Globe },
+    { key: 'api', label: 'API Endpoints', Icon: LucideReact.ServerCog },
+    { key: 'git', label: 'Git Endpoints', Icon: LucideReact.GitBranch },
+    { key: 'packages', label: 'Packages', Icon: LucideReact.Package },
+    { key: 'pages', label: 'Pages', Icon: LucideReact.FileText },
+    { key: 'importer', label: 'Importer', Icon: LucideReact.DownloadCloud },
+    { key: 'actions', label: 'Actions', Icon: LucideReact.Zap },
+    { key: 'actions_macos', label: 'Actions (macOS)', Icon: LucideReact.Apple },
+    { key: 'codespaces', label: 'Codespaces', Icon: LucideReact.Cpu },
+    { key: 'dependabot', label: 'Dependabot', Icon: LucideReact.ShieldCheck },
+    { key: 'copilot', label: 'Copilot', Icon: LucideReact.Activity },
   ];
 
-  const domains = value.domains;
-  const hasEndpoints = endpointFeatures.some(
-    (f) => Array.isArray(value[f.key]) && (value[f.key] as string[]).length > 0,
-  );
-  const hasDomains =
-    !!domains &&
-    Object.values(domains).some((v) => {
-      if (Array.isArray(v)) return v.length > 0;
-      if (typeof v === "object" && v !== null)
-        return Object.values(v as any).some((arr) =>
-          Array.isArray(arr) ? arr.length > 0 : !!arr,
-        );
-      return false;
-    });
-  const hasFeatures =
-    authSupported || fingerprintTypes.length > 0 || hasEndpoints || hasDomains;
+  const domain = value.domains;
+  type DomainSection = {
+    label: string;
+    items?: string[];
+    Icon: React.FC<React.SVGProps<SVGSVGElement>>;
+    subitems?: { label: string; items?: string[] }[];
+  };
+  const domainSections: DomainSection[] = [];
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!hasFeatures) {
-    return (
-      <div className="p-6 bg-white rounded-lg shadow-md text-center text-gray-500">
-        <div className="flex flex-col items-center">
-          <LucideReact.AlertCircle size={32} className="mb-2" />
-          <span>No API features available</span>
-        </div>
-      </div>
+  if (domain) {
+    domainSections.push(
+      { label: 'Website Domains', items: domain.website, Icon: LucideReact.Globe },
+      { label: 'Codespaces Domains', items: domain.codespaces, Icon: LucideReact.Cpu },
+      { label: 'Copilot Domains', items: domain.copilot, Icon: LucideReact.Activity },
+      { label: 'Packages Domains', items: domain.packages, Icon: LucideReact.Package },
+      { label: 'Actions Domains', items: domain.actions, Icon: LucideReact.Zap }
     );
+    if (domain.actions_inbound) {
+      domainSections.push({
+        label: 'Inbound Actions Domains',
+        Icon: LucideReact.Send,
+        subitems: [
+          { label: 'Full Domains', items: domain.actions_inbound.full_domains },
+          { label: 'Wildcard Domains', items: domain.actions_inbound.wildcard_domains },
+        ],
+      });
+    }
+    if (domain.artifact_attestations) {
+      domainSections.push({
+        label: 'Artifact Attestations',
+        Icon: LucideReact.ShieldCheck,
+        subitems: [
+          { label: 'Services', items: domain.artifact_attestations.services },
+        ],
+      });
+    }
   }
 
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">API Overview</h2>
-      <ul className="space-y-3">
-        {/* Authentication Support */}
-        <li className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-gray-700">
-            <LucideReact.Lock size={16} className="text-gray-500" />
-            Password Authentication
-          </span>
-          {authSupported ? (
-            <LucideReact.CheckCircle size={16} className="text-green-500" />
-          ) : (
-            <LucideReact.XCircle size={16} className="text-red-500" />
-          )}
-        </li>
-
-        {/* SSH Fingerprint Types */}
-        {fingerprintTypes.length > 0 && (
-          <li className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-gray-700">
-              <LucideReact.Fingerprint size={16} className="text-gray-500" />
-              SSH Fingerprints
-            </span>
-            <span className="text-sm text-gray-600">
-              {fingerprintTypes.join(", ")}
-            </span>
-          </li>
+    <div className="p-6 bg-white rounded-lg shadow-md space-y-6">
+      {/* Password Authentication Status */}
+      <div className="flex items-center text-sm font-medium">
+        {value.verifiable_password_authentication ? (
+          <>
+            <LucideReact.CheckCircle width={16} height={16} className="text-green-500 mr-2" />
+            <span>Password Authentication Supported</span>
+          </>
+        ) : (
+          <>
+            <LucideReact.XCircle width={16} height={16} className="text-red-500 mr-2" />
+            <span>Password Authentication Not Supported</span>
+          </>
         )}
+      </div>
 
-        {/* Endpoint Counts */}
-        {endpointFeatures.map((feature) => {
-          const list = value[feature.key] as string[] | undefined;
-          if (!list || list.length === 0) return null;
-          return (
-            <li key={feature.key} className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-gray-700">
-                <LucideReact.Code size={16} className="text-gray-500" />
-                {feature.label}
-              </span>
-              <span className="text-sm font-medium text-gray-800">
-                {list.length}
-              </span>
-            </li>
-          );
-        })}
+      {/* SSH Key Fingerprints */}
+      {fingerprintEntries.length > 0 && (
+        <div>
+          <h3 className="flex items-center text-gray-700 font-semibold mb-2">
+            <LucideReact.Key width={18} height={18} className="mr-2 text-gray-500" />
+            SSH Key Fingerprints
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {fingerprintEntries.map(([algo, fp]) => (
+              <div key={algo} className="flex items-center space-x-2">
+                <span className="text-sm text-gray-600">{algo.replace('SHA256_', '')}</span>
+                <code className="bg-gray-100 text-xs text-gray-800 px-2 py-1 rounded truncate">
+                  {fp}
+                </code>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {/* Domains Section */}
-        {domains && hasDomains && (
-          <li>
-            <div className="flex items-center gap-2 text-gray-700 mb-1">
-              <LucideReact.Globe size={16} className="text-gray-500" />
-              Domains
-            </div>
-            <ul className="pl-6 space-y-1">
-              {domains.website && domains.website.length > 0 && (
-                <li className="flex items-center justify-between text-gray-600 text-sm">
-                  <span>Website</span>
-                  <span>{domains.website.length}</span>
-                </li>
-              )}
-              {domains.codespaces && domains.codespaces.length > 0 && (
-                <li className="flex items-center justify-between text-gray-600 text-sm">
-                  <span>Codespaces</span>
-                  <span>{domains.codespaces.length}</span>
-                </li>
-              )}
-              {domains.copilot && domains.copilot.length > 0 && (
-                <li className="flex items-center justify-between text-gray-600 text-sm">
-                  <span>Copilot</span>
-                  <span>{domains.copilot.length}</span>
-                </li>
-              )}
-              {domains.packages && domains.packages.length > 0 && (
-                <li className="flex items-center justify-between text-gray-600 text-sm">
-                  <span>Packages</span>
-                  <span>{domains.packages.length}</span>
-                </li>
-              )}
-              {domains.actions && domains.actions.length > 0 && (
-                <li className="flex items-center justify-between text-gray-600 text-sm">
-                  <span>Actions</span>
-                  <span>{domains.actions.length}</span>
-                </li>
-              )}
-              {domains.actions_inbound?.full_domains &&
-                domains.actions_inbound.full_domains.length > 0 && (
-                  <li className="flex items-center justify-between text-gray-600 text-sm">
-                    <span>Inbound Actions (Full)</span>
-                    <span>{domains.actions_inbound.full_domains.length}</span>
-                  </li>
+      {/* Endpoints Overview */}
+      <div>
+        <h3 className="text-gray-700 font-semibold mb-2">Endpoints Overview</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categoryProps.map(({ key, label, Icon }) => {
+            const items = value[key] as string[] | undefined;
+            if (!items || items.length === 0) return null;
+            const preview = items.slice(0, 3);
+            return (
+              <div key={key} className="p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center mb-1 text-sm font-medium text-gray-700">
+                  <Icon width={16} height={16} className="mr-1 text-gray-500" />
+                  <span>
+                    {label} <span className="text-gray-500">({items.length})</span>
+                  </span>
+                </div>
+                <ul className="list-disc list-inside text-xs text-gray-600 space-y-1">
+                  {preview.map((u, i) => (
+                    <li key={i} className="truncate">
+                      {u}
+                    </li>
+                  ))}
+                  {items.length > 3 && (
+                    <li className="text-gray-500">+{items.length - 3} more</li>
+                  )}
+                </ul>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Domain Configuration */}
+      {domainSections.length > 0 && (
+        <div>
+          <h3 className="text-gray-700 font-semibold mb-2">Domain Configuration</h3>
+          <div className="space-y-4">
+            {domainSections.map(({ label, items, Icon, subitems }, idx) => (
+              <div key={idx}>
+                <div className="flex items-center text-sm font-medium text-gray-700">
+                  <Icon width={16} height={16} className="mr-1 text-gray-500" />
+                  <span>
+                    {label}{' '}
+                    {items && <span className="text-gray-500">({items.length})</span>}
+                  </span>
+                </div>
+                {items && items.length > 0 && (
+                  <ul className="list-disc list-inside text-xs text-gray-600 ml-5 mt-1 space-y-1">
+                    {items.map((d, j) => (
+                      <li key={j} className="truncate">
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
                 )}
-              {domains.actions_inbound?.wildcard_domains &&
-                domains.actions_inbound.wildcard_domains.length > 0 && (
-                  <li className="flex items-center justify-between text-gray-600 text-sm">
-                    <span>Inbound Actions (Wildcard)</span>
-                    <span>
-                      {domains.actions_inbound.wildcard_domains.length}
-                    </span>
-                  </li>
-                )}
-              {domains.artifact_attestations?.services &&
-                domains.artifact_attestations.services.length > 0 && (
-                  <li className="flex items-center justify-between text-gray-600 text-sm">
-                    <span>Artifact Services</span>
-                    <span>{domains.artifact_attestations.services.length}</span>
-                  </li>
-                )}
-            </ul>
-          </li>
-        )}
-      </ul>
+                {subitems &&
+                  subitems.map(
+                    (si, j) =>
+                      si.items && (
+                        <div key={j} className="ml-5 mt-2">
+                          <div className="text-xs font-medium text-gray-600">
+                            {si.label}{' '}
+                            <span className="text-gray-500">({si.items.length})</span>
+                          </div>
+                          <ul className="list-disc list-inside text-xs text-gray-500 ml-4 mt-1 space-y-1">
+                            {si.items.map((d, k) => (
+                              <li key={k} className="truncate">
+                                {d}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                  )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

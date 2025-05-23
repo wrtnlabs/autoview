@@ -1,198 +1,231 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace open {
-    export type PluginView = {
-      plugin?: AutoViewInputSubTypes.Plugin;
-    };
-  }
-  export type Plugin = {
-    id?: string;
-    key?: string & tags.Format<"uuid">;
-    channelId?: string;
-    state?: "waiting" | "active";
-    name: string;
-    createdAt?: number;
-    appearance: "light" | "dark" | "system";
-    labelButton?: boolean;
-    labelButtonText?: string;
-    labelButtonTextI18nMap?: {
-      [key: string]: string;
-    };
-    buttonType: "legacy" | "customImage" | "iconButton";
-    iconButton:
-      | "channel"
-      | "channel-filled"
-      | "chat-bubble-alt"
-      | "chat-bubble-alt-filled"
-      | "chat-bubble-filled"
-      | "chat-lightning-filled"
-      | "chat-progress"
-      | "chat-progress-filled"
-      | "chat-question"
-      | "chat-question-filled"
-      | "comment"
-      | "comment-filled"
-      | "communication"
-      | "headset"
-      | "help-filled"
-      | "send-forward"
-      | "send-forward-filled"
-      | "sms"
-      | "sms-filled";
-    customImage?: AutoViewInputSubTypes.ImageFile;
-    deskImage?: AutoViewInputSubTypes.TinyFile;
-    deskMarginX?: number & tags.Type<"int32">;
-    deskMarginY?: number & tags.Type<"int32">;
-    deskHideButton?: boolean;
-    deskPosition?: "left" | "right";
-    mobileImage?: AutoViewInputSubTypes.TinyFile;
-    mobileMarginX?: number & tags.Type<"int32">;
-    mobileMarginY?: number & tags.Type<"int32">;
-    mobilePosition?: "left" | "right";
-    mobileHideButton?: boolean;
-    mobileBubblePosition?: "top" | "bottom";
-    urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
-    runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
-    facebookPixelId?: string;
-    customImageUrl?: string;
-    deskImageUrl?: string;
-    mobileImageUrl?: string;
-    validLabelButtonText?: boolean;
-    validLabelButtonTextI18nMap?: boolean;
-  };
-  export type ImageFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32">;
-    height?: number & tags.Type<"int32">;
-    contentType?: string & tags.Pattern<"^image/.*">;
-  };
-  export type TinyFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32">;
-    height?: number & tags.Type<"int32">;
-  };
+    export namespace open {
+        export interface PluginView {
+            plugin?: AutoViewInputSubTypes.Plugin;
+        }
+    }
+    export interface Plugin {
+        id?: string;
+        key?: string & tags.Format<"uuid">;
+        channelId?: string;
+        state?: "waiting" | "active";
+        name: string;
+        createdAt?: number;
+        appearance: "light" | "dark" | "system";
+        labelButton?: boolean;
+        labelButtonText?: string;
+        labelButtonTextI18nMap?: {
+            [key: string]: string;
+        };
+        buttonType: "legacy" | "customImage" | "iconButton";
+        iconButton: "channel" | "channel-filled" | "chat-bubble-alt" | "chat-bubble-alt-filled" | "chat-bubble-filled" | "chat-lightning-filled" | "chat-progress" | "chat-progress-filled" | "chat-question" | "chat-question-filled" | "comment" | "comment-filled" | "communication" | "headset" | "help-filled" | "send-forward" | "send-forward-filled" | "sms" | "sms-filled";
+        customImage?: AutoViewInputSubTypes.ImageFile;
+        deskImage?: AutoViewInputSubTypes.TinyFile;
+        deskMarginX?: number & tags.Type<"int32">;
+        deskMarginY?: number & tags.Type<"int32">;
+        deskHideButton?: boolean;
+        deskPosition?: "left" | "right";
+        mobileImage?: AutoViewInputSubTypes.TinyFile;
+        mobileMarginX?: number & tags.Type<"int32">;
+        mobileMarginY?: number & tags.Type<"int32">;
+        mobilePosition?: "left" | "right";
+        mobileHideButton?: boolean;
+        mobileBubblePosition?: "top" | "bottom";
+        urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
+        runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
+        facebookPixelId?: string;
+        customImageUrl?: string;
+        deskImageUrl?: string;
+        mobileImageUrl?: string;
+        validLabelButtonText?: boolean;
+        validLabelButtonTextI18nMap?: boolean;
+    }
+    export interface ImageFile {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+        contentType?: string & tags.Pattern<"^image/.*">;
+    }
+    export interface TinyFile {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.open.PluginView;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const plugin = value.plugin;
-  // Helper: capitalize first letter
-  const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-  // Convert hyphen/underscore delimited icon name to PascalCase component name
-  const pascalCase = (s: string) =>
-    s
-      .split(/[-_]/)
-      .map((w) => capitalize(w))
-      .join("");
-  // Format timestamp to human-readable date
-  const formatDate = (ts?: number) =>
-    ts
-      ? new Date(ts).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
-      : "–";
-  // Placeholder generator for images
-  const placeholderUrl = (label: string) =>
-    `https://placehold.co/100x100/e2e8f0/1e293b?text=${encodeURIComponent(label)}`;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // If no plugin data, show placeholder
   if (!plugin) {
     return (
-      <div className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-sm">
-        <LucideReact.AlertCircle className="text-gray-400" size={48} />
-        <p className="mt-2 text-gray-500">No plugin data available</p>
+      <div className="p-4 bg-white rounded-md shadow-md flex items-center justify-center text-gray-500">
+        <LucideReact.AlertCircle size={24} />
+        <span className="ml-2">No plugin data available</span>
       </div>
     );
   }
 
-  // Prepare status icon
-  const StatusIcon =
-    plugin.state === "active" ? (
-      <LucideReact.CheckCircle className="text-green-500" size={16} />
-    ) : (
-      <LucideReact.Clock className="text-amber-500" size={16} />
-    );
-  // Prepare dynamic iconButton component
-  let IconButton: JSX.Element | null = null;
-  if (plugin.iconButton) {
-    const name = pascalCase(plugin.iconButton);
-    const Component = (LucideReact as any)[name];
-    if (Component)
-      IconButton = <Component className="text-gray-500" size={16} />;
-  }
+  const {
+    name,
+    state,
+    appearance,
+    buttonType,
+    iconButton,
+    labelButton,
+    labelButtonText,
+    urlWhitelist,
+    runRate,
+    createdAt,
+    customImageUrl,
+    deskImageUrl,
+    mobileImageUrl,
+  } = plugin;
 
-  // Collect image URLs
-  const images: { label: string; src?: string }[] = [
-    { label: "Custom Image", src: plugin.customImageUrl },
-    { label: "Desktop Image", src: plugin.deskImageUrl },
-    { label: "Mobile Image", src: plugin.mobileImageUrl },
-  ].filter((img) => img.src);
+  const formattedDate = createdAt
+    ? new Date(createdAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : undefined;
 
+  const runRatePercent =
+    runRate !== undefined ? `${Math.round(runRate * 100)}%` : undefined;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full bg-white p-4 rounded-lg shadow-md">
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {plugin.name}
-        </h2>
-        <div className="flex items-center gap-1">
-          {StatusIcon}
-          <span className="text-sm text-gray-600">
-            {capitalize(plugin.state || "waiting")}
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+        <div className="flex items-center">
+          {state === "active" ? (
+            <LucideReact.CheckCircle
+              className="text-green-500"
+              size={20}
+              aria-label="Active"
+            />
+          ) : (
+            <LucideReact.Clock
+              className="text-amber-500"
+              size={20}
+              aria-label="Waiting"
+            />
+          )}
+          <span className="ml-1 text-sm text-gray-600 capitalize">
+            {state}
           </span>
         </div>
       </div>
 
-      {/* Metadata */}
-      <div className="mt-2 grid grid-cols-2 gap-y-1 gap-x-4 text-sm text-gray-600">
-        <div className="flex items-center gap-1">
-          <LucideReact.Calendar size={16} className="text-gray-400" />
-          <span>{formatDate(plugin.createdAt)}</span>
+      {/* Created Date */}
+      {formattedDate && (
+        <div className="mt-1 text-sm text-gray-500">{formattedDate}</div>
+      )}
+
+      {/* Key Properties */}
+      <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-sm text-gray-700">
+        <div>
+          <span className="font-medium text-gray-600">Appearance:</span>{" "}
+          <span className="capitalize">{appearance}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <LucideReact.Tag size={16} className="text-gray-400" />
-          <span>{capitalize(plugin.appearance)}</span>
+        <div>
+          <span className="font-medium text-gray-600">Button Type:</span>{" "}
+          <span className="capitalize">{buttonType}</span>
         </div>
-        <div className="flex items-center gap-1">
-          <LucideReact.Box size={16} className="text-gray-400" />
-          <span>{capitalize(plugin.buttonType)}</span>
+        <div className="col-span-2">
+          <span className="font-medium text-gray-600">Icon Button:</span>{" "}
+          <span className="ml-1">{iconButton}</span>
         </div>
-        {IconButton && (
-          <div className="flex items-center gap-1">
-            {IconButton}
-            <span>{pascalCase(plugin.iconButton!)}</span>
+        {typeof labelButton === "boolean" && (
+          <div>
+            <span className="font-medium text-gray-600">Label Button:</span>{" "}
+            <span>{labelButton ? "Yes" : "No"}</span>
+          </div>
+        )}
+        {labelButtonText && (
+          <div className="col-span-2 truncate">
+            <span className="font-medium text-gray-600">Label Text:</span>{" "}
+            <span className="ml-1">{labelButtonText}</span>
+          </div>
+        )}
+        {runRatePercent && (
+          <div>
+            <span className="font-medium text-gray-600">Run Rate:</span>{" "}
+            <span>{runRatePercent}</span>
+          </div>
+        )}
+        {urlWhitelist && urlWhitelist.length > 0 && (
+          <div className="col-span-2">
+            <span className="font-medium text-gray-600">URL Whitelist:</span>
+            <ul className="list-disc list-inside ml-4 mt-1 space-y-1 text-xs text-gray-700">
+              {urlWhitelist.map((u) => (
+                <li key={u} className="truncate">
+                  {u}
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
 
-      {/* Images */}
-      {images.length > 0 && (
+      {/* Image Previews */}
+      {(customImageUrl || deskImageUrl || mobileImageUrl) && (
         <div className="mt-4 grid grid-cols-3 gap-2">
-          {images.map(({ label, src }) => (
-            <div
-              key={label}
-              className="aspect-square w-full overflow-hidden rounded bg-gray-100"
-            >
+          {customImageUrl && (
+            <div>
+              <div className="text-xs text-gray-600 mb-1">Custom</div>
               <img
-                src={src}
-                alt={label}
-                className="w-full h-full object-cover"
+                src={customImageUrl}
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src =
-                    placeholderUrl(label);
+                  (e.target as HTMLImageElement).src =
+                    "https://placehold.co/80x80?text=Image";
                 }}
+                alt="Custom"
+                className="w-full h-20 object-cover rounded"
               />
             </div>
-          ))}
+          )}
+          {deskImageUrl && (
+            <div>
+              <div className="text-xs text-gray-600 mb-1">Desktop</div>
+              <img
+                src={deskImageUrl}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "https://placehold.co/80x80?text=Image";
+                }}
+                alt="Desktop"
+                className="w-full h-20 object-cover rounded"
+              />
+            </div>
+          )}
+          {mobileImageUrl && (
+            <div>
+              <div className="text-xs text-gray-600 mb-1">Mobile</div>
+              <img
+                src={mobileImageUrl}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src =
+                    "https://placehold.co/80x80?text=Image";
+                }}
+                alt="Mobile"
+                className="w-full h-20 object-cover rounded"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

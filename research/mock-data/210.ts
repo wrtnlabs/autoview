@@ -4,5 +4,5 @@ import Component from "../components/210";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"result":"This is a sample result string for UI testing purposes. It simulates a realistic multi-sentence output for preview. All content is fictional and clearly designated as test data."};
+  return {"result":"Sample result string for UI component testing. This is a dummy placeholder text. More details follow on multiple lines:\nLine 1: Example data snippet\nLine 2: Another sample entry"};
 }

@@ -1,134 +1,99 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace legacy {
-    export namespace open {
-      export namespace v4 {
-        export type LegacyV4EventView = {
-          event?: AutoViewInputSubTypes.legacy.v4.LegacyV4Event;
-        };
-      }
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export interface LegacyV4EventView {
+                    event?: AutoViewInputSubTypes.legacy.v4.LegacyV4Event;
+                }
+            }
+        }
+        export namespace v4 {
+            export interface LegacyV4Event {
+                userId?: string;
+                id?: string;
+                channelId?: string;
+                name: string;
+                property?: {
+                    [key: string]: {};
+                };
+                createdAt?: number;
+                expireAt?: number;
+                version?: number & tags.Type<"int32">;
+            }
+        }
     }
-    export namespace v4 {
-      export type LegacyV4Event = {
-        userId?: string;
-        id?: string;
-        channelId?: string;
-        name: string;
-        property?: {
-          [key: string]: {};
-        };
-        createdAt?: number;
-        expireAt?: number;
-        version?: number & tags.Type<"int32">;
-      };
-    }
-  }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.legacy.open.v4.LegacyV4EventView;
+export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4EventView;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const event = value.event;
-  const now = Date.now();
+  const formattedCreatedAt = event?.createdAt
+    ? new Date(event.createdAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+    : "Unknown";
+  const formattedExpireAt = event?.expireAt
+    ? new Date(event.expireAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+    : null;
+  const propertyKeys = event?.property ? Object.keys(event.property) : [];
 
-  // If no event data, show an empty state
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   if (!event) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col items-center text-gray-500">
-        <LucideReact.AlertCircle size={32} className="mb-2" />
-        <span>No event data available.</span>
+      <div className="p-6 flex flex-col items-center justify-center text-gray-400">
+        <LucideReact.AlertCircle size={32} />
+        <span className="mt-2 text-sm">No event data available</span>
       </div>
     );
   }
 
-  // Format timestamps to locale strings
-  const formattedCreated = event.createdAt
-    ? new Date(event.createdAt).toLocaleString()
-    : "—";
-  const formattedExpire = event.expireAt
-    ? new Date(event.expireAt).toLocaleString()
-    : null;
-
-  // Determine expiration status
-  const isExpired = typeof event.expireAt === "number" && event.expireAt < now;
-
-  // Extract custom property keys
-  const propertyKeys = event.property ? Object.keys(event.property) : [];
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full bg-white p-5 rounded-lg shadow-md">
-      {/* Event Name */}
-      <div className="flex items-center mb-4">
-        <LucideReact.Calendar size={20} className="text-indigo-500 mr-2" />
-        <h2 className="text-xl font-semibold text-gray-900 truncate">
-          {event.name}
-        </h2>
-      </div>
+    <div className="w-full max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      {/* Event Title */}
+      <h2 className="text-lg font-semibold text-gray-800 truncate">{event.name}</h2>
 
-      {/* Event Details Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 text-sm">
-        {/* Created At */}
-        <div className="flex items-center text-gray-600">
+      {/* Metadata */}
+      <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-500">
+        <div className="flex items-center">
           <LucideReact.Calendar size={16} className="text-gray-400 mr-1" />
-          <span>Created: {formattedCreated}</span>
+          <span>Created: {formattedCreatedAt}</span>
         </div>
-
-        {/* Expires At */}
-        {formattedExpire && (
-          <div
-            className={`flex items-center ${
-              isExpired ? "text-red-500" : "text-gray-600"
-            }`}
-          >
-            {isExpired ? (
-              <LucideReact.AlertTriangle
-                size={16}
-                className="mr-1"
-                aria-label="Expired"
-              />
-            ) : (
-              <LucideReact.Clock
-                size={16}
-                className="text-gray-400 mr-1"
-                aria-label="Expires At"
-              />
-            )}
-            <span>
-              {isExpired ? "Expired:" : "Expires:"} {formattedExpire}
-            </span>
+        {formattedExpireAt && (
+          <div className="flex items-center">
+            <LucideReact.CalendarOff size={16} className="text-gray-400 mr-1" />
+            <span>Expires: {formattedExpireAt}</span>
           </div>
         )}
-
-        {/* Version */}
-        {typeof event.version === "number" && (
-          <div className="flex items-center text-gray-600">
+        {event.version != null && (
+          <div className="flex items-center">
             <LucideReact.Hash size={16} className="text-gray-400 mr-1" />
             <span>Version: {event.version}</span>
           </div>
         )}
-
-        {/* Custom Properties */}
-        {propertyKeys.length > 0 && (
-          <div className="sm:col-span-2">
-            <span className="block font-medium text-gray-800 mb-1">
-              Properties:
-            </span>
-            <ul className="list-disc list-inside max-h-32 overflow-y-auto text-gray-600">
-              {propertyKeys.map((key) => (
-                <li key={key} className="truncate">
-                  {key}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
       </div>
+
+      {/* Properties */}
+      {propertyKeys.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Properties</h3>
+          <div className="flex flex-wrap gap-2">
+            {propertyKeys.map((key) => (
+              <span
+                key={key}
+                className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full truncate"
+                title={key}
+              >
+                {key}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

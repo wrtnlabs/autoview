@@ -1,181 +1,166 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiOrgsActionsRunnersGenerateJitconfig {
-    export type PostResponse = {
-      runner: AutoViewInputSubTypes.runner;
-      /**
-       * The base64 encoded runner configuration.
-       */
-      encoded_jit_config: string;
-    };
-  }
-  /**
-   * A self hosted runner
-   *
-   * @title Self hosted runners
-   */
-  export type runner = {
+    export namespace IApiOrgsActionsRunnersGenerateJitconfig {
+        export interface PostResponse {
+            runner: AutoViewInputSubTypes.runner;
+            /**
+             * The base64 encoded runner configuration.
+            */
+            encoded_jit_config: string;
+        }
+    }
     /**
-     * The ID of the runner.
-     */
-    id: number & tags.Type<"int32">;
+     * A self hosted runner
+     *
+     * @title Self hosted runners
+    */
+    export interface runner {
+        /**
+         * The ID of the runner.
+        */
+        id: number & tags.Type<"int32">;
+        /**
+         * The ID of the runner group.
+        */
+        runner_group_id?: number & tags.Type<"int32">;
+        /**
+         * The name of the runner.
+        */
+        name: string;
+        /**
+         * The Operating System of the runner.
+        */
+        os: string;
+        /**
+         * The status of the runner.
+        */
+        status: string;
+        busy: boolean;
+        labels: AutoViewInputSubTypes.runner_label[];
+        ephemeral?: boolean;
+    }
     /**
-     * The ID of the runner group.
-     */
-    runner_group_id?: number & tags.Type<"int32">;
-    /**
-     * The name of the runner.
-     */
-    name: string;
-    /**
-     * The Operating System of the runner.
-     */
-    os: string;
-    /**
-     * The status of the runner.
-     */
-    status: string;
-    busy: boolean;
-    labels: AutoViewInputSubTypes.runner_label[];
-    ephemeral?: boolean;
-  };
-  /**
-   * A label for a self hosted runner
-   *
-   * @title Self hosted runner label
-   */
-  export type runner_label = {
-    /**
-     * Unique identifier of the label.
-     */
-    id?: number & tags.Type<"int32">;
-    /**
-     * Name of the label.
-     */
-    name: string;
-    /**
-     * The type of label. Read-only labels are applied automatically when the runner is configured.
-     */
-    type?: "read-only" | "custom";
-  };
+     * A label for a self hosted runner
+     *
+     * @title Self hosted runner label
+    */
+    export interface runner_label {
+        /**
+         * Unique identifier of the label.
+        */
+        id?: number & tags.Type<"int32">;
+        /**
+         * Name of the label.
+        */
+        name: string;
+        /**
+         * The type of label. Read-only labels are applied automatically when the runner is configured.
+        */
+        type?: "read-only" | "custom";
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiOrgsActionsRunnersGenerateJitconfig.PostResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnersGenerateJitconfig.PostResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedStatus = (() => {
-    const s = value.runner.status || "";
-    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-  })();
+  // 1. Data aggregation and transformation
+  const { runner, encoded_jit_config } = value;
 
-  const statusIcon = (() => {
-    switch (formattedStatus.toLowerCase()) {
-      case "online":
-        return <LucideReact.CheckCircle className="text-green-500" size={16} />;
-      case "offline":
-        return <LucideReact.XCircle className="text-red-500" size={16} />;
-      case "busy":
-        return <LucideReact.Clock className="text-amber-500" size={16} />;
-      default:
-        return <LucideReact.HelpCircle className="text-gray-500" size={16} />;
-    }
-  })();
+  // Map runner.status to an icon and color
+  const statusMap: Record<string, { icon: JSX.Element; color: string }> = {
+    online: { icon: <LucideReact.CheckCircle size={16} />, color: "text-green-500" },
+    offline: { icon: <LucideReact.XCircle size={16} />, color: "text-red-500" },
+    busy: { icon: <LucideReact.Loader size={16} className="animate-spin" />, color: "text-yellow-500" },
+    pending: { icon: <LucideReact.Clock size={16} />, color: "text-amber-500" },
+    running: { icon: <LucideReact.PlayCircle size={16} />, color: "text-blue-500" },
+  };
+  const statusKey = runner.status.toLowerCase();
+  const statusInfo = statusMap[statusKey] || { icon: <LucideReact.Circle size={16} />, color: "text-gray-500" };
 
-  const busyIndicator = value.runner.busy ? (
-    <>
-      <LucideReact.Loader className="animate-spin text-amber-500" size={16} />
-      <span className="ml-1">Busy</span>
-    </>
-  ) : (
-    <>
-      <LucideReact.CheckCircle className="text-green-500" size={16} />
-      <span className="ml-1">Idle</span>
-    </>
-  );
+  // Truncate long base64 config for preview
+  const configPreview =
+    encoded_jit_config.length > 80
+      ? encoded_jit_config.slice(0, 40) + "…" + encoded_jit_config.slice(-40)
+      : encoded_jit_config;
 
-  const configText = React.useMemo(() => {
-    try {
-      return atob(value.encoded_jit_config);
-    } catch {
-      return value.encoded_jit_config;
-    }
-  }, [value.encoded_jit_config]);
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Visual composition
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <LucideReact.Server className="text-blue-500" size={20} />
-        <h2 className="text-lg font-semibold text-gray-800 truncate">
-          {value.runner.name}
-        </h2>
+    <div className="max-w-md mx-auto p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      {/* Header: Runner Name */}
+      <div className="flex items-center mb-4">
+        <LucideReact.Computer size={20} className="text-gray-700 mr-2" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{runner.name}</h2>
       </div>
 
-      {/* Runner Details */}
-      <dl className="mt-4 space-y-2 text-gray-700">
-        <div className="flex items-center gap-1">
-          <LucideReact.Hash className="text-gray-500" size={16} />
-          <dt className="font-medium">ID:</dt>
-          <dd className="ml-1">{value.runner.id}</dd>
+      {/* Details Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600 mb-4">
+        {/* Operating System */}
+        <div className="flex items-center">
+          <LucideReact.Cpu size={16} className="text-gray-400 mr-1" />
+          <span>{runner.os}</span>
         </div>
-        {value.runner.runner_group_id != null && (
-          <div className="flex items-center gap-1">
-            <LucideReact.PieChart className="text-gray-500" size={16} />
-            <dt className="font-medium">Group:</dt>
-            <dd className="ml-1">{value.runner.runner_group_id}</dd>
+
+        {/* Status */}
+        <div className="flex items-center">
+          <span className="mr-1">Status:</span>
+          <span className={`${statusInfo.color} flex items-center`}>
+            {statusInfo.icon}
+            <span className="ml-1 capitalize">{runner.status}</span>
+          </span>
+        </div>
+
+        {/* Busy Indicator */}
+        <div className="flex items-center">
+          <span className="mr-1">Busy:</span>
+          {runner.busy ? (
+            <LucideReact.Loader size={16} className="animate-spin text-yellow-500" />
+          ) : (
+            <LucideReact.CheckCircle size={16} className="text-green-500" />
+          )}
+        </div>
+
+        {/* Ephemeral Flag */}
+        {runner.ephemeral && (
+          <div className="flex items-center">
+            <LucideReact.Clock size={16} className="text-indigo-500 mr-1" />
+            <span>Ephemeral</span>
           </div>
         )}
-        <div className="flex items-center gap-1">
-          <LucideReact.Cpu className="text-gray-500" size={16} />
-          <dt className="font-medium">OS:</dt>
-          <dd className="ml-1">{value.runner.os}</dd>
-        </div>
-        <div className="flex items-center gap-1">
-          {statusIcon}
-          <dt className="font-medium ml-1">Status:</dt>
-          <dd className="ml-1">{formattedStatus}</dd>
-        </div>
-        <div className="flex items-center gap-1">{busyIndicator}</div>
-        {value.runner.ephemeral && (
-          <div>
-            <span className="inline-flex items-center px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-800 rounded-full">
-              Ephemeral
-            </span>
-          </div>
-        )}
-      </dl>
+      </div>
 
       {/* Labels */}
-      {Array.isArray(value.runner.labels) && value.runner.labels.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-600 mb-2">Labels</h3>
+      {runner.labels.length > 0 && (
+        <div className="mb-4">
+          <h3 className="text-sm font-medium text-gray-700 mb-1">Labels:</h3>
           <div className="flex flex-wrap gap-2">
-            {value.runner.labels.map((label) => (
-              <span
-                key={label.id ?? label.name}
-                className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded"
-              >
-                {label.name}
-              </span>
-            ))}
+            {runner.labels.map((label) => {
+              const isReadOnly = label.type === "read-only";
+              return (
+                <span
+                  key={label.id ?? label.name}
+                  className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                    isReadOnly ? "bg-gray-100 text-gray-800" : "bg-blue-100 text-blue-800"
+                  }`}
+                >
+                  {label.name}
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* JIT Configuration */}
-      <div className="mt-6">
-        <h3 className="flex items-center text-sm font-medium text-gray-600 mb-2">
-          <LucideReact.Code className="text-gray-500 mr-1" size={16} />
-          JIT Configuration
+      {/* Encoded JIT Configuration Preview */}
+      <div>
+        <h3 className="text-sm font-medium text-gray-700 mb-1">
+          JIT Configuration (Base64)
         </h3>
-        <pre className="max-h-40 overflow-y-auto bg-gray-50 p-3 rounded text-xs text-gray-800 font-mono whitespace-pre-wrap break-all">
-          {configText}
+        <pre className="max-h-32 overflow-auto break-all p-2 bg-gray-50 rounded text-xs font-mono text-gray-700">
+          {configPreview}
         </pre>
       </div>
     </div>

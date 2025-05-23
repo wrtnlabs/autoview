@@ -1,80 +1,86 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * An autolink reference.
-   *
-   * @title Autolink reference
-   */
-  export type autolink = {
-    id: number & tags.Type<"int32">;
     /**
-     * The prefix of a key that is linkified.
-     */
-    key_prefix: string;
-    /**
-     * A template for the target URL that is generated if a key was found.
-     */
-    url_template: string;
-    /**
-     * Whether this autolink reference matches alphanumeric characters. If false, this autolink reference only matches numeric characters.
-     */
-    is_alphanumeric: boolean;
-  };
+     * An autolink reference.
+     *
+     * @title Autolink reference
+    */
+    export interface autolink {
+        id: number & tags.Type<"int32">;
+        /**
+         * The prefix of a key that is linkified.
+        */
+        key_prefix: string;
+        /**
+         * A template for the target URL that is generated if a key was found.
+        */
+        url_template: string;
+        /**
+         * Whether this autolink reference matches alphanumeric characters. If false, this autolink reference only matches numeric characters.
+        */
+        is_alphanumeric: boolean;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.autolink;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const ruleText = value.is_alphanumeric
-    ? "Matches alphanumeric characters"
-    : "Matches numeric characters only";
-  const ruleIcon = value.is_alphanumeric ? (
-    <LucideReact.CheckCircle
-      className="text-green-500"
-      size={16}
-      aria-label="Alphanumeric match"
-    />
+  // Derived sample URL by replacing placeholder if present
+  const sampleUrl = value.url_template.includes("$1")
+    ? value.url_template.replace(
+        "$1",
+        encodeURIComponent(value.key_prefix),
+      )
+    : value.url_template;
+
+  // Determine match type display and icon
+  const matchLabel = value.is_alphanumeric
+    ? "Alphanumeric Match"
+    : "Numeric Only";
+  const matchIcon = value.is_alphanumeric ? (
+    <LucideReact.CheckCircle className="text-green-500" size={16} />
   ) : (
-    <LucideReact.AlertTriangle
-      className="text-amber-500"
-      size={16}
-      aria-label="Numeric-only match"
-    />
+    <LucideReact.XCircle className="text-red-500" size={16} />
   );
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Compose the visual card
   return (
-    <div className="max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="flex items-center mb-3">
-        <LucideReact.Link
-          className="text-blue-500"
-          size={20}
-          aria-hidden="true"
-        />
-        <h3 className="ml-2 text-lg font-semibold text-gray-800">
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-4">
+        <LucideReact.Link className="text-blue-500" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
           Autolink Reference
-        </h3>
+        </h2>
       </div>
-      <div className="space-y-2 text-gray-700">
-        <div>
-          <span className="font-medium">Key Prefix:</span>{" "}
-          <span className="inline-block px-2 py-1 bg-gray-100 rounded text-sm truncate">
+      <div className="space-y-3">
+        {/* Key Prefix */}
+        <div className="flex items-center">
+          <LucideReact.Hash className="text-gray-500" size={16} />
+          <span className="ml-2 px-2 py-1 bg-gray-100 rounded text-sm font-medium text-gray-700 truncate">
             {value.key_prefix}
           </span>
         </div>
-        <div>
-          <span className="font-medium">URL Template:</span>
-          <div className="mt-1 px-2 py-1 bg-gray-50 rounded text-sm text-blue-600 break-all">
-            {value.url_template}
-          </div>
-        </div>
+        {/* URL Template / Sample Link */}
         <div className="flex items-center">
-          {ruleIcon}
-          <span className="ml-1 text-sm">{ruleText}</span>
+          <LucideReact.Link className="text-gray-500" size={16} />
+          <a
+            href={sampleUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="ml-2 text-blue-600 text-sm truncate hover:underline"
+            title={sampleUrl}
+          >
+            {sampleUrl}
+          </a>
+        </div>
+        {/* Match Type Indicator */}
+        <div className="flex items-center">
+          {matchIcon}
+          <span className="ml-2 text-sm text-gray-700">{matchLabel}</span>
         </div>
       </div>
     </div>

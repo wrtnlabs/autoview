@@ -1,65 +1,49 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * A topic aggregates entities that are related to a subject.
-   *
-   * @title Topic
-   */
-  export type topic = {
-    names: string[];
-  };
+    /**
+     * A topic aggregates entities that are related to a subject.
+     *
+     * @title Topic
+    */
+    export interface topic {
+        names: string[];
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.topic;
 
-// The component name must always be "VisualComponent"
+
+
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const names = Array.isArray(value.names) ? value.names : [];
-  const totalCount = names.length;
-  const maxDisplay = 10;
-  const displayNames = names.slice(0, maxDisplay);
-  const extraCount = totalCount - displayNames.length;
+  //    Deduplicate and sort the list of entity names for consistent display.
+  const sortedUniqueNames = [...new Set(value.names)].sort((a, b) => a.localeCompare(b));
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+    <div className="p-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center mb-3">
-        <LucideReact.Users
-          size={20}
-          className="text-gray-500 mr-2"
-          aria-hidden="true"
-        />
-        <h2 className="text-lg font-semibold text-gray-800">Topic Entities</h2>
-        <span className="ml-auto text-sm text-gray-500">
-          {totalCount} {totalCount === 1 ? "item" : "items"}
-        </span>
+        <LucideReact.Tag size={20} className="text-gray-500 mr-2" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-gray-700">
+          Entities ({sortedUniqueNames.length})
+        </h2>
       </div>
 
-      {totalCount > 0 ? (
+      {sortedUniqueNames.length > 0 ? (
         <div className="flex flex-wrap gap-2">
-          {displayNames.map((name, index) => (
+          {sortedUniqueNames.map((name, index) => (
             <span
               key={index}
-              className="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-full truncate"
+              className="inline-flex items-center bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm"
             >
+              <LucideReact.Hash size={14} className="text-gray-500 mr-1" aria-hidden="true" />
               {name}
             </span>
           ))}
-          {extraCount > 0 && (
-            <span className="px-3 py-1 bg-gray-100 text-gray-500 text-sm font-medium rounded-full">
-              +{extraCount} more
-            </span>
-          )}
         </div>
       ) : (
-        <div className="flex items-center text-gray-400">
-          <LucideReact.AlertCircle
-            size={24}
-            className="mr-2"
-            aria-hidden="true"
-          />
+        <div className="flex items-center text-gray-500">
+          <LucideReact.AlertCircle size={24} className="text-gray-400 mr-2" aria-hidden="true" />
           <span className="text-sm">No entities available</span>
         </div>
       )}

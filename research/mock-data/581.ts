@@ -4,5 +4,5 @@ import Component from "../components/581";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"total_count":2,"secrets":[{"name":"ORG_SECRET_TOKEN_SAMPLE","created_at":"2025-05-15T09:15:00Z","updated_at":"2025-05-16T11:20:30Z"},{"name":"DEPLOY_KEY_TEST","created_at":"2025-04-01T08:00:00Z","updated_at":"2025-05-19T14:30:00Z"}]};
+  return {"total_count":2,"secrets":[{"name":"SAMPLE_ORG_SECRET","created_at":"2025-05-01T08:15:30Z","updated_at":"2025-05-10T12:45:00Z"},{"name":"TEST_API_TOKEN","created_at":"2025-04-20T14:00:00Z","updated_at":"2025-05-18T16:30:45Z"}]};
 }

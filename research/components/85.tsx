@@ -1,36 +1,38 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
-export namespace AutoViewInputSubTypes {}
+import * as LucideReact from "lucide-react";
+export namespace AutoViewInputSubTypes { }
 export type AutoViewInput = boolean;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Derive display values
-  const isEnabled = value;
-  const icon = isEnabled ? (
-    <LucideReact.CheckCircle
-      className="text-green-500"
-      size={16}
-      aria-label="Enabled"
-    />
-  ) : (
-    <LucideReact.XCircle
-      className="text-red-500"
-      size={16}
-      aria-label="Disabled"
-    />
-  );
-  const label = isEnabled ? "Enabled" : "Disabled";
-  const badgeClasses = isEnabled
-    ? "inline-flex items-center px-2 py-1 bg-green-50 text-green-700 rounded"
-    : "inline-flex items-center px-2 py-1 bg-red-50 text-red-700 rounded";
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const statusText = value ? "True" : "False";
+  const statusClasses = value
+    ? "bg-green-100 text-green-800"
+    : "bg-red-100 text-red-800";
 
-  // 2. Compose the visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className={badgeClasses}>
-      {icon}
-      <span className="ml-1 text-sm font-medium">{label}</span>
+    <div
+      role="status"
+      aria-label={statusText}
+      className={`inline-flex items-center px-2 py-1 text-sm font-medium rounded-full ${statusClasses}`}
+    >
+      {value ? (
+        <LucideReact.CheckCircle
+          className="w-4 h-4 mr-1"
+          aria-hidden="true"
+        />
+      ) : (
+        <LucideReact.XCircle
+          className="w-4 h-4 mr-1"
+          aria-hidden="true"
+        />
+      )}
+      <span>{statusText}</span>
     </div>
   );
 }

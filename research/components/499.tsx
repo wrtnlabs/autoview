@@ -1,176 +1,143 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiOrgsPrivateRegistries {
-    export type GetResponse = {
-      total_count: number & tags.Type<"int32">;
-      configurations: AutoViewInputSubTypes.org_private_registry_configuration[];
-    };
-  }
-  /**
-   * Private registry configuration for an organization
-   *
-   * @title Organization private registry
-   */
-  export type org_private_registry_configuration = {
+    export namespace IApiOrgsPrivateRegistries {
+        export interface GetResponse {
+            total_count: number & tags.Type<"int32">;
+            configurations: AutoViewInputSubTypes.org_private_registry_configuration[];
+        }
+    }
     /**
-     * The name of the private registry configuration.
-     */
-    name: string;
-    /**
-     * The registry type.
-     */
-    registry_type: "maven_repository";
-    /**
-     * The username to use when authenticating with the private registry.
-     */
-    username?: string | null;
-    /**
-     * Which type of organization repositories have access to the private registry.
-     */
-    visibility: "all" | "private" | "selected";
-    created_at: string & tags.Format<"date-time">;
-    updated_at: string & tags.Format<"date-time">;
-  };
+     * Private registry configuration for an organization
+     *
+     * @title Organization private registry
+    */
+    export interface org_private_registry_configuration {
+        /**
+         * The name of the private registry configuration.
+        */
+        name: string;
+        /**
+         * The registry type.
+        */
+        registry_type: "maven_repository";
+        /**
+         * The username to use when authenticating with the private registry.
+        */
+        username?: string | null;
+        /**
+         * Which type of organization repositories have access to the private registry.
+        */
+        visibility: "all" | "private" | "selected";
+        created_at: string & tags.Format<"date-time">;
+        updated_at: string & tags.Format<"date-time">;
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiOrgsPrivateRegistries.GetResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsPrivateRegistries.GetResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Derived constants and helper functions
   const { total_count, configurations } = value;
 
-  // Format created/updated timestamps for readability
-  const formattedConfigs = configurations.map((config) => ({
-    ...config,
-    createdAt: new Date(config.created_at).toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
-    updatedAt: new Date(config.updated_at).toLocaleString(undefined, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    }),
-  }));
+  const formatDate = (iso: string): string =>
+    new Date(iso).toLocaleString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
 
-  // Helper to pick an icon for visibility
-  function getVisibilityIcon(
-    vis: AutoViewInputSubTypes.org_private_registry_configuration["visibility"],
-  ) {
+  const getVisibilityIcon = (
+    vis: AutoViewInputSubTypes.org_private_registry_configuration["visibility"]
+  ): React.ReactNode => {
     switch (vis) {
       case "all":
         return (
           <LucideReact.Globe
-            className="text-gray-500"
             size={16}
-            aria-label="All access"
+            className="text-blue-500"
+            aria-label="All repositories"
           />
         );
       case "private":
         return (
           <LucideReact.Lock
-            className="text-gray-500"
             size={16}
-            aria-label="Private access"
+            className="text-red-500"
+            aria-label="Private only"
           />
         );
       case "selected":
         return (
           <LucideReact.Users
-            className="text-gray-500"
             size={16}
-            aria-label="Selected access"
+            className="text-green-500"
+            aria-label="Selected repositories"
           />
         );
       default:
         return null;
     }
-  }
+  };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Header with total count */}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
       <div className="flex items-center mb-4">
-        <LucideReact.Database
-          className="mr-2 text-indigo-500"
-          size={20}
-          aria-label="Registries"
-        />
-        <h2 className="text-lg font-semibold text-gray-800">
-          Private Registries ({total_count})
+        <LucideReact.Database size={20} className="text-gray-600" />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800 truncate">
+          Total Registries: {total_count}
         </h2>
       </div>
-
-      {formattedConfigs.length === 0 ? (
-        <div className="flex flex-col items-center text-gray-500 py-8">
-          <LucideReact.AlertCircle size={24} className="mb-2" />
-          <span>No private registry configurations found.</span>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {formattedConfigs.map((cfg, idx) => (
+      <div className="flex flex-col gap-4">
+        {configurations.map((config) => {
+          const created = formatDate(config.created_at);
+          const updated = formatDate(config.updated_at);
+          return (
             <div
-              key={idx}
-              className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center"
+              key={config.name}
+              className="p-4 border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
             >
-              {/* Left section: Name, type, username, visibility */}
-              <div className="flex-1">
-                <div className="flex items-center mb-2">
-                  <LucideReact.Package
-                    className="text-gray-600 mr-2"
-                    size={16}
-                    aria-label="Repository type"
-                  />
-                  <span className="text-gray-800 font-medium truncate">
-                    {cfg.name}
-                  </span>
-                </div>
-                {cfg.username && (
-                  <div className="flex items-center text-gray-600 text-sm mb-1">
-                    <LucideReact.User
-                      className="mr-1"
-                      size={14}
-                      aria-label="Username"
-                    />
-                    <span className="truncate">{cfg.username}</span>
-                  </div>
-                )}
-                <div className="flex items-center text-gray-600 text-sm">
-                  {getVisibilityIcon(cfg.visibility)}
-                  <span className="ml-1 capitalize">{cfg.visibility}</span>
+              <div className="flex items-center justify-between">
+                <h3 className="text-md font-medium text-gray-900 truncate">
+                  {config.name}
+                </h3>
+                <div className="flex items-center text-sm text-gray-700">
+                  {getVisibilityIcon(config.visibility)}
+                  <span className="ml-1 capitalize">{config.visibility}</span>
                 </div>
               </div>
-
-              {/* Right section: created/updated timestamps */}
-              <div className="mt-3 sm:mt-0 sm:ml-4 flex flex-col text-gray-500 text-sm">
-                <div className="flex items-center mb-1">
-                  <LucideReact.Calendar
-                    className="mr-1"
-                    size={14}
-                    aria-label="Created at"
-                  />
-                  <span>Created:</span>
-                  <span className="ml-1">{cfg.createdAt}</span>
+              {config.username && (
+                <div className="flex items-center mt-2 text-sm text-gray-600">
+                  <LucideReact.User size={16} className="text-gray-400" />
+                  <span className="ml-1 truncate">{config.username}</span>
+                </div>
+              )}
+              <div className="flex items-center mt-3 space-x-4 text-xs text-gray-500">
+                <div className="flex items-center">
+                  <LucideReact.Calendar size={16} className="text-gray-400" />
+                  <span className="ml-1">{created}</span>
                 </div>
                 <div className="flex items-center">
-                  <LucideReact.Calendar
-                    className="mr-1"
-                    size={14}
-                    aria-label="Updated at"
-                  />
-                  <span>Updated:</span>
-                  <span className="ml-1">{cfg.updatedAt}</span>
+                  <LucideReact.RefreshCw size={16} className="text-gray-400" />
+                  <span className="ml-1">{updated}</span>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+        {configurations.length === 0 && (
+          <div className="flex flex-col items-center py-8 text-gray-400">
+            <LucideReact.AlertCircle size={24} />
+            <span className="mt-2">No configurations available</span>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

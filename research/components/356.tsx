@@ -1,44 +1,39 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Gitignore Template
-   *
-   * @title Gitignore Template
-   */
-  export type gitignore_template = {
-    name: string;
-    source: string;
-  };
+    /**
+     * Gitignore Template
+     *
+     * @title Gitignore Template
+    */
+    export interface gitignore_template {
+        name: string;
+        source: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.gitignore_template;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const fileName = value.name.endsWith(".gitignore")
-    ? value.name
-    : `${value.name}.gitignore`;
-  const lineCount = value.source.split("\n").length;
+  // 1. Data extraction
+  const { name, source } = value;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-full p-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm space-y-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <LucideReact.FileText size={20} className="text-indigo-500" />
-          <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-            {fileName}
-          </span>
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {lineCount} {lineCount === 1 ? "line" : "lines"}
-        </div>
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center mb-3">
+        <LucideReact.FileText className="text-indigo-500 mr-2" size={20} />
+        <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
       </div>
-      <pre className="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 rounded-md overflow-x-auto text-sm font-mono whitespace-pre">
-        {value.source}
-      </pre>
+      <div className="relative bg-gray-50 rounded-md p-4 max-h-64 overflow-auto">
+        <code className="block whitespace-pre-wrap font-mono text-sm text-gray-800">
+          {source}
+        </code>
+        {/* Gradient fade at bottom to hint scroll */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-50"></div>
+      </div>
     </div>
   );
 }

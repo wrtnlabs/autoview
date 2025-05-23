@@ -4,5 +4,5 @@ import Component from "../components/281";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"result":true,"code":1000,"requestToResponse":"req-12345-response-sample","data":{"list":[{"id":101,"userId":1001,"resourceName":"DummyResource_Test","resourceId":2001,"redirectLink":550},{"id":102,"userId":1002}],"count":2,"totalResult":50,"totalPage":25,"search":"alarm_filter_test","page":1}};
+  return {"result":true,"code":1000,"requestToResponse":"req_12345 -> res_12345 (Sample)","data":{"list":[{"id":1,"userId":101,"resourceName":"SampleResourceAlpha (Test)","resourceId":5001,"redirectLink":3001},{"id":2,"userId":102,"resourceName":"SystemMonitor (Sample)","redirectLink":3002}],"count":2,"totalResult":50,"totalPage":5,"search":"Error alarms (Test)","page":1}};
 }

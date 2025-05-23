@@ -1,186 +1,144 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
-   *
-   * @title Reaction
-   */
-  export type reaction = {
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    user: AutoViewInputSubTypes.nullable_simple_user;
     /**
-     * The reaction to use
-     */
-    content:
-      | "+1"
-      | "-1"
-      | "laugh"
-      | "confused"
-      | "heart"
-      | "hooray"
-      | "rocket"
-      | "eyes";
-    created_at: string & tags.Format<"date-time">;
-  };
-  /**
-   * A GitHub user.
-   *
-   * @title Simple User
-   */
-  export type nullable_simple_user = {
-    name?: string | null;
-    email?: string | null;
-    login: string;
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    avatar_url: string & tags.Format<"uri">;
-    gravatar_id: string | null;
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    followers_url: string & tags.Format<"uri">;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string & tags.Format<"uri">;
-    organizations_url: string & tags.Format<"uri">;
-    repos_url: string & tags.Format<"uri">;
-    events_url: string;
-    received_events_url: string & tags.Format<"uri">;
-    type: string;
-    site_admin: boolean;
-    starred_at?: string;
-    user_view_type?: string;
-  } | null;
+     * Reactions to conversations provide a way to help people express their feelings more simply and effectively.
+     *
+     * @title Reaction
+    */
+    export interface reaction {
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        user: AutoViewInputSubTypes.nullable_simple_user;
+        /**
+         * The reaction to use
+        */
+        content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
+        created_at: string & tags.Format<"date-time">;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export type nullable_simple_user = {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes.reaction[];
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation/transformation
-  const reactions = Array.isArray(value) ? value : [];
-  const countMap = reactions.reduce(
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  //    Group reactions by content type to show counts
+  const counts: Record<AutoViewInputSubTypes.reaction["content"], number> = value.reduce(
     (acc, reaction) => {
-      acc[reaction.content] = (acc[reaction.content] || 0) + 1;
+      acc[reaction.content] = (acc[reaction.content] ?? 0) + 1;
       return acc;
     },
-    {} as Record<AutoViewInputSubTypes.reaction["content"], number>,
+    {} as Record<AutoViewInputSubTypes.reaction["content"], number>
   );
 
-  // get unique reactions by user (latest per user) and limit to 5 for avatars
-  const uniqueReactions = Array.from(
-    new Map(
-      reactions
-        .filter((r) => r.user !== null)
-        .map(
-          (r) =>
-            [(r.user as any).id, r] as [number, AutoViewInputSubTypes.reaction],
-        ),
-    ).values(),
-  );
-  const displayedReactions = uniqueReactions.slice(0, 5);
-
-  // icon mapping for each reaction type
-  const getReactionIcon = (
-    content: AutoViewInputSubTypes.reaction["content"],
-    size: number = 16,
-    className: string = "",
-  ) => {
-    switch (content) {
-      case "+1":
-        return <LucideReact.ThumbsUp size={size} className={className} />;
-      case "-1":
-        return <LucideReact.ThumbsDown size={size} className={className} />;
-      case "laugh":
-        return <LucideReact.Smile size={size} className={className} />;
-      case "confused":
-        return <LucideReact.Frown size={size} className={className} />;
-      case "heart":
-        return <LucideReact.Heart size={size} className={className} />;
-      case "hooray":
-        return <LucideReact.Star size={size} className={className} />;
-      case "rocket":
-        return <LucideReact.Rocket size={size} className={className} />;
-      case "eyes":
-        return <LucideReact.Eye size={size} className={className} />;
-      default:
-        return <LucideReact.Gift size={size} className={className} />;
-    }
+  //    Map each reaction content to a semantically appropriate icon
+  const contentIcons: Record<AutoViewInputSubTypes.reaction["content"], JSX.Element> = {
+    "+1": <LucideReact.ThumbsUp size={16} className="text-blue-500" />,
+    "-1": <LucideReact.ThumbsDown size={16} className="text-red-500" />,
+    laugh: <LucideReact.Laugh size={16} className="text-yellow-500" />,
+    confused: <LucideReact.HelpCircle size={16} className="text-amber-500" />,
+    heart: <LucideReact.Heart size={16} className="text-pink-500" />,
+    hooray: <LucideReact.Star size={16} className="text-purple-500" />,
+    rocket: <LucideReact.Rocket size={16} className="text-gray-700" />,
+    eyes: <LucideReact.Eye size={16} className="text-gray-600" />
   };
 
-  // 2. Compose the visual structure
-  if (reactions.length === 0) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-gray-400">
-        <LucideReact.AlertCircle size={24} />
-        <span className="mt-2 text-sm">No reactions yet</span>
-      </div>
-    );
-  }
-
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm">
-      <h2 className="text-lg font-semibold text-gray-900 mb-3">Reactions</h2>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      <header className="flex items-center justify-between mb-4">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-gray-800">
+          <LucideReact.Activity size={20} className="text-gray-600" />
+          Reactions ({value.length})
+        </h2>
+      </header>
 
-      {/* Avatars with reaction badges */}
-      <div className="flex -space-x-2 mb-4">
-        {displayedReactions.map((reaction) => {
-          const user = reaction.user!;
-          const avatarSrc =
-            user.avatar_url ||
-            `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              user.login,
-            )}&background=0D8ABC&color=fff`;
-
-          return (
-            <div key={reaction.id} className="relative">
-              <img
-                src={avatarSrc}
-                onError={(e) => {
-                  e.currentTarget.onerror = null;
-                  e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                    user.login,
-                  )}&background=0D8ABC&color=fff`;
-                }}
-                alt={user.login}
-                className="w-8 h-8 rounded-full border-2 border-white object-cover"
-                title={`${user.login} reacted with "${reaction.content}"`}
-              />
-              <span className="absolute bottom-0 right-0 bg-white rounded-full p-[2px]">
-                {getReactionIcon(reaction.content, 12, "text-gray-600")}
-              </span>
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        {(Object.keys(counts) as Array<AutoViewInputSubTypes.reaction["content"]>).map(
+          (content) => (
+            <div key={content} className="flex items-center gap-1 text-gray-700">
+              {contentIcons[content]}
+              <span className="font-medium">{counts[content]}</span>
             </div>
-          );
-        })}
-
-        {/* indicator for extra reactions */}
-        {uniqueReactions.length > 5 && (
-          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-700 border-2 border-white">
-            +{uniqueReactions.length - 5}
-          </div>
+          )
         )}
       </div>
 
-      {/* Counts per reaction type */}
-      <div className="flex flex-wrap gap-4">
-        {(
-          Object.entries(countMap) as [
-            AutoViewInputSubTypes.reaction["content"],
-            number,
-          ][]
-        ).map(([content, count]) => (
-          <div
-            key={content}
-            className="flex items-center text-sm text-gray-700"
-          >
-            {getReactionIcon(content, 16, "text-gray-500")}
-            <span className="ml-1">{count}</span>
-          </div>
-        ))}
-      </div>
+      <ul className="divide-y divide-gray-100 max-h-60 overflow-y-auto">
+        {value.map((reaction) => {
+          // Format date for readability
+          const formattedDate = new Date(reaction.created_at).toLocaleDateString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+          });
+
+          // Determine user display and avatar
+          const user = reaction.user;
+          const login = user?.login ?? "Unknown";
+          const avatarSrc =
+            user?.avatar_url ||
+            `https://ui-avatars.com/api/?name=${encodeURIComponent(login)}&background=0D8ABC&color=fff`;
+
+          return (
+            <li key={reaction.id} className="flex items-center py-2">
+              <div className="w-8 h-8 flex-shrink-0 rounded-full overflow-hidden mr-3">
+                <img
+                  src={avatarSrc}
+                  alt={login}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const img = e.currentTarget as HTMLImageElement;
+                    img.onerror = null;
+                    img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      login
+                    )}&background=0D8ABC&color=fff`;
+                  }}
+                />
+              </div>
+              <div className="flex-1 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {contentIcons[reaction.content]}
+                  <span className="truncate text-gray-800 font-medium">{login}</span>
+                </div>
+                <time className="text-gray-500 text-sm">{formattedDate}</time>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

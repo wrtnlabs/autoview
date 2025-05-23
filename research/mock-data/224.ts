@@ -4,5 +4,5 @@ import Component from "../components/224";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"bot":{"id":"custom_bot_001","channelId":"channel_ABC123","name":"Test Bot Sample","description":"This is a dummy bot for UI component testing. All data is fictional and for demonstration purposes.","nameDescI18nMap":{"en":{"name":"TestBot","description":"English description for TestBot"},"fr":{"name":"BotTest","description":"Description en francais pour BotTest"}},"createdAt":1687184729,"avatar":{"bucket":"demo-bucket","key":"images/test-bot-avatar.jpg","width":128,"height":128},"color":"#123456","avatarUrl":"https://www.example.com/images/test-bot-avatar.jpg","ai":false}};
+  return {"bot":{"id":"custombot_test_001","channelId":"C1234567890","name":"Sample Test Bot","description":"This is a sample description for the test bot. It demonstrates various fields for UI component testing purposes.","nameDescI18nMap":{"en":{"name":"Sample Test Bot","description":"English description for the sample test bot."},"es":{"name":"Bot de Prueba","description":"Descripción en Español para el bot de prueba."}},"createdAt":1699991000000,"avatar":{"bucket":"test-bucket-sample","key":"sample-avatar.png","width":120,"height":120},"color":"#123456","avatarUrl":"https://www.example.com/assets/sample-avatar.png","ai":true}};
 }

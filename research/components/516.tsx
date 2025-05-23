@@ -1,238 +1,202 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Response
-   *
-   * @title Rule Suite
-   */
-  export type rule_suite = {
     /**
-     * The unique identifier of the rule insight.
-     */
-    id?: number & tags.Type<"int32">;
-    /**
-     * The number that identifies the user.
-     */
-    actor_id?: (number & tags.Type<"int32">) | null;
-    /**
-     * The handle for the GitHub user account.
-     */
-    actor_name?: string | null;
-    /**
-     * The first commit sha before the push evaluation.
-     */
-    before_sha?: string;
-    /**
-     * The last commit sha in the push evaluation.
-     */
-    after_sha?: string;
-    /**
-     * The ref name that the evaluation ran on.
-     */
-    ref?: string;
-    /**
-     * The ID of the repository associated with the rule evaluation.
-     */
-    repository_id?: number & tags.Type<"int32">;
-    /**
-     * The name of the repository without the `.git` extension.
-     */
-    repository_name?: string;
-    pushed_at?: string & tags.Format<"date-time">;
-    /**
-     * The result of the rule evaluations for rules with the `active` enforcement status.
-     */
-    result?: "pass" | "fail" | "bypass";
-    /**
-     * The result of the rule evaluations for rules with the `active` and `evaluate` enforcement statuses, demonstrating whether rules would pass or fail if all rules in the rule suite were `active`. Null if no rules with `evaluate` enforcement status were run.
-     */
-    evaluation_result?: "pass" | "fail" | "bypass" | null;
-    /**
-     * Details on the evaluated rules.
-     */
-    rule_evaluations?: {
-      rule_source?: {
+     * Response
+     *
+     * @title Rule Suite
+    */
+    export interface rule_suite {
         /**
-         * The type of rule source.
-         */
-        type?: string;
+         * The unique identifier of the rule insight.
+        */
+        id?: number & tags.Type<"int32">;
         /**
-         * The ID of the rule source.
-         */
-        id?: (number & tags.Type<"int32">) | null;
+         * The number that identifies the user.
+        */
+        actor_id?: (number & tags.Type<"int32">) | null;
         /**
-         * The name of the rule source.
-         */
-        name?: string | null;
-      };
-      /**
-       * The enforcement level of this rule source.
-       */
-      enforcement?: "active" | "evaluate" | "deleted ruleset";
-      /**
-       * The result of the evaluation of the individual rule.
-       */
-      result?: "pass" | "fail";
-      /**
-       * The type of rule.
-       */
-      rule_type?: string;
-      /**
-       * The detailed failure message for the rule. Null if the rule passed.
-       */
-      details?: string | null;
-    }[];
-  };
+         * The handle for the GitHub user account.
+        */
+        actor_name?: string | null;
+        /**
+         * The first commit sha before the push evaluation.
+        */
+        before_sha?: string;
+        /**
+         * The last commit sha in the push evaluation.
+        */
+        after_sha?: string;
+        /**
+         * The ref name that the evaluation ran on.
+        */
+        ref?: string;
+        /**
+         * The ID of the repository associated with the rule evaluation.
+        */
+        repository_id?: number & tags.Type<"int32">;
+        /**
+         * The name of the repository without the `.git` extension.
+        */
+        repository_name?: string;
+        pushed_at?: string & tags.Format<"date-time">;
+        /**
+         * The result of the rule evaluations for rules with the `active` enforcement status.
+        */
+        result?: "pass" | "fail" | "bypass";
+        /**
+         * The result of the rule evaluations for rules with the `active` and `evaluate` enforcement statuses, demonstrating whether rules would pass or fail if all rules in the rule suite were `active`. Null if no rules with `evaluate` enforcement status were run.
+        */
+        evaluation_result?: "pass" | "fail" | "bypass" | null;
+        /**
+         * Details on the evaluated rules.
+        */
+        rule_evaluations?: {
+            rule_source?: {
+                /**
+                 * The type of rule source.
+                */
+                type?: string;
+                /**
+                 * The ID of the rule source.
+                */
+                id?: (number & tags.Type<"int32">) | null;
+                /**
+                 * The name of the rule source.
+                */
+                name?: string | null;
+            };
+            /**
+             * The enforcement level of this rule source.
+            */
+            enforcement?: "active" | "evaluate" | "deleted ruleset";
+            /**
+             * The result of the evaluation of the individual rule.
+            */
+            result?: "pass" | "fail";
+            /**
+             * The type of rule.
+            */
+            rule_type?: string;
+            /**
+             * The detailed failure message for the rule. Null if the rule passed.
+            */
+            details?: string | null;
+        }[];
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.rule_suite;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const pushedDate = value.pushed_at
+  const repoName = value.repository_name ?? "Unknown Repository";
+  const branch = value.ref ? ` @ ${value.ref}` : "";
+  const actor =
+    value.actor_name ??
+    (value.actor_id != null ? `User #${value.actor_id}` : "Unknown Actor");
+  const pushedAt = value.pushed_at
     ? new Date(value.pushed_at).toLocaleString(undefined, {
         dateStyle: "medium",
         timeStyle: "short",
       })
-    : "—";
-  const beforeSha = value.before_sha?.slice(0, 7) || "";
-  const afterSha = value.after_sha?.slice(0, 7) || "";
-  const resultIcon = {
-    pass: <LucideReact.CheckCircle className="text-green-500" size={16} />,
-    fail: <LucideReact.XCircle className="text-red-500" size={16} />,
-    bypass: <LucideReact.MinusCircle className="text-gray-500" size={16} />,
-  }[value.result ?? "pass"];
-  const evalIcon =
-    value.evaluation_result != null
-      ? {
-          pass: (
-            <LucideReact.CheckCircle className="text-green-500" size={16} />
-          ),
-          fail: <LucideReact.XCircle className="text-red-500" size={16} />,
-          bypass: (
-            <LucideReact.MinusCircle className="text-gray-500" size={16} />
-          ),
-        }[value.evaluation_result]
-      : null;
+    : "Unknown Date";
+
+  const totalRules = value.rule_evaluations?.length ?? 0;
+  const passedRules =
+    value.rule_evaluations?.filter((r) => r.result === "pass").length ?? 0;
+  const failedRules =
+    value.rule_evaluations?.filter((r) => r.result === "fail").length ?? 0;
+
+  const getStatusIcon = (
+    status?: "pass" | "fail" | "bypass" | null
+  ): JSX.Element => {
+    switch (status) {
+      case "pass":
+        return <LucideReact.CheckCircle className="text-green-500" size={20} />;
+      case "fail":
+        return <LucideReact.XCircle className="text-red-500" size={20} />;
+      case "bypass":
+        return <LucideReact.AlertTriangle className="text-amber-500" size={20} />;
+      default:
+        return <LucideReact.HelpCircle className="text-gray-400" size={20} />;
+    }
+  };
+
+  const capitalize = (s?: string | null): string =>
+    s ? s.charAt(0).toUpperCase() + s.slice(1) : "Unknown";
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
-      {/* Primary identifiers */}
-      <div className="flex flex-wrap gap-4">
-        {value.actor_name && (
-          <div className="flex items-center gap-1 text-gray-700">
-            <LucideReact.User size={16} />
-            <span className="font-medium">{value.actor_name}</span>
-          </div>
-        )}
-        {value.repository_name && (
-          <div className="flex items-center gap-1 text-gray-700">
-            <LucideReact.Archive size={16} />
-            <span className="font-medium">{value.repository_name}</span>
-          </div>
-        )}
-        {value.ref && (
-          <div className="flex items-center gap-1 text-gray-700">
-            <LucideReact.GitBranch size={16} />
-            <span className="font-medium">{value.ref}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Commit range and timestamp */}
-      <div className="flex flex-wrap gap-4 text-gray-600">
-        {(beforeSha || afterSha) && (
-          <div className="flex items-center gap-1">
-            <LucideReact.Hash size={16} />
-            <span className="font-mono">
-              {beforeSha} → {afterSha}
-            </span>
-          </div>
-        )}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
+      {/* Header: Repository & Result */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <LucideReact.GitBranch className="text-gray-500" size={16} />
+          <h2 className="text-lg font-semibold text-gray-800 truncate">
+            {repoName}
+            <span className="font-normal">{branch}</span>
+          </h2>
+        </div>
         <div className="flex items-center gap-1">
-          <LucideReact.Calendar size={16} />
-          <span>{pushedDate}</span>
+          {getStatusIcon(value.result)}
+          <span
+            className={
+              "text-sm font-medium " +
+              (value.result === "pass"
+                ? "text-green-600"
+                : value.result === "fail"
+                ? "text-red-600"
+                : "text-amber-600")
+            }
+          >
+            {capitalize(value.result)}
+          </span>
         </div>
       </div>
 
-      {/* Overall result */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {resultIcon}
-        <span className="font-medium capitalize">{value.result ?? "pass"}</span>
-        {value.evaluation_result != null && (
-          <>
-            <span className="mx-2 text-gray-300">|</span>
-            {evalIcon}
-            <span className="font-medium capitalize">
-              {value.evaluation_result}
-            </span>
-          </>
-        )}
+      {/* Subheader: Actor & Date */}
+      <div className="mt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between text-sm text-gray-500">
+        <div className="flex items-center gap-2">
+          <LucideReact.User size={16} />
+          <span className="truncate">{actor}</span>
+        </div>
+        <div className="flex items-center gap-2 mt-1 sm:mt-0">
+          <LucideReact.Calendar size={16} />
+          <span>{pushedAt}</span>
+        </div>
       </div>
 
-      {/* Detailed rule evaluations */}
-      {value.rule_evaluations && value.rule_evaluations.length > 0 && (
-        <div>
-          <h3 className="text-sm font-semibold text-gray-800 mb-2">
-            Rule Evaluations
-          </h3>
-          <div className="max-h-60 overflow-y-auto space-y-2">
-            {value.rule_evaluations.map((ev, idx) => {
-              const evIcon =
-                ev.result === "pass" ? (
-                  <LucideReact.CheckCircle
-                    className="text-green-500"
-                    size={16}
-                  />
-                ) : (
-                  <LucideReact.XCircle className="text-red-500" size={16} />
-                );
-              let badgeColor = "bg-gray-100 text-gray-800";
-              if (ev.enforcement === "active")
-                badgeColor = "bg-blue-100 text-blue-800";
-              else if (ev.enforcement === "evaluate")
-                badgeColor = "bg-amber-100 text-amber-800";
+      <hr className="my-4 border-gray-200" />
 
-              return (
-                <div
-                  key={idx}
-                  className="p-2 bg-gray-50 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center"
-                >
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span
-                        className={`px-2 py-0.5 text-xs rounded ${badgeColor}`}
-                      >
-                        {ev.enforcement}
-                      </span>
-                      <span className="font-medium">
-                        {ev.rule_type ||
-                          ev.rule_source?.name ||
-                          ev.rule_source?.type}
-                      </span>
-                      {ev.rule_source?.name && (
-                        <span className="text-xs text-gray-500">
-                          {ev.rule_source.name}
-                        </span>
-                      )}
-                    </div>
-                    {ev.details && ev.result === "fail" && (
-                      <p className="text-sm text-red-600 line-clamp-2">
-                        {ev.details}
-                      </p>
-                    )}
-                  </div>
-                  <div className="mt-2 sm:mt-0">{evIcon}</div>
-                </div>
-              );
-            })}
-          </div>
+      {/* Optional Evaluation Result */}
+      {value.evaluation_result != null && (
+        <div className="flex items-center gap-2 mb-3">
+          {getStatusIcon(value.evaluation_result)}
+          <span className="text-sm font-medium text-gray-700">
+            Evaluation: {capitalize(value.evaluation_result)}
+          </span>
         </div>
       )}
+
+      {/* Rule Summary */}
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-1 text-sm text-gray-700">
+          <LucideReact.ListOrdered size={16} className="text-gray-500" />
+          <span>Total: {totalRules}</span>
+        </div>
+        <div className="flex items-center gap-1 text-sm text-green-700">
+          <LucideReact.CheckCircle size={16} className="text-green-500" />
+          <span>Pass: {passedRules}</span>
+        </div>
+        <div className="flex items-center gap-1 text-sm text-red-700">
+          <LucideReact.XCircle size={16} className="text-red-500" />
+          <span>Fail: {failedRules}</span>
+        </div>
+      </div>
     </div>
   );
 }

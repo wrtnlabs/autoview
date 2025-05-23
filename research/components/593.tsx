@@ -1,104 +1,86 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiReposActionsRunnersLabels {
-    export type GetResponse = {
-      total_count: number & tags.Type<"int32">;
-      labels: AutoViewInputSubTypes.runner_label[];
-    };
-  }
-  /**
-   * A label for a self hosted runner
-   *
-   * @title Self hosted runner label
-   */
-  export type runner_label = {
+    export namespace IApiReposActionsRunnersLabels {
+        export interface GetResponse {
+            total_count: number & tags.Type<"int32">;
+            labels: AutoViewInputSubTypes.runner_label[];
+        }
+    }
     /**
-     * Unique identifier of the label.
-     */
-    id?: number & tags.Type<"int32">;
-    /**
-     * Name of the label.
-     */
-    name: string;
-    /**
-     * The type of label. Read-only labels are applied automatically when the runner is configured.
-     */
-    type?: "read-only" | "custom";
-  };
+     * A label for a self hosted runner
+     *
+     * @title Self hosted runner label
+    */
+    export interface runner_label {
+        /**
+         * Unique identifier of the label.
+        */
+        id?: number & tags.Type<"int32">;
+        /**
+         * Name of the label.
+        */
+        name: string;
+        /**
+         * The type of label. Read-only labels are applied automatically when the runner is configured.
+        */
+        type?: "read-only" | "custom";
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiReposActionsRunnersLabels.GetResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunnersLabels.GetResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Destructure and prepare derived data
-  const { total_count: totalCount, labels } = value;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const totalCount = value.total_count;
+  const labels = value.labels ?? [];
+  const hasLabels = labels.length > 0;
 
-  // 2. Handle empty state with placeholder
-  if (labels.length === 0) {
-    return (
-      <div className="p-4 bg-white rounded-lg shadow text-center text-gray-500 flex flex-col items-center">
-        <LucideReact.AlertCircle size={24} className="mb-2" />
-        <span>No runner labels found</span>
-      </div>
-    );
-  }
-
-  // 3. Render label list with counts and badges
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-4">
-      {/* Header with icon and total count */}
-      <div className="flex items-center">
-        <LucideReact.Tag size={20} className="text-indigo-500" />
-        <h2 className="ml-2 text-lg font-semibold text-gray-700">
-          Runner Labels
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header with total count */}
+      <div className="flex items-center mb-4">
+        <LucideReact.ListOrdered className="text-gray-500" size={20} strokeWidth={1.5} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">
+          Labels ({totalCount})
         </h2>
-        <span className="ml-auto text-sm font-medium text-gray-500">
-          {totalCount}
-        </span>
       </div>
 
-      {/* Labels grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {labels.map((label) => (
-          <div
-            key={label.id ?? label.name}
-            className="flex items-center justify-between p-2 bg-gray-50 rounded"
-          >
-            {/* Label name with icon */}
-            <div className="flex items-center truncate">
-              <LucideReact.Hash size={16} className="text-gray-400" />
-              <span className="ml-2 text-sm text-gray-600 truncate">
-                {label.name}
-              </span>
-            </div>
+      {/* Labels list or empty state */}
+      {hasLabels ? (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+          {labels.map((label, idx) => {
+            const isReadOnly = label.type === "read-only";
+            const Icon = isReadOnly ? LucideReact.Lock : LucideReact.Tag;
+            const iconColor = isReadOnly ? "text-red-500" : "text-blue-500";
+            const typeText = isReadOnly ? "Read-only" : "Custom";
 
-            {/* Type badge */}
-            <span
-              className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                label.type === "read-only"
-                  ? "bg-gray-200 text-gray-800"
-                  : "bg-blue-200 text-blue-800"
-              }`}
-            >
-              {label.type === "read-only" ? (
-                <>
-                  <LucideReact.Lock size={12} className="mr-1" />
-                  Read-only
-                </>
-              ) : (
-                <>
-                  <LucideReact.Plus size={12} className="mr-1" />
-                  Custom
-                </>
-              )}
-            </span>
-          </div>
-        ))}
-      </div>
+            return (
+              <div
+                key={label.id ?? idx}
+                className="flex items-center p-2 bg-gray-50 rounded-md"
+              >
+                <Icon className={`${iconColor}`} size={16} strokeWidth={1.5} />
+                <div className="ml-2 flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {label.name}
+                  </p>
+                  <span className="text-xs text-gray-500">{typeText}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={24} strokeWidth={1.5} />
+          <span className="mt-2 text-sm">No labels available.</span>
+        </div>
+      )}
     </div>
   );
 }

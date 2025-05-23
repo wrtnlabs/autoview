@@ -1,94 +1,86 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Color-coded labels help you categorize and filter your issues (just like labels in Gmail).
-   *
-   * @title Label
-   */
-  export type label = {
     /**
-     * Unique identifier for the label.
-     */
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    /**
-     * URL for the label
-     */
-    url: string;
-    /**
-     * The name of the label.
-     */
-    name: string;
-    /**
-     * Optional description of the label, such as its purpose.
-     */
-    description: string | null;
-    /**
-     * 6-character hex code, without the leading #, identifying the color
-     */
-    color: string;
-    /**
-     * Whether this label comes by default in a new repository.
-     */
-    default: boolean;
-  };
+     * Color-coded labels help you categorize and filter your issues (just like labels in Gmail).
+     *
+     * @title Label
+    */
+    export interface label {
+        /**
+         * Unique identifier for the label.
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * URL for the label
+        */
+        url: string;
+        /**
+         * The name of the label.
+        */
+        name: string;
+        /**
+         * Optional description of the label, such as its purpose.
+        */
+        description: string | null;
+        /**
+         * 6-character hex code, without the leading #, identifying the color
+        */
+        color: string;
+        /**
+         * Whether this label comes by default in a new repository.
+        */
+        "default": boolean;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.label[];
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    We sort labels so that default labels appear first.
-  const sortedLabels = React.useMemo(() => {
-    return [...value].sort((a, b) => (b.default ? 1 : 0) - (a.default ? 1 : 0));
-  }, [value]);
+  //    Sort labels alphabetically by name for consistent display.
+  const sortedLabels = [...value].sort((a, b) => a.name.localeCompare(b.name));
 
-  //    Compute text color (black or white) based on background luminance for accessibility.
-  function getTextColor(hex: string): string {
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-    return luminance > 186 ? "#000" : "#fff";
-  }
-
-  // 2. Handle empty state
-  if (!value || value.length === 0) {
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    If there are no labels, show an empty state.
+  if (sortedLabels.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-gray-400">
-        <LucideReact.AlertCircle size={48} />
-        <span className="mt-2 text-sm">No Labels</span>
+        <LucideReact.AlertCircle size={32} className="mb-2" />
+        <span className="text-sm">No labels to display</span>
       </div>
     );
   }
 
-  // 3. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm">
-      {/* Header with icon and count */}
-      <div className="flex items-center mb-2 text-gray-700">
-        <LucideReact.Tag size={16} className="mr-1" />
-        <span className="text-sm font-medium">{value.length} Labels</span>
-      </div>
-      {/* Label badges */}
-      <div className="flex flex-wrap gap-2">
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <h2 className="text-lg font-semibold text-gray-800 mb-3">Labels</h2>
+      <div className="flex flex-wrap gap-3">
         {sortedLabels.map((label) => (
-          <span
+          <div
             key={label.id}
-            title={label.description || undefined}
-            style={{
-              backgroundColor: `#${label.color}`,
-              color: getTextColor(label.color),
-            }}
-            className={`px-3 py-1 rounded-full text-sm font-medium max-w-[200px] truncate ${
-              label.default ? "ring-1 ring-gray-400" : ""
-            }`}
+            className="flex flex-col max-w-xs flex-1 p-3 rounded-lg shadow-sm"
+            style={{ backgroundColor: `#${label.color}` }}
           >
-            {label.name}
-          </span>
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-white truncate">{label.name}</span>
+              {label.default && (
+                <LucideReact.CheckCircle
+                  size={16}
+                  className="text-white opacity-80"
+                />
+              )}
+            </div>
+            {label.description && (
+              <p className="mt-1 text-sm text-white opacity-90 line-clamp-2">
+                {label.description}
+              </p>
+            )}
+          </div>
         ))}
       </div>
     </div>

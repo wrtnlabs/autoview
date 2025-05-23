@@ -1,88 +1,73 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type SELECT_MORE_THAN_ONE_IMAGE = {
-    type: "business";
-    result: false;
-    code: 4005;
-    data: "\uC801\uC5B4\uB3C4 1\uC7A5 \uC774\uC0C1\uC758 \uC774\uBBF8\uC9C0\uB97C \uACE8\uB77C\uC57C \uD569\uB2C8\uB2E4.";
-  };
-  export type ResponseForm_lt_Array_lt_string_gt__gt_ = {
-    result: true;
-    code: 1000;
-    requestToResponse?: string;
-    data: string[];
-  };
+    export interface SELECT_MORE_THAN_ONE_IMAGE {
+        type: "business";
+        result: false;
+        code: 4005;
+        data: "\uC801\uC5B4\uB3C4 1\uC7A5 \uC774\uC0C1\uC758 \uC774\uBBF8\uC9C0\uB97C \uACE8\uB77C\uC57C \uD569\uB2C8\uB2E4.";
+    }
+    export interface ResponseForm_lt_Array_lt_string_gt__gt_ {
+        result: true;
+        code: 1000;
+        requestToResponse?: string;
+        data: string[];
+    }
 }
-export type AutoViewInput =
-  | AutoViewInputSubTypes.SELECT_MORE_THAN_ONE_IMAGE
-  | AutoViewInputSubTypes.ResponseForm_lt_Array_lt_string_gt__gt_;
+export type AutoViewInput = AutoViewInputSubTypes.SELECT_MORE_THAN_ONE_IMAGE | AutoViewInputSubTypes.ResponseForm_lt_Array_lt_string_gt__gt_;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Determine if the payload represents an error or a successful response
-  const isError = value.result === false;
+  // Determine if the input is an error (SELECT_MORE_THAN_ONE_IMAGE) or a successful response
+  const isError = !value.result;
 
+  // 1. Error display for SELECT_MORE_THAN_ONE_IMAGE
   if (isError) {
-    // Error case: SELECT_MORE_THAN_ONE_IMAGE
-    const { code, data: message } =
-      value as AutoViewInputSubTypes.SELECT_MORE_THAN_ONE_IMAGE;
-
+    const errorData = value as AutoViewInputSubTypes.SELECT_MORE_THAN_ONE_IMAGE;
     return (
-      <div className="flex items-start p-4 bg-red-50 border border-red-200 rounded-lg">
-        <LucideReact.AlertTriangle
-          className="text-red-500 flex-shrink-0"
-          size={20}
-          aria-label="Error"
-        />
-        <div className="ml-3">
-          <p className="text-sm font-semibold text-red-800">Error {code}</p>
-          <p className="mt-1 text-sm text-red-700">{message}</p>
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+        <LucideReact.AlertTriangle className="text-red-500" size={24} />
+        <div className="flex-1">
+          <h3 className="text-red-800 font-semibold mb-1">Error Code {errorData.code}</h3>
+          <p className="text-red-700">{errorData.data}</p>
         </div>
       </div>
     );
   }
 
-  // Success case: ResponseForm<string[]>
-  const {
-    code,
-    requestToResponse,
-    data: items,
-  } = value as AutoViewInputSubTypes.ResponseForm_lt_Array_lt_string_gt__gt_;
+  // 2. Success display for ResponseForm<Array<string>>
+  const successData = value as AutoViewInputSubTypes.ResponseForm_lt_Array_lt_string_gt__gt_;
+  const hasResponses = Array.isArray(successData.data) && successData.data.length > 0;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <div className="flex items-center text-sm text-gray-500">
-        <LucideReact.MessageSquare className="mr-2" size={16} />
-        <span>Response Code: {code}</span>
+    <div className="p-4 bg-white border border-green-200 rounded-lg shadow-sm">
+      <div className="flex items-center gap-2 mb-3">
+        <LucideReact.CheckCircle className="text-green-500" size={20} />
+        <h3 className="text-green-800 font-semibold">Responses</h3>
       </div>
 
-      {requestToResponse && (
-        <div className="mt-2 text-sm text-gray-700">
-          <span className="font-medium">Request → Response:</span>{" "}
-          <span className="italic">{requestToResponse}</span>
+      {successData.requestToResponse && (
+        <div className="flex items-center text-gray-600 mb-3">
+          <LucideReact.ArrowRight size={16} className="mr-1 text-gray-400" />
+          <span className="truncate">{successData.requestToResponse}</span>
         </div>
       )}
 
-      {items.length > 0 ? (
-        <ul className="mt-3 space-y-2">
-          {items.map((item, idx) => (
-            <li key={idx} className="flex items-start">
-              <LucideReact.CheckCircle
-                className="text-green-500 flex-shrink-0 mt-1"
-                size={16}
-                aria-hidden="true"
-              />
-              <span className="ml-2 text-gray-800 break-words">{item}</span>
+      {hasResponses ? (
+        <ul className="list-disc list-inside space-y-2">
+          {successData.data.map((item, idx) => (
+            <li key={idx} className="flex items-start gap-2">
+              <LucideReact.ChevronRight size={16} className="text-gray-400 mt-[3px]" />
+              <span className="text-gray-700 truncate">{item}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <div className="mt-3 flex items-center text-gray-500">
-          <LucideReact.AlertCircle size={20} className="mr-2" />
-          <span className="text-sm">No items available.</span>
+        <div className="flex items-center text-gray-500 gap-2">
+          <LucideReact.AlertCircle size={20} />
+          <span>No responses available.</span>
         </div>
       )}
     </div>

@@ -1,223 +1,219 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace open {
-    export namespace marketing {
-      export type OneTimeMsgsView = {
-        next?: number;
-        oneTimeMsgs?: AutoViewInputSubTypes.marketing.OneTimeMsg[];
-      };
+    export namespace open {
+        export namespace marketing {
+            export interface OneTimeMsgsView {
+                next?: number;
+                oneTimeMsgs?: AutoViewInputSubTypes.marketing.OneTimeMsg[];
+            }
+        }
     }
-  }
-  export namespace marketing {
-    export type OneTimeMsg = {
-      id?: string;
-      channelId?: string;
-      name: string;
-      state: "draft" | "waiting" | "sent" | "canceled" | "removed";
-      sendMode?:
-        | "immediately"
-        | "reservedWithSenderTime"
-        | "reservedWithReceiverTime";
-      channelOperationId?: string;
-      sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
-      settings?: AutoViewInputSubTypes.marketing.SendMediumSettings;
-      userQuery?: AutoViewInputSubTypes.Expression;
-      goalEventName?: string;
-      goalEventQuery?: AutoViewInputSubTypes.Expression;
-      goalEventDuration?: string;
-      advertising: boolean;
-      sendToOfflineXms?: boolean;
-      sendToOfflineEmail?: boolean;
-      startAt?: number;
-      localStartAt?: string & tags.Format<"date-time">;
-      draft?: AutoViewInputSubTypes.marketing.OneTimeMsgDraft;
-      createdAt?: number;
-      updatedAt?: number;
-      sent?: number & tags.Type<"int32">;
-      view?: number & tags.Type<"int32">;
-      goal?: number & tags.Type<"int32">;
-      click?: number & tags.Type<"int32">;
-      userChatExpireDuration?: string;
-    };
-    export type SendMediumSettings = {
-      type: string;
-    };
-    export type OneTimeMsgDraft = {
-      oneTimeMsg: AutoViewInputSubTypes.marketing.OneTimeMsg;
-    };
-  }
-  export type Expression = {
-    key?: string;
-    type?:
-      | "boolean"
-      | "date"
-      | "datetime"
-      | "list"
-      | "listOfNumber"
-      | "number"
-      | "string"
-      | "listOfObject";
-    operator?: AutoViewInputSubTypes.Operator;
-    values?: {}[];
-    and?: AutoViewInputSubTypes.Expression[];
-    or?: AutoViewInputSubTypes.Expression[];
-  };
-  export type Operator = {};
+    export namespace marketing {
+        export interface OneTimeMsg {
+            id?: string;
+            channelId?: string;
+            name: string;
+            state: "draft" | "waiting" | "sent" | "canceled" | "removed";
+            sendMode?: "immediately" | "reservedWithSenderTime" | "reservedWithReceiverTime";
+            channelOperationId?: string;
+            sendMedium?: "appAlimtalk" | "appLine" | "email" | "inAppChat" | "xms";
+            settings?: AutoViewInputSubTypes.marketing.SendMediumSettings;
+            userQuery?: AutoViewInputSubTypes.Expression;
+            goalEventName?: string;
+            goalEventQuery?: AutoViewInputSubTypes.Expression;
+            goalEventDuration?: string;
+            advertising: boolean;
+            sendToOfflineXms?: boolean;
+            sendToOfflineEmail?: boolean;
+            startAt?: number;
+            localStartAt?: string & tags.Format<"date-time">;
+            draft?: AutoViewInputSubTypes.marketing.OneTimeMsgDraft;
+            createdAt?: number;
+            updatedAt?: number;
+            sent?: number & tags.Type<"int32">;
+            view?: number & tags.Type<"int32">;
+            goal?: number & tags.Type<"int32">;
+            click?: number & tags.Type<"int32">;
+            userChatExpireDuration?: string;
+        }
+        export interface SendMediumSettings {
+            type: string;
+        }
+        export interface OneTimeMsgDraft {
+            oneTimeMsg: AutoViewInputSubTypes.marketing.OneTimeMsg;
+        }
+    }
+    export interface Expression {
+        key?: string;
+        type?: "boolean" | "date" | "datetime" | "list" | "listOfNumber" | "number" | "string" | "listOfObject";
+        operator?: AutoViewInputSubTypes.Operator;
+        values?: {}[];
+        and?: AutoViewInputSubTypes.Expression[];
+        or?: AutoViewInputSubTypes.Expression[];
+    }
+    export interface Operator {
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.open.marketing.OneTimeMsgsView;
+export type AutoViewInput = AutoViewInputSubTypes.open.marketing.OneTimeMsgsView;
 
+
+
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Helpers
-  const formatNumber = (num?: number): string => {
-    if (num == null) return "-";
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
-  };
-
-  const formatDateTime = (input?: string | number): string | null => {
-    if (input == null) return null;
-    const d = typeof input === "string" ? new Date(input) : new Date(input);
-    return d.toLocaleString();
-  };
-
-  // State icon mapping
-  const stateMap: Record<
-    string,
-    { Icon: React.ComponentType<any>; color: string; label: string }
-  > = {
-    draft: { Icon: LucideReact.Clock, color: "text-gray-500", label: "Draft" },
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const stateConfig: Record<AutoViewInputSubTypes.marketing.OneTimeMsg["state"], { icon: JSX.Element; label: string }> = {
+    draft: {
+      icon: <LucideReact.Clock className="text-amber-500" size={16} />,
+      label: "Draft",
+    },
     waiting: {
-      Icon: LucideReact.Clock,
-      color: "text-amber-500",
+      icon: <LucideReact.Clock className="text-amber-500" size={16} />,
       label: "Waiting",
     },
     sent: {
-      Icon: LucideReact.CheckCircle,
-      color: "text-green-500",
+      icon: <LucideReact.CheckCircle className="text-green-500" size={16} />,
       label: "Sent",
     },
     canceled: {
-      Icon: LucideReact.XCircle,
-      color: "text-red-500",
+      icon: <LucideReact.XCircle className="text-red-500" size={16} />,
       label: "Canceled",
     },
     removed: {
-      Icon: LucideReact.XCircle,
-      color: "text-red-500",
+      icon: <LucideReact.Trash2 className="text-gray-400" size={16} />,
       label: "Removed",
     },
   };
 
-  // Medium icon mapping
-  const mediumMap: Record<
-    string,
-    { Icon: React.ComponentType<any>; label: string }
-  > = {
-    email: { Icon: LucideReact.Mail, label: "Email" },
-    inAppChat: { Icon: LucideReact.MessageSquare, label: "In-App Chat" },
-    xms: { Icon: LucideReact.MessageCircle, label: "XMS" },
-    appLine: { Icon: LucideReact.MessageSquare, label: "Line" },
-    appAlimtalk: { Icon: LucideReact.MessageCircle, label: "Alimtalk" },
+  const mediumConfig: Record<string, { icon: JSX.Element; label: string }> = {
+    appAlimtalk: {
+      icon: <LucideReact.MessageSquare className="text-blue-500" size={16} />,
+      label: "AlimTalk",
+    },
+    appLine: {
+      icon: <LucideReact.MessageSquare className="text-green-500" size={16} />,
+      label: "Line",
+    },
+    email: {
+      icon: <LucideReact.Mail className="text-gray-500" size={16} />,
+      label: "Email",
+    },
+    inAppChat: {
+      icon: <LucideReact.MessageCircle className="text-indigo-500" size={16} />,
+      label: "In-App Chat",
+    },
+    xms: {
+      icon: <LucideReact.MessageSquare className="text-purple-500" size={16} />,
+      label: "XMS",
+    },
   };
+
+  const modeLabels: Record<string, string> = {
+    immediately: "Immediately",
+    reservedWithSenderTime: "Reserved (Sender Time)",
+    reservedWithReceiverTime: "Reserved (Receiver Time)",
+  };
+
+  const formatDate = (ts?: number): string =>
+    ts ? new Date(ts).toLocaleString() : "—";
 
   const msgs = value.oneTimeMsgs ?? [];
 
-  // Empty state
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   if (msgs.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
-        <LucideReact.AlertCircle size={48} />
-        <p className="mt-4 text-lg">No messages available</p>
+      <div className="p-6 flex flex-col items-center text-gray-500">
+        <LucideReact.AlertCircle size={48} className="mb-4" />
+        <span className="text-lg">No messages available</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 p-4">
-      {msgs.map((msg, idx) => {
-        const key = msg.id ?? idx.toString();
-        const {
-          Icon: StateIcon,
-          color: stateColor,
-          label: stateLabel,
-        } = stateMap[msg.state] || stateMap.draft;
-        const med = msg.sendMedium
-          ? mediumMap[msg.sendMedium] || {
-              Icon: LucideReact.MessageSquare,
-              label: msg.sendMedium,
-            }
-          : null;
-        const scheduled = formatDateTime(msg.localStartAt ?? msg.startAt);
-        const created = formatDateTime(msg.createdAt);
-
-        return (
-          <div
-            key={key}
-            className="bg-white rounded-lg shadow p-4 grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            {/* Left: Meta */}
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold text-gray-800 truncate">
-                {msg.name}
-              </h3>
-              <div className="flex items-center gap-2 text-sm">
-                <StateIcon size={16} className={stateColor} />
-                <span className="text-gray-600">{stateLabel}</span>
+    <div className="p-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {msgs.map((msg, idx) => {
+          const state = msg.state;
+          const stateInfo = stateConfig[state] || {
+            icon: <LucideReact.Circle className="text-gray-400" size={16} />,
+            label: state,
+          };
+          const medium = msg.sendMedium || "";
+          const mediumInfo = mediumConfig[medium] || {
+            icon: <LucideReact.MessageSquare className="text-gray-400" size={16} />,
+            label: medium || "—",
+          };
+          const sendMode = modeLabels[msg.sendMode || ""] || "—";
+          const sent = msg.sent ?? 0;
+          const viewed = msg.view ?? 0;
+          const clicked = msg.click ?? 0;
+          const goal = msg.goal ?? 0;
+          return (
+            <div
+              key={msg.id ?? idx}
+              className="bg-white rounded-lg shadow-sm hover:shadow-md transition p-5 flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {stateInfo.icon}
+                    <h3 className="text-gray-800 font-medium truncate">
+                      {msg.name}
+                    </h3>
+                  </div>
+                  <span className="text-sm text-gray-600">{stateInfo.label}</span>
+                </div>
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-500 gap-3">
+                  <div className="flex items-center gap-1">
+                    {mediumInfo.icon}
+                    <span>{mediumInfo.label}</span>
+                  </div>
+                  <div className="text-gray-400">|</div>
+                  <span>{sendMode}</span>
+                  {msg.advertising && (
+                    <div className="flex items-center gap-1">
+                      <LucideReact.Tag size={16} className="text-blue-500" />
+                      <span>Advertising</span>
+                    </div>
+                  )}
+                </div>
               </div>
-              {scheduled && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <LucideReact.Calendar size={16} className="text-gray-400" />
-                  <span>Scheduled: {scheduled}</span>
+              <div className="mt-4">
+                <div className="flex flex-wrap items-center text-sm text-gray-500 gap-4">
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Send size={16} className="text-gray-500" />
+                    <span>{sent}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Eye size={16} className="text-gray-500" />
+                    <span>{viewed}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <LucideReact.MousePointer2 size={16} className="text-gray-500" />
+                    <span>{clicked}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <LucideReact.Target size={16} className="text-gray-500" />
+                    <span>{goal}</span>
+                  </div>
                 </div>
-              )}
-              {med && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <med.Icon size={16} className="text-gray-400" />
-                  <span>{med.label}</span>
+                <div className="mt-3 flex items-center text-xs text-gray-400">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  <span>Created: {formatDate(msg.createdAt)}</span>
                 </div>
-              )}
-              {msg.advertising && (
-                <div className="flex items-center gap-2 text-sm text-blue-500">
-                  <LucideReact.Tag size={16} />
-                  <span>Advertising</span>
-                </div>
-              )}
-              {created && (
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <LucideReact.Calendar size={16} className="text-gray-400" />
-                  <span>Created: {created}</span>
-                </div>
-              )}
+              </div>
             </div>
-            {/* Right: Statistics */}
-            <ul className="flex flex-wrap gap-4 text-sm text-gray-600">
-              <li className="flex items-center gap-1">
-                <LucideReact.Send size={16} className="text-gray-400" />
-                <span>{formatNumber(msg.sent)}</span>
-              </li>
-              <li className="flex items-center gap-1">
-                <LucideReact.Eye size={16} className="text-gray-400" />
-                <span>{formatNumber(msg.view)}</span>
-              </li>
-              <li className="flex items-center gap-1">
-                <LucideReact.Target size={16} className="text-gray-400" />
-                <span>{formatNumber(msg.goal)}</span>
-              </li>
-              <li className="flex items-center gap-1">
-                <LucideReact.MousePointer2
-                  size={16}
-                  className="text-gray-400"
-                />
-                <span>{formatNumber(msg.click)}</span>
-              </li>
-            </ul>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
+      {value.next !== undefined && (
+        <div className="mt-6 flex justify-center items-center text-blue-600 text-sm">
+          <LucideReact.ChevronDown size={16} className="mr-1 animate-pulse" />
+          <span>Load more messages...</span>
+        </div>
+      )}
     </div>
   );
 }

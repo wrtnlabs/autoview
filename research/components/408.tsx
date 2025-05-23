@@ -1,85 +1,89 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiOrgsActionsRunnersLabels {
-    export type _DeleteResponse = {
-      total_count: number & tags.Type<"int32">;
-      labels: AutoViewInputSubTypes.runner_label[];
-    };
-  }
-  /**
-   * A label for a self hosted runner
-   *
-   * @title Self hosted runner label
-   */
-  export type runner_label = {
+    export namespace IApiOrgsActionsRunnersLabels {
+        export interface _DeleteResponse {
+            total_count: number & tags.Type<"int32">;
+            labels: AutoViewInputSubTypes.runner_label[];
+        }
+    }
     /**
-     * Unique identifier of the label.
-     */
-    id?: number & tags.Type<"int32">;
-    /**
-     * Name of the label.
-     */
-    name: string;
-    /**
-     * The type of label. Read-only labels are applied automatically when the runner is configured.
-     */
-    type?: "read-only" | "custom";
-  };
+     * A label for a self hosted runner
+     *
+     * @title Self hosted runner label
+    */
+    export interface runner_label {
+        /**
+         * Unique identifier of the label.
+        */
+        id?: number & tags.Type<"int32">;
+        /**
+         * Name of the label.
+        */
+        name: string;
+        /**
+         * The type of label. Read-only labels are applied automatically when the runner is configured.
+        */
+        type?: "read-only" | "custom";
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiOrgsActionsRunnersLabels._DeleteResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsRunnersLabels._DeleteResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const sortedLabels = Array.isArray(value.labels)
-    ? [...value.labels].sort((a, b) => a.name.localeCompare(b.name))
-    : [];
-  const labelCount =
-    typeof value.total_count === "number"
-      ? value.total_count
-      : sortedLabels.length;
-
+  const totalCount = value.total_count;
+  const labels = value.labels ?? [];
+  
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  const hasLabels = sortedLabels.length > 0;
-  const labelItems = hasLabels
-    ? sortedLabels.map((label, index) => {
-        const key = label.id ?? label.name ?? index;
-        const isReadOnly = label.type === "read-only";
-        const pillClasses = `inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium ${
-          isReadOnly
-            ? "bg-gray-100 text-gray-800"
-            : "bg-indigo-100 text-indigo-800"
-        }`;
-        const Icon = isReadOnly ? LucideReact.Lock : LucideReact.Tag;
-        const iconLabel = isReadOnly ? "Read-only label" : "Custom label";
-
-        return (
-          <span key={key} className={pillClasses}>
-            {label.name}
-            <Icon size={12} className="ml-1" aria-label={iconLabel} />
-          </span>
-        );
-      })
-    : null;
-
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
       <div className="flex items-center mb-4">
-        <LucideReact.Tag size={20} className="text-indigo-500" />
-        <h2 className="ml-2 text-lg font-semibold text-gray-800">
-          Runner Labels ({labelCount})
-        </h2>
+        <LucideReact.Tag className="text-gray-700 mr-2" size={20} />
+        <h2 className="text-lg font-semibold text-gray-800">Runner Labels</h2>
       </div>
-      {hasLabels ? (
-        <div className="flex flex-wrap gap-2">{labelItems}</div>
+
+      {/* Total count */}
+      <div className="flex items-center text-gray-600 mb-3">
+        <LucideReact.Users className="text-gray-500 mr-2" size={16} />
+        <span className="font-medium">{totalCount} total</span>
+      </div>
+
+      {/* Label list or empty state */}
+      {labels.length > 0 ? (
+        <ul className="space-y-2">
+          {labels.map((label, idx) => {
+            const isReadOnly = label.type === "read-only";
+            return (
+              <li
+                key={label.id ?? idx}
+                className="flex items-center bg-gray-50 p-2 rounded-md"
+              >
+                {isReadOnly ? (
+                  <LucideReact.Lock
+                    className="text-gray-500 mr-2"
+                    size={16}
+                    aria-label="Read-only label"
+                  />
+                ) : (
+                  <LucideReact.Tag
+                    className="text-blue-500 mr-2"
+                    size={16}
+                    aria-label="Custom label"
+                  />
+                )}
+                <span className="text-gray-700 truncate">{label.name}</span>
+              </li>
+            );
+          })}
+        </ul>
       ) : (
-        <div className="flex items-center text-gray-500">
-          <LucideReact.AlertCircle size={20} className="mr-2" />
+        <div className="flex items-center text-gray-400">
+          <LucideReact.AlertCircle className="mr-2" size={20} />
           <span>No labels available</span>
         </div>
       )}

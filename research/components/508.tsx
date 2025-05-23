@@ -1,178 +1,170 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Custom property defined on an organization
-   *
-   * @title Organization Custom Property
-   */
-  export type custom_property = {
     /**
-     * The name of the property
-     */
-    property_name: string;
-    /**
-     * The URL that can be used to fetch, update, or delete info about this property via the API.
-     */
-    url?: string;
-    /**
-     * The source type of the property
-     */
-    source_type?: "organization" | "enterprise";
-    /**
-     * The type of the value for the property
-     */
-    value_type: "string" | "single_select" | "multi_select" | "true_false";
-    /**
-     * Whether the property is required.
-     */
-    required?: boolean;
-    /**
-     * Default value of the property
-     */
-    default_value?: string | string[] | null;
-    /**
-     * Short description of the property
-     */
-    description?: string | null;
-    /**
-     * An ordered list of the allowed values of the property.
-     * The property can have up to 200 allowed values.
-     */
-    allowed_values?:
-      | ((string & tags.MaxLength<75>)[] & tags.MaxItems<200>)
-      | null;
-    /**
-     * Who can edit the values of the property
-     */
-    values_editable_by?: "org_actors" | "org_and_repo_actors" | null;
-  };
+     * Custom property defined on an organization
+     *
+     * @title Organization Custom Property
+    */
+    export interface custom_property {
+        /**
+         * The name of the property
+        */
+        property_name: string;
+        /**
+         * The URL that can be used to fetch, update, or delete info about this property via the API.
+        */
+        url?: string;
+        /**
+         * The source type of the property
+        */
+        source_type?: "organization" | "enterprise";
+        /**
+         * The type of the value for the property
+        */
+        value_type: "string" | "single_select" | "multi_select" | "true_false";
+        /**
+         * Whether the property is required.
+        */
+        required?: boolean;
+        /**
+         * Default value of the property
+        */
+        default_value?: string | string[] | null;
+        /**
+         * Short description of the property
+        */
+        description?: string | null;
+        /**
+         * An ordered list of the allowed values of the property.
+         * The property can have up to 200 allowed values.
+        */
+        allowed_values?: ((string & tags.MaxLength<75>)[] & tags.MaxItems<200>) | null;
+        /**
+         * Who can edit the values of the property
+        */
+        values_editable_by?: "org_actors" | "org_and_repo_actors" | null;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.custom_property;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const typeLabel = (() => {
-    switch (value.value_type) {
-      case "string":
-        return "String";
-      case "single_select":
-        return "Single Select";
-      case "multi_select":
-        return "Multi Select";
-      case "true_false":
-        return "True / False";
-      default:
-        return value.value_type;
-    }
-  })();
+  const {
+    property_name,
+    description,
+    value_type,
+    required,
+    default_value,
+    allowed_values,
+    values_editable_by,
+    source_type,
+  } = value;
 
-  const sourceLabel = value.source_type
-    ? value.source_type === "organization"
-      ? "Organization"
-      : "Enterprise"
-    : "—";
+  const typeMap: Record<AutoViewInputSubTypes.custom_property["value_type"], string> = {
+    string: "String",
+    single_select: "Single Select",
+    multi_select: "Multiple Select",
+    true_false: "True / False",
+  };
 
-  const requiredLabel = value.required ? (
-    <div className="flex items-center text-green-600">
-      <LucideReact.CheckCircle size={16} className="mr-1" />
-      Required
-    </div>
-  ) : (
-    <div className="flex items-center text-gray-500">
-      <LucideReact.XCircle size={16} className="mr-1" />
-      Optional
-    </div>
-  );
+  const sourceMap: Record<NonNullable<typeof source_type>, string> = {
+    organization: "Organization",
+    enterprise: "Enterprise",
+  };
 
-  const defaultLabel =
-    value.default_value === null || value.default_value === undefined
+  const editableMap: Record<NonNullable<typeof values_editable_by>, string> = {
+    org_actors: "Organization actors",
+    org_and_repo_actors: "Organization & repository actors",
+  };
+
+  const defaultDisplay =
+    default_value == null
       ? "None"
-      : Array.isArray(value.default_value)
-        ? value.default_value.join(", ")
-        : value.default_value;
+      : Array.isArray(default_value)
+      ? default_value.join(", ")
+      : default_value;
 
-  const editableByLabel = (() => {
-    switch (value.values_editable_by) {
-      case "org_actors":
-        return "Organization actors";
-      case "org_and_repo_actors":
-        return "Org & repository actors";
-      default:
-        return "—";
-    }
-  })();
+  const trimmedAllowed = Array.isArray(allowed_values) ? allowed_values : [];
+  const previewAllowed = trimmedAllowed.slice(0, 4);
+  const moreCount = trimmedAllowed.length > 4 ? trimmedAllowed.length - 4 : 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <LucideReact.Tag className="text-blue-500" size={20} />
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          {value.property_name}
-        </h2>
+    <div className="max-w-md p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex items-center mb-2">
+        <h2 className="text-lg font-semibold text-gray-800">{property_name}</h2>
+        {required ? (
+          <span className="ml-2 px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded">
+            Required
+          </span>
+        ) : (
+          <span className="ml-2 px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded">
+            Optional
+          </span>
+        )}
       </div>
 
-      {/* Description */}
-      {value.description ? (
-        <p className="mt-2 text-gray-700 text-sm line-clamp-3">
-          {value.description}
+      {description && (
+        <p className="mb-3 text-gray-600 text-sm line-clamp-3">
+          {description}
         </p>
-      ) : null}
+      )}
 
-      {/* Details */}
-      <dl className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-        <div>
-          <dt className="text-gray-500">Type</dt>
-          <dd className="text-gray-900">{typeLabel}</dd>
+      <dl className="grid grid-cols-1 gap-y-2 text-sm text-gray-700">
+        <div className="flex items-center">
+          <LucideReact.Tag size={16} className="text-gray-500 mr-2" />
+          <dt className="font-medium mr-1">Type:</dt>
+          <dd>{typeMap[value_type]}</dd>
         </div>
 
-        <div>
-          <dt className="text-gray-500">Source</dt>
-          <dd className="text-gray-900">{sourceLabel}</dd>
+        {source_type && (
+          <div className="flex items-center">
+            <LucideReact.Building size={16} className="text-gray-500 mr-2" />
+            <dt className="font-medium mr-1">Source:</dt>
+            <dd>{sourceMap[source_type]}</dd>
+          </div>
+        )}
+
+        <div className="flex items-center">
+          <LucideReact.RotateCw size={16} className="text-gray-500 mr-2" />
+          <dt className="font-medium mr-1">Default:</dt>
+          <dd className="truncate">{defaultDisplay}</dd>
         </div>
 
-        <div>
-          <dt className="text-gray-500">Requirement</dt>
-          <dd>{requiredLabel}</dd>
-        </div>
-
-        <div>
-          <dt className="text-gray-500">Default</dt>
-          <dd className="text-gray-900">{defaultLabel}</dd>
-        </div>
-
-        <div>
-          <dt className="text-gray-500">Editable by</dt>
-          <dd className="text-gray-900">{editableByLabel}</dd>
-        </div>
-
-        {value.allowed_values && value.allowed_values.length > 0 ? (
-          <div className="sm:col-span-2">
-            <dt className="text-gray-500">Allowed values</dt>
-            <dd>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {value.allowed_values.slice(0, 5).map((val, idx) => (
-                  <span
-                    key={idx}
-                    className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded"
-                  >
-                    {val}
-                  </span>
-                ))}
-                {value.allowed_values.length > 5 && (
-                  <span className="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded">
-                    +{value.allowed_values.length - 5} more
-                  </span>
-                )}
-              </div>
+        {previewAllowed.length > 0 && (
+          <div className="flex items-start">
+            <LucideReact.List size={16} className="text-gray-500 mr-2 mt-1" />
+            <dt className="font-medium mr-1">Allowed:</dt>
+            <dd className="flex flex-wrap gap-1">
+              {previewAllowed.map((val, i) => (
+                <span
+                  key={i}
+                  className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded"
+                >
+                  {val}
+                </span>
+              ))}
+              {moreCount > 0 && (
+                <span className="text-gray-500 text-xs mt-0.5">
+                  +{moreCount} more
+                </span>
+              )}
             </dd>
           </div>
-        ) : null}
+        )}
+
+        {values_editable_by && (
+          <div className="flex items-center">
+            <LucideReact.Users size={16} className="text-gray-500 mr-2" />
+            <dt className="font-medium mr-1">Editable by:</dt>
+            <dd>{editableMap[values_editable_by]}</dd>
+          </div>
+        )}
       </dl>
     </div>
   );

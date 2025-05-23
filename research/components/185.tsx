@@ -1,33 +1,35 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace shared {
-    export type StringView = {
-      result?: string;
-    };
-  }
+    export namespace shared {
+        export interface StringView {
+            result?: string;
+        }
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.shared.StringView;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const content = value.result?.trim() ?? "";
-  const hasContent = content.length > 0;
+  const rawText = value.result ?? "";
+  const displayText = rawText.trim();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    If there's no string to display, show a placeholder state.
+  //    - If there's valid text, show it with truncation for long content.
+  //    - If no text is provided, show a placeholder with an icon.
   return (
     <div className="p-4 bg-white rounded-lg shadow-sm max-w-full">
-      {hasContent ? (
-        <p className="text-gray-800 text-base whitespace-pre-wrap break-words">
-          {content}
+      {displayText ? (
+        <p className="text-gray-800 text-base leading-relaxed line-clamp-3 break-words">
+          {displayText}
         </p>
       ) : (
-        <div className="flex flex-col items-center justify-center text-center text-gray-400 py-8">
+        <div className="flex flex-col items-center justify-center text-gray-400">
           <LucideReact.AlertCircle size={24} />
-          <p className="mt-2 text-sm">No data available</p>
+          <span className="mt-2 text-sm">No data available</span>
         </div>
       )}
     </div>

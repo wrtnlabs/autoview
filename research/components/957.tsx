@@ -1,80 +1,97 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Key
-   *
-   * @title Key
-   */
-  export type key = {
-    key: string;
-    id: number & tags.Type<"int32">;
-    url: string;
-    title: string;
-    created_at: string & tags.Format<"date-time">;
-    verified: boolean;
-    read_only: boolean;
-  };
+    /**
+     * Key
+     *
+     * @title Key
+    */
+    export interface key {
+        key: string;
+        id: number & tags.Type<"int32">;
+        url: string;
+        title: string;
+        created_at: string & tags.Format<"date-time">;
+        verified: boolean;
+        read_only: boolean;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.key;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation/transformation
-  const maskedKey =
-    value.key.length > 8
-      ? `${value.key.slice(0, 4)}...${value.key.slice(-4)}`
-      : value.key;
-  const createdDate = new Date(value.created_at);
-  const formattedDate = createdDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-  });
-  const urlDisplay = value.url.replace(/^https?:\/\//, "");
-  const truncatedUrl =
-    urlDisplay.length > 30 ? `${urlDisplay.slice(0, 30)}...` : urlDisplay;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const maskedKey = (() => {
+    const raw = value.key;
+    if (raw.length > 8) {
+      return `${raw.slice(0, 4)}…${raw.slice(-4)}`;
+    }
+    return raw;
+  })();
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  const formattedDate = (() => {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(new Date(value.created_at));
+    } catch {
+      return value.created_at;
+    }
+  })();
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-xs p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-800 truncate">
-        {value.title}
-      </h2>
-      <div className="mt-3 space-y-2 text-sm text-gray-700">
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header: Title and status icons */}
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-lg font-semibold text-gray-800 truncate">
+          {value.title}
+        </h3>
         <div className="flex items-center gap-2">
-          <LucideReact.Key size={16} className="text-gray-500" />
-          <span className="font-mono">{maskedKey}</span>
+          {value.verified ? (
+            <span role="img" aria-label="Verified">
+              <LucideReact.CheckCircle
+                className="text-green-500"
+                size={16}
+              />
+            </span>
+          ) : (
+            <span role="img" aria-label="Not verified">
+              <LucideReact.XCircle
+                className="text-red-500"
+                size={16}
+              />
+            </span>
+          )}
+          {value.read_only && (
+            <span role="img" aria-label="Read only">
+              <LucideReact.Lock
+                className="text-gray-500"
+                size={16}
+              />
+            </span>
+          )}
         </div>
-        <div className="flex items-center gap-2 overflow-hidden">
-          <LucideReact.Link size={16} className="text-gray-500" />
-          <span className="truncate">{truncatedUrl}</span>
+      </div>
+
+      {/* Masked API Key */}
+      <div className="font-mono text-sm text-gray-700 break-all mb-3">
+        {maskedKey}
+      </div>
+
+      {/* Meta: creation date and URL */}
+      <div className="flex flex-col sm:flex-row sm:items-center text-sm text-gray-500 gap-2">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>{formattedDate}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <LucideReact.Calendar size={16} className="text-gray-500" />
-          <time dateTime={value.created_at}>{formattedDate}</time>
-        </div>
-        <div className="flex items-center gap-4 pt-2 border-t border-gray-100">
-          <div className="flex items-center gap-1">
-            {value.verified ? (
-              <LucideReact.CheckCircle size={16} className="text-green-500" />
-            ) : (
-              <LucideReact.XCircle size={16} className="text-red-500" />
-            )}
-            <span>{value.verified ? "Verified" : "Unverified"}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            {value.read_only ? (
-              <LucideReact.Lock size={16} className="text-gray-500" />
-            ) : (
-              <LucideReact.Unlock size={16} className="text-gray-500" />
-            )}
-            <span>{value.read_only ? "Read-only" : "Writable"}</span>
-          </div>
+        <div className="flex items-center gap-1 overflow-hidden">
+          <LucideReact.Link size={16} />
+          <span className="truncate">{value.url}</span>
         </div>
       </div>
     </div>

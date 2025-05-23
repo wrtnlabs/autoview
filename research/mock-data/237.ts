@@ -4,5 +4,5 @@ import Component from "../components/237";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"result":"Sample result for StringView UI component (Test): Lorem ipsum dolor sit amet, consectetur adipiscing elit. This string is fictional and used for UI testing only."};
+  return {"result":"Sample output for UI component (Fictional). This string includes multiple lines for testing:\n- Simulated step 1 completed\n- Simulated step 2 completed\n- All checks passed (100% coverage)."};
 }

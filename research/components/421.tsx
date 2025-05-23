@@ -1,334 +1,345 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * The campaign metadata and alert stats.
-   *
-   * @title Campaign summary
-   */
-  export type campaign_summary = {
     /**
-     * The number of the newly created campaign
-     */
-    number: number & tags.Type<"int32">;
+     * The campaign metadata and alert stats.
+     *
+     * @title Campaign summary
+    */
+    export interface campaign_summary {
+        /**
+         * The number of the newly created campaign
+        */
+        number: number & tags.Type<"int32">;
+        /**
+         * The date and time the campaign was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
+        */
+        created_at: string;
+        /**
+         * The date and time the campaign was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
+        */
+        updated_at: string;
+        /**
+         * The campaign name
+        */
+        name?: string;
+        /**
+         * The campaign description
+        */
+        description: string;
+        /**
+         * The campaign managers
+        */
+        managers: AutoViewInputSubTypes.simple_user[];
+        /**
+         * The campaign team managers
+        */
+        team_managers?: AutoViewInputSubTypes.team[];
+        /**
+         * The date and time the campaign was published, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
+        */
+        published_at?: string;
+        /**
+         * The date and time the campaign has ended, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
+        */
+        ends_at: string;
+        /**
+         * The date and time the campaign was closed, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ. Will be null if the campaign is still open.
+        */
+        closed_at?: (string & tags.Format<"date-time">) | null;
+        state: AutoViewInputSubTypes.campaign_state;
+        /**
+         * The contact link of the campaign.
+        */
+        contact_link: (string & tags.Format<"uri">) | null;
+        alert_stats?: {
+            /**
+             * The number of open alerts
+            */
+            open_count: number & tags.Type<"int32">;
+            /**
+             * The number of closed alerts
+            */
+            closed_count: number & tags.Type<"int32">;
+            /**
+             * The number of in-progress alerts
+            */
+            in_progress_count: number & tags.Type<"int32">;
+        };
+    }
     /**
-     * The date and time the campaign was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
-     */
-    created_at: string;
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
     /**
-     * The date and time the campaign was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
-     */
-    updated_at: string;
+     * Groups of organization members that gives permissions on specified repositories.
+     *
+     * @title Team
+    */
+    export interface team {
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        name: string;
+        slug: string;
+        description: string | null;
+        privacy?: string;
+        notification_setting?: string;
+        permission: string;
+        permissions?: {
+            pull: boolean;
+            triage: boolean;
+            push: boolean;
+            maintain: boolean;
+            admin: boolean;
+        };
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        members_url: string;
+        repositories_url: string & tags.Format<"uri">;
+        parent: AutoViewInputSubTypes.nullable_team_simple;
+    }
     /**
-     * The campaign name
-     */
-    name?: string;
+     * Groups of organization members that gives permissions on specified repositories.
+     *
+     * @title Team Simple
+    */
+    export type nullable_team_simple = {
+        /**
+         * Unique identifier of the team
+        */
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * URL for the team
+        */
+        url: string;
+        members_url: string;
+        /**
+         * Name of the team
+        */
+        name: string;
+        /**
+         * Description of the team
+        */
+        description: string | null;
+        /**
+         * Permission that the team will have for its repositories
+        */
+        permission: string;
+        /**
+         * The level of privacy this team should have
+        */
+        privacy?: string;
+        /**
+         * The notification setting the team has set
+        */
+        notification_setting?: string;
+        html_url: string & tags.Format<"uri">;
+        repositories_url: string & tags.Format<"uri">;
+        slug: string;
+        /**
+         * Distinguished Name (DN) that team maps to within LDAP environment
+        */
+        ldap_dn?: string;
+    } | null;
     /**
-     * The campaign description
-     */
-    description: string;
-    /**
-     * The campaign managers
-     */
-    managers: AutoViewInputSubTypes.simple_user[];
-    /**
-     * The campaign team managers
-     */
-    team_managers?: AutoViewInputSubTypes.team[];
-    /**
-     * The date and time the campaign was published, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
-     */
-    published_at?: string;
-    /**
-     * The date and time the campaign has ended, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
-     */
-    ends_at: string;
-    /**
-     * The date and time the campaign was closed, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ. Will be null if the campaign is still open.
-     */
-    closed_at?: (string & tags.Format<"date-time">) | null;
-    state: AutoViewInputSubTypes.campaign_state;
-    /**
-     * The contact link of the campaign.
-     */
-    contact_link: (string & tags.Format<"uri">) | null;
-    alert_stats?: {
-      /**
-       * The number of open alerts
-       */
-      open_count: number & tags.Type<"int32">;
-      /**
-       * The number of closed alerts
-       */
-      closed_count: number & tags.Type<"int32">;
-      /**
-       * The number of in-progress alerts
-       */
-      in_progress_count: number & tags.Type<"int32">;
-    };
-  };
-  /**
-   * A GitHub user.
-   *
-   * @title Simple User
-   */
-  export type simple_user = {
-    name?: string | null;
-    email?: string | null;
-    login: string;
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    avatar_url: string & tags.Format<"uri">;
-    gravatar_id: string | null;
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    followers_url: string & tags.Format<"uri">;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string & tags.Format<"uri">;
-    organizations_url: string & tags.Format<"uri">;
-    repos_url: string & tags.Format<"uri">;
-    events_url: string;
-    received_events_url: string & tags.Format<"uri">;
-    type: string;
-    site_admin: boolean;
-    starred_at?: string;
-    user_view_type?: string;
-  };
-  /**
-   * Groups of organization members that gives permissions on specified repositories.
-   *
-   * @title Team
-   */
-  export type team = {
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    name: string;
-    slug: string;
-    description: string | null;
-    privacy?: string;
-    notification_setting?: string;
-    permission: string;
-    permissions?: {
-      pull: boolean;
-      triage: boolean;
-      push: boolean;
-      maintain: boolean;
-      admin: boolean;
-    };
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    members_url: string;
-    repositories_url: string & tags.Format<"uri">;
-    parent: AutoViewInputSubTypes.nullable_team_simple;
-  };
-  /**
-   * Groups of organization members that gives permissions on specified repositories.
-   *
-   * @title Team Simple
-   */
-  export type nullable_team_simple = {
-    /**
-     * Unique identifier of the team
-     */
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    /**
-     * URL for the team
-     */
-    url: string;
-    members_url: string;
-    /**
-     * Name of the team
-     */
-    name: string;
-    /**
-     * Description of the team
-     */
-    description: string | null;
-    /**
-     * Permission that the team will have for its repositories
-     */
-    permission: string;
-    /**
-     * The level of privacy this team should have
-     */
-    privacy?: string;
-    /**
-     * The notification setting the team has set
-     */
-    notification_setting?: string;
-    html_url: string & tags.Format<"uri">;
-    repositories_url: string & tags.Format<"uri">;
-    slug: string;
-    /**
-     * Distinguished Name (DN) that team maps to within LDAP environment
-     */
-    ldap_dn?: string;
-  } | null;
-  /**
-   * Indicates whether a campaign is open or closed
-   *
-   * @title Campaign state
-   */
-  export type campaign_state = "open" | "closed";
+     * Indicates whether a campaign is open or closed
+     *
+     * @title Campaign state
+    */
+    export type campaign_state = "open" | "closed";
 }
 export type AutoViewInput = AutoViewInputSubTypes.campaign_summary;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, {
+  const {
+    number,
+    name,
+    description,
+    created_at,
+    published_at,
+    ends_at,
+    closed_at,
+    state,
+    contact_link,
+    managers,
+    team_managers,
+    alert_stats,
+  } = value;
+
+  const displayName = name ?? `Campaign #${number}`;
+
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  const createdAt = formatDate(value.created_at);
-  const endsAt = formatDate(value.ends_at);
-  const updatedAt = formatDate(value.updated_at);
-  const publishedAt = value.published_at
-    ? formatDate(value.published_at)
-    : null;
-  const isClosed = value.state === "closed";
-  const stateLabel = isClosed ? "Closed" : "Open";
-  const stateClasses = isClosed
-    ? "text-red-600 bg-red-100"
-    : "text-green-600 bg-green-100";
 
-  // Managers avatar list
-  const maxAvatars = 5;
-  const managers = value.managers || [];
-  const visibleManagers = managers.slice(0, maxAvatars);
-  const extraCount = managers.length - visibleManagers.length;
-
-  // Team managers badges
-  const teams = value.team_managers ?? [];
+  const maxDescLength = 200;
+  const truncatedDescription =
+    description.length > maxDescLength
+      ? `${description.slice(0, maxDescLength)}...`
+      : description;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-md mx-auto">
-      {/* Header */}
+    <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col space-y-4">
+      {/* Header with title and state */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-800 truncate">
-          {value.name ?? `Campaign #${value.number}`}
-        </h2>
-        <span
-          className={`px-2 py-0.5 text-sm font-medium rounded ${stateClasses}`}
-        >
-          {stateLabel}
-        </span>
+        <h2 className="text-lg font-semibold text-gray-800">{displayName}</h2>
+        {state === "open" ? (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={20}
+            role="img"
+            aria-label="Open"
+          />
+        ) : (
+          <LucideReact.XCircle
+            className="text-red-500"
+            size={20}
+            role="img"
+            aria-label="Closed"
+          />
+        )}
+      </div>
+
+      {/* Date metadata */}
+      <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Created: {formatDate(created_at)}</span>
+        </div>
+        {published_at && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Published: {formatDate(published_at)}</span>
+          </div>
+        )}
+        <div className="flex items-center gap-1">
+          <LucideReact.Calendar size={16} />
+          <span>Ends: {formatDate(ends_at)}</span>
+        </div>
+        {closed_at && (
+          <div className="flex items-center gap-1">
+            <LucideReact.Calendar size={16} />
+            <span>Closed: {formatDate(closed_at)}</span>
+          </div>
+        )}
       </div>
 
       {/* Description */}
-      {value.description && (
-        <p className="mt-2 text-gray-700 text-sm line-clamp-3">
-          {value.description}
-        </p>
-      )}
+      <p className="text-gray-700 line-clamp-3">{truncatedDescription}</p>
 
-      {/* Dates */}
-      <div className="mt-4 grid grid-cols-2 gap-4 text-sm text-gray-600">
-        <div className="flex items-center gap-1">
-          <LucideReact.Calendar size={16} className="text-gray-400" />
-          <span>Created: {createdAt}</span>
+      {/* Managers avatars */}
+      <div>
+        <div className="flex items-center gap-1 text-sm text-gray-600 mb-1">
+          <LucideReact.Users size={16} />
+          <span>Managers</span>
         </div>
-        <div className="flex items-center gap-1">
-          <LucideReact.Calendar size={16} className="text-gray-400" />
-          <span>Ends: {endsAt}</span>
-        </div>
-        {publishedAt && (
-          <div className="flex items-center gap-1 col-span-2">
-            <LucideReact.CheckCircle size={16} className="text-blue-500" />
-            <span>Published: {publishedAt}</span>
-          </div>
-        )}
-        <div className="flex items-center gap-1 col-span-2">
-          <LucideReact.Edit3 size={16} className="text-gray-400" />
-          <span>Last updated: {updatedAt}</span>
-        </div>
-      </div>
-
-      {/* Alert Stats */}
-      {value.alert_stats && (
-        <div className="mt-4 flex items-center gap-6 text-sm text-gray-600">
-          <div className="flex items-center gap-1">
-            <LucideReact.AlertCircle size={16} className="text-yellow-500" />
-            <span>{value.alert_stats.open_count} open</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <LucideReact.RefreshCw size={16} className="text-blue-500" />
-            <span>{value.alert_stats.in_progress_count} in progress</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <LucideReact.CheckCircle size={16} className="text-green-500" />
-            <span>{value.alert_stats.closed_count} closed</span>
-          </div>
-        </div>
-      )}
-
-      {/* Managers */}
-      <div className="mt-4">
-        <h3 className="text-sm font-medium text-gray-800 mb-1">Managers</h3>
-        <div className="flex items-center -space-x-2">
-          {visibleManagers.map((mgr) => {
-            const placeholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-              mgr.name || mgr.login,
+        <div className="flex -space-x-2">
+          {managers.map((mgr) => {
+            const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              mgr.name ?? mgr.login
             )}&background=0D8ABC&color=fff`;
             return (
               <img
                 key={mgr.id}
                 src={mgr.avatar_url}
-                alt={mgr.login}
-                title={mgr.login}
-                className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                alt={mgr.name ?? mgr.login}
                 onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).onerror = null;
-                  (e.currentTarget as HTMLImageElement).src = placeholder;
+                  (e.currentTarget as HTMLImageElement).src = fallbackAvatar;
                 }}
+                className="w-8 h-8 rounded-full border-2 border-white object-cover"
               />
             );
           })}
-          {extraCount > 0 && (
-            <span className="w-8 h-8 flex items-center justify-center bg-gray-200 text-gray-600 text-xs rounded-full border-2 border-white">
-              +{extraCount}
-            </span>
-          )}
         </div>
       </div>
 
-      {/* Team Managers */}
-      {teams.length > 0 && (
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-gray-800 mb-2">Teams</h3>
-          <div className="flex flex-wrap gap-2">
-            {teams.map((team) => (
-              <span
-                key={team?.id}
-                className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded-full"
-              >
-                {team?.name}
-              </span>
-            ))}
+      {/* Team managers list */}
+      {team_managers && team_managers.length > 0 && (
+        <div>
+          <div className="flex items-center gap-1 text-sm text-gray-600">
+            <LucideReact.Users size={16} />
+            <span>Team Managers</span>
+          </div>
+          <div className="mt-1 text-sm text-gray-700">
+            {team_managers.map((team) => team.name).join(", ")}
           </div>
         </div>
       )}
 
-      {/* Contact Link */}
-      {value.contact_link && (
-        <div className="mt-4 flex items-center gap-1 text-sm">
-          <LucideReact.Link size={16} className="text-gray-400" />
+      {/* Contact link */}
+      {contact_link && (
+        <div className="flex items-center gap-1 text-sm text-blue-600">
+          <LucideReact.Link size={16} />
           <a
-            href={value.contact_link}
-            className="text-blue-600 hover:underline truncate"
+            href={contact_link}
             target="_blank"
             rel="noopener noreferrer"
+            className="truncate underline"
           >
-            {value.contact_link}
+            {contact_link}
           </a>
+        </div>
+      )}
+
+      {/* Alert statistics */}
+      {alert_stats && (
+        <div className="grid grid-cols-3 gap-4 text-center text-sm">
+          <div className="flex flex-col items-center text-yellow-500">
+            <LucideReact.AlertTriangle size={20} />
+            <span className="mt-1 text-gray-800">
+              {alert_stats.open_count}
+            </span>
+            <span className="text-gray-500">Open</span>
+          </div>
+          <div className="flex flex-col items-center text-blue-500">
+            <LucideReact.Clock size={20} />
+            <span className="mt-1 text-gray-800">
+              {alert_stats.in_progress_count}
+            </span>
+            <span className="text-gray-500">In Progress</span>
+          </div>
+          <div className="flex flex-col items-center text-green-500">
+            <LucideReact.CheckCircle size={20} />
+            <span className="mt-1 text-gray-800">
+              {alert_stats.closed_count}
+            </span>
+            <span className="text-gray-500">Closed</span>
+          </div>
         </div>
       )}
     </div>

@@ -4,5 +4,5 @@ import Component from "../components/739";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"id":42,"node_id":"DEPLOY_PR_TEST_node_12345XYZ","enabled":true,"app":{"id":101,"slug":"sample-deployment-protection-rule-app","integration_url":"https://api.example.com/apps/sample-deployment-protection-rule-app","node_id":"APP_NODEID_SAMPLE_7890ABC"}};
+  return {"id":101,"node_id":"U_kgDDEPLOY_RULE_Sample_abc123=","enabled":true,"app":{"id":202,"slug":"sample-deployment-protection-app","integration_url":"https://api.example.com/v1/apps/sample-deployment-protection","node_id":"U_kgDAPP_NODEID_def456="}};
 }

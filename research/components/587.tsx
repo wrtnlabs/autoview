@@ -1,184 +1,179 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiReposActionsRunners {
-    export type GetResponse = {
-      total_count: number & tags.Type<"int32">;
-      runners: AutoViewInputSubTypes.runner[];
-    };
-  }
-  /**
-   * A self hosted runner
-   *
-   * @title Self hosted runners
-   */
-  export type runner = {
+    export namespace IApiReposActionsRunners {
+        export interface GetResponse {
+            total_count: number & tags.Type<"int32">;
+            runners: AutoViewInputSubTypes.runner[];
+        }
+    }
     /**
-     * The ID of the runner.
-     */
-    id: number & tags.Type<"int32">;
+     * A self hosted runner
+     *
+     * @title Self hosted runners
+    */
+    export interface runner {
+        /**
+         * The ID of the runner.
+        */
+        id: number & tags.Type<"int32">;
+        /**
+         * The ID of the runner group.
+        */
+        runner_group_id?: number & tags.Type<"int32">;
+        /**
+         * The name of the runner.
+        */
+        name: string;
+        /**
+         * The Operating System of the runner.
+        */
+        os: string;
+        /**
+         * The status of the runner.
+        */
+        status: string;
+        busy: boolean;
+        labels: AutoViewInputSubTypes.runner_label[];
+        ephemeral?: boolean;
+    }
     /**
-     * The ID of the runner group.
-     */
-    runner_group_id?: number & tags.Type<"int32">;
-    /**
-     * The name of the runner.
-     */
-    name: string;
-    /**
-     * The Operating System of the runner.
-     */
-    os: string;
-    /**
-     * The status of the runner.
-     */
-    status: string;
-    busy: boolean;
-    labels: AutoViewInputSubTypes.runner_label[];
-    ephemeral?: boolean;
-  };
-  /**
-   * A label for a self hosted runner
-   *
-   * @title Self hosted runner label
-   */
-  export type runner_label = {
-    /**
-     * Unique identifier of the label.
-     */
-    id?: number & tags.Type<"int32">;
-    /**
-     * Name of the label.
-     */
-    name: string;
-    /**
-     * The type of label. Read-only labels are applied automatically when the runner is configured.
-     */
-    type?: "read-only" | "custom";
-  };
+     * A label for a self hosted runner
+     *
+     * @title Self hosted runner label
+    */
+    export interface runner_label {
+        /**
+         * Unique identifier of the label.
+        */
+        id?: number & tags.Type<"int32">;
+        /**
+         * Name of the label.
+        */
+        name: string;
+        /**
+         * The type of label. Read-only labels are applied automatically when the runner is configured.
+        */
+        type?: "read-only" | "custom";
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiReposActionsRunners.GetResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiReposActionsRunners.GetResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const totalRunners = value.total_count;
-  const runners = value.runners;
-  const onlineCount = runners.filter(
-    (r) => r.status.toLowerCase() === "online",
-  ).length;
-  const offlineCount = runners.filter(
-    (r) => r.status.toLowerCase() === "offline",
-  ).length;
-  const busyCount = runners.filter((r) => r.busy).length;
-  const capitalize = (s: string) =>
-    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+  // 1. Derived constants and helper functions
+  const total = value.total_count;
+  const getStatusIndicator = (
+    status: string
+  ): {
+    icon: JSX.Element;
+    title: string;
+    bgColor: string;
+    textColor: string;
+  } => {
+    const s = status.toLowerCase();
+    if (s === "online") {
+      return {
+        icon: <LucideReact.CheckCircle size={14} className="text-green-500" />,
+        title: "Online",
+        bgColor: "bg-green-100",
+        textColor: "text-green-800",
+      };
+    }
+    if (s === "offline") {
+      return {
+        icon: <LucideReact.XCircle size={14} className="text-red-500" />,
+        title: "Offline",
+        bgColor: "bg-red-100",
+        textColor: "text-red-800",
+      };
+    }
+    // fallback for other statuses
+    return {
+      icon: <LucideReact.Clock size={14} className="text-amber-500" />,
+      title: status.charAt(0).toUpperCase() + status.slice(1),
+      bgColor: "bg-amber-100",
+      textColor: "text-amber-800",
+    };
+  };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. JSX structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md space-y-6">
-      {/* Summary Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-2 text-gray-700">
-          <LucideReact.Users size={20} className="text-gray-500" />
-          <span className="text-lg font-semibold">
-            {totalRunners} Runner{totalRunners !== 1 ? "s" : ""}
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center space-x-4 text-sm text-gray-600">
-          <div className="flex items-center space-x-1">
-            <LucideReact.Circle size={16} className="text-green-500" />
-            <span>{onlineCount} Online</span>
-          </div>
-          <div className="flex items-center space-x-1">
-            <LucideReact.Circle size={16} className="text-red-500" />
-            <span>{offlineCount} Offline</span>
-          </div>
-          {busyCount > 0 && (
-            <div className="flex items-center space-x-1">
-              <LucideReact.Loader
-                size={16}
-                className="animate-spin text-yellow-500"
-              />
-              <span>{busyCount} Busy</span>
-            </div>
-          )}
-        </div>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center mb-4 text-lg font-semibold text-gray-800">
+        <LucideReact.Users size={20} className="text-gray-600 mr-2" />
+        <span>
+          {total} Runner{total !== 1 ? "s" : ""}
+        </span>
       </div>
-
       {/* Runner List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {runners.map((runner) => (
-          <div
-            key={runner.id}
-            className="p-4 border border-gray-200 rounded-lg hover:shadow transition-shadow flex flex-col"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-md font-medium text-gray-800 truncate">
-                {runner.name}
-              </h3>
-              {runner.ephemeral && (
-                <span className="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded">
-                  Ephemeral
+      <ul className="space-y-4">
+        {value.runners.map((runner) => {
+          const { icon, title, bgColor, textColor } = getStatusIndicator(
+            runner.status
+          );
+          return (
+            <li
+              key={runner.id}
+              className="p-4 bg-gray-50 rounded-lg border border-gray-200"
+            >
+              {/* Name & OS */}
+              <div className="flex flex-col md:flex-row md:justify-between">
+                <div className="flex items-center gap-2">
+                  {icon}
+                  <span className="font-medium text-gray-800 truncate">
+                    {runner.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 text-sm text-gray-500 mt-2 md:mt-0">
+                  <LucideReact.Computer size={14} className="text-gray-400" />
+                  <span>{runner.os}</span>
+                </div>
+              </div>
+              {/* Status & Labels */}
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${bgColor} ${textColor} rounded-full`}
+                  title={title}
+                >
+                  {icon}
+                  <span className="ml-1">{title}</span>
                 </span>
-              )}
-            </div>
-
-            <div className="mt-2 flex items-center space-x-2 text-sm text-gray-600">
-              <LucideReact.Monitor size={16} className="text-gray-400" />
-              <span className="truncate">{runner.os}</span>
-            </div>
-
-            <div className="mt-2 flex items-center space-x-2 text-sm">
-              {runner.busy ? (
-                <LucideReact.Loader
-                  size={16}
-                  className="animate-spin text-yellow-500"
-                />
-              ) : runner.status.toLowerCase() === "online" ? (
-                <LucideReact.CheckCircle size={16} className="text-green-500" />
-              ) : runner.status.toLowerCase() === "offline" ? (
-                <LucideReact.XCircle size={16} className="text-red-500" />
-              ) : (
-                <LucideReact.Circle size={16} className="text-gray-500" />
-              )}
-              <span
-                className={
-                  runner.busy
-                    ? "text-yellow-600"
-                    : runner.status.toLowerCase() === "online"
-                      ? "text-green-600"
-                      : runner.status.toLowerCase() === "offline"
-                        ? "text-red-600"
-                        : "text-gray-600"
-                }
-              >
-                {runner.busy ? "Busy" : capitalize(runner.status)}
-              </span>
-            </div>
-
-            {runner.labels.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-1">
-                {runner.labels.map((label) => (
+                {runner.busy && (
+                  <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
+                    <LucideReact.Loader
+                      size={12}
+                      className="mr-1 animate-spin text-blue-500"
+                    />
+                    Busy
+                  </span>
+                )}
+                {runner.ephemeral && (
+                  <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full">
+                    <LucideReact.Tag
+                      size={12}
+                      className="mr-1 text-purple-500"
+                    />
+                    Ephemeral
+                  </span>
+                )}
+                {runner.labels.map((label, idx) => (
                   <span
-                    key={label.name}
-                    className={`text-xs px-2 py-0.5 rounded ${
-                      label.type === "read-only"
-                        ? "bg-gray-100 text-gray-800"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
+                    key={idx}
+                    className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded-full"
                   >
                     {label.name}
                   </span>
                 ))}
               </div>
-            )}
-          </div>
-        ))}
-      </div>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }

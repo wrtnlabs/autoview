@@ -4,5 +4,5 @@ import Component from "../components/248";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"channel":12,"managers":{"101":30,"102":45}};
+  return {"channel":15,"managers":{"MGR1001":20,"MGR1002":15}};
 }

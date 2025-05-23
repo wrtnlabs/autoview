@@ -1,81 +1,62 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Set secrets for GitHub Actions.
-   *
-   * @title Actions Secret
-   */
-  export type actions_secret = {
     /**
-     * The name of the secret.
-     */
-    name: string;
-    created_at: string & tags.Format<"date-time">;
-    updated_at: string & tags.Format<"date-time">;
-  };
+     * Set secrets for GitHub Actions.
+     *
+     * @title Actions Secret
+    */
+    export interface actions_secret {
+        /**
+         * The name of the secret.
+        */
+        name: string;
+        created_at: string & tags.Format<"date-time">;
+        updated_at: string & tags.Format<"date-time">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.actions_secret;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedCreatedAt = React.useMemo(() => {
-    const date = new Date(value.created_at);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  }, [value.created_at]);
+  // 1. Define data aggregation/transformation
+  const createdDate = new Date(value.created_at);
+  const updatedDate = new Date(value.updated_at);
+  const formattedCreated = createdDate.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  const formattedUpdated = updatedDate.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
-  const formattedUpdatedAt = React.useMemo(() => {
-    const date = new Date(value.updated_at);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  }, [value.updated_at]);
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
+  // 2. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="max-w-xs p-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center mb-3">
-        <LucideReact.Key
-          className="mr-2 text-gray-500"
-          size={20}
-          aria-hidden="true"
-        />
-        <h3 className="text-lg font-medium text-gray-800 truncate">
-          {value.name}
-        </h3>
+    <div className="max-w-sm w-full bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+      <div className="flex items-center mb-4">
+        <LucideReact.Key size={20} className="text-indigo-500 mr-2" aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
       </div>
-      <div className="space-y-2">
-        <div className="flex items-center text-sm text-gray-600">
-          <LucideReact.Calendar
-            className="mr-2 text-gray-400"
-            size={16}
-            aria-hidden="true"
-          />
+      <div className="space-y-2 text-gray-600 text-sm">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="text-gray-400 mr-1" aria-hidden="true" />
           <span className="mr-1">Created:</span>
-          <span className="font-medium">{formattedCreatedAt}</span>
+          <span className="font-medium">{formattedCreated}</span>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
-          <LucideReact.Calendar
-            className="mr-2 text-gray-400"
-            size={16}
-            aria-hidden="true"
-          />
+        <div className="flex items-center">
+          <LucideReact.Clock size={16} className="text-gray-400 mr-1" aria-hidden="true" />
           <span className="mr-1">Updated:</span>
-          <span className="font-medium">{formattedUpdatedAt}</span>
+          <span className="font-medium">{formattedUpdated}</span>
         </div>
       </div>
     </div>

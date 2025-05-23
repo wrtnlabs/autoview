@@ -1,127 +1,123 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiUserCodespacesSecrets {
-    export type GetResponse = {
-      total_count: number & tags.Type<"int32">;
-      secrets: AutoViewInputSubTypes.codespaces_secret[];
-    };
-  }
-  /**
-   * Secrets for a GitHub Codespace.
-   *
-   * @title Codespaces Secret
-   */
-  export type codespaces_secret = {
+    export namespace IApiUserCodespacesSecrets {
+        export interface GetResponse {
+            total_count: number & tags.Type<"int32">;
+            secrets: AutoViewInputSubTypes.codespaces_secret[];
+        }
+    }
     /**
-     * The name of the secret
-     */
-    name: string;
-    /**
-     * The date and time at which the secret was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
-     */
-    created_at: string;
-    /**
-     * The date and time at which the secret was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
-     */
-    updated_at: string;
-    /**
-     * The type of repositories in the organization that the secret is visible to
-     */
-    visibility: "all" | "private" | "selected";
-    /**
-     * The API URL at which the list of repositories this secret is visible to can be retrieved
-     */
-    selected_repositories_url: string;
-  };
+     * Secrets for a GitHub Codespace.
+     *
+     * @title Codespaces Secret
+    */
+    export interface codespaces_secret {
+        /**
+         * The name of the secret
+        */
+        name: string;
+        /**
+         * The date and time at which the secret was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
+        */
+        created_at: string;
+        /**
+         * The date and time at which the secret was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.
+        */
+        updated_at: string;
+        /**
+         * The type of repositories in the organization that the secret is visible to
+        */
+        visibility: "all" | "private" | "selected";
+        /**
+         * The API URL at which the list of repositories this secret is visible to can be retrieved
+        */
+        selected_repositories_url: string;
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiUserCodespacesSecrets.GetResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiUserCodespacesSecrets.GetResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const { total_count, secrets } = value;
 
-  const formatDate = (iso: string): string =>
-    new Date(iso).toLocaleString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
+  const formatDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
-  const getVisibilityIcon = (
-    visibility: AutoViewInputSubTypes.codespaces_secret["visibility"],
-  ): JSX.Element => {
+  const getVisibilityIcon = (visibility: AutoViewInputSubTypes.codespaces_secret['visibility']) => {
     switch (visibility) {
-      case "all":
-        return <LucideReact.Users className="text-blue-500" size={16} />;
-      case "private":
-        return <LucideReact.Lock className="text-red-500" size={16} />;
-      case "selected":
-        return <LucideReact.Tag className="text-yellow-500" size={16} />;
+      case 'all':
+        return <LucideReact.Globe className="text-blue-500" size={16} aria-label="Public" />;
+      case 'private':
+        return <LucideReact.Lock className="text-red-500" size={16} aria-label="Private" />;
+      case 'selected':
+        return <LucideReact.ListChecks className="text-amber-500" size={16} aria-label="Selected" />;
       default:
-        return <></>;
+        return null;
     }
   };
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-800">Secrets</h2>
-        <div className="flex items-center text-gray-600">
-          <LucideReact.Database size={20} className="mr-1" />
-          <span className="font-medium">{total_count}</span>
-        </div>
+    <div className="space-y-6">
+      {/* Summary */}
+      <div className="flex items-center text-gray-700">
+        <LucideReact.Lock className="mr-2" size={20} />
+        <span className="font-semibold">Total Secrets:</span>
+        <span className="ml-1 text-indigo-600">{total_count}</span>
       </div>
 
-      {/* Empty State */}
-      {secrets.length === 0 ? (
-        <div className="flex flex-col items-center py-10 text-gray-400">
-          <LucideReact.AlertCircle size={48} />
-          <span className="mt-2 text-sm">No secrets available</span>
-        </div>
-      ) : (
-        <ul className="space-y-4">
-          {secrets.map((secret) => (
-            <li
-              key={secret.name}
-              className="p-4 bg-gray-50 rounded-lg border border-gray-200"
-            >
-              <div className="flex items-center justify-between">
-                <h3
-                  className="text-md font-medium text-gray-900 truncate"
-                  title={secret.name}
-                >
-                  {secret.name}
-                </h3>
-                <div className="flex items-center text-gray-600">
-                  {getVisibilityIcon(secret.visibility)}
-                  <span className="ml-1 capitalize text-sm">
-                    {secret.visibility}
+      {/* Secrets List */}
+      <ul className="space-y-4">
+        {secrets.map((secret) => (
+          <li
+            key={secret.name}
+            className="p-4 bg-white rounded-lg shadow-sm border border-gray-200"
+          >
+            {/* Header: Name & Visibility */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center truncate">
+                <LucideReact.Key className="text-gray-700 mr-2" size={18} />
+                <span className="font-medium text-gray-800 truncate">{secret.name}</span>
+              </div>
+              <div>{getVisibilityIcon(secret.visibility)}</div>
+            </div>
+
+            {/* Metadata: Created, Updated, Selected Repos URL */}
+            <div className="flex flex-col sm:flex-row sm:space-x-6 text-sm text-gray-500">
+              <div className="flex items-center">
+                <LucideReact.Calendar className="mr-1" size={14} />
+                <span>Created: {formatDate(secret.created_at)}</span>
+              </div>
+              <div className="flex items-center mt-2 sm:mt-0">
+                <LucideReact.Clock className="mr-1" size={14} />
+                <span>Updated: {formatDate(secret.updated_at)}</span>
+              </div>
+              {secret.visibility === 'selected' && (
+                <div className="flex items-center mt-2 sm:mt-0 max-w-xs">
+                  <LucideReact.Link className="mr-1" size={14} />
+                  <span
+                    className="truncate"
+                    title={secret.selected_repositories_url}
+                  >
+                    {secret.selected_repositories_url}
                   </span>
                 </div>
-              </div>
-              <div className="mt-2 flex flex-col sm:flex-row sm:space-x-6 text-gray-500 text-sm">
-                <div className="flex items-center">
-                  <LucideReact.Calendar size={16} className="mr-1" />
-                  <span>Created: {formatDate(secret.created_at)}</span>
-                </div>
-                <div className="flex items-center mt-1 sm:mt-0">
-                  <LucideReact.Calendar size={16} className="mr-1" />
-                  <span>Updated: {formatDate(secret.updated_at)}</span>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

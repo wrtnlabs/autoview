@@ -1,57 +1,52 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * A public SSH key used to sign Git commits
-   *
-   * @title SSH Signing Key
-   */
-  export type ssh_signing_key = {
-    key: string;
-    id: number & tags.Type<"int32">;
-    title: string;
-    created_at: string & tags.Format<"date-time">;
-  };
+    /**
+     * A public SSH key used to sign Git commits
+     *
+     * @title SSH Signing Key
+    */
+    export interface ssh_signing_key {
+        key: string;
+        id: number & tags.Type<"int32">;
+        title: string;
+        created_at: string & tags.Format<"date-time">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ssh_signing_key;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDate = new Date(value.created_at).toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
+  const formattedDate = new Date(value.created_at).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {/* Title Section */}
-      <div className="flex items-center space-x-2">
-        <LucideReact.Key className="text-gray-500" size={20} />
-        <h2 className="text-lg font-medium text-gray-800 truncate">
+      <div className="flex items-center gap-2">
+        <LucideReact.Key size={20} className="text-gray-500" />
+        <h3 className="text-lg font-semibold text-gray-800 truncate">
           {value.title}
-        </h2>
+        </h3>
       </div>
-
-      {/* Creation Date */}
-      <div className="flex items-center mt-1 text-gray-500 text-sm">
-        <LucideReact.Calendar className="mr-1" size={16} />
+      <div className="mt-1 flex items-center text-sm text-gray-600 gap-1">
+        <LucideReact.Calendar size={16} />
         <span>{formattedDate}</span>
       </div>
-
-      {/* Public Key Display */}
-      <div className="mt-4">
-        <label className="block text-gray-700 text-sm font-medium">
-          Public SSH Key
-        </label>
-        <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200 font-mono text-xs text-gray-800 overflow-x-auto">
-          {value.key}
-        </div>
+      <div className="mt-4 text-xs font-mono text-gray-800 bg-gray-100 p-2 rounded-lg overflow-x-auto whitespace-pre break-all max-h-40">
+        {value.key}
       </div>
     </div>
   );
+  // 3. Return the React element.
+  //    All displayed data is appropriately filtered, transformed, and formatted.
 }

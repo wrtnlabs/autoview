@@ -1,84 +1,93 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * A hosted compute network configuration.
-   *
-   * @title Hosted compute network configuration
-   */
-  export type network_configuration = {
     /**
-     * The unique identifier of the network configuration.
-     */
-    id: string;
-    /**
-     * The name of the network configuration.
-     */
-    name: string;
-    /**
-     * The hosted compute service the network configuration supports.
-     */
-    compute_service?: "none" | "actions" | "codespaces";
-    /**
-     * The unique identifier of each network settings in the configuration.
-     */
-    network_settings_ids?: string[];
-    /**
-     * The time at which the network configuration was created, in ISO 8601 format.
-     */
-    created_on: (string & tags.Format<"date-time">) | null;
-  };
+     * A hosted compute network configuration.
+     *
+     * @title Hosted compute network configuration
+    */
+    export interface network_configuration {
+        /**
+         * The unique identifier of the network configuration.
+        */
+        id: string;
+        /**
+         * The name of the network configuration.
+        */
+        name: string;
+        /**
+         * The hosted compute service the network configuration supports.
+        */
+        compute_service?: "none" | "actions" | "codespaces";
+        /**
+         * The unique identifier of each network settings in the configuration.
+        */
+        network_settings_ids?: string[];
+        /**
+         * The time at which the network configuration was created, in ISO 8601 format.
+        */
+        created_on: (string & tags.Format<"date-time">) | null;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.network_configuration;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const computeServiceLabel: string = value.compute_service
-    ? value.compute_service.charAt(0).toUpperCase() +
-      value.compute_service.slice(1)
-    : "None";
-  const networkSettingsCount: number = value.network_settings_ids?.length ?? 0;
-  const createdOnDisplay: string = value.created_on
-    ? new Date(value.created_on).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+  // 1. Data aggregation/transformation
+  const settingsCount = value.network_settings_ids?.length ?? 0;
+  const formattedDate = value.created_on
+    ? new Date(value.created_on).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
       })
-    : "Unknown";
+    : 'Unknown';
+
+  const serviceMap = {
+    none: {
+      label: 'No Hosted Service',
+      icon: LucideReact.XCircle,
+      color: 'text-gray-400',
+    },
+    actions: {
+      label: 'GitHub Actions',
+      icon: LucideReact.Activity,
+      color: 'text-blue-500',
+    },
+    codespaces: {
+      label: 'Codespaces',
+      icon: LucideReact.Code,
+      color: 'text-purple-500',
+    },
+  } as const;
+  type ServiceKey = keyof typeof serviceMap;
+  const serviceKey = (value.compute_service ?? 'none') as ServiceKey;
+  const { label: serviceLabel, icon: ServiceIcon, color: serviceColor } =
+    serviceMap[serviceKey];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
-  const containerClasses =
-    "p-4 bg-white rounded-lg shadow-md text-gray-800 max-w-sm w-full mx-auto space-y-4";
-  const rowClasses = "flex items-center text-sm";
-  const iconClasses = "text-gray-500 mr-2 flex-shrink-0";
-
-  // 3. Return the React element.
   return (
-    <div className={containerClasses}>
-      <div className="text-xl font-semibold truncate">{value.name}</div>
-
-      <div className={rowClasses}>
-        <LucideReact.Code size={16} className={iconClasses} />
-        <span className="font-medium">Compute Service:</span>
-        <span className="ml-1">{computeServiceLabel}</span>
-      </div>
-
-      <div className={rowClasses}>
-        <LucideReact.Settings size={16} className={iconClasses} />
-        <span className="font-medium">Network Settings:</span>
-        <span className="ml-1">{networkSettingsCount}</span>
-      </div>
-
-      <div className={rowClasses}>
-        <LucideReact.Calendar size={16} className={iconClasses} />
-        <span className="font-medium">Created On:</span>
-        <span className="ml-1">{createdOnDisplay}</span>
+    <div className="max-w-sm w-full bg-white p-4 rounded-lg shadow-md mx-auto">
+      <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
+      <div className="mt-3 flex flex-col space-y-2">
+        <div className="flex items-center gap-2 text-sm">
+          <ServiceIcon className={serviceColor} size={16} strokeWidth={2} />
+          <span className="text-gray-700">{serviceLabel}</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <LucideReact.List className="text-gray-500" size={16} strokeWidth={2} />
+          <span className="text-gray-700">
+            {settingsCount > 0
+              ? `${settingsCount} setting${settingsCount > 1 ? 's' : ''}`
+              : 'No settings'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-sm">
+          <LucideReact.Calendar className="text-gray-500" size={16} strokeWidth={2} />
+          <span className="text-gray-700">Created on {formattedDate}</span>
+        </div>
       </div>
     </div>
   );

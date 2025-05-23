@@ -1,90 +1,102 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Runner Application
-   *
-   * @title Runner Application
-   */
-  export type runner_application = {
-    os: string;
-    architecture: string;
-    download_url: string;
-    filename: string;
     /**
-     * A short lived bearer token used to download the runner, if needed.
-     */
-    temp_download_token?: string;
-    sha256_checksum?: string;
-  };
+     * Runner Application
+     *
+     * @title Runner Application
+    */
+    export interface runner_application {
+        os: string;
+        architecture: string;
+        download_url: string;
+        filename: string;
+        /**
+         * A short lived bearer token used to download the runner, if needed.
+        */
+        temp_download_token?: string;
+        sha256_checksum?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner_application[];
 
-// The component name must always be "VisualComponent"
+
+
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Handle empty state
-  if (!value || value.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-6 text-gray-500">
-        <LucideReact.AlertCircle size={24} className="flex-shrink-0" />
-        <span className="ml-2 text-sm">No runner applications available</span>
-      </div>
-    );
-  }
+  // 1. Derived constants
+  const totalCount = value.length;
+  const hasItems = totalCount > 0;
 
-  // 2. Sort runners by OS then architecture for consistent display
-  const sortedRunners = [...value].sort((a, b) => {
-    const osCompare = a.os.localeCompare(b.os);
-    return osCompare !== 0
-      ? osCompare
-      : a.architecture.localeCompare(b.architecture);
-  });
-
-  // 3. Compose the visual structure using JSX and Tailwind CSS
+  // 2. JSX structure
   return (
     <div className="space-y-4">
-      {sortedRunners.map((runner, idx) => (
-        <div
-          key={`${runner.os}-${runner.architecture}-${idx}`}
-          className="flex flex-col sm:flex-row sm:justify-between p-4 bg-white border border-gray-200 rounded-lg shadow-sm"
-        >
-          {/* Left section: OS / Architecture and Filename */}
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <LucideReact.Cpu size={20} className="text-gray-600" />
-              <h3 className="text-lg font-medium text-gray-900">
-                {runner.os} / {runner.architecture}
-              </h3>
-            </div>
-            <p className="mt-1 text-sm text-gray-700 truncate">
-              {runner.filename}
-            </p>
-          </div>
+      {/* Header with total count */}
+      <div className="flex items-center text-xl font-semibold text-gray-700">
+        <LucideReact.DownloadCloud size={24} className="mr-2 text-blue-500" />
+        <span>Runner Applications ({totalCount})</span>
+      </div>
 
-          {/* Right section: Download URL and optional checksum */}
-          <div className="mt-4 sm:mt-0 sm:ml-6 flex-1 space-y-2 text-sm text-gray-600">
-            <div className="flex items-start gap-2">
-              <LucideReact.Link
-                size={16}
-                className="text-gray-400 flex-shrink-0"
-              />
-              <code className="break-all">{runner.download_url}</code>
-            </div>
-            {runner.sha256_checksum && (
-              <div className="flex items-center gap-2">
-                <LucideReact.Hash
-                  size={16}
-                  className="text-gray-400 flex-shrink-0"
-                />
-                <span className="font-mono truncate">
-                  {runner.sha256_checksum}
+      {/* Empty state */}
+      {!hasItems ? (
+        <div className="flex items-center justify-center text-gray-400 py-8">
+          <LucideReact.AlertCircle size={24} className="mr-2" />
+          <span>No runner applications available.</span>
+        </div>
+      ) : (
+        /* List of runner_application cards */
+        value.map((runner, idx) => {
+          // Shortened SHA-256 checksum
+          const checksum = runner.sha256_checksum
+            ? `${runner.sha256_checksum.slice(0, 8)}…${runner.sha256_checksum.slice(-8)}`
+            : null;
+
+          return (
+            <div
+              key={`${runner.os}-${runner.architecture}-${idx}`}
+              className="p-4 bg-white rounded-lg shadow-md"
+            >
+              {/* OS / Architecture */}
+              <div className="flex items-center gap-2 mb-2">
+                <LucideReact.Computer size={20} className="text-gray-500" />
+                <span className="text-lg font-medium text-gray-800">
+                  {runner.os} / {runner.architecture}
                 </span>
               </div>
-            )}
-          </div>
-        </div>
-      ))}
+
+              {/* Details */}
+              <div className="space-y-1 text-sm text-gray-600">
+                {/* Filename */}
+                <div className="flex items-center gap-2">
+                  <LucideReact.FileText size={16} className="text-gray-400" />
+                  <span className="truncate">{runner.filename}</span>
+                </div>
+
+                {/* Temporary download token */}
+                {runner.temp_download_token && (
+                  <div className="flex items-center gap-2">
+                    <LucideReact.Key size={16} className="text-gray-400" />
+                    <span className="font-mono">{runner.temp_download_token}</span>
+                  </div>
+                )}
+
+                {/* Download URL */}
+                <div className="flex items-center gap-2">
+                  <LucideReact.Link size={16} className="text-gray-400" />
+                  <span className="break-all">{runner.download_url}</span>
+                </div>
+
+                {/* SHA-256 checksum */}
+                {checksum && (
+                  <div className="flex items-center gap-2">
+                    <LucideReact.Hash size={16} className="text-gray-400" />
+                    <span className="font-mono">{checksum}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })
+      )}
     </div>
   );
 }

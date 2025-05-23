@@ -1,156 +1,192 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Organization Invitation
-   *
-   * @title Organization Invitation
-   */
-  export type organization_invitation = {
-    id: number & tags.Type<"int32">;
-    login: string | null;
-    email: string | null;
-    role: string;
-    created_at: string;
-    failed_at?: string | null;
-    failed_reason?: string | null;
-    inviter: AutoViewInputSubTypes.simple_user;
-    team_count: number & tags.Type<"int32">;
-    node_id: string;
-    invitation_teams_url: string;
-    invitation_source?: string;
-  };
-  /**
-   * A GitHub user.
-   *
-   * @title Simple User
-   */
-  export type simple_user = {
-    name?: string | null;
-    email?: string | null;
-    login: string;
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    avatar_url: string & tags.Format<"uri">;
-    gravatar_id: string | null;
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    followers_url: string & tags.Format<"uri">;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string & tags.Format<"uri">;
-    organizations_url: string & tags.Format<"uri">;
-    repos_url: string & tags.Format<"uri">;
-    events_url: string;
-    received_events_url: string & tags.Format<"uri">;
-    type: string;
-    site_admin: boolean;
-    starred_at?: string;
-    user_view_type?: string;
-  };
+    /**
+     * Organization Invitation
+     *
+     * @title Organization Invitation
+    */
+    export interface organization_invitation {
+        id: number & tags.Type<"int32">;
+        login: string | null;
+        email: string | null;
+        role: string;
+        created_at: string;
+        failed_at?: string | null;
+        failed_reason?: string | null;
+        inviter: AutoViewInputSubTypes.simple_user;
+        team_count: number & tags.Type<"int32">;
+        node_id: string;
+        invitation_teams_url: string;
+        invitation_source?: string;
+    }
+    /**
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export interface simple_user {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.organization_invitation;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const displayLogin = value.login ?? "N/A";
-  const formattedDate = new Date(value.created_at).toLocaleDateString(
-    undefined,
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    },
-  );
   const isFailed = Boolean(value.failed_at);
   const statusText = isFailed ? "Failed" : "Pending";
   const statusIcon = isFailed ? (
-    <LucideReact.XCircle className="text-red-500" size={16} />
+    <LucideReact.AlertTriangle className="text-red-500" size={16} />
   ) : (
     <LucideReact.Clock className="text-amber-500" size={16} />
   );
-  const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    value.inviter.login,
-  )}&background=0D8ABC&color=fff`;
+  const createdDate = new Date(value.created_at).toLocaleString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const failedDate = value.failed_at
+    ? new Date(value.failed_at).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
+  const inviterName = value.inviter.name || value.inviter.login;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  //    Utilize semantic HTML elements where appropriate.
   return (
-    <div className="max-w-sm p-4 bg-white rounded-lg shadow-md space-y-3">
-      {/* Header: Invited User and Role */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <LucideReact.User className="text-gray-500" size={20} />
-          <h3 className="text-lg font-semibold text-gray-800 truncate">
-            {displayLogin}
-          </h3>
-        </div>
-        <div className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-          {value.role}
-        </div>
-      </div>
-
-      {/* Email */}
-      {value.email && (
-        <div className="flex items-center text-gray-600 text-sm truncate">
-          <LucideReact.Mail size={16} />
-          <span className="ml-1">{value.email}</span>
-        </div>
-      )}
-
-      {/* Status and Date */}
-      <div className="flex items-center text-sm text-gray-700 space-x-2">
-        <div className="flex items-center gap-1">
+    <div className="w-full sm:max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Status */}
+      <div className="flex items-center justify-between mb-4">
+        <div className={`flex items-center ${isFailed ? "text-red-600" : "text-amber-600"}`}>
           {statusIcon}
-          <span className={isFailed ? "text-red-600" : "text-amber-700"}>
-            {statusText}
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <LucideReact.Calendar className="text-gray-400" size={16} />
-          <span className="text-gray-600">{formattedDate}</span>
+          <span className="ml-2 font-semibold">{statusText}</span>
         </div>
       </div>
 
-      {/* Failure Reason */}
-      {isFailed && value.failed_reason && (
-        <p className="text-xs text-red-600 line-clamp-2">
-          {value.failed_reason}
-        </p>
-      )}
-
-      {/* Team Count */}
-      <div className="flex items-center text-sm text-gray-700">
-        <LucideReact.Users className="text-gray-500" size={16} />
-        <span className="ml-1">
-          {value.team_count} team{value.team_count !== 1 ? "s" : ""}
-        </span>
-      </div>
-
-      {/* Invitation Source */}
-      {value.invitation_source && (
-        <div className="text-xs text-gray-500">
-          Source: {value.invitation_source}
+      <div className="grid grid-cols-1 gap-4">
+        {/* Invitee */}
+        <div className="space-y-1">
+          <div className="text-sm font-medium text-gray-500">Invitee</div>
+          <div className="text-gray-900 font-medium">
+            {value.login || "—"}
+          </div>
+          {value.email && (
+            <div className="flex items-center text-gray-700">
+              <LucideReact.Mail size={16} className="mr-1" />
+              <span>{value.email}</span>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Inviter Info */}
-      <div className="flex items-center mt-2">
-        <img
-          src={value.inviter.avatar_url}
-          alt={value.inviter.login}
-          className="w-8 h-8 rounded-full object-cover"
-          onError={(e) => {
-            e.currentTarget.onerror = null;
-            e.currentTarget.src = avatarFallback;
-          }}
-        />
-        <span className="ml-2 text-sm text-gray-800 truncate">
-          Invited by {value.inviter.login}
-        </span>
+        {/* Role */}
+        <div className="space-y-1">
+          <div className="text-sm font-medium text-gray-500">Role</div>
+          <div className="flex items-center text-gray-900">
+            <LucideReact.UserCheck size={16} className="mr-1" />
+            <span className="capitalize">{value.role}</span>
+          </div>
+        </div>
+
+        {/* Created At */}
+        <div className="space-y-1">
+          <div className="text-sm font-medium text-gray-500">Created</div>
+          <div className="flex items-center text-gray-900">
+            <LucideReact.Calendar size={16} className="mr-1" />
+            <span>{createdDate}</span>
+          </div>
+        </div>
+
+        {/* Teams Invited */}
+        <div className="space-y-1">
+          <div className="text-sm font-medium text-gray-500">Teams Invited</div>
+          <div className="flex items-center text-gray-900">
+            <LucideReact.Users size={16} className="mr-1" />
+            <span>{value.team_count}</span>
+          </div>
+        </div>
+
+        {/* Invitation Source */}
+        {value.invitation_source && (
+          <div className="space-y-1">
+            <div className="text-sm font-medium text-gray-500">Source</div>
+            <div className="flex items-center text-gray-900">
+              <LucideReact.Link size={16} className="mr-1" />
+              <span>{value.invitation_source}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Failure Details */}
+        {isFailed && (
+          <div className="space-y-1 pt-2 border-t border-gray-100 text-red-600">
+            <div className="text-sm font-medium text-red-500">Failure Reason</div>
+            <div className="flex items-center">
+              <LucideReact.AlertTriangle size={16} className="mr-1" />
+              <span>{value.failed_reason || "Unknown reason"}</span>
+            </div>
+            {failedDate && (
+              <div className="flex items-center text-gray-900">
+                <LucideReact.Calendar size={16} className="mr-1" />
+                <span>{failedDate}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Inviter Info */}
+        <div className="col-span-full pt-4 border-t border-gray-100">
+          <div className="text-sm font-medium text-gray-500 mb-2">Invited By</div>
+          <div className="flex items-center">
+            <img
+              src={value.inviter.avatar_url}
+              alt={`${inviterName} avatar`}
+              onError={(e) => {
+                const img = e.currentTarget;
+                img.onerror = null;
+                img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                  inviterName
+                )}&background=0D8ABC&color=fff`;
+              }}
+              className="w-10 h-10 rounded-full object-cover"
+            />
+            <div className="ml-3">
+              <div className="text-gray-900 font-medium">{inviterName}</div>
+              <div className="text-gray-500 text-sm">{value.inviter.login}</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

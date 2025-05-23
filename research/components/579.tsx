@@ -1,73 +1,89 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Actions OIDC subject customization for a repository
-   *
-   * @title Actions OIDC subject customization for a repository
-   */
-  export type oidc_custom_sub_repo = {
     /**
-     * Whether to use the default template or not. If `true`, the `include_claim_keys` field is ignored.
-     */
-    use_default: boolean;
-    /**
-     * Array of unique strings. Each claim key can only contain alphanumeric characters and underscores.
-     */
-    include_claim_keys?: string[];
-  };
+     * Actions OIDC subject customization for a repository
+     *
+     * @title Actions OIDC subject customization for a repository
+    */
+    export interface oidc_custom_sub_repo {
+        /**
+         * Whether to use the default template or not. If `true`, the `include_claim_keys` field is ignored.
+        */
+        use_default: boolean;
+        /**
+         * Array of unique strings. Each claim key can only contain alphanumeric characters and underscores.
+        */
+        include_claim_keys?: string[];
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.oidc_custom_sub_repo;
 
-export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define derived constants for clarity
-  const useDefault = value.use_default;
-  const claimKeys = value.include_claim_keys ?? [];
 
-  // 2. Render the visual structure
+
+// The component name must always be "VisualComponent"
+export default function VisualComponent(value: AutoViewInput): React.ReactNode {
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const usesDefault = value.use_default;
+  const keys = value.include_claim_keys ?? [];
+  const hasCustomKeys = !usesDefault && keys.length > 0;
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white rounded-lg shadow p-4 sm:p-6 max-w-md mx-auto">
+    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
       {/* Header */}
-      <div className="flex items-center mb-4">
-        <LucideReact.Settings className="text-gray-600 mr-2" size={20} />
-        <h2 className="text-lg font-semibold text-gray-800">
+      <div className="flex items-center gap-2 mb-4">
+        <LucideReact.Shield className="text-blue-500" size={20} aria-hidden="true" />
+        <h2 className="text-lg font-semibold text-gray-900">
           OIDC Subject Customization
         </h2>
       </div>
 
-      {/* Status */}
-      <div className="flex items-center mb-4">
-        {useDefault ? (
-          <LucideReact.CheckCircle className="text-green-500 mr-2" size={16} />
+      {/* Default usage indicator */}
+      <div className="flex items-center mb-2">
+        <span className="font-medium text-gray-700">Use Default Template:</span>
+        {usesDefault ? (
+          <LucideReact.CheckCircle
+            className="ml-2 text-green-500"
+            size={16}
+            aria-label="Yes"
+          />
         ) : (
-          <LucideReact.Code className="text-blue-500 mr-2" size={16} />
+          <LucideReact.XCircle
+            className="ml-2 text-red-500"
+            size={16}
+            aria-label="No"
+          />
         )}
-        <span className="text-sm text-gray-700">
-          {useDefault ? "Default template enabled" : "Custom template enabled"}
-        </span>
       </div>
 
-      {/* Included Claim Keys */}
-      {!useDefault && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">
-            Included Claim Keys
-          </h3>
-          {claimKeys.length > 0 ? (
-            <ul className="flex flex-wrap gap-2">
-              {claimKeys.map((key) => (
-                <li
-                  key={key}
-                  className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
-                >
-                  {key}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-gray-500">No claim keys specified.</p>
-          )}
+      {/* Conditional details */}
+      {usesDefault ? (
+        <p className="text-sm text-gray-500">
+          Default template is in use. Any custom claim keys are ignored.
+        </p>
+      ) : hasCustomKeys ? (
+        <div className="mt-2">
+          <span className="font-medium text-gray-700">Included Claim Keys:</span>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {keys.map((key) => (
+              <span
+                key={key}
+                className="bg-gray-100 text-gray-800 px-2 py-0.5 rounded-full text-sm"
+              >
+                {key}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center mt-2 text-sm text-gray-500">
+          <LucideReact.AlertTriangle
+            className="mr-1 text-amber-500"
+            size={16}
+            aria-hidden="true"
+          />
+          <span>No custom claim keys specified.</span>
         </div>
       )}
     </div>

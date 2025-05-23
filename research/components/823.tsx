@@ -1,178 +1,188 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Projects are a way to organize columns and cards of work.
-   *
-   * @title Project
-   */
-  export type project = {
-    owner_url: string & tags.Format<"uri">;
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    columns_url: string & tags.Format<"uri">;
-    id: number & tags.Type<"int32">;
-    node_id: string;
     /**
-     * Name of the project
-     */
-    name: string;
+     * Projects are a way to organize columns and cards of work.
+     *
+     * @title Project
+    */
+    export interface project {
+        owner_url: string & tags.Format<"uri">;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        columns_url: string & tags.Format<"uri">;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        /**
+         * Name of the project
+        */
+        name: string;
+        /**
+         * Body of the project
+        */
+        body: string | null;
+        number: number & tags.Type<"int32">;
+        /**
+         * State of the project; either 'open' or 'closed'
+        */
+        state: string;
+        creator: AutoViewInputSubTypes.nullable_simple_user;
+        created_at: string & tags.Format<"date-time">;
+        updated_at: string & tags.Format<"date-time">;
+        /**
+         * The baseline permission that all organization members have on this project. Only present if owner is an organization.
+        */
+        organization_permission?: "read" | "write" | "admin" | "none";
+        /**
+         * Whether or not this project can be seen by everyone. Only present if owner is an organization.
+        */
+        "private"?: boolean;
+    }
     /**
-     * Body of the project
-     */
-    body: string | null;
-    number: number & tags.Type<"int32">;
-    /**
-     * State of the project; either 'open' or 'closed'
-     */
-    state: string;
-    creator: AutoViewInputSubTypes.nullable_simple_user;
-    created_at: string & tags.Format<"date-time">;
-    updated_at: string & tags.Format<"date-time">;
-    /**
-     * The baseline permission that all organization members have on this project. Only present if owner is an organization.
-     */
-    organization_permission?: "read" | "write" | "admin" | "none";
-    /**
-     * Whether or not this project can be seen by everyone. Only present if owner is an organization.
-     */
-    private?: boolean;
-  };
-  /**
-   * A GitHub user.
-   *
-   * @title Simple User
-   */
-  export type nullable_simple_user = {
-    name?: string | null;
-    email?: string | null;
-    login: string;
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    avatar_url: string & tags.Format<"uri">;
-    gravatar_id: string | null;
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    followers_url: string & tags.Format<"uri">;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string & tags.Format<"uri">;
-    organizations_url: string & tags.Format<"uri">;
-    repos_url: string & tags.Format<"uri">;
-    events_url: string;
-    received_events_url: string & tags.Format<"uri">;
-    type: string;
-    site_admin: boolean;
-    starred_at?: string;
-    user_view_type?: string;
-  } | null;
+     * A GitHub user.
+     *
+     * @title Simple User
+    */
+    export type nullable_simple_user = {
+        name?: string | null;
+        email?: string | null;
+        login: string;
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        starred_at?: string;
+        user_view_type?: string;
+    } | null;
 }
 export type AutoViewInput = AutoViewInputSubTypes.project[];
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formatDate = (dateStr: string): string => {
-    try {
-      return new Date(dateStr).toLocaleDateString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
+  const formatDate = (dateStr: string): string =>
+    new Date(dateStr).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {value.map((project) => {
-        const { id, name, state, body, creator, created_at, updated_at } =
-          project;
-        const creatorName = creator?.login ?? "Unknown";
-        const avatarUrl =
-          creator?.avatar_url ??
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(
-            creatorName,
-          )}&background=0D8ABC&color=fff`;
-
-        return (
+    <div className="space-y-4">
+      {value.length === 0 ? (
+        <div className="flex flex-col items-center text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <span className="mt-2 text-sm">No projects available</span>
+        </div>
+      ) : (
+        value.map((project) => (
           <div
-            key={id}
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow flex flex-col"
+            key={project.id}
+            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-colors flex flex-col md:flex-row md:items-center md:justify-between gap-4"
           >
-            <div className="flex items-center justify-between mb-2">
-              <h2
-                className="text-lg font-semibold text-gray-800 truncate"
-                title={name}
-              >
-                {name}
-              </h2>
-              <span
-                className={`inline-flex items-center text-xs font-medium px-2 py-1 rounded-full ${
-                  state === "open"
-                    ? "bg-green-100 text-green-800"
-                    : "bg-red-100 text-red-800"
-                }`}
-              >
-                {state === "open" ? (
-                  <>
-                    <LucideReact.CheckCircle
-                      className="mr-1"
-                      size={12}
-                      aria-label="Open"
-                    />
-                    <span>Open</span>
-                  </>
+            <div className="flex items-start md:items-center space-x-3 flex-1">
+              {project.private ? (
+                <LucideReact.Lock className="text-gray-500" size={20} />
+              ) : (
+                <LucideReact.Folder className="text-gray-500" size={20} />
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  {project.name}
+                </h3>
+                <div className="flex flex-wrap items-center text-sm text-gray-500 space-x-4 mt-1">
+                  <div className="flex items-center">
+                    <LucideReact.Calendar size={14} className="mr-1" />
+                    <span>{formatDate(project.created_at)}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Edit3 size={14} className="mr-1" />
+                    <span>{formatDate(project.updated_at)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center text-sm text-gray-700">
+                <LucideReact.Hash
+                  className="mr-1 text-gray-500"
+                  size={14}
+                />
+                <span>#{project.number}</span>
+              </div>
+              <div className="flex items-center text-sm">
+                {project.state === "open" ? (
+                  <LucideReact.CheckCircle
+                    className="mr-1 text-green-500"
+                    size={14}
+                  />
                 ) : (
-                  <>
-                    <LucideReact.XCircle
-                      className="mr-1"
-                      size={12}
-                      aria-label="Closed"
-                    />
-                    <span>Closed</span>
-                  </>
+                  <LucideReact.XCircle
+                    className="mr-1 text-red-500"
+                    size={14}
+                  />
                 )}
-              </span>
-            </div>
-
-            {body && (
-              <p className="text-sm text-gray-600 line-clamp-2 mb-4">{body}</p>
-            )}
-
-            <div className="flex items-center mb-4">
-              <img
-                src={avatarUrl}
-                alt={creatorName}
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).src =
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                      creatorName,
-                    )}&background=0D8ABC&color=fff`;
-                }}
-                className="w-6 h-6 rounded-full object-cover mr-2"
-              />
-              <span className="text-sm text-gray-700">{creatorName}</span>
-            </div>
-
-            <div className="mt-auto flex flex-col space-y-1 text-xs text-gray-500">
-              <div className="flex items-center">
-                <LucideReact.Calendar className="mr-1" size={14} />
-                <span>Created: {formatDate(created_at)}</span>
+                <span
+                  className={
+                    project.state === "open"
+                      ? "text-green-600"
+                      : "text-red-600"
+                  }
+                >
+                  {project.state.charAt(0).toUpperCase() +
+                    project.state.slice(1)}
+                </span>
               </div>
-              <div className="flex items-center">
-                <LucideReact.Calendar className="mr-1" size={14} />
-                <span>Updated: {formatDate(updated_at)}</span>
+              <div className="flex items-center text-sm">
+                {project.creator && project.creator.avatar_url ? (
+                  <img
+                    src={project.creator.avatar_url}
+                    alt={project.creator.login}
+                    className="w-6 h-6 rounded-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        project.creator?.login || ""
+                      )}&background=cccccc&color=ffffff`;
+                    }}
+                  />
+                ) : (
+                  <LucideReact.User
+                    className="text-gray-500"
+                    size={16}
+                  />
+                )}
+                <span className="ml-1 text-gray-700">
+                  {project.creator?.login || "Unknown"}
+                </span>
               </div>
             </div>
+
+            {project.body ? (
+              <p className="mt-2 md:mt-0 md:ml-6 text-sm text-gray-600 line-clamp-2">
+                {project.body}
+              </p>
+            ) : null}
           </div>
-        );
-      })}
+        ))
+      )}
     </div>
   );
 }

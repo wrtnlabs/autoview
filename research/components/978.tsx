@@ -1,70 +1,65 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Social media account
-   *
-   * @title Social account
-   */
-  export type social_account = {
-    provider: string;
-    url: string;
-  };
+    /**
+     * Social media account
+     *
+     * @title Social account
+    */
+    export interface social_account {
+        provider: string;
+        url: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.social_account[];
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  //    - Capitalize provider names
-  //    - Extract a short domain for URL display
-  const formattedAccounts = value.map((account) => {
-    const providerName =
-      account.provider.charAt(0).toUpperCase() +
-      account.provider.slice(1).toLowerCase();
-    let domain = account.url;
-    try {
-      domain = new URL(account.url).hostname;
-    } catch {
-      // fallback to full URL if parsing fails
-    }
-    return { ...account, providerName, domain };
-  });
+  // 1. Data aggregation/transformation
+  const validAccounts = value.filter(
+    (acc): acc is AutoViewInputSubTypes.social_account =>
+      typeof acc.provider === "string" && typeof acc.url === "string"
+  );
+  const capitalize = (s: string) =>
+    s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    - Handle empty state
-  if (formattedAccounts.length === 0) {
+  // 2. Render empty state if no data
+  if (validAccounts.length === 0) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow flex flex-col items-center text-gray-500">
-        <LucideReact.AlertCircle size={24} />
-        <span className="mt-2 text-sm">No social accounts available</span>
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} aria-hidden="true" />
+        <p className="mt-2 text-sm">No social accounts available.</p>
       </div>
     );
   }
 
-  // 3. Render the list of social accounts
+  // 3. Compose the visual structure
   return (
-    <div className="p-4 bg-white rounded-lg shadow">
-      <h2 className="flex items-center text-lg font-semibold text-gray-800 mb-4">
-        <LucideReact.Users size={20} className="mr-2 text-gray-600" />
+    <div className="p-4 bg-white rounded-lg shadow-sm">
+      <h2 className="mb-3 text-lg font-medium text-gray-900">
         Social Accounts
       </h2>
-      <ul className="space-y-3">
-        {formattedAccounts.map((acc, idx) => (
-          <li key={idx} className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <LucideReact.Link size={16} className="text-gray-400" />
-              <span className="font-medium text-gray-700">
-                {acc.providerName}
-              </span>
+      <ul className="space-y-2">
+        {validAccounts.map((acc, idx) => (
+          <li
+            key={idx}
+            className="flex items-start gap-3 p-3 bg-gray-50 rounded-md"
+          >
+            <LucideReact.Link
+              size={20}
+              className="flex-shrink-0 text-gray-400"
+              aria-hidden="true"
+            />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-800">
+                {capitalize(acc.provider)}
+              </p>
+              <p className="mt-1 text-sm text-blue-600 break-all truncate">
+                {acc.url}
+              </p>
             </div>
-            <span
-              className="text-sm text-gray-600 truncate max-w-xs"
-              title={acc.url}
-            >
-              {acc.domain}
-            </span>
           </li>
         ))}
       </ul>

@@ -1,136 +1,120 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type BotsView = {
-    next?: number;
-    bots?: AutoViewInputSubTypes.bot.CustomBot[];
-  };
-  export namespace bot {
-    export type CustomBot = {
-      id?: string;
-      channelId?: string;
-      name: string;
-      description?: string;
-      nameDescI18nMap?: {
-        [key: string]: AutoViewInputSubTypes.NameDesc;
-      };
-      createdAt?: number;
-      avatar?: AutoViewInputSubTypes.TinyFile;
-      color: string & tags.Default<"#123456">;
-      avatarUrl?: string;
-      ai?: boolean;
-    };
-  }
-  export type NameDesc = {
-    name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
-    description?: string;
-  };
-  export type TinyFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32">;
-    height?: number & tags.Type<"int32">;
-  };
+    export interface BotsView {
+        next?: number;
+        bots?: AutoViewInputSubTypes.bot.CustomBot[];
+    }
+    export namespace bot {
+        export interface CustomBot {
+            id?: string;
+            channelId?: string;
+            name: string;
+            description?: string;
+            nameDescI18nMap?: {
+                [key: string]: AutoViewInputSubTypes.NameDesc;
+            };
+            createdAt?: number;
+            avatar?: AutoViewInputSubTypes.TinyFile;
+            color: string & tags.Default<"#123456">;
+            avatarUrl?: string;
+            ai?: boolean;
+        }
+    }
+    export interface NameDesc {
+        name: string & tags.Pattern<"^[^@#$%:/\\\\]+$">;
+        description?: string;
+    }
+    export interface TinyFile {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.BotsView;
 
-// The component name must always be "VisualComponent"
+
+
+// The component name is "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  // 1. Derived constants and helper functions
   const bots = value.bots ?? [];
+  const formatDate = (timestamp?: number): string =>
+    timestamp
+      ? new Date(timestamp).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : "Unknown";
+  const getPlaceholderAvatar = (name: string): string =>
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+      name,
+    )}&background=0D8ABC&color=fff`;
 
-  function formatDate(timestamp?: number) {
-    if (!timestamp) return null;
-    return new Date(timestamp).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
-
-  // Generate a placeholder avatar URL when none is provided
-  function getAvatarUrl(bot: AutoViewInputSubTypes.bot.CustomBot) {
-    if (bot.avatarUrl) return bot.avatarUrl;
-    // Fallback to initials-based avatar with bot.color as background
-    const bg = encodeURIComponent(bot.color.replace("#", ""));
-    const name = encodeURIComponent(bot.name);
-    return `https://ui-avatars.com/api/?name=${name}&background=${bg}&color=fff`;
-  }
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (bots.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-center text-gray-500">
-        <LucideReact.AlertCircle size={48} className="mb-4" />
-        <p className="text-lg">No bots available</p>
-      </div>
-    );
-  }
-
+  // 2. Compose visual structure
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      {bots.map((bot, idx) => {
-        const created = formatDate(bot.createdAt);
-        return (
-          <div
-            key={idx}
-            className="flex flex-col bg-white rounded-lg shadow-md overflow-hidden"
-          >
-            <div className="flex items-center p-4">
-              <div
-                className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
-                style={{ border: `2px solid ${bot.color}` }}
-              >
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {bots.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {bots.map((bot, index) => (
+            <div
+              key={index}
+              className="flex flex-col bg-gray-50 rounded-lg overflow-hidden shadow-sm"
+            >
+              <div className="w-full aspect-square bg-gray-200">
                 <img
-                  src={getAvatarUrl(bot)}
-                  alt={`${bot.name} avatar`}
+                  src={bot.avatarUrl ?? getPlaceholderAvatar(bot.name)}
+                  alt={bot.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src =
-                      "https://placehold.co/80x80/e2e8f0/1e293b?text=Bot";
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = getPlaceholderAvatar(bot.name);
                   }}
                 />
               </div>
-              <div className="ml-4 flex-1">
-                <h3 className="text-lg font-medium text-gray-900 truncate">
-                  {bot.name}
-                </h3>
-                {bot.ai && (
-                  <div className="flex items-center text-gray-500 text-sm mt-1">
-                    <LucideReact.Cpu size={16} className="mr-1" />
-                    <span>AI</span>
-                  </div>
+              <div className="p-4 flex-1 flex flex-col">
+                <div className="flex items-center">
+                  <h3 className="font-semibold text-lg text-gray-800 truncate">
+                    {bot.name}
+                  </h3>
+                  <span
+                    className="w-3 h-3 ml-2 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: bot.color }}
+                  />
+                  {bot.ai && (
+                    <LucideReact.Bot
+                      className="ml-auto text-blue-500"
+                      size={16}
+                      aria-label="AI Bot"
+                    />
+                  )}
+                </div>
+                {bot.description && (
+                  <p className="mt-2 text-sm text-gray-600 line-clamp-3">
+                    {bot.description}
+                  </p>
                 )}
+                <div className="mt-4 text-xs text-gray-500 flex items-center">
+                  <LucideReact.Calendar size={14} className="mr-1" />
+                  <span>{formatDate(bot.createdAt)}</span>
+                </div>
               </div>
             </div>
-            {bot.description && (
-              <p className="px-4 text-gray-600 text-sm line-clamp-2">
-                {bot.description}
-              </p>
-            )}
-            <div className="mt-auto px-4 py-3 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-              {created ? (
-                <div className="flex items-center">
-                  <LucideReact.Calendar size={16} className="mr-1" />
-                  <span>{created}</span>
-                </div>
-              ) : (
-                <span>&nbsp;</span>
-              )}
-              <span
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: bot.color }}
-                title={`Color: ${bot.color}`}
-              />
-            </div>
-          </div>
-        );
-      })}
-      {typeof value.next === "number" && (
-        <div className="col-span-full text-center text-gray-500 mt-4">
-          More bots available...
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center text-gray-500 py-10">
+          <LucideReact.AlertCircle size={48} className="mb-2" />
+          <span>No bots available</span>
+        </div>
+      )}
+
+      {value.next != null && bots.length > 0 && (
+        <div className="mt-4 flex justify-end text-sm text-gray-500">
+          <span>Next token: {value.next}</span>
         </div>
       )}
     </div>

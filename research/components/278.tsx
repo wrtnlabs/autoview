@@ -1,167 +1,118 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type WebhookView = {
-    webhook?: AutoViewInputSubTypes.webhook.Webhook;
-  };
-  export namespace webhook {
-    export type Webhook = {
-      id?: string;
-      channelId?: string;
-      name: string;
-      url: string;
-      token?: string;
-      createdAt?: number;
-      scopes: (
-        | "userChat.opened"
-        | "message.created.userChat"
-        | "message.created.teamChat"
-        | "lead.upserted.contact"
-        | "lead.upserted.subscription"
-        | "lead.deleted"
-        | "member.upserted.contact"
-        | "member.upserted.subscription"
-        | "member.deleted"
-      )[] &
-        tags.UniqueItems;
-      /**
-       * @deprecated
-       */
-      keywords?: string[] &
-        tags.MinItems<1> &
-        tags.MaxItems<20> &
-        tags.UniqueItems;
-      apiVersion: string;
-      lastBlockedAt?: number;
-      blocked?: boolean;
-    };
-  }
+    export interface WebhookView {
+        webhook?: AutoViewInputSubTypes.webhook.Webhook;
+    }
+    export namespace webhook {
+        export interface Webhook {
+            id?: string;
+            channelId?: string;
+            name: string;
+            url: string;
+            token?: string;
+            createdAt?: number;
+            scopes: ("userChat.opened" | "message.created.userChat" | "message.created.teamChat" | "lead.upserted.contact" | "lead.upserted.subscription" | "lead.deleted" | "member.upserted.contact" | "member.upserted.subscription" | "member.deleted")[] & tags.UniqueItems;
+            /**
+             * @deprecated
+            */
+            keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
+            apiVersion: string;
+            lastBlockedAt?: number;
+            blocked?: boolean;
+        }
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.WebhookView;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const webhook = value.webhook;
-  // 1. Handle missing webhook
+  // Helper to format scope keys like "userChat.opened" ⇒ "UserChat Opened"
+  const formatScope = (s: string) =>
+    s
+      .split('.')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  // If there's no webhook object, render an empty state
   if (!webhook) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
-        <LucideReact.AlertCircle size={48} />
-        <span className="mt-2 text-sm">No webhook data available.</span>
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={48} className="mb-2" aria-label="No data" />
+        <span className="text-lg">No webhook data available</span>
       </div>
     );
   }
-
-  // 2. Data transformations and derived constants
-  const createdDate = webhook.createdAt
-    ? new Date(webhook.createdAt).toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
-    : "N/A";
-  const lastBlockedDate = webhook.lastBlockedAt
-    ? new Date(webhook.lastBlockedAt).toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
-      })
+  // Destructure relevant fields
+  const { name, url, apiVersion, scopes, createdAt, blocked, lastBlockedAt } = webhook;
+  // Format dates
+  const formattedCreated = createdAt
+    ? new Date(createdAt).toLocaleString()
+    : 'Unknown';
+  const formattedLastBlocked = lastBlockedAt
+    ? new Date(lastBlockedAt).toLocaleString()
     : null;
-  const isActive = !webhook.blocked;
-  const statusText = isActive ? "Active" : "Blocked";
-  const statusIcon = isActive ? (
-    <LucideReact.CheckCircle
-      className="text-green-500"
-      size={16}
-      aria-label="Active"
-    />
-  ) : (
-    <LucideReact.XCircle
-      className="text-red-500"
-      size={16}
-      aria-label="Blocked"
-    />
-  );
-  const formatScope = (s: string) =>
-    s
-      .split(/[\._]/)
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(" ");
 
-  // 3. Compose visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md max-w-md w-full mx-auto">
-      {/* Header: Name & Status */}
-      <div className="flex items-center justify-between mb-4">
-        <h3
-          className="text-lg font-semibold text-gray-800 truncate"
-          title={webhook.name}
-        >
-          {webhook.name}
-        </h3>
-        <div className="flex items-center space-x-1">
-          {statusIcon}
-          <span className="text-sm text-gray-600">{statusText}</span>
-        </div>
-      </div>
-
-      {/* Core Details */}
-      <div className="space-y-2 text-sm text-gray-700">
-        <div className="flex items-center">
-          <LucideReact.Link
-            size={16}
-            className="text-gray-400 flex-shrink-0"
-            aria-label="Webhook URL"
-          />
-          <span className="ml-2 truncate" title={webhook.url}>
-            {webhook.url}
-          </span>
-        </div>
-        <div className="flex items-center">
-          <LucideReact.Calendar
-            size={16}
-            className="text-gray-400 flex-shrink-0"
-            aria-label="Created At"
-          />
-          <span className="ml-2">Created: {createdDate}</span>
-        </div>
-        {lastBlockedDate && (
-          <div className="flex items-center">
-            <LucideReact.Calendar
-              size={16}
-              className="text-gray-400 flex-shrink-0"
-              aria-label="Last Blocked At"
-            />
-            <span className="ml-2">Last Blocked: {lastBlockedDate}</span>
+    <div className="max-w-md w-full bg-white border border-gray-200 rounded-lg shadow-sm p-4 mx-auto">
+      {/* Header: Name + Status */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+        {blocked ? (
+          <div className="flex items-center text-red-500" title="Blocked">
+            <LucideReact.XCircle size={20} />
+          </div>
+        ) : (
+          <div className="flex items-center text-green-500" title="Active">
+            <LucideReact.CheckCircle size={20} />
           </div>
         )}
-        <div className="flex items-center">
-          <LucideReact.Code
-            size={16}
-            className="text-gray-400 flex-shrink-0"
-            aria-label="API Version"
-          />
-          <span className="ml-2">API Version: {webhook.apiVersion}</span>
-        </div>
+      </div>
+
+      {/* URL */}
+      <div className="mt-3 flex items-center text-gray-600 truncate">
+        <LucideReact.Link size={16} className="mr-1 flex-shrink-0" />
+        <span className="truncate">{url}</span>
+      </div>
+
+      {/* API Version */}
+      <div className="mt-2 text-sm text-gray-500">
+        API Version:&nbsp;
+        <span className="font-medium text-gray-700">{apiVersion}</span>
       </div>
 
       {/* Scopes */}
       <div className="mt-4">
-        <h4 className="text-sm font-medium text-gray-800 mb-1">Scopes</h4>
-        {webhook.scopes.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {webhook.scopes.map((scope, idx) => (
-              <span
-                key={idx}
-                className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full"
-                title={scope}
-              >
-                {formatScope(scope)}
-              </span>
-            ))}
+        <div className="text-sm font-medium text-gray-600 mb-1">Event Scopes</div>
+        <div className="flex flex-wrap gap-2">
+          {scopes.map((scope, idx) => (
+            <span
+              key={idx}
+              className="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded"
+            >
+              {formatScope(scope)}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* Timestamps */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-500">
+        <div className="flex items-center">
+          <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+          <span>Created: {formattedCreated}</span>
+        </div>
+        {formattedLastBlocked && (
+          <div className="flex items-center">
+            <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
+            <span>Last Blocked: {formattedLastBlocked}</span>
           </div>
-        ) : (
-          <span className="text-gray-500 text-sm">No scopes assigned.</span>
         )}
       </div>
     </div>

@@ -1,148 +1,155 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type runner_groups_org = {
-    id: number;
-    name: string;
-    visibility: string;
-    default: boolean;
-    /**
-     * Link to the selected repositories resource for this runner group. Not present unless visibility was set to `selected`
-     */
-    selected_repositories_url?: string;
-    runners_url: string;
-    hosted_runners_url?: string;
-    /**
-     * The identifier of a hosted compute network configuration.
-     */
-    network_configuration_id?: string;
-    inherited: boolean;
-    inherited_allows_public_repositories?: boolean;
-    allows_public_repositories: boolean;
-    /**
-     * If `true`, the `restricted_to_workflows` and `selected_workflows` fields cannot be modified.
-     */
-    workflow_restrictions_read_only?: boolean;
-    /**
-     * If `true`, the runner group will be restricted to running only the workflows specified in the `selected_workflows` array.
-     */
-    restricted_to_workflows?: boolean;
-    /**
-     * List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.
-     */
-    selected_workflows?: string[];
-  };
+    export interface runner_groups_org {
+        id: number;
+        name: string;
+        visibility: string;
+        "default": boolean;
+        /**
+         * Link to the selected repositories resource for this runner group. Not present unless visibility was set to `selected`
+        */
+        selected_repositories_url?: string;
+        runners_url: string;
+        hosted_runners_url?: string;
+        /**
+         * The identifier of a hosted compute network configuration.
+        */
+        network_configuration_id?: string;
+        inherited: boolean;
+        inherited_allows_public_repositories?: boolean;
+        allows_public_repositories: boolean;
+        /**
+         * If `true`, the `restricted_to_workflows` and `selected_workflows` fields cannot be modified.
+        */
+        workflow_restrictions_read_only?: boolean;
+        /**
+         * If `true`, the runner group will be restricted to running only the workflows specified in the `selected_workflows` array.
+        */
+        restricted_to_workflows?: boolean;
+        /**
+         * List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.
+        */
+        selected_workflows?: string[];
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.runner_groups_org;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const isSelectedVisibility = value.visibility === "selected";
-  const visibilityLabel = (() => {
-    switch (value.visibility) {
-      case "all":
-        return "All repositories";
-      case "selected":
-        return "Selected repositories";
-      default:
-        return (
-          value.visibility.charAt(0).toUpperCase() + value.visibility.slice(1)
-        );
-    }
-  })();
-  const selectedWorkflowsCount = value.selected_workflows?.length ?? 0;
-  const workflowInfo = value.workflow_restrictions_read_only
-    ? {
-        icon: <LucideReact.Lock size={16} className="text-amber-500" />,
-        label: "Restrictions locked",
-      }
-    : value.restricted_to_workflows
-      ? {
-          icon: (
-            <LucideReact.CheckCircle size={16} className="text-green-500" />
-          ),
-          label: `Restricted to ${selectedWorkflowsCount} workflow${selectedWorkflowsCount !== 1 ? "s" : ""}`,
-        }
-      : {
-          icon: <LucideReact.XCircle size={16} className="text-gray-400" />,
-          label: "No workflow restrictions",
-        };
+  const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+  const visibilityLabel = capitalize(value.visibility);
+  const selectedWorkflows = value.selected_workflows ?? [];
+  const workflowDisplay =
+    value.restricted_to_workflows
+      ? selectedWorkflows.length > 0
+        ? selectedWorkflows.length <= 3
+          ? selectedWorkflows
+          : [...selectedWorkflows.slice(0, 3), `+${selectedWorkflows.length - 3} more`]
+        : ['None']
+      : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900 truncate">
-          {value.name}
-        </h2>
+    <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200 max-w-md">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{value.name}</h2>
         {value.default && (
-          <div className="flex items-center text-blue-600 text-sm font-medium">
-            <LucideReact.Star size={16} className="mr-1" /> Default
-          </div>
+          <LucideReact.Star
+            className="text-yellow-500"
+            size={20}
+            aria-label="Default group"
+          />
         )}
       </div>
 
-      {/* Details Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
-        {/* Visibility */}
+      <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700">
         <div className="flex items-center gap-2">
-          {isSelectedVisibility ? (
-            <LucideReact.Lock size={16} className="text-gray-500" />
-          ) : (
-            <LucideReact.Globe2 size={16} className="text-gray-500" />
-          )}
-          <span className="font-medium">{visibilityLabel}</span>
+          <LucideReact.Eye className="text-gray-500" size={16} aria-label="Visibility icon" />
+          <span>Visibility: {visibilityLabel}</span>
         </div>
 
-        {/* Inherited */}
         <div className="flex items-center gap-2">
           {value.inherited ? (
-            <LucideReact.CheckCircle size={16} className="text-green-500" />
+            <LucideReact.Share2
+              className="text-blue-500"
+              size={16}
+              aria-label="Inherited"
+            />
           ) : (
-            <LucideReact.XCircle size={16} className="text-red-400" />
+            <LucideReact.UserMinus
+              className="text-gray-400"
+              size={16}
+              aria-label="Not inherited"
+            />
           )}
-          <span>{value.inherited ? "Inherited" : "Custom"}</span>
+          <span>Inherited: {value.inherited ? 'Yes' : 'No'}</span>
         </div>
 
-        {/* Public Repos */}
         <div className="flex items-center gap-2">
           {value.allows_public_repositories ? (
-            <LucideReact.CheckCircle size={16} className="text-green-500" />
+            <LucideReact.Unlock
+              className="text-green-500"
+              size={16}
+              aria-label="Public repos allowed"
+            />
           ) : (
-            <LucideReact.XCircle size={16} className="text-red-400" />
+            <LucideReact.Lock
+              className="text-red-500"
+              size={16}
+              aria-label="Public repos disallowed"
+            />
           )}
-          <span>Public repos allowed</span>
+          <span>Public repos: {value.allows_public_repositories ? 'Allowed' : 'Disallowed'}</span>
         </div>
 
-        {/* Workflow Restrictions */}
-        <div className="flex items-center gap-2">
-          {workflowInfo.icon}
-          <span>{workflowInfo.label}</span>
-        </div>
-
-        {/* Selected Workflows (if any) */}
-        {value.restricted_to_workflows && selectedWorkflowsCount > 0 && (
-          <div className="col-span-full flex items-center gap-2 text-gray-600">
-            <LucideReact.ListChecks size={16} className="text-gray-500" />
-            <span className="line-clamp-2">
-              {value.selected_workflows!.join(", ")}
-            </span>
+        {value.restricted_to_workflows !== undefined && (
+          <div className="flex items-start gap-2">
+            <LucideReact.ShieldCheck
+              className="text-indigo-500 mt-0.5"
+              size={16}
+              aria-label="Workflow restrictions"
+            />
+            <div>
+              <div>Workflow restrictions:</div>
+              <div className="ml-5">
+                {value.restricted_to_workflows ? 'Restricted' : 'Unrestricted'}
+              </div>
+            </div>
           </div>
         )}
 
-        {/* Network Configuration */}
+        {value.restricted_to_workflows && workflowDisplay && (
+          <div className="flex flex-col gap-1 col-span-full">
+            <div className="flex items-center gap-2">
+              <LucideReact.ListChecks
+                className="text-gray-600"
+                size={16}
+                aria-label="Selected workflows"
+              />
+              <span>Selected workflows:</span>
+            </div>
+            <ul className="ml-6 list-disc text-gray-600">
+              {workflowDisplay.map((wf, idx) => (
+                <li key={idx} className="truncate">
+                  {wf}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {value.network_configuration_id && (
-          <div className="col-span-full flex items-center gap-2">
-            <LucideReact.Settings size={16} className="text-gray-500" />
-            <span>
-              Net config ID:{" "}
-              <span className="font-medium">
-                {value.network_configuration_id}
-              </span>
-            </span>
+          <div className="flex items-center gap-2 col-span-full">
+            <LucideReact.Server
+              className="text-gray-500"
+              size={16}
+              aria-label="Network configuration"
+            />
+            <span>Network config ID: {value.network_configuration_id}</span>
           </div>
         )}
       </div>

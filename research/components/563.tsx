@@ -1,36 +1,34 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiProjectsColumnsMoves {
-    export type PostResponse = {};
-  }
+    export namespace IApiProjectsColumnsMoves {
+        export interface PostResponse {
+        }
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiProjectsColumnsMoves.PostResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiProjectsColumnsMoves.PostResponse;
 
+
+
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // Determine if the input object has any keys to display
   const hasData = value && Object.keys(value).length > 0;
 
-  // 1. Empty state: no meaningful data to render
+  // If there's no meaningful data, render an empty state placeholder
   if (!hasData) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-gray-500">
-        <LucideReact.AlertCircle className="text-gray-400" size={48} />
-        <span className="mt-2 text-sm">No data available</span>
+        <LucideReact.AlertCircle size={48} className="mb-2" />
+        <span className="text-sm">No data available</span>
       </div>
     );
   }
 
-  // 2. Fallback: pretty-print any unexpected shape of data
-  //    This ensures that if the API response expands in the future,
-  //    the component will still render something useful.
+  // Fallback: Render the raw JSON in a code block for any unexpected data
   return (
-    <div className="p-4 bg-gray-50 rounded-md shadow-inner overflow-auto max-h-64">
-      <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-        {JSON.stringify(value, null, 2)}
-      </pre>
-    </div>
+    <pre className="p-4 bg-gray-50 rounded-lg text-sm text-gray-700 overflow-auto">
+      {JSON.stringify(value, null, 2)}
+    </pre>
   );
 }

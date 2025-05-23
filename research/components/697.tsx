@@ -1,131 +1,146 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Repository Collaborator Permission
-   *
-   * @title Repository Collaborator Permission
-   */
-  export type repository_collaborator_permission = {
-    permission: string;
-    role_name: string;
-    user: AutoViewInputSubTypes.nullable_collaborator;
-  };
-  /**
-   * Collaborator
-   *
-   * @title Collaborator
-   */
-  export type nullable_collaborator = {
-    login: string;
-    id: number & tags.Type<"int32">;
-    email?: string | null;
-    name?: string | null;
-    node_id: string;
-    avatar_url: string & tags.Format<"uri">;
-    gravatar_id: string | null;
-    url: string & tags.Format<"uri">;
-    html_url: string & tags.Format<"uri">;
-    followers_url: string & tags.Format<"uri">;
-    following_url: string;
-    gists_url: string;
-    starred_url: string;
-    subscriptions_url: string & tags.Format<"uri">;
-    organizations_url: string & tags.Format<"uri">;
-    repos_url: string & tags.Format<"uri">;
-    events_url: string;
-    received_events_url: string & tags.Format<"uri">;
-    type: string;
-    site_admin: boolean;
-    permissions?: {
-      pull: boolean;
-      triage?: boolean;
-      push: boolean;
-      maintain?: boolean;
-      admin: boolean;
-    };
-    role_name: string;
-    user_view_type?: string;
-  } | null;
+    /**
+     * Repository Collaborator Permission
+     *
+     * @title Repository Collaborator Permission
+    */
+    export interface repository_collaborator_permission {
+        permission: string;
+        role_name: string;
+        user: AutoViewInputSubTypes.nullable_collaborator;
+    }
+    /**
+     * Collaborator
+     *
+     * @title Collaborator
+    */
+    export type nullable_collaborator = {
+        login: string;
+        id: number & tags.Type<"int32">;
+        email?: string | null;
+        name?: string | null;
+        node_id: string;
+        avatar_url: string & tags.Format<"uri">;
+        gravatar_id: string | null;
+        url: string & tags.Format<"uri">;
+        html_url: string & tags.Format<"uri">;
+        followers_url: string & tags.Format<"uri">;
+        following_url: string;
+        gists_url: string;
+        starred_url: string;
+        subscriptions_url: string & tags.Format<"uri">;
+        organizations_url: string & tags.Format<"uri">;
+        repos_url: string & tags.Format<"uri">;
+        events_url: string;
+        received_events_url: string & tags.Format<"uri">;
+        type: string;
+        site_admin: boolean;
+        permissions?: {
+            pull: boolean;
+            triage?: boolean;
+            push: boolean;
+            maintain?: boolean;
+            admin: boolean;
+        };
+        role_name: string;
+        user_view_type?: string;
+    } | null;
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.repository_collaborator_permission;
+export type AutoViewInput = AutoViewInputSubTypes.repository_collaborator_permission;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const user = value.user;
-  const fullNameOrLogin = user?.name
-    ? user.name
-    : user?.login
-      ? user.login
-      : "Unknown User";
-  const login = user?.login ?? "";
-  const email = user?.email ?? "";
-  const avatarPlaceholder = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-    fullNameOrLogin,
-  )}&background=0D8ABC&color=fff`;
-
-  function getPermissionStyle(permission: string): string {
-    const p = permission.toLowerCase();
-    if (p.includes("admin")) return "bg-green-100 text-green-800";
-    if (p.includes("write")) return "bg-blue-100 text-blue-800";
-    if (p.includes("read")) return "bg-gray-100 text-gray-800";
-    return "bg-indigo-100 text-indigo-800";
-  }
+  const displayName = user
+    ? user.name?.trim() || user.login
+    : "Unknown Collaborator";
+  const permissionLabel =
+    value.permission.charAt(0).toUpperCase() + value.permission.slice(1);
+  const repoRoleLabel =
+    value.role_name
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (ch) => ch.toUpperCase());
+  // Avatar and fallback
+  const rawAvatar = user?.avatar_url || "";
+  const fallbackAvatar =
+    user === null
+      ? "https://placehold.co/48x48/e2e8f0/1e293b?text=?"
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          displayName
+        )}&background=0D8ABC&color=fff`;
+  const email = user?.email;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
-      {/* Avatar */}
-      <div className="flex-shrink-0">
-        {user?.avatar_url ? (
+    <div className="max-w-sm w-full p-4 bg-white rounded-lg shadow border border-gray-200">
+      <div className="flex items-center space-x-4">
+        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
           <img
-            src={user.avatar_url}
-            alt={fullNameOrLogin}
-            className="w-12 h-12 rounded-full object-cover"
-            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) =>
-              (e.currentTarget.src = avatarPlaceholder)
-            }
+            src={rawAvatar || fallbackAvatar}
+            alt={displayName}
+            className="w-full h-full object-cover"
+            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = fallbackAvatar;
+            }}
           />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-            <LucideReact.User size={24} className="text-gray-400" />
-          </div>
-        )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-lg font-semibold text-gray-900 truncate">
+            {displayName}
+          </p>
+          {user?.login && (
+            <p className="text-sm text-gray-500 truncate">
+              @{user.login}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* User Info */}
-      <div className="flex-1 flex flex-col space-y-0.5 min-w-0">
-        <span className="font-semibold text-gray-900 truncate">
-          {fullNameOrLogin}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+          <LucideReact.Shield size={12} className="mr-1" />
+          {permissionLabel}
         </span>
-        {login && (
-          <span className="text-gray-500 text-sm truncate">@{login}</span>
-        )}
-        {email && (
-          <div className="flex items-center text-gray-500 text-sm truncate">
-            <LucideReact.Mail size={14} className="mr-1" />
-            <span className="truncate">{email}</span>
-          </div>
-        )}
+        <span className="inline-flex items-center px-2 py-0.5 bg-green-100 text-green-800 text-xs font-medium rounded">
+          <LucideReact.User size={12} className="mr-1" />
+          {repoRoleLabel}
+        </span>
       </div>
 
-      {/* Permission & Role Badges */}
-      <div className="flex flex-col items-end space-y-1">
-        <span
-          className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${getPermissionStyle(
-            value.permission,
-          )}`}
-        >
-          {value.permission.charAt(0).toUpperCase() + value.permission.slice(1)}
-        </span>
-        <span className="inline-block px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-          {value.role_name.charAt(0).toUpperCase() + value.role_name.slice(1)}
-        </span>
-      </div>
+      {email && (
+        <div className="mt-3 flex items-center text-sm text-gray-500">
+          <LucideReact.Mail size={14} className="mr-1" />
+          <span className="truncate">{email}</span>
+        </div>
+      )}
+
+      {user && (
+        <div className="mt-2 flex items-center text-sm text-gray-500">
+          {user.site_admin ? (
+            <LucideReact.CheckCircle
+              size={14}
+              className="text-green-500 mr-1"
+              aria-label="Site Admin"
+            />
+          ) : (
+            <LucideReact.XCircle
+              size={14}
+              className="text-red-500 mr-1"
+              aria-label="Not Site Admin"
+            />
+          )}
+          <span>
+            {user.site_admin ? "Site Admin" : "Regular User"}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

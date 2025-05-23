@@ -1,155 +1,110 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiOrgsActionsHostedRunnersMachineSizes {
-    export type GetResponse = {
-      total_count: number & tags.Type<"int32">;
-      machine_specs: AutoViewInputSubTypes.actions_hosted_runner_machine_spec[];
-    };
-  }
-  /**
-   * Provides details of a particular machine spec.
-   *
-   * @title Github-owned VM details.
-   */
-  export type actions_hosted_runner_machine_spec = {
+    export namespace IApiOrgsActionsHostedRunnersMachineSizes {
+        export interface GetResponse {
+            total_count: number & tags.Type<"int32">;
+            machine_specs: AutoViewInputSubTypes.actions_hosted_runner_machine_spec[];
+        }
+    }
     /**
-     * The ID used for the `size` parameter when creating a new runner.
-     */
-    id: string;
-    /**
-     * The number of cores.
-     */
-    cpu_cores: number & tags.Type<"int32">;
-    /**
-     * The available RAM for the machine spec.
-     */
-    memory_gb: number & tags.Type<"int32">;
-    /**
-     * The available SSD storage for the machine spec.
-     */
-    storage_gb: number & tags.Type<"int32">;
-  };
+     * Provides details of a particular machine spec.
+     *
+     * @title Github-owned VM details.
+    */
+    export interface actions_hosted_runner_machine_spec {
+        /**
+         * The ID used for the `size` parameter when creating a new runner.
+        */
+        id: string;
+        /**
+         * The number of cores.
+        */
+        cpu_cores: number & tags.Type<"int32">;
+        /**
+         * The available RAM for the machine spec.
+        */
+        memory_gb: number & tags.Type<"int32">;
+        /**
+         * The available SSD storage for the machine spec.
+        */
+        storage_gb: number & tags.Type<"int32">;
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiOrgsActionsHostedRunnersMachineSizes.GetResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiOrgsActionsHostedRunnersMachineSizes.GetResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { total_count, machine_specs } = value;
-  const specsCount = machine_specs.length;
-  const averageCores =
-    specsCount > 0
-      ? machine_specs.reduce((sum, spec) => sum + spec.cpu_cores, 0) /
-        specsCount
-      : 0;
-  const averageMemory =
-    specsCount > 0
-      ? machine_specs.reduce((sum, spec) => sum + spec.memory_gb, 0) /
-        specsCount
-      : 0;
-  const averageStorage =
-    specsCount > 0
-      ? machine_specs.reduce((sum, spec) => sum + spec.storage_gb, 0) /
-        specsCount
-      : 0;
+  const specs = value.machine_specs;
+  const specCount = specs.length;
+  const avgCpu = specCount > 0
+    ? Math.round(specs.reduce((sum, s) => sum + s.cpu_cores, 0) / specCount)
+    : 0;
+  const avgMemory = specCount > 0
+    ? Math.round(specs.reduce((sum, s) => sum + s.memory_gb, 0) / specCount)
+    : 0;
+  const avgStorage = specCount > 0
+    ? Math.round(specs.reduce((sum, s) => sum + s.storage_gb, 0) / specCount)
+    : 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md">
-      {/* Header */}
-      <div className="flex items-center mb-4">
-        <LucideReact.Server
-          size={20}
-          className="text-gray-600 mr-2"
-          aria-hidden
-        />
-        <h2 className="text-lg font-semibold text-gray-800">
-          Machine Sizes ({total_count})
-        </h2>
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      <div className="flex items-center text-sm text-gray-500">
+        <LucideReact.Server size={16} className="mr-1" />
+        <span>
+          {value.total_count} Hosted Runner {value.total_count === 1 ? 'Size' : 'Sizes'}
+        </span>
       </div>
 
-      {/* Empty State */}
-      {specsCount === 0 && (
-        <div className="flex flex-col items-center text-gray-400">
-          <LucideReact.AlertCircle size={24} className="mb-2" aria-hidden />
-          <span>No machine specifications available.</span>
+      {specCount === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+          <LucideReact.AlertCircle size={48} />
+          <p className="mt-2">No machine specs available.</p>
         </div>
-      )}
-
-      {/* Specifications Grid */}
-      {specsCount > 0 && (
+      ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            {machine_specs.map((spec) => (
-              <div
-                key={spec.id}
-                className="p-4 bg-gray-50 rounded-lg flex flex-col space-y-2"
-              >
-                <h3 className="text-sm font-medium text-gray-700 flex items-center">
-                  <LucideReact.Tag
-                    size={16}
-                    className="text-gray-500 mr-1"
-                    aria-hidden
-                  />
-                  {spec.id}
-                </h3>
-                <div className="flex items-center text-gray-600">
-                  <LucideReact.Cpu
-                    size={16}
-                    className="text-gray-500 mr-1"
-                    aria-hidden
-                  />
-                  <span>{spec.cpu_cores} cores</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <LucideReact.Server
-                    size={16}
-                    className="text-gray-500 mr-1"
-                    aria-hidden
-                  />
-                  <span>{spec.memory_gb} GB RAM</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <LucideReact.HardDrive
-                    size={16}
-                    className="text-gray-500 mr-1"
-                    aria-hidden
-                  />
-                  <span>{spec.storage_gb} GB SSD</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            {specs.map((spec) => (
+              <div key={spec.id} className="border border-gray-200 rounded-lg p-4">
+                <h3 className="font-semibold text-lg text-gray-800 truncate">{spec.id}</h3>
+                <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+                  <div className="flex items-center">
+                    <LucideReact.Cpu size={16} className="text-indigo-500 mr-1" />
+                    <span>{spec.cpu_cores} Cores</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.Database size={16} className="text-green-500 mr-1" />
+                    <span>{spec.memory_gb} GB RAM</span>
+                  </div>
+                  <div className="flex items-center">
+                    <LucideReact.HardDrive size={16} className="text-yellow-500 mr-1" />
+                    <span>{spec.storage_gb} GB SSD</span>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Averages Summary */}
-          <div className="flex flex-wrap gap-6">
-            <div className="flex items-center text-gray-700">
-              <LucideReact.Cpu
-                size={16}
-                className="text-gray-500 mr-1"
-                aria-hidden
-              />
-              <span>Avg CPU: {averageCores.toFixed(1)}</span>
-            </div>
-            <div className="flex items-center text-gray-700">
-              <LucideReact.Server
-                size={16}
-                className="text-gray-500 mr-1"
-                aria-hidden
-              />
-              <span>Avg RAM: {averageMemory.toFixed(1)} GB</span>
-            </div>
-            <div className="flex items-center text-gray-700">
-              <LucideReact.HardDrive
-                size={16}
-                className="text-gray-500 mr-1"
-                aria-hidden
-              />
-              <span>Avg Storage: {averageStorage.toFixed(1)} GB</span>
+          <div className="mt-6 border-t border-gray-200 pt-4">
+            <span className="text-gray-700 font-medium">Average Specs:</span>
+            <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-600">
+              <div className="flex items-center">
+                <LucideReact.Cpu size={16} className="text-indigo-500 mr-1" />
+                <span>{avgCpu} Cores</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.Database size={16} className="text-green-500 mr-1" />
+                <span>{avgMemory} GB RAM</span>
+              </div>
+              <div className="flex items-center">
+                <LucideReact.HardDrive size={16} className="text-yellow-500 mr-1" />
+                <span>{avgStorage} GB SSD</span>
+              </div>
             </div>
           </div>
         </>

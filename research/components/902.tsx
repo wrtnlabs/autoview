@@ -1,113 +1,146 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiSearchLabels {
-    export type GetResponse = {
-      total_count: number & tags.Type<"int32">;
-      incomplete_results: boolean;
-      items: AutoViewInputSubTypes.label_search_result_item[];
-    };
-  }
-  /**
-   * Label Search Result Item
-   *
-   * @title Label Search Result Item
-   */
-  export type label_search_result_item = {
-    id: number & tags.Type<"int32">;
-    node_id: string;
-    url: string & tags.Format<"uri">;
-    name: string;
-    color: string;
-    default: boolean;
-    description: string | null;
-    score: number;
-    text_matches?: AutoViewInputSubTypes.search_result_text_matches;
-  };
-  /**
-   * @title Search Result Text Matches
-   */
-  export type search_result_text_matches = {
-    object_url?: string;
-    object_type?: string | null;
-    property?: string;
-    fragment?: string;
-    matches?: {
-      text?: string;
-      indices?: (number & tags.Type<"int32">)[];
+    export namespace IApiSearchLabels {
+        export interface GetResponse {
+            total_count: number & tags.Type<"int32">;
+            incomplete_results: boolean;
+            items: AutoViewInputSubTypes.label_search_result_item[];
+        }
+    }
+    /**
+     * Label Search Result Item
+     *
+     * @title Label Search Result Item
+    */
+    export interface label_search_result_item {
+        id: number & tags.Type<"int32">;
+        node_id: string;
+        url: string & tags.Format<"uri">;
+        name: string;
+        color: string;
+        "default": boolean;
+        description: string | null;
+        score: number;
+        text_matches?: AutoViewInputSubTypes.search_result_text_matches;
+    }
+    /**
+     * @title Search Result Text Matches
+    */
+    export type search_result_text_matches = {
+        object_url?: string;
+        object_type?: string | null;
+        property?: string;
+        fragment?: string;
+        matches?: {
+            text?: string;
+            indices?: (number & tags.Type<"int32">)[];
+        }[];
     }[];
-  }[];
 }
 export type AutoViewInput = AutoViewInputSubTypes.IApiSearchLabels.GetResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedTotal = value.total_count.toLocaleString();
-  const hasIncomplete = value.incomplete_results;
+  const { total_count, incomplete_results, items } = value;
+  const hasItems = Array.isArray(items) && items.length > 0;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
-  //    Utilize semantic HTML elements where appropriate.
-
-  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm">
-      {/* Header */}
+    <div className="p-4 bg-white rounded-lg shadow-md">
+      {/* Header with total count and incomplete flag */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center text-gray-800">
-          <LucideReact.Tag size={20} className="mr-2 text-blue-500" />
-          <h2 className="text-lg font-semibold">Labels ({formattedTotal})</h2>
+        <div className="flex items-center space-x-2">
+          <LucideReact.Tag size={24} className="text-blue-500" />
+          <h2 className="text-xl font-semibold text-gray-800">
+            Labels ({total_count})
+          </h2>
         </div>
-        {hasIncomplete && (
-          <div className="flex items-center text-amber-600 text-sm">
-            <LucideReact.AlertTriangle size={16} className="mr-1" />
-            <span>Incomplete results</span>
+        {incomplete_results && (
+          <div className="flex items-center text-amber-500 text-sm">
+            <LucideReact.AlertTriangle size={20} className="flex-shrink-0" />
+            <span className="ml-1">Incomplete results</span>
           </div>
         )}
       </div>
-      {/* List of label items */}
-      <ul className="space-y-4">
-        {value.items.map((item) => (
-          <li
-            key={item.id}
-            className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-center overflow-hidden">
-                <span
-                  className="w-4 h-4 rounded-sm mr-2 flex-shrink-0"
-                  style={{ backgroundColor: `#${item.color}` }}
-                />
-                <h3 className="text-md font-medium text-gray-900 truncate">
-                  {item.name}
-                </h3>
-                {item.default && (
-                  <LucideReact.CheckCircle
-                    size={16}
-                    className="ml-2 text-green-500"
-                    aria-label="Default Label"
-                  />
-                )}
+
+      {/* Item list or empty state */}
+      {hasItems ? (
+        <ul className="space-y-6">
+          {items.map((item) => (
+            <li
+              key={item.id}
+              className="flex flex-col sm:flex-row sm:items-start sm:space-x-4"
+            >
+              {/* Color Badge */}
+              <div
+                className="flex-shrink-0 w-5 h-5 rounded-full mt-1 sm:mt-0"
+                style={{ backgroundColor: `#${item.color}` }}
+                title={`Color: #${item.color}`}
+              />
+
+              <div className="flex-1">
+                {/* Name and Default Indicator */}
+                <div className="flex items-center">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {item.name}
+                  </h3>
+                  {item.default && (
+                    <LucideReact.CheckCircle
+                      size={16}
+                      className="ml-2 text-green-500 flex-shrink-0"
+                      aria-label="Default label"
+                    />
+                  )}
+                </div>
+
+                {/* Description */}
+                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
+                  {item.description ?? "No description provided."}
+                </p>
+
+                {/* Metadata: Score and URL */}
+                <div className="mt-2 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+                  {/* Relevance Score */}
+                  <div className="flex items-center">
+                    <LucideReact.Star
+                      size={14}
+                      className="text-yellow-400 flex-shrink-0"
+                    />
+                    <span className="ml-1">{item.score.toFixed(2)}</span>
+                  </div>
+
+                  {/* Link to Label */}
+                  <div className="flex items-center max-w-full">
+                    <LucideReact.Link
+                      size={14}
+                      className="text-gray-400 flex-shrink-0"
+                    />
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="ml-1 truncate text-blue-600 hover:underline"
+                      title={item.url}
+                    >
+                      {item.url}
+                    </a>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center text-gray-500 text-sm">
-                <LucideReact.BarChart2 size={16} className="mr-1" />
-                <span>{item.score.toFixed(2)}</span>
-              </div>
-            </div>
-            {item.description ? (
-              <p className="mt-2 text-sm text-gray-600 line-clamp-2">
-                {item.description}
-              </p>
-            ) : (
-              <p className="mt-2 text-sm text-gray-400 italic">
-                No description
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
+          <LucideReact.AlertCircle size={32} className="mb-2" />
+          <span>No labels found.</span>
+        </div>
+      )}
     </div>
   );
 }

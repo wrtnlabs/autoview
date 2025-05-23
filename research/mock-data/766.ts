@@ -4,5 +4,5 @@ import Component from "../components/766";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return [{"id":101,"remote_id":"remote_101","remote_name":"PorterAdmin_Test","email":"porter.admin.test@example.com","name":"Porter Admin (Test)","url":"https://www.example.com/authors/porter-admin-test","import_url":"https://api.example.org/v1/import/porter_author/remote_101"},{"id":102,"remote_id":"auth_xyz_102","remote_name":"SampleAuthor_Dummy","email":"sample.author@example.org","name":"Sample Author (Dummy)","url":"https://www.example.com/authors/sample-author-dummy","import_url":"https://api.example.org/v1/import/porter_author/auth_xyz_102"}];
+  return [{"id":1,"remote_id":"porter_auth_001","remote_name":"Porter Author One (Sample)","email":"author.one@example.com","name":"Sample Porter Author One","url":"https://api.example.com/authors/1","import_url":"https://import.example.org/authors/1"},{"id":2,"remote_id":"porter_auth_002","remote_name":"Porter Author Two (Test)","email":"author.two@example.org","name":"Sample Porter Author Two","url":"https://api.example.net/authors/2","import_url":"https://import.example.com/authors/2"}];
 }

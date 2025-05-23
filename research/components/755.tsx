@@ -1,106 +1,96 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * The hierarchy between files in a Git repository.
-   *
-   * @title Git Tree
-   */
-  export type git_tree = {
-    sha: string;
-    url?: string & tags.Format<"uri">;
-    truncated: boolean;
     /**
-     * Objects specifying a tree structure
-     */
-    tree: {
-      path: string;
-      mode: string;
-      type: string;
-      sha: string;
-      size?: number & tags.Type<"int32">;
-      url?: string;
-    }[];
-  };
+     * The hierarchy between files in a Git repository.
+     *
+     * @title Git Tree
+    */
+    export interface git_tree {
+        sha: string;
+        url?: string & tags.Format<"uri">;
+        truncated: boolean;
+        /**
+         * Objects specifying a tree structure
+        */
+        tree: {
+            path: string;
+            mode: string;
+            type: string;
+            sha: string;
+            size?: number & tags.Type<"int32">;
+            url?: string;
+        }[];
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.git_tree;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation and transformation
-  const rootSha = value.sha.slice(0, 7);
-  const fileCount = value.tree.filter((item) => item.type === "blob").length;
-  const dirCount = value.tree.filter((item) => item.type === "tree").length;
-  const totalCount = value.tree.length;
+  // Derived constants
+  const shortSha = value.sha.slice(0, 7);
+  const itemCount = value.tree.length;
 
-  const formatBytes = (bytes?: number): string => {
-    if (bytes == null) return "-";
+  // Utility: human-readable byte formatter
+  function formatBytes(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     const kb = bytes / 1024;
     if (kb < 1024) return `${kb.toFixed(1)} KB`;
     const mb = kb / 1024;
-    if (mb < 1024) return `${mb.toFixed(1)} MB`;
-    return `${(mb / 1024).toFixed(1)} GB`;
-  };
+    return `${mb.toFixed(1)} MB`;
+  }
 
-  // 2. Visual structure using JSX and Tailwind CSS
+  // Main render
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-full">
-      {/* Header: root SHA, summary counts, truncated indicator */}
-      <div className="mb-4 flex flex-wrap items-center justify-between text-sm text-gray-600">
-        <div className="flex items-center gap-1">
-          <LucideReact.Hash size={16} className="text-gray-500" />
-          <span className="font-mono">{rootSha}</span>
-        </div>
-        <div className="text-gray-500">
-          Items: {totalCount} (
-          <span className="text-gray-700">{fileCount} files</span>,{" "}
-          <span className="text-gray-700">{dirCount} dirs</span>)
+    <div className="p-4 bg-white rounded-lg shadow-md flex flex-col space-y-4">
+      {/* Header: Commit SHA and truncation indicator */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <LucideReact.GitCommit size={20} className="text-gray-500" aria-label="Commit SHA" />
+          <span className="font-mono text-sm text-gray-700">{shortSha}</span>
         </div>
         {value.truncated && (
-          <div className="flex items-center text-amber-500">
-            <LucideReact.AlertTriangle size={16} />
-            <span className="ml-1">Truncated</span>
+          <div className="flex items-center text-amber-600 text-sm">
+            <LucideReact.AlertTriangle size={16} className="mr-1" aria-label="Truncated" />
+            <span>Truncated</span>
           </div>
         )}
       </div>
 
-      {/* Tree items list */}
-      <ul className="divide-y divide-gray-100 border-t border-b border-gray-200 max-h-64 overflow-y-auto">
-        {value.tree.map((item) => (
-          <li
-            key={item.sha}
-            className="flex items-center justify-between py-2 text-sm"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              {item.type === "tree" ? (
+      {/* Item count */}
+      <div className="flex items-center text-gray-500 text-sm">
+        <LucideReact.Folder size={16} className="mr-1" aria-label="Entries" />
+        <span>
+          {itemCount} {itemCount === 1 ? 'item' : 'items'}
+        </span>
+      </div>
+
+      {/* Tree entries list */}
+      <ul className="max-h-64 overflow-y-auto divide-y divide-gray-100">
+        {value.tree.map((entry) => (
+          <li key={entry.sha} className="py-2 flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-2 truncate">
+              {entry.type === 'tree' ? (
                 <LucideReact.Folder
                   size={16}
-                  className="text-blue-500 flex-shrink-0"
+                  className="text-gray-400 flex-shrink-0"
+                  aria-label="Directory"
                 />
               ) : (
                 <LucideReact.FileText
                   size={16}
-                  className="text-gray-500 flex-shrink-0"
+                  className="text-gray-400 flex-shrink-0"
+                  aria-label="File"
                 />
               )}
-              <span className="truncate">{item.path}</span>
+              <span className="truncate">{entry.path}</span>
             </div>
-            <div className="flex items-center gap-4 text-gray-500 min-w-0">
-              {item.type === "blob" && (
-                <span className="font-mono">{formatBytes(item.size)}</span>
-              )}
-              {item.url && (
-                <div className="flex items-center gap-1 min-w-0">
-                  <LucideReact.Link size={16} />
-                  <span className="break-all truncate max-w-xs">
-                    {item.url}
-                  </span>
-                </div>
-              )}
-            </div>
+            {entry.size !== undefined && (
+              <span className="text-gray-500 ml-2">{formatBytes(entry.size)}</span>
+            )}
           </li>
         ))}
       </ul>

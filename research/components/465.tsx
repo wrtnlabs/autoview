@@ -1,156 +1,147 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * API Insights usage time stats for an organization
-   *
-   * @title Time Stats
-   */
-  export type api_insights_time_stats = {
-    timestamp?: string;
-    total_request_count?: number & tags.Type<"int32">;
-    rate_limited_request_count?: number & tags.Type<"int32">;
-  }[];
+    /**
+     * API Insights usage time stats for an organization
+     *
+     * @title Time Stats
+    */
+    export type api_insights_time_stats = {
+        timestamp?: string;
+        total_request_count?: number & tags.Type<"int32">;
+        rate_limited_request_count?: number & tags.Type<"int32">;
+    }[];
 }
 export type AutoViewInput = AutoViewInputSubTypes.api_insights_time_stats;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Parse and sort the incoming time stats
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const stats = Array.isArray(value) ? value : [];
-  if (stats.length === 0) {
-    return (
-      <div className="p-4 flex flex-col items-center text-gray-400">
-        <LucideReact.AlertCircle size={48} aria-hidden="true" />
-        <span className="mt-2 text-sm">No data available</span>
-      </div>
-    );
-  }
 
-  type StatItem = { timestamp: Date; total: number; rateLimited: number };
-  const parsedStats: StatItem[] = stats
-    .map((item) => ({
-      timestamp: item.timestamp ? new Date(item.timestamp) : new Date(0),
-      total: item.total_request_count ?? 0,
-      rateLimited: item.rate_limited_request_count ?? 0,
-    }))
-    .filter((s) => s.timestamp.getTime() > 0);
-
-  parsedStats.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
-
-  // 2. Aggregate overall metrics
-  const totalRequests = parsedStats.reduce((sum, s) => sum + s.total, 0);
-  const totalRateLimited = parsedStats.reduce(
-    (sum, s) => sum + s.rateLimited,
-    0,
+  const totalRequestsSum = stats.reduce(
+    (sum, item) => sum + (item.total_request_count ?? 0),
+    0
   );
-  const rateLimitPercent =
-    totalRequests > 0 ? (totalRateLimited / totalRequests) * 100 : 0;
+  const rateLimitedSum = stats.reduce(
+    (sum, item) => sum + (item.rate_limited_request_count ?? 0),
+    0
+  );
+  const rateLimitedPct =
+    totalRequestsSum > 0 ? (rateLimitedSum / totalRequestsSum) * 100 : 0;
 
-  // 3. Date formatting helper
-  const formatDate = (date: Date) =>
-    date.toLocaleDateString(undefined, {
+  const sortedStats = [...stats].sort((a, b) => {
+    const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+    return ta - tb;
+  });
+
+  const formatDate = (iso?: string): string => {
+    if (!iso) return "-";
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
 
-  // 4. Compose the visual structure
+  const formatNumber = (num: number): string => num.toLocaleString();
+
+  const formatPercent = (num: number): string => `${num.toFixed(2)}%`;
+
+  // 2. Handle empty state
+  if (stats.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 text-gray-400">
+        <LucideReact.AlertCircle
+          size={48}
+          className="text-gray-400"
+          aria-hidden="true"
+        />
+        <span className="mt-4 text-lg">No data available</span>
+      </div>
+    );
+  }
+
+  // 3. Compose the visual structure using JSX and Tailwind CSS.
   return (
     <div className="p-4 bg-white rounded-lg shadow-md">
-      {/* Header with summary */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-800 flex items-center">
-          <LucideReact.Activity
-            className="mr-2 text-blue-500"
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.Server
             size={20}
+            className="text-blue-500"
             aria-hidden="true"
           />
-          API Insights Time Stats
-        </h2>
-        <div className="flex flex-wrap gap-4 mt-2 md:mt-0 text-gray-600 text-sm">
-          <div className="flex items-center">
-            <LucideReact.Server
-              className="mr-1 text-gray-500"
-              size={16}
-              aria-hidden="true"
-            />
-            <span>
-              Total:{" "}
-              <span className="font-medium">
-                {totalRequests.toLocaleString()}
-              </span>
-            </span>
+          <div className="ml-3">
+            <div className="text-sm text-gray-500">Total Requests</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {formatNumber(totalRequestsSum)}
+            </div>
           </div>
-          <div className="flex items-center">
-            <LucideReact.AlertOctagon
-              className="mr-1 text-red-500"
-              size={16}
-              aria-hidden="true"
-            />
-            <span>
-              Rate Limited:{" "}
-              <span className="font-medium">
-                {totalRateLimited.toLocaleString()}
-              </span>
-            </span>
+        </div>
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.AlertTriangle
+            size={20}
+            className="text-red-500"
+            aria-hidden="true"
+          />
+          <div className="ml-3">
+            <div className="text-sm text-gray-500">Rate Limited</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {formatNumber(rateLimitedSum)}
+            </div>
           </div>
-          <div className="flex items-center">
-            <LucideReact.Percent
-              className="mr-1 text-gray-500"
-              size={16}
-              aria-hidden="true"
-            />
-            <span>
-              % Rate Limited:{" "}
-              <span className="font-medium">
-                {rateLimitPercent.toFixed(2)}%
-              </span>
-            </span>
+        </div>
+        <div className="flex items-center p-4 bg-gray-50 rounded-lg">
+          <LucideReact.Percent
+            size={20}
+            className="text-green-500"
+            aria-hidden="true"
+          />
+          <div className="ml-3">
+            <div className="text-sm text-gray-500">Rate Limit %</div>
+            <div className="text-lg font-semibold text-gray-800">
+              {formatPercent(rateLimitedPct)}
+            </div>
           </div>
         </div>
       </div>
 
       {/* Detailed table */}
       <div className="overflow-x-auto">
-        <table className="w-full table-auto border-collapse">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                Date
-              </th>
-              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                Total
-              </th>
-              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                Rate Limited
-              </th>
-              <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">
-                %
-              </th>
+        <table className="min-w-full text-sm text-left text-gray-600">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2">Time</th>
+              <th className="px-4 py-2">Total</th>
+              <th className="px-4 py-2">Rate Limited</th>
+              <th className="px-4 py-2">% Rate Limit</th>
             </tr>
           </thead>
           <tbody>
-            {parsedStats.map((s, idx) => {
-              const pct = s.total > 0 ? (s.rateLimited / s.total) * 100 : 0;
-              const rowBg = idx % 2 === 0 ? "bg-white" : "bg-gray-50";
+            {sortedStats.map((item, idx) => {
+              const total = item.total_request_count ?? 0;
+              const limited = item.rate_limited_request_count ?? 0;
+              const pct = total > 0 ? (limited / total) * 100 : 0;
               return (
-                <tr key={idx} className={rowBg}>
-                  <td className="px-3 py-2 text-sm text-gray-700">
-                    {formatDate(s.timestamp)}
+                <tr
+                  key={idx}
+                  className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                >
+                  <td className="px-4 py-2 whitespace-nowrap">
+                    {formatDate(item.timestamp)}
                   </td>
-                  <td className="px-3 py-2 text-sm text-gray-700 text-right">
-                    {s.total.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-gray-700 text-right">
-                    {s.rateLimited.toLocaleString()}
-                  </td>
-                  <td className="px-3 py-2 text-sm text-gray-700 text-right">
-                    {pct.toFixed(2)}%
-                  </td>
+                  <td className="px-4 py-2">{formatNumber(total)}</td>
+                  <td className="px-4 py-2">{formatNumber(limited)}</td>
+                  <td className="px-4 py-2">{formatPercent(pct)}</td>
                 </tr>
               );
             })}

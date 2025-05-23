@@ -1,97 +1,73 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type ruleset_version_with_state = {
-    /**
-     * The ID of the previous version of the ruleset
-     */
-    version_id: number & tags.Type<"int32">;
-    /**
-     * The actor who updated the ruleset
-     */
-    actor: {
-      id?: number & tags.Type<"int32">;
-      type?: string;
-    };
-    updated_at: string & tags.Format<"date-time">;
-    /**
-     * The state of the ruleset version
-     */
-    state: {};
-  };
+    export interface ruleset_version_with_state {
+        /**
+         * The ID of the previous version of the ruleset
+        */
+        version_id: number & tags.Type<"int32">;
+        /**
+         * The actor who updated the ruleset
+        */
+        actor: {
+            id?: number & tags.Type<"int32">;
+            type?: string;
+        };
+        updated_at: string & tags.Format<"date-time">;
+        /**
+         * The state of the ruleset version
+        */
+        state: {};
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.ruleset_version_with_state;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation/transformation
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const formattedDate = new Date(value.updated_at).toLocaleString(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
   });
-  const actorDisplay = value.actor?.type
+  const actorDisplay = value.actor.type
     ? `${value.actor.type}${value.actor.id ? ` (#${value.actor.id})` : ""}`
-    : value.actor?.id
-      ? `Actor #${value.actor.id}`
-      : "Unknown actor";
-  const stateKeys = Object.keys(value.state);
+    : value.actor.id
+    ? `Actor (#${value.actor.id})`
+    : "Unknown actor";
+  const stateKeys = value.state && typeof value.state === "object"
+    ? Object.keys(value.state)
+    : [];
   const hasState = stateKeys.length > 0;
-  const rawState = hasState ? JSON.stringify(value.state, null, 2) : "";
-  const statePreview =
-    rawState.length > 100 ? `${rawState.slice(0, 100)}...` : rawState;
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm space-y-4 text-gray-800 text-sm">
-      <div className="flex items-center">
-        <LucideReact.Hash
-          className="text-gray-500"
-          size={16}
-          aria-hidden="true"
-        />
-        <span className="ml-2 font-medium">Version:</span>
-        <span className="ml-1">{value.version_id}</span>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md text-gray-700">
+      <div className="flex items-center mb-2">
+        <LucideReact.Hash className="text-gray-500" size={20} />
+        <span className="ml-2 font-semibold text-lg">Version {value.version_id}</span>
       </div>
-
-      <div className="flex items-center">
-        <LucideReact.User
-          className="text-gray-500"
-          size={16}
-          aria-hidden="true"
-        />
-        <span className="ml-2 font-medium">Updated by:</span>
-        <span className="ml-1">{actorDisplay}</span>
+      <div className="flex items-center text-sm mb-1">
+        <LucideReact.User className="text-gray-400" size={16} />
+        <span className="ml-1">Actor: {actorDisplay}</span>
       </div>
-
-      <div className="flex items-center">
-        <LucideReact.Calendar
-          className="text-gray-500"
-          size={16}
-          aria-hidden="true"
-        />
-        <span className="ml-2 font-medium">Updated at:</span>
-        <span className="ml-1">{formattedDate}</span>
+      <div className="flex items-center text-sm mb-4">
+        <LucideReact.Calendar className="text-gray-400" size={16} />
+        <span className="ml-1">Updated: {formattedDate}</span>
       </div>
-
-      <div>
-        <div className="flex items-center mb-1">
-          <LucideReact.FileText
-            className="text-gray-500"
-            size={16}
-            aria-hidden="true"
-          />
-          <span className="ml-2 font-medium">State:</span>
-        </div>
-        {hasState ? (
-          <pre className="bg-gray-50 p-2 rounded max-h-40 overflow-auto text-xs font-mono whitespace-pre-wrap break-words">
-            {statePreview}
+      {hasState && (
+        <details className="text-sm">
+          <summary className="flex items-center cursor-pointer text-gray-600">
+            <LucideReact.Box className="text-gray-400" size={16} />
+            <span className="ml-1">State ({stateKeys.length} properties)</span>
+          </summary>
+          <pre className="mt-2 p-2 bg-gray-100 rounded text-xs max-h-40 overflow-auto">
+            {JSON.stringify(value.state, null, 2)}
           </pre>
-        ) : (
-          <span className="ml-6 italic text-gray-500">No state details</span>
-        )}
-      </div>
+        </details>
+      )}
     </div>
   );
 }

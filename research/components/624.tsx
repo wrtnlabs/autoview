@@ -1,83 +1,84 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * An autolink reference.
-   *
-   * @title Autolink reference
-   */
-  export type autolink = {
-    id: number & tags.Type<"int32">;
     /**
-     * The prefix of a key that is linkified.
-     */
-    key_prefix: string;
-    /**
-     * A template for the target URL that is generated if a key was found.
-     */
-    url_template: string;
-    /**
-     * Whether this autolink reference matches alphanumeric characters. If false, this autolink reference only matches numeric characters.
-     */
-    is_alphanumeric: boolean;
-  };
+     * An autolink reference.
+     *
+     * @title Autolink reference
+    */
+    export interface autolink {
+        id: number & tags.Type<"int32">;
+        /**
+         * The prefix of a key that is linkified.
+        */
+        key_prefix: string;
+        /**
+         * A template for the target URL that is generated if a key was found.
+        */
+        url_template: string;
+        /**
+         * Whether this autolink reference matches alphanumeric characters. If false, this autolink reference only matches numeric characters.
+        */
+        is_alphanumeric: boolean;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.autolink[];
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Determine if there are any autolink references to display
-  const hasItems = Array.isArray(value) && value.length > 0;
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const totalCount = value.length;
+  const alphaCount = value.filter(item => item.is_alphanumeric).length;
+  const numericOnlyCount = totalCount - alphaCount;
 
-  // 3. Return placeholder for empty state
-  if (!hasItems) {
-    return (
-      <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-md text-gray-500">
-        <LucideReact.AlertCircle size={48} className="mb-2" />
-        <p className="text-sm">No autolink references available.</p>
-      </div>
-    );
-  }
-
-  // 1. (No complex transformations needed for this schema)
-
-  // 2. Compose the visual structure
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
-      <h2 className="flex items-center text-lg font-semibold text-gray-800 mb-4">
-        <LucideReact.Link className="mr-2 text-gray-600" size={20} />
-        Autolink References
-      </h2>
-      <ul className="space-y-3">
-        {value.map((ref) => (
+    <div role="region" aria-label="Autolink References" className="p-6 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center space-x-2">
+        <LucideReact.Link size={20} className="text-indigo-500" />
+        <h2 className="text-lg font-semibold text-gray-900">
+          Autolink References ({totalCount})
+        </h2>
+      </div>
+
+      {/* Summary */}
+      <p className="mt-2 text-sm text-gray-600">
+        {alphaCount} alphanumeric, {numericOnlyCount} numeric-only
+      </p>
+
+      {/* List of references */}
+      <ul className="mt-4 space-y-4">
+        {value.map(item => (
           <li
-            key={ref.id}
-            className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 rounded-lg"
+            key={item.id}
+            className="flex flex-col md:flex-row md:items-center md:justify-between p-4 bg-gray-50 rounded-lg"
           >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 w-full">
-              <div className="flex items-center text-gray-800">
-                <LucideReact.Tag className="mr-1 text-gray-500" size={16} />
-                <span className="font-medium truncate">{ref.key_prefix}</span>
-              </div>
-              <div className="flex items-center text-blue-600 mt-1 sm:mt-0 w-full">
-                <LucideReact.Link className="mr-1 flex-shrink-0" size={16} />
-                <span className="truncate break-words">{ref.url_template}</span>
-              </div>
+            {/* Key Prefix */}
+            <div className="flex items-center space-x-2">
+              <LucideReact.Tag size={16} className="text-blue-500" />
+              <span className="font-medium text-gray-800 truncate">{item.key_prefix}</span>
             </div>
-            <div className="mt-2 sm:mt-0">
-              {ref.is_alphanumeric ? (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-green-100 text-green-800">
-                  <LucideReact.CheckCircle className="mr-1" size={14} />
-                  Alphanumeric
-                </span>
+
+            {/* URL Template */}
+            <div className="mt-2 md:mt-0 flex-1 flex items-center space-x-2 text-sm text-gray-700 break-all">
+              <LucideReact.Link size={16} className="text-gray-500" />
+              <code className="font-mono truncate">{item.url_template}</code>
+            </div>
+
+            {/* Match Type */}
+            <div className="mt-2 md:mt-0 flex items-center space-x-1">
+              {item.is_alphanumeric ? (
+                <LucideReact.CheckCircle size={16} className="text-green-500" />
               ) : (
-                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-800">
-                  <LucideReact.Hash className="mr-1" size={14} />
-                  Numeric Only
-                </span>
+                <LucideReact.XCircle size={16} className="text-red-500" />
               )}
+              <span className="text-sm text-gray-600">
+                {item.is_alphanumeric ? 'Alphanumeric' : 'Numeric-only'}
+              </span>
             </div>
           </li>
         ))}

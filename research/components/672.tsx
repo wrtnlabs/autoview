@@ -1,78 +1,92 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type code_scanning_autofix = {
-    status: AutoViewInputSubTypes.code_scanning_autofix_status;
-    description: AutoViewInputSubTypes.code_scanning_autofix_description;
-    started_at: AutoViewInputSubTypes.code_scanning_autofix_started_at;
-  };
-  /**
-   * The status of an autofix.
-   */
-  export type code_scanning_autofix_status =
-    | "pending"
-    | "error"
-    | "success"
-    | "outdated";
-  /**
-   * The description of an autofix.
-   */
-  export type code_scanning_autofix_description = string | null;
-  /**
-   * The start time of an autofix in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.
-   */
-  export type code_scanning_autofix_started_at = string;
+    export interface code_scanning_autofix {
+        status: AutoViewInputSubTypes.code_scanning_autofix_status;
+        description: AutoViewInputSubTypes.code_scanning_autofix_description;
+        started_at: AutoViewInputSubTypes.code_scanning_autofix_started_at;
+    }
+    /**
+     * The status of an autofix.
+    */
+    export type code_scanning_autofix_status = "pending" | "error" | "success" | "outdated";
+    /**
+     * The description of an autofix.
+    */
+    export type code_scanning_autofix_description = string | null;
+    /**
+     * The start time of an autofix in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.
+    */
+    export type code_scanning_autofix_started_at = string;
 }
 export type AutoViewInput = AutoViewInputSubTypes.code_scanning_autofix;
 
+
+
+// The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define derived values: icon, status text, formatted date, and safe description.
-  const statusIconMap: Record<
-    AutoViewInputSubTypes.code_scanning_autofix_status,
-    JSX.Element
-  > = {
-    pending: <LucideReact.Clock className="text-amber-500" size={20} />,
-    error: <LucideReact.AlertTriangle className="text-red-500" size={20} />,
-    success: <LucideReact.CheckCircle className="text-green-500" size={20} />,
-    outdated: <LucideReact.RefreshCw className="text-gray-500" size={20} />,
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const statusMap: Record<AutoViewInputSubTypes.code_scanning_autofix_status, {
+    icon: React.ReactNode;
+    label: string;
+    textClass: string;
+  }> = {
+    pending: {
+      icon: <LucideReact.Clock className="text-amber-500" size={16} aria-label="Pending" />,
+      label: "Pending",
+      textClass: "text-amber-600",
+    },
+    error: {
+      icon: <LucideReact.AlertTriangle className="text-red-500" size={16} aria-label="Error" />,
+      label: "Error",
+      textClass: "text-red-600",
+    },
+    success: {
+      icon: <LucideReact.CheckCircle className="text-green-500" size={16} aria-label="Success" />,
+      label: "Success",
+      textClass: "text-green-600",
+    },
+    outdated: {
+      icon: <LucideReact.RefreshCw className="text-gray-500" size={16} aria-label="Outdated" />,
+      label: "Outdated",
+      textClass: "text-gray-600",
+    },
   };
-  const statusTextMap: Record<
-    AutoViewInputSubTypes.code_scanning_autofix_status,
-    string
-  > = {
-    pending: "Pending",
-    error: "Error",
-    success: "Success",
-    outdated: "Outdated",
-  };
-  const icon = statusIconMap[value.status];
-  const statusLabel = statusTextMap[value.status];
+
+  const { icon: statusIcon, label: statusLabel, textClass: statusTextClass } = statusMap[value.status];
+
   const startedDate = new Date(value.started_at);
-  const formattedDate = startedDate.toLocaleString(undefined, {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const description =
-    value.description && value.description.trim()
-      ? value.description
-      : "No description provided";
+  const formattedDate = !isNaN(startedDate.getTime())
+    ? startedDate.toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : value.started_at;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-sm space-y-3">
-      <div className="flex items-center space-x-2">
-        {icon}
-        <span className="text-lg font-medium text-gray-800">{statusLabel}</span>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Status */}
+      <div className="flex items-center mb-2">
+        {statusIcon}
+        <span className={`ml-2 font-medium ${statusTextClass}`}>{statusLabel}</span>
       </div>
-      <p className="text-gray-700 text-sm line-clamp-2">{description}</p>
-      <div className="flex items-center text-gray-500 text-xs">
-        <LucideReact.Calendar size={16} className="mr-1" />
-        <span title={value.started_at}>Started on {formattedDate}</span>
+
+      {/* Started At */}
+      <div className="flex items-center text-sm text-gray-500 mb-4">
+        <LucideReact.Calendar size={16} className="flex-shrink-0" aria-label="Started at" />
+        <time className="ml-1">{formattedDate}</time>
       </div>
+
+      {/* Description */}
+      {value.description ? (
+        <p className="text-gray-700 text-sm line-clamp-3">{value.description}</p>
+      ) : (
+        <p className="text-gray-500 italic text-sm">No description provided.</p>
+      )}
     </div>
   );
 }

@@ -4,5 +4,5 @@ import Component from "../components/9";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"pagination":{"current":1,"limit":2,"records":3,"pages":2},"data":[{"id":"a3bb189e-8bf9-3888-9912-ace4e6543002","created_at":"2025-04-10T09:15:00Z","code":"DEP-TEST-001","source":"Sample ATM Deposit","direction":1},{"id":"b6cc199e-1cf9-4888-9912-fde4e6543011","created_at":"2025-04-12T14:45:30Z","code":"WD-SAMPLE-002","source":"Online Transfer (Test)","direction":-1}]};
+  return {"pagination":{"current":1,"limit":2,"records":5,"pages":3},"data":[{"id":"d290f1ee-6c54-4b01-90e6-d701748f0851","created_at":"2025-05-19T08:23:15Z","code":"DEP-SAMPLE-001","source":"web_portal_test","direction":1},{"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","created_at":"2025-05-18T16:45:00Z","code":"DEP-SAMPLE-002-REVERSAL","source":"atm_machine_dummy","direction":-1}]};
 }

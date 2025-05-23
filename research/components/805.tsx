@@ -1,99 +1,70 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Results of a successful merge upstream request
-   *
-   * @title Merged upstream
-   */
-  export type merged_upstream = {
-    message?: string;
-    merge_type?: "merge" | "fast-forward" | "none";
-    base_branch?: string;
-  };
+    /**
+     * Results of a successful merge upstream request
+     *
+     * @title Merged upstream
+    */
+    export interface merged_upstream {
+        message?: string;
+        merge_type?: "merge" | "fast-forward" | "none";
+        base_branch?: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.merged_upstream;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const mergeType = value.merge_type ?? "unknown";
-  const mergeLabels: Record<string, string> = {
+  const mergeType: "merge" | "fast-forward" | "none" = value.merge_type ?? "none";
+
+  const mergeLabels: Record<"merge" | "fast-forward" | "none", string> = {
     merge: "Merged",
-    "fast-forward": "Fast-forwarded",
-    none: "No merge",
-    unknown: "Unknown",
+    "fast-forward": "Fast-Forwarded",
+    none: "No Merge",
   };
-  const mergeLabel = mergeLabels[mergeType] || mergeLabels.unknown;
+  const displayLabel = mergeLabels[mergeType];
 
-  // Select appropriate icon for merge type
-  let mergeIcon: JSX.Element;
-  if (mergeType === "merge") {
-    mergeIcon = (
-      <LucideReact.CheckCircle
-        className="text-green-500"
-        size={16}
-        aria-label="Merged"
-      />
-    );
-  } else if (mergeType === "fast-forward") {
-    mergeIcon = (
-      <LucideReact.FastForward
-        className="text-blue-500"
-        size={16}
-        aria-label="Fast-forwarded"
-      />
-    );
+  // Select appropriate icon and color based on merge type
+  let StatusIcon = LucideReact.CheckCircle;
+  let statusColor = "text-green-500";
+  if (mergeType === "fast-forward") {
+    StatusIcon = LucideReact.FastForward;
+    statusColor = "text-blue-500";
   } else if (mergeType === "none") {
-    mergeIcon = (
-      <LucideReact.AlertTriangle
-        className="text-yellow-500"
-        size={16}
-        aria-label="No merge"
-      />
-    );
-  } else {
-    mergeIcon = (
-      <LucideReact.HelpCircle
-        className="text-gray-400"
-        size={16}
-        aria-label="Unknown merge status"
-      />
-    );
+    StatusIcon = LucideReact.Clock;
+    statusColor = "text-gray-400";
   }
-
-  // Derive branch display
-  const branchName = value.base_branch?.trim() || "Unknown branch";
-
-  // Prepare optional message
-  const message = value.message?.trim();
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-sm w-full bg-white p-4 rounded-lg shadow-md">
-      <div className="flex items-center mb-3">
-        {mergeIcon}
-        <h2 className="ml-2 text-lg font-semibold text-gray-800">
-          {mergeLabel}
-        </h2>
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-sm">
+      <div className="flex items-center gap-2">
+        <StatusIcon className={statusColor} size={20} strokeWidth={2} />
+        <h2 className="text-lg font-semibold text-gray-800">{displayLabel}</h2>
       </div>
-      <div className="flex items-center text-sm text-gray-600 mb-2">
-        <LucideReact.GitBranch
-          className="text-gray-500"
-          size={16}
-          aria-label="Base branch"
-        />
-        <span className="ml-1 truncate">{branchName}</span>
-      </div>
-      {message && (
-        <div className="flex items-start text-sm text-gray-700">
-          <LucideReact.MessageSquare
-            className="text-gray-500 mt-1"
-            size={16}
-            aria-label="Merge message"
-          />
-          <p className="ml-1 line-clamp-3 break-words">{message}</p>
+
+      {value.base_branch && (
+        <div className="mt-3 flex items-center text-gray-600">
+          <LucideReact.GitBranch className="mr-1" size={16} />
+          <span className="text-sm truncate">Base branch: {value.base_branch}</span>
+        </div>
+      )}
+
+      {value.message && (
+        <div className="mt-3 flex items-start text-gray-700">
+          <LucideReact.MessageSquare className="mt-0.5 mr-1 text-gray-400" size={16} />
+          <p className="text-sm leading-relaxed line-clamp-3">{value.message}</p>
+        </div>
+      )}
+
+      {mergeType === "none" && !value.base_branch && !value.message && (
+        <div className="mt-4 flex items-center text-gray-400">
+          <LucideReact.AlertCircle className="mr-1" size={16} />
+          <span className="text-sm">No merge information available.</span>
         </div>
       )}
     </div>

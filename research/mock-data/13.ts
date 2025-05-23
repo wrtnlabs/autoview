@@ -4,5 +4,5 @@ import Component from "../components/13";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"pagination":{"current":1,"limit":3,"records":25,"pages":9},"data":[{"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","value":150,"created_at":"2025-05-19T10:15:30Z","code":"REFERRAL_BONUS_SAMPLE","source":"referral_program_test","direction":1},{"id":"d6fae6c3-7c7a-47e8-9f3e-0d1b6a2c0001","value":null,"created_at":"2025-04-10T08:00:00Z","code":"ADJUSTMENT_DEDUCTION_TEST","source":"admin_adjustment_sample","direction":-1},{"id":"8b1d1f6a-3ec0-4f65-9c9f-123abc456def","value":200,"created_at":"2025-03-25T14:45:00Z","code":"PURCHASE_EARNED_SAMPLE","source":"online_store_sample","direction":1}]};
+  return {"pagination":{"current":1,"limit":10,"records":25,"pages":3},"data":[{"id":"d3c1f8a2-4e0d-4cbb-8491-abcdef123456","value":1500,"created_at":"2025-05-19T08:30:00Z","code":"MILG_SAMPLE_001","source":"online_purchase_sample","direction":1},{"id":"a1b2c3d4-e5f6-47a8-1234-abcdef789012","value":null,"created_at":"2025-05-18T16:45:30Z","code":"MILG_SAMPLE_002","source":"promotional_offer_sample","direction":-1},{"id":"9f8e7d6c-5b4a-3210-fedc-ba9876543210","value":750,"created_at":"2025-05-17T12:00:00Z","code":"MILG_SAMPLE_003","source":"refund_adjustment_sample","direction":1}]};
 }

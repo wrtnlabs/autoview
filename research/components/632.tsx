@@ -1,70 +1,63 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Protected Branch Admin Enforced
-   *
-   * @title Protected Branch Admin Enforced
-   */
-  export type protected_branch_admin_enforced = {
-    url: string & tags.Format<"uri">;
-    enabled: boolean;
-  };
+    /**
+     * Protected Branch Admin Enforced
+     *
+     * @title Protected Branch Admin Enforced
+    */
+    export interface protected_branch_admin_enforced {
+        url: string & tags.Format<"uri">;
+        enabled: boolean;
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.protected_branch_admin_enforced;
+export type AutoViewInput = AutoViewInputSubTypes.protected_branch_admin_enforced;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const { url, enabled } = value;
-  // Derive a concise domain or fallback to full URL
-  const domain = (() => {
-    try {
-      return new URL(url).hostname;
-    } catch {
-      return url;
-    }
-  })();
-  const statusLabel = enabled ? "Enabled" : "Disabled";
+  // 1. Derive the hostname to display a concise URL
+  let hostname: string;
+  try {
+    hostname = new URL(value.url).hostname;
+  } catch {
+    hostname = value.url;
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 2. Prepare the status icon based on `enabled`
+  const statusIcon = value.enabled ? (
+    <LucideReact.CheckCircle
+      className="text-green-500"
+      size={16}
+      aria-label="Protected branch enforced"
+    />
+  ) : (
+    <LucideReact.XCircle
+      className="text-red-500"
+      size={16}
+      aria-label="Protected branch not enforced"
+    />
+  );
+
+  // 3. Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
+    <div className="p-4 bg-white rounded-lg shadow-sm flex flex-col space-y-2">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          <LucideReact.Link
-            size={16}
-            className="text-gray-500"
-            aria-hidden="true"
-          />
-          <span className="font-medium text-gray-800 truncate">{domain}</span>
-        </div>
-        {enabled ? (
-          <LucideReact.CheckCircle
-            size={16}
-            className="text-green-500"
-            aria-label="Protected branch is enabled"
-          />
-        ) : (
-          <LucideReact.XCircle
-            size={16}
-            className="text-red-500"
-            aria-label="Protected branch is disabled"
-          />
-        )}
+        <span className="text-sm font-semibold text-gray-800">
+          Protected Branch
+        </span>
+        {statusIcon}
       </div>
-      <div className="mt-2 text-sm text-gray-600 break-all">{url}</div>
-      <div className="mt-4 flex items-center text-sm">
-        <span className="font-medium text-gray-700">Status:</span>
-        <span
-          className={`ml-2 font-semibold ${
-            enabled ? "text-green-600" : "text-red-600"
-          }`}
-        >
-          {statusLabel}
+      <div className="flex items-center text-gray-600 text-sm">
+        <LucideReact.Link
+          className="mr-1 text-gray-400 flex-shrink-0"
+          size={16}
+          aria-hidden="true"
+        />
+        <span className="truncate" title={value.url}>
+          {hostname}
         </span>
       </div>
     </div>

@@ -4,5 +4,5 @@ import Component from "../components/277";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"next":2,"webhooks":[{"id":"wh_001_test","channelId":"channel_123_test","name":"User Chat Opened Webhook (Sample)","url":"https://api.example.org/webhooks/wh_001_test","token":"tok_test_abc123","createdAt":1622471123456,"scopes":["userChat.opened","message.created.userChat","lead.upserted.contact"],"keywords":["urgent","daily-updates"],"apiVersion":"v1.0","lastBlockedAt":1622557523456,"blocked":false},{"name":"Sample Webhook No.2","url":"https://www.example.com/webhooks/sample2","scopes":["member.upserted.subscription"],"apiVersion":"v2-beta"}]};
+  return {"next":2,"webhooks":[{"id":"wh_001_sample","channelId":"ch_123_test","name":"Sample Webhook (Test)","url":"https://api.example.com/webhooks/sample-endpoint","token":"dummyToken123456","createdAt":1716192000000,"scopes":["userChat.opened","message.created.teamChat","lead.upserted.subscription"],"keywords":["test","webhook","sample"],"apiVersion":"v1","lastBlockedAt":1716278400000,"blocked":true},{"id":"wh_002_dummy","name":"Secondary Webhook Dummy","url":"https://hooks.example.net/secondary-sample","scopes":["member.deleted"],"apiVersion":"2024-04-01"}]};
 }

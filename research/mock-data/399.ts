@@ -4,5 +4,5 @@ import Component from "../components/399";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"total_count":2,"runners":[{"id":101,"runner_group_id":5,"name":"sample-runner-01","os":"linux","status":"online","busy":false,"labels":[{"id":1,"name":"self-hosted","type":"read-only"},{"name":"linux","type":"read-only"}]},{"id":102,"name":"gpu-test-runner","os":"linux","status":"offline","busy":false,"labels":[{"id":3,"name":"self-hosted","type":"read-only"},{"id":4,"name":"GPU","type":"custom"}],"ephemeral":true}]};
+  return {"total_count":2,"runners":[{"id":101,"runner_group_id":2001,"name":"Sample Runner Alpha (Test)","os":"Ubuntu 20.04","status":"online","busy":false,"labels":[{"id":501,"name":"self-hosted","type":"read-only"},{"name":"linux","type":"custom"}]},{"id":102,"name":"Ephemeral Runner Beta Dummy","os":"Windows Server 2019","status":"offline","busy":true,"labels":[{"id":502,"name":"windows","type":"read-only"}],"ephemeral":true}]};
 }

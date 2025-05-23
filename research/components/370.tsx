@@ -1,110 +1,115 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Thread Subscription
-   *
-   * @title Thread Subscription
-   */
-  export type thread_subscription = {
-    subscribed: boolean;
-    ignored: boolean;
-    reason: string | null;
-    created_at: (string & tags.Format<"date-time">) | null;
-    url: string & tags.Format<"uri">;
-    thread_url?: string & tags.Format<"uri">;
-    repository_url?: string & tags.Format<"uri">;
-  };
+    /**
+     * Thread Subscription
+     *
+     * @title Thread Subscription
+    */
+    export interface thread_subscription {
+        subscribed: boolean;
+        ignored: boolean;
+        reason: string | null;
+        created_at: (string & tags.Format<"date-time">) | null;
+        url: string & tags.Format<"uri">;
+        thread_url?: string & tags.Format<"uri">;
+        repository_url?: string & tags.Format<"uri">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.thread_subscription;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const formattedDate: string = value.created_at
+  const status = value.ignored
+    ? { label: "Ignored", Icon: LucideReact.EyeOff, color: "text-amber-500" }
+    : value.subscribed
+    ? { label: "Subscribed", Icon: LucideReact.CheckCircle, color: "text-green-500" }
+    : { label: "Unsubscribed", Icon: LucideReact.XCircle, color: "text-red-500" };
+
+  const { label: statusLabel, Icon: StatusIcon, color: statusColor } = status;
+
+  const formattedDate = value.created_at
     ? new Date(value.created_at).toLocaleString(undefined, {
-        dateStyle: "medium",
-        timeStyle: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       })
-    : "—";
+    : null;
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="max-w-md w-full p-4 bg-white rounded-lg shadow-md">
-      {/* Subscription & Ignored Status */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          {value.subscribed ? (
-            <LucideReact.CheckCircle
-              className="text-green-500"
-              size={20}
-              aria-label="Subscribed"
-            />
-          ) : (
-            <LucideReact.XCircle
-              className="text-red-500"
-              size={20}
-              aria-label="Not Subscribed"
-            />
-          )}
-          <span className="font-medium text-gray-800">
-            {value.subscribed ? "Subscribed" : "Not Subscribed"}
-          </span>
-        </div>
-        {value.ignored && (
-          <div className="flex items-center gap-1 text-yellow-600">
-            <LucideReact.EyeOff size={18} aria-label="Ignored" />
-            <span className="text-sm">Ignored</span>
-          </div>
-        )}
+    <div className="w-full max-w-sm mx-auto p-4 bg-white rounded-lg shadow border border-gray-200 space-y-4 text-gray-800">
+      {/* Status */}
+      <div className="flex items-center space-x-2">
+        <StatusIcon className={`w-5 h-5 ${statusColor}`} />
+        <span className="font-semibold">{statusLabel}</span>
       </div>
 
-      {/* Reason */}
-      {value.reason && (
-        <div className="mb-3">
-          <div className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-            <LucideReact.Tag size={14} className="mr-1" aria-hidden="true" />
-            <span className="truncate max-w-xs">{value.reason}</span>
-          </div>
+      {/* Created At */}
+      {formattedDate && (
+        <div className="flex items-center space-x-2 text-sm text-gray-500">
+          <LucideReact.Calendar className="w-4 h-4" />
+          <time dateTime={value.created_at ?? undefined}>{formattedDate}</time>
         </div>
       )}
 
-      {/* Creation Date */}
-      <div className="flex items-center text-gray-600 text-sm mb-4">
-        <LucideReact.Calendar size={16} className="mr-1" aria-hidden="true" />
-        <span>Since {formattedDate}</span>
-      </div>
-
-      {/* URLs */}
-      <div className="space-y-2 text-sm text-gray-700">
-        <div className="flex items-start gap-1 break-all">
-          <LucideReact.Link
-            size={16}
-            className="mt-[2px] text-gray-500"
-            aria-hidden="true"
-          />
-          <span>{value.url}</span>
+      {/* Reason */}
+      {value.reason && (
+        <div className="flex items-start space-x-2 bg-yellow-50 p-2 rounded text-yellow-900 text-sm">
+          <LucideReact.AlertTriangle className="w-4 h-4 mt-0.5" />
+          <p className="line-clamp-3">{value.reason}</p>
         </div>
+      )}
+
+      {/* Links */}
+      <div className="space-y-2">
+        {/* Subscription URL */}
+        <div className="flex items-center space-x-2">
+          <LucideReact.Link className="w-4 h-4 text-gray-400" />
+          <a
+            href={value.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline truncate"
+            title={value.url}
+          >
+            Subscription
+          </a>
+        </div>
+        {/* Thread URL */}
         {value.thread_url && (
-          <div className="flex items-start gap-1 break-all">
-            <LucideReact.MessageCircle
-              size={16}
-              className="mt-[2px] text-gray-500"
-              aria-hidden="true"
-            />
-            <span>{value.thread_url}</span>
+          <div className="flex items-center space-x-2">
+            <LucideReact.MessageCircle className="w-4 h-4 text-gray-400" />
+            <a
+              href={value.thread_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline truncate"
+              title={value.thread_url}
+            >
+              Thread
+            </a>
           </div>
         )}
+        {/* Repository URL */}
         {value.repository_url && (
-          <div className="flex items-start gap-1 break-all">
-            <LucideReact.GitBranch
-              size={16}
-              className="mt-[2px] text-gray-500"
-              aria-hidden="true"
-            />
-            <span>{value.repository_url}</span>
+          <div className="flex items-center space-x-2">
+            <LucideReact.GitBranch className="w-4 h-4 text-gray-400" />
+            <a
+              href={value.repository_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline truncate"
+              title={value.repository_url}
+            >
+              Repository
+            </a>
           </div>
         )}
       </div>

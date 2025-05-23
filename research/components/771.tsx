@@ -1,103 +1,85 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace IApiReposInteractionLimits {
-    export type GetResponse =
-      | AutoViewInputSubTypes.interaction_limit_response
-      | {};
-  }
-  /**
-   * Interaction limit settings.
-   *
-   * @title Interaction Limits
-   */
-  export type interaction_limit_response = {
-    limit: AutoViewInputSubTypes.interaction_group;
-    origin: string;
-    expires_at: string & tags.Format<"date-time">;
-  };
-  /**
-   * The type of GitHub user that can comment, open issues, or create pull requests while the interaction limit is in effect.
-   */
-  export type interaction_group =
-    | "existing_users"
-    | "contributors_only"
-    | "collaborators_only";
+    export namespace IApiReposInteractionLimits {
+        export type GetResponse = AutoViewInputSubTypes.interaction_limit_response | {};
+    }
+    /**
+     * Interaction limit settings.
+     *
+     * @title Interaction Limits
+    */
+    export interface interaction_limit_response {
+        limit: AutoViewInputSubTypes.interaction_group;
+        origin: string;
+        expires_at: string & tags.Format<"date-time">;
+    }
+    /**
+     * The type of GitHub user that can comment, open issues, or create pull requests while the interaction limit is in effect.
+    */
+    export type interaction_group = "existing_users" | "contributors_only" | "collaborators_only";
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.IApiReposInteractionLimits.GetResponse;
+export type AutoViewInput = AutoViewInputSubTypes.IApiReposInteractionLimits.GetResponse;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Type guard: check if value is an interaction_limit_response
-  const isLimitResponse = (
-    v: AutoViewInput,
-  ): v is AutoViewInputSubTypes.interaction_limit_response =>
-    typeof (v as any).limit === "string";
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const data = value as AutoViewInputSubTypes.interaction_limit_response;
+  const hasData = typeof data.limit === 'string';
 
-  // Mapping for human-readable labels
-  const groupLabels = {
-    existing_users: "Existing Users",
-    contributors_only: "Contributors Only",
-    collaborators_only: "Collaborators Only",
-  } as const;
+  // Map raw enum to human-readable label
+  const groupLabels: Record<AutoViewInputSubTypes.interaction_group, string> = {
+    existing_users: 'Existing Users',
+    contributors_only: 'Contributors Only',
+    collaborators_only: 'Collaborators Only',
+  };
 
-  // Mapping for icons per group
-  const groupIcons = {
-    existing_users: <LucideReact.Users className="text-gray-500" size={20} />,
-    contributors_only: (
-      <LucideReact.UserCheck className="text-blue-500" size={20} />
-    ),
-    collaborators_only: (
-      <LucideReact.UserCheck className="text-purple-500" size={20} />
-    ),
-  } as const;
+  // Format the expiration date if available
+  const formattedExpires = hasData
+    ? new Date(data.expires_at).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : '';
 
-  // Empty state when no limits are defined
-  if (!isLimitResponse(value)) {
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!hasData) {
+    // Visual for empty state
     return (
-      <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-sm border border-gray-200">
-        <LucideReact.AlertCircle
-          size={48}
-          className="text-gray-300 mb-2"
-          aria-label="No data"
-        />
-        <span className="text-sm text-gray-500">
-          No interaction limits set.
-        </span>
+      <div className="p-4 bg-white rounded-lg shadow-md flex flex-col items-center justify-center text-gray-500">
+        <LucideReact.AlertCircle size={24} className="mb-2" />
+        <span className="text-sm">No interaction limits set.</span>
       </div>
     );
   }
 
-  // Format expiration date
-  const expiresDate = new Date(value.expires_at);
-  const formattedExpires = expiresDate.toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-
-  // Derive display values
-  const group = value.limit;
-  const label = groupLabels[group];
-  const icon = groupIcons[group];
-
-  // Main visual structure
+  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md border border-gray-200 max-w-sm mx-auto">
-      <div className="flex items-center mb-3">
-        {icon}
-        <span className="ml-2 font-medium text-gray-800">{label}</span>
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-md w-full mx-auto">
+      <div className="flex items-center mb-4">
+        <LucideReact.Users className="text-gray-600" size={20} />
+        <h2 className="ml-2 text-lg font-semibold text-gray-800">Interaction Limits</h2>
       </div>
-      <div className="flex items-center mb-2 text-gray-600">
-        <LucideReact.Link size={16} className="flex-shrink-0" />
-        <span className="ml-1 break-all">{value.origin}</span>
-      </div>
-      <div className="flex items-center text-gray-600">
-        <LucideReact.Calendar size={16} className="flex-shrink-0" />
-        <span className="ml-1">{formattedExpires}</span>
-      </div>
+      <dl className="space-y-3 text-gray-700">
+        <div className="flex items-center">
+          <LucideReact.Users className="text-blue-500" size={16} />
+          <span className="ml-2 font-medium">Allowed Group:</span>
+          <span className="ml-1 truncate">{groupLabels[data.limit]}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Globe className="text-green-500" size={16} />
+          <span className="ml-2 font-medium">Origin:</span>
+          <span className="ml-1 truncate">{data.origin}</span>
+        </div>
+        <div className="flex items-center">
+          <LucideReact.Calendar className="text-gray-500" size={16} />
+          <span className="ml-2 font-medium">Expires At:</span>
+          <span className="ml-1">{formattedExpires}</span>
+        </div>
+      </dl>
     </div>
   );
 }

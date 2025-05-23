@@ -4,5 +4,5 @@ import Component from "../components/895";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return [{"path":"/home","title":"Home Page (Sample)","count":1500,"uniques":1200},{"path":"/about","title":"About Us (Test Content)","count":850,"uniques":742},{"path":"/blog/mock-data-generator","title":"Blog: Introducing Mock Data Generator (Demo)","count":430,"uniques":389},{"path":"/dashboard","title":"Dashboard Overview (Sample)","count":2200,"uniques":1987}];
+  return [{"path":"/","title":"Landing Page (Sample)","count":15234,"uniques":14300},{"path":"/about-us","title":"About Us (Test)","count":8345,"uniques":8123},{"path":"/products/widget-xyz","title":"Widget XYZ Overview (Sample)","count":4590,"uniques":4098},{"path":"/blog/2025/05/sample-article","title":"Sample Article: Testing UI Components","count":3012,"uniques":2890}];
 }

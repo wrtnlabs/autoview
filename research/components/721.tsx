@@ -1,136 +1,159 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * A diff of the dependencies between two commits.
-   *
-   * @title Dependency Graph Diff
-   */
-  export type dependency_graph_diff = {
-    change_type: "added" | "removed";
-    manifest: string;
-    ecosystem: string;
-    name: string;
-    version: string;
-    package_url: string | null;
-    license: string | null;
-    source_repository_url: string | null;
-    vulnerabilities: {
-      severity: string;
-      advisory_ghsa_id: string;
-      advisory_summary: string;
-      advisory_url: string;
-    }[];
     /**
-     * Where the dependency is utilized. `development` means that the dependency is only utilized in the development environment. `runtime` means that the dependency is utilized at runtime and in the development environment.
-     */
-    scope: "unknown" | "runtime" | "development";
-  }[];
+     * A diff of the dependencies between two commits.
+     *
+     * @title Dependency Graph Diff
+    */
+    export type dependency_graph_diff = {
+        change_type: "added" | "removed";
+        manifest: string;
+        ecosystem: string;
+        name: string;
+        version: string;
+        package_url: string | null;
+        license: string | null;
+        source_repository_url: string | null;
+        vulnerabilities: {
+            severity: string;
+            advisory_ghsa_id: string;
+            advisory_summary: string;
+            advisory_url: string;
+        }[];
+        /**
+         * Where the dependency is utilized. `development` means that the dependency is only utilized in the development environment. `runtime` means that the dependency is utilized at runtime and in the development environment.
+        */
+        scope: "unknown" | "runtime" | "development";
+    }[];
 }
 export type AutoViewInput = AutoViewInputSubTypes.dependency_graph_diff;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Data aggregation and transformation
-  type DiffItem = AutoViewInputSubTypes.dependency_graph_diff[0];
-  const addedItems = value.filter((item) => item.change_type === "added");
-  const removedItems = value.filter((item) => item.change_type === "removed");
-  const totalAdded = addedItems.length;
-  const totalRemoved = removedItems.length;
+  // 1. Data aggregation: split into added and removed groups
+  const added = value.filter((pkg) => pkg.change_type === "added");
+  const removed = value.filter((pkg) => pkg.change_type === "removed");
 
-  const formatScope = (scope: DiffItem["scope"]) => {
+  // 2. Helper for scope badge classes
+  const getScopeBadge = (scope: string) => {
     switch (scope) {
       case "runtime":
-        return "Runtime";
+        return "bg-blue-100 text-blue-800";
       case "development":
-        return "Development";
+        return "bg-yellow-100 text-yellow-800";
       default:
-        return "Unknown";
+        return "bg-gray-100 text-gray-800";
     }
   };
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS
-  return (
-    <div className="p-4 bg-gray-50 rounded-lg">
-      {/* Summary */}
-      <div className="flex flex-col sm:flex-row sm:space-x-6 space-y-2 sm:space-y-0 mb-6">
-        <div className="flex items-center text-green-600">
-          <LucideReact.PlusCircle size={20} className="mr-2" />
-          <span className="font-medium">{totalAdded} Added</span>
-        </div>
-        <div className="flex items-center text-red-600">
-          <LucideReact.MinusCircle size={20} className="mr-2" />
-          <span className="font-medium">{totalRemoved} Removed</span>
-        </div>
+  // 3. Empty state
+  if (value.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-6 text-gray-400">
+        <LucideReact.AlertCircle size={32} />
+        <span className="mt-2">No dependency changes detected.</span>
       </div>
+    );
+  }
 
-      {/* Grouped Lists */}
-      <div className="space-y-8">
-        {["added", "removed"].map((type) => {
-          const items = type === "added" ? addedItems : removedItems;
-          if (items.length === 0) return null;
-          const isAdded = type === "added";
-          return (
-            <div key={type}>
-              <h3 className="text-lg font-semibold capitalize">{type}</h3>
-              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {items.map((item, idx) => (
-                  <div
-                    key={`${item.name}@${item.version}-${idx}`}
-                    className={`p-4 bg-white rounded-lg shadow-sm border-l-4 ${
-                      isAdded ? "border-green-500" : "border-red-500"
-                    }`}
+  // 4. Compose the visual structure
+  return (
+    <div className="p-6 bg-white rounded-lg shadow-md">
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        Dependency Graph Diff
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[
+          {
+            title: "Added Dependencies",
+            items: added,
+            Icon: LucideReact.PlusCircle,
+            iconColor: "text-green-500",
+          },
+          {
+            title: "Removed Dependencies",
+            items: removed,
+            Icon: LucideReact.XCircle,
+            iconColor: "text-red-500",
+          },
+        ].map((group) => (
+          <div key={group.title} className="space-y-3">
+            <div className="flex items-center gap-2">
+              <group.Icon className={group.iconColor} size={20} />
+              <h3 className="text-lg font-medium text-gray-700">
+                {group.title} ({group.items.length})
+              </h3>
+            </div>
+            {group.items.length === 0 ? (
+              <div className="text-sm text-gray-500">No changes</div>
+            ) : (
+              <ul className="space-y-2">
+                {group.items.map((pkg) => (
+                  <li
+                    key={`${pkg.name}@${pkg.version}`}
+                    className="flex flex-col md:flex-row md:items-center md:justify-between p-3 border border-gray-100 rounded-md hover:bg-gray-50"
                   >
-                    {/* Header: name@version & ecosystem */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <LucideReact.Package
-                          size={18}
-                          className="text-gray-500"
-                        />
-                        <h4 className="text-md font-medium text-gray-800 truncate">
-                          {item.name}@{item.version}
-                        </h4>
-                      </div>
-                      <span className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                        {item.ecosystem}
+                    <div className="flex items-baseline space-x-2 truncate">
+                      <span className="font-medium text-gray-800 truncate">
+                        {pkg.name}@{pkg.version}
+                      </span>
+                      <span className="text-xs text-gray-500 uppercase truncate">
+                        {pkg.ecosystem}
                       </span>
                     </div>
-
-                    {/* Manifest */}
-                    <p className="mt-1 text-sm text-gray-600 truncate">
-                      {item.manifest}
-                    </p>
-
-                    {/* Metadata */}
-                    <div className="mt-3 flex flex-wrap gap-3 text-sm text-gray-500">
-                      {item.license && (
-                        <div className="flex items-center space-x-1">
-                          <LucideReact.Copyright size={16} />
-                          <span>{item.license.toUpperCase()}</span>
-                        </div>
+                    <div className="flex flex-wrap items-center gap-2 mt-2 md:mt-0">
+                      {pkg.license && (
+                        <span className="text-xs text-gray-500 truncate">
+                          {pkg.license}
+                        </span>
                       )}
-                      <div className="flex items-center space-x-1">
-                        <LucideReact.Tag size={16} />
-                        <span>{formatScope(item.scope)}</span>
-                      </div>
-                      {item.vulnerabilities.length > 0 && (
-                        <div className="flex items-center space-x-1 text-red-500">
+                      <span
+                        className={`px-2 py-0.5 text-xs font-medium rounded ${getScopeBadge(
+                          pkg.scope
+                        )}`}
+                      >
+                        {pkg.scope}
+                      </span>
+                      {pkg.package_url && (
+                        <a
+                          href={pkg.package_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 hover:text-blue-500"
+                          title="View package URL"
+                        >
+                          <LucideReact.Link size={16} />
+                        </a>
+                      )}
+                      {pkg.source_repository_url && (
+                        <a
+                          href={pkg.source_repository_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 hover:text-gray-600"
+                          title="View source repository"
+                        >
+                          <LucideReact.GitBranch size={16} />
+                        </a>
+                      )}
+                      {pkg.vulnerabilities.length > 0 && (
+                        <div className="flex items-center text-red-500 text-xs">
                           <LucideReact.AlertTriangle size={16} />
-                          <span>
-                            {item.vulnerabilities.length} vuln
-                            {item.vulnerabilities.length > 1 ? "s" : ""}
+                          <span className="ml-1">
+                            {pkg.vulnerabilities.length}
                           </span>
                         </div>
                       )}
                     </div>
-                  </div>
+                  </li>
                 ))}
-              </div>
-            </div>
-          );
-        })}
+              </ul>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );

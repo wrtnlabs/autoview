@@ -1,177 +1,125 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace desk {
-    export type GroupsInfiniteScrollingView = {
-      next?: string;
-      groups?: AutoViewInputSubTypes.Group[];
-    };
-  }
-  export type Group = {
-    id?: string;
-    channelId?: string;
-    title: string;
-    scope: "all" | "public" | "private";
-    managerIds?: string[] &
-      tags.MinItems<1> &
-      tags.MaxItems<2147483647> &
-      tags.UniqueItems;
-    icon?: string & tags.Pattern<"\\S+">;
-    liveMeetId?: string;
-    description?: string;
-    createdAt?: number;
-    updatedAt?: number;
-    /**
-     * @deprecated
-     */
-    name?: string;
-    active?: boolean;
-  };
+    export namespace desk {
+        export interface GroupsInfiniteScrollingView {
+            next?: string;
+            groups?: AutoViewInputSubTypes.Group[];
+        }
+    }
+    export interface Group {
+        id?: string;
+        channelId?: string;
+        title: string;
+        scope: "all" | "public" | "private";
+        managerIds?: string[] & tags.MinItems<1> & tags.MaxItems<2147483647> & tags.UniqueItems;
+        icon?: string & tags.Pattern<"\\S+">;
+        liveMeetId?: string;
+        description?: string;
+        createdAt?: number;
+        updatedAt?: number;
+        /**
+         * @deprecated
+        */
+        name?: string;
+        active?: boolean;
+    }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.desk.GroupsInfiniteScrollingView;
+export type AutoViewInput = AutoViewInputSubTypes.desk.GroupsInfiniteScrollingView;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // Derived data
-  const groups: AutoViewInputSubTypes.Group[] = value.groups ?? [];
-  const groupCount = groups.length;
-  const hasNext = Boolean(value.next);
-  const placeholderIconUrl =
-    "https://placehold.co/80x80/f8fafc/475569?text=Group";
+  // 1. Define data aggregation/transformation functions or derived constants if necessary.
+  const groups = value.groups ?? [];
+  const hasGroups = groups.length > 0;
 
-  // Helper: date formatter
-  const formatDate = (timestamp: number): string =>
-    new Date(timestamp).toLocaleDateString(undefined, {
+  const scopeLabels = {
+    all: "All Users",
+    public: "Public",
+    private: "Private",
+  } as const;
+
+  function formatDate(timestamp?: number): string {
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleDateString(undefined, {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
+  }
 
-  // Empty state
-  if (groupCount === 0) {
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  if (!hasGroups) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-center">
-        <LucideReact.AlertCircle size={48} className="text-gray-400" />
-        <p className="mt-4 text-gray-500">No groups available</p>
+      <div className="flex flex-col items-center justify-center p-6 text-gray-500">
+        <LucideReact.AlertCircle aria-hidden size={48} />
+        <span>No groups available</span>
       </div>
     );
   }
 
-  // Main render
   return (
-    <div className="p-4">
-      <div className="mb-4 text-sm text-gray-600">
-        Showing {groupCount} group{groupCount > 1 ? "s" : ""}
-      </div>
-      <ul className="space-y-4">
-        {groups.map((group) => {
-          const {
-            id,
-            title,
-            icon,
-            description,
-            scope = "public",
-            managerIds,
-            createdAt,
-            active = true,
-          } = group;
-          const key = id ?? title;
-          const formattedCreated = createdAt ? formatDate(createdAt) : null;
-          const scopeStyles: Record<string, string> = {
-            all: "bg-blue-100 text-blue-800",
-            public: "bg-green-100 text-green-800",
-            private: "bg-red-100 text-red-800",
-          };
-          const scopeLabels: Record<string, string> = {
-            all: "All",
-            public: "Public",
-            private: "Private",
-          };
+    <div className="space-y-4">
+      {groups.map((group, idx) => (
+        <div key={group.id ?? idx} className="p-4 bg-white rounded-lg shadow">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900 truncate">
+              {group.title}
+            </h3>
+            {group.active ? (
+              <LucideReact.CheckCircle
+                className="text-green-500"
+                size={16}
+                aria-hidden
+              />
+            ) : (
+              <LucideReact.XCircle
+                className="text-red-500"
+                size={16}
+                aria-hidden
+              />
+            )}
+          </div>
 
-          return (
-            <li
-              key={key}
-              className="flex items-start bg-white p-4 rounded-lg shadow"
-            >
-              {/* Icon or placeholder */}
-              <div className="flex-shrink-0 w-12 h-12 mr-4">
-                {icon ? (
-                  <img
-                    src={icon}
-                    alt={`${title} icon`}
-                    className="w-full h-full object-cover rounded-full"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = placeholderIconUrl;
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-100 rounded-full flex items-center justify-center">
-                    <LucideReact.Users size={24} className="text-gray-400" />
-                  </div>
-                )}
+          <div className="mt-2 flex flex-wrap items-center text-sm text-gray-500 space-x-4">
+            <span className="px-2 py-0.5 bg-gray-100 text-gray-800 rounded">
+              {scopeLabels[group.scope]}
+            </span>
+
+            {group.managerIds && (
+              <div className="flex items-center">
+                <LucideReact.Users className="mr-1" size={16} aria-hidden />
+                <span>
+                  {group.managerIds.length}{" "}
+                  {group.managerIds.length === 1 ? "Manager" : "Managers"}
+                </span>
               </div>
+            )}
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold text-gray-900 truncate">
-                    {title}
-                  </h3>
-                  {active ? (
-                    <LucideReact.CheckCircle
-                      className="text-green-500"
-                      size={16}
-                    />
-                  ) : (
-                    <LucideReact.XCircle className="text-red-500" size={16} />
-                  )}
-                </div>
-
-                <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                  <span
-                    className={`px-2 py-0.5 rounded-full ${scopeStyles[scope]}`}
-                  >
-                    {scopeLabels[scope]}
-                  </span>
-                  {managerIds && managerIds.length > 0 && (
-                    <div className="flex items-center space-x-1">
-                      <LucideReact.Users size={16} className="text-gray-400" />
-                      <span>{managerIds.length}</span>
-                    </div>
-                  )}
-                  {formattedCreated && (
-                    <div className="flex items-center space-x-1">
-                      <LucideReact.Calendar
-                        size={16}
-                        className="text-gray-400"
-                      />
-                      <time dateTime={new Date(createdAt!).toISOString()}>
-                        {formattedCreated}
-                      </time>
-                    </div>
-                  )}
-                </div>
-
-                {description && (
-                  <p className="mt-2 text-sm text-gray-700 line-clamp-2">
-                    {description}
-                  </p>
-                )}
+            {group.createdAt && (
+              <div className="flex items-center">
+                <LucideReact.Calendar
+                  className="mr-1"
+                  size={16}
+                  aria-hidden
+                />
+                <time dateTime={new Date(group.createdAt).toISOString()}>
+                  {formatDate(group.createdAt)}
+                </time>
               </div>
-            </li>
-          );
-        })}
-      </ul>
+            )}
+          </div>
 
-      {hasNext && (
-        <div className="mt-4 text-xs text-gray-400 text-center">
-          More groups available
+          {group.description && (
+            <p className="mt-2 text-gray-600 text-sm line-clamp-2">
+              {group.description}
+            </p>
+          )}
         </div>
-      )}
+      ))}
     </div>
   );
 }

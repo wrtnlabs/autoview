@@ -1,115 +1,104 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export type actions_organization_permissions = {
-    enabled_repositories: AutoViewInputSubTypes.enabled_repositories;
+    export interface actions_organization_permissions {
+        enabled_repositories: AutoViewInputSubTypes.enabled_repositories;
+        /**
+         * The API URL to use to get or set the selected repositories that are allowed to run GitHub Actions, when `enabled_repositories` is set to `selected`.
+        */
+        selected_repositories_url?: string;
+        allowed_actions?: AutoViewInputSubTypes.allowed_actions;
+        selected_actions_url?: AutoViewInputSubTypes.selected_actions_url;
+    }
     /**
-     * The API URL to use to get or set the selected repositories that are allowed to run GitHub Actions, when `enabled_repositories` is set to `selected`.
-     */
-    selected_repositories_url?: string;
-    allowed_actions?: AutoViewInputSubTypes.allowed_actions;
-    selected_actions_url?: AutoViewInputSubTypes.selected_actions_url;
-  };
-  /**
-   * The policy that controls the repositories in the organization that are allowed to run GitHub Actions.
-   */
-  export type enabled_repositories = "all" | "none" | "selected";
-  /**
-   * The permissions policy that controls the actions and reusable workflows that are allowed to run.
-   */
-  export type allowed_actions = "all" | "local_only" | "selected";
-  /**
-   * The API URL to use to get or set the actions and reusable workflows that are allowed to run, when `allowed_actions` is set to `selected`.
-   */
-  export type selected_actions_url = string;
+     * The policy that controls the repositories in the organization that are allowed to run GitHub Actions.
+    */
+    export type enabled_repositories = "all" | "none" | "selected";
+    /**
+     * The permissions policy that controls the actions and reusable workflows that are allowed to run.
+    */
+    export type allowed_actions = "all" | "local_only" | "selected";
+    /**
+     * The API URL to use to get or set the actions and reusable workflows that are allowed to run, when `allowed_actions` is set to `selected`.
+    */
+    export type selected_actions_url = string;
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.actions_organization_permissions;
+export type AutoViewInput = AutoViewInputSubTypes.actions_organization_permissions;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const repoLabels: Record<AutoViewInputSubTypes.enabled_repositories, string> =
-    {
-      all: "All repositories",
-      none: "No repositories",
-      selected: "Selected repositories",
-    };
-  const actionsKey = (value.allowed_actions ??
-    "all") as NonNullable<AutoViewInputSubTypes.allowed_actions>;
-  const actionsLabels: Record<
-    NonNullable<AutoViewInputSubTypes.allowed_actions>,
-    string
+  const truncate = (str: string, max = 40): string =>
+    str.length > max ? `${str.slice(0, max)}…` : str;
+
+  const repoPolicyMap: Record<
+    AutoViewInputSubTypes.enabled_repositories,
+    { icon: JSX.Element; text: string }
   > = {
-    all: "All actions and reusable workflows",
-    local_only: "Local actions and reusable workflows only",
-    selected: "Selected actions and reusable workflows",
+    all: {
+      icon: <LucideReact.CheckCircle size={16} className="text-green-500" />,
+      text: "All repositories",
+    },
+    none: {
+      icon: <LucideReact.XCircle size={16} className="text-red-500" />,
+      text: "No repositories",
+    },
+    selected: {
+      icon: <LucideReact.ListChecks size={16} className="text-amber-500" />,
+      text: "Selected repositories",
+    },
   };
-  const truncate = (str: string, max = 50) =>
-    str.length > max ? str.slice(0, max) + "…" : str;
+  const enabledPolicy = repoPolicyMap[value.enabled_repositories];
+
+  const allowed = value.allowed_actions ?? "all";
+  const actionPolicyMap: Record<
+    AutoViewInputSubTypes.allowed_actions,
+    { icon: JSX.Element; text: string }
+  > = {
+    all: {
+      icon: <LucideReact.CheckCircle size={16} className="text-green-500" />,
+      text: "All actions",
+    },
+    local_only: {
+      icon: <LucideReact.Lock size={16} className="text-amber-500" />,
+      text: "Local only actions",
+    },
+    selected: {
+      icon: <LucideReact.ListChecks size={16} className="text-blue-500" />,
+      text: "Selected actions",
+    },
+  };
+  const actionsPolicy = actionPolicyMap[allowed];
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // 3. Return the React element.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-sm">
-      <h2 className="text-lg font-semibold text-gray-800 mb-4">
-        GitHub Actions Policy
+    <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
+      <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+        <LucideReact.Zap size={20} className="text-blue-500" />
+        <span>Actions Organization Permissions</span>
       </h2>
-      <div className="space-y-6">
-        {/* Enabled Repositories Section */}
-        <div>
-          <div className="flex items-center text-gray-700">
-            <LucideReact.GitBranch
-              size={18}
-              className="mr-2 text-gray-500"
-              aria-hidden
-            />
-            <span className="font-medium">Allowed Repositories:</span>
-          </div>
-          <div className="ml-6 mt-1 text-gray-900">
-            {repoLabels[value.enabled_repositories]}
-          </div>
-          {value.enabled_repositories === "selected" &&
-            value.selected_repositories_url && (
-              <div className="ml-6 mt-2 flex items-start">
-                <LucideReact.Link
-                  size={16}
-                  className="mt-1 mr-1 text-gray-500"
-                  aria-hidden
-                />
-                <code className="text-sm text-blue-600 break-words">
-                  {truncate(value.selected_repositories_url)}
-                </code>
-              </div>
-            )}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          {enabledPolicy.icon}
+          <span className="text-sm font-medium">{enabledPolicy.text}</span>
         </div>
-
-        {/* Allowed Actions Section */}
-        <div>
-          <div className="flex items-center text-gray-700">
-            <LucideReact.PlayCircle
-              size={18}
-              className="mr-2 text-gray-500"
-              aria-hidden
-            />
-            <span className="font-medium">Allowed Actions:</span>
+        {value.enabled_repositories === "selected" && value.selected_repositories_url && (
+          <div className="ml-6 text-sm text-gray-600 break-all truncate">
+            {truncate(value.selected_repositories_url)}
           </div>
-          <div className="ml-6 mt-1 text-gray-900">
-            {actionsLabels[actionsKey]}
-          </div>
-          {actionsKey === "selected" && value.selected_actions_url && (
-            <div className="ml-6 mt-2 flex items-start">
-              <LucideReact.Link
-                size={16}
-                className="mt-1 mr-1 text-gray-500"
-                aria-hidden
-              />
-              <code className="text-sm text-blue-600 break-words">
-                {truncate(value.selected_actions_url)}
-              </code>
-            </div>
-          )}
+        )}
+        <div className="flex items-center gap-2">
+          {actionsPolicy.icon}
+          <span className="text-sm font-medium">{actionsPolicy.text}</span>
         </div>
+        {allowed === "selected" && value.selected_actions_url && (
+          <div className="ml-6 text-sm text-gray-600 break-all truncate">
+            {truncate(value.selected_actions_url)}
+          </div>
+        )}
       </div>
     </div>
   );

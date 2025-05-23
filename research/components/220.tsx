@@ -1,171 +1,197 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace legacy {
-    export namespace open {
-      export namespace v4 {
-        export type LegacyV4WebhookView = {
-          webhook?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook;
-        };
-      }
+    export namespace legacy {
+        export namespace open {
+            export namespace v4 {
+                export interface LegacyV4WebhookView {
+                    webhook?: AutoViewInputSubTypes.legacy.v4.LegacyV4Webhook;
+                }
+            }
+        }
+        export namespace v4 {
+            export interface LegacyV4Webhook {
+                id?: string;
+                channelId?: string;
+                name: string;
+                url: string;
+                token?: string;
+                keywords?: string[] & tags.MinItems<1> & tags.MaxItems<20> & tags.UniqueItems;
+                createdAt?: number;
+                watchUserChats?: boolean;
+                watchGroups?: boolean;
+                apiVersion: string;
+                lastBlockedAt?: number;
+                blocked?: boolean;
+            }
+        }
     }
-    export namespace v4 {
-      export type LegacyV4Webhook = {
-        id?: string;
-        channelId?: string;
-        name: string;
-        url: string;
-        token?: string;
-        keywords?: string[] &
-          tags.MinItems<1> &
-          tags.MaxItems<20> &
-          tags.UniqueItems;
-        createdAt?: number;
-        watchUserChats?: boolean;
-        watchGroups?: boolean;
-        apiVersion: string;
-        lastBlockedAt?: number;
-        blocked?: boolean;
-      };
-    }
-  }
 }
-export type AutoViewInput =
-  AutoViewInputSubTypes.legacy.open.v4.LegacyV4WebhookView;
+export type AutoViewInput = AutoViewInputSubTypes.legacy.open.v4.LegacyV4WebhookView;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const wk = value.webhook;
-  const hasWebhook = Boolean(wk);
-  const name = wk?.name ?? "";
-  const url = wk?.url ?? "";
-  const apiVersion = wk?.apiVersion ?? "";
-  const keywords = wk?.keywords ?? [];
-  const createdAt = wk?.createdAt;
-  const lastBlockedAt = wk?.lastBlockedAt;
-  const watchUserChats = wk?.watchUserChats ?? false;
-  const watchGroups = wk?.watchGroups ?? false;
-  const blocked = wk?.blocked ?? false;
-
-  const formattedCreatedAt = createdAt
-    ? new Date(createdAt).toLocaleString()
-    : undefined;
-  const formattedLastBlockedAt = lastBlockedAt
-    ? new Date(lastBlockedAt).toLocaleString()
-    : undefined;
-
-  // Icons and status
-  const statusIcon = blocked ? (
-    <LucideReact.AlertTriangle
-      size={16}
-      className="text-red-500"
-      aria-label="Blocked"
-    />
-  ) : (
-    <LucideReact.CheckCircle
-      size={16}
-      className="text-green-500"
-      aria-label="Active"
-    />
-  );
-  const statusText = blocked ? "Blocked" : "Active";
-
-  const chatIcon = (
-    <LucideReact.MessageSquare
-      size={16}
-      className={watchUserChats ? "text-green-500" : "text-gray-400"}
-      aria-label={
-        watchUserChats ? "Watching user chats" : "Not watching user chats"
-      }
-    />
-  );
-  const groupIcon = (
-    <LucideReact.Users
-      size={16}
-      className={watchGroups ? "text-green-500" : "text-gray-400"}
-      aria-label={watchGroups ? "Watching groups" : "Not watching groups"}
-    />
-  );
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
-  if (!hasWebhook) {
+  const webhook = value.webhook;
+  if (!webhook) {
     return (
-      <div className="p-4 bg-white rounded-lg shadow text-center text-gray-500">
-        <LucideReact.AlertCircle size={24} className="mx-auto mb-2" />
-        <p>No webhook configured.</p>
+      <div className="p-6 bg-white rounded-lg shadow-md flex flex-col items-center text-gray-400">
+        <LucideReact.AlertCircle size={48} aria-label="No Data" />
+        <p className="mt-2 text-sm">No webhook configured</p>
       </div>
     );
   }
 
+  const {
+    name,
+    url,
+    apiVersion,
+    createdAt,
+    lastBlockedAt,
+    blocked,
+    watchUserChats,
+    watchGroups,
+    keywords,
+  } = webhook;
+
+  const formattedCreatedAt = createdAt
+    ? new Date(createdAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      })
+    : undefined;
+
+  const formattedBlockedAt = lastBlockedAt
+    ? new Date(lastBlockedAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      })
+    : undefined;
+
+  const keywordList = Array.isArray(keywords) ? keywords : [];
+
+  // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md max-w-md mx-auto space-y-4">
-      {/* Header: Name */}
-      <div className="flex items-center space-x-2">
-        <LucideReact.Rss size={20} className="text-indigo-500" />
-        <h2 className="text-lg font-semibold text-gray-900 truncate">{name}</h2>
+    <div className="w-full max-w-md mx-auto p-4 bg-white rounded-lg shadow-md">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">{name}</h2>
+        {blocked ? (
+          <LucideReact.AlertTriangle
+            className="text-red-500"
+            size={20}
+            aria-label="Blocked"
+          />
+        ) : (
+          <LucideReact.CheckCircle
+            className="text-green-500"
+            size={20}
+            aria-label="Active"
+          />
+        )}
       </div>
 
-      {/* URL & API Version */}
-      <div className="space-y-1">
-        <div className="flex items-center text-blue-600 overflow-hidden">
-          <LucideReact.Link size={16} className="mr-1 flex-shrink-0" />
-          <span className="text-sm truncate">{url}</span>
-        </div>
-        <div className="text-sm text-gray-500">API Version: {apiVersion}</div>
+      {/* URL */}
+      <div className="mt-3 flex items-start text-gray-600">
+        <LucideReact.Link
+          className="mt-1 mr-1 text-gray-400"
+          size={16}
+          aria-label="Webhook URL"
+        />
+        <span className="break-all text-blue-600 text-sm">{url}</span>
       </div>
 
-      {/* Status */}
-      <div className="flex items-center space-x-1 text-sm">
-        <span>Status:</span>
-        <span className="flex items-center space-x-1">
-          {statusIcon}
-          <span className={blocked ? "text-red-600" : "text-green-600"}>
-            {statusText}
-          </span>
-        </span>
-      </div>
-      {blocked && formattedLastBlockedAt && (
-        <div className="text-xs text-red-500">
-          Last blocked: {formattedLastBlockedAt}
+      {/* Details Grid */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-600">
+        {/* API Version */}
+        <div className="flex items-center">
+          <LucideReact.Code
+            className="mr-1 text-gray-400"
+            size={16}
+            aria-label="API Version"
+          />
+          <span>v{apiVersion}</span>
         </div>
-      )}
 
-      {/* Creation Date */}
-      {formattedCreatedAt && (
-        <div className="flex items-center text-sm text-gray-500">
-          <LucideReact.Calendar size={16} className="mr-1 flex-shrink-0" />
-          <span>Created: {formattedCreatedAt}</span>
-        </div>
-      )}
+        {/* Created At */}
+        {formattedCreatedAt && (
+          <div className="flex items-center">
+            <LucideReact.Calendar
+              className="mr-1 text-gray-400"
+              size={16}
+              aria-label="Created At"
+            />
+            <span>{formattedCreatedAt}</span>
+          </div>
+        )}
 
-      {/* Watch Settings */}
-      <div className="flex items-center space-x-6 text-sm">
-        <div className="flex items-center space-x-1">
-          {chatIcon}
-          <span className={watchUserChats ? "text-gray-800" : "text-gray-400"}>
-            User Chats
-          </span>
+        {/* Watch User Chats */}
+        <div className="flex items-center">
+          {watchUserChats ? (
+            <LucideReact.CheckCircle
+              className="mr-1 text-green-500"
+              size={16}
+              aria-label="Watching User Chats"
+            />
+          ) : (
+            <LucideReact.XCircle
+              className="mr-1 text-red-500"
+              size={16}
+              aria-label="Not Watching User Chats"
+            />
+          )}
+          <span>Watch User Chats</span>
         </div>
-        <div className="flex items-center space-x-1">
-          {groupIcon}
-          <span className={watchGroups ? "text-gray-800" : "text-gray-400"}>
-            Groups
-          </span>
+
+        {/* Watch Groups */}
+        <div className="flex items-center">
+          {watchGroups ? (
+            <LucideReact.CheckCircle
+              className="mr-1 text-green-500"
+              size={16}
+              aria-label="Watching Groups"
+            />
+          ) : (
+            <LucideReact.XCircle
+              className="mr-1 text-red-500"
+              size={16}
+              aria-label="Not Watching Groups"
+            />
+          )}
+          <span>Watch Groups</span>
         </div>
+
+        {/* Blocked At */}
+        {blocked && formattedBlockedAt && (
+          <div className="sm:col-span-2 flex items-center text-red-600">
+            <LucideReact.AlertTriangle
+              className="mr-1 text-red-500"
+              size={16}
+              aria-label="Blocked At"
+            />
+            <span>Blocked at {formattedBlockedAt}</span>
+          </div>
+        )}
       </div>
 
       {/* Keywords */}
-      {keywords.length > 0 && (
-        <div className="mt-2">
-          <span className="text-sm font-medium text-gray-700">Keywords:</span>
-          <div className="mt-1 flex flex-wrap">
-            {keywords.map((kw, idx) => (
+      {keywordList.length > 0 && (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-gray-700">Keywords</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {keywordList.map((kw, idx) => (
               <span
                 key={idx}
-                className="inline-block bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-1"
+                className="px-2 py-1 bg-indigo-100 text-indigo-800 text-xs rounded-full truncate"
               >
                 {kw}
               </span>

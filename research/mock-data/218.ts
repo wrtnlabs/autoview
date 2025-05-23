@@ -4,5 +4,5 @@ import Component from "../components/218";
 export type InputType = Parameters<typeof Component>[0];
 
 export function random(): InputType {
-  return {"webhook":{"id":"wh_123456789_sample","channelId":"channel_sample_001","name":"Sample Webhook (Test)","url":"https://api.example.com/webhooks/sample-webhook-endpoint","token":"token_sample_abcdef123456","keywords":["chat","notifications","sample"],"createdAt":1716096000000,"watchUserChats":true,"watchGroups":false,"apiVersion":"v1","lastBlockedAt":1716182400000,"blocked":false}};
+  return {"webhook":{"id":"test_webhook_001","channelId":"channel_test_001","name":"Sample Webhook (Test)","url":"https://api.example.com/v1/test-webhook-endpoint","token":"sample_token_abc123","keywords":["alert","update","test"],"createdAt":1716205200000,"watchUserChats":true,"watchGroups":false,"apiVersion":"v4","lastBlockedAt":1716291600000,"blocked":false}};
 }

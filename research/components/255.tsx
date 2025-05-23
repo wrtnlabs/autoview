@@ -1,221 +1,278 @@
-import * as LucideReact from "lucide-react";
-import React, { JSX } from "react";
 import { tags } from "typia";
-
+import React, { JSX } from "react";
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  export namespace open {
-    export type PluginView = {
-      plugin?: AutoViewInputSubTypes.Plugin;
-    };
-  }
-  export type Plugin = {
-    id?: string;
-    key?: string & tags.Format<"uuid">;
-    channelId?: string;
-    state?: "waiting" | "active";
-    name: string;
-    createdAt?: number;
-    appearance: "light" | "dark" | "system";
-    labelButton?: boolean;
-    labelButtonText?: string;
-    labelButtonTextI18nMap?: {
-      [key: string]: string;
-    };
-    buttonType: "legacy" | "customImage" | "iconButton";
-    iconButton:
-      | "channel"
-      | "channel-filled"
-      | "chat-bubble-alt"
-      | "chat-bubble-alt-filled"
-      | "chat-bubble-filled"
-      | "chat-lightning-filled"
-      | "chat-progress"
-      | "chat-progress-filled"
-      | "chat-question"
-      | "chat-question-filled"
-      | "comment"
-      | "comment-filled"
-      | "communication"
-      | "headset"
-      | "help-filled"
-      | "send-forward"
-      | "send-forward-filled"
-      | "sms"
-      | "sms-filled";
-    customImage?: AutoViewInputSubTypes.ImageFile;
-    deskImage?: AutoViewInputSubTypes.TinyFile;
-    deskMarginX?: number & tags.Type<"int32">;
-    deskMarginY?: number & tags.Type<"int32">;
-    deskHideButton?: boolean;
-    deskPosition?: "left" | "right";
-    mobileImage?: AutoViewInputSubTypes.TinyFile;
-    mobileMarginX?: number & tags.Type<"int32">;
-    mobileMarginY?: number & tags.Type<"int32">;
-    mobilePosition?: "left" | "right";
-    mobileHideButton?: boolean;
-    mobileBubblePosition?: "top" | "bottom";
-    urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
-    runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
-    facebookPixelId?: string;
-    customImageUrl?: string;
-    deskImageUrl?: string;
-    mobileImageUrl?: string;
-    validLabelButtonText?: boolean;
-    validLabelButtonTextI18nMap?: boolean;
-  };
-  export type ImageFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32">;
-    height?: number & tags.Type<"int32">;
-    contentType?: string & tags.Pattern<"^image/.*">;
-  };
-  export type TinyFile = {
-    bucket: string;
-    key: string;
-    width?: number & tags.Type<"int32">;
-    height?: number & tags.Type<"int32">;
-  };
+    export namespace open {
+        export interface PluginView {
+            plugin?: AutoViewInputSubTypes.Plugin;
+        }
+    }
+    export interface Plugin {
+        id?: string;
+        key?: string & tags.Format<"uuid">;
+        channelId?: string;
+        state?: "waiting" | "active";
+        name: string;
+        createdAt?: number;
+        appearance: "light" | "dark" | "system";
+        labelButton?: boolean;
+        labelButtonText?: string;
+        labelButtonTextI18nMap?: {
+            [key: string]: string;
+        };
+        buttonType: "legacy" | "customImage" | "iconButton";
+        iconButton: "channel" | "channel-filled" | "chat-bubble-alt" | "chat-bubble-alt-filled" | "chat-bubble-filled" | "chat-lightning-filled" | "chat-progress" | "chat-progress-filled" | "chat-question" | "chat-question-filled" | "comment" | "comment-filled" | "communication" | "headset" | "help-filled" | "send-forward" | "send-forward-filled" | "sms" | "sms-filled";
+        customImage?: AutoViewInputSubTypes.ImageFile;
+        deskImage?: AutoViewInputSubTypes.TinyFile;
+        deskMarginX?: number & tags.Type<"int32">;
+        deskMarginY?: number & tags.Type<"int32">;
+        deskHideButton?: boolean;
+        deskPosition?: "left" | "right";
+        mobileImage?: AutoViewInputSubTypes.TinyFile;
+        mobileMarginX?: number & tags.Type<"int32">;
+        mobileMarginY?: number & tags.Type<"int32">;
+        mobilePosition?: "left" | "right";
+        mobileHideButton?: boolean;
+        mobileBubblePosition?: "top" | "bottom";
+        urlWhitelist?: string[] & tags.MinItems<0> & tags.MaxItems<5>;
+        runRate?: number & tags.Minimum<0> & tags.Maximum<1>;
+        facebookPixelId?: string;
+        customImageUrl?: string;
+        deskImageUrl?: string;
+        mobileImageUrl?: string;
+        validLabelButtonText?: boolean;
+        validLabelButtonTextI18nMap?: boolean;
+    }
+    export interface ImageFile {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+        contentType?: string & tags.Pattern<"^image/.*">;
+    }
+    export interface TinyFile {
+        bucket: string;
+        key: string;
+        width?: number & tags.Type<"int32">;
+        height?: number & tags.Type<"int32">;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.open.PluginView;
 
+
+
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
   const plugin = value.plugin;
   if (!plugin) {
     return (
       <div className="flex flex-col items-center justify-center p-6 text-gray-500">
-        <LucideReact.AlertCircle size={48} />
+        <LucideReact.AlertCircle size={24} />
         <span className="mt-2">No plugin data available</span>
       </div>
     );
   }
 
-  const createdAt = plugin.createdAt
-    ? new Date(plugin.createdAt).toLocaleString()
-    : "N/A";
-  const runRate =
-    typeof plugin.runRate === "number"
-      ? `${(plugin.runRate * 100).toFixed(0)}%`
-      : "N/A";
-  const whitelistCount = plugin.urlWhitelist?.length ?? 0;
+  // Helper to transform kebab-case to PascalCase for icon lookup
+  function toPascalCase(str: string): string {
+    return str
+      .split(/[-_]/)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join("");
+  }
 
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // State display
+  const stateLabel =
+    plugin.state === "active"
+      ? "Active"
+      : plugin.state === "waiting"
+      ? "Waiting"
+      : "Unknown";
+  const StateIcon =
+    plugin.state === "active"
+      ? LucideReact.CheckCircle
+      : plugin.state === "waiting"
+      ? LucideReact.Clock
+      : LucideReact.AlertCircle;
+  const stateColor =
+    plugin.state === "active"
+      ? "text-green-500"
+      : plugin.state === "waiting"
+      ? "text-amber-500"
+      : "text-gray-400";
+
+  // Created date formatting
+  const createdDate = plugin.createdAt
+    ? new Date(plugin.createdAt).toLocaleString()
+    : "—";
+
+  // Run rate as percentage
+  const runRatePercent =
+    plugin.runRate != null
+      ? `${Math.round(plugin.runRate * 100)}%`
+      : "—";
+
+  // URL whitelist items
+  const whitelistItems = plugin.urlWhitelist ?? [];
+
+  // Image source resolver
+  const resolveImage = (
+    file?: AutoViewInputSubTypes.ImageFile | AutoViewInputSubTypes.TinyFile,
+    url?: string
+  ): string | null => {
+    if (url) return url;
+    if (file) {
+      const bucket = (file as any).bucket;
+      const key = (file as any).key;
+      return `https://${bucket}.s3.amazonaws.com/${key}`;
+    }
+    return null;
+  };
+
+  const customImgSrc = resolveImage(
+    plugin.customImage,
+    plugin.customImageUrl
+  );
+  const deskImgSrc = resolveImage(
+    plugin.deskImage,
+    plugin.deskImageUrl
+  );
+  const mobileImgSrc = resolveImage(
+    plugin.mobileImage,
+    plugin.mobileImageUrl
+  );
+
+  // Appearance mapping
+  const appearanceLabels = {
+    light: "Light",
+    dark: "Dark",
+    system: "System",
+  } as const;
+  const appearanceLabel = appearanceLabels[plugin.appearance];
+  const AppearanceIcon =
+    plugin.appearance === "light"
+      ? LucideReact.Sun
+      : plugin.appearance === "dark"
+      ? LucideReact.Moon
+      : LucideReact.Monitor;
+
+  // Button type mapping
+  const buttonTypeLabels = {
+    legacy: "Legacy",
+    customImage: "Custom Image",
+    iconButton: "Icon Button",
+  } as const;
+  const buttonTypeLabel = buttonTypeLabels[plugin.buttonType];
+
+  // Label button text
+  const labelText = plugin.labelButton
+    ? plugin.labelButtonText || "Label"
+    : null;
+
+  // Dynamic icon button component (typed as any to accept Lucide props)
+  const iconKey = toPascalCase(plugin.iconButton) as keyof typeof LucideReact;
+  const IconButtonComponent = LucideReact[
+    iconKey
+  ] as React.ComponentType<any> | undefined;
+
   return (
-    <div className="p-6 bg-white rounded-lg shadow-md max-w-full">
-      <header className="mb-4">
-        <h2 className="text-xl font-semibold text-gray-800">{plugin.name}</h2>
-        {plugin.key && (
-          <div
-            className="mt-1 text-sm text-gray-500 truncate"
-            title={plugin.key}
-          >
-            {plugin.key}
+    <div className="p-4 bg-white rounded-lg shadow-md max-w-lg mx-auto space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-800 truncate">
+          {plugin.name}
+        </h2>
+        <div className={`flex items-center ${stateColor}`}>
+          <StateIcon size={16} className="mr-1" />
+          <span className="text-sm">{stateLabel}</span>
+        </div>
+      </div>
+
+      {/* Properties Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+        <div className="flex items-center truncate">
+          <LucideReact.Calendar size={16} className="mr-1 text-gray-400" />
+          <span>Created:</span>
+          <span className="ml-1">{createdDate}</span>
+        </div>
+        <div className="flex items-center truncate">
+          <AppearanceIcon size={16} className="mr-1 text-gray-400" />
+          <span>Appearance:</span>
+          <span className="ml-1">{appearanceLabel}</span>
+        </div>
+        <div className="flex items-center truncate">
+          <LucideReact.Layers size={16} className="mr-1 text-gray-400" />
+          <span>Button Type:</span>
+          <span className="ml-1">{buttonTypeLabel}</span>
+        </div>
+        {labelText && (
+          <div className="flex items-center truncate">
+            <LucideReact.Tag size={16} className="mr-1 text-gray-400" />
+            <span>Label:</span>
+            <span className="ml-1">{labelText}</span>
           </div>
         )}
-      </header>
-
-      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-700">
-        <div>
-          <dt className="font-medium">Status</dt>
-          <dd className="flex items-center mt-1">
-            {plugin.state === "active" ? (
-              <LucideReact.CheckCircle className="text-green-500" size={16} />
-            ) : (
-              <LucideReact.Clock className="text-amber-500" size={16} />
-            )}
-            <span className="ml-2 capitalize">{plugin.state ?? "Unknown"}</span>
-          </dd>
+        <div className="flex items-center truncate">
+          <LucideReact.BarChart2 size={16} className="mr-1 text-gray-400" />
+          <span>Run Rate:</span>
+          <span className="ml-1">{runRatePercent}</span>
         </div>
+      </div>
 
-        <div>
-          <dt className="font-medium">Created</dt>
-          <dd className="mt-1 flex items-center">
-            <LucideReact.Calendar className="text-gray-400" size={16} />
-            <span className="ml-2">{createdAt}</span>
-          </dd>
-        </div>
-
-        <div>
-          <dt className="font-medium">Appearance</dt>
-          <dd className="mt-1 capitalize">{plugin.appearance}</dd>
-        </div>
-
-        <div>
-          <dt className="font-medium">Run Rate</dt>
-          <dd className="mt-1">{runRate}</dd>
-        </div>
-
-        <div>
-          <dt className="font-medium">Whitelisted URLs</dt>
-          <dd className="mt-1">
-            {whitelistCount} {whitelistCount === 1 ? "URL" : "URLs"}
-          </dd>
-        </div>
-
-        <div>
-          <dt className="font-medium">Button Type</dt>
-          <dd className="mt-1 flex items-center space-x-2">
-            {plugin.buttonType === "iconButton" && (
-              <span className="px-2 py-1 bg-gray-100 rounded text-gray-600">
-                {plugin.iconButton}
-              </span>
-            )}
-            {plugin.buttonType === "customImage" && plugin.customImageUrl && (
-              <img
-                src={plugin.customImageUrl}
-                alt="Custom Button"
-                className="w-6 h-6 object-cover rounded"
-              />
-            )}
-            {plugin.buttonType === "legacy" && (
-              <LucideReact.Circle className="text-gray-500" size={16} />
-            )}
-            <span className="capitalize">{plugin.buttonType}</span>
-          </dd>
-        </div>
-      </dl>
-
-      {(plugin.customImageUrl ||
-        plugin.deskImageUrl ||
-        plugin.mobileImageUrl) && (
-        <div className="mt-6">
-          <h3 className="text-sm font-medium text-gray-800 mb-2">Images</h3>
-          <div className="flex items-center gap-6">
-            {(["custom", "desk", "mobile"] as const).map((type) => {
-              const url =
-                type === "custom"
-                  ? plugin.customImageUrl
-                  : type === "desk"
-                    ? plugin.deskImageUrl
-                    : plugin.mobileImageUrl;
-              return (
-                <div key={type} className="flex flex-col items-center">
-                  {url ? (
-                    <img
-                      src={url}
-                      alt={`${type} image`}
-                      className="w-16 h-16 bg-gray-100 rounded object-cover"
-                      onError={(e) => {
-                        (e.currentTarget as HTMLImageElement).src =
-                          "https://placehold.co/64x64/e2e8f0/1e293b?text=No+Img";
-                      }}
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">
-                      No {type}
-                    </div>
-                  )}
-                  <span className="mt-1 text-xs text-gray-600 capitalize">
-                    {type}
-                  </span>
-                </div>
-              );
-            })}
+      {/* URL Whitelist */}
+      {whitelistItems.length > 0 && (
+        <div className="space-y-1">
+          <div className="flex items-center text-sm text-gray-600">
+            <LucideReact.Link size={16} className="mr-1 text-gray-400" />
+            <span>Allowed URLs:</span>
           </div>
+          <ul className="list-disc list-inside text-sm text-gray-600 space-y-0.5">
+            {whitelistItems.map((url, idx) => (
+              <li key={idx} className="truncate">
+                {url}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
+
+      {/* Image Previews */}
+      <div className="grid grid-cols-2 gap-4">
+        {[
+          { label: "Custom Image", src: customImgSrc },
+          { label: "Desktop Image", src: deskImgSrc },
+          { label: "Mobile Image", src: mobileImgSrc },
+        ]
+          .filter((item) => item.src)
+          .map((item) => (
+            <div key={item.label} className="flex flex-col">
+              <span className="text-xs text-gray-500 mb-1">
+                {item.label}
+              </span>
+              <div className="aspect-square bg-gray-100 rounded overflow-hidden">
+                <img
+                  src={item.src!}
+                  alt={item.label}
+                  onError={(e) =>
+                    ((e.target as HTMLImageElement).src =
+                      "https://placehold.co/150x150/e2e8f0/1e293b?text=Image")
+                  }
+                  className="object-cover w-full h-full"
+                />
+              </div>
+            </div>
+          ))}
+      </div>
+
+      {/* Icon Button Preview */}
+      <div className="flex items-center text-sm text-gray-600">
+        <span>Icon Button:</span>
+        {IconButtonComponent ? (
+          <IconButtonComponent size={16} className="ml-1 text-gray-500" />
+        ) : (
+          <span className="ml-1 text-gray-400">N/A</span>
+        )}
+      </div>
     </div>
   );
 }

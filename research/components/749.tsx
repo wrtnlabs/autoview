@@ -1,51 +1,68 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
+import * as LucideReact from "lucide-react";
 export namespace AutoViewInputSubTypes {
-  /**
-   * Short Blob
-   *
-   * @title Short Blob
-   */
-  export type short_blob = {
-    url: string;
-    sha: string;
-  };
+    /**
+     * Short Blob
+     *
+     * @title Short Blob
+    */
+    export interface short_blob {
+        url: string;
+        sha: string;
+    }
 }
 export type AutoViewInput = AutoViewInputSubTypes.short_blob;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
   // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const fileName = value.url.split("/").pop() || value.url;
-  const shortSha = value.sha.slice(0, 7);
+  const { url, sha } = value;
+  // Derive file name from URL
+  const segments = url.split("/");
+  const rawName = segments[segments.length - 1] || url;
+  const fileName = rawName.split("?")[0];
+  // Truncate SHA for display
+  const truncatedSha = sha.length > 8 ? `${sha.slice(0, 8)}…` : sha;
+  // Determine if the URL likely points to an image
+  const isImage = /\.(jpe?g|png|gif|webp|svg)$/i.test(url);
+  // Manage image load errors
+  const [imgError, setImgError] = React.useState<boolean>(false);
 
   // 2. Compose the visual structure using JSX and Tailwind CSS.
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md w-full max-w-md mx-auto">
-      {/* File Name Header */}
-      <div className="flex items-center mb-3">
-        <LucideReact.FileText size={20} className="text-indigo-500 mr-2" />
-        <h2
-          className="text-lg font-semibold text-gray-800 truncate"
-          title={fileName}
-        >
-          {fileName}
-        </h2>
-      </div>
-      {/* URL and SHA details */}
-      <div className="space-y-3 text-sm text-gray-600">
-        <div className="flex items-start gap-2 break-all">
-          <LucideReact.Link size={16} className="mt-0.5 text-gray-500" />
-          <span className="break-all">{value.url}</span>
+    <div className="flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      {/* Preview: image or generic file icon */}
+      {isImage && !imgError ? (
+        <img
+          src={url}
+          alt={fileName}
+          onError={() => setImgError(true)}
+          className="w-16 h-16 object-cover rounded-md bg-gray-100"
+        />
+      ) : (
+        <div className="w-16 h-16 flex items-center justify-center bg-gray-100 rounded-md">
+          <LucideReact.FileText size={32} className="text-gray-400" />
         </div>
-        <div className="flex items-center gap-2">
-          <LucideReact.Hash size={16} className="text-gray-500" />
-          <code className="font-mono">{shortSha}</code>
-          <span className="ml-auto text-xs text-gray-400">truncated SHA</span>
+      )}
+
+      {/* File information */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center space-x-2">
+          <LucideReact.Folder size={16} className="text-gray-500" />
+          <span
+            className="text-sm font-medium text-gray-900 truncate"
+            title={fileName}
+          >
+            {fileName}
+          </span>
         </div>
-        <div className="ml-6 text-xs text-gray-400 font-mono break-all">
-          Full SHA: {value.sha}
+        <div className="mt-1 flex items-center text-xs text-gray-500">
+          <LucideReact.Hash size={14} className="mr-1 text-gray-400" />
+          <span className="font-mono truncate" title={sha}>
+            {truncatedSha}
+          </span>
         </div>
       </div>
     </div>

@@ -1,37 +1,33 @@
-import * as LucideReact from "lucide-react";
 import React, { JSX } from "react";
-
-export namespace AutoViewInputSubTypes {}
+import * as LucideReact from "lucide-react";
+export namespace AutoViewInputSubTypes { }
 export type AutoViewInput = string;
+
+
 
 // The component name must always be "VisualComponent"
 export default function VisualComponent(value: AutoViewInput): React.ReactNode {
-  // 1. Define data aggregation/transformation functions or derived constants if necessary.
-  const rawText = typeof value === "string" ? value : String(value);
-  const text = rawText.trim();
-  const isEmpty = text.length === 0;
+  // Truncate very long text for better mobile presentation
+  const maxLength = 200;
+  const isLong = typeof value === "string" && value.length > maxLength;
+  const displayText = isLong
+    ? value.slice(0, maxLength).trimEnd() + "…"
+    : value;
 
-  // Truncate long text for mobile-first layout
-  const MAX_PREVIEW_LENGTH = 200;
-  const isLong = text.length > MAX_PREVIEW_LENGTH;
-  const previewText = isLong ? `${text.slice(0, MAX_PREVIEW_LENGTH)}…` : text;
-
-  // 2. Compose the visual structure using JSX and Tailwind CSS.
+  // Compose the visual structure using JSX and Tailwind CSS
   return (
-    <div className="w-full max-w-lg mx-auto p-4 bg-white rounded-lg shadow-sm">
-      {isEmpty ? (
-        <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-          <LucideReact.AlertCircle size={48} className="mb-2" />
-          <span className="text-sm">No data available</span>
-        </div>
-      ) : (
-        <p className="text-gray-800 text-base leading-relaxed break-words line-clamp-3">
-          {previewText}
-        </p>
-      )}
-      {isLong && !isEmpty && (
-        <p className="mt-2 text-sm text-gray-500 italic">Content truncated</p>
-      )}
+    <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex items-center mb-2">
+        <LucideReact.FileText
+          size={20}
+          className="text-gray-400"
+          aria-hidden="true"
+        />
+        <span className="ml-2 text-gray-700 font-medium">Content</span>
+      </div>
+      <p className="text-gray-800 text-sm whitespace-pre-wrap break-words leading-relaxed line-clamp-3">
+        {displayText}
+      </p>
     </div>
   );
 }
