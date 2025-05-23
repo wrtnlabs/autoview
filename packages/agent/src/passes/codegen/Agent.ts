@@ -80,6 +80,29 @@ export class Agent implements AgentBase<Input, Output> {
 
     const results = await new LlmProxy<Input, Output>()
       .withTextHandler(handleText(service))
+      .withPreGenerationCallback(
+        async (api, body, options, backoffStrategy) => {
+          if (!input.onPreLlmGeneration) {
+            return;
+          }
+
+          const result = await input.onPreLlmGeneration(
+            input.sessionId,
+            api,
+            body,
+            options,
+            backoffStrategy,
+          );
+
+          if (typeof result === "function") {
+            return async (completion) => {
+              await result(input.sessionId, completion);
+            };
+          }
+
+          return;
+        },
+      )
       .call(
         input,
         input.vendor.api,

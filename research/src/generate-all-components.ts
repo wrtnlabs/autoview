@@ -1,9 +1,11 @@
-import {
-  AutoViewAgent,
-  IAutoViewVendor,
-  LlmUnrecoverableError,
-} from "@autoview/agent";
+import { AutoViewAgent, IAutoViewVendor } from "@autoview/agent";
+import * as crypto from "crypto";
 import * as fs from "fs/promises";
+import {
+  Langfuse,
+  LangfuseGenerationClient,
+  LangfuseTraceClient,
+} from "langfuse";
 import OpenAI from "openai";
 import * as path from "path";
 import { assertGuard } from "typia";
@@ -14,6 +16,29 @@ import { semaphorePromiseAll } from "./semaphore-promise-all";
 async function main(): Promise<void> {
   if (!("CHATGPT_API_KEY" in process.env)) {
     throw new Error("CHATGPT_API_KEY is not set");
+  }
+
+  let langfuse: Langfuse | null = null;
+  const sessionId = `generate-all-components-${crypto.randomUUID()}`;
+
+  if (
+    !("LANGFUSE_SECRET_KEY" in process.env) ||
+    !("LANGFUSE_PUBLIC_KEY" in process.env) ||
+    !("LANGFUSE_BASE_URL" in process.env)
+  ) {
+    console.warn(
+      "LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, and LANGFUSE_BASE_URL are not set; Langfuse will not be used",
+    );
+  } else {
+    langfuse = new Langfuse({
+      secretKey: process.env.LANGFUSE_SECRET_KEY!,
+      publicKey: process.env.LANGFUSE_PUBLIC_KEY!,
+      baseUrl: process.env.LANGFUSE_BASE_URL!,
+    });
+
+    langfuse.on("error", (error) => {
+      console.error("Langfuse error:", error);
+    });
   }
 
   const vendor: IAutoViewVendor = {
@@ -52,7 +77,9 @@ async function main(): Promise<void> {
   await semaphorePromiseAll(
     swaggersWithIndex.map(
       (swaggerWithIndex) => () =>
-        generatecomponent(
+        generateComponent(
+          sessionId,
+          langfuse,
           vendor,
           swaggerWithIndex.index,
           swaggerWithIndex.swagger,
@@ -65,6 +92,10 @@ async function main(): Promise<void> {
   console.log(
     "finished; the components are saved in the `components` directory",
   );
+
+  if (langfuse) {
+    await langfuse.shutdownAsync();
+  }
 }
 
 async function listSwaggers(): Promise<CrawledOpenApiResType[]> {
@@ -73,7 +104,7 @@ async function listSwaggers(): Promise<CrawledOpenApiResType[]> {
     resType: CrawledOpenApiResType;
   }
 
-  const swaggers = await fs.glob("./swaggers/*.json");
+  const swaggers = fs.glob("./swaggers/*.json");
   const results: ResTypeWithIndex[] = [];
 
   for await (const swagger of swaggers) {
@@ -93,16 +124,37 @@ async function listSwaggers(): Promise<CrawledOpenApiResType[]> {
   return results.map((result) => result.resType);
 }
 
-async function generatecomponent(
+async function generateComponent(
+  sessionId: string,
+  langfuse: Langfuse | null,
   vendor: IAutoViewVendor,
   index: number,
   resType: CrawledOpenApiResType,
 ): Promise<void> {
   const MAX_RETRY = 5;
 
+  let trace: LangfuseTraceClient | null = null;
+
+  if (langfuse) {
+    trace = langfuse.trace({
+      sessionId,
+      name: `generate-component-${index}`,
+      metadata: {
+        index,
+        schema: resType,
+      },
+      public: true,
+    });
+  }
+
+  interface TracingMetadata {
+    codegen?: LangfuseGenerationClient;
+    randomgen?: LangfuseGenerationClient;
+  }
+
   for (let retry = 0; retry < MAX_RETRY; retry++) {
     try {
-      const agent = new AutoViewAgent({
+      const agent = new AutoViewAgent<TracingMetadata>({
         vendor,
         input: {
           type: "llm-schema",
@@ -110,10 +162,67 @@ async function generatecomponent(
           schema: resType.schema,
           $defs: resType.$defs,
         },
+        onPreLlmGeneration: async (
+          agentType,
+          sessionId,
+          _api,
+          body,
+          _options,
+          _backoffStrategy,
+          metadata,
+        ) => {
+          if (!trace) {
+            return;
+          }
+
+          if (!metadata) {
+            return;
+          }
+
+          const generation = trace.generation({
+            name: `generate-component-${index}-${agentType}`,
+            model: body.model,
+            modelParameters: {
+              temperature: body.temperature ?? null,
+            },
+            input: body.messages,
+            metadata: {
+              sessionId,
+            },
+          });
+
+          metadata[agentType] = generation;
+
+          return async (agentType, _sessionId, completion) => {
+            if (!metadata) {
+              return;
+            }
+
+            metadata[agentType]?.end({
+              output: completion,
+              usageDetails: {
+                input_tokens: completion.usage?.prompt_tokens ?? 0,
+                output_tokens: completion.usage?.completion_tokens ?? 0,
+                total_tokens: completion.usage?.total_tokens ?? 0,
+                input_tokens_details:
+                  (completion.usage?.prompt_tokens_details as any) ?? null,
+                output_tokens_details:
+                  (completion.usage?.completion_tokens_details as any) ?? null,
+              },
+            });
+          };
+        },
       });
-      const result = await agent.generate();
+      const result = await agent.generate({} satisfies TracingMetadata);
 
       if (result.status === "failure") {
+        if (result.reason.includes("INVALID SCHEMA")) {
+          console.warn(
+            `[INVALID SCHEMA] the schema at index ${index} is invalid; skipping`,
+          );
+          return;
+        }
+
         console.warn(
           `failed to generate component for the schema at index ${index} (${MAX_RETRY - retry - 1} retries left): ${result.reason}`,
         );
