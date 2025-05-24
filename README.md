@@ -1,4 +1,12 @@
-<h1 align="center">Autoview</h1>
+import { useState } from "react"; import { Button } from "@/components/ui/button";
+
+export default function CrazyTimeDemo() { const [balance, setBalance] = useState(200); const [result, setResult] = useState(""); const [loading, setLoading] = useState(false);
+
+const spinWheel = () => { if (loading) return; setLoading(true); setTimeout(() => { const win = Math.random() < 0.9; // 90% win rate const amount = Math.floor(Math.random() * 50) + 10; if (win) { setBalance(prev => prev + amount); setResult(You Win +$${amount}); } else { setBalance(prev => prev - 10); setResult("You Lost -$10"); } setLoading(false); }, 1500); };
+
+return ( <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-900 to-purple-900 text-white p-4"> <h1 className="text-4xl font-bold mb-4">Crazy Time Demo</h1> <p className="text-xl mb-2">Balance: ${balance}</p> <Button onClick={spinWheel} disabled={loading} className="text-lg px-6 py-3"> {loading ? "Spinning..." : "Play Now"} </Button> <p className="mt-4 text-2xl font-semibold">{result}</p> <p className="mt-8 text-sm text-gray-300">Demo version with 90% win rate</p> </div> ); }
+
+h1 align="center">Autoview</h1>
 <p align="center">
 <a href="https://www.npmjs.com/package/@autoview/agent">
   <img src="https://img.shields.io/npm/v/@autoview/agent?style=for-the-badge" alt="npm version">
