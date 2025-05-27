@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { Stream } from "openai/streaming";
+import { isPromise } from "util/types";
 
 import { ILlmBackoffStrategy, createCompletion } from "../core";
 import { IAutoViewVendor } from "../structures";
@@ -142,37 +143,36 @@ export class AutoViewChatAgentDriver<M = undefined> {
     return this;
   }
 
-  private sendEvent(event: AutoViewChatAgentEvent): void {
-    if (this.eventHandler) {
-      try {
-        void this.eventHandler(event);
-      } catch (error: unknown) {
-        this.sendError(`emitting event ${event.type}`, error);
-      }
-    }
+  private sendError(context: string, error: unknown): void {
+    // SAFETY: It might be useful if we have some mechanism to handle cases where error reporting is not possible.
+    // Currently this kind of errors are not handled.
+    void this.errorHandler?.(
+      `[ERROR] ${context}: ${JSON.stringify(error, null, 2)}`,
+    );
   }
 
-  private sendError(context: string, error: unknown): void {
-    if (this.errorHandler) {
-      try {
-        void this.errorHandler(
-          `[ERROR] ${context}: ${JSON.stringify(error, null, 2)}`,
-        );
-      } catch {}
+  private sendEvent(event: AutoViewChatAgentEvent): void {
+    const result = this.eventHandler?.(event);
+
+    if (!isPromise(result)) {
+      return;
     }
+
+    result.catch((error) =>
+      this.sendError(`emitting event ${event.type}`, error),
+    );
   }
 
   private sendMessage(message: IAutoViewChatMessage): void {
-    if (this.messageHandler) {
-      try {
-        void this.messageHandler(message);
-      } catch (error: unknown) {
-        this.sendError(`sending message ${message.id}`, {
-          error,
-          message,
-        });
-      }
+    const result = this.messageHandler?.(message);
+
+    if (!isPromise(result)) {
+      return;
     }
+
+    result.catch((error) =>
+      this.sendError(`sending message ${message.id}`, error),
+    );
   }
 
   private sendStreamingMessage(
@@ -180,18 +180,20 @@ export class AutoViewChatAgentDriver<M = undefined> {
     role: "assistant",
     partialContent: string,
   ): void {
-    if (this.streamingMessageHandler) {
-      try {
-        void this.streamingMessageHandler(id, role, partialContent);
-      } catch (error: unknown) {
-        this.sendError(`sending streaming message ${id}`, {
-          error,
-          id,
-          role,
-          partialContent,
-        });
-      }
+    const result = this.streamingMessageHandler?.(id, role, partialContent);
+
+    if (!isPromise(result)) {
+      return;
     }
+
+    result.catch((error) =>
+      this.sendError(`sending streaming message ${id}`, {
+        error,
+        id,
+        role,
+        partialContent,
+      }),
+    );
   }
 
   async send(
