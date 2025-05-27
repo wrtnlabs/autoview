@@ -76,6 +76,7 @@ export class Agent implements AgentBase<Input, Output> {
     const systemPrompt = prompt({
       boilerplate,
       pre_defined_components_info: "NO-COMPONENTS-SUPPORTED-YET",
+      context: input.context ?? "NO-CONTEXT-PROVIDED",
     });
 
     const results = await new LlmProxy<Input, Output>()

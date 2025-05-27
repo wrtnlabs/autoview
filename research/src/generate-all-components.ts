@@ -7,6 +7,7 @@ import {
   LangfuseTraceClient,
 } from "langfuse";
 import OpenAI from "openai";
+import { Stream } from "openai/streaming";
 import * as path from "path";
 import { assertGuard } from "typia";
 
@@ -195,6 +196,10 @@ async function generateComponent(
 
           return async (agentType, _sessionId, completion) => {
             if (!metadata) {
+              return;
+            }
+
+            if (completion instanceof Stream) {
               return;
             }
 

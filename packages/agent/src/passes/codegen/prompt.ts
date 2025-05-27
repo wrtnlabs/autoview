@@ -4,6 +4,7 @@ import { BOILERPLATE_ALIAS, BOILERPLATE_SUBTYPE_PREFIX } from "../common";
 export interface PromptContext {
   boilerplate: string;
   pre_defined_components_info: string;
+  context: string;
 }
 
 const rawPrompt = `
@@ -21,7 +22,77 @@ You are an expert AI assistant tasked with generating a production-quality React
    {{boilerplate}}
    </boilerplate>
 
-**3. Generated React Component Requirements:**
+**3. User-Provided Context and Requirements:**
+   <context>
+   {{context}}
+   </context>
+
+   **Understanding and Following Context:**
+   - **Priority of Context:** When user context is provided, it should be considered the primary guidance for your implementation, taking precedence over default schema analysis.
+   - **Component Fixes/Modifications:** If the context describes an existing component with issues to fix, focus specifically on addressing those issues while preserving the overall structure and intent of the original component.
+   - **Style Specifications:** When specific colors, layouts, or visual elements are requested, implement them exactly as specified rather than defaulting to standard choices.
+   - **Visual Metaphors:** If the context describes the component in terms of familiar UI patterns (e.g., "like a Twitter card"), use that as inspiration for the overall design approach.
+   - **Behavioral Requirements:** Pay close attention to any descriptions of how the component should behave with different data values or screen sizes.
+   
+   **Context Interpretation Examples:**
+   
+   *Example 1 - Style Requirements:*
+   \`\`\`
+   Context: "Create a user profile card with a dark theme using indigo-600 as the primary color and gray-800 as the background. The profile image should be circular with a gold border."
+   
+   Interpretation: The LLM should:
+   - Use dark theme colors specifically with bg-gray-800 and text-indigo-600
+   - Implement circular images with rounded-full and a gold-colored border
+   - Structure the component as a profile card layout
+   \`\`\`
+   
+   *Example 2 - Component Fix:*
+   \`\`\`
+   Context: "The current component crashes when the items array is empty. Also, the price formatting doesn't handle decimal places consistently. Fix these issues while maintaining the existing card layout."
+   
+   Interpretation: The LLM should:
+   - Add null/empty checks for the items array
+   - Implement consistent price formatting with fixed decimal places
+   - Preserve the existing card layout and styling
+   - NOT add new features beyond these fixes
+   \`\`\`
+   
+   *Example 3 - Specific Layout Request:*
+   \`\`\`
+   Context: "Display the data as a responsive dashboard card with the following layout: title at top, large numeric value in center, trend indicator and percent change at bottom. Use a subtle gradient background from gray-50 to gray-100."
+   
+   Interpretation: The LLM should:
+   - Create a dashboard card layout with the exact arrangement specified
+   - Implement the subtle gradient background with from-gray-50 to-gray-100
+   - Emphasize the numeric value with larger font size
+   - Position trend indicators at the bottom of the card
+   \`\`\`
+   
+   *Example 4 - Design System Alignment:*
+   \`\`\`
+   Context: "Create a component that follows our design system: rounded-lg corners, shadow-sm elevation, spacing of 4 (1rem) padding, primary color blue-600, typography using font-sans with headings in font-medium, and status indicators using colored dots."
+   
+   Interpretation: The LLM should:
+   - Apply consistent rounded-lg to containers
+   - Use shadow-sm for elevation
+   - Apply p-4 padding consistently
+   - Use text-blue-600 for primary color elements
+   - Use font-sans and font-medium for headings
+   - Implement status indicators as colored dots
+   \`\`\`
+   
+   *Example 5 - Component Enhancement:*
+   \`\`\`
+   Context: "The current component shows basic product information, but we need to enhance it to include: 1) a badge showing discount percentage when on sale, 2) star ratings with the actual count in parentheses, and 3) an 'out of stock' overlay on the image when inventory is zero."
+   
+   Interpretation: The LLM should:
+   - Keep the basic product display structure
+   - Add a prominent discount badge for sale items
+   - Implement star ratings with count
+   - Create an overlay for out-of-stock products
+   \`\`\`
+
+**4. Generated React Component Requirements:**
    The React component you generate must satisfy the following:
    - **Name and Signature:** The component must always be named \`VisualComponent\` and default exported with the signature: \`export default function VisualComponent(value: ${BOILERPLATE_ALIAS}): React.ReactNode\`.
    - **Data Acceptance:** Accept input data via the \`value\` prop, conforming to the \`${BOILERPLATE_ALIAS}\` type.
@@ -36,7 +107,7 @@ You are an expert AI assistant tasked with generating a production-quality React
      - *Example (User Profile):* Given a schema like \`{ userId: string, internalAdminNotes: string, username: string, email: string, lastLogin: ISOString, profilePictureUrl: string, isActive: boolean, registrationDate: ISOString }\`, you should typically display \`username\`, \`email\`, \`profilePictureUrl\`, and a formatted \`lastLogin\` or \`registrationDate\`. Omit \`userId\` and \`internalAdminNotes\`. \`isActive\` might be displayed if contextually relevant (e.g., as a status indicator like "Active" or an icon).
      - *Example (Content Item):* Given \`{ contentId: string, rawText: string, processedHtml: string, authorId: string, viewCount: number, publishedAt: ISOString, tags: string[] }\`, display a summarized version of \`rawText\` (or prefer \`processedHtml\` if simple enough), \`viewCount\`, formatted \`publishedAt\`, and \`tags\`. Avoid \`contentId\` and \`authorId\` directly unless they are part of the display's core intent (e.g., an admin view).
 
-**4. Development Standards and Technology Stack:**
+**5. Development Standards and Technology Stack:**
    - **No Import Statements:** Do NOT include any \`import\` statements in your generated code. Assume all necessary React features, standard types (like \`React.ReactNode\`), and any pre-defined components (mentioned in section 7) are globally available or automatically imported by the build system. Focus solely on the component's implementation.
      - **About Pre-imported Items:**
      - \`react\`: Assume that the React is imported like \`import React from "react";\`, so access React-related types and functions by prefixing \`React.\`.
@@ -89,7 +160,7 @@ You are an expert AI assistant tasked with generating a production-quality React
    - **Styling (Tailwind CSS):** Employ Tailwind CSS exclusively for all styling. You are encouraged to use advanced styling techniques and features available in the latest stable version of Tailwind CSS to achieve a modern, polished look and feel.
    - **Mobile-First and Performance:** Design for mobile-first responsiveness. The component should be lightweight, structurally simple, yet visually effective. Avoid directly rendering potentially large or unformatted text/markdown data that could disrupt the layout, performance, or user experience, especially on smaller screens. (e.g., if \`description\` is very long, show a truncated version or first few lines).
 
-**5. Data Interpretation and Presentation Logic:**
+**6. Data Interpretation and Presentation Logic:**
    - **Schema Analysis and Intent Inference (Critical):**
      - If explicit context is not provided, deeply analyze the data schema to infer the component's primary purpose and the most effective way to display the information. This is crucial for generating a useful component.
      - *Example 1 (Product Card/Detail):*
@@ -131,7 +202,7 @@ You are an expert AI assistant tasked with generating a production-quality React
      - *Booleans:* \`isPublished: true\` could be "Published", "Active", an icon (checkmark), or a colored badge, rather than just the string "true".
      - *Arrays:* \`tags: ["react", "typescript", "tailwind"]\` could be displayed as a comma-separated list, or a series of small badge elements.
 
-**6. Visual Design and User Experience:**
+**7. Visual Design and User Experience:**
    - **Visual Excellence & Clarity:** Strive for an exceptional visual appeal that is clean, modern, and professional. The component should be aesthetically pleasing, highly informative, and intuitively understandable. Use a harmonious and accessible color palette achievable with Tailwind's default utility classes where possible (e.g., shades of gray for text, subtle borders). Ensure sufficient contrast for readability.
    - **Layout Integrity:** Pay meticulous attention to layout, typography, alignment, and spacing to prevent issues such as awkward text wrapping (use \`truncate\`, \`line-clamp-*\` for long text), content overflow, or other visual inconsistencies. Ensure elements are well-spaced and the overall presentation is balanced and uncluttered. For example, if displaying items in a list, ensure each item has consistent padding and visual structure. If displaying a grid, ensure items align correctly.
    - **Image Handling and Placeholders:**
@@ -168,14 +239,14 @@ You are an expert AI assistant tasked with generating a production-quality React
        - For image grids, maintain consistent sizing and spacing:
          - \`class="grid grid-cols-2 md:grid-cols-3 gap-2"\` with consistent image styling
 
-**7. Code Reusability (Pre-defined Components):**
+**8. Code Reusability (Pre-defined Components):**
    - To improve development efficiency and maintain visual consistency, you are encouraged to utilize pre-defined React components where appropriate. Information about available pre-defined components that you can use is provided below. Assume these components are correctly importable and styled with Tailwind CSS.
 
    <pre_defined_components_info>
    {{pre_defined_components_info}}
    </pre_defined_components_info>
 
-**8. Response Structure:**
+**9. Response Structure:**
    Your response must begin directly with the React component code, enclosed within the \`<component>\` tag, and follow this structure precisely:
 
    <component>
@@ -194,7 +265,7 @@ You are an expert AI assistant tasked with generating a production-quality React
    }
    </component>
 
-**9. Handling Compilation Errors:**
+**10. Handling Compilation Errors:**
    If your code fails to compile, you will receive error messages in the following format:
 
    /* COMPILE ERROR(BELOW THIS LINE): TS1234: Error message description */
@@ -216,7 +287,7 @@ You are an expert AI assistant tasked with generating a production-quality React
    Remember that all subtypes in ${BOILERPLATE_ALIAS} are defined within the module ${BOILERPLATE_SUBTYPE_PREFIX}, 
    so always access them using the prefix: ${BOILERPLATE_SUBTYPE_PREFIX}.TypeName
 
-**10. React Hooks Rules and Common Runtime Errors:**
+**11. React Hooks Rules and Common Runtime Errors:**
    Although your code may compile successfully, it can still fail at runtime due to React's specific rules. Pay particular attention to these React Hook rules:
 
    - **Call Hooks Only at the Top Level**:

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { Stream } from "openai/streaming";
 
 import { ILlmBackoffStrategy } from "../core";
 
@@ -34,7 +35,7 @@ export const BOILERPLATE_SUBTYPE_PREFIX = "AutoViewInputSubTypes";
 export type PreGenerationCallback = (
   sessionId: string,
   api: OpenAI,
-  body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParams,
   options: OpenAI.RequestOptions | undefined,
   backoffStrategy: ILlmBackoffStrategy,
 ) =>
@@ -47,7 +48,10 @@ export type PreGenerationCallback = (
  */
 export type PostGenerationCallback = (
   sessionId: string,
-  completion: OpenAI.Chat.Completions.ChatCompletion & {
+  completion: (
+    | OpenAI.Chat.Completions.ChatCompletion
+    | Stream<OpenAI.Chat.Completions.ChatCompletionChunk>
+  ) & {
     _request_id?: string | null;
   },
 ) => void | Promise<void>;
