@@ -254,40 +254,32 @@ export class AutoViewChatAgentDriver<M = undefined> {
                     options,
                     backoffStrategy,
                   ) => {
-                    if (this.eventHandler) {
-                      const startTimestamp = new Date();
+                    const startTimestamp = new Date();
+                    this.sendEvent({
+                      type: "pre-llm-generation",
+                      agent,
+                      sessionId,
+                      api,
+                      body,
+                      options,
+                      backoffStrategy,
+                    });
 
-                      await this.eventHandler({
-                        type: "pre-llm-generation",
+                    return async (agent, sessionId, completion) => {
+                      const endTimestamp = new Date();
+                      this.sendEvent({
+                        type: "post-llm-generation",
                         agent,
                         sessionId,
                         api,
                         body,
                         options,
                         backoffStrategy,
+                        completion,
+                        startTimestamp,
+                        endTimestamp,
                       });
-
-                      return async (agent, sessionId, completion) => {
-                        if (this.eventHandler) {
-                          const endTimestamp = new Date();
-
-                          await this.eventHandler({
-                            type: "post-llm-generation",
-                            agent,
-                            sessionId,
-                            api,
-                            body,
-                            options,
-                            backoffStrategy,
-                            completion,
-                            startTimestamp,
-                            endTimestamp,
-                          });
-                        }
-                      };
-                    }
-
-                    return;
+                    };
                   },
                 },
                 toolCall.arguments,
