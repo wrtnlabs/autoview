@@ -1,0 +1,6 @@
+[files]
+extend-exclude = [
+  "components/**/*",
+  "mock-data/**/*",
+  "swaggers/**/*"
+]
