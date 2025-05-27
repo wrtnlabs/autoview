@@ -166,7 +166,10 @@ export class AutoViewAgent<M = undefined> {
    *
    * @returns The result of the agent pipeline.
    */
-  async generate(metadata?: M): Promise<IAutoViewResult> {
+  async generate(
+    context: string | undefined,
+    metadata?: M,
+  ): Promise<IAutoViewResult> {
     const sessionId = this.config.sessionId ?? crypto.randomUUID();
     const inputSchema = this.getInputSchema();
 
@@ -189,6 +192,7 @@ export class AutoViewAgent<M = undefined> {
             sessionId,
             vendor: this.config.vendor,
             inputSchema,
+            context,
             onPreLlmGeneration: async (
               sessionId,
               api,
