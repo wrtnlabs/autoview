@@ -1,6 +1,7 @@
 import { IAutoViewCompilerMetadata } from "@autoview/interface";
 import { type ILlmSchema } from "@samchon/openapi";
 import OpenAI from "openai";
+import { Stream } from "openai/streaming";
 import { type IJsonSchemaUnit } from "typia";
 
 import { ILlmBackoffStrategy, LlmUnrecoverableError } from "../core";
@@ -53,7 +54,7 @@ export type AutoViewPreLlmGenerationCallback<M> = (
   agent: AutoViewAgentType,
   sessionId: string,
   api: OpenAI,
-  body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParams,
   options: OpenAI.RequestOptions | undefined,
   backoffStrategy: ILlmBackoffStrategy,
   metadata: M | undefined,
@@ -65,7 +66,10 @@ export type AutoViewPreLlmGenerationCallback<M> = (
 export type AutoViewPostLlmGenerationCallback<M> = (
   agent: AutoViewAgentType,
   sessionId: string,
-  completion: OpenAI.Chat.Completions.ChatCompletion & {
+  completion: (
+    | OpenAI.Chat.Completions.ChatCompletion
+    | Stream<OpenAI.Chat.Completions.ChatCompletionChunk>
+  ) & {
     _request_id?: string | null;
   },
   metadata: M | undefined,
