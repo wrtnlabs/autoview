@@ -12,9 +12,9 @@
     "url": "https://github.com/wrtnlabs/autoview/issues"
   },
   "scripts": {
-    "build": "rimraf lib && ts-node build/iconName.ts && ts-node build/build-icon-id-bk-tree.ts && tsc",
+    "build": "rimraf lib && tsc",
     "dev": "pnpm run build --watch",
-    "prepare": "ts-patch install && ts-node build/iconName.ts",
+    "prepare": "ts-patch install",
     "test": "vitest"
   },
   "files": [
