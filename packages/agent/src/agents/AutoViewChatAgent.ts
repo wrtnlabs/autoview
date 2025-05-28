@@ -1,5 +1,7 @@
+import * as crypto from "crypto";
 import OpenAI from "openai";
 import { Stream } from "openai/streaming";
+import typia, { TypeGuardError } from "typia";
 import { isPromise } from "util/types";
 
 import { ILlmBackoffStrategy, createCompletion } from "../core";
@@ -25,8 +27,13 @@ export interface IAutoViewChatConfig {
   toolMockDataVendor?: IAutoViewVendor;
 }
 
-export interface IAutoViewChatSchemaProvider {
-  getSchema(): Promise<IAutoViewInput>;
+export interface IAutoViewChatMemoryProvider {
+  readMemory(): Promise<IAutoViewChatMemory>;
+}
+
+export interface IAutoViewChatMemory {
+  schema: IAutoViewInput;
+  code: string;
 }
 
 export class AutoViewChatAgent<M = undefined> {
@@ -58,11 +65,17 @@ export type AutoViewChatAgentStreamingMessageHandler = (
 export type AutoViewChatAgentEvent =
   | AutoViewChatAgentPreLlmGenerationEvent
   | AutoViewChatAgentPostLlmGenerationEvent
-  | AutoViewChatAgentProcessingEvent
+  | AutoViewChatAgentPreProcessingEvent
+  | AutoViewChatAgentPostProcessingEvent
+  | AutoViewChatAgentInvalidToolCallEvent
+  | AutoViewChatAgentPreReadSchemaAndCodeEvent
+  | AutoViewChatAgentPostReadSchemaAndCodeEvent
   | AutoViewChatAgentPreComponentGenerationEvent
   | AutoViewChatAgentPostComponentGenerationEvent;
 
 export interface AutoViewChatAgentEventBase<T extends string> {
+  id: string;
+  timestamp: Date;
   type: T;
 }
 
@@ -94,15 +107,36 @@ export interface AutoViewChatAgentPostLlmGenerationEvent
   endTimestamp: Date;
 }
 
-export interface AutoViewChatAgentProcessingEvent
-  extends AutoViewChatAgentEventBase<"processing"> {}
+export interface AutoViewChatAgentPreProcessingEvent
+  extends AutoViewChatAgentEventBase<"pre-processing"> {}
+
+export interface AutoViewChatAgentPostProcessingEvent
+  extends AutoViewChatAgentEventBase<"post-processing"> {
+  error?: unknown;
+}
+
+export interface AutoViewChatAgentInvalidToolCallEvent
+  extends AutoViewChatAgentEventBase<"invalid-tool-call"> {
+  toolCall: IAutoViewChatMessageToolCallContent;
+  error?: unknown;
+}
+
+export interface AutoViewChatAgentPreReadSchemaAndCodeEvent
+  extends AutoViewChatAgentEventBase<"pre-read-schema-and-code"> {}
+
+export interface AutoViewChatAgentPostReadSchemaAndCodeEvent
+  extends AutoViewChatAgentEventBase<"post-read-schema-and-code"> {
+  error?: unknown;
+  memory?: IAutoViewChatMemory;
+}
 
 export interface AutoViewChatAgentPreComponentGenerationEvent
   extends AutoViewChatAgentEventBase<"pre-component-generation"> {}
 
 export interface AutoViewChatAgentPostComponentGenerationEvent
   extends AutoViewChatAgentEventBase<"post-component-generation"> {
-  result: IAutoViewResult;
+  error?: unknown;
+  result?: IAutoViewResult;
 }
 
 export class AutoViewChatAgentDriver<M = undefined> {
@@ -152,16 +186,25 @@ export class AutoViewChatAgentDriver<M = undefined> {
     );
   }
 
-  private sendEvent(event: AutoViewChatAgentEvent): void {
-    const result = this.eventHandler?.(event);
+  private sendEvent<T extends Omit<AutoViewChatAgentEvent, "id" | "timestamp">>(
+    event: T,
+    pairId?: string,
+  ): string {
+    const id = pairId ?? crypto.randomUUID();
+    const timestamp = new Date();
+    const result = this.eventHandler?.({
+      id,
+      timestamp,
+      ...event,
+    } as AutoViewChatAgentEvent);
 
-    if (!isPromise(result)) {
-      return;
+    if (isPromise(result)) {
+      result.catch((error) =>
+        this.sendError(`emitting event ${event.type}`, error),
+      );
     }
 
-    result.catch((error) =>
-      this.sendError(`emitting event ${event.type}`, error),
-    );
+    return id;
   }
 
   private sendMessage(message: IAutoViewChatMessage): void {
@@ -198,12 +241,36 @@ export class AutoViewChatAgentDriver<M = undefined> {
   }
 
   async send(
-    schemaProvider: IAutoViewChatSchemaProvider,
+    threadContextProvider: IAutoViewChatMemoryProvider,
     context: IAutoViewChatMessage[],
   ): Promise<void> {
     try {
-      const [id, timestamp, content, toolCalls] =
-        await this.callStream(context);
+      const preProcessingEventId = this.sendEvent({
+        type: "pre-processing",
+      });
+
+      const [id, timestamp, content, toolCalls] = await this.callStream(context)
+        .then((result) => {
+          this.sendEvent(
+            {
+              type: "post-processing",
+            },
+            preProcessingEventId,
+          );
+
+          return result;
+        })
+        .catch((error) => {
+          this.sendEvent(
+            {
+              type: "post-processing",
+              error,
+            },
+            preProcessingEventId,
+          );
+
+          throw error;
+        });
 
       this.sendMessage({
         id,
@@ -237,75 +304,68 @@ export class AutoViewChatAgentDriver<M = undefined> {
         let result: Promise<string>;
 
         switch (toolCall.toolName) {
+          case "read_schema_and_code":
+            {
+              result = this.triggerReadSchemaAndCode(threadContextProvider);
+            }
+            break;
           case "generate_auto_view_component":
             {
-              this.sendEvent({
-                type: "pre-component-generation",
-              });
+              interface GenerateAutoViewComponentArguments {
+                context: string;
+              }
 
-              result = generateAutoViewComponent(
-                {
-                  sessionId: this.sessionId,
-                  vendor: this.config.toolCodeGenVendor,
-                  mockDataVendor: this.config.toolMockDataVendor,
-                  input: await schemaProvider.getSchema(),
-                  onPreLlmGeneration: async (
-                    agent,
-                    sessionId,
-                    api,
-                    body,
-                    options,
-                    backoffStrategy,
-                  ) => {
-                    const startTimestamp = new Date();
-                    this.sendEvent({
-                      type: "pre-llm-generation",
-                      agent,
-                      sessionId,
-                      api,
-                      body,
-                      options,
-                      backoffStrategy,
-                    });
+              let args: GenerateAutoViewComponentArguments;
 
-                    return async (agent, sessionId, completion) => {
-                      const endTimestamp = new Date();
-                      this.sendEvent({
-                        type: "post-llm-generation",
-                        agent,
-                        sessionId,
-                        api,
-                        body,
-                        options,
-                        backoffStrategy,
-                        completion,
-                        startTimestamp,
-                        endTimestamp,
-                      });
-                    };
-                  },
-                },
-                toolCall.arguments,
-                undefined,
-              ).then((result) => {
+              try {
+                args = JSON.parse(toolCall.arguments);
+                typia.assertGuard<GenerateAutoViewComponentArguments>(args);
+              } catch (error: unknown) {
+                let errorMessage: string;
+
+                if (error instanceof TypeGuardError) {
+                  errorMessage = `[FAILURE] Invalid arguments: ${error}`;
+                } else {
+                  errorMessage = `[FAILURE] Unable to parse arguments: ${error}`;
+                }
+
                 this.sendEvent({
-                  type: "post-component-generation",
-                  result,
+                  type: "invalid-tool-call",
+                  toolCall: {
+                    type: "tool",
+                    id: toolCall.id,
+                    tool_name: toolCall.toolName,
+                    arguments: toolCall.arguments,
+                  },
+                  error: errorMessage,
                 });
 
-                if (result.status === "success") {
-                  return result.tsxCodeGeneratedOnly;
-                } else {
-                  return `[FAILURE] ${result.reason}`;
-                }
-              });
+                result = Promise.resolve(errorMessage);
+                break;
+              }
+
+              result = this.triggerGenerateAutoViewComponent(
+                threadContextProvider,
+                args.context,
+              );
             }
             break;
           default:
             {
-              result = Promise.resolve(
-                `[FAILURE] Unknown tool name: ${toolCall.toolName}`,
-              );
+              const errorMessage = `[FAILURE] Unknown tool name: ${toolCall.toolName}`;
+
+              this.sendEvent({
+                type: "invalid-tool-call",
+                toolCall: {
+                  type: "tool",
+                  id: toolCall.id,
+                  tool_name: toolCall.toolName,
+                  arguments: toolCall.arguments,
+                },
+                error: errorMessage,
+              });
+
+              result = Promise.resolve(errorMessage);
             }
             break;
         }
@@ -363,7 +423,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
       undefined,
       async (api, body, options, backoffStrategy) => {
         const startTimestamp = new Date();
-        this.sendEvent({
+        const preLlmGenerationEventId = this.sendEvent({
           type: "pre-llm-generation",
           agent: "chat",
           sessionId: this.sessionId,
@@ -375,18 +435,21 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
         return async (completion) => {
           const endTimestamp = new Date();
-          this.sendEvent({
-            type: "post-llm-generation",
-            agent: "chat",
-            sessionId: this.sessionId,
-            api,
-            body,
-            options,
-            backoffStrategy,
-            completion,
-            startTimestamp,
-            endTimestamp,
-          });
+          this.sendEvent(
+            {
+              type: "post-llm-generation",
+              agent: "chat",
+              sessionId: this.sessionId,
+              api,
+              body,
+              options,
+              backoffStrategy,
+              completion,
+              startTimestamp,
+              endTimestamp,
+            },
+            preLlmGenerationEventId,
+          );
         };
       },
     );
@@ -452,6 +515,131 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
     return [id ?? "", timestamp ?? new Date(), content, toolCalls];
   }
+
+  private async triggerReadSchemaAndCode(
+    threadContextProvider: IAutoViewChatMemoryProvider,
+  ): Promise<string> {
+    const preReadSchemaAndCodeEventId = this.sendEvent({
+      type: "pre-read-schema-and-code",
+    });
+
+    try {
+      const result = await readSchemaAndCode(threadContextProvider);
+
+      this.sendEvent(
+        {
+          type: "post-read-schema-and-code",
+          memory: result,
+        },
+        preReadSchemaAndCodeEventId,
+      );
+
+      return `Here is the current schema and component code:
+
+  <schema>
+  ${result.schema}
+  </schema>
+
+  <component_code>
+  ${result.code}
+  </component_code>`;
+    } catch (error: unknown) {
+      this.sendEvent(
+        {
+          type: "post-read-schema-and-code",
+          error,
+        },
+        preReadSchemaAndCodeEventId,
+      );
+
+      throw error;
+    }
+  }
+
+  private async triggerGenerateAutoViewComponent(
+    threadContextProvider: IAutoViewChatMemoryProvider,
+    context: string,
+  ): Promise<string> {
+    const preComponentGenerationEventId = this.sendEvent({
+      type: "pre-component-generation",
+    });
+
+    try {
+      const memory = await threadContextProvider.readMemory();
+      const result = await generateAutoViewComponent(
+        {
+          sessionId: this.sessionId,
+          vendor: this.config.toolCodeGenVendor,
+          mockDataVendor: this.config.toolMockDataVendor,
+          input: memory.schema,
+          onPreLlmGeneration: async (
+            agent,
+            sessionId,
+            api,
+            body,
+            options,
+            backoffStrategy,
+          ) => {
+            const startTimestamp = new Date();
+            const preLlmGenerationEventId = this.sendEvent({
+              type: "pre-llm-generation",
+              agent,
+              sessionId,
+              api,
+              body,
+              options,
+              backoffStrategy,
+            });
+
+            return async (agent, sessionId, completion) => {
+              const endTimestamp = new Date();
+              this.sendEvent(
+                {
+                  type: "post-llm-generation",
+                  agent,
+                  sessionId,
+                  api,
+                  body,
+                  options,
+                  backoffStrategy,
+                  completion,
+                  startTimestamp,
+                  endTimestamp,
+                },
+                preLlmGenerationEventId,
+              );
+            };
+          },
+        },
+        context,
+        undefined,
+      );
+
+      this.sendEvent(
+        {
+          type: "post-component-generation",
+          result,
+        },
+        preComponentGenerationEventId,
+      );
+
+      if (result.status === "success") {
+        return result.tsxCodeGeneratedOnly;
+      } else {
+        return `[FAILURE] ${result.reason}`;
+      }
+    } catch (error: unknown) {
+      this.sendEvent(
+        {
+          type: "post-component-generation",
+          error,
+        },
+        preComponentGenerationEventId,
+      );
+
+      throw error;
+    }
+  }
 }
 
 interface ToolCallPart {
@@ -469,15 +657,12 @@ function createBodyFromContext(
     messages: [
       {
         role: "developer",
-        content: prompt({
-          component_code: "",
-          component_schema: "",
-        }),
+        content: prompt({}),
       },
       ...context.map(toOpenAIMessage),
     ],
     ...(config.vendor.isThinkingEnabled ? { reasoning_effort: "medium" } : {}),
-    tools: [generateAutoViewComponentTool()],
+    tools: [readSchemaAndCodeTool(), generateAutoViewComponentTool()],
     stream: true,
     stream_options: {
       include_usage: true,
@@ -563,9 +748,24 @@ function toOpenAIMessage(
   }
 }
 
-/**
- * A tool that generates an AutoView component.
- */
+async function readSchemaAndCode(
+  memoryProvider: IAutoViewChatMemoryProvider,
+): Promise<IAutoViewChatMemory> {
+  const memory = await memoryProvider.readMemory();
+  return memory;
+}
+
+function readSchemaAndCodeTool(): OpenAI.Chat.Completions.ChatCompletionTool {
+  return {
+    type: "function",
+    function: {
+      name: "read_schema_and_code",
+      description:
+        "Fetch the latest schema and component code which are bound to the current chat session.",
+    },
+  };
+}
+
 async function generateAutoViewComponent<M>(
   config: IAutoViewConfig<M>,
   context: string,
