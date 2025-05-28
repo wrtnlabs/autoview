@@ -534,6 +534,7 @@ async function runAttempt(
 
   try {
     const result = await codegenAgent.execute({
+      sessionId: "test",
       vendor,
       inputSchema: schema.schema,
       onCompilerError(tsCode, diagnostics) {

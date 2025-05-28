@@ -85,7 +85,7 @@ const generateForSwagger = async (
           $defs: func.parameters.$defs,
         },
       });
-      const result = await agent.generate();
+      const result = await agent.generate(undefined);
 
       const path = `src/features/test_autoview_complex/${key[0].toUpperCase()}${key.slice(1)}.ts`;
       await fs.writeFile(

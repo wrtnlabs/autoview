@@ -36,7 +36,7 @@ export async function test_complex_one(): Promise<void> {
       $defs: schema.$defs,
     },
   });
-  const result = await agent.generate();
+  const result = await agent.generate(undefined);
 
   console.log(result.status);
 
