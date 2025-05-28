@@ -17,6 +17,7 @@ import {
   IAutoViewInput,
   IAutoViewResult,
 } from "./AutoViewAgent";
+import { prompt } from "./AutoViewChatAgent/prompt";
 
 export interface IAutoViewChatConfig {
   vendor: IAutoViewVendor;
@@ -465,7 +466,16 @@ function createBodyFromContext(
 ): OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming {
   return {
     model: config.vendor.model,
-    messages: context.map(toOpenAIMessage),
+    messages: [
+      {
+        role: "developer",
+        content: prompt({
+          component_code: "",
+          component_schema: "",
+        }),
+      },
+      ...context.map(toOpenAIMessage),
+    ],
     ...(config.vendor.isThinkingEnabled ? { reasoning_effort: "medium" } : {}),
     tools: [generateAutoViewComponentTool()],
     stream: true,
