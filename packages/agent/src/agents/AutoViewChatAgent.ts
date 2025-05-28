@@ -7,6 +7,7 @@ import { isPromise } from "util/types";
 import { ILlmBackoffStrategy, createCompletion } from "../core";
 import { IAutoViewVendor } from "../structures";
 import {
+  IAutoViewChatAssistantMessage,
   IAutoViewChatMessage,
   IAutoViewChatMessageTextContent,
   IAutoViewChatMessageToolCallContent,
@@ -243,7 +244,43 @@ export class AutoViewChatAgentDriver<M = undefined> {
   async send(
     threadContextProvider: IAutoViewChatMemoryProvider,
     context: IAutoViewChatMessage[],
+    userMessage: string,
   ): Promise<void> {
+    const userMessageItem = {
+      id: crypto.randomUUID(),
+      role: "user",
+      timestamp: new Date(),
+      contents: [
+        {
+          type: "text",
+          text: userMessage,
+        } satisfies IAutoViewChatMessageTextContent,
+      ],
+    } satisfies IAutoViewChatMessage;
+
+    this.sendMessage(userMessageItem);
+    context.push(userMessageItem);
+
+    for (;;) {
+      const result = await this.processTurn(threadContextProvider, context);
+
+      if (!result.assistantMessage) {
+        break;
+      }
+
+      if ((result.toolMessages?.length ?? 0) === 0) {
+        break;
+      }
+
+      context.push(result.assistantMessage);
+      context.push(...(result.toolMessages ?? []));
+    }
+  }
+
+  private async processTurn(
+    threadContextProvider: IAutoViewChatMemoryProvider,
+    context: IAutoViewChatMessage[],
+  ): Promise<TurnResult> {
     try {
       const preProcessingEventId = this.sendEvent({
         type: "pre-processing",
@@ -272,7 +309,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
           throw error;
         });
 
-      this.sendMessage({
+      const assistantMessage = {
         id,
         role: "assistant",
         timestamp,
@@ -291,7 +328,15 @@ export class AutoViewChatAgentDriver<M = undefined> {
               }) satisfies IAutoViewChatMessageToolCallContent,
           ),
         ],
-      });
+      } satisfies IAutoViewChatAssistantMessage;
+      this.sendMessage(assistantMessage);
+
+      if (toolCalls.length === 0) {
+        return {
+          assistantMessage,
+          toolMessages: [],
+        };
+      }
 
       interface CallResult {
         value: string;
@@ -393,37 +438,54 @@ export class AutoViewChatAgentDriver<M = undefined> {
         result: results[index]!,
       }));
 
-      for (const { toolCall, result } of joined) {
-        this.sendMessage({
-          id: toolCall.id,
-          role: "tool",
-          timestamp: result.timestamp,
-          tool_call_id: toolCall.id,
-          tool_name: toolCall.toolName,
-          contents: [
-            {
-              type: "text",
-              text: result.value,
-            } satisfies IAutoViewChatMessageTextContent,
-          ],
-        } satisfies IAutoViewChatToolMessage);
+      const toolMessages = joined.map(
+        ({ toolCall, result }) =>
+          ({
+            id: toolCall.id,
+            role: "tool",
+            timestamp: result.timestamp,
+            tool_call_id: toolCall.id,
+            tool_name: toolCall.toolName,
+            contents: [
+              {
+                type: "text",
+                text: result.value,
+              } satisfies IAutoViewChatMessageTextContent,
+            ],
+          }) satisfies IAutoViewChatToolMessage,
+      );
+
+      for (const toolMessage of toolMessages) {
+        this.sendMessage(toolMessage);
       }
+
+      return {
+        assistantMessage,
+        toolMessages,
+      };
     } catch (error: unknown) {
       this.sendError("calling the LLM", error);
+
+      return {};
     }
   }
 
   private async callStream(
     context: IAutoViewChatMessage[],
   ): Promise<[string, Date, string, ToolCallPart[]]> {
+    let preLlmGenerationEvent:
+      | AutoViewChatAgentPreLlmGenerationEvent
+      | undefined;
+
     const stream = await createCompletion(
       this.config.vendor.api,
       createBodyFromContext(this.config, context),
       this.config.vendor.options,
       undefined,
-      async (api, body, options, backoffStrategy) => {
-        const startTimestamp = new Date();
-        const preLlmGenerationEventId = this.sendEvent({
+      (api, body, options, backoffStrategy) => {
+        preLlmGenerationEvent = {
+          id: crypto.randomUUID(),
+          timestamp: new Date(),
           type: "pre-llm-generation",
           agent: "chat",
           sessionId: this.sessionId,
@@ -431,31 +493,21 @@ export class AutoViewChatAgentDriver<M = undefined> {
           body,
           options,
           backoffStrategy,
-        });
-
-        return async (completion) => {
-          const endTimestamp = new Date();
-          this.sendEvent(
-            {
-              type: "post-llm-generation",
-              agent: "chat",
-              sessionId: this.sessionId,
-              api,
-              body,
-              options,
-              backoffStrategy,
-              completion,
-              startTimestamp,
-              endTimestamp,
-            },
-            preLlmGenerationEventId,
-          );
         };
       },
     );
 
+    if (preLlmGenerationEvent) {
+      this.sendEvent(preLlmGenerationEvent, preLlmGenerationEvent.id);
+    }
+
     let id: string | undefined;
     let timestamp: Date | undefined;
+    let usage: OpenAI.Completions.CompletionUsage | undefined;
+    let finishReason:
+      | OpenAI.Chat.Completions.ChatCompletion.Choice["finish_reason"]
+      | undefined;
+    let completion: OpenAI.Chat.Completions.ChatCompletion | undefined;
     const toolCallParts: Map<number, ToolCallPart> = new Map();
     const contentParts: string[] = [];
 
@@ -466,6 +518,22 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
       if (!timestamp) {
         timestamp = new Date(chunk.created);
+      }
+
+      if (!usage) {
+        usage = chunk.usage ?? undefined;
+      }
+
+      if (!completion) {
+        completion = {
+          id: chunk.id,
+          choices: [],
+          created: chunk.created,
+          model: chunk.model,
+          object: "chat.completion",
+          service_tier: chunk.service_tier,
+          system_fingerprint: chunk.system_fingerprint,
+        };
       }
 
       const choice = chunk.choices[0];
@@ -506,12 +574,63 @@ export class AutoViewChatAgentDriver<M = undefined> {
           }
         }
       }
+
+      if (choice.finish_reason) {
+        finishReason = choice.finish_reason;
+      }
     }
 
+    const endTimestamp = new Date();
     const toolCalls = Array.from(toolCallParts.entries())
       .sort(([a], [b]) => a - b)
       .map(([, toolCallPart]) => toolCallPart);
     const content = contentParts.join("");
+
+    if (finishReason && completion) {
+      if (usage) {
+        completion.usage = usage;
+      }
+
+      completion.choices.push({
+        index: 0,
+        logprobs: null,
+        finish_reason: finishReason,
+        message: {
+          role: "assistant",
+          content: content,
+          refusal: null,
+          tool_calls:
+            toolCalls.length === 0
+              ? undefined
+              : toolCalls.map((toolCall) => ({
+                  id: toolCall.id,
+                  type: "function",
+                  function: {
+                    name: toolCall.toolName,
+                    arguments: toolCall.arguments,
+                  },
+                })),
+        },
+      });
+    }
+
+    if (preLlmGenerationEvent && completion) {
+      this.sendEvent(
+        {
+          type: "post-llm-generation",
+          agent: preLlmGenerationEvent.agent,
+          sessionId: preLlmGenerationEvent.sessionId,
+          api: preLlmGenerationEvent.api,
+          body: preLlmGenerationEvent.body,
+          options: preLlmGenerationEvent.options,
+          backoffStrategy: preLlmGenerationEvent.backoffStrategy,
+          completion,
+          startTimestamp: preLlmGenerationEvent.timestamp,
+          endTimestamp,
+        },
+        preLlmGenerationEvent.id,
+      );
+    }
 
     return [id ?? "", timestamp ?? new Date(), content, toolCalls];
   }
@@ -640,6 +759,11 @@ export class AutoViewChatAgentDriver<M = undefined> {
       throw error;
     }
   }
+}
+
+interface TurnResult {
+  assistantMessage?: IAutoViewChatAssistantMessage;
+  toolMessages?: IAutoViewChatToolMessage[];
 }
 
 interface ToolCallPart {
