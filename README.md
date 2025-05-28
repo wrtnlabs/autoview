@@ -66,7 +66,7 @@ For frontend developers, this means you can instantly see your design take shape
 
 Backend developers benefit as well—just supply your swagger.json file and let _Autoview_ work its magic. Whether your API defines 200 functions or 300, the tool scales effortlessly by generating an equal number of frontend components, streamlining integration and boosting productivity.
 
-## 🚀 Key Features
+##  Key Features
 
 - **🤖 Automated Viewer Generation**: Uses LLM function calling to automatically compose React viewer components.
 - **💻 TypeScript Code Generation**: Generate compile-ready TypeScript code based on your schema, easing the path for rapid prototyping.
@@ -76,7 +76,11 @@ Backend developers benefit as well—just supply your swagger.json file and let 
 
 ---
 
-## ⚡ Quickstart
+![391](https://github.com/user-attachments/assets/54754163-da6a-4020-89b5-6ec3ec7d1841)
+![392](https://github.com/user-attachments/assets/23b37445-16e7-4420-bbd4-bb82147ee634)
+
+
+##  Quickstart
 
 ### Step 1. Setup
 
@@ -155,7 +159,7 @@ export default function MemberComponent(props: MemberComponentProps) {
 
 ---
 
-## 🙋 Frequently Asked Questions (FAQ)
+##  Frequently Asked Questions (FAQ)
 
 ### Q: What is AutoView and why was it created?
 
@@ -239,7 +243,7 @@ With this architecture, AutoView goes beyond just “drawing” UI—it intellig
 
 ---
 
-## 💬 Community & Support
+##  Community & Support
 
 For support, questions, or to provide feedback, join our Discord community:
 
@@ -247,7 +251,7 @@ For support, questions, or to provide feedback, join our Discord community:
 
 ---
 
-## ⚖️ License
+##  License
 
 Autoview is open-source and available under the [MIT License](https://github.com/wrtnlabs/autoview/blob/master/LICENSE).
 
