@@ -55,6 +55,17 @@
   </a>
 </p>
 
+ 
+<p align="center">
+  <a href="https://www.bloomberg.com/news/videos/2025-03-31/wtrn-on-series-b-funding-growth-strategy-video">
+    <img src="https://wrtnlabs.io/agentica/images/badges/fund-raising-news-202503.svg" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/wrtnlabs">
+    <img src="https://wrtnlabs.io/agentica/images/badges/open-source-mission.svg" />
+  </a>
+</p>
+
 
 </h3>
 
