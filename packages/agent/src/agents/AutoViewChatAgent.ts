@@ -2,7 +2,6 @@ import * as crypto from "crypto";
 import OpenAI from "openai";
 import { Stream } from "openai/streaming";
 import typia, { TypeGuardError } from "typia";
-import { isPromise } from "util/types";
 
 import { ILlmBackoffStrategy, createCompletion } from "../core";
 import { IAutoViewVendor } from "../structures";
@@ -179,66 +178,59 @@ export class AutoViewChatAgentDriver<M = undefined> {
     return this;
   }
 
-  private sendError(context: string, error: unknown): void {
-    // SAFETY: It might be useful if we have some mechanism to handle cases where error reporting is not possible.
-    // Currently this kind of errors are not handled.
-    void this.errorHandler?.(
-      `[ERROR] ${context}: ${JSON.stringify(error, null, 2)}`,
-    );
+  private async sendError(context: string, error: unknown): Promise<void> {
+    try {
+      await this.errorHandler?.(
+        `[ERROR] ${context}: ${JSON.stringify(error, null, 2)}`,
+      );
+    } catch {
+      // SAFETY: It might be useful if we have some mechanism to handle cases where error reporting is not possible.
+      // Currently this kind of errors are not handled.
+    }
   }
 
-  private sendEvent<T extends Omit<AutoViewChatAgentEvent, "id" | "timestamp">>(
-    event: T,
-    pairId?: string,
-  ): string {
+  private async sendEvent<
+    T extends Omit<AutoViewChatAgentEvent, "id" | "timestamp">,
+  >(event: T, pairId?: string): Promise<string> {
     const id = pairId ?? crypto.randomUUID();
     const timestamp = new Date();
-    const result = this.eventHandler?.({
-      id,
-      timestamp,
-      ...event,
-    } as AutoViewChatAgentEvent);
 
-    if (isPromise(result)) {
-      result.catch((error) =>
-        this.sendError(`emitting event ${event.type}`, error),
-      );
+    try {
+      await this.eventHandler?.({
+        id,
+        timestamp,
+        ...event,
+      } as AutoViewChatAgentEvent);
+    } catch (error: unknown) {
+      await this.sendError(`emitting event ${event.type}`, error);
     }
 
     return id;
   }
 
-  private sendMessage(message: IAutoViewChatMessage): void {
-    const result = this.messageHandler?.(message);
-
-    if (!isPromise(result)) {
-      return;
+  private async sendMessage(message: IAutoViewChatMessage): Promise<void> {
+    try {
+      await this.messageHandler?.(message);
+    } catch (error: unknown) {
+      await this.sendError(`sending message ${message.id}`, error);
     }
-
-    result.catch((error) =>
-      this.sendError(`sending message ${message.id}`, error),
-    );
   }
 
-  private sendStreamingMessage(
+  private async sendStreamingMessage(
     id: string,
     role: "assistant",
     partialContent: string,
-  ): void {
-    const result = this.streamingMessageHandler?.(id, role, partialContent);
-
-    if (!isPromise(result)) {
-      return;
-    }
-
-    result.catch((error) =>
-      this.sendError(`sending streaming message ${id}`, {
+  ): Promise<void> {
+    try {
+      await this.streamingMessageHandler?.(id, role, partialContent);
+    } catch (error: unknown) {
+      await this.sendError(`sending streaming message ${id}`, {
         error,
         id,
         role,
         partialContent,
-      }),
-    );
+      });
+    }
   }
 
   async send(
@@ -258,7 +250,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
       ],
     } satisfies IAutoViewChatMessage;
 
-    this.sendMessage(userMessageItem);
+    await this.sendMessage(userMessageItem);
     context.push(userMessageItem);
 
     for (;;) {
@@ -282,13 +274,13 @@ export class AutoViewChatAgentDriver<M = undefined> {
     context: IAutoViewChatMessage[],
   ): Promise<TurnResult> {
     try {
-      const preProcessingEventId = this.sendEvent({
+      const preProcessingEventId = await this.sendEvent({
         type: "pre-processing",
       });
 
       const [id, timestamp, content, toolCalls] = await this.callStream(context)
-        .then((result) => {
-          this.sendEvent(
+        .then(async (result) => {
+          await this.sendEvent(
             {
               type: "post-processing",
             },
@@ -297,8 +289,8 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
           return result;
         })
-        .catch((error) => {
-          this.sendEvent(
+        .catch(async (error) => {
+          await this.sendEvent(
             {
               type: "post-processing",
               error,
@@ -329,7 +321,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
           ),
         ],
       } satisfies IAutoViewChatAssistantMessage;
-      this.sendMessage(assistantMessage);
+      await this.sendMessage(assistantMessage);
 
       if (toolCalls.length === 0) {
         return {
@@ -374,7 +366,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
                   errorMessage = `[FAILURE] Unable to parse arguments: ${error}`;
                 }
 
-                this.sendEvent({
+                await this.sendEvent({
                   type: "invalid-tool-call",
                   toolCall: {
                     type: "tool",
@@ -399,7 +391,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
             {
               const errorMessage = `[FAILURE] Unknown tool name: ${toolCall.toolName}`;
 
-              this.sendEvent({
+              await this.sendEvent({
                 type: "invalid-tool-call",
                 toolCall: {
                   type: "tool",
@@ -421,8 +413,8 @@ export class AutoViewChatAgentDriver<M = undefined> {
               value: result,
               timestamp: new Date(),
             }))
-            .catch((error) => {
-              this.sendError(`calling tool ${toolCall.toolName}`, error);
+            .catch(async (error) => {
+              await this.sendError(`calling tool ${toolCall.toolName}`, error);
 
               return {
                 value: `[FAILURE] ${error}`,
@@ -456,7 +448,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
       );
 
       for (const toolMessage of toolMessages) {
-        this.sendMessage(toolMessage);
+        await this.sendMessage(toolMessage);
       }
 
       return {
@@ -464,7 +456,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
         toolMessages,
       };
     } catch (error: unknown) {
-      this.sendError("calling the LLM", error);
+      await this.sendError("calling the LLM", error);
 
       return {};
     }
@@ -498,7 +490,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
     );
 
     if (preLlmGenerationEvent) {
-      this.sendEvent(preLlmGenerationEvent, preLlmGenerationEvent.id);
+      await this.sendEvent(preLlmGenerationEvent, preLlmGenerationEvent.id);
     }
 
     let id: string | undefined;
@@ -544,7 +536,11 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
       if (choice.delta.content) {
         contentParts.push(choice.delta.content);
-        this.sendStreamingMessage(chunk.id, "assistant", choice.delta.content);
+        await this.sendStreamingMessage(
+          chunk.id,
+          "assistant",
+          choice.delta.content,
+        );
       }
 
       if (choice.delta.tool_calls) {
@@ -615,7 +611,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
     }
 
     if (preLlmGenerationEvent && completion) {
-      this.sendEvent(
+      await this.sendEvent(
         {
           type: "post-llm-generation",
           agent: preLlmGenerationEvent.agent,
@@ -638,14 +634,14 @@ export class AutoViewChatAgentDriver<M = undefined> {
   private async triggerReadSchemaAndCode(
     threadContextProvider: IAutoViewChatMemoryProvider,
   ): Promise<string> {
-    const preReadSchemaAndCodeEventId = this.sendEvent({
+    const preReadSchemaAndCodeEventId = await this.sendEvent({
       type: "pre-read-schema-and-code",
     });
 
     try {
       const result = await readSchemaAndCode(threadContextProvider);
 
-      this.sendEvent(
+      await this.sendEvent(
         {
           type: "post-read-schema-and-code",
           memory: result,
@@ -663,7 +659,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
   ${result.code}
   </component_code>`;
     } catch (error: unknown) {
-      this.sendEvent(
+      await this.sendEvent(
         {
           type: "post-read-schema-and-code",
           error,
@@ -679,7 +675,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
     threadContextProvider: IAutoViewChatMemoryProvider,
     context: string,
   ): Promise<string> {
-    const preComponentGenerationEventId = this.sendEvent({
+    const preComponentGenerationEventId = await this.sendEvent({
       type: "pre-component-generation",
     });
 
@@ -700,7 +696,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
             backoffStrategy,
           ) => {
             const startTimestamp = new Date();
-            const preLlmGenerationEventId = this.sendEvent({
+            const preLlmGenerationEventId = await this.sendEvent({
               type: "pre-llm-generation",
               agent,
               sessionId,
@@ -712,7 +708,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
             return async (agent, sessionId, completion) => {
               const endTimestamp = new Date();
-              this.sendEvent(
+              await this.sendEvent(
                 {
                   type: "post-llm-generation",
                   agent,
@@ -734,7 +730,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
         undefined,
       );
 
-      this.sendEvent(
+      await this.sendEvent(
         {
           type: "post-component-generation",
           result,
@@ -748,7 +744,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
         return `[FAILURE] ${result.reason}`;
       }
     } catch (error: unknown) {
-      this.sendEvent(
+      await this.sendEvent(
         {
           type: "post-component-generation",
           error,
