@@ -1,0 +1,52 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsActionsCacheUsageByRepository.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsActionsCacheUsageByRepository.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "repository_cache_usages"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "repository_cache_usages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actions-cache-usage-by-repository"
+          }
+        }
+      }
+    },
+    "actions-cache-usage-by-repository": {
+      "title": "Actions Cache Usage by repository",
+      "description": "GitHub Actions Cache Usage by repository.",
+      "type": "object",
+      "properties": {
+        "full_name": {
+          "description": "The repository owner and name for the cache usage being shown.",
+          "example": "octo-org/Hello-World",
+          "type": "string"
+        },
+        "active_caches_size_in_bytes": {
+          "description": "The sum of the size in bytes of all the active cache items in the repository.",
+          "example": 2322142,
+          "type": "integer"
+        },
+        "active_caches_count": {
+          "description": "The number of active caches in the repository.",
+          "example": 3,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "full_name",
+        "active_caches_size_in_bytes",
+        "active_caches_count"
+      ]
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schema": {
+    "$ref": "#/$defs/secret-scanning-push-protection-bypass"
+  },
+  "$defs": {
+    "IApiReposSecretScanningPushProtectionBypasses.PostBody": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/secret-scanning-push-protection-bypass-reason"
+        },
+        "placeholder_id": {
+          "$ref": "#/$defs/secret-scanning-push-protection-bypass-placeholder-id"
+        }
+      },
+      "required": [
+        "reason",
+        "placeholder_id"
+      ]
+    },
+    "secret-scanning-push-protection-bypass-reason": {
+      "description": "The reason for bypassing push protection.",
+      "oneOf": [
+        {
+          "const": "false_positive"
+        },
+        {
+          "const": "used_in_tests"
+        },
+        {
+          "const": "will_fix_later"
+        }
+      ]
+    },
+    "secret-scanning-push-protection-bypass-placeholder-id": {
+      "description": "The ID of the push protection bypass placeholder. This value is returned on any push protected routes.",
+      "type": "string"
+    },
+    "secret-scanning-push-protection-bypass": {
+      "type": "object",
+      "properties": {
+        "reason": {
+          "$ref": "#/$defs/secret-scanning-push-protection-bypass-reason"
+        },
+        "expire_at": {
+          "description": "The time that the bypass will expire in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "token_type": {
+          "description": "The token type this bypass is for.",
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

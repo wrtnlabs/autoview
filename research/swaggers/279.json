@@ -1,0 +1,108 @@
+{
+  "schema": {
+    "$ref": "#/$defs/WebhookView"
+  },
+  "$defs": {
+    "WebhookView": {
+      "type": "object",
+      "properties": {
+        "webhook": {
+          "$ref": "#/$defs/webhook.Webhook"
+        }
+      },
+      "required": []
+    },
+    "webhook.Webhook": {
+      "required": [
+        "apiVersion",
+        "name",
+        "scopes",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704943118,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "scopes": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "userChat.opened"
+              },
+              {
+                "const": "message.created.userChat"
+              },
+              {
+                "const": "message.created.teamChat"
+              },
+              {
+                "const": "lead.upserted.contact"
+              },
+              {
+                "const": "lead.upserted.subscription"
+              },
+              {
+                "const": "lead.deleted"
+              },
+              {
+                "const": "member.upserted.contact"
+              },
+              {
+                "const": "member.upserted.subscription"
+              },
+              {
+                "const": "member.deleted"
+              }
+            ]
+          }
+        },
+        "keywords": {
+          "maxItems": 20,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "deprecated": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "apiVersion": {
+          "type": "string"
+        },
+        "lastBlockedAt": {
+          "example": 1744704943118,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "blocked": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

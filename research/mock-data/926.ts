@@ -1,0 +1,8 @@
+
+import Component from "../components/926";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"login":"sampledev","id":101,"node_id":"NODEID_private_user_abc123XYZ=","avatar_url":"https://avatars.example.com/u/101?v=4","gravatar_id":"","url":"https://api.example.com/users/sampledev","html_url":"https://www.example.com/sampledev","followers_url":"https://api.example.com/users/sampledev/followers","following_url":"https://api.example.com/users/sampledev/following{/other_user}","gists_url":"https://api.example.com/users/sampledev/gists{/gist_id}","starred_url":"https://api.example.com/users/sampledev/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/sampledev/subscriptions","organizations_url":"https://api.example.com/users/sampledev/orgs","repos_url":"https://api.example.com/users/sampledev/repos","events_url":"https://api.example.com/users/sampledev/events{/privacy}","received_events_url":"https://api.example.com/users/sampledev/received_events","type":"User","site_admin":false,"name":"Sample Developer (Test Account)","company":"Example Org (Test)","blog":"https://blog.example.com/sampledev-test","location":"Fictional City, Imaginary State","email":"sample.dev@example.com","hireable":true,"bio":"This is a sample bio for UI testing. All content is fictional and for demonstration only.","public_repos":12,"public_gists":3,"followers":5,"following":2,"created_at":"2025-05-19T14:30:00Z","updated_at":"2025-05-20T08:45:00Z","private_gists":1,"total_private_repos":4,"owned_private_repos":2,"disk_usage":1280,"collaborators":3,"two_factor_authentication":true,"plan":{"collaborators":5,"name":"Pro (Test Plan)","space":50000,"private_repos":10},"business_plus":false};
+}

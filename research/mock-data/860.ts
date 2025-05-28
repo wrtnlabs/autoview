@@ -1,0 +1,8 @@
+
+import Component from "../components/860";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"id":42,"name":"Main Branch Protection Ruleset (Test)","target":"branch","source_type":"Repository","source":"example-repo","enforcement":"active","bypass_actors":[{"actor_id":1,"actor_type":"OrganizationAdmin","bypass_mode":"always"},{"actor_id":null,"actor_type":"DeployKey"}],"current_user_can_bypass":"pull_requests_only","node_id":"NODEID_ruleset_ABC123_Test","_links":{"self":{"href":"https://api.example.com/repos/example-org/example-repo/rulesets/42"},"html":{"href":"https://www.example.com/repos/example-org/example-repo/settings/rulesets/42"}},"conditions":{"ref_name":{"include":["main-test","release/*"],"exclude":["dependabot/*"]}},"rules":[{"type":"pull_request","parameters":{"allowed_merge_methods":["merge","squash"],"automatic_copilot_code_review_enabled":false,"dismiss_stale_reviews_on_push":true,"require_code_owner_review":true,"require_last_push_approval":false,"required_approving_review_count":2,"required_review_thread_resolution":true}},{"type":"required_status_checks","parameters":{"do_not_enforce_on_create":false,"required_status_checks":[{"context":"ci/test-suite","integration_id":987},{"context":"security/scan"}],"strict_required_status_checks_policy":true}},{"type":"merge_queue","parameters":{"check_response_timeout_minutes":30,"grouping_strategy":"HEADGREEN","max_entries_to_build":5,"max_entries_to_merge":10,"merge_method":"SQUASH","min_entries_to_merge":2,"min_entries_to_merge_wait_minutes":15}}],"created_at":"2025-05-19T12:00:00Z","updated_at":"2025-05-20T08:30:00Z"};
+}

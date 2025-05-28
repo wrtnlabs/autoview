@@ -1,0 +1,8 @@
+
+import Component from "../components/225";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"next":2,"campaigns":[{"id":"camp_001","channelId":"chan_abc","name":"Spring Sale Campaign (Test)","state":"active","sendMedium":"email","triggerEventName":"user_signed_up","waitingTime":"PT30M","filterEventName":"cart_abandoned","filterMatch":"positive","filterHpc":{"baseEventName":"cart_abandoned","baseEventKey":"cart_value","baseEventType":"triggerEvent","values":{"threshold":100}},"goalEventName":"purchase_completed","goalEventDuration":"P7D","advertising":true,"sendToOfflineXms":true,"sendToOfflineEmail":false,"cooldown":"PT1H","sendMode":"always","channelOperationId":"op_123","sendTimeRanges":[{"dayOfWeeks":["mon","wed","fri"],"from":480,"to":1020}],"startAt":1716374400000,"endAt":1716796800000,"deleteMessageAfterStop":true,"createdAt":1716000000000,"updatedAt":1716003600000,"sent":1500,"view":1200,"goal":200,"click":150,"userChatExpireDuration":"P30D","managerId":"mgr_test_01"},{"id":"camp_002","name":"Welcome Message Campaign (Sample)","sendMedium":"inAppChat","triggerEventName":"app_opened","waitingTime":"PT5M","advertising":false,"sendMode":"away"}],"msgs":[{"id":"msg_001","campaignId":"camp_001","channelId":"chan_abc","name":"Spring Sale Email (Test)","sendMedium":"email","settings":{"type":"transactional"},"createdAt":1716000000000,"updatedAt":1716003600000,"sent":1500,"view":1200,"goal":200,"click":150},{"id":"msg_002","campaignId":"camp_002","name":"Welcome Chat Message (Sample)","sendMedium":"inAppChat","settings":{"type":"notification"},"sent":300,"view":290,"goal":50,"click":45}]};
+}

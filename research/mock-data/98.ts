@@ -1,0 +1,8 @@
+
+import Component from "../components/98";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"writer":{"type":"customer","member":{"id":"member_001_test","nickname":"sample_member_test","emails":[{"id":"member_email_001","value":"sample.member+test@example.com","created_at":"2025-04-01T12:00:00Z"}],"created_at":"2025-04-01T12:00:00Z","citizen":{"id":"citizen_002_test","created_at":"2025-03-20T09:00:00Z","mobile":"+1-555-000-0002","name":"Member Tester (Test Citizen)"},"seller":null,"administrator":null},"citizen":{"id":"citizen_001_test","created_at":"2025-05-19T14:50:00Z","mobile":"+1-555-123-4567","name":"Sample Tester (Test Citizen)"},"id":"customer_001_test","channel":{"id":"channel_001_test","created_at":"2025-05-01T10:00:00Z","code":"WEB_PORTAL","name":"Web Portal (Test)"},"external_user":null,"href":"https://www.example.com/test_page","referrer":"https://www.example.com/referrer-test","ip":"203.0.113.5","created_at":"2025-05-19T15:00:00Z"},"id":"comment_001_test","parent_id":null,"snapshots":[{"id":"snapshot_001","created_at":"2025-05-19T15:01:00Z","format":"md","body":"Initial comment body content in Markdown format for testing purposes.","files":[{"name":"image1","extension":"png","url":"https://www.example.com/files/image1.png"},{"name":"doc","extension":"pdf","url":"https://www.example.com/files/comment-document.pdf"}]},{"id":"snapshot_002","created_at":"2025-05-19T15:10:00Z","format":"md","body":"Edited comment body content with updates for UI testing.","files":[{"name":"image1","extension":"png","url":"https://www.example.com/files/image1.png"},{"name":"image2","extension":"jpg","url":"https://www.example.com/files/image2.jpg"}]}],"created_at":"2025-05-19T15:20:30Z"};
+}

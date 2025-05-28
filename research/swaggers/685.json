@@ -1,0 +1,84 @@
+{
+  "schema": {
+    "$ref": "#/$defs/codeowners-errors"
+  },
+  "$defs": {
+    "IApiReposCodeownersErrors.GetQuery": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "description": "A branch, tag or commit name used to determine which version of the CODEOWNERS file to use. Default: the repository's default branch (e.g. `main`)",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "codeowners-errors": {
+      "title": "CODEOWNERS errors",
+      "description": "A list of errors found in a repo's CODEOWNERS file",
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "line": {
+                "description": "The line number where this errors occurs.",
+                "example": 7,
+                "type": "integer"
+              },
+              "column": {
+                "description": "The column number where this errors occurs.",
+                "example": 3,
+                "type": "integer"
+              },
+              "source": {
+                "description": "The contents of the line where the error occurs.",
+                "example": "* user",
+                "type": "string"
+              },
+              "kind": {
+                "description": "The type of error.",
+                "example": "Invalid owner",
+                "type": "string"
+              },
+              "suggestion": {
+                "description": "Suggested action to fix the error. This will usually be `null`, but is provided for some common errors.",
+                "example": "The pattern `/` will never match anything, did you mean `*` instead?",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "message": {
+                "description": "A human-readable description of the error, combining information from multiple fields, laid out for display in a monospaced typeface (for example, a command-line setting).",
+                "example": "Invalid owner on line 7:\n\n  * user\n    ^",
+                "type": "string"
+              },
+              "path": {
+                "description": "The path of the file where the error occured.",
+                "example": ".github/CODEOWNERS",
+                "type": "string"
+              }
+            },
+            "required": [
+              "line",
+              "column",
+              "kind",
+              "message",
+              "path"
+            ]
+          }
+        }
+      },
+      "required": [
+        "errors"
+      ]
+    }
+  }
+}

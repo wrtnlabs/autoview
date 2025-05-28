@@ -1,0 +1,8 @@
+
+import Component from "../components/363";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"url":"https://api.example.com/marketplace_purchase/12345","type":"marketplace_purchase","id":12345,"login":"sample-user","organization_billing_email":"billing-team@example.com","email":"user@example.com","marketplace_pending_change":{"is_installed":true,"effective_date":"2025-06-01T00:00:00Z","unit_count":10,"id":54321,"plan":{"url":"https://api.example.com/plans/plan-001","accounts_url":"https://api.example.com/plans/plan-001/accounts","id":1,"number":101,"name":"Basic Plan (Test)","description":"This is a sample description for the Basic Plan. All data is fictional.","monthly_price_in_cents":500,"yearly_price_in_cents":5000,"price_model":"PER_UNIT","has_free_trial":true,"unit_name":"seat","state":"PUBLIC","bullets":["Feature A (Sample)","Feature B (Test)","Seat-based billing"]}},"marketplace_purchase":{"billing_cycle":"monthly","next_billing_date":"2025-06-19T00:00:00Z","is_installed":true,"unit_count":5,"on_free_trial":true,"free_trial_ends_on":"2025-07-19T00:00:00Z","updated_at":"2025-05-19T12:34:56Z","plan":{"url":"https://api.example.com/plans/plan-002","accounts_url":"https://api.example.com/plans/plan-002/accounts","id":2,"number":202,"name":"Enterprise Plan (Sample)","description":"A sample Enterprise subscription for UI testing purposes.","monthly_price_in_cents":2000,"yearly_price_in_cents":20000,"price_model":"FLAT_RATE","has_free_trial":false,"unit_name":null,"state":"PUBLIC","bullets":["Unlimited usage","Priority support (Sample)","Flat rate pricing"]}}};
+}

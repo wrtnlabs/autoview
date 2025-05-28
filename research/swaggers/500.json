@@ -1,0 +1,120 @@
+{
+  "schema": {
+    "$ref": "#/$defs/org-private-registry-configuration-with-selected-repositories"
+  },
+  "$defs": {
+    "IApiOrgsPrivateRegistries.PostBody": {
+      "type": "object",
+      "properties": {
+        "registry_type": {
+          "description": "The registry type.",
+          "const": "maven_repository"
+        },
+        "username": {
+          "description": "The username to use when authenticating with the private registry. This field should be omitted if the private registry does not require a username for authentication.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "encrypted_value": {
+          "description": "The value for your secret, encrypted with [LibSodium](https://libsodium.gitbook.io/doc/bindings_for_other_languages) using the public key retrieved from the [Get private registries public key for an organization](https://docs.github.com/rest/private-registries/organization-configurations#get-private-registries-public-key-for-an-organization) endpoint.",
+          "type": "string",
+          "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})$"
+        },
+        "key_id": {
+          "description": "The ID of the key you used to encrypt the secret.",
+          "type": "string"
+        },
+        "visibility": {
+          "description": "Which type of organization repositories have access to the private registry. `selected` means only the repositories specified by `selected_repository_ids` can access the private registry.",
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "private"
+            },
+            {
+              "const": "selected"
+            }
+          ]
+        },
+        "selected_repository_ids": {
+          "description": "An array of repository IDs that can access the organization private registry. You can only provide a list of repository IDs when `visibility` is set to `selected`. You can manage the list of selected repositories using the [Update a private registry for an organization](https://docs.github.com/rest/private-registries/organization-configurations#update-a-private-registry-for-an-organization) endpoint. This field should be omitted if `visibility` is set to `all` or `private`.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "required": [
+        "registry_type",
+        "encrypted_value",
+        "key_id",
+        "visibility"
+      ]
+    },
+    "org-private-registry-configuration-with-selected-repositories": {
+      "title": "Organization private registry",
+      "description": "Private registry configuration for an organization",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the private registry configuration.",
+          "example": "MAVEN_REPOSITORY_SECRET",
+          "type": "string"
+        },
+        "registry_type": {
+          "description": "The registry type.",
+          "const": "maven_repository"
+        },
+        "username": {
+          "description": "The username to use when authenticating with the private registry.",
+          "example": "monalisa",
+          "type": "string"
+        },
+        "visibility": {
+          "description": "Which type of organization repositories have access to the private registry. `selected` means only the repositories specified by `selected_repository_ids` can access the private registry.",
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "private"
+            },
+            {
+              "const": "selected"
+            }
+          ]
+        },
+        "selected_repository_ids": {
+          "description": "An array of repository IDs that can access the organization private registry when `visibility` is set to `selected`.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "registry_type",
+        "visibility",
+        "created_at",
+        "updated_at"
+      ]
+    }
+  }
+}

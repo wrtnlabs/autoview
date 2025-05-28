@@ -1,0 +1,235 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/user-marketplace-purchase"
+    }
+  },
+  "$defs": {
+    "user-marketplace-purchase": {
+      "title": "User Marketplace Purchase",
+      "description": "User Marketplace Purchase",
+      "type": "object",
+      "properties": {
+        "billing_cycle": {
+          "example": "monthly",
+          "type": "string"
+        },
+        "next_billing_date": {
+          "example": "2017-11-11T00:00:00Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit_count": {
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "on_free_trial": {
+          "example": true,
+          "type": "boolean"
+        },
+        "free_trial_ends_on": {
+          "example": "2017-11-11T00:00:00Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "example": "2017-11-02T01:12:12Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "account": {
+          "$ref": "#/$defs/marketplace-account"
+        },
+        "plan": {
+          "$ref": "#/$defs/marketplace-listing-plan"
+        }
+      },
+      "required": [
+        "billing_cycle",
+        "next_billing_date",
+        "unit_count",
+        "updated_at",
+        "on_free_trial",
+        "free_trial_ends_on",
+        "account",
+        "plan"
+      ]
+    },
+    "marketplace-account": {
+      "title": "Marketplace Account",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "type": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "login": {
+          "type": "string"
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "email"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "organization_billing_email": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "email"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "url",
+        "id",
+        "type",
+        "login"
+      ]
+    },
+    "marketplace-listing-plan": {
+      "title": "Marketplace Listing Plan",
+      "description": "Marketplace Listing Plan",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/marketplace_listing/plans/1313",
+          "type": "string",
+          "format": "uri"
+        },
+        "accounts_url": {
+          "example": "https://api.github.com/marketplace_listing/plans/1313/accounts",
+          "type": "string",
+          "format": "uri"
+        },
+        "id": {
+          "example": 1313,
+          "type": "integer"
+        },
+        "number": {
+          "example": 3,
+          "type": "integer"
+        },
+        "name": {
+          "example": "Pro",
+          "type": "string"
+        },
+        "description": {
+          "example": "A professional-grade CI solution",
+          "type": "string"
+        },
+        "monthly_price_in_cents": {
+          "example": 1099,
+          "type": "integer"
+        },
+        "yearly_price_in_cents": {
+          "example": 11870,
+          "type": "integer"
+        },
+        "price_model": {
+          "example": "FLAT_RATE",
+          "oneOf": [
+            {
+              "const": "FREE"
+            },
+            {
+              "const": "FLAT_RATE"
+            },
+            {
+              "const": "PER_UNIT"
+            }
+          ]
+        },
+        "has_free_trial": {
+          "example": true,
+          "type": "boolean"
+        },
+        "unit_name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "state": {
+          "example": "published",
+          "type": "string"
+        },
+        "bullets": {
+          "example": [
+            "Up to 25 private repositories",
+            "11 concurrent builds"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "url",
+        "accounts_url",
+        "id",
+        "number",
+        "name",
+        "description",
+        "has_free_trial",
+        "price_model",
+        "unit_name",
+        "monthly_price_in_cents",
+        "state",
+        "yearly_price_in_cents",
+        "bullets"
+      ]
+    }
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "schema": {
+    "$ref": "#/$defs/Try_lt_string_gt_"
+  },
+  "$defs": {
+    "LoginUserDto": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "email": {
+          "description": "사용자의 이메일 주소로 로그인 시 필요",
+          "x-typia-metaTags": [
+            {
+              "kind": "format",
+              "value": "email"
+            },
+            {
+              "kind": "minLength",
+              "value": 4
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "format",
+              "text": [
+                {
+                  "text": "email",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "4",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "format": "email",
+          "minLength": 4,
+          "maxLength": 50
+        },
+        "password": {
+          "description": "사용자의 비밀번호로 로그인 시 필요",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string"
+        }
+      },
+      "required": [
+        "email",
+        "password"
+      ]
+    },
+    "Try_lt_string_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    }
+  }
+}

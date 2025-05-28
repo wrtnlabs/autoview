@@ -1,0 +1,634 @@
+{
+  "schema": {
+    "$ref": "#/$defs/team-full"
+  },
+  "$defs": {
+    "IApiOrgsTeams.PostBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the team.",
+          "type": "string"
+        },
+        "description": {
+          "description": "The description of the team.",
+          "type": "string"
+        },
+        "maintainers": {
+          "description": "List GitHub IDs for organization members who will become team maintainers.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "repo_names": {
+          "description": "The full name (e.g., \"organization-name/repository-name\") of repositories to add the team to.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "privacy": {
+          "description": "The level of privacy this team should have. The options are:  \n**For a non-nested team:**  \n * `secret` - only visible to organization owners and members of this team.  \n * `closed` - visible to all members of this organization.  \nDefault: `secret`  \n**For a parent or child team:**  \n * `closed` - visible to all members of this organization.  \nDefault for child team: `closed`",
+          "oneOf": [
+            {
+              "const": "secret"
+            },
+            {
+              "const": "closed"
+            }
+          ]
+        },
+        "notification_setting": {
+          "description": "The notification setting the team has chosen. The options are:  \n * `notifications_enabled` - team members receive notifications when the team is @mentioned.  \n * `notifications_disabled` - no one receives notifications.  \nDefault: `notifications_enabled`",
+          "oneOf": [
+            {
+              "const": "notifications_enabled"
+            },
+            {
+              "const": "notifications_disabled"
+            }
+          ]
+        },
+        "permission": {
+          "description": "**Closing down notice**. The permission that new repositories will be added to the team with when none is specified.",
+          "oneOf": [
+            {
+              "const": "pull"
+            },
+            {
+              "const": "push"
+            }
+          ]
+        },
+        "parent_team_id": {
+          "description": "The ID of a team to set as the parent team.",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "team-full": {
+      "title": "Full Team",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the team",
+          "example": 42,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDQ6VGVhbTE=",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL for the team",
+          "example": "https://api.github.com/organizations/1/team/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/rails/teams/core",
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "description": "Name of the team",
+          "example": "Developers",
+          "type": "string"
+        },
+        "slug": {
+          "example": "justice-league",
+          "type": "string"
+        },
+        "description": {
+          "example": "A great team.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "privacy": {
+          "description": "The level of privacy this team should have",
+          "example": "closed",
+          "oneOf": [
+            {
+              "const": "closed"
+            },
+            {
+              "const": "secret"
+            }
+          ]
+        },
+        "notification_setting": {
+          "description": "The notification setting the team has set",
+          "example": "notifications_enabled",
+          "oneOf": [
+            {
+              "const": "notifications_enabled"
+            },
+            {
+              "const": "notifications_disabled"
+            }
+          ]
+        },
+        "permission": {
+          "description": "Permission that the team will have for its repositories",
+          "example": "push",
+          "type": "string"
+        },
+        "members_url": {
+          "example": "https://api.github.com/organizations/1/team/1/members{/member}",
+          "type": "string"
+        },
+        "repositories_url": {
+          "example": "https://api.github.com/organizations/1/team/1/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "parent": {
+          "$ref": "#/$defs/nullable-team-simple"
+        },
+        "members_count": {
+          "example": 3,
+          "type": "integer"
+        },
+        "repos_count": {
+          "example": 10,
+          "type": "integer"
+        },
+        "created_at": {
+          "example": "2017-07-14T16:53:42Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "example": "2017-08-17T12:37:15Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "organization": {
+          "$ref": "#/$defs/team-organization"
+        },
+        "ldap_dn": {
+          "description": "Distinguished Name (DN) that team maps to within LDAP environment",
+          "example": "uid=example,ou=users,dc=github,dc=com",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "url",
+        "members_url",
+        "name",
+        "description",
+        "permission",
+        "html_url",
+        "repositories_url",
+        "slug",
+        "created_at",
+        "updated_at",
+        "members_count",
+        "repos_count",
+        "organization"
+      ]
+    },
+    "nullable-team-simple": {
+      "title": "Team Simple",
+      "description": "Groups of organization members that gives permissions on specified repositories.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the team",
+              "example": 1,
+              "type": "integer"
+            },
+            "node_id": {
+              "example": "MDQ6VGVhbTE=",
+              "type": "string"
+            },
+            "url": {
+              "description": "URL for the team",
+              "example": "https://api.github.com/organizations/1/team/1",
+              "type": "string",
+              "format": "uri"
+            },
+            "members_url": {
+              "example": "https://api.github.com/organizations/1/team/1/members{/member}",
+              "type": "string"
+            },
+            "name": {
+              "description": "Name of the team",
+              "example": "Justice League",
+              "type": "string"
+            },
+            "description": {
+              "description": "Description of the team",
+              "example": "A great team.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "permission": {
+              "description": "Permission that the team will have for its repositories",
+              "example": "admin",
+              "type": "string"
+            },
+            "privacy": {
+              "description": "The level of privacy this team should have",
+              "example": "closed",
+              "type": "string"
+            },
+            "notification_setting": {
+              "description": "The notification setting the team has set",
+              "example": "notifications_enabled",
+              "type": "string"
+            },
+            "html_url": {
+              "example": "https://github.com/orgs/rails/teams/core",
+              "type": "string",
+              "format": "uri"
+            },
+            "repositories_url": {
+              "example": "https://api.github.com/organizations/1/team/1/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "slug": {
+              "example": "justice-league",
+              "type": "string"
+            },
+            "ldap_dn": {
+              "description": "Distinguished Name (DN) that team maps to within LDAP environment",
+              "example": "uid=example,ou=users,dc=github,dc=com",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "url",
+            "members_url",
+            "name",
+            "description",
+            "permission",
+            "html_url",
+            "repositories_url",
+            "slug"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "team-organization": {
+      "title": "Team Organization",
+      "description": "Team Organization",
+      "type": "object",
+      "properties": {
+        "login": {
+          "example": "github",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEyOk9yZ2FuaXphdGlvbjE=",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://api.github.com/orgs/github",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/orgs/github/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/orgs/github/events",
+          "type": "string",
+          "format": "uri"
+        },
+        "hooks_url": {
+          "example": "https://api.github.com/orgs/github/hooks",
+          "type": "string"
+        },
+        "issues_url": {
+          "example": "https://api.github.com/orgs/github/issues",
+          "type": "string"
+        },
+        "members_url": {
+          "example": "https://api.github.com/orgs/github/members{/member}",
+          "type": "string"
+        },
+        "public_members_url": {
+          "example": "https://api.github.com/orgs/github/public_members{/member}",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string"
+        },
+        "description": {
+          "example": "A great organization",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "example": "github",
+          "type": "string"
+        },
+        "company": {
+          "example": "GitHub",
+          "type": "string"
+        },
+        "blog": {
+          "example": "https://github.com/blog",
+          "type": "string",
+          "format": "uri"
+        },
+        "location": {
+          "example": "San Francisco",
+          "type": "string"
+        },
+        "email": {
+          "example": "octocat@github.com",
+          "type": "string",
+          "format": "email"
+        },
+        "twitter_username": {
+          "example": "github",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "is_verified": {
+          "example": true,
+          "type": "boolean"
+        },
+        "has_organization_projects": {
+          "example": true,
+          "type": "boolean"
+        },
+        "has_repository_projects": {
+          "example": true,
+          "type": "boolean"
+        },
+        "public_repos": {
+          "example": 2,
+          "type": "integer"
+        },
+        "public_gists": {
+          "example": 1,
+          "type": "integer"
+        },
+        "followers": {
+          "example": 20,
+          "type": "integer"
+        },
+        "following": {
+          "example": 0,
+          "type": "integer"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "created_at": {
+          "example": "2008-01-14T04:33:35Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "type": {
+          "example": "Organization",
+          "type": "string"
+        },
+        "total_private_repos": {
+          "example": 100,
+          "type": "integer"
+        },
+        "owned_private_repos": {
+          "example": 100,
+          "type": "integer"
+        },
+        "private_gists": {
+          "example": 81,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "disk_usage": {
+          "example": 10000,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "collaborators": {
+          "example": 8,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "billing_email": {
+          "example": "org@example.com",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "email"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "space": {
+              "type": "integer"
+            },
+            "private_repos": {
+              "type": "integer"
+            },
+            "filled_seats": {
+              "type": "integer"
+            },
+            "seats": {
+              "type": "integer"
+            }
+          },
+          "required": [
+            "name",
+            "space",
+            "private_repos"
+          ]
+        },
+        "default_repository_permission": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "members_can_create_repositories": {
+          "example": true,
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "two_factor_requirement_enabled": {
+          "example": true,
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "members_allowed_repository_creation_type": {
+          "example": "all",
+          "type": "string"
+        },
+        "members_can_create_public_repositories": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_private_repositories": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_internal_repositories": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_pages": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_public_pages": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_create_private_pages": {
+          "example": true,
+          "type": "boolean"
+        },
+        "members_can_fork_private_repositories": {
+          "example": false,
+          "oneOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "web_commit_signoff_required": {
+          "example": false,
+          "type": "boolean"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "archived_at": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "login",
+        "url",
+        "id",
+        "node_id",
+        "repos_url",
+        "events_url",
+        "hooks_url",
+        "issues_url",
+        "members_url",
+        "public_members_url",
+        "avatar_url",
+        "description",
+        "html_url",
+        "has_organization_projects",
+        "has_repository_projects",
+        "public_repos",
+        "public_gists",
+        "followers",
+        "following",
+        "type",
+        "created_at",
+        "updated_at",
+        "archived_at"
+      ]
+    }
+  }
+}

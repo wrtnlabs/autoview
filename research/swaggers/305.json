@@ -1,0 +1,515 @@
+{
+  "schema": {
+    "oneOf": [
+      {
+        "$ref": "#/$defs/ALREADY_CREATED_EMAIL"
+      },
+      {
+        "$ref": "#/$defs/ALREADY_CREATED_PHONE_NUMBER"
+      },
+      {
+        "$ref": "#/$defs/ResponseForm_lt_DecodedUserToken_gt_"
+      }
+    ]
+  },
+  "$defs": {
+    "CreateUserDto": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "이름 칼럼으로 사용자의 이름을 의미",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "nickname": {
+          "description": "사용자의 별칭, 설정하지 않는 경우도 있다.",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "email": {
+          "description": "사용자의 이메일 주소로 로그인 시 필요",
+          "x-typia-metaTags": [
+            {
+              "kind": "format",
+              "value": "email"
+            },
+            {
+              "kind": "minLength",
+              "value": 4
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "format",
+              "text": [
+                {
+                  "text": "email",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "4",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "format": "email",
+          "minLength": 4,
+          "maxLength": 50
+        },
+        "password": {
+          "description": "사용자의 비밀번호로 로그인 시 필요",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string"
+        },
+        "phoneNumber": {
+          "description": "사용자의 전화번호로 동일한 값은 없으며, 미입력된 계정 둘의 전화번호가 같을 경우 계정 통합을 요구할 예정",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 11
+            },
+            {
+              "kind": "maxLength",
+              "value": 13
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "11",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "13",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 11,
+          "maxLength": 13
+        },
+        "birth": {
+          "description": "사용자의 생일을 의미하는 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gender": {
+          "description": "사용자의 성별로 true면 남자라고 가정한다.",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "smsAdsConsent": {
+          "description": "회원 가입 시 받는 값으로 수신 거부 가능",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "boolean"
+        },
+        "emailAdsConsent": {
+          "description": "회원 가입 시 받는 값으로 수신 거부 가능",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "nickname",
+        "email",
+        "password",
+        "phoneNumber",
+        "smsAdsConsent",
+        "emailAdsConsent"
+      ]
+    },
+    "ALREADY_CREATED_EMAIL": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4001
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "이미 생성된 이메일입니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ALREADY_CREATED_PHONE_NUMBER": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4013
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "이미 생성된 전화번호입니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ResponseForm_lt_DecodedUserToken_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/DecodedUserToken"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "DecodedUserToken": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "이름 칼럼으로 사용자의 이름을 의미",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "nickname": {
+          "description": "사용자의 별칭, 설정하지 않는 경우도 있다.",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "email": {
+          "description": "사용자의 이메일 주소로 로그인 시 필요",
+          "x-typia-metaTags": [
+            {
+              "kind": "format",
+              "value": "email"
+            },
+            {
+              "kind": "minLength",
+              "value": 4
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "format",
+              "text": [
+                {
+                  "text": "email",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "4",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "format": "email",
+          "minLength": 4,
+          "maxLength": 50
+        },
+        "birth": {
+          "description": "사용자의 생일을 의미하는 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "nickname",
+        "email",
+        "id"
+      ]
+    }
+  }
+}

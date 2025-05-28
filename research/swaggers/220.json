@@ -1,0 +1,77 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4WebhookView"
+  },
+  "$defs": {
+    "legacy.v4.LegacyV4Webhook": {
+      "required": [
+        "apiVersion",
+        "name",
+        "url"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string",
+          "readOnly": true
+        },
+        "keywords": {
+          "maxItems": 20,
+          "minItems": 1,
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "example": 1744704934442,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "watchUserChats": {
+          "type": "boolean"
+        },
+        "watchGroups": {
+          "type": "boolean"
+        },
+        "apiVersion": {
+          "type": "string"
+        },
+        "lastBlockedAt": {
+          "example": 1744704934442,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "blocked": {
+          "type": "boolean"
+        }
+      }
+    },
+    "legacy.open.v4.LegacyV4WebhookView": {
+      "type": "object",
+      "properties": {
+        "webhook": {
+          "$ref": "#/$defs/legacy.v4.LegacyV4Webhook"
+        }
+      },
+      "required": []
+    }
+  }
+}

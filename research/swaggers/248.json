@@ -1,0 +1,43 @@
+{
+  "schema": {
+    "$ref": "#/$defs/MeetWrapUpTimeView"
+  },
+  "$defs": {
+    "IApiOpenV5MeetCallWrapUpTime.GetQuery": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "to": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ]
+    },
+    "MeetWrapUpTimeView": {
+      "type": "object",
+      "properties": {
+        "channel": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "managers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "properties": {},
+          "required": []
+        }
+      },
+      "required": []
+    }
+  }
+}

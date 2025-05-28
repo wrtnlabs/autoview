@@ -1,0 +1,724 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiSearchRepositories.GetResponse"
+  },
+  "$defs": {
+    "IApiSearchRepositories.GetQuery": {
+      "type": "object",
+      "properties": {
+        "q": {
+          "description": "The query contains one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as the web interface for GitHub. To learn more about the format of the query, see [Constructing a search query](https://docs.github.com/rest/search/search#constructing-a-search-query). See \"[Searching for repositories](https://docs.github.com/articles/searching-for-repositories/)\" for a detailed list of qualifiers.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "q"
+      ]
+    },
+    "IApiSearchRepositories.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "incomplete_results",
+        "items"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "incomplete_results": {
+          "type": "boolean"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/repo-search-result-item"
+          }
+        }
+      }
+    },
+    "repo-search-result-item": {
+      "title": "Repo Search Result Item",
+      "description": "Repo Search Result Item",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "private": {
+          "type": "boolean"
+        },
+        "html_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "description": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fork": {
+          "type": "boolean"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "pushed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "homepage": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "size": {
+          "type": "integer"
+        },
+        "stargazers_count": {
+          "type": "integer"
+        },
+        "watchers_count": {
+          "type": "integer"
+        },
+        "language": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "forks_count": {
+          "type": "integer"
+        },
+        "open_issues_count": {
+          "type": "integer"
+        },
+        "master_branch": {
+          "type": "string"
+        },
+        "default_branch": {
+          "type": "string"
+        },
+        "score": {
+          "type": "number"
+        },
+        "forks_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "keys_url": {
+          "type": "string"
+        },
+        "collaborators_url": {
+          "type": "string"
+        },
+        "teams_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "hooks_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "issue_events_url": {
+          "type": "string"
+        },
+        "events_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "assignees_url": {
+          "type": "string"
+        },
+        "branches_url": {
+          "type": "string"
+        },
+        "tags_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "blobs_url": {
+          "type": "string"
+        },
+        "git_tags_url": {
+          "type": "string"
+        },
+        "git_refs_url": {
+          "type": "string"
+        },
+        "trees_url": {
+          "type": "string"
+        },
+        "statuses_url": {
+          "type": "string"
+        },
+        "languages_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "stargazers_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "contributors_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "subscribers_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "subscription_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "commits_url": {
+          "type": "string"
+        },
+        "git_commits_url": {
+          "type": "string"
+        },
+        "comments_url": {
+          "type": "string"
+        },
+        "issue_comment_url": {
+          "type": "string"
+        },
+        "contents_url": {
+          "type": "string"
+        },
+        "compare_url": {
+          "type": "string"
+        },
+        "merges_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "archive_url": {
+          "type": "string"
+        },
+        "downloads_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "issues_url": {
+          "type": "string"
+        },
+        "pulls_url": {
+          "type": "string"
+        },
+        "milestones_url": {
+          "type": "string"
+        },
+        "notifications_url": {
+          "type": "string"
+        },
+        "labels_url": {
+          "type": "string"
+        },
+        "releases_url": {
+          "type": "string"
+        },
+        "deployments_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "git_url": {
+          "type": "string"
+        },
+        "ssh_url": {
+          "type": "string"
+        },
+        "clone_url": {
+          "type": "string"
+        },
+        "svn_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "forks": {
+          "type": "integer"
+        },
+        "open_issues": {
+          "type": "integer"
+        },
+        "watchers": {
+          "type": "integer"
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mirror_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "has_issues": {
+          "type": "boolean"
+        },
+        "has_projects": {
+          "type": "boolean"
+        },
+        "has_pages": {
+          "type": "boolean"
+        },
+        "has_wiki": {
+          "type": "boolean"
+        },
+        "has_downloads": {
+          "type": "boolean"
+        },
+        "has_discussions": {
+          "type": "boolean"
+        },
+        "archived": {
+          "type": "boolean"
+        },
+        "disabled": {
+          "description": "Returns whether or not this repository disabled.",
+          "type": "boolean"
+        },
+        "visibility": {
+          "description": "The repository visibility: public, private, or internal.",
+          "type": "string"
+        },
+        "license": {
+          "$ref": "#/$defs/nullable-license-simple"
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "admin": {
+              "type": "boolean"
+            },
+            "maintain": {
+              "type": "boolean"
+            },
+            "push": {
+              "type": "boolean"
+            },
+            "triage": {
+              "type": "boolean"
+            },
+            "pull": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "admin",
+            "pull",
+            "push"
+          ]
+        },
+        "text_matches": {
+          "$ref": "#/$defs/search-result-text-matches"
+        },
+        "temp_clone_token": {
+          "type": "string"
+        },
+        "allow_merge_commit": {
+          "type": "boolean"
+        },
+        "allow_squash_merge": {
+          "type": "boolean"
+        },
+        "allow_rebase_merge": {
+          "type": "boolean"
+        },
+        "allow_auto_merge": {
+          "type": "boolean"
+        },
+        "delete_branch_on_merge": {
+          "type": "boolean"
+        },
+        "allow_forking": {
+          "type": "boolean"
+        },
+        "is_template": {
+          "type": "boolean"
+        },
+        "web_commit_signoff_required": {
+          "example": false,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "archive_url",
+        "assignees_url",
+        "blobs_url",
+        "branches_url",
+        "collaborators_url",
+        "comments_url",
+        "commits_url",
+        "compare_url",
+        "contents_url",
+        "contributors_url",
+        "deployments_url",
+        "description",
+        "downloads_url",
+        "events_url",
+        "fork",
+        "forks_url",
+        "full_name",
+        "git_commits_url",
+        "git_refs_url",
+        "git_tags_url",
+        "hooks_url",
+        "html_url",
+        "id",
+        "node_id",
+        "issue_comment_url",
+        "issue_events_url",
+        "issues_url",
+        "keys_url",
+        "labels_url",
+        "languages_url",
+        "merges_url",
+        "milestones_url",
+        "name",
+        "notifications_url",
+        "owner",
+        "private",
+        "pulls_url",
+        "releases_url",
+        "stargazers_url",
+        "statuses_url",
+        "subscribers_url",
+        "subscription_url",
+        "tags_url",
+        "teams_url",
+        "trees_url",
+        "url",
+        "clone_url",
+        "default_branch",
+        "forks",
+        "forks_count",
+        "git_url",
+        "has_downloads",
+        "has_issues",
+        "has_projects",
+        "has_wiki",
+        "has_pages",
+        "homepage",
+        "language",
+        "archived",
+        "disabled",
+        "mirror_url",
+        "open_issues",
+        "open_issues_count",
+        "license",
+        "pushed_at",
+        "size",
+        "ssh_url",
+        "stargazers_count",
+        "svn_url",
+        "watchers",
+        "watchers_count",
+        "created_at",
+        "updated_at",
+        "score"
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-license-simple": {
+      "title": "License Simple",
+      "description": "License Simple",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "key": {
+              "example": "mit",
+              "type": "string"
+            },
+            "name": {
+              "example": "MIT License",
+              "type": "string"
+            },
+            "url": {
+              "example": "https://api.github.com/licenses/mit",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "spdx_id": {
+              "example": "MIT",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "node_id": {
+              "example": "MDc6TGljZW5zZW1pdA==",
+              "type": "string"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "key",
+            "name",
+            "url",
+            "spdx_id",
+            "node_id"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "search-result-text-matches": {
+      "title": "Search Result Text Matches",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "object_url": {
+            "type": "string"
+          },
+          "object_type": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "property": {
+            "type": "string"
+          },
+          "fragment": {
+            "type": "string"
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "type": "string"
+                },
+                "indices": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "required": []
+            }
+          }
+        },
+        "required": []
+      }
+    }
+  }
+}

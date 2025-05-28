@@ -1,0 +1,108 @@
+{
+  "schema": {
+    "$ref": "#/$defs/status-check-policy"
+  },
+  "$defs": {
+    "IApiReposBranchesProtectionRequiredStatusChecks.PatchBody": {
+      "type": "object",
+      "properties": {
+        "strict": {
+          "description": "Require branches to be up to date before merging.",
+          "type": "boolean"
+        },
+        "contexts": {
+          "description": "**Closing down notice**: The list of status checks to require in order to merge into this branch. If any of these checks have recently been set by a particular GitHub App, they will be required to come from that app in future for the branch to merge. Use `checks` instead of `contexts` for more fine-grained control.",
+          "type": "array",
+          "deprecated": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks": {
+          "description": "The list of status checks to require in order to merge into this branch.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "context"
+            ],
+            "properties": {
+              "context": {
+                "description": "The name of the required check",
+                "type": "string"
+              },
+              "app_id": {
+                "description": "The ID of the GitHub App that must provide this check. Omit this field to automatically select the GitHub App that has recently provided this check, or any app if it was not set by a GitHub App. Pass -1 to explicitly allow any app to set the status.",
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "required": []
+    },
+    "status-check-policy": {
+      "title": "Status Check Policy",
+      "description": "Status Check Policy",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks",
+          "type": "string",
+          "format": "uri"
+        },
+        "strict": {
+          "example": true,
+          "type": "boolean"
+        },
+        "contexts": {
+          "example": [
+            "continuous-integration/travis-ci"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "context": {
+                "example": "continuous-integration/travis-ci",
+                "type": "string"
+              },
+              "app_id": {
+                "oneOf": [
+                  {
+                    "type": "integer"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "context",
+              "app_id"
+            ]
+          }
+        },
+        "contexts_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/required_status_checks/contexts",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "url",
+        "contexts_url",
+        "strict",
+        "contexts",
+        "checks"
+      ]
+    }
+  }
+}

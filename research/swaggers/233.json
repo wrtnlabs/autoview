@@ -1,0 +1,79 @@
+{
+  "schema": {
+    "$ref": "#/$defs/EventView"
+  },
+  "$defs": {
+    "Event": {
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "property": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          },
+          "properties": {},
+          "required": []
+        },
+        "createdAt": {
+          "example": 1744704935622,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "expireAt": {
+          "example": 1744704935623,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "managed": {
+          "type": "boolean",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "nameI18nMap": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          },
+          "readOnly": true,
+          "properties": {},
+          "required": []
+        }
+      }
+    },
+    "EventView": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "$ref": "#/$defs/Event"
+        }
+      },
+      "required": []
+    }
+  }
+}

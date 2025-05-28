@@ -1,19 +1,18 @@
 import { OpenApi, OpenApiTypeChecker } from "@samchon/openapi";
 import ts from "typescript";
-import typia from "typia";
 import { TypeFactory } from "typia/lib/factories/TypeFactory";
 import { FormatCheatSheet } from "typia/lib/tags/internal/FormatCheatSheet";
 import { Escaper } from "typia/lib/utils/Escaper";
 
 import { FilePrinter } from "../utils/FilePrinter";
 import { StringUtil } from "../utils/StringUtil";
-import { AutoViewImportProgrammer } from "./AutoViewImportProgrammer";
 import { IAutoViewProgrammerContext } from "./IAutoViewProgrammerContext";
 
 export namespace AutoViewSchemaProgrammer {
   export const writeSchema = (
     ctx: IAutoViewProgrammerContext,
     schema: OpenApi.IJsonSchema,
+    referencePrefix: string,
   ): ts.TypeNode => {
     // CONSIDER ANY TYPE CASE
     const union: ts.TypeNode[] = [];
@@ -34,16 +33,16 @@ export namespace AutoViewSchemaProgrammer {
         return writeString(ctx, schema);
       // INSTANCES
       else if (OpenApiTypeChecker.isArray(schema))
-        return writeArray(ctx, schema);
+        return writeArray(ctx, schema, referencePrefix);
       else if (OpenApiTypeChecker.isTuple(schema))
-        return writeTuple(ctx, schema);
+        return writeTuple(ctx, schema, referencePrefix);
       else if (OpenApiTypeChecker.isObject(schema))
-        return writeObject(ctx, schema);
+        return writeObject(ctx, schema, referencePrefix);
       else if (OpenApiTypeChecker.isReference(schema))
-        return writeReference(schema);
+        return writeReference(schema, referencePrefix);
       // UNION
       else if (OpenApiTypeChecker.isOneOf(schema))
-        return writeOneOf(ctx, schema);
+        return writeOneOf(ctx, schema, referencePrefix);
       else if (OpenApiTypeChecker.isNull(schema)) return createNode("null");
       else return TypeFactory.keyword("any");
     })();
@@ -54,12 +53,47 @@ export namespace AutoViewSchemaProgrammer {
     else if (union.length === 1) return union[0]!;
     return ts.factory.createUnionTypeNode(union);
   };
+  export const writeSchemaForInterface = (
+    ctx: IAutoViewProgrammerContext,
+    schema: OpenApi.IJsonSchema,
+    referencePrefix: string,
+  ): ts.TypeElement[] => {
+    if (!OpenApiTypeChecker.isObject(schema)) {
+      return [];
+    }
+
+    const regular = () =>
+      Object.entries(schema.properties ?? []).map(([key, value]) =>
+        writeRegularProperty(
+          ctx,
+          {
+            required: schema.required ?? [],
+            key,
+            value,
+          },
+          referencePrefix,
+        ),
+      );
+    const dynamic = () =>
+      writeDynamicProperty(
+        ctx,
+        schema.additionalProperties as OpenApi.IJsonSchema,
+        referencePrefix,
+      );
+
+    return !!schema.properties?.length &&
+      typeof schema.additionalProperties === "object"
+      ? [...regular(), dynamic()]
+      : typeof schema.additionalProperties === "object"
+        ? [dynamic()]
+        : regular();
+  };
 
   /* -----------------------------------------------------------
     ATOMICS
   ----------------------------------------------------------- */
   const writeConstant = (
-    ctx: IAutoViewProgrammerContext,
+    _ctx: IAutoViewProgrammerContext,
     schema: OpenApi.IJsonSchema.IConstant,
   ): ts.TypeNode => {
     const intersection: ts.TypeNode[] = [
@@ -78,28 +112,28 @@ export namespace AutoViewSchemaProgrammer {
             : ts.factory.createStringLiteral(schema.const),
       ),
     ];
-    writePlugin({
-      importer: ctx.importer,
-      regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IConstant>(),
-      intersection,
-      schema,
-    });
+    // writePlugin({
+    //   importer: ctx.importer,
+    //   regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IConstant>(),
+    //   intersection,
+    //   schema,
+    // });
     return intersection.length === 1
       ? intersection[0]!
       : ts.factory.createIntersectionTypeNode(intersection);
   };
 
   const writeBoolean = (
-    ctx: IAutoViewProgrammerContext,
-    schema: OpenApi.IJsonSchema.IBoolean,
+    _ctx: IAutoViewProgrammerContext,
+    _schema: OpenApi.IJsonSchema.IBoolean,
   ): ts.TypeNode => {
     const intersection: ts.TypeNode[] = [TypeFactory.keyword("boolean")];
-    writePlugin({
-      importer: ctx.importer,
-      regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IBoolean>(),
-      intersection,
-      schema,
-    });
+    // writePlugin({
+    //   importer: ctx.importer,
+    //   regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IBoolean>(),
+    //   intersection,
+    //   schema,
+    // });
     return intersection.length === 1
       ? intersection[0]!
       : ts.factory.createIntersectionTypeNode(intersection);
@@ -146,12 +180,12 @@ export namespace AutoViewSchemaProgrammer {
         );
       if (schema.multipleOf !== undefined)
         intersection.push(ctx.importer.tag("MultipleOf", schema.multipleOf));
-      writePlugin({
-        importer: ctx.importer,
-        regular: typia.misc.literals<keyof OpenApi.IJsonSchema.INumber>(),
-        intersection,
-        schema,
-      });
+      // writePlugin({
+      //   importer: ctx.importer,
+      //   regular: typia.misc.literals<keyof OpenApi.IJsonSchema.INumber>(),
+      //   intersection,
+      //   schema,
+      // });
       return intersection.length === 1
         ? intersection[0]!
         : ts.factory.createIntersectionTypeNode(intersection);
@@ -171,8 +205,19 @@ export namespace AutoViewSchemaProgrammer {
       intersection.push(ctx.importer.tag("MinLength", schema.minLength));
     if (schema.maxLength !== undefined)
       intersection.push(ctx.importer.tag("MaxLength", schema.maxLength));
-    if (schema.pattern !== undefined)
-      intersection.push(ctx.importer.tag("Pattern", schema.pattern));
+    if (schema.pattern !== undefined) {
+      function isValidRegex(pattern: string): boolean {
+        try {
+          new RegExp(pattern);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      if (isValidRegex(schema.pattern))
+        intersection.push(ctx.importer.tag("Pattern", schema.pattern));
+    }
     if (
       schema.format !== undefined &&
       (FormatCheatSheet as Record<string, string>)[schema.format] !== undefined
@@ -182,12 +227,12 @@ export namespace AutoViewSchemaProgrammer {
       intersection.push(
         ctx.importer.tag("ContentMediaType", schema.contentMediaType),
       );
-    writePlugin({
-      importer: ctx.importer,
-      regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IString>(),
-      intersection,
-      schema,
-    });
+    // writePlugin({
+    //   importer: ctx.importer,
+    //   regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IString>(),
+    //   intersection,
+    //   schema,
+    // });
     return intersection.length === 1
       ? intersection[0]!
       : ts.factory.createIntersectionTypeNode(intersection);
@@ -199,9 +244,12 @@ export namespace AutoViewSchemaProgrammer {
   const writeArray = (
     ctx: IAutoViewProgrammerContext,
     schema: OpenApi.IJsonSchema.IArray,
+    referencePrefix: string,
   ): ts.TypeNode => {
     const intersection: ts.TypeNode[] = [
-      ts.factory.createArrayTypeNode(writeSchema(ctx, schema.items)),
+      ts.factory.createArrayTypeNode(
+        writeSchema(ctx, schema.items, referencePrefix),
+      ),
     ];
     if (schema.minItems !== undefined)
       intersection.push(ctx.importer.tag("MinItems", schema.minItems));
@@ -209,12 +257,12 @@ export namespace AutoViewSchemaProgrammer {
       intersection.push(ctx.importer.tag("MaxItems", schema.maxItems));
     if (schema.uniqueItems === true)
       intersection.push(ctx.importer.tag("UniqueItems"));
-    writePlugin({
-      importer: ctx.importer,
-      regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IArray>(),
-      intersection,
-      schema,
-    });
+    // writePlugin({
+    //   importer: ctx.importer,
+    //   regular: typia.misc.literals<keyof OpenApi.IJsonSchema.IArray>(),
+    //   intersection,
+    //   schema,
+    // });
     return intersection.length === 1
       ? intersection[0]!
       : ts.factory.createIntersectionTypeNode(intersection);
@@ -223,14 +271,15 @@ export namespace AutoViewSchemaProgrammer {
   const writeTuple = (
     ctx: IAutoViewProgrammerContext,
     schema: OpenApi.IJsonSchema.ITuple,
+    referencePrefix: string,
   ): ts.TypeNode => {
     const tuple: ts.TypeNode = ts.factory.createTupleTypeNode([
-      ...schema.prefixItems.map((pi) => writeSchema(ctx, pi)),
+      ...schema.prefixItems.map((pi) => writeSchema(ctx, pi, referencePrefix)),
       ...(typeof schema.additionalItems === "object" &&
       schema.additionalItems !== null
         ? [
             ts.factory.createRestTypeNode(
-              writeSchema(ctx, schema.additionalItems),
+              writeSchema(ctx, schema.additionalItems, referencePrefix),
             ),
           ]
         : schema.additionalItems === true
@@ -244,12 +293,12 @@ export namespace AutoViewSchemaProgrammer {
           : []),
     ]);
     const intersection: ts.TypeNode[] = [tuple];
-    writePlugin({
-      importer: ctx.importer,
-      regular: typia.misc.literals<keyof OpenApi.IJsonSchema.ITuple>(),
-      intersection,
-      schema,
-    });
+    // writePlugin({
+    //   importer: ctx.importer,
+    //   regular: typia.misc.literals<keyof OpenApi.IJsonSchema.ITuple>(),
+    //   intersection,
+    //   schema,
+    // });
     return intersection.length === 1
       ? intersection[0]!
       : ts.factory.createIntersectionTypeNode(intersection);
@@ -258,15 +307,20 @@ export namespace AutoViewSchemaProgrammer {
   const writeObject = (
     ctx: IAutoViewProgrammerContext,
     schema: OpenApi.IJsonSchema.IObject,
+    referencePrefix: string,
   ): ts.TypeNode => {
     const regular = () =>
       ts.factory.createTypeLiteralNode(
         Object.entries(schema.properties ?? []).map(([key, value]) =>
-          writeRegularProperty(ctx, {
-            required: schema.required ?? [],
-            key,
-            value,
-          }),
+          writeRegularProperty(
+            ctx,
+            {
+              required: schema.required ?? [],
+              key,
+              value,
+            },
+            referencePrefix,
+          ),
         ),
       );
     const dynamic = () =>
@@ -274,6 +328,7 @@ export namespace AutoViewSchemaProgrammer {
         writeDynamicProperty(
           ctx,
           schema.additionalProperties as OpenApi.IJsonSchema,
+          referencePrefix,
         ),
       ]);
     return !!schema.properties?.length &&
@@ -291,6 +346,7 @@ export namespace AutoViewSchemaProgrammer {
       key: string;
       value: OpenApi.IJsonSchema;
     },
+    referencePrefix: string,
   ) =>
     FilePrinter.description(
       ts.factory.createPropertySignature(
@@ -301,7 +357,7 @@ export namespace AutoViewSchemaProgrammer {
         props.required.includes(props.key)
           ? undefined
           : ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-        writeSchema(ctx, props.value),
+        writeSchema(ctx, props.value, referencePrefix),
       ),
       writeComment(props.value),
     );
@@ -309,6 +365,7 @@ export namespace AutoViewSchemaProgrammer {
   const writeDynamicProperty = (
     ctx: IAutoViewProgrammerContext,
     value: OpenApi.IJsonSchema,
+    referencePrefix: string,
   ) =>
     FilePrinter.description(
       ts.factory.createIndexSignature(
@@ -322,13 +379,14 @@ export namespace AutoViewSchemaProgrammer {
             TypeFactory.keyword("string"),
           ),
         ],
-        writeSchema(ctx, value),
+        writeSchema(ctx, value, referencePrefix),
       ),
       writeComment(value),
     );
 
   const writeReference = (
     schema: OpenApi.IJsonSchema.IReference,
+    referencePrefix: string,
   ): ts.TypeReferenceNode | ts.KeywordTypeNode => {
     if (schema.$ref.startsWith("#/components/schemas") === false)
       return TypeFactory.keyword("any");
@@ -339,7 +397,7 @@ export namespace AutoViewSchemaProgrammer {
       .map(StringUtil.escapeNonVariable)
       .join("");
     if (name === "") return TypeFactory.keyword("any");
-    return ts.factory.createTypeReferenceNode(name);
+    return ts.factory.createTypeReferenceNode(`${referencePrefix}${name}`);
   };
 
   /* -----------------------------------------------------------
@@ -348,9 +406,10 @@ export namespace AutoViewSchemaProgrammer {
   const writeOneOf = (
     ctx: IAutoViewProgrammerContext,
     schema: OpenApi.IJsonSchema.IOneOf,
+    referencePrefix: string,
   ): ts.UnionTypeNode =>
     ts.factory.createUnionTypeNode(
-      schema.oneOf.map((elem) => writeSchema(ctx, elem)),
+      schema.oneOf.map((elem) => writeSchema(ctx, elem, referencePrefix)),
     );
 }
 
@@ -370,19 +429,19 @@ const createNode = (text: string) => ts.factory.createTypeReferenceNode(text);
 //     .split("*/")
 //     .join("*\\/");
 
-const writePlugin = (props: {
-  importer: AutoViewImportProgrammer;
-  regular: string[];
-  intersection: ts.TypeNode[];
-  schema: any;
-}) => {
-  const extra: any = {};
-  for (const [key, value] of Object.entries(props.schema))
-    if (value !== undefined && false === props.regular.includes(key))
-      extra[key] = value;
-  if (Object.keys(extra).length !== 0)
-    props.intersection.push(props.importer.tag("JsonSchemaPlugin", extra));
-};
+// const writePlugin = (props: {
+//   importer: AutoViewImportProgrammer;
+//   regular: string[];
+//   intersection: ts.TypeNode[];
+//   schema: any;
+// }) => {
+//   const extra: any = {};
+//   for (const [key, value] of Object.entries(props.schema))
+//     if (value !== undefined && false === props.regular.includes(key))
+//       extra[key] = value;
+//   if (Object.keys(extra).length !== 0)
+//     props.intersection.push(props.importer.tag("JsonSchemaPlugin", extra));
+// };
 
 const writeComment = (schema: OpenApi.IJsonSchema): string =>
   [

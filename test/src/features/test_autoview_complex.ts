@@ -25,7 +25,7 @@ export async function test_autoview_complex(): Promise<void> {
   console.log("----------------------------");
   console.log("page");
   console.log("----------------------------");
-  console.log(page.transformTsCode);
+  console.log(page.status === "success" ? page.tsxCode : page.reason);
   console.log("----------------------------");
 
   console.log("");
@@ -35,7 +35,7 @@ export async function test_autoview_complex(): Promise<void> {
   console.log("----------------------------");
   console.log("sale");
   console.log("----------------------------");
-  console.log(sale.transformTsCode);
+  console.log(sale.status === "success" ? sale.tsxCode : sale.reason);
   console.log("----------------------------");
 }
 
@@ -76,7 +76,6 @@ const generateForSwagger = async (
       page,
       sale,
     }).map(async ([key, func]) => {
-      const name: string = `transform${key[0].toUpperCase()}${key.slice(1)}`;
       const agent: AutoViewAgent = new AutoViewAgent({
         vendor,
         input: {
@@ -85,13 +84,15 @@ const generateForSwagger = async (
           schema: func.output!,
           $defs: func.parameters.$defs,
         },
-        transformFunctionName: name,
-        experimentalAllInOne: true,
       });
-      const result = await agent.generate();
+      const result = await agent.generate(undefined);
 
       const path = `src/features/test_autoview_complex/${key[0].toUpperCase()}${key.slice(1)}.ts`;
-      await fs.writeFile(path, result.transformTsCode, "utf8");
+      await fs.writeFile(
+        path,
+        result.status === "success" ? result.tsxCode : result.reason,
+        "utf8",
+      );
       console.log(`Generated ${path}`);
 
       return result;

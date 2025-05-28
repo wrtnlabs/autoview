@@ -1,0 +1,8 @@
+
+import Component from "../components/731";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"id":101,"node_id":"NODEID_Env_abc123","name":"Staging Environment (Test)","url":"https://api.example.com/v1/environments/101","html_url":"https://www.example.com/environments/101","created_at":"2025-05-18T08:30:00Z","updated_at":"2025-05-19T12:00:00Z","protection_rules":[{"id":201,"node_id":"NODEID_Protection_201","type":"wait_timer","wait_timer":60},{"id":202,"node_id":"NODEID_Protection_202","type":"deployment_reviewers","prevent_self_review":false,"reviewers":[{"type":"User","reviewer":{"login":"test.user","id":501,"node_id":"NODEID_User_501","avatar_url":"https://avatars.example.com/u/501?v=4","gravatar_id":null,"url":"https://api.example.com/users/test.user","html_url":"https://www.example.com/test.user","followers_url":"https://api.example.com/users/test.user/followers","following_url":"https://api.example.com/users/test.user/following{/other_user}","gists_url":"https://api.example.com/users/test.user/gists{/gist_id}","starred_url":"https://api.example.com/users/test.user/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/test.user/subscriptions","organizations_url":"https://api.example.com/users/test.user/orgs","repos_url":"https://api.example.com/users/test.user/repos","events_url":"https://api.example.com/users/test.user/events{/privacy}","received_events_url":"https://api.example.com/users/test.user/received_events","type":"User","site_admin":false,"starred_at":"2025-05-18T09:00:00Z","user_view_type":"full"}}]}],"deployment_branch_policy":{"protected_branches":false,"custom_branch_policies":true}};
+}

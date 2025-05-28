@@ -1,0 +1,54 @@
+{
+  "schema": {
+    "$ref": "#/$defs/clone-traffic"
+  },
+  "$defs": {
+    "clone-traffic": {
+      "title": "Clone Traffic",
+      "description": "Clone Traffic",
+      "type": "object",
+      "properties": {
+        "count": {
+          "example": 173,
+          "type": "integer"
+        },
+        "uniques": {
+          "example": 128,
+          "type": "integer"
+        },
+        "clones": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/traffic"
+          }
+        }
+      },
+      "required": [
+        "uniques",
+        "count",
+        "clones"
+      ]
+    },
+    "traffic": {
+      "title": "Traffic",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "uniques": {
+          "type": "integer"
+        },
+        "count": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "timestamp",
+        "uniques",
+        "count"
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+
+import Component from "../components/136";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"section_code":"sec_electronics_sample","status":"paused","opened_at":"2025-05-20T09:00:00Z","closed_at":"2025-06-20T23:59:59Z","content":{"title":"Summer Electronics Sale (Sample)","format":"md","body":"## Summer Sale Specials\n\nEnjoy up to 25% off on all sample electronics items! This is a **fictional** sale for UI testing purposes.\n\n- Laptops\n- Tablets\n- Accessories\n\n_All items are imaginary and for demo only._","files":[{"name":"specs","extension":"pdf","url":"https://www.example.com/test/files/specs.pdf"},{"name":"details","extension":null,"url":"https://www.example.com/test/files/details"}],"thumbnails":[{"name":"thumb1","extension":"jpg","url":"https://www.example.com/test/images/thumb1.jpg"}]},"units":[{"options":[{"type":"select","name":"Color (Sample)","variable":true,"candidates":[{"name":"Red"},{"name":"Green"},{"name":"Blue"}]}],"stocks":[{"name":"Red Sample","price":{"nominal":1000,"real":900},"quantity":50,"choices":[{"option_index":0,"candidate_index":0}]},{"name":"Green Sample","price":{"nominal":1000,"real":950},"quantity":30,"choices":[{"option_index":0,"candidate_index":1}]},{"name":"Blue Sample","price":{"nominal":1000,"real":920},"quantity":20,"choices":[{"option_index":0,"candidate_index":2}]}],"name":"Color Options","primary":true,"required":true},{"options":[{"type":"string","name":"Engraving Text (Optional)"}],"stocks":[{"name":"Default","price":{"nominal":50,"real":50},"quantity":9999,"choices":[]}],"name":"Engraving Service","primary":false,"required":false}],"tags":["summer_sale","electronics","sample"],"category_codes":["cat_electronics","cat_gadgets"]};
+}

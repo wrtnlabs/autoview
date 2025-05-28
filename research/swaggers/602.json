@@ -1,0 +1,152 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposActionsRunsArtifacts.GetResponse"
+  },
+  "$defs": {
+    "IApiReposActionsRunsArtifacts.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "artifacts"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "artifacts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/artifact"
+          }
+        }
+      }
+    },
+    "artifact": {
+      "title": "Artifact",
+      "description": "An artifact",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 5,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEwOkNoZWNrU3VpdGU1",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the artifact.",
+          "example": "AdventureWorks.Framework",
+          "type": "string"
+        },
+        "size_in_bytes": {
+          "description": "The size in bytes of the artifact.",
+          "example": 12345,
+          "type": "integer"
+        },
+        "url": {
+          "example": "https://api.github.com/repos/github/hello-world/actions/artifacts/5",
+          "type": "string"
+        },
+        "archive_download_url": {
+          "example": "https://api.github.com/repos/github/hello-world/actions/artifacts/5/zip",
+          "type": "string"
+        },
+        "expired": {
+          "description": "Whether or not the artifact has expired.",
+          "type": "boolean"
+        },
+        "created_at": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expires_at": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "digest": {
+          "description": "The SHA256 digest of the artifact. This field will only be populated on artifacts uploaded with upload-artifact v4 or newer. For older versions, this field will be null.",
+          "example": "sha256:cfc3236bdad15b5898bca8408945c9e19e1917da8704adc20eaa618444290a8c",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workflow_run": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "example": 10,
+                  "type": "integer"
+                },
+                "repository_id": {
+                  "example": 42,
+                  "type": "integer"
+                },
+                "head_repository_id": {
+                  "example": 42,
+                  "type": "integer"
+                },
+                "head_branch": {
+                  "example": "main",
+                  "type": "string"
+                },
+                "head_sha": {
+                  "example": "009b8a3a9ccbb128af87f9b1c0f4c62e8a304f6d",
+                  "type": "string"
+                }
+              },
+              "required": []
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "name",
+        "size_in_bytes",
+        "url",
+        "archive_download_url",
+        "expired",
+        "created_at",
+        "expires_at",
+        "updated_at"
+      ]
+    }
+  }
+}

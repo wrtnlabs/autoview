@@ -1,0 +1,8 @@
+
+import Component from "../components/884";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"url":"https://api.example.com/statuses/101","avatar_url":"https://avatars.example.com/status/101.png","id":101,"node_id":"MDg6U3RhdHVzMTAxU2FtcGxl","state":"success","description":"Sample status check for UI testing purposes.","target_url":"https://ci.example.com/builds/sample-build-01","context":"continuous-integration/sample-ci","created_at":"2025-05-18T12:34:56Z","updated_at":"2025-05-18T12:35:10Z","creator":{"name":"Test User (Sample)","email":"test.user@example.com","login":"sample-user","id":202,"node_id":"MDQ6VXNlcjIwMg==","avatar_url":"https://avatars.example.com/u/202?v=4","gravatar_id":null,"url":"https://api.example.com/users/sample-user","html_url":"https://www.example.com/sample-user","followers_url":"https://api.example.com/users/sample-user/followers","following_url":"https://api.example.com/users/sample-user/following{/other_user}","gists_url":"https://api.example.com/users/sample-user/gists{/gist_id}","starred_url":"https://api.example.com/users/sample-user/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/sample-user/subscriptions","organizations_url":"https://api.example.com/users/sample-user/orgs","repos_url":"https://api.example.com/users/sample-user/repos","events_url":"https://api.example.com/users/sample-user/events{/privacy}","received_events_url":"https://api.example.com/users/sample-user/received_events","type":"User","site_admin":false,"starred_at":"2025-05-18T12:00:00Z","user_view_type":"public"}};
+}

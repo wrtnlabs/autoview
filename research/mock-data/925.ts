@@ -1,0 +1,8 @@
+
+import Component from "../components/925";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"id":101,"node_id":"MDEzOlRlYW0xMDE=","name":"Sample Team Alpha","slug":"sample-team-alpha","description":"A sample team for UI testing purposes.","privacy":"closed","notification_setting":"notifications_enabled","permission":"admin","permissions":{"pull":true,"triage":false,"push":true,"maintain":false,"admin":true},"url":"https://api.example.com/teams/101","html_url":"https://www.example.com/teams/sample-team-alpha","members_url":"https://api.example.com/teams/101/members{/member}","repositories_url":"https://api.example.com/teams/101/repos","parent":null},{"id":202,"node_id":"MDEzOlRlYW0yMDI=","name":"Nested Test Team (Sample)","slug":"nested-test-team-sample","description":null,"permission":"push","url":"https://api.example.com/teams/202","html_url":"https://www.example.com/teams/nested-test-team-sample","members_url":"https://api.example.com/teams/202/members{/member}","repositories_url":"https://api.example.com/teams/202/repos","parent":{"id":100,"node_id":"MDEzOlRlYW0xMDA=","url":"https://api.example.com/teams/100","members_url":"https://api.example.com/teams/100/members{/member}","name":"Parent Team Sample","description":"Dummy parent team for nested test sample.","permission":"maintain","privacy":"secret","notification_setting":"notifications_disabled","html_url":"https://www.example.com/teams/parent-team-sample","repositories_url":"https://api.example.com/teams/100/repos","slug":"parent-team-sample","ldap_dn":"cn=parent-team-sample,ou=teams,dc=example,dc=com"}}];
+}

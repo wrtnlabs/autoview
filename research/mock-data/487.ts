@@ -1,0 +1,8 @@
+
+import Component from "../components/487";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"id":42,"name":"Sample Role (Test)","description":"A sample description for this organization role used in UI testing. All data is fictional.","base_role":"write","source":"Organization","permissions":["members:read","repos:write","deployments:read"],"organization":{"name":"Test User (Sample)","email":"test.user@example.com","login":"testuser-sample","id":2030,"node_id":"NODEID_TestUser_Sample_abc123=","avatar_url":"https://avatars.example.com/u/2030?v=4","gravatar_id":null,"url":"https://api.example.com/users/testuser-sample","html_url":"https://www.example.com/testuser-sample","followers_url":"https://api.example.com/users/testuser-sample/followers","following_url":"https://api.example.com/users/testuser-sample/following{/other_user}","gists_url":"https://api.example.com/users/testuser-sample/gists{/gist_id}","starred_url":"https://api.example.com/users/testuser-sample/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/testuser-sample/subscriptions","organizations_url":"https://api.example.com/users/testuser-sample/orgs","repos_url":"https://api.example.com/users/testuser-sample/repos","events_url":"https://api.example.com/users/testuser-sample/events{/privacy}","received_events_url":"https://api.example.com/users/testuser-sample/received_events","type":"User","site_admin":false,"starred_at":"2025-05-19T10:15:00Z","user_view_type":"public"},"created_at":"2025-05-19T09:00:00Z","updated_at":"2025-05-19T12:00:00Z"};
+}

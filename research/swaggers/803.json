@@ -1,0 +1,17 @@
+{
+  "schema": {
+    "$ref": "#/$defs/language"
+  },
+  "$defs": {
+    "language": {
+      "title": "Language",
+      "description": "Language",
+      "type": "object",
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "properties": {},
+      "required": []
+    }
+  }
+}

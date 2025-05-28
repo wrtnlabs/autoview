@@ -1,0 +1,64 @@
+{
+  "schema": {
+    "$ref": "#/$defs/key"
+  },
+  "$defs": {
+    "IApiUserKeys.PostBody": {
+      "properties": {
+        "title": {
+          "description": "A descriptive name for the new key.",
+          "example": "Personal MacBook Air",
+          "type": "string"
+        },
+        "key": {
+          "description": "The public SSH key to add to your GitHub account.",
+          "type": "string",
+          "pattern": "^ssh-(rsa|dss|ed25519) |^ecdsa-sha2-nistp(256|384|521) "
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "type": "object"
+    },
+    "key": {
+      "title": "Key",
+      "description": "Key",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "read_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "id",
+        "url",
+        "title",
+        "created_at",
+        "verified",
+        "read_only"
+      ]
+    }
+  }
+}

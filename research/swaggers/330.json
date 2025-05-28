@@ -1,0 +1,15 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiEmojis.GetResponse"
+  },
+  "$defs": {
+    "IApiEmojis.GetResponse": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "properties": {},
+      "required": []
+    }
+  }
+}

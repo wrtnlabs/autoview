@@ -1,0 +1,610 @@
+{
+  "schema": {
+    "$ref": "#/$defs/open.marketing.CampaignsView"
+  },
+  "$defs": {
+    "IApiOpenV5MktCampaigns.GetQuery": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "example": 1744704934876,
+          "type": "number",
+          "format": "int64"
+        },
+        "limit": {
+          "description": "Restrict the maximum number of results (range[1, 500])",
+          "maximum": 500,
+          "minimum": 1,
+          "type": "integer",
+          "format": "int32",
+          "default": 25
+        },
+        "states": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "draft"
+              },
+              {
+                "const": "active"
+              },
+              {
+                "const": "stopped"
+              },
+              {
+                "const": "removed"
+              }
+            ]
+          }
+        }
+      },
+      "required": []
+    },
+    "open.marketing.CampaignsView": {
+      "type": "object",
+      "properties": {
+        "next": {
+          "example": 1744704934837,
+          "type": "number",
+          "format": "int64"
+        },
+        "campaigns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marketing.Campaign"
+          }
+        },
+        "msgs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marketing.CampaignMsg"
+          }
+        }
+      },
+      "required": []
+    },
+    "marketing.Campaign": {
+      "description": "### 이벤트 기록\n\n- 마케팅 이벤트 기록에 대한 [문서](https://www.notion.so/channelio/e5d745446b6342198e9e5b004e48d312)",
+      "required": [
+        "advertising",
+        "name",
+        "sendMedium",
+        "sendMode",
+        "triggerEventName",
+        "waitingTime"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "active"
+            },
+            {
+              "const": "stopped"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "triggerEventName": {
+          "type": "string"
+        },
+        "triggerEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "waitingTime": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "filterEventName": {
+          "type": "string"
+        },
+        "filterEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "filterMatch": {
+          "oneOf": [
+            {
+              "const": "positive"
+            },
+            {
+              "const": "negative"
+            }
+          ]
+        },
+        "filterHpc": {
+          "$ref": "#/$defs/marketing.HoldingPropertyConstant"
+        },
+        "goalEventName": {
+          "type": "string"
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "goalHpc": {
+          "$ref": "#/$defs/marketing.HoldingPropertyConstant"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "cooldown": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "sendMode": {
+          "oneOf": [
+            {
+              "const": "always"
+            },
+            {
+              "const": "away"
+            },
+            {
+              "const": "inOperation"
+            },
+            {
+              "const": "customUsingSenderTime"
+            },
+            {
+              "const": "customUsingReceiverTime"
+            },
+            {
+              "const": "custom"
+            }
+          ]
+        },
+        "channelOperationId": {
+          "type": "string"
+        },
+        "sendTimeRanges": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TimeRange"
+          }
+        },
+        "startAt": {
+          "example": 1744704941659,
+          "type": "number",
+          "format": "int64"
+        },
+        "endAt": {
+          "example": 1744704941659,
+          "type": "number",
+          "format": "int64"
+        },
+        "deleteMessageAfterStop": {
+          "type": "boolean"
+        },
+        "draft": {
+          "$ref": "#/$defs/marketing.CampaignDraft"
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string"
+        },
+        "recipeCaseId": {
+          "type": "string"
+        }
+      }
+    },
+    "Expression": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "oneOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "list"
+            },
+            {
+              "const": "listOfNumber"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "string"
+            },
+            {
+              "const": "listOfObject"
+            }
+          ]
+        },
+        "operator": {
+          "$ref": "#/$defs/Operator"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          }
+        },
+        "and": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "or": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        }
+      },
+      "required": []
+    },
+    "Operator": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "marketing.HoldingPropertyConstant": {
+      "required": [
+        "baseEventKey",
+        "baseEventName",
+        "baseEventType"
+      ],
+      "type": "object",
+      "properties": {
+        "baseEventName": {
+          "type": "string"
+        },
+        "baseEventKey": {
+          "type": "string"
+        },
+        "eventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "baseEventType": {
+          "oneOf": [
+            {
+              "const": "triggerEvent"
+            },
+            {
+              "const": "additionalFilter"
+            }
+          ]
+        },
+        "operator": {
+          "$ref": "#/$defs/EventSchema"
+        },
+        "values": {
+          "type": "object",
+          "writeOnly": true,
+          "properties": {},
+          "required": []
+        }
+      }
+    },
+    "EventSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "eventName": {
+          "type": "string",
+          "readOnly": true
+        },
+        "key": {
+          "type": "string"
+        },
+        "parentKey": {
+          "type": "string"
+        },
+        "type": {
+          "oneOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "list"
+            },
+            {
+              "const": "listOfNumber"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "string"
+            },
+            {
+              "const": "listOfObject"
+            }
+          ]
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "icon": {
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "TimeRange": {
+      "required": [
+        "dayOfWeeks",
+        "from",
+        "to"
+      ],
+      "type": "object",
+      "properties": {
+        "dayOfWeeks": {
+          "uniqueItems": true,
+          "type": "array",
+          "items": {
+            "oneOf": [
+              {
+                "const": "mon"
+              },
+              {
+                "const": "tue"
+              },
+              {
+                "const": "wed"
+              },
+              {
+                "const": "thu"
+              },
+              {
+                "const": "fri"
+              },
+              {
+                "const": "sat"
+              },
+              {
+                "const": "sun"
+              }
+            ]
+          }
+        },
+        "from": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
+        },
+        "to": {
+          "maximum": 1440,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "marketing.CampaignDraft": {
+      "required": [
+        "campaign",
+        "msgs"
+      ],
+      "type": "object",
+      "properties": {
+        "campaign": {
+          "$ref": "#/$defs/marketing.Campaign"
+        },
+        "msgs": {
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/marketing.CampaignMsg"
+          }
+        }
+      }
+    },
+    "marketing.CampaignMsg": {
+      "required": [
+        "id",
+        "name",
+        "sendMedium",
+        "settings"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "campaignId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "settings": {
+          "$ref": "#/$defs/marketing.SendMediumSettings"
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        }
+      }
+    },
+    "marketing.SendMediumSettings": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    }
+  }
+}

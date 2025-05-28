@@ -1,0 +1,8 @@
+
+import Component from "../components/486";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"total_count":2,"roles":[{"id":101,"name":"Contributor (Sample Role)","description":"Allows write access to repositories and pull requests. (Test)","base_role":"write","source":"Organization","permissions":["repo:read","issues:write","pull_requests:write"],"organization":{"name":"Test Organization User","email":"test.user@example.com","login":"test-org-user","id":1001,"node_id":"NODEID_OrgUser_1001abcXYZ=","avatar_url":"https://avatars.example.com/u/1001?v=4","gravatar_id":null,"url":"https://api.example.com/users/test-org-user","html_url":"https://github.com/test-org-user","followers_url":"https://api.example.com/users/test-org-user/followers","following_url":"https://api.example.com/users/test-org-user/following","gists_url":"https://api.example.com/users/test-org-user/gists","starred_url":"https://api.example.com/users/test-org-user/starred","subscriptions_url":"https://api.example.com/users/test-org-user/subscriptions","organizations_url":"https://api.example.com/users/test-org-user/orgs","repos_url":"https://api.example.com/users/test-org-user/repos","events_url":"https://api.example.com/users/test-org-user/events","received_events_url":"https://api.example.com/users/test-org-user/received_events","type":"User","site_admin":false,"starred_at":"2025-05-12T16:00:00Z","user_view_type":"default"},"created_at":"2025-05-01T09:15:00Z","updated_at":"2025-05-10T12:00:00Z"},{"id":102,"name":"Viewer","description":null,"base_role":"read","source":"Predefined","permissions":["repo:read"],"organization":null,"created_at":"2025-04-20T08:00:00Z","updated_at":"2025-05-15T14:30:00Z"}]};
+}

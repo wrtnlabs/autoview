@@ -1,0 +1,31 @@
+{
+  "schema": {
+    "$ref": "#/$defs/empty-object"
+  },
+  "$defs": {
+    "IApiReposEnvironmentsVariables.PostBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the variable.",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value of the variable.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "value"
+      ]
+    },
+    "empty-object": {
+      "title": "Empty Object",
+      "description": "An object without any properties.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+}

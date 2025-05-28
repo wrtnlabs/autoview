@@ -1,0 +1,8 @@
+
+import Component from "../components/35";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"pagination":{"current":1,"limit":20,"records":1,"pages":1},"data":[{"price_range":{"lowest":{"nominal":499.99,"real":449.99},"highest":{"nominal":699.99,"real":649.99}},"id":"sale-sample-001","snapshot_id":"snapshot-sample-001","latest":true,"content":{"id":"123e4567-e89b-12d3-a456-426614174000","title":"Sample Sale Snapshot (Test)","thumbnails":[{"id":"attach-001","created_at":"2025-05-19T14:30:00Z","name":"image1","extension":"png","url":"https://www.example.com/files/sample-image1.png"},{"id":"attach-002","created_at":"2025-05-18T09:15:00Z","name":"","extension":null,"url":"https://www.example.com/files/README"}]},"categories":[{"parent":null,"id":"123e4567-e89b-12d3-a456-426614174001","code":"ELEC","parent_id":null,"name":"Electronics","created_at":"2025-05-10T08:00:00Z"},{"parent":{"parent":null,"id":"123e4567-e89b-12d3-a456-426614174001","code":"ELEC","parent_id":null,"name":"Electronics","created_at":"2025-05-10T08:00:00Z"},"id":"123e4567-e89b-12d3-a456-426614174002","code":"MOB","parent_id":"123e4567-e89b-12d3-a456-426614174001","name":"Mobile Devices","created_at":"2025-05-11T11:20:00Z"}],"tags":["electronics_test","mobile(sample)","sale_dummy"],"units":[{"price_range":{"lowest":{"nominal":499.99,"real":449.99},"highest":{"nominal":499.99,"real":449.99}},"id":"unit-sample-001","name":"Smartphone Model X (Test)","primary":true,"required":true},{"price_range":{"lowest":{"nominal":59.99,"real":49.99},"highest":{"nominal":59.99,"real":49.99}},"id":"unit-sample-002","name":"Protective Case (Sample)","primary":false,"required":false}]}]};
+}

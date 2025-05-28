@@ -1,0 +1,99 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/issue-type"
+    }
+  },
+  "$defs": {
+    "issue-type": {
+      "title": "Issue Type",
+      "description": "The type of issue.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "The unique identifier of the issue type.",
+              "type": "integer"
+            },
+            "node_id": {
+              "description": "The node identifier of the issue type.",
+              "type": "string"
+            },
+            "name": {
+              "description": "The name of the issue type.",
+              "type": "string"
+            },
+            "description": {
+              "description": "The description of the issue type.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "color": {
+              "description": "The color of the issue type.",
+              "oneOf": [
+                {
+                  "const": "gray"
+                },
+                {
+                  "const": "blue"
+                },
+                {
+                  "const": "green"
+                },
+                {
+                  "const": "yellow"
+                },
+                {
+                  "const": "orange"
+                },
+                {
+                  "const": "red"
+                },
+                {
+                  "const": "pink"
+                },
+                {
+                  "const": "purple"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "created_at": {
+              "description": "The time the issue type created.",
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "description": "The time the issue type last updated.",
+              "type": "string",
+              "format": "date-time"
+            },
+            "is_enabled": {
+              "description": "The enabled state of the issue type.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "name",
+            "description"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

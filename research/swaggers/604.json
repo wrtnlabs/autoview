@@ -1,0 +1,347 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiReposActionsRunsAttemptsJobs.GetResponse"
+  },
+  "$defs": {
+    "IApiReposActionsRunsAttemptsJobs.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "jobs"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "jobs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/job"
+          }
+        }
+      }
+    },
+    "job": {
+      "title": "Job",
+      "description": "Information of a job execution in a workflow run",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The id of the job.",
+          "example": 21,
+          "type": "integer"
+        },
+        "run_id": {
+          "description": "The id of the associated workflow run.",
+          "example": 5,
+          "type": "integer"
+        },
+        "run_url": {
+          "example": "https://api.github.com/repos/github/hello-world/actions/runs/5",
+          "type": "string"
+        },
+        "run_attempt": {
+          "description": "Attempt number of the associated workflow run, 1 for first attempt and higher if the workflow was re-run.",
+          "example": 1,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDg6Q2hlY2tSdW40",
+          "type": "string"
+        },
+        "head_sha": {
+          "description": "The SHA of the commit that is being run.",
+          "example": "009b8a3a9ccbb128af87f9b1c0f4c62e8a304f6d",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://api.github.com/repos/github/hello-world/actions/jobs/21",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/github/hello-world/runs/4",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "description": "The phase of the lifecycle that the job is currently in.",
+          "example": "queued",
+          "oneOf": [
+            {
+              "const": "queued"
+            },
+            {
+              "const": "in_progress"
+            },
+            {
+              "const": "completed"
+            },
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "requested"
+            },
+            {
+              "const": "pending"
+            }
+          ]
+        },
+        "conclusion": {
+          "description": "The outcome of the job.",
+          "example": "success",
+          "oneOf": [
+            {
+              "const": "success"
+            },
+            {
+              "const": "failure"
+            },
+            {
+              "const": "neutral"
+            },
+            {
+              "const": "cancelled"
+            },
+            {
+              "const": "skipped"
+            },
+            {
+              "const": "timed_out"
+            },
+            {
+              "const": "action_required"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "description": "The time that the job created, in ISO 8601 format.",
+          "example": "2019-08-08T08:00:00-07:00",
+          "format": "date-time",
+          "type": "string"
+        },
+        "started_at": {
+          "description": "The time that the job started, in ISO 8601 format.",
+          "example": "2019-08-08T08:00:00-07:00",
+          "format": "date-time",
+          "type": "string"
+        },
+        "completed_at": {
+          "description": "The time that the job finished, in ISO 8601 format.",
+          "example": "2019-08-08T08:00:00-07:00",
+          "oneOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "name": {
+          "description": "The name of the job.",
+          "example": "test-coverage",
+          "type": "string"
+        },
+        "steps": {
+          "description": "Steps in this job.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name",
+              "status",
+              "conclusion",
+              "number"
+            ],
+            "properties": {
+              "status": {
+                "description": "The phase of the lifecycle that the job is currently in.",
+                "example": "queued",
+                "oneOf": [
+                  {
+                    "const": "queued"
+                  },
+                  {
+                    "const": "in_progress"
+                  },
+                  {
+                    "const": "completed"
+                  }
+                ]
+              },
+              "conclusion": {
+                "description": "The outcome of the job.",
+                "example": "success",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "name": {
+                "description": "The name of the job.",
+                "example": "test-coverage",
+                "type": "string"
+              },
+              "number": {
+                "example": 1,
+                "type": "integer"
+              },
+              "started_at": {
+                "description": "The time that the step started, in ISO 8601 format.",
+                "example": "2019-08-08T08:00:00-07:00",
+                "oneOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completed_at": {
+                "description": "The time that the job finished, in ISO 8601 format.",
+                "example": "2019-08-08T08:00:00-07:00",
+                "oneOf": [
+                  {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "check_run_url": {
+          "example": "https://api.github.com/repos/github/hello-world/check-runs/4",
+          "type": "string"
+        },
+        "labels": {
+          "description": "Labels for the workflow job. Specified by the \"runs_on\" attribute in the action's workflow file.",
+          "example": [
+            "self-hosted",
+            "foo",
+            "bar"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "runner_id": {
+          "description": "The ID of the runner to which this job has been assigned. (If a runner hasn't yet been assigned, this will be null.)",
+          "example": 1,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runner_name": {
+          "description": "The name of the runner to which this job has been assigned. (If a runner hasn't yet been assigned, this will be null.)",
+          "example": "my runner",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runner_group_id": {
+          "description": "The ID of the runner group to which this job has been assigned. (If a runner hasn't yet been assigned, this will be null.)",
+          "example": 2,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "runner_group_name": {
+          "description": "The name of the runner group to which this job has been assigned. (If a runner hasn't yet been assigned, this will be null.)",
+          "example": "my runner group",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workflow_name": {
+          "description": "The name of the workflow.",
+          "example": "Build",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "head_branch": {
+          "description": "The name of the current branch.",
+          "example": "main",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "run_id",
+        "run_url",
+        "head_sha",
+        "workflow_name",
+        "head_branch",
+        "name",
+        "url",
+        "html_url",
+        "status",
+        "conclusion",
+        "started_at",
+        "completed_at",
+        "check_run_url",
+        "labels",
+        "runner_id",
+        "runner_name",
+        "runner_group_id",
+        "runner_group_name",
+        "created_at"
+      ]
+    }
+  }
+}

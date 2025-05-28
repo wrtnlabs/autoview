@@ -1,0 +1,8 @@
+
+import Component from "../components/93";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"secret":false,"type":"question","customer":{"type":"customer","member":{"citizen":{"id":"citi_4001","created_at":"2024-11-10T08:25:00Z","mobile":"+1-555-123-4567","name":"Sample User (Test)"},"seller":null,"administrator":null,"id":"m_2001","nickname":"test_user_123 (Test)","emails":[{"id":"me_3001","value":"test.user@example.com","created_at":"2024-11-10T08:30:00Z"}],"created_at":"2024-11-10T08:30:00Z"},"citizen":{"id":"cit_4002","created_at":"2025-01-15T11:20:00Z","mobile":"+1-555-765-4321","name":"Another Sample (Test)"},"id":"cust_5001","channel":{"id":"ch_6001","created_at":"2024-01-01T00:00:00Z","code":"WEB_TEST","name":"Web Channel (Test)"},"external_user":null,"href":"https://www.example.com/products/1234?ref=test","referrer":"https://www.example.com/home","ip":"198.51.100.23","created_at":"2025-05-18T09:14:52Z"},"answer":{"seller":{"id":"sell_7001","created_at":"2023-12-01T10:00:00Z"},"id":"ans_8001","snapshots":[{"id":"snap_9001","created_at":"2025-05-19T10:00:00Z","format":"md","title":"Answer to your question (Test)","body":"Hello, this is a sample response to your question. Let us know if you need more details. (Test Data)","files":[{"name":"manual","extension":"pdf","url":"https://www.example.com/files/sample-manual.pdf"}]}],"created_at":"2025-05-19T10:00:00Z"},"read_by_seller":true,"id":"qs_1001","snapshots":[{"id":"snap_q_10001","created_at":"2025-05-18T09:15:00Z","format":"txt","title":"Question about product size (Test)","body":"Could you tell me the dimensions of this product? (Test Data)","files":[]}],"created_at":"2025-05-18T09:15:00Z"};
+}

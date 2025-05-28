@@ -1,0 +1,49 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/key"
+    }
+  },
+  "$defs": {
+    "key": {
+      "title": "Key",
+      "description": "Key",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "url": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "read_only": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "id",
+        "url",
+        "title",
+        "created_at",
+        "verified",
+        "read_only"
+      ]
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "schema": {
+    "$ref": "#/$defs/repository-subscription"
+  },
+  "$defs": {
+    "IApiReposSubscription.PutBody": {
+      "type": "object",
+      "properties": {
+        "subscribed": {
+          "description": "Determines if notifications should be received from this repository.",
+          "type": "boolean"
+        },
+        "ignored": {
+          "description": "Determines if all notifications should be blocked from this repository.",
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "repository-subscription": {
+      "title": "Repository Invitation",
+      "description": "Repository invitations let you manage who you collaborate with.",
+      "type": "object",
+      "properties": {
+        "subscribed": {
+          "description": "Determines if notifications should be received from this repository.",
+          "example": true,
+          "type": "boolean"
+        },
+        "ignored": {
+          "description": "Determines if all notifications should be blocked from this repository.",
+          "type": "boolean"
+        },
+        "reason": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "created_at": {
+          "example": "2012-10-06T21:34:12Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "url": {
+          "example": "https://api.github.com/repos/octocat/example/subscription",
+          "type": "string",
+          "format": "uri"
+        },
+        "repository_url": {
+          "example": "https://api.github.com/repos/octocat/example",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "created_at",
+        "ignored",
+        "reason",
+        "subscribed",
+        "url",
+        "repository_url"
+      ]
+    }
+  }
+}

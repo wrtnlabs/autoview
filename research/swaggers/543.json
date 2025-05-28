@@ -1,0 +1,303 @@
+{
+  "schema": {
+    "$ref": "#/$defs/team-discussion-comment"
+  },
+  "$defs": {
+    "IApiOrgsTeamsDiscussionsComments.PatchBody": {
+      "type": "object",
+      "properties": {
+        "body": {
+          "description": "The discussion comment's body text.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "body"
+      ]
+    },
+    "team-discussion-comment": {
+      "title": "Team Discussion Comment",
+      "description": "A reply to a discussion within a team.",
+      "type": "object",
+      "properties": {
+        "author": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "body": {
+          "description": "The main text of the comment.",
+          "example": "I agree with this suggestion.",
+          "type": "string"
+        },
+        "body_html": {
+          "example": "<p>Do you like apples?</p>",
+          "type": "string"
+        },
+        "body_version": {
+          "description": "The current version of the body content. If provided, this update operation will be rejected if the given version does not match the latest version on the server.",
+          "example": "0307116bbf7ced493b8d8a346c650b71",
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2018-01-15T23:53:58Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_edited_at": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "discussion_url": {
+          "example": "https://api.github.com/organizations/1/team/2403582/discussions/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/orgs/github/teams/justice-league/discussions/1/comments/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "node_id": {
+          "example": "MDIxOlRlYW1EaXNjdXNzaW9uQ29tbWVudDE=",
+          "type": "string"
+        },
+        "number": {
+          "description": "The unique sequence number of a team discussion comment.",
+          "example": 42,
+          "type": "integer"
+        },
+        "updated_at": {
+          "example": "2018-01-15T23:53:58Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "url": {
+          "example": "https://api.github.com/organizations/1/team/2403582/discussions/1/comments/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "reactions": {
+          "$ref": "#/$defs/reaction-rollup"
+        }
+      },
+      "required": [
+        "author",
+        "body",
+        "body_html",
+        "body_version",
+        "created_at",
+        "last_edited_at",
+        "discussion_url",
+        "html_url",
+        "node_id",
+        "number",
+        "updated_at",
+        "url"
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reaction-rollup": {
+      "title": "Reaction Rollup",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "total_count": {
+          "type": "integer"
+        },
+        "+1": {
+          "type": "integer"
+        },
+        "-1": {
+          "type": "integer"
+        },
+        "laugh": {
+          "type": "integer"
+        },
+        "confused": {
+          "type": "integer"
+        },
+        "heart": {
+          "type": "integer"
+        },
+        "hooray": {
+          "type": "integer"
+        },
+        "eyes": {
+          "type": "integer"
+        },
+        "rocket": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "url",
+        "total_count",
+        "+1",
+        "-1",
+        "laugh",
+        "confused",
+        "heart",
+        "hooray",
+        "eyes",
+        "rocket"
+      ]
+    }
+  }
+}

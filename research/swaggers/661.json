@@ -1,0 +1,110 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/check-annotation"
+    }
+  },
+  "$defs": {
+    "check-annotation": {
+      "title": "Check Annotation",
+      "description": "Check Annotation",
+      "type": "object",
+      "properties": {
+        "path": {
+          "example": "README.md",
+          "type": "string"
+        },
+        "start_line": {
+          "example": 2,
+          "type": "integer"
+        },
+        "end_line": {
+          "example": 2,
+          "type": "integer"
+        },
+        "start_column": {
+          "example": 5,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_column": {
+          "example": 10,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "annotation_level": {
+          "example": "warning",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "title": {
+          "example": "Spell Checker",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "message": {
+          "example": "Check your spelling for 'banaas'.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "raw_details": {
+          "example": "Do you mean 'bananas' or 'banana'?",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "blob_href": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "blob_href",
+        "start_line",
+        "end_line",
+        "start_column",
+        "end_column",
+        "annotation_level",
+        "title",
+        "message",
+        "raw_details"
+      ]
+    }
+  }
+}

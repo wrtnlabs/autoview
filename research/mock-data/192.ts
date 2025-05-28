@@ -1,0 +1,8 @@
+
+import Component from "../components/192";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"managers":[{"id":"mgr_001","channelId":"channel_123","accountId":"acc_789","name":"Jane Manager (Test)","description":"Sample manager description for UI testing purposes.","showDescriptionToFront":true,"nameDescI18nMap":{"en-US":{"name":"Jane Manager","description":"Sample description in English."},"fr":{"name":"Gestionnaire Jane","description":"Description d'exemple en français."}},"profile":{"settings":{}},"email":"jane.manager@example.com","showEmailToFront":false,"mobileNumber":"+15551234567","showMobileNumberToFront":false,"role":"owner","removed":false,"createdAt":1620000000000,"displayAsChannel":false,"defaultGroupWatch":"all","defaultDirectChatWatch":"info","defaultUserChatWatch":"none","operatorScore":10.5,"touchScore":5,"avatar":{"bucket":"test-bucket-sample","key":"avatars/jane_manager.png","width":128,"height":128},"operatorEmailReminder":true,"operator":true,"statusEmoji":":wave:","statusText":"Working remotely (Test)","statusClearAt":1690000000000,"managerId":"manager-legacy-v4-mgr_001","avatarUrl":"https://www.example.com/avatars/jane_manager.png","emailForFront":"jane.manager.front@example.com","mobileNumberForFront":"+15557654321"},{"name":"Sample Member (Test)","email":"sample.member@example.org","role":"member","createdAt":1625000000000}],"onlines":[{"channelId":"channel_123","personType":"manager","personId":"mgr_001","id":"online_001"},{"channelId":"channel_123","personType":"member","personId":"member_001","id":"online_002"}],"next":"cursor_abcdef123456"};
+}

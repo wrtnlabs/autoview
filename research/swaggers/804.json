@@ -1,0 +1,186 @@
+{
+  "schema": {
+    "$ref": "#/$defs/license-content"
+  },
+  "$defs": {
+    "license-content": {
+      "title": "License Content",
+      "description": "License Content",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "sha": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "git_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "download_url": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "encoding": {
+          "type": "string"
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "git": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "html": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "self": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "git",
+            "html",
+            "self"
+          ]
+        },
+        "license": {
+          "$ref": "#/$defs/nullable-license-simple"
+        }
+      },
+      "required": [
+        "_links",
+        "git_url",
+        "html_url",
+        "download_url",
+        "name",
+        "path",
+        "sha",
+        "size",
+        "type",
+        "url",
+        "content",
+        "encoding",
+        "license"
+      ]
+    },
+    "nullable-license-simple": {
+      "title": "License Simple",
+      "description": "License Simple",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "key": {
+              "example": "mit",
+              "type": "string"
+            },
+            "name": {
+              "example": "MIT License",
+              "type": "string"
+            },
+            "url": {
+              "example": "https://api.github.com/licenses/mit",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "spdx_id": {
+              "example": "MIT",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "node_id": {
+              "example": "MDc6TGljZW5zZW1pdA==",
+              "type": "string"
+            },
+            "html_url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "key",
+            "name",
+            "url",
+            "spdx_id",
+            "node_id"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,398 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4OneTimeMsgView"
+  },
+  "$defs": {
+    "legacy.open.v4.LegacyV4OneTimeMsgView": {
+      "type": "object",
+      "properties": {
+        "oneTimeMsg": {
+          "$ref": "#/$defs/legacy.v4.marketing.LegacyV4OneTimeMsg"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.marketing.LegacyV4OneTimeMsg": {
+      "required": [
+        "advertising",
+        "enableSupportBot",
+        "name",
+        "state"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "sent"
+            },
+            {
+              "const": "canceled"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "sendMode": {
+          "oneOf": [
+            {
+              "const": "immediately"
+            },
+            {
+              "const": "reservedWithSenderTime"
+            },
+            {
+              "const": "reservedWithReceiverTime"
+            }
+          ]
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "settings": {
+          "$ref": "#/$defs/marketing.SendMediumSettings"
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventName": {
+          "type": "string"
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "enableSupportBot": {
+          "type": "boolean"
+        },
+        "followingSupportBotId": {
+          "type": "string"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "startAt": {
+          "example": 1744704933151,
+          "type": "number",
+          "format": "int64"
+        },
+        "draft": {
+          "$ref": "#/$defs/marketing.OneTimeMsgDraft"
+        },
+        "createdAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704933155,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        }
+      }
+    },
+    "marketing.SendMediumSettings": {
+      "required": [
+        "type"
+      ],
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        }
+      },
+      "discriminator": {
+        "propertyName": "type"
+      }
+    },
+    "Expression": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "type": {
+          "oneOf": [
+            {
+              "const": "boolean"
+            },
+            {
+              "const": "date"
+            },
+            {
+              "const": "datetime"
+            },
+            {
+              "const": "list"
+            },
+            {
+              "const": "listOfNumber"
+            },
+            {
+              "const": "number"
+            },
+            {
+              "const": "string"
+            },
+            {
+              "const": "listOfObject"
+            }
+          ]
+        },
+        "operator": {
+          "$ref": "#/$defs/Operator"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {},
+            "required": []
+          }
+        },
+        "and": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        },
+        "or": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Expression"
+          }
+        }
+      },
+      "required": []
+    },
+    "Operator": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "marketing.OneTimeMsgDraft": {
+      "required": [
+        "oneTimeMsg"
+      ],
+      "type": "object",
+      "properties": {
+        "oneTimeMsg": {
+          "$ref": "#/$defs/marketing.OneTimeMsg"
+        }
+      }
+    },
+    "marketing.OneTimeMsg": {
+      "required": [
+        "advertising",
+        "name",
+        "state"
+      ],
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "type": "string"
+        },
+        "state": {
+          "oneOf": [
+            {
+              "const": "draft"
+            },
+            {
+              "const": "waiting"
+            },
+            {
+              "const": "sent"
+            },
+            {
+              "const": "canceled"
+            },
+            {
+              "const": "removed"
+            }
+          ]
+        },
+        "sendMode": {
+          "oneOf": [
+            {
+              "const": "immediately"
+            },
+            {
+              "const": "reservedWithSenderTime"
+            },
+            {
+              "const": "reservedWithReceiverTime"
+            }
+          ]
+        },
+        "channelOperationId": {
+          "type": "string"
+        },
+        "sendMedium": {
+          "oneOf": [
+            {
+              "const": "appAlimtalk"
+            },
+            {
+              "const": "appLine"
+            },
+            {
+              "const": "email"
+            },
+            {
+              "const": "inAppChat"
+            },
+            {
+              "const": "xms"
+            }
+          ]
+        },
+        "settings": {
+          "$ref": "#/$defs/marketing.SendMediumSettings"
+        },
+        "userQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventName": {
+          "type": "string"
+        },
+        "goalEventQuery": {
+          "$ref": "#/$defs/Expression"
+        },
+        "goalEventDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        },
+        "advertising": {
+          "type": "boolean"
+        },
+        "sendToOfflineXms": {
+          "type": "boolean"
+        },
+        "sendToOfflineEmail": {
+          "type": "boolean"
+        },
+        "startAt": {
+          "example": 1744704941659,
+          "type": "number",
+          "format": "int64"
+        },
+        "localStartAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "draft": {
+          "$ref": "#/$defs/marketing.OneTimeMsgDraft"
+        },
+        "createdAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941654,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "sent": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "view": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "goal": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "click": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "userChatExpireDuration": {
+          "example": "PT23H50M",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

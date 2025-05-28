@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ESNext",
+    "jsx": "preserve",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "downlevelIteration": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": ".."
+  },
+  "include": ["../components/**/*.tsx", "../mock-data/**/*.ts"],
+  "exclude": ["node_modules"]
+}

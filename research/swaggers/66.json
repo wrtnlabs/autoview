@@ -1,0 +1,63 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingDepositChargePublish"
+  },
+  "$defs": {
+    "IShoppingDepositChargePublish.ICreate": {
+      "type": "object",
+      "properties": {
+        "vendor": {
+          "type": "string"
+        },
+        "uid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "vendor",
+        "uid"
+      ]
+    },
+    "IShoppingDepositChargePublish": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "paid_at": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        },
+        "cancelled_at": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "date-time"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "paid_at",
+        "cancelled_at"
+      ]
+    }
+  }
+}

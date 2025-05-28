@@ -1,0 +1,8 @@
+
+import Component from "../components/139";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"writer":{"type":"customer","member":{"citizen":{"id":"citizen-11111","created_at":"2025-05-01T09:15:00Z","mobile":"+1-555-000-1234","name":"Test User (Sample)"},"seller":null,"administrator":null,"id":"member-54321","nickname":"testuser_01 (Test)","emails":[{"id":"email-1001","value":"test.user@example.com","created_at":"2025-05-01T09:05:00Z"},{"id":"email-1002","value":"sample.user+test@example.org","created_at":"2025-05-02T10:00:00Z"}],"created_at":"2025-05-01T09:00:00Z"},"citizen":{"id":"citizen-11111","created_at":"2025-05-01T09:15:00Z","mobile":"+1-555-000-1234","name":"Test User (Sample)"},"id":"customer-12345","channel":{"id":"channel-abc-001","created_at":"2025-01-15T12:00:00Z","code":"web-store-test","name":"Web Store (Test Channel)"},"external_user":null,"href":"https://www.example.com/shop-inquiry?id=12345","referrer":"https://www.example.org/referrer-page","ip":"192.0.2.123","created_at":"2025-05-19T10:00:00Z"},"id":"comment-98765-uuid","parent_id":null,"snapshots":[{"id":"3fa85f64-5717-4562-b3fc-2c963f66afa6","created_at":"2025-05-19T10:15:00Z","format":"md","body":"Initial test comment for sale inquiry. (Sample)","files":[{"name":"attachment1","extension":"txt","url":"https://www.example.com/files/sample.txt"}]},{"id":"4b45f862-8f77-4c99-a34b-1c2d3e4f5678","created_at":"2025-05-19T10:45:00Z","format":"md","body":"Edited test comment content for UI testing. (Sample update)","files":[]}],"created_at":"2025-05-19T11:00:00Z"};
+}

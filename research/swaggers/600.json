@@ -1,0 +1,232 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/environment-approvals"
+    }
+  },
+  "$defs": {
+    "environment-approvals": {
+      "title": "Environment Approval",
+      "description": "An entry in the reviews log for environment deployments",
+      "type": "object",
+      "properties": {
+        "environments": {
+          "description": "The list of environments that were approved or rejected",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "description": "The id of the environment.",
+                "example": 56780428,
+                "type": "integer"
+              },
+              "node_id": {
+                "example": "MDExOkVudmlyb25tZW50NTY3ODA0Mjg=",
+                "type": "string"
+              },
+              "name": {
+                "description": "The name of the environment.",
+                "example": "staging",
+                "type": "string"
+              },
+              "url": {
+                "example": "https://api.github.com/repos/github/hello-world/environments/staging",
+                "type": "string"
+              },
+              "html_url": {
+                "example": "https://github.com/github/hello-world/deployments/activity_log?environments_filter=staging",
+                "type": "string"
+              },
+              "created_at": {
+                "description": "The time that the environment was created, in ISO 8601 format.",
+                "example": "2020-11-23T22:00:40Z",
+                "format": "date-time",
+                "type": "string"
+              },
+              "updated_at": {
+                "description": "The time that the environment was last updated, in ISO 8601 format.",
+                "example": "2020-11-23T22:00:40Z",
+                "format": "date-time",
+                "type": "string"
+              }
+            },
+            "required": []
+          }
+        },
+        "state": {
+          "description": "Whether deployment to the environment(s) was approved or rejected or pending (with comments)",
+          "example": "approved",
+          "oneOf": [
+            {
+              "const": "approved"
+            },
+            {
+              "const": "rejected"
+            },
+            {
+              "const": "pending"
+            }
+          ]
+        },
+        "user": {
+          "$ref": "#/$defs/simple-user"
+        },
+        "comment": {
+          "description": "The comment submitted with the deployment review",
+          "example": "Ship it!",
+          "type": "string"
+        }
+      },
+      "required": [
+        "environments",
+        "state",
+        "user",
+        "comment"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    }
+  }
+}

@@ -1,0 +1,8 @@
+
+import Component from "../components/241";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"chat":{"active":true,"createdAt":1700000000000,"channelId":"channel-test-001","id":"chat001","managerIds":["mgr1","mgr2"]},"message":{"chatKey":"chat001","id":"msg001","channelId":"channel-test-001","chatType":"group","chatId":"chat001","personType":"manager","personId":"mgr1","createdAt":1700000000000,"plainText":"This is a sample message for UI testing purposes.","blocks":[{"type":"text","value":"Sample text block for testing UI layout."}],"buttons":[{"title":"Approve (Test)","action":{"type":"approveAction","attributes":{}}}],"files":[{"id":"file001","name":"document_test.pdf","size":1024,"bucket":"bucket-sample","key":"key-sample-document"}],"options":["private"],"state":"sent"},"thread":{"id":"thread001","managerIds":["mgr1"],"repliedManagerIds":["mgr2"],"replyCount":2,"chatType":"group","chatId":"chat001","rootMessageId":"msg000"},"bot":{"color":"#123456","createdAt":1700000000000,"avatarUrl":"https://www.example.com/avatar.png","ai":true,"name":"Sample Bot (Test)","channelId":"channel-test-001","id":"bot001","description":"This is a sample bot for UI testing.","nameDescI18nMap":{"en":{"name":"Sample Bot","description":"Test Bot Description"}}},"managers":[{"id":"mgr1","channelId":"channel-test-001","accountId":"acct1","name":"Alice Manager (Test)","email":"alice.manager@example.com","showEmailToFront":true,"profile":{"role":{}},"mobileNumber":"+18004424000"},{"id":"mgr2","channelId":"channel-test-002","accountId":"acct2","name":"Bob Supervisor (Test)","showEmailToFront":false,"mobileNumber":"+18004424000"}]};
+}

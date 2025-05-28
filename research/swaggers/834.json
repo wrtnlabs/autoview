@@ -1,0 +1,97 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/diff-entry"
+    }
+  },
+  "$defs": {
+    "diff-entry": {
+      "title": "Diff Entry",
+      "description": "Diff Entry",
+      "type": "object",
+      "properties": {
+        "sha": {
+          "example": "bbcd538c8e72b8c175046e27cc8f907076331401",
+          "type": "string"
+        },
+        "filename": {
+          "example": "file1.txt",
+          "type": "string"
+        },
+        "status": {
+          "example": "added",
+          "oneOf": [
+            {
+              "const": "added"
+            },
+            {
+              "const": "removed"
+            },
+            {
+              "const": "modified"
+            },
+            {
+              "const": "renamed"
+            },
+            {
+              "const": "copied"
+            },
+            {
+              "const": "changed"
+            },
+            {
+              "const": "unchanged"
+            }
+          ]
+        },
+        "additions": {
+          "example": 103,
+          "type": "integer"
+        },
+        "deletions": {
+          "example": 21,
+          "type": "integer"
+        },
+        "changes": {
+          "example": 124,
+          "type": "integer"
+        },
+        "blob_url": {
+          "example": "https://github.com/octocat/Hello-World/blob/6dcb09b5b57875f334f61aebed695e2e4193db5e/file1.txt",
+          "type": "string",
+          "format": "uri"
+        },
+        "raw_url": {
+          "example": "https://github.com/octocat/Hello-World/raw/6dcb09b5b57875f334f61aebed695e2e4193db5e/file1.txt",
+          "type": "string",
+          "format": "uri"
+        },
+        "contents_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/contents/file1.txt?ref=6dcb09b5b57875f334f61aebed695e2e4193db5e",
+          "type": "string",
+          "format": "uri"
+        },
+        "patch": {
+          "example": "@@ -132,7 +132,7 @@ module Test @@ -1000,7 +1000,7 @@ module Test",
+          "type": "string"
+        },
+        "previous_filename": {
+          "example": "file.txt",
+          "type": "string"
+        }
+      },
+      "required": [
+        "additions",
+        "blob_url",
+        "changes",
+        "contents_url",
+        "deletions",
+        "filename",
+        "raw_url",
+        "sha",
+        "status"
+      ]
+    }
+  }
+}

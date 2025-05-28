@@ -1,0 +1,86 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/email"
+    }
+  },
+  "$defs": {
+    "IApiUserEmails.PostBody": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "emails": {
+              "description": "Adds one or more email addresses to your GitHub account. Must contain at least one email address. **Note:** Alternatively, you can pass a single email address or an `array` of emails addresses directly, but we recommend that you pass an object using the `emails` key.",
+              "example": [],
+              "type": "array",
+              "items": {
+                "example": "username@example.com",
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          },
+          "required": [
+            "emails"
+          ],
+          "example": {
+            "emails": [
+              "octocat@github.com",
+              "mona@github.com"
+            ]
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "example": "username@example.com",
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
+    "email": {
+      "title": "Email",
+      "description": "Email",
+      "type": "object",
+      "properties": {
+        "email": {
+          "example": "octocat@github.com",
+          "type": "string",
+          "format": "email"
+        },
+        "primary": {
+          "example": true,
+          "type": "boolean"
+        },
+        "verified": {
+          "example": true,
+          "type": "boolean"
+        },
+        "visibility": {
+          "example": "public",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "email",
+        "primary",
+        "verified",
+        "visibility"
+      ]
+    }
+  }
+}

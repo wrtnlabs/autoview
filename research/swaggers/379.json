@@ -1,0 +1,73 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsActionsHostedRunnersImagesGithubOwned.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsActionsHostedRunnersImagesGithubOwned.GetResponse": {
+      "type": "object",
+      "required": [
+        "total_count",
+        "images"
+      ],
+      "properties": {
+        "total_count": {
+          "type": "integer"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/actions-hosted-runner-image"
+          }
+        }
+      }
+    },
+    "actions-hosted-runner-image": {
+      "title": "GitHub-hosted runner image details.",
+      "description": "Provides details of a hosted runner image",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID of the image. Use this ID for the `image` parameter when creating a new larger runner.",
+          "example": "ubuntu-20.04",
+          "type": "string"
+        },
+        "platform": {
+          "description": "The operating system of the image.",
+          "example": "linux-x64",
+          "type": "string"
+        },
+        "size_gb": {
+          "description": "Image size in GB.",
+          "example": 86,
+          "type": "integer"
+        },
+        "display_name": {
+          "description": "Display name for this image.",
+          "example": 20.04,
+          "type": "string"
+        },
+        "source": {
+          "description": "The image provider.",
+          "oneOf": [
+            {
+              "const": "github"
+            },
+            {
+              "const": "partner"
+            },
+            {
+              "const": "custom"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "platform",
+        "size_gb",
+        "display_name",
+        "source"
+      ]
+    }
+  }
+}

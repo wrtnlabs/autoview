@@ -1,0 +1,18 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/code-frequency-stat"
+    }
+  },
+  "$defs": {
+    "code-frequency-stat": {
+      "title": "Code Frequency Stat",
+      "description": "Code Frequency Stat",
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4OneTimeMsgUserView"
+  },
+  "$defs": {
+    "legacy.open.v4.LegacyV4OneTimeMsgUserView": {
+      "type": "object",
+      "properties": {
+        "oneTimeMsgUser": {
+          "$ref": "#/$defs/legacy.v4.marketing.LegacyV4OneTimeMsgUser"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.marketing.LegacyV4OneTimeMsgUser": {
+      "type": "object",
+      "properties": {
+        "oneTimeMsgId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "sent": {
+          "example": 1744704930779,
+          "type": "number",
+          "format": "int64"
+        },
+        "view": {
+          "example": 1744704930779,
+          "type": "number",
+          "format": "int64"
+        },
+        "goal": {
+          "example": 1744704930779,
+          "type": "number",
+          "format": "int64"
+        },
+        "click": {
+          "example": 1744704930779,
+          "type": "number",
+          "format": "int64"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

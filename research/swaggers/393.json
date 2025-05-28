@@ -1,0 +1,140 @@
+{
+  "schema": {
+    "$ref": "#/$defs/runner-groups-org"
+  },
+  "$defs": {
+    "IApiOrgsActionsRunnerGroups.PostBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the runner group.",
+          "type": "string"
+        },
+        "visibility": {
+          "description": "Visibility of a runner group. You can select all repositories, select individual repositories, or limit access to private repositories.",
+          "oneOf": [
+            {
+              "const": "selected"
+            },
+            {
+              "const": "all"
+            },
+            {
+              "const": "private"
+            }
+          ]
+        },
+        "selected_repository_ids": {
+          "description": "List of repository IDs that can access the runner group.",
+          "type": "array",
+          "items": {
+            "description": "Unique identifier of the repository.",
+            "type": "integer"
+          }
+        },
+        "runners": {
+          "description": "List of runner IDs to add to the runner group.",
+          "type": "array",
+          "items": {
+            "description": "Unique identifier of the runner.",
+            "type": "integer"
+          }
+        },
+        "allows_public_repositories": {
+          "description": "Whether the runner group can be used by `public` repositories.",
+          "type": "boolean",
+          "default": false
+        },
+        "restricted_to_workflows": {
+          "description": "If `true`, the runner group will be restricted to running only the workflows specified in the `selected_workflows` array.",
+          "type": "boolean",
+          "default": false
+        },
+        "selected_workflows": {
+          "description": "List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.",
+          "type": "array",
+          "items": {
+            "description": "Name of workflow the runner group should be allowed to run. Note that a ref, tag, or long SHA is required.",
+            "example": "octo-org/octo-repo/.github/workflows/deploy.yaml@main",
+            "type": "string"
+          }
+        },
+        "network_configuration_id": {
+          "description": "The identifier of a hosted compute network configuration.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "runner-groups-org": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "visibility": {
+          "type": "string"
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "selected_repositories_url": {
+          "description": "Link to the selected repositories resource for this runner group. Not present unless visibility was set to `selected`",
+          "type": "string"
+        },
+        "runners_url": {
+          "type": "string"
+        },
+        "hosted_runners_url": {
+          "type": "string"
+        },
+        "network_configuration_id": {
+          "description": "The identifier of a hosted compute network configuration.",
+          "type": "string"
+        },
+        "inherited": {
+          "type": "boolean"
+        },
+        "inherited_allows_public_repositories": {
+          "type": "boolean"
+        },
+        "allows_public_repositories": {
+          "type": "boolean"
+        },
+        "workflow_restrictions_read_only": {
+          "description": "If `true`, the `restricted_to_workflows` and `selected_workflows` fields cannot be modified.",
+          "type": "boolean",
+          "default": false
+        },
+        "restricted_to_workflows": {
+          "description": "If `true`, the runner group will be restricted to running only the workflows specified in the `selected_workflows` array.",
+          "type": "boolean",
+          "default": false
+        },
+        "selected_workflows": {
+          "description": "List of workflows the runner group should be allowed to run. This setting will be ignored unless `restricted_to_workflows` is set to `true`.",
+          "type": "array",
+          "items": {
+            "description": "Name of workflow the runner group should be allowed to run. Note that a ref, tag, or long SHA is required.",
+            "example": "octo-org/octo-repo/.github/workflows/deploy.yaml@main",
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "visibility",
+        "default",
+        "runners_url",
+        "inherited",
+        "allows_public_repositories"
+      ]
+    }
+  }
+}

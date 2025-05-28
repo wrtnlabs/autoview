@@ -1,0 +1,284 @@
+{
+  "schema": {
+    "$ref": "#/$defs/classroom-assignment"
+  },
+  "$defs": {
+    "classroom-assignment": {
+      "title": "Classroom Assignment",
+      "description": "A GitHub Classroom assignment",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the repository.",
+          "example": 42,
+          "type": "integer"
+        },
+        "public_repo": {
+          "description": "Whether an accepted assignment creates a public repository.",
+          "example": true,
+          "type": "boolean"
+        },
+        "title": {
+          "description": "Assignment title.",
+          "example": "Intro to Binaries",
+          "type": "string"
+        },
+        "type": {
+          "description": "Whether it's a group assignment or individual assignment.",
+          "example": "individual",
+          "oneOf": [
+            {
+              "const": "individual"
+            },
+            {
+              "const": "group"
+            }
+          ]
+        },
+        "invite_link": {
+          "description": "The link that a student can use to accept the assignment.",
+          "example": "https://classroom.github.com/a/Lx7jiUgx",
+          "type": "string"
+        },
+        "invitations_enabled": {
+          "description": "Whether the invitation link is enabled. Visiting an enabled invitation link will accept the assignment.",
+          "example": true,
+          "type": "boolean"
+        },
+        "slug": {
+          "description": "Sluggified name of the assignment.",
+          "example": "intro-to-binaries",
+          "type": "string"
+        },
+        "students_are_repo_admins": {
+          "description": "Whether students are admins on created repository when a student accepts the assignment.",
+          "example": true,
+          "type": "boolean"
+        },
+        "feedback_pull_requests_enabled": {
+          "description": "Whether feedback pull request will be created when a student accepts the assignment.",
+          "example": true,
+          "type": "boolean"
+        },
+        "max_teams": {
+          "description": "The maximum allowable teams for the assignment.",
+          "example": 0,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "max_members": {
+          "description": "The maximum allowable members per team.",
+          "example": 0,
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "editor": {
+          "description": "The selected editor for the assignment.",
+          "example": "codespaces",
+          "type": "string"
+        },
+        "accepted": {
+          "description": "The number of students that have accepted the assignment.",
+          "example": 25,
+          "type": "integer"
+        },
+        "submitted": {
+          "description": "The number of students that have submitted the assignment.",
+          "example": 10,
+          "type": "integer"
+        },
+        "passing": {
+          "description": "The number of students that have passed the assignment.",
+          "example": 10,
+          "type": "integer"
+        },
+        "language": {
+          "description": "The programming language used in the assignment.",
+          "example": "elixir",
+          "type": "string"
+        },
+        "deadline": {
+          "description": "The time at which the assignment is due.",
+          "example": "2011-01-26T19:06:43Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "starter_code_repository": {
+          "$ref": "#/$defs/simple-classroom-repository"
+        },
+        "classroom": {
+          "$ref": "#/$defs/classroom"
+        }
+      },
+      "required": [
+        "id",
+        "public_repo",
+        "title",
+        "type",
+        "invite_link",
+        "invitations_enabled",
+        "slug",
+        "students_are_repo_admins",
+        "feedback_pull_requests_enabled",
+        "max_teams",
+        "max_members",
+        "editor",
+        "accepted",
+        "submitted",
+        "passing",
+        "language",
+        "deadline",
+        "starter_code_repository",
+        "classroom"
+      ]
+    },
+    "simple-classroom-repository": {
+      "title": "Simple Classroom Repository",
+      "description": "A GitHub repository view for Classroom",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A unique identifier of the repository.",
+          "example": 1296269,
+          "type": "integer"
+        },
+        "full_name": {
+          "description": "The full, globally unique name of the repository.",
+          "example": "octocat/Hello-World",
+          "type": "string"
+        },
+        "html_url": {
+          "description": "The URL to view the repository on GitHub.com.",
+          "example": "https://github.com/octocat/Hello-World",
+          "type": "string",
+          "format": "uri"
+        },
+        "node_id": {
+          "description": "The GraphQL identifier of the repository.",
+          "example": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
+          "type": "string"
+        },
+        "private": {
+          "description": "Whether the repository is private.",
+          "type": "boolean"
+        },
+        "default_branch": {
+          "description": "The default branch for the repository.",
+          "example": "main",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "full_name",
+        "html_url",
+        "node_id",
+        "private",
+        "default_branch"
+      ]
+    },
+    "classroom": {
+      "title": "Classroom",
+      "description": "A GitHub Classroom classroom",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the classroom.",
+          "example": 42,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the classroom.",
+          "example": "Programming Elixir",
+          "type": "string"
+        },
+        "archived": {
+          "description": "Whether classroom is archived.",
+          "example": false,
+          "type": "boolean"
+        },
+        "organization": {
+          "$ref": "#/$defs/simple-classroom-organization"
+        },
+        "url": {
+          "description": "The URL of the classroom on GitHub Classroom.",
+          "example": "https://classroom.github.com/classrooms/1-programming-elixir",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "archived",
+        "organization",
+        "url"
+      ]
+    },
+    "simple-classroom-organization": {
+      "title": "Organization Simple for Classroom",
+      "description": "A GitHub organization.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "example": 1,
+          "type": "integer"
+        },
+        "login": {
+          "example": "github",
+          "type": "string"
+        },
+        "node_id": {
+          "example": "MDEyOk9yZ2FuaXphdGlvbjE=",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/github",
+          "type": "string",
+          "format": "uri"
+        },
+        "name": {
+          "example": "Github - Code thigns happen here",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "login",
+        "node_id",
+        "html_url",
+        "name",
+        "avatar_url"
+      ]
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "schema": {
+    "$ref": "#/$defs/webhook-config"
+  },
+  "$defs": {
+    "IApiAppHookConfig.PatchBody": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "$ref": "#/$defs/webhook-config-url"
+        },
+        "content_type": {
+          "$ref": "#/$defs/webhook-config-content-type"
+        },
+        "secret": {
+          "$ref": "#/$defs/webhook-config-secret"
+        },
+        "insecure_ssl": {
+          "$ref": "#/$defs/webhook-config-insecure-ssl"
+        }
+      },
+      "required": []
+    },
+    "webhook-config-url": {
+      "description": "The URL to which the payloads will be delivered.",
+      "example": "https://example.com/webhook",
+      "type": "string",
+      "format": "uri"
+    },
+    "webhook-config-content-type": {
+      "description": "The media type used to serialize the payloads. Supported values include `json` and `form`. The default is `form`.",
+      "example": "\"json\"",
+      "type": "string"
+    },
+    "webhook-config-secret": {
+      "description": "If provided, the `secret` will be used as the `key` to generate the HMAC hex digest value for [delivery signature headers](https://docs.github.com/webhooks/event-payloads/#delivery-headers).",
+      "example": "\"********\"",
+      "type": "string"
+    },
+    "webhook-config-insecure-ssl": {
+      "oneOf": [
+        {
+          "type": "string",
+          "description": "Determines whether the SSL certificate of the host for `url` will be verified when delivering payloads. Supported values include `0` (verification is performed) and `1` (verification is not performed). The default is `0`. **We strongly recommend not setting this to `1` as you are subject to man-in-the-middle and other attacks.**",
+          "example": "\"0\""
+        },
+        {
+          "type": "number"
+        }
+      ]
+    },
+    "webhook-config": {
+      "title": "Webhook Configuration",
+      "description": "Configuration object of the webhook",
+      "type": "object",
+      "properties": {
+        "url": {
+          "$ref": "#/$defs/webhook-config-url"
+        },
+        "content_type": {
+          "$ref": "#/$defs/webhook-config-content-type"
+        },
+        "secret": {
+          "$ref": "#/$defs/webhook-config-secret"
+        },
+        "insecure_ssl": {
+          "$ref": "#/$defs/webhook-config-insecure-ssl"
+        }
+      },
+      "required": []
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "schema": {
+    "$ref": "#/$defs/deployment-branch-policy"
+  },
+  "$defs": {
+    "deployment-branch-policy-name-pattern": {
+      "title": "Deployment branch policy name pattern",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name pattern that branches must match in order to deploy to the environment.\n\nWildcard characters will not match `/`. For example, to match branches that begin with `release/` and contain an additional single slash, use `release/*/*`.\nFor more information about pattern matching syntax, see the [Ruby File.fnmatch documentation](https://ruby-doc.org/core-2.5.1/File.html#method-c-fnmatch).",
+          "example": "release/*",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "deployment-branch-policy": {
+      "title": "Deployment branch policy",
+      "description": "Details of a deployment branch or tag policy.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the branch or tag policy.",
+          "example": 361471,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDE2OkdhdGVCcmFuY2hQb2xpY3kzNjE0NzE=",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name pattern that branches or tags must match in order to deploy to the environment.",
+          "example": "release/*",
+          "type": "string"
+        },
+        "type": {
+          "description": "Whether this rule targets a branch or tag.",
+          "example": "branch",
+          "oneOf": [
+            {
+              "const": "branch"
+            },
+            {
+              "const": "tag"
+            }
+          ]
+        }
+      },
+      "required": []
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/license-simple"
+    }
+  },
+  "$defs": {
+    "IApiLicenses.GetQuery": {
+      "type": "object",
+      "properties": {
+        "featured": {
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "license-simple": {
+      "title": "License Simple",
+      "description": "License Simple",
+      "type": "object",
+      "properties": {
+        "key": {
+          "example": "mit",
+          "type": "string"
+        },
+        "name": {
+          "example": "MIT License",
+          "type": "string"
+        },
+        "url": {
+          "example": "https://api.github.com/licenses/mit",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "spdx_id": {
+          "example": "MIT",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "node_id": {
+          "example": "MDc6TGljZW5zZW1pdA==",
+          "type": "string"
+        },
+        "html_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "key",
+        "name",
+        "url",
+        "spdx_id",
+        "node_id"
+      ]
+    }
+  }
+}

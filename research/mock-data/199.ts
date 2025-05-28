@@ -1,0 +1,8 @@
+
+import Component from "../components/199";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"plugin":{"id":"plugin-01-sample","key":"123e4567-e89b-12d3-a456-426614174000","channelId":"channel-xyz-sample","state":"active","name":"Sample Plugin View (Test)","createdAt":1687184729,"color":"#123456","botName":"SampleBot (Test)","textI18n":{"text":"Sample placeholder text.","en":"Sample placeholder text.","ja":"サンプルのプレースホルダーテキスト。","ko":"샘플 자리표시자 텍스트입니다."},"labelButton":true,"deskImage":{"bucket":"sample-bucket","key":"desk_image_01.png","width":200,"height":100},"deskMarginX":10,"deskMarginY":15,"deskPosition":"left","mobileImage":{"bucket":"sample-bucket","key":"mobile_image_01.png","width":100,"height":50},"mobileMarginX":5,"mobileMarginY":8,"mobilePosition":"right","mobileHideButton":false,"mobileBubblePosition":"bottom","accessSecret":"secret-test-123","welcomeI18n":{"text":"Welcome to SampleBot!","en":"Welcome to SampleBot!","ja":"SampleBotへようこそ！","ko":"SampleBot에 오신 것을 환영합니다!"},"profileBot":true,"profileBotMessageI18n":{"text":"Hello! This is a sample profile bot message.","en":"Hello! This is a sample profile bot message.","ja":"こんにちは! これはサンプルのプロフィールボットメッセージです。","ko":"안녕하세요! 이것은 샘플 프로필 봇 메시지입니다."},"profileBotSchemaIds":["schema1","schema2"],"urlWhitelist":["https://www.example.com","https://api.example.org/test-endpoint"],"runRate":0.75,"facebookPixelId":"FB-1234567890","bright":true,"borderColor":"#abcdef","gradientColor":"#fedcba","textColor":"#0f0f0f","deskImageUrl":"https://www.example.com/images/desk_image_01.png","mobileImageUrl":"https://www.example.com/images/mobile_image_01.png","showPoweredBy":false}};
+}

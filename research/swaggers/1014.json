@@ -1,0 +1,11 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "example": "2021-01-01",
+      "type": "string",
+      "format": "date"
+    }
+  },
+  "$defs": {}
+}

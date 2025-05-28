@@ -1,0 +1,739 @@
+{
+  "schema": {
+    "$ref": "#/$defs/code-scanning-variant-analysis"
+  },
+  "$defs": {
+    "code-scanning-variant-analysis": {
+      "title": "Variant Analysis",
+      "description": "A run of a CodeQL query against one or more repositories.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID of the variant analysis.",
+          "type": "integer"
+        },
+        "controller_repo": {
+          "$ref": "#/$defs/simple-repository"
+        },
+        "actor": {
+          "$ref": "#/$defs/simple-user"
+        },
+        "query_language": {
+          "$ref": "#/$defs/code-scanning-variant-analysis-language"
+        },
+        "query_pack_url": {
+          "description": "The download url for the query pack.",
+          "type": "string"
+        },
+        "created_at": {
+          "description": "The date and time at which the variant analysis was created, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "description": "The date and time at which the variant analysis was last updated, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "completed_at": {
+          "description": "The date and time at which the variant analysis was completed, in ISO 8601 format':' YYYY-MM-DDTHH:MM:SSZ. Will be null if the variant analysis has not yet completed or this information is not available.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "oneOf": [
+            {
+              "const": "in_progress"
+            },
+            {
+              "const": "succeeded"
+            },
+            {
+              "const": "failed"
+            },
+            {
+              "const": "cancelled"
+            }
+          ]
+        },
+        "actions_workflow_run_id": {
+          "description": "The GitHub Actions workflow run used to execute this variant analysis. This is only available if the workflow run has started.",
+          "type": "integer"
+        },
+        "failure_reason": {
+          "description": "The reason for a failure of the variant analysis. This is only available if the variant analysis has failed.",
+          "oneOf": [
+            {
+              "const": "no_repos_queried"
+            },
+            {
+              "const": "actions_workflow_run_failed"
+            },
+            {
+              "const": "internal_error"
+            }
+          ]
+        },
+        "scanned_repositories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "repository": {
+                "$ref": "#/$defs/code-scanning-variant-analysis-repository"
+              },
+              "analysis_status": {
+                "$ref": "#/$defs/code-scanning-variant-analysis-status"
+              },
+              "result_count": {
+                "description": "The number of results in the case of a successful analysis. This is only available for successful analyses.",
+                "type": "integer"
+              },
+              "artifact_size_in_bytes": {
+                "description": "The size of the artifact. This is only available for successful analyses.",
+                "type": "integer"
+              },
+              "failure_message": {
+                "description": "The reason of the failure of this repo task. This is only available if the repository task has failed.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "repository",
+              "analysis_status"
+            ]
+          }
+        },
+        "skipped_repositories": {
+          "description": "Information about repositories that were skipped from processing. This information is only available to the user that initiated the variant analysis.",
+          "type": "object",
+          "properties": {
+            "access_mismatch_repos": {
+              "$ref": "#/$defs/code-scanning-variant-analysis-skipped-repo-group"
+            },
+            "not_found_repos": {
+              "type": "object",
+              "properties": {
+                "repository_count": {
+                  "description": "The total number of repositories that were skipped for this reason.",
+                  "example": 2,
+                  "type": "integer"
+                },
+                "repository_full_names": {
+                  "description": "A list of full repository names that were skipped. This list may not include all repositories that were skipped.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "repository_count",
+                "repository_full_names"
+              ]
+            },
+            "no_codeql_db_repos": {
+              "$ref": "#/$defs/code-scanning-variant-analysis-skipped-repo-group"
+            },
+            "over_limit_repos": {
+              "$ref": "#/$defs/code-scanning-variant-analysis-skipped-repo-group"
+            }
+          },
+          "required": [
+            "access_mismatch_repos",
+            "not_found_repos",
+            "no_codeql_db_repos",
+            "over_limit_repos"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "controller_repo",
+        "actor",
+        "query_language",
+        "query_pack_url",
+        "status"
+      ]
+    },
+    "simple-repository": {
+      "title": "Simple Repository",
+      "description": "A GitHub repository.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A unique identifier of the repository.",
+          "example": 1296269,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "description": "The GraphQL identifier of the repository.",
+          "example": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the repository.",
+          "example": "Hello-World",
+          "type": "string"
+        },
+        "full_name": {
+          "description": "The full, globally unique, name of the repository.",
+          "example": "octocat/Hello-World",
+          "type": "string"
+        },
+        "owner": {
+          "$ref": "#/$defs/simple-user"
+        },
+        "private": {
+          "description": "Whether the repository is private.",
+          "type": "boolean"
+        },
+        "html_url": {
+          "description": "The URL to view the repository on GitHub.com.",
+          "example": "https://github.com/octocat/Hello-World",
+          "type": "string",
+          "format": "uri"
+        },
+        "description": {
+          "description": "The repository description.",
+          "example": "This your first repo!",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fork": {
+          "description": "Whether the repository is a fork.",
+          "type": "boolean"
+        },
+        "url": {
+          "description": "The URL to get more information about the repository from the GitHub API.",
+          "example": "https://api.github.com/repos/octocat/Hello-World",
+          "type": "string",
+          "format": "uri"
+        },
+        "archive_url": {
+          "description": "A template for the API URL to download the repository as an archive.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/{archive_format}{/ref}",
+          "type": "string"
+        },
+        "assignees_url": {
+          "description": "A template for the API URL to list the available assignees for issues in the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/assignees{/user}",
+          "type": "string"
+        },
+        "blobs_url": {
+          "description": "A template for the API URL to create or retrieve a raw Git blob in the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/git/blobs{/sha}",
+          "type": "string"
+        },
+        "branches_url": {
+          "description": "A template for the API URL to get information about branches in the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches{/branch}",
+          "type": "string"
+        },
+        "collaborators_url": {
+          "description": "A template for the API URL to get information about collaborators of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/collaborators{/collaborator}",
+          "type": "string"
+        },
+        "comments_url": {
+          "description": "A template for the API URL to get information about comments on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/comments{/number}",
+          "type": "string"
+        },
+        "commits_url": {
+          "description": "A template for the API URL to get information about commits on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/commits{/sha}",
+          "type": "string"
+        },
+        "compare_url": {
+          "description": "A template for the API URL to compare two commits or refs.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/compare/{base}...{head}",
+          "type": "string"
+        },
+        "contents_url": {
+          "description": "A template for the API URL to get the contents of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/contents/{+path}",
+          "type": "string"
+        },
+        "contributors_url": {
+          "description": "A template for the API URL to list the contributors to the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/contributors",
+          "type": "string",
+          "format": "uri"
+        },
+        "deployments_url": {
+          "description": "The API URL to list the deployments of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/deployments",
+          "type": "string",
+          "format": "uri"
+        },
+        "downloads_url": {
+          "description": "The API URL to list the downloads on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/downloads",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "description": "The API URL to list the events of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/events",
+          "type": "string",
+          "format": "uri"
+        },
+        "forks_url": {
+          "description": "The API URL to list the forks of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/forks",
+          "type": "string",
+          "format": "uri"
+        },
+        "git_commits_url": {
+          "description": "A template for the API URL to get information about Git commits of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/git/commits{/sha}",
+          "type": "string"
+        },
+        "git_refs_url": {
+          "description": "A template for the API URL to get information about Git refs of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/git/refs{/sha}",
+          "type": "string"
+        },
+        "git_tags_url": {
+          "description": "A template for the API URL to get information about Git tags of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/git/tags{/sha}",
+          "type": "string"
+        },
+        "issue_comment_url": {
+          "description": "A template for the API URL to get information about issue comments on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/issues/comments{/number}",
+          "type": "string"
+        },
+        "issue_events_url": {
+          "description": "A template for the API URL to get information about issue events on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/issues/events{/number}",
+          "type": "string"
+        },
+        "issues_url": {
+          "description": "A template for the API URL to get information about issues on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/issues{/number}",
+          "type": "string"
+        },
+        "keys_url": {
+          "description": "A template for the API URL to get information about deploy keys on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/keys{/key_id}",
+          "type": "string"
+        },
+        "labels_url": {
+          "description": "A template for the API URL to get information about labels of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/labels{/name}",
+          "type": "string"
+        },
+        "languages_url": {
+          "description": "The API URL to get information about the languages of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/languages",
+          "type": "string",
+          "format": "uri"
+        },
+        "merges_url": {
+          "description": "The API URL to merge branches in the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/merges",
+          "type": "string",
+          "format": "uri"
+        },
+        "milestones_url": {
+          "description": "A template for the API URL to get information about milestones of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/milestones{/number}",
+          "type": "string"
+        },
+        "notifications_url": {
+          "description": "A template for the API URL to get information about notifications on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/notifications{?since,all,participating}",
+          "type": "string"
+        },
+        "pulls_url": {
+          "description": "A template for the API URL to get information about pull requests on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls{/number}",
+          "type": "string"
+        },
+        "releases_url": {
+          "description": "A template for the API URL to get information about releases on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/releases{/id}",
+          "type": "string"
+        },
+        "stargazers_url": {
+          "description": "The API URL to list the stargazers on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/stargazers",
+          "type": "string",
+          "format": "uri"
+        },
+        "statuses_url": {
+          "description": "A template for the API URL to get information about statuses of a commit.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/statuses/{sha}",
+          "type": "string"
+        },
+        "subscribers_url": {
+          "description": "The API URL to list the subscribers on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/subscribers",
+          "type": "string",
+          "format": "uri"
+        },
+        "subscription_url": {
+          "description": "The API URL to subscribe to notifications for this repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/subscription",
+          "type": "string",
+          "format": "uri"
+        },
+        "tags_url": {
+          "description": "The API URL to get information about tags on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/tags",
+          "type": "string",
+          "format": "uri"
+        },
+        "teams_url": {
+          "description": "The API URL to list the teams on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/teams",
+          "type": "string",
+          "format": "uri"
+        },
+        "trees_url": {
+          "description": "A template for the API URL to create or retrieve a raw Git tree of the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/git/trees{/sha}",
+          "type": "string"
+        },
+        "hooks_url": {
+          "description": "The API URL to list the hooks on the repository.",
+          "example": "https://api.github.com/repos/octocat/Hello-World/hooks",
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "archive_url",
+        "assignees_url",
+        "blobs_url",
+        "branches_url",
+        "collaborators_url",
+        "comments_url",
+        "commits_url",
+        "compare_url",
+        "contents_url",
+        "contributors_url",
+        "deployments_url",
+        "description",
+        "downloads_url",
+        "events_url",
+        "fork",
+        "forks_url",
+        "full_name",
+        "git_commits_url",
+        "git_refs_url",
+        "git_tags_url",
+        "hooks_url",
+        "html_url",
+        "id",
+        "node_id",
+        "issue_comment_url",
+        "issue_events_url",
+        "issues_url",
+        "keys_url",
+        "labels_url",
+        "languages_url",
+        "merges_url",
+        "milestones_url",
+        "name",
+        "notifications_url",
+        "owner",
+        "private",
+        "pulls_url",
+        "releases_url",
+        "stargazers_url",
+        "statuses_url",
+        "subscribers_url",
+        "subscription_url",
+        "tags_url",
+        "teams_url",
+        "trees_url",
+        "url"
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "code-scanning-variant-analysis-language": {
+      "description": "The language targeted by the CodeQL query",
+      "oneOf": [
+        {
+          "const": "cpp"
+        },
+        {
+          "const": "csharp"
+        },
+        {
+          "const": "go"
+        },
+        {
+          "const": "java"
+        },
+        {
+          "const": "javascript"
+        },
+        {
+          "const": "python"
+        },
+        {
+          "const": "ruby"
+        },
+        {
+          "const": "rust"
+        },
+        {
+          "const": "swift"
+        }
+      ]
+    },
+    "code-scanning-variant-analysis-repository": {
+      "title": "Repository Identifier",
+      "description": "Repository Identifier",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "A unique identifier of the repository.",
+          "example": 1296269,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the repository.",
+          "example": "Hello-World",
+          "type": "string"
+        },
+        "full_name": {
+          "description": "The full, globally unique, name of the repository.",
+          "example": "octocat/Hello-World",
+          "type": "string"
+        },
+        "private": {
+          "description": "Whether the repository is private.",
+          "type": "boolean"
+        },
+        "stargazers_count": {
+          "example": 80,
+          "type": "integer"
+        },
+        "updated_at": {
+          "example": "2011-01-26T19:14:43Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "full_name",
+        "id",
+        "name",
+        "private",
+        "stargazers_count",
+        "updated_at"
+      ]
+    },
+    "code-scanning-variant-analysis-status": {
+      "description": "The new status of the CodeQL variant analysis repository task.",
+      "oneOf": [
+        {
+          "const": "pending"
+        },
+        {
+          "const": "in_progress"
+        },
+        {
+          "const": "succeeded"
+        },
+        {
+          "const": "failed"
+        },
+        {
+          "const": "canceled"
+        },
+        {
+          "const": "timed_out"
+        }
+      ]
+    },
+    "code-scanning-variant-analysis-skipped-repo-group": {
+      "type": "object",
+      "properties": {
+        "repository_count": {
+          "description": "The total number of repositories that were skipped for this reason.",
+          "example": 2,
+          "type": "integer"
+        },
+        "repositories": {
+          "description": "A list of repositories that were skipped. This list may not include all repositories that were skipped. This is only available when the repository was found and the user has access to it.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/code-scanning-variant-analysis-repository"
+          }
+        }
+      },
+      "required": [
+        "repository_count",
+        "repositories"
+      ]
+    }
+  }
+}

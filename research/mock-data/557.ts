@@ -1,0 +1,8 @@
+
+import Component from "../components/557";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"url":"https://api.github.com/projects/12345/cards/67890","id":67890,"node_id":"MDExOlByb2plY3RDYXJkNjc4OTA=","note":"This is a sample project card note for UI testing purposes.","creator":{"name":"Sample User (Test)","email":"test.user@example.com","login":"sampleuser123","id":13579,"node_id":"MDQ6VXNlcjEzNTc5","avatar_url":"https://avatars.example.com/u/13579?v=4","gravatar_id":null,"url":"https://api.github.com/users/sampleuser123","html_url":"https://github.com/sampleuser123","followers_url":"https://api.github.com/users/sampleuser123/followers","following_url":"https://api.github.com/users/sampleuser123/following{/other_user}","gists_url":"https://api.github.com/users/sampleuser123/gists{/gist_id}","starred_url":"https://api.github.com/users/sampleuser123/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/sampleuser123/subscriptions","organizations_url":"https://api.github.com/users/sampleuser123/orgs","repos_url":"https://api.github.com/users/sampleuser123/repos","events_url":"https://api.github.com/users/sampleuser123/events{/privacy}","received_events_url":"https://api.github.com/users/sampleuser123/received_events","type":"User","site_admin":false,"starred_at":"2025-05-19T15:00:00Z","user_view_type":"detail"},"created_at":"2025-05-19T14:30:00Z","updated_at":"2025-05-20T09:15:00Z","archived":false,"column_name":"In Progress (Sample)","project_id":"12345","column_url":"https://api.github.com/projects/12345/columns/4321","content_url":"https://www.example.com/content/sample-card","project_url":"https://api.github.com/projects/12345"};
+}

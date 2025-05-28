@@ -1,0 +1,136 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsActionsRunnersGenerateJitconfig.PostResponse"
+  },
+  "$defs": {
+    "IApiOrgsActionsRunnersGenerateJitconfig.PostBody": {
+      "type": "object",
+      "required": [
+        "name",
+        "runner_group_id",
+        "labels"
+      ],
+      "properties": {
+        "name": {
+          "description": "The name of the new runner.",
+          "type": "string"
+        },
+        "runner_group_id": {
+          "description": "The ID of the runner group to register the runner to.",
+          "type": "integer"
+        },
+        "labels": {
+          "description": "The names of the custom labels to add to the runner. **Minimum items**: 1. **Maximum items**: 100.",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "type": "string"
+          }
+        },
+        "work_folder": {
+          "description": "The working directory to be used for job execution, relative to the runner install directory.",
+          "type": "string",
+          "default": "_work"
+        }
+      }
+    },
+    "IApiOrgsActionsRunnersGenerateJitconfig.PostResponse": {
+      "type": "object",
+      "required": [
+        "runner",
+        "encoded_jit_config"
+      ],
+      "properties": {
+        "runner": {
+          "$ref": "#/$defs/runner"
+        },
+        "encoded_jit_config": {
+          "description": "The base64 encoded runner configuration.",
+          "type": "string"
+        }
+      }
+    },
+    "runner": {
+      "title": "Self hosted runners",
+      "description": "A self hosted runner",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID of the runner.",
+          "example": 5,
+          "type": "integer"
+        },
+        "runner_group_id": {
+          "description": "The ID of the runner group.",
+          "example": 1,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the runner.",
+          "example": "iMac",
+          "type": "string"
+        },
+        "os": {
+          "description": "The Operating System of the runner.",
+          "example": "macos",
+          "type": "string"
+        },
+        "status": {
+          "description": "The status of the runner.",
+          "example": "online",
+          "type": "string"
+        },
+        "busy": {
+          "type": "boolean"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/runner-label"
+          }
+        },
+        "ephemeral": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "os",
+        "status",
+        "busy",
+        "labels"
+      ]
+    },
+    "runner-label": {
+      "title": "Self hosted runner label",
+      "description": "A label for a self hosted runner",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the label.",
+          "type": "integer"
+        },
+        "name": {
+          "description": "Name of the label.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of label. Read-only labels are applied automatically when the runner is configured.",
+          "oneOf": [
+            {
+              "const": "read-only"
+            },
+            {
+              "const": "custom"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    }
+  }
+}

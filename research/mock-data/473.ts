@@ -1,0 +1,8 @@
+
+import Component from "../components/473";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"id":101,"node_id":"MDQ6VGVhbTEwMQ==","name":"Sample Team (Test)","slug":"sample-team-test","description":"A sample team for testing UI components. All content is fictional for test purposes.","privacy":"closed","notification_setting":"notifications_enabled","permission":"push","permissions":{"pull":true,"triage":false,"push":true,"maintain":false,"admin":false},"url":"https://api.example.com/teams/101","html_url":"https://www.example.com/orgs/sample-org/teams/sample-team-test","members_url":"https://api.example.com/teams/101/members{/member}","repositories_url":"https://api.example.com/teams/101/repos","parent":null},{"id":102,"node_id":"MDQ6VGVhbTAxMg==","name":"Feature Dev Team Sample","slug":"feature-dev-team-sample","description":null,"permission":"admin","url":"https://api.example.com/teams/102","html_url":"https://www.example.com/orgs/sample-org/teams/feature-dev-team-sample","members_url":"https://api.example.com/teams/102/members{/member}","repositories_url":"https://api.example.com/teams/102/repos","parent":{"id":10,"node_id":"MDQ6VGVhbDEw","url":"https://api.example.com/teams/10","members_url":"https://api.example.com/teams/10/members{/member}","name":"Parent Team Sample","description":"Parent team of feature development teams (Test Data).","permission":"pull","privacy":"visible","notification_setting":"notifications_disabled","html_url":"https://www.example.com/orgs/sample-org/teams/parent-team-sample","repositories_url":"https://api.example.com/teams/10/repos","slug":"parent-team-sample","ldap_dn":"cn=Parent Team Sample,ou=Teams,dc=example,dc=com"}}];
+}

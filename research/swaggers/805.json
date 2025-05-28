@@ -1,0 +1,46 @@
+{
+  "schema": {
+    "$ref": "#/$defs/merged-upstream"
+  },
+  "$defs": {
+    "IApiReposMergeUpstream.PostBody": {
+      "type": "object",
+      "properties": {
+        "branch": {
+          "description": "The name of the branch which should be updated to match upstream.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "branch"
+      ]
+    },
+    "merged-upstream": {
+      "title": "Merged upstream",
+      "description": "Results of a successful merge upstream request",
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        },
+        "merge_type": {
+          "oneOf": [
+            {
+              "const": "merge"
+            },
+            {
+              "const": "fast-forward"
+            },
+            {
+              "const": "none"
+            }
+          ]
+        },
+        "base_branch": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

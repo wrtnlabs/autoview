@@ -3,12 +3,12 @@ import { IAutoViewCompilerResult } from "./IAutoViewCompilerResult";
 
 export interface IAutoViewCompilerService {
   initialize(props: IAutoViewCompilerProps): Promise<void>;
-  generateComponentDto(): string;
-  generateBoilerplate(transformFunctionName: string): string;
-  generateBoilerplateForRawTsCode(transformFunctionName: string): string;
-  compile(
-    script: string,
-    transformFunctionName: string,
+  generateBoilerplateForReactComponent(
+    alias: string,
+    subTypePrefix: string,
+  ): string;
+  compileReactComponent(
+    boilerplate: string,
+    componentTsCode: string,
   ): Promise<IAutoViewCompilerResult>;
-  compileRandom(): Promise<IAutoViewCompilerResult>;
 }

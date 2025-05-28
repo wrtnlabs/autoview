@@ -1,0 +1,54 @@
+{
+  "schema": {
+    "$ref": "#/$defs/git-ref"
+  },
+  "$defs": {
+    "git-ref": {
+      "title": "Git Reference",
+      "description": "Git references within a repository",
+      "type": "object",
+      "properties": {
+        "ref": {
+          "type": "string"
+        },
+        "node_id": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "object": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "sha": {
+              "description": "SHA for the reference",
+              "example": "7638417db6d59f3c431d3e1f261cc637155684cd",
+              "type": "string",
+              "minLength": 40,
+              "maxLength": 40
+            },
+            "url": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "required": [
+            "type",
+            "sha",
+            "url"
+          ]
+        }
+      },
+      "required": [
+        "ref",
+        "node_id",
+        "url",
+        "object"
+      ]
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IPageIShoppingSaleUnitStockSupplement"
+  },
+  "$defs": {
+    "IShoppingSaleUnitStockSupplement.IRequest": {
+      "description": "Request information of the stock supplement list.",
+      "type": "object",
+      "properties": {
+        "sort": {
+          "title": "Sortable columns",
+          "description": "Sortable columns.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "const": "-created_at"
+                  },
+                  {
+                    "const": "+created_at"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "page": {
+          "title": "Page number",
+          "description": "Page number.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "integer",
+              "minimum": 0
+            }
+          ]
+        }
+      },
+      "required": []
+    },
+    "IPageIShoppingSaleUnitStockSupplement": {
+      "description": "A page.\n\nCollection of records with pagination indformation.",
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "title": "Page information",
+          "description": "Page information.",
+          "$ref": "#/$defs/IPage.IPagination"
+        },
+        "data": {
+          "title": "List of records",
+          "description": "List of records.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleUnitStockSupplement"
+          }
+        }
+      },
+      "required": [
+        "pagination",
+        "data"
+      ]
+    },
+    "IPage.IPagination": {
+      "description": "Page information.",
+      "type": "object",
+      "properties": {
+        "current": {
+          "title": "Current page number",
+          "description": "Current page number.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "title": "Limitation of records per a page",
+          "description": "Limitation of records per a page.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "records": {
+          "title": "Total records in the database",
+          "description": "Total records in the database.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "pages": {
+          "title": "Total pages",
+          "description": "Total pages.\n\nEqual to {@link records} / {@link limit} with ceiling.",
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "current",
+        "limit",
+        "records",
+        "pages"
+      ]
+    },
+    "IShoppingSaleUnitStockSupplement": {
+      "description": "Supplementation of inventory quantity of stock.\n\nYou know what? If a {@link IShoppingSaleUnitStock stock} has been sold over\nits {@link IShoppingSaleUnitStock.ICreate.quantity initial inventory quantity},\nthe stock can't be sold anymore, because of out of stock. In that case, how the\n{@link IShoppingSeller} should do?\n\nWhen the sotck is sold out, seller can supplement the inventory record by\nregistering this `IShoppingSaleUnitStockSupplement` record. Right, this\n`IShoppingSaleUnitStockSupplement` is an entity that embodies the\nsupplementation of the inventory quantity of the belonged stock.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Supplemented quantity",
+          "description": "Supplemented quantity.",
+          "type": "integer",
+          "minimum": 0
+        },
+        "created_at": {
+          "title": "Creation time of the record",
+          "description": "Creation time of the record.\n\nAnother words, the time when inventory of the stock being supplemented.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at"
+      ]
+    }
+  }
+}

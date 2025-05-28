@@ -1,0 +1,719 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingSaleReview"
+  },
+  "$defs": {
+    "IShoppingSaleReview.ICreate": {
+      "description": "Creation information of the review.",
+      "type": "object",
+      "properties": {
+        "good_id": {
+          "title": "Target good's {@link IShoppingOrderGood.id}",
+          "description": "Target good's {@link IShoppingOrderGood.id}.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "score": {
+          "title": "Score of the review",
+          "description": "Score of the review.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of article",
+          "description": "Title of article.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Content body of article",
+          "description": "Content body of article.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "good_id",
+        "score",
+        "format",
+        "title",
+        "body",
+        "files"
+      ]
+    },
+    "IAttachmentFile.ICreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IShoppingSaleReview": {
+      "description": "Reviews for sale snapshots.\n\n`IShoppingSaleReview` is a subtype entity of {@link IShoppingSaleInquiry},\nand is used when a {@link IShoppingCustomer customer} purchases a\n{@link IShoppingSale sale} ({@link IShoppingSaleSnapshot snapshot} at the time)\nregistered by the {@link IShoppingSeller seller} as a product and leaves a\nreview and rating for it.\n\nFor reference, `IShoppingSaleReview` and\n{@link IShoppingOrderGod shopping_order_goods} have a logarithmic relationship\nof N: 1, but this does not mean that customers can continue to write reviews\nfor the same product indefinitely. Wouldn't there be restrictions, such as\nif you write a review once, you can write an additional review a month later?",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Type of the derived inquiry",
+          "description": "Type of the derived inquiry.\n\n- `question`: {@link IShoppingSaleQuestion}\n- `review`: {@link IShoppingSaleReview}",
+          "const": "review"
+        },
+        "customer": {
+          "title": "Customer who wrote the inquiry",
+          "description": "Customer who wrote the inquiry.",
+          "$ref": "#/$defs/IShoppingCustomer"
+        },
+        "answer": {
+          "title": "Formal answer for the inquiry by the seller",
+          "description": "Formal answer for the inquiry by the seller.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSaleInquiryAnswer"
+            }
+          ]
+        },
+        "read_by_seller": {
+          "title": "Whether the seller has viewed the inquiry or not",
+          "description": "Whether the seller has viewed the inquiry or not.",
+          "type": "boolean"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "snapshots": {
+          "title": "List of snapshot contents",
+          "description": "List of snapshot contents.\n\nIt is created for the first time when an article is created, and is\naccumulated every time the article is modified.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingSaleReview.ISnapshot"
+          },
+          "minItems": 1
+        },
+        "created_at": {
+          "title": "Creation time of article",
+          "description": "Creation time of article.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "customer",
+        "answer",
+        "read_by_seller",
+        "id",
+        "snapshots",
+        "created_at"
+      ]
+    },
+    "IShoppingCustomer": {
+      "description": "Customer information, but not a person but a connection basis.\n\n`IShoppingCustomer` is an entity that literally embodies the information of\nthose who participated in the market as customers. By the way, the\n`IShoppingCustomer` does not mean a person, but a connection basis. Therefore,\neven if the same person connects to the shopping mall multiple, multiple\nrecords are created in `IShoppingCustomer`.\n\nThe first purpose of this is to track the customer's inflow path in detail,\nand it is for cases where the same person enters as a non-member,\n{@link IShoppingCartCommodity puts items in the shopping cart} in advance,\nand only authenticates their {@link IShoppingCitizen real name} or\nregisters/logs in at the moment of {@link IShoppingOrderPublish payment}.\nIt is the second. Lastly, it is to accurately track the activities that\na person performs at the shopping mall in various ways like below.\n\n- Same person comes from an {@link IShoppingExternalUser external service}\n- Same person creates multiple accounts\n- Same person makes a {@link IShoppingOrderPublish purchase} as a non-member with only {@link IShoppingCitizen real name authentication}\n- Same person acts both {@link IShoppingSeller seller} and {@link IShoppingAdministrator admin} at the same time\n\nTherefore, `IShoppingCustomer` can have multiple records with the same\n{@link IShoppingCitizen}, {@link IShoppingMember}, and\n{@link IShoppingExternalUser}. Additionally, if a customer signs up for\nmembership after verifying their real name or signs up for our service after\nbeing a user of an external service, all related records are changed at once.\nTherefore, identification and tracking of customers can be done very\nsystematically.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "title": "Discriminant for the type of customer",
+          "description": "Discriminant for the type of customer.",
+          "const": "customer"
+        },
+        "member": {
+          "title": "Membership information",
+          "description": "Membership information.\n\nIf the customer has joined as a member.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingMember"
+            }
+          ]
+        },
+        "citizen": {
+          "title": "Citizen information",
+          "description": "Citizen information.\n\nIf the customer has verified his real name and mobile number.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCitizen"
+            }
+          ]
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "channel": {
+          "title": "Belonged channel",
+          "description": "Belonged channel.",
+          "$ref": "#/$defs/IShoppingChannel"
+        },
+        "external_user": {
+          "title": "External user information",
+          "description": "External user information.\n\nWhen the customer has come from an external service.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingExternalUser"
+            }
+          ]
+        },
+        "href": {
+          "title": "Connection address",
+          "description": "Connection address.\n\nSame with {@link window.location.href} of client.",
+          "type": "string",
+          "format": "uri"
+        },
+        "referrer": {
+          "title": "Referrer address",
+          "description": "Referrer address.\n\nSame with {@link window.document.referrer} of client.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "string",
+              "maxLength": 0
+            }
+          ]
+        },
+        "ip": {
+          "title": "Connection IP Address",
+          "description": "Connection IP Address.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "ipv4"
+            },
+            {
+              "type": "string",
+              "format": "ipv6"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of the connection record",
+          "description": "Creation time of the connection record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "type",
+        "member",
+        "citizen",
+        "id",
+        "channel",
+        "external_user",
+        "href",
+        "referrer",
+        "ip",
+        "created_at"
+      ]
+    },
+    "IShoppingMember": {
+      "description": "Member Account.\n\n`IShoppingMember` is an entity that symbolizes the case when a\n{@link IShoppingCustomer} signs up as a member of this shopping mall\nsystem.\n\nIf a `IShoppingMember` has seller or administrator property. it means that\nthe {@link IShoppingCustomer} has acting as a {@link IShoppingSeller seller}\nor {@link IShoppingAdministrator administrator} at the same time.",
+      "type": "object",
+      "properties": {
+        "citizen": {
+          "title": "Citizen information",
+          "description": "Citizen information.\n\nOnly when has verified as a citizen, with mobile number and real name.\n\nFor reference, if the member has signed up as a seller or administrator,\nthis citizen information must be.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCitizen"
+            }
+          ]
+        },
+        "seller": {
+          "title": "Seller information",
+          "description": "Seller information.\n\nIf the member also signed up as a seller.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingSeller"
+            }
+          ]
+        },
+        "administrator": {
+          "title": "Administrator information",
+          "description": "Administrator information.\n\nIf the member also signed up as an administrator.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingAdministrator"
+            }
+          ]
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "nickname": {
+          "title": "Nickname that uniquely identifies the member",
+          "description": "Nickname that uniquely identifies the member.",
+          "type": "string"
+        },
+        "emails": {
+          "title": "List of emails",
+          "description": "List of emails.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingMemberEmail"
+          }
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the member has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "citizen",
+        "seller",
+        "administrator",
+        "id",
+        "nickname",
+        "emails",
+        "created_at"
+      ]
+    },
+    "IShoppingCitizen": {
+      "description": "Citizen verification information.\n\n`IShoppingCitizen` is an entity that records the user's\n{@link name real name} and {@link mobile} input information.\n\nFor reference, in South Korea, real name authentication is required for\ne-commerce participants, so the name attribute is important. However, the\nsituation is different overseas, so in reality, mobile attributes are the\nmost important, and identification of individual person is also done based\non this mobile.\n\nOf course, real name and mobile phone authentication information are\nencrypted and stored.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "mobile": {
+          "title": "Mobile number",
+          "description": "Mobile number.",
+          "x-wrtn-payment-order-mobile": true,
+          "type": "string",
+          "pattern": "^[0-9]*$"
+        },
+        "name": {
+          "title": "Real name, or equivalent nickname",
+          "description": "Real name, or equivalent nickname.",
+          "x-wrtn-payment-order-citizen": true,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "mobile",
+        "name"
+      ]
+    },
+    "IShoppingSeller": {
+      "description": "Seller information.\n\n`IShoppingSeller` is an entity that embodies a person who registers\n{@link IShoppingSale sales} to operate selling activities, with\n{@link IShoppingMember membership} joining.\n\nFor reference, unlike {@link IShoppingCustomer customers} which can\nparticipate even without membership joining, seller must join membership\nto operate sales. Also, seller must do the\n{@link IShoppingCitizen real-name and mobile authentication}, too.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation tmie of record",
+          "description": "Creation tmie of record.\n\nAnother words, the time when the seller has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingAdministrator": {
+      "description": "Administrator account.\n\n`IShoppingAdministrator` is an entity that embodies a person who manages\nthe shopping mall system, with {@link IShoppingMember membership} joining.\n\nFor reference, unlike {@link IShoppingCustomer customers} which can participate\neven without membership joining, administrator must join membership to operate\nmanagements. Also, administrator must perform the\n{@link IShoppingCitizen real-name and mobile authentication}, too.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother words, the time when the administrator has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "created_at"
+      ]
+    },
+    "IShoppingMemberEmail": {
+      "description": "Email address of member.\n\nThis shopping mall system allows multiple email addresses to be\nregistered for one {@link IShoppingMember member}. If you don't have to\nplan such multiple email addresses, just use only one.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "value": {
+          "title": "Email address value",
+          "description": "Email address value.",
+          "type": "string",
+          "format": "email"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "value",
+        "created_at"
+      ]
+    },
+    "IShoppingChannel": {
+      "description": "Channel information.\n\n`IShoppingChannel` is a concept that shapes the distribution channel in the\nmarket. Therefore, the difference in the channel in this e-commerce system\nmeans that it is another site or application.\n\nBy the way, if your shopping mall system requires only one channel, then\njust use only one. This concept is designed to be expandable in the future.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "code": {
+          "title": "Identifier code",
+          "description": "Identifier code.",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name of the channel",
+          "description": "Name of the channel.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "code",
+        "name"
+      ]
+    },
+    "IShoppingExternalUser": {
+      "description": "External user information.\n\n`IShoppingExternalUser` is an entity dsigned for when this system needs\nto connect with external services and welcome their users as\n{@link IShoppingCustomer customers} of this service.\n\nFor reference, customers who connect from an external service must have\nthis record, and the external service user is identified through the two\nattributes {@link application} and {@link uid}. If a customer connected\nfrom an external service completes\n{@link IShoppingCitizen real-name authentication} from this service, each\ntime the external service user reconnects to this service and issues a\nnew customer authentication token, real-name authentication begins with\ncompleted.\n\nAnd {@link password} is the password issued to the user by the external\nservice system (the so-called permanent user authentication token), and\nis never the actual user password. However, for customers who entered the\nsame application and uid as the current external system user, this is to\ndetermine whether to view this as a correct external system user or a\nviolation.\n\nIn addition, additional information received from external services can\nbe recorded in the data field in JSON format.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "citizen": {
+          "title": "Citizen activation info",
+          "description": "Citizen activation info.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/IShoppingCitizen"
+            }
+          ]
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.\n\nAnother word, first time when the external user connected.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "uid": {
+          "title": "Identifier key of external user from the external system",
+          "description": "Identifier key of external user from the external system.",
+          "type": "string"
+        },
+        "application": {
+          "title": "Identifier code of the external service",
+          "description": "Identifier code of the external service.\n\nIt can be same with {@link IShoppingChannel.code} in common.",
+          "type": "string"
+        },
+        "nickname": {
+          "title": "Nickname of external user in the external system",
+          "description": "Nickname of external user in the external system.",
+          "type": "string"
+        },
+        "data": {
+          "description": "Additional information about external user from the external\nsystem."
+        }
+      },
+      "required": [
+        "id",
+        "citizen",
+        "created_at",
+        "uid",
+        "application",
+        "nickname",
+        "data"
+      ]
+    },
+    "IShoppingSaleInquiryAnswer": {
+      "description": "Answers to questions about sale snapshots.\n\n`IShoppingSaleInquiryAnswer` is an entity that embodies the official\nanswer written by the {@link IShoppingSeller seller} to the\n{@link IShoppingSaleInquiry inquiry} written by the\n{@link IShoppingCustomer customer}.\n\nOf course, in addition to writing an official response like this, it is\nalso possible for the seller to communicate with the inqjuiry written\ncustomer and multiple customers through\n{@link IShoppingSaleInquiryComment comments} in the attribution inquiry.\n\nFor reference, it is not possible to write comments on this answer.\nEncourage people to write comments on the inquiry article. This is to\nprevent comments from being scattered in both inquiry and answer\narticles.",
+      "type": "object",
+      "properties": {
+        "seller": {
+          "title": "Seller who've written the answer",
+          "description": "Seller who've written the answer.",
+          "$ref": "#/$defs/IShoppingSeller"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "snapshots": {
+          "title": "List of snapshot contents",
+          "description": "List of snapshot contents.\n\nIt is created for the first time when an article is created, and is\naccumulated every time the article is modified.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IBbsArticle.ISnapshot"
+          },
+          "minItems": 1
+        },
+        "created_at": {
+          "title": "Creation time of article",
+          "description": "Creation time of article.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "seller",
+        "id",
+        "snapshots",
+        "created_at"
+      ]
+    },
+    "IBbsArticle.ISnapshot": {
+      "description": "Snapshot of article.\n\n`IBbsArticle.ISnapshot` is a snapshot entity that contains the contents of\nthe article, as mentioned in {@link IBbsArticle}, the contents of the article\nare separated from the article record to keep evidence and prevent fraud.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of snapshot record",
+          "description": "Creation time of snapshot record.\n\nIn other words, creation time or update time or article.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of article",
+          "description": "Title of article.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Content body of article",
+          "description": "Content body of article.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "format",
+        "title",
+        "body",
+        "files"
+      ]
+    },
+    "IShoppingSaleReview.ISnapshot": {
+      "description": "Snapshot content of the review article.",
+      "type": "object",
+      "properties": {
+        "score": {
+          "title": "Score of the review",
+          "description": "Score of the review.",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of snapshot record",
+          "description": "Creation time of snapshot record.\n\nIn other words, creation time or update time or article.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of article",
+          "description": "Title of article.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Content body of article",
+          "description": "Content body of article.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "score",
+        "id",
+        "created_at",
+        "format",
+        "title",
+        "body",
+        "files"
+      ]
+    }
+  }
+}

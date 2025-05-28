@@ -1,0 +1,136 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingSaleInquiryComment.ISnapshot"
+  },
+  "$defs": {
+    "IShoppingSaleInquiryComment.ICreate": {
+      "description": "Creation information of the comment.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "body": {
+          "title": "Content body of comment",
+          "description": "Content body of comment.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "format",
+        "body",
+        "files"
+      ]
+    },
+    "IAttachmentFile.ICreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IShoppingSaleInquiryComment.ISnapshot": {
+      "description": "Snapshot content of the comment.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation time of snapshot record",
+          "description": "Creation time of snapshot record.\n\nIn other words, creation time or update time or comment.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "body": {
+          "title": "Content body of comment",
+          "description": "Content body of comment.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "format",
+        "body",
+        "files"
+      ]
+    }
+  }
+}

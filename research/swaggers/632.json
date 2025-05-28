@@ -1,0 +1,27 @@
+{
+  "schema": {
+    "$ref": "#/$defs/protected-branch-admin-enforced"
+  },
+  "$defs": {
+    "protected-branch-admin-enforced": {
+      "title": "Protected Branch Admin Enforced",
+      "description": "Protected Branch Admin Enforced",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/branches/master/protection/enforce_admins",
+          "type": "string",
+          "format": "uri"
+        },
+        "enabled": {
+          "example": true,
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "url",
+        "enabled"
+      ]
+    }
+  }
+}

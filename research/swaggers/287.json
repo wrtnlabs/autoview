@@ -1,0 +1,474 @@
+{
+  "schema": {
+    "oneOf": [
+      {
+        "$ref": "#/$defs/CANNOT_FINDONE_ARTICLE"
+      },
+      {
+        "$ref": "#/$defs/ResponseForm_lt_ArticleType.DetailArticle_gt_"
+      }
+    ]
+  },
+  "$defs": {
+    "CANNOT_FINDONE_ARTICLE": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "type": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "business"
+        },
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": false
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 4004
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": "게시글을 찾지 못했습니다."
+        }
+      },
+      "required": [
+        "type",
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ResponseForm_lt_ArticleType.DetailArticle_gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "result": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": true
+        },
+        "code": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "const": 1000
+        },
+        "requestToResponse": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "string",
+          "pattern": "^(-?\\d+\\.?\\d*ms)$"
+        },
+        "data": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/ArticleType.DetailArticle"
+        }
+      },
+      "required": [
+        "result",
+        "code",
+        "data"
+      ]
+    },
+    "ArticleType.DetailArticle": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "images": {
+          "description": "",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "type": "array",
+          "items": {
+            "description": "",
+            "x-typia-required": false,
+            "x-typia-optional": true,
+            "$ref": "#/$defs/Pick_lt_BodyImageEntity_comma__space__doublequote_id_doublequote__space__or__space__doublequote_position_doublequote__space__or__space__doublequote_url_doublequote__space__or__space__doublequote_depth_doublequote__gt_"
+          }
+        },
+        "writer": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "$ref": "#/$defs/UserType.Profile"
+        },
+        "comments": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "array",
+          "items": {
+            "description": "",
+            "x-typia-required": true,
+            "x-typia-optional": false,
+            "$ref": "#/$defs/Pick_lt_CommentEntity_comma__space__doublequote_id_doublequote__space__or__space__doublequote_contents_doublequote__space__or__space__doublequote_parentId_doublequote__space__or__space__doublequote_xPosition_doublequote__space__or__space__doublequote_yPosition_doublequote__gt_"
+          }
+        },
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "contents": {
+          "description": "글의 내용물로, 최대 3,000자",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 3000
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "3000",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 3000
+        }
+      },
+      "required": [
+        "writer",
+        "comments",
+        "id",
+        "contents"
+      ]
+    },
+    "Pick_lt_BodyImageEntity_comma__space__doublequote_id_doublequote__space__or__space__doublequote_position_doublequote__space__or__space__doublequote_url_doublequote__space__or__space__doublequote_depth_doublequote__gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "position": {
+          "description": "이미지의 정렬 순서로, 오름차순 정렬된다.",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "이미지의 정렬 순서로, 오름차순 정렬된다.",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "pattern": "^(-?\\d+\\.?\\d*|(-?\\d+\\.?\\d*))$"
+            },
+            {
+              "description": "이미지의 정렬 순서로, 오름차순 정렬된다.",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "description": "서버를 통해 한 번 전처리된 이미지\nexample is @link {https://folder/test.jpg}",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 4
+            },
+            {
+              "kind": "maxLength",
+              "value": 2048
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "4",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "2048",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 2048
+        },
+        "depth": {
+          "description": "처음 이미지를 1이라 할 때, 몇 번째 업데이트 이미지인지를 의미하는 값",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "url",
+        "depth"
+      ]
+    },
+    "UserType.Profile": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "description": "사용자의 별칭, 설정하지 않는 경우도 있다.",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 50
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "50",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "profileImage": {
+          "description": "사용자의 프로필 이미지",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "nickname",
+        "id"
+      ]
+    },
+    "Pick_lt_CommentEntity_comma__space__doublequote_id_doublequote__space__or__space__doublequote_contents_doublequote__space__or__space__doublequote_parentId_doublequote__space__or__space__doublequote_xPosition_doublequote__space__or__space__doublequote_yPosition_doublequote__gt_": {
+      "x-typia-jsDocTags": [],
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "",
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "number"
+        },
+        "contents": {
+          "description": "게시글 내용",
+          "x-typia-metaTags": [
+            {
+              "kind": "minLength",
+              "value": 1
+            },
+            {
+              "kind": "maxLength",
+              "value": 1000
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "minLength",
+              "text": [
+                {
+                  "text": "1",
+                  "kind": "text"
+                }
+              ]
+            },
+            {
+              "name": "maxLength",
+              "text": [
+                {
+                  "text": "1000",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": true,
+          "x-typia-optional": false,
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "parentId": {
+          "description": "'부모 댓글이 있는 경우, 즉 답글인 경우에는 부모 댓글 아이디를 받는다.'",
+          "x-typia-metaTags": [
+            {
+              "kind": "type",
+              "value": "int"
+            }
+          ],
+          "x-typia-jsDocTags": [
+            {
+              "name": "type",
+              "text": [
+                {
+                  "text": "int",
+                  "kind": "text"
+                }
+              ]
+            }
+          ],
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "x-typia-metaTags": [
+                {
+                  "kind": "type",
+                  "value": "int"
+                }
+              ],
+              "x-typia-jsDocTags": [
+                {
+                  "name": "type",
+                  "text": [
+                    {
+                      "text": "int",
+                      "kind": "text"
+                    }
+                  ]
+                }
+              ],
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "xPosition": {
+          "description": "소수점을 포함한 좌표 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "pattern": "^(-?\\d+\\.?\\d*|(-?\\d+\\.?\\d*))$"
+            },
+            {
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "yPosition": {
+          "description": "소수점을 포함한 좌표 값",
+          "x-typia-required": false,
+          "x-typia-optional": true,
+          "oneOf": [
+            {
+              "type": "string",
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "pattern": "^(-?\\d+\\.?\\d*|(-?\\d+\\.?\\d*))$"
+            },
+            {
+              "description": "소수점을 포함한 좌표 값",
+              "x-typia-required": false,
+              "x-typia-optional": true,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "contents"
+      ]
+    }
+  }
+}

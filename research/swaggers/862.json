@@ -1,0 +1,179 @@
+{
+  "schema": {
+    "$ref": "#/$defs/rule-suite"
+  },
+  "$defs": {
+    "rule-suite": {
+      "title": "Rule Suite",
+      "description": "Response",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the rule insight.",
+          "type": "integer"
+        },
+        "actor_id": {
+          "description": "The number that identifies the user.",
+          "oneOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "actor_name": {
+          "description": "The handle for the GitHub user account.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "before_sha": {
+          "description": "The first commit sha before the push evaluation.",
+          "type": "string"
+        },
+        "after_sha": {
+          "description": "The last commit sha in the push evaluation.",
+          "type": "string"
+        },
+        "ref": {
+          "description": "The ref name that the evaluation ran on.",
+          "type": "string"
+        },
+        "repository_id": {
+          "description": "The ID of the repository associated with the rule evaluation.",
+          "type": "integer"
+        },
+        "repository_name": {
+          "description": "The name of the repository without the `.git` extension.",
+          "type": "string"
+        },
+        "pushed_at": {
+          "example": "2011-01-26T19:06:43Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "result": {
+          "description": "The result of the rule evaluations for rules with the `active` enforcement status.",
+          "oneOf": [
+            {
+              "const": "pass"
+            },
+            {
+              "const": "fail"
+            },
+            {
+              "const": "bypass"
+            }
+          ]
+        },
+        "evaluation_result": {
+          "description": "The result of the rule evaluations for rules with the `active` and `evaluate` enforcement statuses, demonstrating whether rules would pass or fail if all rules in the rule suite were `active`. Null if no rules with `evaluate` enforcement status were run.",
+          "oneOf": [
+            {
+              "const": "pass"
+            },
+            {
+              "const": "fail"
+            },
+            {
+              "const": "bypass"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rule_evaluations": {
+          "description": "Details on the evaluated rules.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule_source": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "description": "The type of rule source.",
+                    "type": "string"
+                  },
+                  "id": {
+                    "description": "The ID of the rule source.",
+                    "oneOf": [
+                      {
+                        "type": "integer"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "name": {
+                    "description": "The name of the rule source.",
+                    "oneOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": []
+              },
+              "enforcement": {
+                "description": "The enforcement level of this rule source.",
+                "oneOf": [
+                  {
+                    "const": "active"
+                  },
+                  {
+                    "const": "evaluate"
+                  },
+                  {
+                    "const": "deleted ruleset"
+                  }
+                ]
+              },
+              "result": {
+                "description": "The result of the evaluation of the individual rule.",
+                "oneOf": [
+                  {
+                    "const": "pass"
+                  },
+                  {
+                    "const": "fail"
+                  }
+                ]
+              },
+              "rule_type": {
+                "description": "The type of rule.",
+                "type": "string"
+              },
+              "details": {
+                "description": "The detailed failure message for the rule. Null if the rule passed.",
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": []
+          }
+        }
+      },
+      "required": []
+    }
+  }
+}

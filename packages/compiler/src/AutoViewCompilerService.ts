@@ -15,40 +15,24 @@ export class AutoViewCompilerService implements IAutoViewCompilerService {
     this.compiler_ = new AutoViewCompiler(props);
   }
 
-  public generateComponentDto(): string {
-    if (this.compiler_ === null)
-      throw new Error("You have not initialized yet.");
-    return this.compiler_.generateComponentDto();
-  }
-
-  public generateBoilerplate(transformFunctionName: string): string {
-    if (this.compiler_ === null)
-      throw new Error("You have not initialized yet.");
-    return this.compiler_.generateBoilerplate(transformFunctionName);
-  }
-
-  public generateBoilerplateForRawTsCode(
-    transformFunctionName: string,
+  public generateBoilerplateForReactComponent(
+    alias: string,
+    subTypePrefix: string,
   ): string {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.generateBoilerplateForRawTsCode(
-      transformFunctionName,
+    return this.compiler_.generateBoilerplateForReactComponent(
+      alias,
+      subTypePrefix,
     );
   }
 
-  public async compile(
-    script: string,
-    transformFunctionName: string,
+  public compileReactComponent(
+    boilerplate: string,
+    componentTsCode: string,
   ): Promise<IAutoViewCompilerResult> {
     if (this.compiler_ === null)
       throw new Error("You have not initialized yet.");
-    return this.compiler_.compile(script, transformFunctionName);
-  }
-
-  public async compileRandom(): Promise<IAutoViewCompilerResult> {
-    if (this.compiler_ === null)
-      throw new Error("You have not initialized yet.");
-    return this.compiler_.compileRandom();
+    return this.compiler_.compileReactComponent(boilerplate, componentTsCode);
   }
 }

@@ -1,0 +1,8 @@
+
+import Component from "../components/112";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"pagination":{"current":1,"limit":10,"records":2,"pages":1},"data":[{"categories":[{"children":[{"children":[],"id":"33333333-3333-3333-3333-333333333333","code":"phones","parent_id":"11111111-1111-1111-1111-111111111111","name":"Mobile Phones","created_at":"2025-05-18T12:30:00Z"},{"children":[],"id":"44444444-4444-4444-4444-444444444444","code":"laptops","parent_id":"11111111-1111-1111-1111-111111111111","name":"Laptops","created_at":"2025-05-18T12:30:00Z"}],"id":"11111111-1111-1111-1111-111111111111","code":"electronics","parent_id":null,"name":"Electronics (Test)","created_at":"2025-05-18T12:00:00Z"},{"children":[{"children":[],"id":"55555555-5555-5555-5555-555555555555","code":"men-clothing","parent_id":"22222222-2222-2222-2222-222222222222","name":"Men's Clothing","created_at":"2025-05-18T12:30:00Z"},{"children":[],"id":"66666666-6666-6666-6666-666666666666","code":"women-clothing","parent_id":"22222222-2222-2222-2222-222222222222","name":"Women's Clothing","created_at":"2025-05-18T12:30:00Z"}],"id":"22222222-2222-2222-2222-222222222222","code":"clothing","parent_id":null,"name":"Clothing (Sample)","created_at":"2025-05-18T12:00:00Z"}],"id":"channel-001-test","created_at":"2025-05-19T10:00:00Z","code":"online-store","name":"Online Store (Test)"},{"categories":[{"children":[],"id":"77777777-7777-7777-7777-777777777777","code":"clearance","parent_id":null,"name":"Clearance Items (Sample)","created_at":"2025-05-18T13:00:00Z"}],"id":"channel-002-sample","created_at":"2025-05-19T11:00:00Z","code":"outlet-store","name":"Outlet Store (Sample)"}]};
+}

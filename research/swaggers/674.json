@@ -1,0 +1,131 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/code-scanning-alert-instance"
+    }
+  },
+  "$defs": {
+    "code-scanning-alert-instance": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/code-scanning-ref"
+        },
+        "analysis_key": {
+          "$ref": "#/$defs/code-scanning-analysis-analysis-key"
+        },
+        "environment": {
+          "$ref": "#/$defs/code-scanning-alert-environment"
+        },
+        "category": {
+          "$ref": "#/$defs/code-scanning-analysis-category"
+        },
+        "state": {
+          "$ref": "#/$defs/code-scanning-alert-state"
+        },
+        "commit_sha": {
+          "type": "string"
+        },
+        "message": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            }
+          },
+          "required": []
+        },
+        "location": {
+          "$ref": "#/$defs/code-scanning-alert-location"
+        },
+        "html_url": {
+          "type": "string"
+        },
+        "classifications": {
+          "description": "Classifications that have been applied to the file that triggered the alert.\nFor example identifying it as documentation, or a generated file.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/code-scanning-alert-classification"
+          }
+        }
+      },
+      "required": []
+    },
+    "code-scanning-ref": {
+      "description": "The Git reference, formatted as `refs/pull/<number>/merge`, `refs/pull/<number>/head`,\n`refs/heads/<branch name>` or simply `<branch name>`.",
+      "type": "string"
+    },
+    "code-scanning-analysis-analysis-key": {
+      "description": "Identifies the configuration under which the analysis was executed. For example, in GitHub Actions this includes the workflow filename and job name.",
+      "type": "string"
+    },
+    "code-scanning-alert-environment": {
+      "description": "Identifies the variable values associated with the environment in which the analysis that generated this alert instance was performed, such as the language that was analyzed.",
+      "type": "string"
+    },
+    "code-scanning-analysis-category": {
+      "description": "Identifies the configuration under which the analysis was executed. Used to distinguish between multiple analyses for the same tool and commit, but performed on different languages or different parts of the code.",
+      "type": "string"
+    },
+    "code-scanning-alert-state": {
+      "description": "State of a code scanning alert.",
+      "oneOf": [
+        {
+          "const": "open"
+        },
+        {
+          "const": "dismissed"
+        },
+        {
+          "const": "fixed"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "code-scanning-alert-location": {
+      "description": "Describe a region within a file for the alert.",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "start_line": {
+          "type": "integer"
+        },
+        "end_line": {
+          "type": "integer"
+        },
+        "start_column": {
+          "type": "integer"
+        },
+        "end_column": {
+          "type": "integer"
+        }
+      },
+      "required": []
+    },
+    "code-scanning-alert-classification": {
+      "description": "A classification of the file. For example to identify it as generated.",
+      "oneOf": [
+        {
+          "const": "source"
+        },
+        {
+          "const": "generated"
+        },
+        {
+          "const": "test"
+        },
+        {
+          "const": "library"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

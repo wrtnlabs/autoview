@@ -1,0 +1,51 @@
+{
+  "schema": {
+    "$ref": "#/$defs/ssh-signing-key"
+  },
+  "$defs": {
+    "IApiUserSshSigningKeys.PostBody": {
+      "properties": {
+        "title": {
+          "description": "A descriptive name for the new key.",
+          "example": "Personal MacBook Air",
+          "type": "string"
+        },
+        "key": {
+          "description": "The public SSH key to add to your GitHub account. For more information, see \"[Checking for existing SSH keys](https://docs.github.com/authentication/connecting-to-github-with-ssh/checking-for-existing-ssh-keys).\"",
+          "type": "string",
+          "pattern": "^ssh-(rsa|dss|ed25519) |^ecdsa-sha2-nistp(256|384|521) |^(sk-ssh-ed25519|sk-ecdsa-sha2-nistp256)@openssh.com "
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "type": "object"
+    },
+    "ssh-signing-key": {
+      "title": "SSH Signing Key",
+      "description": "A public SSH key used to sign Git commits",
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "id": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "key",
+        "id",
+        "title",
+        "created_at"
+      ]
+    }
+  }
+}

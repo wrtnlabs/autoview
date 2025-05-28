@@ -1,0 +1,8 @@
+
+import Component from "../components/815";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"url":"https://ci.example.org/builds/page-build-sample-001","status":"success","error":{"message":null},"pusher":{"name":"Test User (Dev)","email":"test.user@example.com","login":"testuser123","id":101,"node_id":"NODEID_SampleUser_abc123XYZ=","avatar_url":"https://avatars.example.com/testuser123.png","gravatar_id":null,"url":"https://api.example.com/users/testuser123","html_url":"https://www.example.com/testuser123","followers_url":"https://api.example.com/users/testuser123/followers","following_url":"https://api.example.com/users/testuser123/following{/other_user}","gists_url":"https://api.example.com/users/testuser123/gists{/gist_id}","starred_url":"https://api.example.com/users/testuser123/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/testuser123/subscriptions","organizations_url":"https://api.example.com/users/testuser123/orgs","repos_url":"https://api.example.com/users/testuser123/repos","events_url":"https://api.example.com/users/testuser123/events{/privacy}","received_events_url":"https://api.example.com/users/testuser123/received_events","type":"User","site_admin":false,"starred_at":"2025-05-18T12:00:00Z"},"commit":"f0e1d2c3b4a5968778695a4b3c2d1e0f98765432","duration":120,"created_at":"2025-05-19T14:30:00Z","updated_at":"2025-05-19T14:45:00Z"},{"url":"https://ci.example.org/builds/page-build-sample-002","status":"failure","error":{"message":"Page build failed due to simulated timeout error (Test)."},"pusher":null,"commit":"a1b2c3d4e5f67890123456789abcdef012345678","duration":300,"created_at":"2025-05-19T15:00:00Z","updated_at":"2025-05-19T15:05:00Z"}];
+}

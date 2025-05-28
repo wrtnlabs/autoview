@@ -1,0 +1,8 @@
+
+import Component from "../components/556";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"url":"https://api.example.com/projects/42/cards/1001","id":1001,"node_id":"NODEID_ProjectCard_1001XYZ=","note":"This is a sample project card note for UI testing purposes.","creator":{"name":"Test User (Dev)","email":"test.user@example.com","login":"testuser-sample","id":101,"node_id":"NODEID_TestUser_ABC123=","avatar_url":"https://avatars.example.com/u/101?v=4","gravatar_id":null,"url":"https://api.example.com/users/testuser-sample","html_url":"https://www.example.com/testuser-sample","followers_url":"https://api.example.com/users/testuser-sample/followers","following_url":"https://api.example.com/users/testuser-sample/following{/other_user}","gists_url":"https://api.example.com/users/testuser-sample/gists{/gist_id}","starred_url":"https://api.example.com/users/testuser-sample/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/testuser-sample/subscriptions","organizations_url":"https://api.example.com/users/testuser-sample/orgs","repos_url":"https://api.example.com/users/testuser-sample/repos","events_url":"https://api.example.com/users/testuser-sample/events{/privacy}","received_events_url":"https://api.example.com/users/testuser-sample/received_events","type":"User","site_admin":false,"starred_at":"2025-05-19T12:00:00Z","user_view_type":"detailed"},"created_at":"2025-05-19T09:00:00Z","updated_at":"2025-05-19T10:15:30Z","archived":false,"column_name":"To Do (Test)","project_id":"42","column_url":"https://api.example.com/projects/42/columns/10","content_url":"https://api.example.com/projects/42/cards/1001/content","project_url":"https://api.example.com/projects/42"};
+}

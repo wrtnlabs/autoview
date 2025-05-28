@@ -1,0 +1,8 @@
+
+import Component from "../components/994";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return [{"id":42,"name":"Sample GPG Key (Test)","primary_key_id":42,"key_id":"0123456789ABCDEF","public_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: TestPGP v1.0\nDummyPublicKeyDataLine1\nDummyPublicKeyDataLine2\n-----END PGP PUBLIC KEY BLOCK-----","emails":[{"email":"test.user@example.com","verified":true},{"email":"unverified.user@example.com","verified":false}],"subkeys":[{"id":100,"primary_key_id":42,"key_id":"FEDCBA9876543210","public_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\nSubkeyDummyLine\n-----END PGP PUBLIC KEY BLOCK-----","emails":[{"email":"subkey.user@example.com","verified":true}],"subkeys":[],"can_sign":true,"can_encrypt_comms":true,"can_encrypt_storage":false,"can_certify":false,"created_at":"2025-05-19T09:00:00Z","expires_at":"2026-05-19T09:00:00Z","raw_key":null,"revoked":false}],"can_sign":true,"can_encrypt_comms":true,"can_encrypt_storage":true,"can_certify":true,"created_at":"2025-05-19T08:30:00Z","expires_at":"2027-05-19T08:30:00Z","revoked":false,"raw_key":"-----BEGIN PGP PRIVATE KEY BLOCK-----\nVersion: TestPGP v1.0\nDummyPrivateKeyData\n-----END PGP PRIVATE KEY BLOCK-----"},{"id":84,"name":null,"primary_key_id":null,"key_id":"ABCDEF1234567890","public_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\nAnotherDummyPublicKey\n-----END PGP PUBLIC KEY BLOCK-----","emails":[],"subkeys":[],"can_sign":false,"can_encrypt_comms":false,"can_encrypt_storage":false,"can_certify":false,"created_at":"2025-05-19T10:15:00Z","expires_at":null,"revoked":true,"raw_key":null}];
+}

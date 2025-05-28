@@ -1,0 +1,39 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/content-traffic"
+    }
+  },
+  "$defs": {
+    "content-traffic": {
+      "title": "Content Traffic",
+      "description": "Content Traffic",
+      "type": "object",
+      "properties": {
+        "path": {
+          "example": "/github/hubot",
+          "type": "string"
+        },
+        "title": {
+          "example": "github/hubot: A customizable life embetterment robot.",
+          "type": "string"
+        },
+        "count": {
+          "example": 3542,
+          "type": "integer"
+        },
+        "uniques": {
+          "example": 2225,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "title",
+        "uniques",
+        "count"
+      ]
+    }
+  }
+}

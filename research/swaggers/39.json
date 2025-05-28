@@ -1,0 +1,67 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/IShoppingChannelCategory.IHierarchical"
+    }
+  },
+  "$defs": {
+    "IShoppingChannelCategory.IHierarchical": {
+      "description": "Hierarchical category information with children categories.",
+      "type": "object",
+      "properties": {
+        "children": {
+          "title": "List of children categories with hierarchical structure",
+          "description": "List of children categories with hierarchical structure.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IShoppingChannelCategory.IHierarchical"
+          }
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "code": {
+          "title": "Identifier code of the category",
+          "description": "Identifier code of the category.\n\nThe code must be unique in the channel.",
+          "type": "string"
+        },
+        "parent_id": {
+          "title": "Parent category's ID",
+          "description": "Parent category's ID.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "format": "uuid"
+            }
+          ]
+        },
+        "name": {
+          "title": "Representative name of the category",
+          "description": "Representative name of the category.\n\nThe name must be unique within the parent category. If no parent exists,\nthen the name must be unique within the channel between no parent\ncategories.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of record",
+          "description": "Creation time of record.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "children",
+        "id",
+        "code",
+        "parent_id",
+        "name",
+        "created_at"
+      ]
+    }
+  }
+}

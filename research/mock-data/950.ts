@@ -1,0 +1,8 @@
+
+import Component from "../components/950";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"id":101,"name":"Sample GPG Key (Test)","primary_key_id":null,"key_id":"ABCD1234EFGH5678","public_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: GnuPG v2 (Sample)\n\nmQENBFv2TjwBCAC3u1g5WsqL4aXk2D0E1vJtZ9y0l4YbJ3mlE8KX2NvVlZlbiBUZXN0IFVzZXIgPGV4YW1wbGUudXNlckBleGFtcGxlLmNvbT6JATgEEwECACIFAlv2TjwCGwMGCwkIBwMCBhUIAgkKCwQWAgMBAh4BAheAAAoJEBNVZWVuIERNQzJTwbYH/3tZKXG1u6a9sKknG1GABswZ+qH39m3eoUpqB6Y2fHvL4r+ZtZO+/Yau874UObF7gZFWOfWpblRAX+vGaxX0yR6EnO1T1mSjrqGgFg6Ky0E8sJ+ZfI+Qk7JMTXpVa0cD4HEp1Rb1G1RuqRfi2FlwR2+5Rn6P1GARe+2ragQ==\n=AbCd\n-----END PGP PUBLIC KEY BLOCK-----","emails":[{"email":"test.user@example.com","verified":true},{"email":"dummy.recipient@example.org","verified":false}],"subkeys":[{"id":102,"primary_key_id":101,"key_id":"WXYZ9876IJKL5432","public_key":"-----BEGIN PGP PUBLIC KEY BLOCK-----\nVersion: GnuPG v2 (Sample)\n\nnQENBFv2TjwBCAD4X1yF2q8kYt7yU1hXzZ5tKr0DlQeK1ZmFgL1a3tW2oP9Ls8Zx\nwY7Q5Hn8d8j7uJ3+vjSgfr2xEg9pD3Vz5k9Jf3tPzTUr5f9g6k2dY6M3mXzZ0J2P\n5fYwLn7P2Hk7yJ2f0Th8KX3Yz7wL1Q9n0GzV4Bn9XkW1HKP2Lr5aG7Xt9HcJNr5F\n=EfGh\n-----END PGP PUBLIC KEY BLOCK-----","emails":[{"email":"subkey.user@example.net","verified":false}],"subkeys":[],"can_sign":false,"can_encrypt_comms":true,"can_encrypt_storage":true,"can_certify":false,"created_at":"2025-05-01T12:00:00Z","expires_at":"2026-05-01T12:00:00Z","raw_key":null,"revoked":false}],"can_sign":true,"can_encrypt_comms":true,"can_encrypt_storage":false,"can_certify":true,"created_at":"2025-01-15T09:30:00Z","expires_at":null,"revoked":false,"raw_key":null};
+}

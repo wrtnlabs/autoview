@@ -1,0 +1,8 @@
+
+import Component from "../components/564";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"owner_url":"https://api.example.com/users/sample-owner","url":"https://api.example.com/projects/123","html_url":"https://www.example.com/projects/123","columns_url":"https://api.example.com/projects/123/columns","id":123,"node_id":"NODEID_Project_abc123XYZ","name":"Sample Project Alpha (Test)","body":"This is a sample project description for testing UI components. All content is fictional and for demonstration purposes only.","number":7,"state":"open","creator":{"name":"Sample User (Test Account)","email":"test.user@example.com","login":"sample-user","id":456,"node_id":"NODEID_User_def456UVW","avatar_url":"https://www.example.com/avatar/sample-user.png","gravatar_id":null,"url":"https://api.example.com/users/sample-user","html_url":"https://www.example.com/sample-user","followers_url":"https://api.example.com/users/sample-user/followers","following_url":"https://api.example.com/users/sample-user/following{/other_user}","gists_url":"https://api.example.com/users/sample-user/gists{/gist_id}","starred_url":"https://api.example.com/users/sample-user/starred{/owner}{/repo}","subscriptions_url":"https://api.example.com/users/sample-user/subscriptions","organizations_url":"https://api.example.com/users/sample-user/orgs","repos_url":"https://api.example.com/users/sample-user/repos","events_url":"https://api.example.com/users/sample-user/events{/privacy}","received_events_url":"https://api.example.com/users/sample-user/received_events","type":"User","site_admin":false,"starred_at":"2025-05-18T12:00:00Z","user_view_type":"default"},"created_at":"2025-05-19T14:30:00Z","updated_at":"2025-05-20T09:15:00Z"};
+}

@@ -1,0 +1,147 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IBbsArticle.ISnapshot"
+  },
+  "$defs": {
+    "IBbsArticle.ICreate": {
+      "description": "Creation information of the article.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of article",
+          "description": "Title of article.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Content body of article",
+          "description": "Content body of article.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "format",
+        "title",
+        "body",
+        "files"
+      ]
+    },
+    "IAttachmentFile.ICreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IBbsArticle.ISnapshot": {
+      "description": "Snapshot of article.\n\n`IBbsArticle.ISnapshot` is a snapshot entity that contains the contents of\nthe article, as mentioned in {@link IBbsArticle}, the contents of the article\nare separated from the article record to keep evidence and prevent fraud.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of snapshot record",
+          "description": "Creation time of snapshot record.\n\nIn other words, creation time or update time or article.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of article",
+          "description": "Title of article.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Content body of article",
+          "description": "Content body of article.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "format",
+        "title",
+        "body",
+        "files"
+      ]
+    }
+  }
+}

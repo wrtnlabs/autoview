@@ -1,0 +1,813 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/dependabot-alert"
+    }
+  },
+  "$defs": {
+    "IApiReposDependabotAlerts.GetQuery": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "description": "**Closing down notice**. Page number of the results to fetch. Use cursor-based pagination with `before` or `after` instead.",
+          "type": "integer",
+          "default": 1
+        },
+        "per_page": {
+          "description": "The number of results per page (max 100). For more information, see \"[Using pagination in the REST API](https://docs.github.com/rest/using-the-rest-api/using-pagination-in-the-rest-api).\"",
+          "type": "integer",
+          "default": 30
+        }
+      },
+      "required": []
+    },
+    "dependabot-alert": {
+      "description": "A Dependabot alert.",
+      "type": "object",
+      "properties": {
+        "number": {
+          "$ref": "#/$defs/alert-number"
+        },
+        "state": {
+          "description": "The state of the Dependabot alert.",
+          "oneOf": [
+            {
+              "const": "auto_dismissed"
+            },
+            {
+              "const": "dismissed"
+            },
+            {
+              "const": "fixed"
+            },
+            {
+              "const": "open"
+            }
+          ]
+        },
+        "dependency": {
+          "description": "Details for the vulnerable dependency.",
+          "type": "object",
+          "readOnly": true,
+          "properties": {
+            "package": {
+              "$ref": "#/$defs/dependabot-alert-package"
+            },
+            "manifest_path": {
+              "description": "The full path to the dependency manifest file, relative to the root of the repository.",
+              "type": "string",
+              "readOnly": true
+            },
+            "scope": {
+              "description": "The execution scope of the vulnerable dependency.",
+              "oneOf": [
+                {
+                  "const": "development"
+                },
+                {
+                  "const": "runtime"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "relationship": {
+              "description": "The vulnerable dependency's relationship to your project.\n\n> [!NOTE]\n> We are rolling out support for dependency relationship across ecosystems. This value will be \"unknown\" for all dependencies in unsupported ecosystems.\n",
+              "oneOf": [
+                {
+                  "const": "unknown"
+                },
+                {
+                  "const": "direct"
+                },
+                {
+                  "const": "transitive"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        "security_advisory": {
+          "$ref": "#/$defs/dependabot-alert-security-advisory"
+        },
+        "security_vulnerability": {
+          "$ref": "#/$defs/dependabot-alert-security-vulnerability"
+        },
+        "url": {
+          "$ref": "#/$defs/alert-url"
+        },
+        "html_url": {
+          "$ref": "#/$defs/alert-html-url"
+        },
+        "created_at": {
+          "$ref": "#/$defs/alert-created-at"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/alert-updated-at"
+        },
+        "dismissed_at": {
+          "$ref": "#/$defs/alert-dismissed-at"
+        },
+        "dismissed_by": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "dismissed_reason": {
+          "description": "The reason that the alert was dismissed.",
+          "oneOf": [
+            {
+              "const": "fix_started"
+            },
+            {
+              "const": "inaccurate"
+            },
+            {
+              "const": "no_bandwidth"
+            },
+            {
+              "const": "not_used"
+            },
+            {
+              "const": "tolerable_risk"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dismissed_comment": {
+          "description": "An optional comment associated with the alert's dismissal.",
+          "oneOf": [
+            {
+              "type": "string",
+              "maxLength": 280
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "fixed_at": {
+          "$ref": "#/$defs/alert-fixed-at"
+        },
+        "auto_dismissed_at": {
+          "$ref": "#/$defs/alert-auto-dismissed-at"
+        }
+      },
+      "required": [
+        "number",
+        "state",
+        "dependency",
+        "security_advisory",
+        "security_vulnerability",
+        "url",
+        "html_url",
+        "created_at",
+        "updated_at",
+        "dismissed_at",
+        "dismissed_by",
+        "dismissed_reason",
+        "dismissed_comment",
+        "fixed_at"
+      ]
+    },
+    "alert-number": {
+      "description": "The security alert number.",
+      "type": "integer",
+      "readOnly": true
+    },
+    "dependabot-alert-package": {
+      "description": "Details for the vulnerable package.",
+      "type": "object",
+      "readOnly": true,
+      "properties": {
+        "ecosystem": {
+          "description": "The package's language or package management ecosystem.",
+          "type": "string",
+          "readOnly": true
+        },
+        "name": {
+          "description": "The unique package name within its ecosystem.",
+          "type": "string",
+          "readOnly": true
+        }
+      },
+      "required": [
+        "ecosystem",
+        "name"
+      ]
+    },
+    "dependabot-alert-security-advisory": {
+      "description": "Details for the GitHub Security Advisory.",
+      "type": "object",
+      "readOnly": true,
+      "properties": {
+        "ghsa_id": {
+          "description": "The unique GitHub Security Advisory ID assigned to the advisory.",
+          "type": "string",
+          "readOnly": true
+        },
+        "cve_id": {
+          "description": "The unique CVE ID assigned to the advisory.",
+          "oneOf": [
+            {
+              "type": "string",
+              "readOnly": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "summary": {
+          "description": "A short, plain text summary of the advisory.",
+          "type": "string",
+          "readOnly": true,
+          "maxLength": 1024
+        },
+        "description": {
+          "description": "A long-form Markdown-supported description of the advisory.",
+          "type": "string",
+          "readOnly": true
+        },
+        "vulnerabilities": {
+          "description": "Vulnerable version range information for the advisory.",
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/$defs/dependabot-alert-security-vulnerability"
+          }
+        },
+        "severity": {
+          "description": "The severity of the advisory.",
+          "oneOf": [
+            {
+              "const": "low"
+            },
+            {
+              "const": "medium"
+            },
+            {
+              "const": "high"
+            },
+            {
+              "const": "critical"
+            }
+          ]
+        },
+        "cvss": {
+          "description": "Details for the advisory pertaining to the Common Vulnerability Scoring System.",
+          "type": "object",
+          "readOnly": true,
+          "properties": {
+            "score": {
+              "description": "The overall CVSS score of the advisory.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10,
+              "readOnly": true
+            },
+            "vector_string": {
+              "description": "The full CVSS vector string for the advisory.",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "readOnly": true
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "score",
+            "vector_string"
+          ]
+        },
+        "cvss_severities": {
+          "$ref": "#/$defs/cvss-severities"
+        },
+        "epss": {
+          "$ref": "#/$defs/security-advisory-epss"
+        },
+        "cwes": {
+          "description": "Details for the advisory pertaining to Common Weakness Enumeration.",
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "description": "A CWE weakness assigned to the advisory.",
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+              "cwe_id": {
+                "description": "The unique CWE ID.",
+                "type": "string",
+                "readOnly": true
+              },
+              "name": {
+                "description": "The short, plain text name of the CWE.",
+                "type": "string",
+                "readOnly": true
+              }
+            },
+            "required": [
+              "cwe_id",
+              "name"
+            ]
+          }
+        },
+        "identifiers": {
+          "description": "Values that identify this advisory among security information sources.",
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "description": "An advisory identifier.",
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+              "type": {
+                "description": "The type of advisory identifier.",
+                "oneOf": [
+                  {
+                    "const": "CVE"
+                  },
+                  {
+                    "const": "GHSA"
+                  }
+                ]
+              },
+              "value": {
+                "description": "The value of the advisory identifer.",
+                "type": "string",
+                "readOnly": true
+              }
+            },
+            "required": [
+              "value",
+              "type"
+            ]
+          }
+        },
+        "references": {
+          "description": "Links to additional advisory information.",
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "description": "A link to additional advisory information.",
+            "type": "object",
+            "readOnly": true,
+            "properties": {
+              "url": {
+                "description": "The URL of the reference.",
+                "type": "string",
+                "format": "uri",
+                "readOnly": true
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "published_at": {
+          "description": "The time that the advisory was published in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "description": "The time that the advisory was last modified in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "withdrawn_at": {
+          "description": "The time that the advisory was withdrawn in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "readOnly": true
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "ghsa_id",
+        "cve_id",
+        "summary",
+        "description",
+        "vulnerabilities",
+        "severity",
+        "cvss",
+        "cwes",
+        "identifiers",
+        "references",
+        "published_at",
+        "updated_at",
+        "withdrawn_at"
+      ]
+    },
+    "dependabot-alert-security-vulnerability": {
+      "description": "Details pertaining to one vulnerable version range for the advisory.",
+      "type": "object",
+      "readOnly": true,
+      "properties": {
+        "package": {
+          "$ref": "#/$defs/dependabot-alert-package"
+        },
+        "severity": {
+          "description": "The severity of the vulnerability.",
+          "oneOf": [
+            {
+              "const": "low"
+            },
+            {
+              "const": "medium"
+            },
+            {
+              "const": "high"
+            },
+            {
+              "const": "critical"
+            }
+          ]
+        },
+        "vulnerable_version_range": {
+          "description": "Conditions that identify vulnerable versions of this vulnerability's package.",
+          "type": "string",
+          "readOnly": true
+        },
+        "first_patched_version": {
+          "description": "Details pertaining to the package version that patches this vulnerability.",
+          "oneOf": [
+            {
+              "type": "object",
+              "readOnly": true,
+              "properties": {
+                "identifier": {
+                  "description": "The package version that patches this vulnerability.",
+                  "type": "string",
+                  "readOnly": true
+                }
+              },
+              "required": [
+                "identifier"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "package",
+        "severity",
+        "vulnerable_version_range",
+        "first_patched_version"
+      ]
+    },
+    "cvss-severities": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "cvss_v3": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "vector_string": {
+                      "description": "The CVSS 3 vector string.",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "score": {
+                      "description": "The CVSS 3 score.",
+                      "oneOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 10,
+                          "readOnly": true
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "vector_string",
+                    "score"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "cvss_v4": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "vector_string": {
+                      "description": "The CVSS 4 vector string.",
+                      "oneOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "score": {
+                      "description": "The CVSS 4 score.",
+                      "oneOf": [
+                        {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 10,
+                          "readOnly": true
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "vector_string",
+                    "score"
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "security-advisory-epss": {
+      "description": "The EPSS scores as calculated by the [Exploit Prediction Scoring System](https://www.first.org/epss).",
+      "oneOf": [
+        {
+          "type": "object",
+          "readOnly": true,
+          "properties": {
+            "percentage": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "percentile": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": []
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "alert-url": {
+      "description": "The REST API URL of the alert resource.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "alert-html-url": {
+      "description": "The GitHub URL of the alert resource.",
+      "type": "string",
+      "format": "uri",
+      "readOnly": true
+    },
+    "alert-created-at": {
+      "description": "The time that the alert was created in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "alert-updated-at": {
+      "description": "The time that the alert was last updated in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "alert-dismissed-at": {
+      "description": "The time that the alert was dismissed in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "alert-fixed-at": {
+      "description": "The time that the alert was no longer detected and was considered fixed in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "alert-auto-dismissed-at": {
+      "description": "The time that the alert was auto-dismissed in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.",
+      "oneOf": [
+        {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

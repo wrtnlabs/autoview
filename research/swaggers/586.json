@@ -1,0 +1,37 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-get-default-workflow-permissions"
+  },
+  "$defs": {
+    "actions-get-default-workflow-permissions": {
+      "type": "object",
+      "properties": {
+        "default_workflow_permissions": {
+          "$ref": "#/$defs/actions-default-workflow-permissions"
+        },
+        "can_approve_pull_request_reviews": {
+          "$ref": "#/$defs/actions-can-approve-pull-request-reviews"
+        }
+      },
+      "required": [
+        "default_workflow_permissions",
+        "can_approve_pull_request_reviews"
+      ]
+    },
+    "actions-default-workflow-permissions": {
+      "description": "The default workflow permissions granted to the GITHUB_TOKEN when running workflows.",
+      "oneOf": [
+        {
+          "const": "read"
+        },
+        {
+          "const": "write"
+        }
+      ]
+    },
+    "actions-can-approve-pull-request-reviews": {
+      "description": "Whether GitHub Actions can approve pull requests. Enabling this can be a security risk.",
+      "type": "boolean"
+    }
+  }
+}

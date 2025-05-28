@@ -1,0 +1,666 @@
+{
+  "schema": {
+    "$ref": "#/$defs/deployment"
+  },
+  "$defs": {
+    "deployment": {
+      "title": "Deployment",
+      "description": "A request for a specific ref(branch,sha,tag) to be deployed",
+      "type": "object",
+      "properties": {
+        "url": {
+          "example": "https://api.github.com/repos/octocat/example/deployments/1",
+          "type": "string",
+          "format": "uri"
+        },
+        "id": {
+          "description": "Unique identifier of the deployment",
+          "example": 42,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDEwOkRlcGxveW1lbnQx",
+          "type": "string"
+        },
+        "sha": {
+          "example": "a84d88e7554fc1fa21bcbc4efae3c782a70d2b9d",
+          "type": "string"
+        },
+        "ref": {
+          "description": "The ref to deploy. This can be a branch, tag, or sha.",
+          "example": "topic-branch",
+          "type": "string"
+        },
+        "task": {
+          "description": "Parameter to specify a task to execute",
+          "example": "deploy",
+          "type": "string"
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {},
+              "required": []
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "original_environment": {
+          "example": "staging",
+          "type": "string"
+        },
+        "environment": {
+          "description": "Name for the target deployment environment.",
+          "example": "production",
+          "type": "string"
+        },
+        "description": {
+          "example": "Deploy request from hubot",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "creator": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "created_at": {
+          "example": "2012-07-20T01:19:13Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "example": "2012-07-20T01:19:13Z",
+          "type": "string",
+          "format": "date-time"
+        },
+        "statuses_url": {
+          "example": "https://api.github.com/repos/octocat/example/deployments/1/statuses",
+          "type": "string",
+          "format": "uri"
+        },
+        "repository_url": {
+          "example": "https://api.github.com/repos/octocat/example",
+          "type": "string",
+          "format": "uri"
+        },
+        "transient_environment": {
+          "description": "Specifies if the given environment is will no longer exist at some point in the future. Default: false.",
+          "example": true,
+          "type": "boolean"
+        },
+        "production_environment": {
+          "description": "Specifies if the given environment is one that end-users directly interact with. Default: false.",
+          "example": true,
+          "type": "boolean"
+        },
+        "performed_via_github_app": {
+          "$ref": "#/$defs/nullable-integration"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "sha",
+        "ref",
+        "task",
+        "environment",
+        "creator",
+        "payload",
+        "description",
+        "statuses_url",
+        "repository_url",
+        "url",
+        "created_at",
+        "updated_at"
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-integration": {
+      "title": "GitHub app",
+      "description": "GitHub apps are a new way to extend GitHub. They can be installed directly on organizations and user accounts and granted access to specific repositories. They come with granular permissions and built-in webhooks. GitHub apps are first class actors within GitHub.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "Unique identifier of the GitHub app",
+              "example": 37,
+              "type": "integer"
+            },
+            "slug": {
+              "description": "The slug name of the GitHub app",
+              "example": "probot-owners",
+              "type": "string"
+            },
+            "node_id": {
+              "example": "MDExOkludGVncmF0aW9uMQ==",
+              "type": "string"
+            },
+            "client_id": {
+              "example": "\"Iv1.25b5d1e65ffc4022\"",
+              "type": "string"
+            },
+            "owner": {
+              "oneOf": [
+                {
+                  "$ref": "#/$defs/simple-user"
+                },
+                {
+                  "$ref": "#/$defs/enterprise"
+                }
+              ]
+            },
+            "name": {
+              "description": "The name of the GitHub app",
+              "example": "Probot Owners",
+              "type": "string"
+            },
+            "description": {
+              "example": "The description of the app.",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "external_url": {
+              "example": "https://example.com",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/apps/super-ci",
+              "type": "string",
+              "format": "uri"
+            },
+            "created_at": {
+              "example": "2017-07-08T16:18:44-04:00",
+              "type": "string",
+              "format": "date-time"
+            },
+            "updated_at": {
+              "example": "2017-07-08T16:18:44-04:00",
+              "type": "string",
+              "format": "date-time"
+            },
+            "permissions": {
+              "description": "The set of permissions for the GitHub app",
+              "example": {
+                "issues": "read",
+                "deployments": "write"
+              },
+              "type": "object",
+              "properties": {
+                "issues": {
+                  "type": "string"
+                },
+                "checks": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "string"
+                },
+                "contents": {
+                  "type": "string"
+                },
+                "deployments": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": {
+                "type": "string"
+              },
+              "required": []
+            },
+            "events": {
+              "description": "The list of events for the GitHub app",
+              "example": [
+                "label",
+                "deployment"
+              ],
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "installations_count": {
+              "description": "The number of installations associated with the GitHub app",
+              "example": 5,
+              "type": "integer"
+            },
+            "client_secret": {
+              "example": "\"1d4b2097ac622ba702d19de498f005747a8b21d3\"",
+              "type": "string"
+            },
+            "webhook_secret": {
+              "example": "\"6fba8f2fc8a7e8f2cca5577eddd82ca7586b3b6b\"",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "pem": {
+              "example": "\"-----BEGIN RSA PRIVATE KEY-----\\nMIIEogIBAAKCAQEArYxrNYD/iT5CZVpRJu4rBKmmze3PVmT/gCo2ATUvDvZTPTey\\nxcGJ3vvrJXazKk06pN05TN29o98jrYz4cengG3YGsXPNEpKsIrEl8NhbnxapEnM9\\nJCMRe0P5JcPsfZlX6hmiT7136GRWiGOUba2X9+HKh8QJVLG5rM007TBER9/z9mWm\\nrJuNh+m5l320oBQY/Qq3A7wzdEfZw8qm/mIN0FCeoXH1L6B8xXWaAYBwhTEh6SSn\\nZHlO1Xu1JWDmAvBCi0RO5aRSKM8q9QEkvvHP4yweAtK3N8+aAbZ7ovaDhyGz8r6r\\nzhU1b8Uo0Z2ysf503WqzQgIajr7Fry7/kUwpgQIDAQABAoIBADwJp80Ko1xHPZDy\\nfcCKBDfIuPvkmSW6KumbsLMaQv1aGdHDwwTGv3t0ixSay8CGlxMRtRDyZPib6SvQ\\n6OH/lpfpbMdW2ErkksgtoIKBVrDilfrcAvrNZu7NxRNbhCSvN8q0s4ICecjbbVQh\\nnueSdlA6vGXbW58BHMq68uRbHkP+k+mM9U0mDJ1HMch67wlg5GbayVRt63H7R2+r\\nVxcna7B80J/lCEjIYZznawgiTvp3MSanTglqAYi+m1EcSsP14bJIB9vgaxS79kTu\\noiSo93leJbBvuGo8QEiUqTwMw4tDksmkLsoqNKQ1q9P7LZ9DGcujtPy4EZsamSJT\\ny8OJt0ECgYEA2lxOxJsQk2kI325JgKFjo92mQeUObIvPfSNWUIZQDTjniOI6Gv63\\nGLWVFrZcvQBWjMEQraJA9xjPbblV8PtfO87MiJGLWCHFxmPz2dzoedN+2Coxom8m\\nV95CLz8QUShuao6u/RYcvUaZEoYs5bHcTmy5sBK80JyEmafJPtCQVxMCgYEAy3ar\\nZr3yv4xRPEPMat4rseswmuMooSaK3SKub19WFI5IAtB/e7qR1Rj9JhOGcZz+OQrl\\nT78O2OFYlgOIkJPvRMrPpK5V9lslc7tz1FSh3BZMRGq5jSyD7ETSOQ0c8T2O/s7v\\nbeEPbVbDe4mwvM24XByH0GnWveVxaDl51ABD65sCgYB3ZAspUkOA5egVCh8kNpnd\\nSd6SnuQBE3ySRlT2WEnCwP9Ph6oPgn+oAfiPX4xbRqkL8q/k0BdHQ4h+zNwhk7+h\\nWtPYRAP1Xxnc/F+jGjb+DVaIaKGU18MWPg7f+FI6nampl3Q0KvfxwX0GdNhtio8T\\nTj1E+SnFwh56SRQuxSh2gwKBgHKjlIO5NtNSflsUYFM+hyQiPiqnHzddfhSG+/3o\\nm5nNaSmczJesUYreH5San7/YEy2UxAugvP7aSY2MxB+iGsiJ9WD2kZzTUlDZJ7RV\\nUzWsoqBR+eZfVJ2FUWWvy8TpSG6trh4dFxImNtKejCR1TREpSiTV3Zb1dmahK9GV\\nrK9NAoGAbBxRLoC01xfxCTgt5BDiBcFVh4fp5yYKwavJPLzHSpuDOrrI9jDn1oKN\\nonq5sDU1i391zfQvdrbX4Ova48BN+B7p63FocP/MK5tyyBoT8zQEk2+vWDOw7H/Z\\nu5dTCPxTIsoIwUw1I+7yIxqJzLPFgR2gVBwY1ra/8iAqCj+zeBw=\\n-----END RSA PRIVATE KEY-----\\n\"",
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "node_id",
+            "owner",
+            "name",
+            "description",
+            "external_url",
+            "html_url",
+            "created_at",
+            "updated_at",
+            "permissions",
+            "events"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "email": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "login": {
+          "example": "octocat",
+          "type": "string"
+        },
+        "id": {
+          "example": 1,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDQ6VXNlcjE=",
+          "type": "string"
+        },
+        "avatar_url": {
+          "example": "https://github.com/images/error/octocat_happy.gif",
+          "type": "string",
+          "format": "uri"
+        },
+        "gravatar_id": {
+          "example": "41d064eb2195891e12d0413f63227ea7",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "example": "https://api.github.com/users/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat",
+          "type": "string",
+          "format": "uri"
+        },
+        "followers_url": {
+          "example": "https://api.github.com/users/octocat/followers",
+          "type": "string",
+          "format": "uri"
+        },
+        "following_url": {
+          "example": "https://api.github.com/users/octocat/following{/other_user}",
+          "type": "string"
+        },
+        "gists_url": {
+          "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+          "type": "string"
+        },
+        "starred_url": {
+          "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+          "type": "string"
+        },
+        "subscriptions_url": {
+          "example": "https://api.github.com/users/octocat/subscriptions",
+          "type": "string",
+          "format": "uri"
+        },
+        "organizations_url": {
+          "example": "https://api.github.com/users/octocat/orgs",
+          "type": "string",
+          "format": "uri"
+        },
+        "repos_url": {
+          "example": "https://api.github.com/users/octocat/repos",
+          "type": "string",
+          "format": "uri"
+        },
+        "events_url": {
+          "example": "https://api.github.com/users/octocat/events{/privacy}",
+          "type": "string"
+        },
+        "received_events_url": {
+          "example": "https://api.github.com/users/octocat/received_events",
+          "type": "string",
+          "format": "uri"
+        },
+        "type": {
+          "example": "User",
+          "type": "string"
+        },
+        "site_admin": {
+          "type": "boolean"
+        },
+        "starred_at": {
+          "example": "\"2020-07-09T00:17:55Z\"",
+          "type": "string"
+        },
+        "user_view_type": {
+          "example": "public",
+          "type": "string"
+        }
+      },
+      "required": [
+        "avatar_url",
+        "events_url",
+        "followers_url",
+        "following_url",
+        "gists_url",
+        "gravatar_id",
+        "html_url",
+        "id",
+        "node_id",
+        "login",
+        "organizations_url",
+        "received_events_url",
+        "repos_url",
+        "site_admin",
+        "starred_url",
+        "subscriptions_url",
+        "type",
+        "url"
+      ]
+    },
+    "enterprise": {
+      "title": "Enterprise",
+      "description": "An enterprise on GitHub.",
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "A short description of the enterprise.",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "html_url": {
+          "example": "https://github.com/enterprises/octo-business",
+          "type": "string",
+          "format": "uri"
+        },
+        "website_url": {
+          "description": "The enterprise's website URL.",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uri"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "Unique identifier of the enterprise",
+          "example": 42,
+          "type": "integer"
+        },
+        "node_id": {
+          "example": "MDEwOlJlcG9zaXRvcnkxMjk2MjY5",
+          "type": "string"
+        },
+        "name": {
+          "description": "The name of the enterprise.",
+          "example": "Octo Business",
+          "type": "string"
+        },
+        "slug": {
+          "description": "The slug url identifier for the enterprise.",
+          "example": "octo-business",
+          "type": "string"
+        },
+        "created_at": {
+          "example": "2019-01-26T19:01:12Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "updated_at": {
+          "example": "2019-01-26T19:14:43Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "avatar_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "name",
+        "slug",
+        "html_url",
+        "created_at",
+        "updated_at",
+        "avatar_url"
+      ]
+    }
+  }
+}

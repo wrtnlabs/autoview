@@ -1,0 +1,132 @@
+{
+  "schema": {
+    "$ref": "#/$defs/dependency-graph-diff"
+  },
+  "$defs": {
+    "dependency-graph-diff": {
+      "title": "Dependency Graph Diff",
+      "description": "A diff of the dependencies between two commits.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "change_type": {
+            "oneOf": [
+              {
+                "const": "added"
+              },
+              {
+                "const": "removed"
+              }
+            ]
+          },
+          "manifest": {
+            "example": "path/to/package-lock.json",
+            "type": "string"
+          },
+          "ecosystem": {
+            "example": "npm",
+            "type": "string"
+          },
+          "name": {
+            "example": "@actions/core",
+            "type": "string"
+          },
+          "version": {
+            "example": "1.0.0",
+            "type": "string"
+          },
+          "package_url": {
+            "example": "pkg:/npm/%40actions/core@1.1.0",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "license": {
+            "example": "MIT",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_repository_url": {
+            "example": "https://github.com/github/actions",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "vulnerabilities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "severity": {
+                  "example": "critical",
+                  "type": "string"
+                },
+                "advisory_ghsa_id": {
+                  "example": "GHSA-rf4j-j272-fj86",
+                  "type": "string"
+                },
+                "advisory_summary": {
+                  "example": "A summary of the advisory.",
+                  "type": "string"
+                },
+                "advisory_url": {
+                  "example": "https://github.com/advisories/GHSA-rf4j-j272-fj86",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "severity",
+                "advisory_ghsa_id",
+                "advisory_summary",
+                "advisory_url"
+              ]
+            }
+          },
+          "scope": {
+            "description": "Where the dependency is utilized. `development` means that the dependency is only utilized in the development environment. `runtime` means that the dependency is utilized at runtime and in the development environment.",
+            "oneOf": [
+              {
+                "const": "unknown"
+              },
+              {
+                "const": "runtime"
+              },
+              {
+                "const": "development"
+              }
+            ]
+          }
+        },
+        "required": [
+          "change_type",
+          "manifest",
+          "ecosystem",
+          "name",
+          "version",
+          "package_url",
+          "license",
+          "source_repository_url",
+          "vulnerabilities",
+          "scope"
+        ]
+      }
+    }
+  }
+}

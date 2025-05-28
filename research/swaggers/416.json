@@ -1,0 +1,53 @@
+{
+  "schema": {
+    "$ref": "#/$defs/empty-object"
+  },
+  "$defs": {
+    "IApiOrgsActionsVariables.PostBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "The name of the variable.",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value of the variable.",
+          "type": "string"
+        },
+        "visibility": {
+          "description": "The type of repositories in the organization that can access the variable. `selected` means only the repositories specified by `selected_repository_ids` can access the variable.",
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "private"
+            },
+            {
+              "const": "selected"
+            }
+          ]
+        },
+        "selected_repository_ids": {
+          "description": "An array of repository ids that can access the organization variable. You can only provide a list of repository ids when the `visibility` is set to `selected`.",
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "required": [
+        "name",
+        "value",
+        "visibility"
+      ]
+    },
+    "empty-object": {
+      "title": "Empty Object",
+      "description": "An object without any properties.",
+      "type": "object",
+      "properties": {},
+      "required": []
+    }
+  }
+}

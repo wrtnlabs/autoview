@@ -1,0 +1,8 @@
+
+import Component from "../components/195";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"oneTimeMsg":{"id":"msg_001_test","channelId":"channel_abc_test","name":"Spring Sale Campaign (Sample)","state":"waiting","sendMode":"reservedWithReceiverTime","sendMedium":"email","settings":{"type":"default_email_settings"},"userQuery":{"key":"signupDate","type":"date","operator":{},"values":[{"start":"2025-05-01","end":"2025-05-31"}]},"goalEventName":"purchaseOrder","goalEventQuery":{"key":"orderValue","type":"number","operator":{},"values":[{"min":100,"max":1000}]},"enableSupportBot":true,"followingSupportBotId":"support_bot_123","advertising":false,"sendToOfflineXms":false,"sendToOfflineEmail":true,"startAt":1740000000000,"draft":{"oneTimeMsg":{"id":"draft_msg_001","channelId":"channel_draft_abc","name":"Draft: Summer Promo (Sample)","state":"draft","sendMode":"immediately","channelOperationId":"op_1234_test","sendMedium":"appLine","settings":{"type":"line_default"},"userQuery":{"key":"subscriptionStatus","type":"string","operator":{},"values":[{"status":"active"}]},"goalEventName":"appOpen","goalEventQuery":{"key":"openCount","type":"number","operator":{},"values":[{"min":1}]},"goalEventDuration":"7d","advertising":false,"sendToOfflineXms":true,"sendToOfflineEmail":false,"startAt":1740100000000,"localStartAt":"2025-10-02T09:00:00Z","createdAt":1740000000000,"updatedAt":1740003600000,"sent":0,"view":0,"goal":0,"click":0,"userChatExpireDuration":"30m"}},"createdAt":1740000000000,"updatedAt":1740003600000,"sent":150,"view":145,"goal":20,"click":5,"userChatExpireDuration":"15m"}};
+}

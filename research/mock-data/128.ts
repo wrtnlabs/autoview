@@ -1,0 +1,8 @@
+
+import Component from "../components/128";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"pagination":{"current":1,"limit":10,"records":2,"pages":1},"data":[{"id":"coupon_A12345","designer":{"id":"admin_001","created_at":"2025-05-19T09:15:00Z"},"inventory":{"volume":1000,"volume_per_citizen":2},"criterias":[{"type":"section","direction":"include","sections":[{"id":"section_A1","code":"electronics","name":"Electronics Test Section","created_at":"2025-02-01T09:00:00Z"}]},{"type":"funnel","direction":"exclude","funnels":[{"kind":"url","value":"https://www.example.com/promotion?utm_source=test"},{"kind":"variable","key":"campaign","value":"spring_test"}]}],"discount":{"unit":"amount","value":500,"threshold":1000,"limit":null,"multiplicative":true},"restriction":{"access":"public","exclusive":false,"volume":null,"volume_per_citizen":1,"expired_in":30,"expired_at":null},"name":"Spring Sale Coupon (Test)","opened_at":"2025-05-01T00:00:00Z","closed_at":"2025-05-31T23:59:59Z","created_at":"2025-04-20T12:00:00Z"},{"id":"coupon_B67890","designer":{"id":"seller_ABC123","created_at":"2025-03-15T08:10:00Z"},"inventory":{"volume":null,"volume_per_citizen":null},"criterias":[{"type":"seller","direction":"include","sellers":[{"id":"seller_ABC123","created_at":"2025-03-15T08:10:00Z"}]}],"discount":{"unit":"percent","value":15,"threshold":null,"limit":500},"restriction":{"access":"private","exclusive":true,"volume":100,"volume_per_citizen":null,"expired_in":null,"expired_at":"2025-12-31T23:59:59Z"},"name":"Exclusive 15% Off Coupon (Sample)","opened_at":null,"closed_at":null,"created_at":"2025-05-10T11:45:00Z"}]};
+}

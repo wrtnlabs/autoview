@@ -1,0 +1,125 @@
+{
+  "schema": {
+    "$ref": "#/$defs/ChatSessionsView"
+  },
+  "$defs": {
+    "ChatSessionsView": {
+      "type": "object",
+      "properties": {
+        "sessions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatSession"
+          }
+        }
+      },
+      "required": []
+    },
+    "ChatSession": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "readOnly": true
+        },
+        "chatId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "teamChatSectionId": {
+          "type": "string"
+        },
+        "chatKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "updatedKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "unreadKey": {
+          "type": "string",
+          "readOnly": true
+        },
+        "channelId": {
+          "type": "string",
+          "readOnly": true
+        },
+        "alert": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "unread": {
+          "type": "integer",
+          "format": "int32",
+          "readOnly": true
+        },
+        "watch": {
+          "oneOf": [
+            {
+              "const": "all"
+            },
+            {
+              "const": "info"
+            },
+            {
+              "const": "none"
+            }
+          ]
+        },
+        "allMentionImportant": {
+          "type": "boolean"
+        },
+        "readAt": {
+          "example": 1744704941683,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "receivedAt": {
+          "example": 1744704941683,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "postedAt": {
+          "example": 1744704941683,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "updatedAt": {
+          "example": 1744704941696,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "createdAt": {
+          "example": 1744704941696,
+          "type": "number",
+          "format": "int64",
+          "readOnly": true
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64",
+          "readOnly": true
+        },
+        "id": {
+          "type": "string"
+        },
+        "chatType": {
+          "type": "string"
+        },
+        "personType": {
+          "type": "string"
+        },
+        "personId": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

@@ -1,0 +1,8 @@
+
+import Component from "../components/273";
+
+export type InputType = Parameters<typeof Component>[0];
+
+export function random(): InputType {
+  return {"user":{"id":"user-12345","channelId":"channel-abc","memberId":"member-999","veilId":"veil-xyz","unifiedId":"unified-111","type":"member","name":"Test User (Sample)","mobileNumberQualified":true,"emailQualified":true,"profile":{"bio":{}},"profileOnce":{"initialSetup":{}},"tags":["premium","beta-user"],"userImportTags":["import-flag1","import-flag2"],"alert":5,"unread":2,"popUpChatId":"chat-321","blocked":false,"blockedKey":"block-key-sample","unsubscribeEmail":true,"unsubscribeEmailUpdatedAt":1687260000000,"unsubscribeTexting":false,"unsubscribeTextingUpdatedAt":1687265000000,"hasChat":true,"mainChatId":"chat-123","hasPushToken":false,"language":"en","country":"US","timeZone":"America/Los_Angeles","province":"California","city":"San Francisco","latitude":37.7749,"longitude":-122.4194,"web":{"device":"Desktop","os":"Windows 10","osName":"Windows","browser":"Chrome 92","browserName":"Google Chrome","sessionsCount":8,"lastSeenAt":1687270000000},"mobile":{"device":"iPhone 12","os":"iOS 14","osName":"iOS","appName":"SampleApp","appVersion":"1.0.0-test","sdkName":"SampleSDK","sdkVersion":"2.1.0","sessionsCount":3,"lastSeenAt":1687265000000},"sessionsCount":12,"lastSeenAt":1687270000000,"createdAt":1687000000000,"updatedAt":1687350000000,"version":3,"managedKey":42,"named":true,"member":true,"email":"test.user@example.com","avatarUrl":"https://www.example.com/avatar/test-user-sample.png","mobileNumber":"+15555550123","landlineNumber":"+15555550000","constrainted":false,"systemLanguage":"en"},"online":{"channelId":"channel-123","personType":"user","personId":"user-456","id":"online-789"}};
+}

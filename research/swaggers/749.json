@@ -1,0 +1,41 @@
+{
+  "schema": {
+    "$ref": "#/$defs/short-blob"
+  },
+  "$defs": {
+    "IApiReposGitBlobs.PostBody": {
+      "type": "object",
+      "properties": {
+        "content": {
+          "description": "The new blob's content.",
+          "type": "string"
+        },
+        "encoding": {
+          "description": "The encoding used for `content`. Currently, `\"utf-8\"` and `\"base64\"` are supported.",
+          "type": "string",
+          "default": "utf-8"
+        }
+      },
+      "required": [
+        "content"
+      ]
+    },
+    "short-blob": {
+      "title": "Short Blob",
+      "description": "Short Blob",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "sha": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url",
+        "sha"
+      ]
+    }
+  }
+}

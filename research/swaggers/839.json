@@ -1,0 +1,297 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/pull-request-review"
+    }
+  },
+  "$defs": {
+    "pull-request-review": {
+      "title": "Pull Request Review",
+      "description": "Pull Request Reviews are reviews on pull requests.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Unique identifier of the review",
+          "example": 42,
+          "type": "integer",
+          "format": "int64"
+        },
+        "node_id": {
+          "example": "MDE3OlB1bGxSZXF1ZXN0UmV2aWV3ODA=",
+          "type": "string"
+        },
+        "user": {
+          "$ref": "#/$defs/nullable-simple-user"
+        },
+        "body": {
+          "description": "The text of the review.",
+          "example": "This looks great.",
+          "type": "string"
+        },
+        "state": {
+          "example": "CHANGES_REQUESTED",
+          "type": "string"
+        },
+        "html_url": {
+          "example": "https://github.com/octocat/Hello-World/pull/12#pullrequestreview-80",
+          "type": "string",
+          "format": "uri"
+        },
+        "pull_request_url": {
+          "example": "https://api.github.com/repos/octocat/Hello-World/pulls/12",
+          "type": "string",
+          "format": "uri"
+        },
+        "_links": {
+          "type": "object",
+          "properties": {
+            "html": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "href"
+              ]
+            },
+            "pull_request": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "href"
+              ]
+            }
+          },
+          "required": [
+            "html",
+            "pull_request"
+          ]
+        },
+        "submitted_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "commit_id": {
+          "description": "A commit SHA for the review. If the commit object was garbage collected or forcibly deleted, then it no longer exists in Git and this value will be `null`.",
+          "example": "54bb654c9e6025347f57900a4a5c2313a96b8035",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "body_html": {
+          "type": "string"
+        },
+        "body_text": {
+          "type": "string"
+        },
+        "author_association": {
+          "$ref": "#/$defs/author-association"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "user",
+        "body",
+        "state",
+        "commit_id",
+        "html_url",
+        "pull_request_url",
+        "_links",
+        "author_association"
+      ]
+    },
+    "nullable-simple-user": {
+      "title": "Simple User",
+      "description": "A GitHub user.",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "name": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "email": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "login": {
+              "example": "octocat",
+              "type": "string"
+            },
+            "id": {
+              "example": 1,
+              "type": "integer",
+              "format": "int64"
+            },
+            "node_id": {
+              "example": "MDQ6VXNlcjE=",
+              "type": "string"
+            },
+            "avatar_url": {
+              "example": "https://github.com/images/error/octocat_happy.gif",
+              "type": "string",
+              "format": "uri"
+            },
+            "gravatar_id": {
+              "example": "41d064eb2195891e12d0413f63227ea7",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "url": {
+              "example": "https://api.github.com/users/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "html_url": {
+              "example": "https://github.com/octocat",
+              "type": "string",
+              "format": "uri"
+            },
+            "followers_url": {
+              "example": "https://api.github.com/users/octocat/followers",
+              "type": "string",
+              "format": "uri"
+            },
+            "following_url": {
+              "example": "https://api.github.com/users/octocat/following{/other_user}",
+              "type": "string"
+            },
+            "gists_url": {
+              "example": "https://api.github.com/users/octocat/gists{/gist_id}",
+              "type": "string"
+            },
+            "starred_url": {
+              "example": "https://api.github.com/users/octocat/starred{/owner}{/repo}",
+              "type": "string"
+            },
+            "subscriptions_url": {
+              "example": "https://api.github.com/users/octocat/subscriptions",
+              "type": "string",
+              "format": "uri"
+            },
+            "organizations_url": {
+              "example": "https://api.github.com/users/octocat/orgs",
+              "type": "string",
+              "format": "uri"
+            },
+            "repos_url": {
+              "example": "https://api.github.com/users/octocat/repos",
+              "type": "string",
+              "format": "uri"
+            },
+            "events_url": {
+              "example": "https://api.github.com/users/octocat/events{/privacy}",
+              "type": "string"
+            },
+            "received_events_url": {
+              "example": "https://api.github.com/users/octocat/received_events",
+              "type": "string",
+              "format": "uri"
+            },
+            "type": {
+              "example": "User",
+              "type": "string"
+            },
+            "site_admin": {
+              "type": "boolean"
+            },
+            "starred_at": {
+              "example": "\"2020-07-09T00:17:55Z\"",
+              "type": "string"
+            },
+            "user_view_type": {
+              "example": "public",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avatar_url",
+            "events_url",
+            "followers_url",
+            "following_url",
+            "gists_url",
+            "gravatar_id",
+            "html_url",
+            "id",
+            "node_id",
+            "login",
+            "organizations_url",
+            "received_events_url",
+            "repos_url",
+            "site_admin",
+            "starred_url",
+            "subscriptions_url",
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "author-association": {
+      "title": "author_association",
+      "description": "How the author is associated with the repository.",
+      "example": "OWNER",
+      "oneOf": [
+        {
+          "const": "COLLABORATOR"
+        },
+        {
+          "const": "CONTRIBUTOR"
+        },
+        {
+          "const": "FIRST_TIMER"
+        },
+        {
+          "const": "FIRST_TIME_CONTRIBUTOR"
+        },
+        {
+          "const": "MANNEQUIN"
+        },
+        {
+          "const": "MEMBER"
+        },
+        {
+          "const": "NONE"
+        },
+        {
+          "const": "OWNER"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/org-repo-custom-property-values"
+    }
+  },
+  "$defs": {
+    "IApiOrgsPropertiesValues.GetQuery": {
+      "type": "object",
+      "properties": {
+        "repository_query": {
+          "description": "Finds repositories in the organization with a query containing one or more search keywords and qualifiers. Qualifiers allow you to limit your search to specific areas of GitHub. The REST API supports the same qualifiers as the web interface for GitHub. To learn more about the format of the query, see [Constructing a search query](https://docs.github.com/rest/search/search#constructing-a-search-query). See \"[Searching for repositories](https://docs.github.com/articles/searching-for-repositories/)\" for a detailed list of qualifiers.",
+          "type": "string"
+        }
+      },
+      "required": []
+    },
+    "org-repo-custom-property-values": {
+      "title": "Organization Repository Custom Property Values",
+      "description": "List of custom property values for a repository",
+      "type": "object",
+      "properties": {
+        "repository_id": {
+          "example": 1296269,
+          "type": "integer"
+        },
+        "repository_name": {
+          "example": "Hello-World",
+          "type": "string"
+        },
+        "repository_full_name": {
+          "example": "octocat/Hello-World",
+          "type": "string"
+        },
+        "properties": {
+          "description": "List of custom property names and associated values",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/custom-property-value"
+          }
+        }
+      },
+      "required": [
+        "repository_id",
+        "repository_name",
+        "repository_full_name",
+        "properties"
+      ]
+    },
+    "custom-property-value": {
+      "title": "Custom Property Value",
+      "description": "Custom property name and associated value",
+      "type": "object",
+      "properties": {
+        "property_name": {
+          "description": "The name of the property",
+          "type": "string"
+        },
+        "value": {
+          "description": "The value assigned to the property",
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "property_name",
+        "value"
+      ]
+    }
+  }
+}

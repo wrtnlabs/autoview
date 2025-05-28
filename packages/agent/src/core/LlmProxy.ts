@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { Stream } from "openai/streaming";
 
 /**
  * A promise or a value.
@@ -23,6 +24,25 @@ export type ToolHandler<I, O> = (
   toolName: string,
   toolInput: unknown,
 ) => PromiseOrValue<O>;
+
+export type PreGenerationCallback = (
+  api: OpenAI,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParams,
+  options: OpenAI.RequestOptions | undefined,
+  backoffStrategy: ILlmBackoffStrategy,
+) =>
+  | void
+  | PostGenerationCallback
+  | Promise<PostGenerationCallback | undefined | void>;
+
+export type PostGenerationCallback = (
+  completion: (
+    | OpenAI.Chat.Completions.ChatCompletion
+    | Stream<OpenAI.Chat.Completions.ChatCompletionChunk>
+  ) & {
+    _request_id?: string | null;
+  },
+) => void | Promise<void>;
 
 /**
  * A strategy for retrying a request.
@@ -72,6 +92,22 @@ export class LlmUnrecoverableError {
   }
 }
 
+export async function createCompletion(
+  api: OpenAI,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+  options?: OpenAI.RequestOptions,
+  backoffStrategy?: ILlmBackoffStrategy,
+  callback?: PreGenerationCallback,
+): Promise<OpenAI.ChatCompletion>;
+
+export async function createCompletion(
+  api: OpenAI,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming,
+  options?: OpenAI.RequestOptions,
+  backoffStrategy?: ILlmBackoffStrategy,
+  callback?: PreGenerationCallback,
+): Promise<Stream<OpenAI.ChatCompletionChunk>>;
+
 /**
  * Create a completion.
  *
@@ -85,12 +121,13 @@ export class LlmUnrecoverableError {
  * @param backoffStrategy - The backoff strategy to use for the request to the LLM.
  * @returns The completion.
  */
-async function createCompletion(
+export async function createCompletion(
   api: OpenAI,
-  body: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
+  body: OpenAI.Chat.Completions.ChatCompletionCreateParams,
   options?: OpenAI.RequestOptions,
   backoffStrategy?: ILlmBackoffStrategy,
-): Promise<OpenAI.ChatCompletion> {
+  callback?: PreGenerationCallback,
+): Promise<OpenAI.ChatCompletion | Stream<OpenAI.ChatCompletionChunk>> {
   const backoffStrategyOrDefault = backoffStrategy ?? {
     maximumAttempts: 5,
     baseDelay: 1000,
@@ -103,10 +140,25 @@ async function createCompletion(
 
   for (let i = 1; i <= backoffStrategyOrDefault.maximumAttempts; ++i) {
     try {
+      let postGenerationCallback: PostGenerationCallback | null = null;
+
+      if (callback) {
+        const result = await callback(
+          api,
+          body,
+          options,
+          backoffStrategyOrDefault,
+        );
+
+        if (typeof result === "function") {
+          postGenerationCallback = result;
+        }
+      }
+
       const completion = await api.chat.completions.create(body, options);
 
-      if (completion.choices.length === 0) {
-        continue;
+      if (postGenerationCallback) {
+        postGenerationCallback(completion);
       }
 
       return completion;
@@ -166,6 +218,7 @@ export class LlmProxy<I, O> {
   private textHandler: TextHandler<I, O> | undefined;
   private readonly toolHandlers: Map<string, ToolHandler<I, O>> = new Map();
   private errorCallback: ((error: LlmFailure) => void) | undefined;
+  private preGenerationCallback: PreGenerationCallback | undefined;
 
   /**
    * Set the text handler.
@@ -199,8 +252,13 @@ export class LlmProxy<I, O> {
     return this;
   }
 
+  withPreGenerationCallback(callback: PreGenerationCallback): this {
+    this.preGenerationCallback = callback;
+    return this;
+  }
+
   /**
-   * Call the LLM.
+   * Call the LLM without streaming.
    *
    * This method will call the LLM with the given body and options.
    *
@@ -242,9 +300,10 @@ export class LlmProxy<I, O> {
 
       const completion = await createCompletion(
         api,
-        body,
+        mergedBody,
         options,
         backoffStrategy,
+        this.preGenerationCallback,
       );
 
       const outputs: O[] = [];

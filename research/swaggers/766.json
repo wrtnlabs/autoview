@@ -1,0 +1,49 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/porter-author"
+    }
+  },
+  "$defs": {
+    "porter-author": {
+      "title": "Porter Author",
+      "description": "Porter Author",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "remote_id": {
+          "type": "string"
+        },
+        "remote_name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "import_url": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "id",
+        "remote_id",
+        "remote_name",
+        "email",
+        "name",
+        "url",
+        "import_url"
+      ]
+    }
+  }
+}

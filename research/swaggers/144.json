@@ -1,0 +1,207 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IShoppingSaleInquiryAnswer"
+  },
+  "$defs": {
+    "IBbsArticle.ICreate": {
+      "description": "Creation information of the article.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of article",
+          "description": "Title of article.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Content body of article",
+          "description": "Content body of article.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "format",
+        "title",
+        "body",
+        "files"
+      ]
+    },
+    "IAttachmentFile.ICreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "title": "File name, except extension",
+          "description": "File name, except extension.\n\nIf there's file `.gitignore`, then its name is an empty string.",
+          "type": "string",
+          "maxLength": 255
+        },
+        "extension": {
+          "title": "Extension",
+          "description": "Extension.\n\nPossible to omit like `README` case.",
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 8
+            }
+          ]
+        },
+        "url": {
+          "title": "URL path of the real file",
+          "description": "URL path of the real file.",
+          "type": "string",
+          "format": "uri",
+          "contentMediaType": "image/*"
+        }
+      },
+      "required": [
+        "name",
+        "extension",
+        "url"
+      ]
+    },
+    "IShoppingSaleInquiryAnswer": {
+      "description": "Answers to questions about sale snapshots.\n\n`IShoppingSaleInquiryAnswer` is an entity that embodies the official\nanswer written by the {@link IShoppingSeller seller} to the\n{@link IShoppingSaleInquiry inquiry} written by the\n{@link IShoppingCustomer customer}.\n\nOf course, in addition to writing an official response like this, it is\nalso possible for the seller to communicate with the inqjuiry written\ncustomer and multiple customers through\n{@link IShoppingSaleInquiryComment comments} in the attribution inquiry.\n\nFor reference, it is not possible to write comments on this answer.\nEncourage people to write comments on the inquiry article. This is to\nprevent comments from being scattered in both inquiry and answer\narticles.",
+      "type": "object",
+      "properties": {
+        "seller": {
+          "title": "Seller who've written the answer",
+          "description": "Seller who've written the answer.",
+          "$ref": "#/$defs/IShoppingSeller"
+        },
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "snapshots": {
+          "title": "List of snapshot contents",
+          "description": "List of snapshot contents.\n\nIt is created for the first time when an article is created, and is\naccumulated every time the article is modified.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IBbsArticle.ISnapshot"
+          },
+          "minItems": 1
+        },
+        "created_at": {
+          "title": "Creation time of article",
+          "description": "Creation time of article.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "seller",
+        "id",
+        "snapshots",
+        "created_at"
+      ]
+    },
+    "IShoppingSeller": {
+      "description": "Seller information.\n\n`IShoppingSeller` is an entity that embodies a person who registers\n{@link IShoppingSale sales} to operate selling activities, with\n{@link IShoppingMember membership} joining.\n\nFor reference, unlike {@link IShoppingCustomer customers} which can\nparticipate even without membership joining, seller must join membership\nto operate sales. Also, seller must do the\n{@link IShoppingCitizen real-name and mobile authentication}, too.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string",
+          "format": "uuid"
+        },
+        "created_at": {
+          "title": "Creation tmie of record",
+          "description": "Creation tmie of record.\n\nAnother words, the time when the seller has signed up.",
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "created_at"
+      ]
+    },
+    "IBbsArticle.ISnapshot": {
+      "description": "Snapshot of article.\n\n`IBbsArticle.ISnapshot` is a snapshot entity that contains the contents of\nthe article, as mentioned in {@link IBbsArticle}, the contents of the article\nare separated from the article record to keep evidence and prevent fraud.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Primary Key",
+          "description": "Primary Key.",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Creation time of snapshot record",
+          "description": "Creation time of snapshot record.\n\nIn other words, creation time or update time or article.",
+          "type": "string",
+          "format": "date-time"
+        },
+        "format": {
+          "title": "Format of body",
+          "description": "Format of body.\n\nSame meaning with extension like `html`, `md`, `txt`.",
+          "oneOf": [
+            {
+              "const": "html"
+            },
+            {
+              "const": "md"
+            },
+            {
+              "const": "txt"
+            }
+          ]
+        },
+        "title": {
+          "title": "Title of article",
+          "description": "Title of article.",
+          "type": "string"
+        },
+        "body": {
+          "title": "Content body of article",
+          "description": "Content body of article.",
+          "type": "string"
+        },
+        "files": {
+          "title": "List of attachment files",
+          "description": "List of attachment files.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IAttachmentFile.ICreate"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "created_at",
+        "format",
+        "title",
+        "body",
+        "files"
+      ]
+    }
+  }
+}

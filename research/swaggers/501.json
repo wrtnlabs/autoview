@@ -1,0 +1,26 @@
+{
+  "schema": {
+    "$ref": "#/$defs/IApiOrgsPrivateRegistriesPublicKey.GetResponse"
+  },
+  "$defs": {
+    "IApiOrgsPrivateRegistriesPublicKey.GetResponse": {
+      "type": "object",
+      "required": [
+        "key_id",
+        "key"
+      ],
+      "properties": {
+        "key_id": {
+          "description": "The identifier for the key.",
+          "example": "012345678912345678",
+          "type": "string"
+        },
+        "key": {
+          "description": "The Base64 encoded public key.",
+          "example": "2Sg8iYjAxxmI2LvUXpJjkYrMxURPc8r+dB7TJyvv1234",
+          "type": "string"
+        }
+      }
+    }
+  }
+}

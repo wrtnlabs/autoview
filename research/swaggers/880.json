@@ -1,0 +1,45 @@
+{
+  "schema": {
+    "type": "array",
+    "items": {
+      "$ref": "#/$defs/commit-activity"
+    }
+  },
+  "$defs": {
+    "commit-activity": {
+      "title": "Commit Activity",
+      "description": "Commit Activity",
+      "type": "object",
+      "properties": {
+        "days": {
+          "example": [
+            0,
+            3,
+            26,
+            20,
+            39,
+            1,
+            0
+          ],
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "total": {
+          "example": 89,
+          "type": "integer"
+        },
+        "week": {
+          "example": 1336280400,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "days",
+        "total",
+        "week"
+      ]
+    }
+  }
+}

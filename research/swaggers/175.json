@@ -1,0 +1,58 @@
+{
+  "schema": {
+    "$ref": "#/$defs/legacy.open.v4.LegacyV4CampaignUserView"
+  },
+  "$defs": {
+    "legacy.open.v4.LegacyV4CampaignUserView": {
+      "type": "object",
+      "properties": {
+        "campaignUser": {
+          "$ref": "#/$defs/legacy.v4.marketing.LegacyV4CampaignUser"
+        }
+      },
+      "required": []
+    },
+    "legacy.v4.marketing.LegacyV4CampaignUser": {
+      "type": "object",
+      "properties": {
+        "campaignId": {
+          "type": "string"
+        },
+        "userId": {
+          "type": "string"
+        },
+        "msgId": {
+          "type": "string"
+        },
+        "sent": {
+          "example": 1744704928003,
+          "type": "number",
+          "format": "int64"
+        },
+        "view": {
+          "example": 1744704928004,
+          "type": "number",
+          "format": "int64"
+        },
+        "goal": {
+          "example": 1744704928004,
+          "type": "number",
+          "format": "int64"
+        },
+        "click": {
+          "example": 1744704928004,
+          "type": "number",
+          "format": "int64"
+        },
+        "version": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": []
+    }
+  }
+}

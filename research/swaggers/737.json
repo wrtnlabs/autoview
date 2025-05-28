@@ -1,0 +1,81 @@
+{
+  "schema": {
+    "$ref": "#/$defs/deployment-protection-rule"
+  },
+  "$defs": {
+    "IApiReposEnvironmentsDeploymentProtectionRules.PostBody": {
+      "type": "object",
+      "properties": {
+        "integration_id": {
+          "description": "The ID of the custom app that will be enabled on the environment.",
+          "type": "integer"
+        }
+      },
+      "required": []
+    },
+    "deployment-protection-rule": {
+      "title": "Deployment protection rule",
+      "description": "Deployment protection rule",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier for the deployment protection rule.",
+          "example": 3515,
+          "type": "integer"
+        },
+        "node_id": {
+          "description": "The node ID for the deployment protection rule.",
+          "example": "MDQ6R2F0ZTM1MTU=",
+          "type": "string"
+        },
+        "enabled": {
+          "description": "Whether the deployment protection rule is enabled for the environment.",
+          "example": true,
+          "type": "boolean"
+        },
+        "app": {
+          "$ref": "#/$defs/custom-deployment-rule-app"
+        }
+      },
+      "required": [
+        "id",
+        "node_id",
+        "enabled",
+        "app"
+      ]
+    },
+    "custom-deployment-rule-app": {
+      "title": "Custom deployment protection rule app",
+      "description": "A GitHub App that is providing a custom deployment protection rule.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the deployment protection rule integration.",
+          "example": 3515,
+          "type": "integer"
+        },
+        "slug": {
+          "description": "The slugified name of the deployment protection rule integration.",
+          "example": "my-custom-app",
+          "type": "string"
+        },
+        "integration_url": {
+          "description": "The URL for the endpoint to get details about the app.",
+          "example": "https://api.github.com/apps/custom-app-slug",
+          "type": "string"
+        },
+        "node_id": {
+          "description": "The node ID for the deployment protection rule integration.",
+          "example": "MDQ6R2F0ZTM1MTU=",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "integration_url",
+        "node_id"
+      ]
+    }
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "schema": {
+    "$ref": "#/$defs/actions-hosted-runner"
+  },
+  "$defs": {
+    "IApiOrgsActionsHostedRunners.PatchBody": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the runner. Must be between 1 and 64 characters and may only contain upper and lowercase letters a-z, numbers 0-9, '.', '-', and '_'.",
+          "type": "string"
+        },
+        "runner_group_id": {
+          "description": "The existing runner group to add this runner to.",
+          "type": "integer"
+        },
+        "maximum_runners": {
+          "description": "The maximum amount of runners to scale up to. Runners will not auto-scale above this number. Use this setting to limit your cost.",
+          "type": "integer"
+        },
+        "enable_static_ip": {
+          "description": "Whether this runner should be updated with a static public IP. Note limit on account. To list limits on account, use `GET actions/hosted-runners/limits`",
+          "type": "boolean"
+        }
+      },
+      "required": []
+    },
+    "actions-hosted-runner": {
+      "title": "GitHub-hosted hosted runner",
+      "description": "A Github-hosted hosted runner.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique identifier of the hosted runner.",
+          "example": 5,
+          "type": "integer"
+        },
+        "name": {
+          "description": "The name of the hosted runner.",
+          "example": "my-github-hosted-runner",
+          "type": "string"
+        },
+        "runner_group_id": {
+          "description": "The unique identifier of the group that the hosted runner belongs to.",
+          "example": 2,
+          "type": "integer"
+        },
+        "image_details": {
+          "$ref": "#/$defs/nullable-actions-hosted-runner-pool-image"
+        },
+        "machine_size_details": {
+          "$ref": "#/$defs/actions-hosted-runner-machine-spec"
+        },
+        "status": {
+          "description": "The status of the runner.",
+          "example": "Ready",
+          "oneOf": [
+            {
+              "const": "Ready"
+            },
+            {
+              "const": "Provisioning"
+            },
+            {
+              "const": "Shutdown"
+            },
+            {
+              "const": "Deleting"
+            },
+            {
+              "const": "Stuck"
+            }
+          ]
+        },
+        "platform": {
+          "description": "The operating system of the image.",
+          "example": "linux-x64",
+          "type": "string"
+        },
+        "maximum_runners": {
+          "description": "The maximum amount of hosted runners. Runners will not scale automatically above this number. Use this setting to limit your cost.",
+          "example": 5,
+          "type": "integer",
+          "default": 10
+        },
+        "public_ip_enabled": {
+          "description": "Whether public IP is enabled for the hosted runners.",
+          "example": true,
+          "type": "boolean"
+        },
+        "public_ips": {
+          "description": "The public IP ranges when public IP is enabled for the hosted runners.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/public-ip"
+          }
+        },
+        "last_active_on": {
+          "description": "The time at which the runner was last used, in ISO 8601 format.",
+          "example": "2022-10-09T23:39:01Z",
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "image_details",
+        "machine_size_details",
+        "status",
+        "public_ip_enabled",
+        "platform"
+      ]
+    },
+    "nullable-actions-hosted-runner-pool-image": {
+      "title": "GitHub-hosted runner image details.",
+      "description": "Provides details of a hosted runner image",
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "description": "The ID of the image. Use this ID for the `image` parameter when creating a new larger runner.",
+              "example": "ubuntu-20.04",
+              "type": "string"
+            },
+            "size_gb": {
+              "description": "Image size in GB.",
+              "example": 86,
+              "type": "integer"
+            },
+            "display_name": {
+              "description": "Display name for this image.",
+              "example": 20.04,
+              "type": "string"
+            },
+            "source": {
+              "description": "The image provider.",
+              "oneOf": [
+                {
+                  "const": "github"
+                },
+                {
+                  "const": "partner"
+                },
+                {
+                  "const": "custom"
+                }
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "size_gb",
+            "display_name",
+            "source",
+            "version"
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "actions-hosted-runner-machine-spec": {
+      "title": "Github-owned VM details.",
+      "description": "Provides details of a particular machine spec.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The ID used for the `size` parameter when creating a new runner.",
+          "example": "8-core",
+          "type": "string"
+        },
+        "cpu_cores": {
+          "description": "The number of cores.",
+          "example": 8,
+          "type": "integer"
+        },
+        "memory_gb": {
+          "description": "The available RAM for the machine spec.",
+          "example": 32,
+          "type": "integer"
+        },
+        "storage_gb": {
+          "description": "The available SSD storage for the machine spec.",
+          "example": 300,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "cpu_cores",
+        "memory_gb",
+        "storage_gb"
+      ]
+    },
+    "public-ip": {
+      "title": "Public IP for a GitHub-hosted larger runners.",
+      "description": "Provides details of Public IP for a GitHub-hosted larger runners",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Whether public IP is enabled.",
+          "example": true,
+          "type": "boolean"
+        },
+        "prefix": {
+          "description": "The prefix for the public IP.",
+          "example": "20.80.208.150",
+          "type": "string"
+        },
+        "length": {
+          "description": "The length of the IP prefix.",
+          "example": 28,
+          "type": "integer"
+        }
+      },
+      "required": []
+    }
+  }
+}
