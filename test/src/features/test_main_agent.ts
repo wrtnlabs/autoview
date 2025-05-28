@@ -24,7 +24,7 @@ export async function test_main_agent(): Promise<void> {
       parameters: schema,
     },
   });
-  const result = await agent.generate();
+  const result = await agent.generate(undefined);
 
   if (result.status === "success") {
     console.log(result.tsxCode);
