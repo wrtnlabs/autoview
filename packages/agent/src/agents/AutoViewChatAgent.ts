@@ -839,18 +839,25 @@ function toOpenAIMessage(
               },
             }) satisfies OpenAI.Chat.Completions.ChatCompletionMessageToolCall,
         );
+      const isContentEmpty =
+        toolCalls.length !== 0 &&
+        message.contents.filter(
+          (content) => content.type === "text" && content.text.length !== 0,
+        ).length === 0;
 
       return {
         role: "assistant",
-        content: message.contents
-          .filter((content) => content.type === "text")
-          .map(
-            (content) =>
-              ({
-                type: "text",
-                text: content.text,
-              }) satisfies OpenAI.Chat.Completions.ChatCompletionContentPartText,
-          ),
+        content: isContentEmpty
+          ? undefined
+          : message.contents
+              .filter((content) => content.type === "text")
+              .map(
+                (content) =>
+                  ({
+                    type: "text",
+                    text: content.text,
+                  }) satisfies OpenAI.Chat.Completions.ChatCompletionContentPartText,
+              ),
         tool_calls: toolCalls.length === 0 ? undefined : toolCalls,
       } satisfies OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam;
     }
