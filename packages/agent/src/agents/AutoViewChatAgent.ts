@@ -667,7 +667,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
         preReadSchemaAndCodeEventId,
       );
 
-      throw error;
+      return `[ERROR] ${error}`;
     }
   }
 
@@ -752,7 +752,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
         preComponentGenerationEventId,
       );
 
-      throw error;
+      return `[ERROR] ${error}`;
     }
   }
 }
