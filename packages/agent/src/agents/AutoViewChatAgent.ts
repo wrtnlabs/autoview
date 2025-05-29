@@ -826,6 +826,20 @@ function toOpenAIMessage(
       } satisfies OpenAI.Chat.Completions.ChatCompletionUserMessageParam;
     }
     case "assistant": {
+      const toolCalls = message.contents
+        .filter((content) => content.type === "tool")
+        .map(
+          (content) =>
+            ({
+              id: content.id,
+              type: "function",
+              function: {
+                name: content.tool_name,
+                arguments: content.arguments,
+              },
+            }) satisfies OpenAI.Chat.Completions.ChatCompletionMessageToolCall,
+        );
+
       return {
         role: "assistant",
         content: message.contents
@@ -837,19 +851,7 @@ function toOpenAIMessage(
                 text: content.text,
               }) satisfies OpenAI.Chat.Completions.ChatCompletionContentPartText,
           ),
-        tool_calls: message.contents
-          .filter((content) => content.type === "tool")
-          .map(
-            (content) =>
-              ({
-                id: content.id,
-                type: "function",
-                function: {
-                  name: content.tool_name,
-                  arguments: content.arguments,
-                },
-              }) satisfies OpenAI.Chat.Completions.ChatCompletionMessageToolCall,
-          ),
+        tool_calls: toolCalls.length === 0 ? undefined : toolCalls,
       } satisfies OpenAI.Chat.Completions.ChatCompletionAssistantMessageParam;
     }
     case "tool": {
