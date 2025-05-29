@@ -549,9 +549,9 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
           if (!toolCallPart) {
             toolCallPart = {
-              id: toolCall.id ?? "",
-              toolName: toolCall.function?.name ?? "",
-              arguments: toolCall.function?.arguments ?? "",
+              id: "",
+              toolName: "",
+              arguments: "",
             };
 
             toolCallParts.set(toolCall.index, toolCallPart);
