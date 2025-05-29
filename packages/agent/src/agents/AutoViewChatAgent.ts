@@ -652,7 +652,7 @@ export class AutoViewChatAgentDriver<M = undefined> {
       return `Here is the current schema and component code:
 
   <schema>
-  ${result.schema}
+  ${JSON.stringify(result.schema, null, 2)}
   </schema>
 
   <component_code>
