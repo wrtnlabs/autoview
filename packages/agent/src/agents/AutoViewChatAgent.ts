@@ -549,24 +549,23 @@ export class AutoViewChatAgentDriver<M = undefined> {
 
           if (!toolCallPart) {
             toolCallPart = {
-              id: "",
-              toolName: "",
-              arguments: "",
+              id: toolCall.id ?? "",
+              toolName: toolCall.function?.name ?? "",
+              arguments: toolCall.function?.arguments ?? "",
             };
 
             toolCallParts.set(toolCall.index, toolCallPart);
-          }
+          } else {
+            if (toolCall.id) {
+              toolCallPart.id += toolCall.id;
+            }
+            if (toolCall.function?.name) {
+              toolCallPart.toolName += toolCall.function.name;
+            }
 
-          if (toolCall.id) {
-            toolCallPart.id += toolCall.id;
-          }
-
-          if (toolCall.function?.name) {
-            toolCallPart.toolName += toolCall.function.name;
-          }
-
-          if (toolCall.function?.arguments) {
-            toolCallPart.arguments += toolCall.function.arguments;
+            if (toolCall.function?.arguments) {
+              toolCallPart.arguments += toolCall.function.arguments;
+            }
           }
         }
       }
